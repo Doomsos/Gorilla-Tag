@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
@@ -6,91 +6,6 @@ using UnityEngine.Events;
 
 public class RadioButtonGroupWearable : MonoBehaviour, ISpawnable
 {
-	public bool IsSpawned { get; set; }
-
-	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
-
-	private void Start()
-	{
-		this.stateBitsWriteInfo = VRRig.WearablePackedStatesBitWriteInfos[(int)this.assignedSlot];
-		if (!this.ownerRig.isLocal)
-		{
-			GorillaPressableButton[] array = this.buttons;
-			for (int i = 0; i < array.Length; i++)
-			{
-				Collider component = array[i].GetComponent<Collider>();
-				if (component != null)
-				{
-					component.enabled = false;
-				}
-			}
-		}
-	}
-
-	private void OnEnable()
-	{
-		this.SharedRefreshState();
-	}
-
-	private int GetCurrentState()
-	{
-		return GTBitOps.ReadBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo.index, this.stateBitsWriteInfo.valueMask);
-	}
-
-	private void Update()
-	{
-		if (this.ownerRig.isLocal)
-		{
-			return;
-		}
-		if (this.lastReportedState != this.GetCurrentState())
-		{
-			this.SharedRefreshState();
-		}
-	}
-
-	public void SharedRefreshState()
-	{
-		int currentState = this.GetCurrentState();
-		int num = this.AllowSelectNone ? (currentState - 1) : currentState;
-		for (int i = 0; i < this.buttons.Length; i++)
-		{
-			this.buttons[i].isOn = (num == i);
-			this.buttons[i].UpdateColor();
-		}
-		if (this.lastReportedState != currentState)
-		{
-			this.lastReportedState = currentState;
-			this.OnSelectionChanged.Invoke(currentState);
-		}
-	}
-
-	public void OnPress(GorillaPressableButton button)
-	{
-		int currentState = this.GetCurrentState();
-		int num = Array.IndexOf<GorillaPressableButton>(this.buttons, button);
-		if (this.AllowSelectNone)
-		{
-			num++;
-		}
-		int value = num;
-		if (this.AllowSelectNone && num == currentState)
-		{
-			value = 0;
-		}
-		this.ownerRig.WearablePackedStates = GTBitOps.WriteBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo, value);
-		this.SharedRefreshState();
-	}
-
-	public void OnSpawn(VRRig rig)
-	{
-		this.ownerRig = rig;
-	}
-
-	public void OnDespawn()
-	{
-	}
-
 	[SerializeField]
 	private bool AllowSelectNone = true;
 
@@ -109,4 +24,86 @@ public class RadioButtonGroupWearable : MonoBehaviour, ISpawnable
 	private VRRig ownerRig;
 
 	private GTBitOps.BitWriteInfo stateBitsWriteInfo;
+
+	public bool IsSpawned { get; set; }
+
+	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
+
+	private void Start()
+	{
+		stateBitsWriteInfo = VRRig.WearablePackedStatesBitWriteInfos[(int)assignedSlot];
+		if (ownerRig.isLocal)
+		{
+			return;
+		}
+		GorillaPressableButton[] array = buttons;
+		for (int i = 0; i < array.Length; i++)
+		{
+			Collider component = array[i].GetComponent<Collider>();
+			if (component != null)
+			{
+				component.enabled = false;
+			}
+		}
+	}
+
+	private void OnEnable()
+	{
+		SharedRefreshState();
+	}
+
+	private int GetCurrentState()
+	{
+		return GTBitOps.ReadBits(ownerRig.WearablePackedStates, stateBitsWriteInfo.index, stateBitsWriteInfo.valueMask);
+	}
+
+	private void Update()
+	{
+		if (!ownerRig.isLocal && lastReportedState != GetCurrentState())
+		{
+			SharedRefreshState();
+		}
+	}
+
+	public void SharedRefreshState()
+	{
+		int currentState = GetCurrentState();
+		int num = (AllowSelectNone ? (currentState - 1) : currentState);
+		for (int i = 0; i < buttons.Length; i++)
+		{
+			buttons[i].isOn = num == i;
+			buttons[i].UpdateColor();
+		}
+		if (lastReportedState != currentState)
+		{
+			lastReportedState = currentState;
+			OnSelectionChanged.Invoke(currentState);
+		}
+	}
+
+	public void OnPress(GorillaPressableButton button)
+	{
+		int currentState = GetCurrentState();
+		int num = Array.IndexOf(buttons, button);
+		if (AllowSelectNone)
+		{
+			num++;
+		}
+		int value = num;
+		if (AllowSelectNone && num == currentState)
+		{
+			value = 0;
+		}
+		ownerRig.WearablePackedStates = GTBitOps.WriteBits(ownerRig.WearablePackedStates, stateBitsWriteInfo, value);
+		SharedRefreshState();
+	}
+
+	public void OnSpawn(VRRig rig)
+	{
+		ownerRig = rig;
+	}
+
+	public void OnDespawn()
+	{
+	}
 }

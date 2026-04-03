@@ -1,8 +1,11 @@
-﻿using System;
 using GorillaNetworking.Store;
 
 public class TryOnBundleButton : GorillaPressableButton
 {
+	public int buttonIndex;
+
+	public string playfabBundleID = "NULL";
+
 	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
 		base.ButtonActivationWithHand(isLeftHand);
@@ -11,19 +14,17 @@ public class TryOnBundleButton : GorillaPressableButton
 
 	public override void UpdateColor()
 	{
-		if (this.playfabBundleID == "NULL")
+		if (playfabBundleID == "NULL")
 		{
-			this.buttonRenderer.material = this.unpressedMaterial;
-			if (this.myText != null)
+			buttonRenderer.material = unpressedMaterial;
+			if (myText != null)
 			{
-				this.myText.text = "";
+				myText.text = "";
 			}
-			return;
 		}
-		base.UpdateColor();
+		else
+		{
+			base.UpdateColor();
+		}
 	}
-
-	public int buttonIndex;
-
-	public string playfabBundleID = "NULL";
 }

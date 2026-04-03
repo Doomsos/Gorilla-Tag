@@ -1,23 +1,21 @@
-﻿using System;
 using GorillaTagScripts.VirtualStumpCustomMaps.UI;
 
 public class CustomMapsKeyToggleButton : CustomMapsKeyButton
 {
+	private bool isPressed;
+
 	public override void PressButtonColourUpdate()
 	{
 	}
 
 	public void SetButtonStatus(bool newIsPressed)
 	{
-		if (this.isPressed == newIsPressed)
+		if (isPressed != newIsPressed)
 		{
-			return;
+			isPressed = newIsPressed;
+			propBlock.SetColor("_BaseColor", isPressed ? ButtonColorSettings.PressedColor : ButtonColorSettings.UnpressedColor);
+			propBlock.SetColor("_Color", isPressed ? ButtonColorSettings.PressedColor : ButtonColorSettings.UnpressedColor);
+			ButtonRenderer.SetPropertyBlock(propBlock);
 		}
-		this.isPressed = newIsPressed;
-		this.propBlock.SetColor("_BaseColor", this.isPressed ? this.ButtonColorSettings.PressedColor : this.ButtonColorSettings.UnpressedColor);
-		this.propBlock.SetColor("_Color", this.isPressed ? this.ButtonColorSettings.PressedColor : this.ButtonColorSettings.UnpressedColor);
-		this.ButtonRenderer.SetPropertyBlock(this.propBlock);
 	}
-
-	private bool isPressed;
 }

@@ -1,40 +1,34 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
 using UnityEngine;
 
-[NetworkStructWeaved(21)]
 [StructLayout(LayoutKind.Explicit, Size = 84)]
+[NetworkStructWeaved(21)]
 public struct GhostLabData : INetworkStruct
 {
-	public int DoorState { readonly get; set; }
+	[FieldOffset(4)]
+	[FixedBufferProperty(typeof(NetworkArray<NetworkBool>), typeof(UnityArraySurrogate_0040ElementReaderWriterNetworkBool), 20, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_004020 _OpenDoors;
+
+	[field: FieldOffset(0)]
+	public int DoorState { get; set; }
 
 	[Networked]
 	[Capacity(20)]
-	[NetworkedWeavedArray(20, 1, typeof(ElementReaderWriterNetworkBool))]
+	[NetworkedWeavedArray(20, 1, typeof(Fusion.ElementReaderWriterNetworkBool))]
 	[NetworkedWeaved(1, 20)]
-	public NetworkArray<NetworkBool> OpenDoors
-	{
-		get
-		{
-			return new NetworkArray<NetworkBool>(Native.ReferenceToPointer<FixedStorage@20>(ref this._OpenDoors), 20, ElementReaderWriterNetworkBool.GetInstance());
-		}
-	}
+	public unsafe NetworkArray<NetworkBool> OpenDoors => new NetworkArray<NetworkBool>(Native.ReferenceToPointer(ref _OpenDoors), 20, Fusion.ElementReaderWriterNetworkBool.GetInstance());
 
 	public GhostLabData(int state, bool[] openDoors)
 	{
-		this.DoorState = state;
+		DoorState = state;
 		for (int i = 0; i < openDoors.Length; i++)
 		{
-			bool val = openDoors[i];
-			this.OpenDoors.Set(i, val);
+			bool flag = openDoors[i];
+			OpenDoors.Set(i, flag);
 		}
 	}
-
-	[FixedBufferProperty(typeof(NetworkArray<NetworkBool>), typeof(UnityArraySurrogate@ElementReaderWriterNetworkBool), 20, order = -2147483647)]
-	[WeaverGenerated]
-	[SerializeField]
-	[FieldOffset(4)]
-	private FixedStorage@20 _OpenDoors;
 }

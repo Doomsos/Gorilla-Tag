@@ -1,81 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct NetworkSystemConfig
 {
-	public static string AppVersion
-	{
-		get
-		{
-			return NetworkSystemConfig.prependCode + "." + NetworkSystemConfig.AppVersionStripped;
-		}
-	}
-
-	public static string AppVersionStripped
-	{
-		get
-		{
-			return string.Concat(new string[]
-			{
-				NetworkSystemConfig.gameVersionType,
-				".",
-				NetworkSystemConfig.majorVersion.ToString(),
-				".",
-				NetworkSystemConfig.minorVersion.ToString(),
-				".",
-				NetworkSystemConfig.minorVersion2.ToString()
-			});
-		}
-	}
-
-	public static string BundleVersion
-	{
-		get
-		{
-			return string.Concat(new string[]
-			{
-				NetworkSystemConfig.majorVersion.ToString(),
-				".",
-				NetworkSystemConfig.minorVersion.ToString(),
-				".",
-				NetworkSystemConfig.minorVersion2.ToString()
-			});
-		}
-	}
-
-	public static string GameVersionType
-	{
-		get
-		{
-			return NetworkSystemConfig.gameVersionType;
-		}
-	}
-
-	public static int GameMajorVersion
-	{
-		get
-		{
-			return NetworkSystemConfig.majorVersion;
-		}
-	}
-
-	public static int GameMinorVersion
-	{
-		get
-		{
-			return NetworkSystemConfig.minorVersion;
-		}
-	}
-
-	public static int GameMinorVersion2
-	{
-		get
-		{
-			return NetworkSystemConfig.minorVersion2;
-		}
-	}
-
 	[HideInInspector]
 	public int MaxPlayerCount;
 
@@ -88,4 +16,18 @@ public struct NetworkSystemConfig
 	public static int minorVersion = 1;
 
 	public static int minorVersion2 = 134;
+
+	public static string AppVersion => prependCode + "." + AppVersionStripped;
+
+	public static string AppVersionStripped => gameVersionType + "." + majorVersion + "." + minorVersion + "." + minorVersion2;
+
+	public static string BundleVersion => majorVersion + "." + minorVersion + "." + minorVersion2;
+
+	public static string GameVersionType => gameVersionType;
+
+	public static int GameMajorVersion => majorVersion;
+
+	public static int GameMinorVersion => minorVersion;
+
+	public static int GameMinorVersion2 => minorVersion2;
 }

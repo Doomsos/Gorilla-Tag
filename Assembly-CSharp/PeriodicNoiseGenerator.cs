@@ -1,34 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class PeriodicNoiseGenerator : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.noiseActor = base.GetComponentInParent<CrittersLoudNoise>();
-		this.lastTime = Time.time;
-		this.mR = base.GetComponentInChildren<MeshRenderer>();
-	}
-
-	private void Update()
-	{
-		if (!CrittersManager.instance.LocalAuthority())
-		{
-			return;
-		}
-		if (Time.time > this.lastTime + this.sleepDuration)
-		{
-			this.lastTime = Time.time + this.randomDuration * Random.value;
-			this.noiseActor.SetTimeEnabled();
-			this.noiseActor.soundEnabled = true;
-			this.mR.sharedMaterial = this.solid;
-		}
-		if (!this.noiseActor.soundEnabled && this.mR.sharedMaterial != this.transparent)
-		{
-			this.mR.sharedMaterial = this.transparent;
-		}
-	}
-
 	public float sleepDuration;
 
 	public float randomDuration;
@@ -42,4 +15,29 @@ public class PeriodicNoiseGenerator : MonoBehaviour
 	public Material solid;
 
 	private MeshRenderer mR;
+
+	private void Awake()
+	{
+		noiseActor = GetComponentInParent<CrittersLoudNoise>();
+		lastTime = Time.time;
+		mR = GetComponentInChildren<MeshRenderer>();
+	}
+
+	private void Update()
+	{
+		if (CrittersManager.instance.LocalAuthority())
+		{
+			if (Time.time > lastTime + sleepDuration)
+			{
+				lastTime = Time.time + randomDuration * Random.value;
+				noiseActor.SetTimeEnabled();
+				noiseActor.soundEnabled = true;
+				mR.sharedMaterial = solid;
+			}
+			if (!noiseActor.soundEnabled && mR.sharedMaterial != transparent)
+			{
+				mR.sharedMaterial = transparent;
+			}
+		}
+	}
 }

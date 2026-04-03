@@ -1,4 +1,3 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 
@@ -12,9 +11,11 @@ public class MonkeBallBallKillZone : MonoBehaviour
 			if (!PhotonNetwork.IsMasterClient)
 			{
 				MonkeBallGame.Instance.RequestResetBall(component.id, -1);
-				return;
 			}
-			GameBallManager.Instance.RequestSetBallPosition(component.id);
+			else
+			{
+				GameBallManager.Instance.RequestSetBallPosition(component.id);
+			}
 		}
 	}
 }

@@ -1,27 +1,29 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public class CosmeticBoundaryTrigger : GorillaTriggerBox
 {
+	public VRRig rigRef;
+
+	private static TimeSince sinceLastTryOnEvent = 0f;
+
 	public void OnTriggerEnter(Collider other)
 	{
 		if (other.attachedRigidbody == null)
 		{
 			return;
 		}
-		this.rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (this.rigRef == null)
+		rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+		if (!(rigRef == null))
 		{
-			return;
+			if (sinceLastTryOnEvent.HasElapsed(0.5f, resetOnElapsed: true))
+			{
+				GorillaTelemetry.PostShopEvent(rigRef, GTShopEventType.item_try_on, rigRef.tryOnSet.items);
+			}
+			rigRef.inTryOnRoom = true;
+			rigRef.LocalUpdateCosmeticsWithTryon(rigRef.cosmeticSet, rigRef.tryOnSet, playfx: false);
+			rigRef.myBodyDockPositions.RefreshTransferrableItems();
 		}
-		if (CosmeticBoundaryTrigger.sinceLastTryOnEvent.HasElapsed(0.5f, true))
-		{
-			GorillaTelemetry.PostShopEvent(this.rigRef, GTShopEventType.item_try_on, this.rigRef.tryOnSet.items);
-		}
-		this.rigRef.inTryOnRoom = true;
-		this.rigRef.LocalUpdateCosmeticsWithTryon(this.rigRef.cosmeticSet, this.rigRef.tryOnSet, false);
-		this.rigRef.myBodyDockPositions.RefreshTransferrableItems();
 	}
 
 	public void OnTriggerExit(Collider other)
@@ -30,24 +32,19 @@ public class CosmeticBoundaryTrigger : GorillaTriggerBox
 		{
 			return;
 		}
-		this.rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (this.rigRef == null)
+		rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+		if (!(rigRef == null))
 		{
-			return;
+			rigRef.inTryOnRoom = false;
+			if (rigRef.isOfflineVRRig)
+			{
+				rigRef.tryOnSet.ClearSet(CosmeticsController.instance.nullItem);
+				CosmeticsController.instance.ClearCheckout(sendEvent: false);
+				CosmeticsController.instance.UpdateShoppingCart();
+				CosmeticsController.instance.UpdateWornCosmetics(sync: true);
+			}
+			rigRef.LocalUpdateCosmeticsWithTryon(rigRef.cosmeticSet, rigRef.tryOnSet, playfx: false);
+			rigRef.myBodyDockPositions.RefreshTransferrableItems();
 		}
-		this.rigRef.inTryOnRoom = false;
-		if (this.rigRef.isOfflineVRRig)
-		{
-			this.rigRef.tryOnSet.ClearSet(CosmeticsController.instance.nullItem);
-			CosmeticsController.instance.ClearCheckout(false);
-			CosmeticsController.instance.UpdateShoppingCart();
-			CosmeticsController.instance.UpdateWornCosmetics(true);
-		}
-		this.rigRef.LocalUpdateCosmeticsWithTryon(this.rigRef.cosmeticSet, this.rigRef.tryOnSet, false);
-		this.rigRef.myBodyDockPositions.RefreshTransferrableItems();
 	}
-
-	public VRRig rigRef;
-
-	private static TimeSince sinceLastTryOnEvent = 0f;
 }

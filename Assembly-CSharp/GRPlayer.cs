@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,1244 +9,95 @@ using UnityEngine;
 
 public class GRPlayer : MonoBehaviourTick
 {
-	public GRPlayer.GRPlayerState State
+	public enum GRPlayerState
 	{
-		get
-		{
-			return this.state;
-		}
+		Alive,
+		Ghost,
+		Shielded
 	}
 
-	public int Juice
+	public enum GRPlayerShieldFlags
 	{
-		get
-		{
-			return this.playerJuice;
-		}
+		Light = 1,
+		Stealth = 2,
+		Heal = 4
 	}
 
-	public int ShiftCreditCapIncreases { get; set; }
-
-	public int ShiftCreditCapIncreasesMax { get; set; }
-
-	public int ShiftCredits
-	{
-		get
-		{
-			return this.shiftCreditCache;
-		}
-	}
-
-	public bool HasXRayVision()
-	{
-		return this.xRayVisionRefCount > 0;
-	}
-
-	public int MaxHp
-	{
-		get
-		{
-			return this.maxHp;
-		}
-	}
-
-	public int MaxShieldHp
-	{
-		get
-		{
-			return this.maxShieldHp;
-		}
-	}
-
-	public int Hp
-	{
-		get
-		{
-			return this.hp;
-		}
-	}
-
-	public int ShieldHp
-	{
-		get
-		{
-			return this.shieldHp;
-		}
-	}
-
-	public int ShieldFlags
-	{
-		get
-		{
-			return this.shieldFlags;
-		}
-	}
-
-	public bool InStealthMode
-	{
-		get
-		{
-			return this.inStealthMode;
-		}
-	}
-
-	public VRRig MyRig
-	{
-		get
-		{
-			return this.vrRig;
-		}
-	}
-
-	public float ShiftPlayTime
-	{
-		get
-		{
-			return this.shiftPlayTime;
-		}
-		set
-		{
-			this.shiftPlayTime = value;
-		}
-	}
-
-	public int LastShiftCut
-	{
-		get
-		{
-			return this.lastShiftCut;
-		}
-		set
-		{
-			this.lastShiftCut = value;
-		}
-	}
-
-	public GRPlayer.ProgressionData CurrentProgression
-	{
-		get
-		{
-			return this.currentProgression;
-		}
-		set
-		{
-			this.currentProgression = value;
-		}
-	}
-
-	private void Awake()
-	{
-		this.vrRig = base.GetComponent<VRRig>();
-		this.lowHealthVisualPropertyBlock = new MaterialPropertyBlock();
-		this.damageEffects = GTPlayer.Instance.mainCamera.GetComponent<GRPlayerDamageEffects>();
-		this.lowHealthTintPropertyId = Shader.PropertyToID("_TintColor");
-		this.isEmployee = false;
-		this.SetHp(this.maxHp);
-		this.SetShieldHp(0);
-		this.state = GRPlayer.GRPlayerState.Alive;
-		this.RefreshDamageVignetteVisual();
-		this.shieldHeadVisual.gameObject.SetActive(false);
-		this.shieldBodyVisual.gameObject.SetActive(false);
-		this.shieldGameLight = this.shieldBodyVisual.gameObject.GetComponentInChildren<GameLight>(true);
-		this.requestCollectItemLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.requestChargeToolLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.requestDepositCurrencyLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.requestShiftStartLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.requestToolPurchaseStationLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.applyEnemyHitLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.reportLocalHitLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.reportBreakableBrokenLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.playerStateChangeLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.promotionBotLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.progressionBroadcastLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.scoreboardPageLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.fireShieldLimiter = new CallLimiter(25, 1f, 0.5f);
-		this.shuttleData = new GRPlayer.ShuttleData();
-		this.lastLeftWithBadgeAttachedTime = -10000.0;
-	}
-
-	private void Start()
-	{
-		if (this.gamePlayer != null && this.gamePlayer.IsLocal())
-		{
-			this.LoadMyProgression();
-			ProgressionManager.Instance.OnGetShiftCredit += this.OnShiftCreditChanged;
-			ProgressionManager.Instance.OnGetShiftCreditCapData += this.OnShiftCreditCapChanged;
-			this.soak = new GhostReactorSoak();
-			this.soak.Setup(this);
-		}
-		else
-		{
-			this.currentProgression = new GRPlayer.ProgressionData
-			{
-				points = 0,
-				redeemedPoints = 0
-			};
-		}
-		if (ProgressionManager.Instance != null)
-		{
-			ProgressionManager.Instance.OnGetShiftCredit += this.OnShiftCreditChanged;
-			ProgressionManager.Instance.OnGetShiftCreditCapData += this.OnShiftCreditCapChanged;
-		}
-	}
-
-	private new void OnDisable()
-	{
-		this.Reset();
-	}
-
-	public void Reset()
-	{
-		this.SetHp(this.maxHp);
-		this.SetShieldHp(0);
-		this.state = GRPlayer.GRPlayerState.Alive;
-		this.RefreshDamageVignetteVisual();
-		this.RefreshPlayerVisuals();
-		for (int i = 0; i < 8; i++)
-		{
-			this.synchronizedSessionStats[i] = 0f;
-		}
-	}
-
-	private void SetHp(int newHp)
-	{
-		this.hp = Mathf.Max(newHp, 0);
-	}
-
-	private void SetShieldHp(int newShieldHp)
-	{
-		this.shieldHp = Mathf.Max(newShieldHp, 0);
-	}
-
-	public void OnShiftCreditCapChanged(string targetMothershipId, int newCap, int newCapMax)
-	{
-		if (this.mothershipId != null && targetMothershipId == this.mothershipId)
-		{
-			if (this.gamePlayer.IsLocal() && (newCap != this.ShiftCreditCapIncreases || newCapMax != this.ShiftCreditCapIncreasesMax) && GhostReactor.instance != null)
-			{
-				GhostReactor.instance.grManager.RefreshShiftCredit();
-			}
-			this.ShiftCreditCapIncreases = newCap;
-			this.ShiftCreditCapIncreasesMax = newCapMax;
-		}
-	}
-
-	public void OnShiftCreditChanged(string targetMothershipId, int newShiftCredits)
-	{
-		if (this.mothershipId != null && targetMothershipId == this.mothershipId)
-		{
-			int num = this.shiftCreditCache;
-			this.shiftCreditCache = newShiftCredits;
-			if (GhostReactor.instance != null && this.gamePlayer.IsLocal() && num != newShiftCredits && GhostReactor.instance != null)
-			{
-				if (GhostReactor.instance.promotionBot != null)
-				{
-					GhostReactor.instance.promotionBot.Refresh();
-				}
-				if (GhostReactor.instance.grManager != null)
-				{
-					GhostReactor.instance.grManager.RefreshShiftCredit();
-				}
-			}
-		}
-		if (GhostReactor.instance != null)
-		{
-			GhostReactor.instance.RefreshScoreboards();
-		}
-	}
-
-	public void OnShiftCreditCapData(string targetMothershipId, int shiftCreditCapNumberOfIncreases, int shiftCreditMaxNumberOfIncreases)
-	{
-		if (this.mothershipId != null)
-		{
-			targetMothershipId == this.mothershipId;
-		}
-	}
-
-	public void SubtractShiftCredit(int shiftCreditDelta)
-	{
-		if (this.gamePlayer.IsLocal())
-		{
-			ProgressionManager.Instance.SubtractShiftCredit(shiftCreditDelta);
-		}
-	}
-
-	public void OnPlayerHit(Vector3 hitPosition, Vector3 hitImpulse, GhostReactorManager manager, GameEntityId hitByEntityId)
-	{
-		GameEntity gameEntity = manager.gameEntityManager.GetGameEntity(hitByEntityId);
-		int num = 1;
-		if (this.gamePlayer.IsLocal())
-		{
-			GTPlayer instance = GTPlayer.Instance;
-			float magnitude = hitImpulse.magnitude;
-			if (magnitude > 0f)
-			{
-				instance.ApplyKnockback(hitImpulse / magnitude, magnitude, true);
-			}
-		}
-		if (this.State == GRPlayer.GRPlayerState.Alive)
-		{
-			if (this.shieldHp > 0)
-			{
-				if (gameEntity != null)
-				{
-					GRAttributes component = gameEntity.GetComponent<GRAttributes>();
-					if (component != null)
-					{
-						num = component.CalculateFinalValueForAttribute(GRAttributeType.PlayerShieldDamage);
-					}
-				}
-				this.SetShieldHp(this.shieldHp - num);
-				if (this.shieldHp > 0)
-				{
-					if (this.shieldDamagedSound != null)
-					{
-						this.audioSource.PlayOneShot(this.shieldDamagedSound, this.shieldDamagedVolume);
-					}
-					this.shieldDamagedEffect.Play();
-				}
-				else
-				{
-					if (this.shieldDestroyedSound != null)
-					{
-						this.audioSource.PlayOneShot(this.shieldDestroyedSound, this.shieldDestroyedVolume);
-					}
-					this.shieldDestroyedEffect.Play();
-				}
-				this.RefreshPlayerVisuals();
-				return;
-			}
-			if (gameEntity != null)
-			{
-				GRAttributes component2 = gameEntity.GetComponent<GRAttributes>();
-				if (component2 != null)
-				{
-					num = component2.CalculateFinalValueForAttribute(GRAttributeType.PlayerDamage);
-				}
-			}
-			Debug.Log(string.Format("GRPlayer OnPlayerHit, hit by: {0} damage: {1}, state: {2}, hp: {3}, shield hp: {4}", new object[]
-			{
-				hitByEntityId.index,
-				num,
-				this.state,
-				this.hp,
-				this.shieldHp
-			}));
-			this.PlayHitFx(hitPosition);
-			this.SetHp(this.hp - num);
-			this.RefreshDamageVignetteVisual();
-			if (this.hp <= 0)
-			{
-				this.ChangePlayerState(GRPlayer.GRPlayerState.Ghost, manager);
-			}
-		}
-	}
-
-	public void OnPlayerRevive(GhostReactorManager manager)
-	{
-		this.SetHp(this.maxHp);
-		this.RefreshDamageVignetteVisual();
-		this.ChangePlayerState(GRPlayer.GRPlayerState.Alive, manager);
-	}
-
-	public void ChangePlayerState(GRPlayer.GRPlayerState newState, GhostReactorManager manager)
-	{
-		if (!NetworkSystem.Instance.InRoom)
-		{
-			newState = GRPlayer.GRPlayerState.Alive;
-		}
-		if (this.state == newState)
-		{
-			return;
-		}
-		this.state = newState;
-		GRPlayer.GRPlayerState grplayerState = this.state;
-		if (grplayerState != GRPlayer.GRPlayerState.Alive)
-		{
-			if (grplayerState == GRPlayer.GRPlayerState.Ghost)
-			{
-				this.SetHp(0);
-				this.SetShieldHp(0);
-				this.RefreshDamageVignetteVisual();
-				if (this.playerTurnedGhostEffect != null)
-				{
-					this.playerTurnedGhostEffect.Play();
-				}
-				this.playerTurnedGhostSoundBank.Play();
-				manager.ReportPlayerDeath(this);
-				this.IncrementDeaths(1);
-			}
-		}
-		else
-		{
-			this.SetHp(this.maxHp);
-			this.RefreshDamageVignetteVisual();
-			this.IncrementRevives(1);
-			if (this.playerRevivedEffect != null)
-			{
-				this.playerRevivedEffect.Play();
-			}
-			if (this.audioSource != null && this.playerRevivedSound != null)
-			{
-				this.audioSource.PlayOneShot(this.playerRevivedSound, this.playerRevivedVolume);
-			}
-		}
-		this.RefreshPlayerVisuals();
-		if (this.vrRig.isLocal)
-		{
-			this.vrRigs.Clear();
-			VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-			for (int i = 0; i < this.vrRigs.Count; i++)
-			{
-				this.vrRigs[i].GetComponent<GRPlayer>().RefreshPlayerVisuals();
-			}
-		}
-	}
-
-	public void RefreshPlayerVisuals()
-	{
-		this.RefreshDamageVignetteVisual();
-		GRPlayer.GRPlayerState grplayerState = this.state;
-		if (grplayerState == GRPlayer.GRPlayerState.Alive)
-		{
-			this.gamePlayer.DisableGrabbing(false);
-			if (this.badge != null)
-			{
-				this.badge.UnHide();
-			}
-			this.vrRig.ChangeMaterialLocal(0);
-			this.vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Default);
-			this.vrRig.SetInvisibleToLocalPlayer(false);
-			if (this.vrRig.isLocal)
-			{
-				CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(false);
-				GameLightingManager.instance.SetDesaturateAndTintEnabled(false, Color.black);
-				Color ambientLightDynamic = Color.black;
-				GhostReactor instance = GhostReactor.instance;
-				if (instance != null && instance.zone != GTZone.customMaps)
-				{
-					ambientLightDynamic = instance.GetCurrLevelGenConfig().ambientLight;
-				}
-				GameLightingManager.instance.SetAmbientLightDynamic(ambientLightDynamic);
-			}
-			if (this.shieldHp > 0)
-			{
-				this.shieldHeadVisual.gameObject.SetActive(true);
-				this.shieldBodyVisual.gameObject.SetActive(true);
-				Color value = this.shieldColorNormal;
-				if ((this.shieldFlags & 1) != 0)
-				{
-					value = this.shieldColorLight;
-				}
-				else if ((this.shieldFlags & 2) != 0)
-				{
-					value = this.shieldColorStealth;
-				}
-				else if ((this.shieldFlags & 4) != 0)
-				{
-					value = this.shieldColorHeal;
-				}
-				Renderer component = this.shieldBodyVisual.GetComponent<Renderer>();
-				if (component != null)
-				{
-					component.material.SetColor("_BaseColor", value);
-				}
-				Renderer component2 = this.shieldHeadVisual.GetComponent<Renderer>();
-				if (component2 != null)
-				{
-					component2.material.SetColor("_BaseColor", value);
-				}
-			}
-			else
-			{
-				this.shieldHeadVisual.gameObject.SetActive(false);
-				this.shieldBodyVisual.gameObject.SetActive(false);
-			}
-			this.shieldGameLight.gameObject.SetActive((this.shieldFlags & 1) != 0);
-			return;
-		}
-		if (grplayerState != GRPlayer.GRPlayerState.Ghost)
-		{
-			return;
-		}
-		if (this.vrRig.isLocal)
-		{
-			this.gamePlayer.RequestDropAllSnapped();
-		}
-		this.gamePlayer.DisableGrabbing(true);
-		this.shieldHeadVisual.gameObject.SetActive(false);
-		this.shieldBodyVisual.gameObject.SetActive(false);
-		this.shieldGameLight.gameObject.SetActive(false);
-		if (this.badge != null)
-		{
-			this.badge.Hide();
-		}
-		if (this.vrRig.isLocal)
-		{
-			GamePlayerLocal.instance.OnUpdateInteract();
-			this.vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Skeleton);
-			this.vrRig.ChangeMaterialLocal(13);
-			this.vrRig.SetInvisibleToLocalPlayer(false);
-			CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(true);
-			GameLightingManager.instance.SetDesaturateAndTintEnabled(true, this.deathTintColor);
-			GameLightingManager.instance.SetAmbientLightDynamic(this.deathAmbientLightColor);
-			return;
-		}
-		if (VRRigCache.Instance.localRig.GetComponent<GRPlayer>().State == GRPlayer.GRPlayerState.Ghost)
-		{
-			this.vrRig.ChangeMaterialLocal(13);
-			this.vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Skeleton);
-			this.vrRig.SetInvisibleToLocalPlayer(false);
-			return;
-		}
-		this.vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Invisible);
-		this.vrRig.SetInvisibleToLocalPlayer(true);
-	}
-
-	public static GRPlayer Get(int actorNumber)
-	{
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(actorNumber, out gamePlayer))
-		{
-			return null;
-		}
-		return gamePlayer.GetComponent<GRPlayer>();
-	}
-
-	public static GRPlayer Get(NetPlayer player)
-	{
-		if (player == null)
-		{
-			return null;
-		}
-		return GRPlayer.Get(player.ActorNumber);
-	}
-
-	public static GRPlayer Get(VRRig vrRig)
-	{
-		if (!(vrRig != null))
-		{
-			return null;
-		}
-		return vrRig.GetComponent<GRPlayer>();
-	}
-
-	public static GRPlayer GetLocal()
-	{
-		return GRPlayer.Get(VRRig.LocalRig);
-	}
-
-	public void AttachBadge(GRBadge grBadge)
-	{
-		this.badge = grBadge;
-		this.badge.transform.SetParent(this.badgeBodyAnchor);
-		this.badge.GetComponent<Rigidbody>().isKinematic = true;
-		this.badge.StartRetracting();
-	}
-
-	public bool CanActivateShield(int shieldHitPoints)
-	{
-		return this.state == GRPlayer.GRPlayerState.Alive && shieldHitPoints > 0;
-	}
-
-	public bool TryActivateShield(int shieldHitpoints, int shieldFlags)
-	{
-		if (this.state == GRPlayer.GRPlayerState.Alive)
-		{
-			if (this.shieldHp <= 0 && this.shieldActivatedSound != null)
-			{
-				this.audioSource.PlayOneShot(this.shieldActivatedSound, this.shieldActivatedVolume);
-			}
-			this.SetShieldHp(Mathf.Min(shieldHitpoints, this.maxShieldHp));
-			this.shieldFlags = shieldFlags;
-			this.inStealthMode = ((shieldFlags & 2) != 0);
-			if (this.inStealthMode)
-			{
-				if (this.damageEffects.stealthModeVisualRenderer != null)
-				{
-					this.damageEffects.stealthModeVisualRenderer.gameObject.SetActive(true);
-				}
-				this.shieldStealthModeEndTime = Time.timeAsDouble + (double)this.shieldStealthModeDuration;
-			}
-			if ((shieldFlags & 4) != 0)
-			{
-				this.SetHp(this.maxHp);
-			}
-			this.RefreshPlayerVisuals();
-			return true;
-		}
-		return false;
-	}
-
-	public void ClearStealthMode()
-	{
-		this.inStealthMode = false;
-		if (this.damageEffects.stealthModeVisualRenderer != null)
-		{
-			this.damageEffects.stealthModeVisualRenderer.gameObject.SetActive(false);
-		}
-	}
-
-	public void SerializeNetworkState(BinaryWriter writer, NetPlayer player)
-	{
-		writer.Write((byte)this.state);
-		writer.Write(this.hp);
-		writer.Write(this.shieldHp);
-		writer.Write(this.shiftJoinTime);
-		writer.Write(this.isEmployee ? 1 : 0);
-		writer.Write(this.CurrentProgression.points);
-		writer.Write(this.CurrentProgression.redeemedPoints);
-		writer.Write(this.dropPodLevel);
-		writer.Write(this.dropPodChasisLevel);
-		for (int i = 0; i < 8; i++)
-		{
-			writer.Write(this.synchronizedSessionStats[i]);
-		}
-	}
-
-	public static void DeserializeNetworkStateAndBurn(BinaryReader reader, GRPlayer player, GhostReactorManager grManager)
-	{
-		GRPlayer.GRPlayerState newState = (GRPlayer.GRPlayerState)reader.ReadByte();
-		int num = reader.ReadInt32();
-		int num2 = reader.ReadInt32();
-		double num3 = reader.ReadDouble();
-		bool flag = reader.ReadByte() > 0;
-		int points = reader.ReadInt32();
-		int redeemedPoints = reader.ReadInt32();
-		int num4 = reader.ReadInt32();
-		int num5 = reader.ReadInt32();
-		for (int i = 0; i < 8; i++)
-		{
-			player.synchronizedSessionStats[i] = reader.ReadSingle();
-		}
-		if (player != null)
-		{
-			player.SetHp(num);
-			player.SetShieldHp(num2);
-			player.isEmployee = flag;
-			player.ChangePlayerState(newState, grManager);
-			player.RefreshPlayerVisuals();
-			if (!player.gamePlayer.IsLocal())
-			{
-				player.SetProgressionData(points, redeemedPoints, false);
-				player.dropPodLevel = num4;
-				player.dropPodChasisLevel = num5;
-			}
-			if (double.IsNaN(num3) || double.IsInfinity(num3))
-			{
-				player.shiftJoinTime = PhotonNetwork.Time;
-			}
-			else
-			{
-				player.shiftJoinTime = Math.Min(num3, PhotonNetwork.Time);
-			}
-		}
-		if (grManager != null)
-		{
-			grManager.SendMothershipId();
-		}
-	}
-
-	public void PlayHitFx(Vector3 attackLocation)
-	{
-		if (this.playerDamageAudioSource != null)
-		{
-			this.playerDamageAudioSource.PlayOneShot(this.playerDamageSound, this.playerDamageVolume);
-		}
-		if (this.bodyCenter != null)
-		{
-			Vector3 vector = attackLocation - this.bodyCenter.position;
-			vector.y = 0f;
-			Vector3 b = vector.normalized * this.playerDamageOffsetDist;
-			if (this.playerDamageEffect != null)
-			{
-				this.playerDamageEffect.transform.position = this.bodyCenter.position + b;
-				this.playerDamageEffect.Play();
-			}
-			if (this.vrRig.isLocal)
-			{
-				Vector3 normalized = Vector3.ProjectOnPlane(GTPlayer.Instance.mainCamera.transform.forward, Vector3.up).normalized;
-				vector = Vector3.ProjectOnPlane(vector, Vector3.up).normalized;
-				float num = Vector3.SignedAngle(normalized, vector, Vector3.up);
-				this.damageEffects.radialDamageEffect.transform.localRotation = Quaternion.Euler(0f, 0f, -num);
-				this.damageEffects.radialDamageEffect.Play();
-			}
-		}
-		if (this.gamePlayer == GamePlayerLocal.instance.gamePlayer)
-		{
-			GorillaTagger.Instance.StartVibration(true, GorillaTagger.Instance.tapHapticStrength, 0.5f);
-			GorillaTagger.Instance.StartVibration(false, GorillaTagger.Instance.tapHapticStrength, 0.5f);
-		}
-	}
-
-	public void SendGameStartedTelemetry(float timeIntoShift, bool wasPlayerInAtStart, int currentFloor)
-	{
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		string titleNameFromLevel = GhostReactorProgression.GetTitleNameFromLevel(GhostReactorProgression.GetTitleLevel(this.CurrentProgression.redeemedPoints));
-		GorillaTelemetry.GhostReactorShiftStart(this.gameId, this.ShiftCredits, timeIntoShift, wasPlayerInAtStart, this.vrRigs.Count + 1, currentFloor, titleNameFromLevel);
-		this.wasPlayerInAtShiftStart = wasPlayerInAtStart;
-		this.ResetGameTelemetryTracking();
-	}
-
-	public void SendGameEndedTelemetry(bool isShiftActuallyEnding, ZoneClearReason zoneClearReason)
-	{
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		GorillaTelemetry.GhostReactorGameEnd(this.gameId, this.ShiftCredits, this.totalCoresCollectedByPlayer, this.totalCoresCollectedByGroup, this.totalCoresSpentByPlayer, this.totalCoresSpentByGroup, this.totalGatesUnlocked, this.totalDeaths, this.totalItemsPurchased, this.lastShiftCut, isShiftActuallyEnding, this.timeIntoShiftAtJoin, (float)(PhotonNetwork.Time - (double)this.gameStartTime), this.wasPlayerInAtShiftStart, zoneClearReason, this.maxNumberOfPlayersInShift, this.vrRigs.Count + 1, this.totalItemTypesHeldThisShift, this.totalRevives, this.numShiftsPlayed);
-		this.isFirstShift = true;
-	}
-
-	public void SendFloorStartedTelemetry(float timeIntoShift, bool wasPlayerInAtStart, int currentFloor, string floorPreset, string floorModifier)
-	{
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		string titleNameFromLevel = GhostReactorProgression.GetTitleNameFromLevel(GhostReactorProgression.GetTitleLevel(this.CurrentProgression.redeemedPoints));
-		GorillaTelemetry.GhostReactorFloorStart(this.gameId, this.ShiftCredits, timeIntoShift, wasPlayerInAtStart, this.vrRigs.Count + 1, titleNameFromLevel, currentFloor, floorPreset, floorModifier);
-		this.wasPlayerInAtShiftStart = wasPlayerInAtStart;
-	}
-
-	public void SendFloorEndedTelemetry(bool isShiftActuallyEnding, float shiftStartTime, ZoneClearReason zoneClearReason, int currentFloor, string floorPreset, string floorModifier, bool objectivesCompleted, string section, int xpGained)
-	{
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		GorillaTelemetry.GhostReactorFloorComplete(this.gameId, this.ShiftCredits, this.coresCollectedByPlayer, this.coresCollectedByGroup, this.coresSpentByPlayer, this.coresSpentByGroup, this.gatesUnlocked, this.deaths, this.itemsPurchased, this.lastShiftCut, isShiftActuallyEnding, this.timeIntoShiftAtJoin, (float)(PhotonNetwork.Time - (double)(this.timeIntoShiftAtJoin + shiftStartTime)), this.wasPlayerInAtShiftStart, zoneClearReason, this.maxNumberOfPlayersInShift, this.vrRigs.Count + 1, this.itemTypesHeldThisShift, this.revives, currentFloor, floorPreset, floorModifier, this.sentientCoresCollected, objectivesCompleted, section, xpGained);
-	}
-
-	public void SendToolPurchasedTelemetry(string toolName, int toolLevel, int coresSpent, int shinyRocksSpent)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorToolPurchased(this.gameId, toolName, toolLevel, coresSpent, shinyRocksSpent, floor, preset);
-	}
-
-	public void SendRankUpTelemetry(string newRank)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorRankUp(this.gameId, newRank, floor, preset);
-	}
-
-	public void SendToolUpgradeTelemetry(string upgradeType, string toolName, int newLevel, int juiceSpent, int griftSpent, int coresSpent)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorToolUpgrade(this.gameId, upgradeType, toolName, newLevel, juiceSpent, griftSpent, coresSpent, floor, preset);
-	}
-
-	public void SendSeedDepositedTelemetry(string unlockTime, int seedsInQueue)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorChaosSeedStart(this.gameId, unlockTime, seedsInQueue, floor, preset);
-	}
-
-	public void SendJuiceCollectedTelemetry(int juiceCollected, int coresProcessedByOverdrive)
-	{
-		GorillaTelemetry.GhostReactorChaosJuiceCollected(this.gameId, juiceCollected, coresProcessedByOverdrive);
-	}
-
-	public void SendOverdrivePurchasedTelemetry(int shinyRocksUsed, int seedsInQueue)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorOverdrivePurchased(this.gameId, shinyRocksUsed, seedsInQueue, floor, preset);
-	}
-
-	public void SendPodUpgradeTelemetry(string toolName, int level, int shinyRocksSpent, int juiceSpent)
-	{
-		GorillaTelemetry.GhostReactorPodUpgradePurchased(this.gameId, toolName, level, shinyRocksSpent, juiceSpent);
-	}
-
-	public void SendCreditsRefilledTelemetry(int shinyRocksSpent, int finalCredits)
-	{
-		int floor = -1;
-		string preset = "";
-		GhostReactor instance = GhostReactor.instance;
-		if (instance != null && instance.zone != GTZone.customMaps)
-		{
-			floor = instance.GetDepthLevel();
-			preset = instance.GetCurrLevelGenConfig().name;
-		}
-		GorillaTelemetry.GhostReactorCreditsRefillPurchased(this.gameId, shinyRocksSpent, finalCredits, floor, preset);
-	}
-
-	public void ResetTelemetryTracking(string newGameId, float timeSinceShiftStart)
-	{
-		this.gameId = newGameId;
-		this.coresCollectedByPlayer = 0;
-		this.coresCollectedByGroup = 0;
-		this.gatesUnlocked = 0;
-		this.deaths = 0;
-		this.caughtByAnomaly = false;
-		this.itemsPurchased = new List<string>();
-		this.levelsUnlocked = new List<string>();
-		this.sentientCoresCollected = 0;
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		this.maxNumberOfPlayersInShift = this.vrRigs.Count + 1;
-		this.timeIntoShiftAtJoin = timeSinceShiftStart;
-		this.itemsHeldThisShift.Clear();
-		this.itemTypesHeldThisShift.Clear();
-	}
-
-	public void ResetGameTelemetryTracking()
-	{
-		this.totalCoresCollectedByPlayer = 0;
-		this.totalCoresCollectedByGroup = 0;
-		this.totalGatesUnlocked = 0;
-		this.totalDeaths = 0;
-		this.totalItemsPurchased = new List<string>();
-		this.vrRigs.Clear();
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		this.maxNumberOfPlayersIngame = this.vrRigs.Count + 1;
-		this.totalItemsHeldThisShift.Clear();
-		this.totalItemTypesHeldThisShift.Clear();
-		this.numShiftsPlayed = 0;
-		this.isFirstShift = false;
-	}
-
-	public void IncrementCoresCollectedPlayer(int coreValue)
-	{
-		this.totalCoresCollectedByPlayer += coreValue;
-		this.coresCollectedByPlayer += coreValue;
-	}
-
-	public void IncrementCoresCollectedGroup(int coreValue)
-	{
-		this.totalCoresCollectedByGroup += coreValue;
-		this.coresCollectedByGroup += coreValue;
-	}
-
-	public void IncrementCoresSpentPlayer(int coreValue)
-	{
-		this.totalCoresSpentByPlayer += coreValue;
-		this.coresSpentByPlayer += coreValue;
-	}
-
-	public void IncrementCoresSpentGroup(int coreValue)
-	{
-		this.totalCoresSpentByGroup += coreValue;
-		this.coresSpentByGroup += coreValue;
-	}
-
-	public void IncrementChaosSeedsCollected(int numSeeds)
-	{
-		this.sentientCoresCollected += numSeeds;
-	}
-
-	public void IncrementGatesUnlocked(int numGatesUnlocked)
-	{
-		this.gatesUnlocked += numGatesUnlocked;
-		this.totalGatesUnlocked += numGatesUnlocked;
-	}
-
-	public void IncrementDeaths(int numDeaths)
-	{
-		this.deaths += numDeaths;
-		this.totalDeaths += numDeaths;
-	}
-
-	public void IncrementRevives(int numRevives)
-	{
-		this.revives += numRevives;
-		this.totalRevives += numRevives;
-	}
-
-	public void IncrementShiftsPlayed(int numShifts)
-	{
-		this.numShiftsPlayed += numShifts;
-	}
-
-	public void AddItemPurchased(string newItemPurchased)
-	{
-		this.itemsPurchased.Add(newItemPurchased);
-		this.totalItemsPurchased.Add(newItemPurchased);
-	}
-
-	public void GrabbedItem(GameEntityId id, string itemName)
-	{
-		if (this.itemsHeldThisShift.Contains(id))
-		{
-			return;
-		}
-		this.itemsHeldThisShift.Add(id);
-		if (this.itemTypesHeldThisShift.ContainsKey(itemName))
-		{
-			this.itemTypesHeldThisShift[itemName] = this.itemTypesHeldThisShift[itemName] + 1;
-		}
-		else
-		{
-			this.itemTypesHeldThisShift[itemName] = 1;
-		}
-		if (this.totalItemsHeldThisShift.Contains(id))
-		{
-			return;
-		}
-		this.totalItemsHeldThisShift.Add(id);
-		if (this.totalItemTypesHeldThisShift.ContainsKey(itemName))
-		{
-			this.totalItemTypesHeldThisShift[itemName] = this.totalItemTypesHeldThisShift[itemName] + 1;
-			return;
-		}
-		this.totalItemTypesHeldThisShift[itemName] = 1;
-	}
-
-	public GRShuttle GetAssignedShuttle(bool isOnDrillovator)
-	{
-		GhostReactor instance = GhostReactor.instance;
-		GRShuttle drillShuttleForPlayer = GRElevatorManager._instance.GetDrillShuttleForPlayer(this.gamePlayer.rig.OwningNetPlayer.ActorNumber);
-		GRShuttle stagingShuttleForPlayer = GRElevatorManager._instance.GetStagingShuttleForPlayer(this.gamePlayer.rig.OwningNetPlayer.ActorNumber);
-		if (!isOnDrillovator)
-		{
-			return stagingShuttleForPlayer;
-		}
-		return drillShuttleForPlayer;
-	}
-
-	public void RefreshShuttles()
-	{
-		GRShuttle assignedShuttle = this.GetAssignedShuttle(true);
-		if (assignedShuttle != null)
-		{
-			assignedShuttle.Refresh();
-		}
-		assignedShuttle = this.GetAssignedShuttle(false);
-		if (assignedShuttle != null)
-		{
-			assignedShuttle.Refresh();
-		}
-	}
-
-	public static GRPlayer GetFromUserId(string userId)
-	{
-		GRPlayer.tempRigs.Clear();
-		GRPlayer.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GRPlayer.tempRigs);
-		for (int i = 0; i < GRPlayer.tempRigs.Count; i++)
-		{
-			if (GRPlayer.tempRigs[i].OwningNetPlayer != null && GRPlayer.tempRigs[i].OwningNetPlayer.UserId == userId)
-			{
-				return GRPlayer.Get(GRPlayer.tempRigs[i].OwningNetPlayer);
-			}
-		}
-		return null;
-	}
-
-	[ContextMenu("Refresh Damage Vignette Visual")]
-	public void RefreshDamageVignetteVisual()
-	{
-		if (this.vrRig.isLocal && this.currentHealthVisualValue != this.hp)
-		{
-			this.currentHealthVisualValue = this.hp;
-			if (this.hp <= this.damageOverlayMaxHp && this.hp > 0)
-			{
-				if (this.lowHeathVisualCoroutine != null)
-				{
-					base.StopCoroutine(this.lowHeathVisualCoroutine);
-				}
-				this.damageEffects.lowHealthVisualRenderer.gameObject.SetActive(true);
-				this.lowHeathVisualCoroutine = base.StartCoroutine(this.LowHeathVisualCoroutine());
-				return;
-			}
-			this.damageEffects.lowHealthVisualRenderer.gameObject.SetActive(false);
-		}
-	}
-
-	private IEnumerator LowHeathVisualCoroutine()
-	{
-		int index = this.hp - 1;
-		if (index >= 0 && index < this.damageOverlayValues.Count)
-		{
-			float startTime = Time.time;
-			while (Time.time - startTime < this.damageOverlayValues[index].effectDuration)
-			{
-				float time = Mathf.Clamp01((Time.time - startTime) / this.damageOverlayValues[index].effectDuration);
-				float num = this.damageOverlayValues[index].effectCurve.Evaluate(time);
-				Color tint = this.damageOverlayValues[index].tint;
-				tint.a *= num;
-				this.damageEffects.lowHealthVisualRenderer.GetPropertyBlock(this.lowHealthVisualPropertyBlock);
-				this.lowHealthVisualPropertyBlock.SetColor(this.lowHealthTintPropertyId, tint);
-				this.damageEffects.lowHealthVisualRenderer.SetPropertyBlock(this.lowHealthVisualPropertyBlock);
-				yield return null;
-			}
-		}
-		yield break;
-	}
-
-	public void SetGooParticleSystemEnabled(bool bIsLeftHand, bool newEnableState)
-	{
-		if (this.vrRig != null)
-		{
-			this.vrRig.SetGooParticleSystemStatus(bIsLeftHand, newEnableState);
-		}
-	}
-
-	public void SetAsFrozen(float duration)
-	{
-		if (GorillaTagger.Instance.currentStatus != GorillaTagger.StatusEffect.Frozen)
-		{
-			this.freezeDuration = duration;
-			if (this.gamePlayer.rig.OwningNetPlayer.IsLocal)
-			{
-				GorillaTagger.Instance.ApplyStatusEffect(GorillaTagger.StatusEffect.Frozen, duration);
-				GorillaTagger.Instance.StartVibration(true, GorillaTagger.Instance.taggedHapticStrength, GorillaTagger.Instance.taggedHapticDuration);
-				GorillaTagger.Instance.StartVibration(false, GorillaTagger.Instance.taggedHapticStrength, GorillaTagger.Instance.taggedHapticDuration);
-				GorillaTagger.Instance.offlineVRRig.PlayTaggedEffect();
-				if (this.damageEffects.frozenVisualRenderer != null)
-				{
-					this.damageEffects.frozenVisualRenderer.gameObject.SetActive(true);
-				}
-				this.playerDamageAudioSource.PlayOneShot(this.playerFrozenSound, 1f);
-			}
-			this.gamePlayer.rig.UpdateFrozenEffect(true);
-			base.Invoke("RemoveFrozen", duration);
-		}
-	}
-
-	public void RemoveFrozen()
-	{
-		this.gamePlayer.rig.UpdateFrozenEffect(false);
-		this.freezeDuration = 0f;
-		if (this.damageEffects.frozenVisualRenderer != null)
-		{
-			this.damageEffects.frozenVisualRenderer.gameObject.SetActive(false);
-		}
-	}
-
-	public override void Tick()
-	{
-		if (this.lastPlayerPosition != Vector3.zero)
-		{
-			Vector3 position = this.vrRig.transform.position;
-			float magnitude = (this.lastPlayerPosition - position).magnitude;
-			this.IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat.DistanceTraveled, magnitude);
-		}
-		this.lastPlayerPosition = this.vrRig.transform.position;
-		if (this.freezeDuration > 0f)
-		{
-			this.gamePlayer.rig.UpdateFrozen(Time.deltaTime, this.freezeDuration);
-		}
-		if (this.inStealthMode && Time.timeAsDouble > this.shieldStealthModeEndTime)
-		{
-			this.ClearStealthMode();
-		}
-		GRShuttle.UpdateGRPlayerShuttle(this);
-		if (this.soak != null && this.soak.IsSoaking())
-		{
-			this.soak.OnUpdate();
-		}
-	}
-
-	public void SetSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat stat, float amt)
+	public enum SynchronizedSessionStat
 	{
-		this.synchronizedSessionStats[(int)stat] = amt;
+		CoresDeposited,
+		EarnedCredits,
+		SpentCredits,
+		DistanceTraveled,
+		Deaths,
+		Kills,
+		Assists,
+		TimeChaosExposure,
+		Count
 	}
 
-	public void IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat stat, float amt)
+	[Serializable]
+	private struct DamageOverlayValues
 	{
-		this.synchronizedSessionStats[(int)stat] += amt;
-	}
+		public Color tint;
 
-	public void ResetSynchronizedSessionStats()
-	{
-		for (int i = 0; i < 8; i++)
-		{
-			this.synchronizedSessionStats[i] = 0f;
-		}
-	}
+		public float effectDuration;
 
-	private void RequestSetMothershipUserData(string keyName, string value)
-	{
-		if (this.saveEquipmentInProgress)
-		{
-			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: request already in progress");
-			return;
-		}
-		this.saveEquipmentInProgress = true;
-		try
-		{
-			if (!MothershipClientApiUnity.SetUserDataValue(keyName, value, new Action<SetUserDataResponse>(this.OnSetMothershipUserDataSuccess), new Action<MothershipError, int>(this.OnSetMothershipUserDataFail), ""))
-			{
-				Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: SetUserDataValue Fail");
-				this.OnSetMothershipDataComplete(false);
-			}
-		}
-		catch (Exception ex)
-		{
-			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: exception " + ex.Message);
-			this.OnSetMothershipDataComplete(false);
-		}
+		public AnimationCurve effectCurve;
 	}
 
-	private void OnSetMothershipUserDataSuccess(SetUserDataResponse response)
+	public enum ShuttleState
 	{
-		GTDev.Log<string>("GRPlayer OnSetMothershipUserDataSuccess", null);
-		this.OnSetMothershipDataComplete(true);
-		response.Dispose();
+		Idle,
+		Moving,
+		WaitForLeaveRoom,
+		JoinRoom,
+		WaitForLeadPlayer,
+		Teleport,
+		TeleportToMyShuttleSafety,
+		PostTeleport
 	}
 
-	private void OnSetMothershipUserDataFail(MothershipError error, int status)
+	public class ShuttleData
 	{
-		string str = (error == null) ? status.ToString() : error.Message;
-		GTDev.LogError<string>("GRPlayer OnSetMothershipUserDataFail: " + str, null);
-		this.OnSetMothershipDataComplete(false);
-		if (error != null)
-		{
-			error.Dispose();
-		}
-	}
+		public string ownerUserId;
 
-	private void OnSetMothershipDataComplete(bool success)
-	{
-		this.saveEquipmentInProgress = false;
-	}
+		public int currShuttleId;
 
-	public void RequestFetchMothershipUserData(string key)
-	{
-		if (!this.hasPulledEquipment)
-		{
-			try
-			{
-				if (!MothershipClientApiUnity.GetUserDataValue(key, new Action<MothershipUserData>(this.OnGetMothershipFetchUserDataSuccess), new Action<MothershipError, int>(this.OnGetMothershipFetchUserDataFail), ""))
-				{
-					Debug.LogError("GRPlayer RequestFetchMothershipUserData failed ");
-				}
-			}
-			catch (Exception ex)
-			{
-				Debug.LogError("GRPlayer RequestFetchMothershipUserData exception " + ex.Message);
-			}
-		}
-	}
+		public int targetShuttleId;
 
-	private void OnGetMothershipFetchUserDataSuccess(MothershipUserData response)
-	{
-		GTDev.Log<string>("GRPlayer OnGetMothershipFetchUserDataSuccess", null);
-		bool flag = response != null && response.value != null && response.value.Length > 0;
-		if (response != null)
-		{
-		}
-		if (response != null)
-		{
-			response.Dispose();
-		}
-	}
+		public int targetLevel;
 
-	private void OnGetMothershipFetchUserDataFail(MothershipError error, int status)
-	{
-		string str = (error == null) ? status.ToString() : error.Message;
-		GTDev.LogError<string>("GRPlayer OnGetMothershipFetchUserDataFail: " + str, null);
-		if (error != null)
-		{
-			error.Dispose();
-		}
-	}
+		public ShuttleState state;
 
-	public bool IsDropPodUnlocked()
-	{
-		return this.dropPodLevel > 0;
+		public double stateStartTime;
 	}
 
-	public int GetMaxDropFloor()
+	[Serializable]
+	public struct ProgressionData
 	{
-		switch (this.dropPodChasisLevel + this.dropPodLevel)
-		{
-		case 0:
-			return 1;
-		case 1:
-			return 5;
-		case 2:
-			return 10;
-		case 3:
-			return 15;
-		case 4:
-			return 20;
-		default:
-			return 0;
-		}
-	}
+		public int points;
 
-	public void CollectShiftCut()
-	{
-		this.SetProgressionData(this.currentProgression.points + this.LastShiftCut, this.currentProgression.redeemedPoints, true);
+		public int redeemedPoints;
 	}
 
-	public bool AttemptPromotion()
+	[Serializable]
+	public struct ProgressionLevels
 	{
-		ValueTuple<int, int, int, int> gradePointDetails = GhostReactorProgression.GetGradePointDetails(this.CurrentProgression.redeemedPoints);
-		int item = gradePointDetails.Item3;
-		int item2 = gradePointDetails.Item4;
-		if (item - item2 < this.CurrentProgression.points - this.CurrentProgression.redeemedPoints)
-		{
-			this.SetProgressionData(this.currentProgression.points, this.currentProgression.points, false);
-			return true;
-		}
-		return false;
-	}
+		public int tierId;
 
-	public void SetProgressionData(int _points, int _redeemedPoints, bool saveProgression = false)
-	{
-		if (_points < 0 || _redeemedPoints < 0)
-		{
-			return;
-		}
-		this.currentProgression = new GRPlayer.ProgressionData
-		{
-			points = _points,
-			redeemedPoints = _redeemedPoints
-		};
-		if (this.gamePlayer.IsLocal() && saveProgression)
-		{
-			this.SaveMyProgression();
-		}
-	}
+		public string tierName;
 
-	public void LoadMyProgression()
-	{
-		GhostReactorProgression.instance.GetStartingProgression(this);
-	}
+		public int grades;
 
-	public void SaveMyProgression()
-	{
-		GhostReactorProgression.instance.SetProgression(this.LastShiftCut, this);
+		public int pointsPerGrade;
 	}
 
 	public const int MAX_CURRENCY = 500;
 
 	public GamePlayer gamePlayer;
 
-	private GRPlayer.GRPlayerState state;
+	private GRPlayerState state;
 
 	private int shiftCreditCache;
 
@@ -1321,7 +172,7 @@ public class GRPlayer : MonoBehaviourTick
 
 	private double shieldStealthModeEndTime;
 
-	public Color shieldColorNormal = new Color(0.42352942f, 0.25490198f, 1f, 0.45490196f);
+	public Color shieldColorNormal = new Color(36f / 85f, 13f / 51f, 1f, 0.45490196f);
 
 	public Color shieldColorLight = new Color(1f, 1f, 1f, 0.5f);
 
@@ -1360,7 +211,7 @@ public class GRPlayer : MonoBehaviourTick
 	[Header("Damage Vignette")]
 	[SerializeField]
 	[Tooltip("First entry is 1 hp, second entry is 2 hp, etc.")]
-	private List<GRPlayer.DamageOverlayValues> damageOverlayValues = new List<GRPlayer.DamageOverlayValues>();
+	private List<DamageOverlayValues> damageOverlayValues = new List<DamageOverlayValues>();
 
 	[SerializeField]
 	private int damageOverlayMaxHp = 1;
@@ -1478,9 +329,9 @@ public class GRPlayer : MonoBehaviourTick
 
 	public AudioClip playerFrozenSound;
 
-	public GRPlayer.ShuttleData shuttleData;
+	public ShuttleData shuttleData;
 
-	private GRPlayer.ProgressionData currentProgression;
+	private ProgressionData currentProgression;
 
 	private float shiftPlayTime;
 
@@ -1502,87 +353,1158 @@ public class GRPlayer : MonoBehaviourTick
 
 	public int dropPodChasisLevel;
 
-	public enum GRPlayerState
+	public GRPlayerState State => state;
+
+	public int Juice => playerJuice;
+
+	public int ShiftCreditCapIncreases { get; set; }
+
+	public int ShiftCreditCapIncreasesMax { get; set; }
+
+	public int ShiftCredits => shiftCreditCache;
+
+	public int MaxHp => maxHp;
+
+	public int MaxShieldHp => maxShieldHp;
+
+	public int Hp => hp;
+
+	public int ShieldHp => shieldHp;
+
+	public int ShieldFlags => shieldFlags;
+
+	public bool InStealthMode => inStealthMode;
+
+	public VRRig MyRig => vrRig;
+
+	public float ShiftPlayTime
 	{
-		Alive,
-		Ghost,
-		Shielded
+		get
+		{
+			return shiftPlayTime;
+		}
+		set
+		{
+			shiftPlayTime = value;
+		}
 	}
 
-	public enum GRPlayerShieldFlags
+	public int LastShiftCut
 	{
-		Light = 1,
-		Stealth,
-		Heal = 4
+		get
+		{
+			return lastShiftCut;
+		}
+		set
+		{
+			lastShiftCut = value;
+		}
 	}
 
-	public enum SynchronizedSessionStat
+	public ProgressionData CurrentProgression
 	{
-		CoresDeposited,
-		EarnedCredits,
-		SpentCredits,
-		DistanceTraveled,
-		Deaths,
-		Kills,
-		Assists,
-		TimeChaosExposure,
-		Count
+		get
+		{
+			return currentProgression;
+		}
+		set
+		{
+			currentProgression = value;
+		}
 	}
 
-	[Serializable]
-	private struct DamageOverlayValues
+	public bool HasXRayVision()
 	{
-		public Color tint;
-
-		public float effectDuration;
-
-		public AnimationCurve effectCurve;
+		return xRayVisionRefCount > 0;
 	}
 
-	public enum ShuttleState
+	private void Awake()
 	{
-		Idle,
-		Moving,
-		WaitForLeaveRoom,
-		JoinRoom,
-		WaitForLeadPlayer,
-		Teleport,
-		TeleportToMyShuttleSafety,
-		PostTeleport
+		vrRig = GetComponent<VRRig>();
+		lowHealthVisualPropertyBlock = new MaterialPropertyBlock();
+		damageEffects = GTPlayer.Instance.mainCamera.GetComponent<GRPlayerDamageEffects>();
+		lowHealthTintPropertyId = Shader.PropertyToID("_TintColor");
+		isEmployee = false;
+		SetHp(maxHp);
+		SetShieldHp(0);
+		state = GRPlayerState.Alive;
+		RefreshDamageVignetteVisual();
+		shieldHeadVisual.gameObject.SetActive(value: false);
+		shieldBodyVisual.gameObject.SetActive(value: false);
+		shieldGameLight = shieldBodyVisual.gameObject.GetComponentInChildren<GameLight>(includeInactive: true);
+		requestCollectItemLimiter = new CallLimiter(25, 1f);
+		requestChargeToolLimiter = new CallLimiter(25, 1f);
+		requestDepositCurrencyLimiter = new CallLimiter(25, 1f);
+		requestShiftStartLimiter = new CallLimiter(25, 1f);
+		requestToolPurchaseStationLimiter = new CallLimiter(25, 1f);
+		applyEnemyHitLimiter = new CallLimiter(25, 1f);
+		reportLocalHitLimiter = new CallLimiter(25, 1f);
+		reportBreakableBrokenLimiter = new CallLimiter(25, 1f);
+		playerStateChangeLimiter = new CallLimiter(25, 1f);
+		promotionBotLimiter = new CallLimiter(25, 1f);
+		progressionBroadcastLimiter = new CallLimiter(25, 1f);
+		scoreboardPageLimiter = new CallLimiter(25, 1f);
+		fireShieldLimiter = new CallLimiter(25, 1f);
+		shuttleData = new ShuttleData();
+		lastLeftWithBadgeAttachedTime = -10000.0;
 	}
 
-	public class ShuttleData
+	private void Start()
 	{
-		public string ownerUserId;
-
-		public int currShuttleId;
-
-		public int targetShuttleId;
-
-		public int targetLevel;
-
-		public GRPlayer.ShuttleState state;
-
-		public double stateStartTime;
+		if (gamePlayer != null && gamePlayer.IsLocal())
+		{
+			LoadMyProgression();
+			ProgressionManager.Instance.OnGetShiftCredit += OnShiftCreditChanged;
+			ProgressionManager.Instance.OnGetShiftCreditCapData += OnShiftCreditCapChanged;
+			soak = new GhostReactorSoak();
+			soak.Setup(this);
+		}
+		else
+		{
+			currentProgression = new ProgressionData
+			{
+				points = 0,
+				redeemedPoints = 0
+			};
+		}
+		if (ProgressionManager.Instance != null)
+		{
+			ProgressionManager.Instance.OnGetShiftCredit += OnShiftCreditChanged;
+			ProgressionManager.Instance.OnGetShiftCreditCapData += OnShiftCreditCapChanged;
+		}
 	}
 
-	[Serializable]
-	public struct ProgressionData
+	private new void OnDisable()
 	{
-		public int points;
-
-		public int redeemedPoints;
+		Reset();
 	}
 
-	[Serializable]
-	public struct ProgressionLevels
+	public void Reset()
 	{
-		public int tierId;
+		SetHp(maxHp);
+		SetShieldHp(0);
+		state = GRPlayerState.Alive;
+		RefreshDamageVignetteVisual();
+		RefreshPlayerVisuals();
+		for (int i = 0; i < 8; i++)
+		{
+			synchronizedSessionStats[i] = 0f;
+		}
+	}
 
-		public string tierName;
+	private void SetHp(int newHp)
+	{
+		hp = Mathf.Max(newHp, 0);
+	}
 
-		public int grades;
+	private void SetShieldHp(int newShieldHp)
+	{
+		shieldHp = Mathf.Max(newShieldHp, 0);
+	}
 
-		public int pointsPerGrade;
+	public void OnShiftCreditCapChanged(string targetMothershipId, int newCap, int newCapMax)
+	{
+		if (mothershipId != null && targetMothershipId == mothershipId)
+		{
+			if (gamePlayer.IsLocal() && (newCap != ShiftCreditCapIncreases || newCapMax != ShiftCreditCapIncreasesMax) && GhostReactor.instance != null)
+			{
+				GhostReactor.instance.grManager.RefreshShiftCredit();
+			}
+			ShiftCreditCapIncreases = newCap;
+			ShiftCreditCapIncreasesMax = newCapMax;
+		}
+	}
+
+	public void OnShiftCreditChanged(string targetMothershipId, int newShiftCredits)
+	{
+		if (mothershipId != null && targetMothershipId == mothershipId)
+		{
+			int num = shiftCreditCache;
+			shiftCreditCache = newShiftCredits;
+			if (GhostReactor.instance != null && gamePlayer.IsLocal() && num != newShiftCredits && GhostReactor.instance != null)
+			{
+				if (GhostReactor.instance.promotionBot != null)
+				{
+					GhostReactor.instance.promotionBot.Refresh();
+				}
+				if (GhostReactor.instance.grManager != null)
+				{
+					GhostReactor.instance.grManager.RefreshShiftCredit();
+				}
+			}
+		}
+		if (GhostReactor.instance != null)
+		{
+			GhostReactor.instance.RefreshScoreboards();
+		}
+	}
+
+	public void OnShiftCreditCapData(string targetMothershipId, int shiftCreditCapNumberOfIncreases, int shiftCreditMaxNumberOfIncreases)
+	{
+		if (mothershipId != null)
+		{
+			_ = targetMothershipId == mothershipId;
+		}
+	}
+
+	public void SubtractShiftCredit(int shiftCreditDelta)
+	{
+		if (gamePlayer.IsLocal())
+		{
+			ProgressionManager.Instance.SubtractShiftCredit(shiftCreditDelta);
+		}
+	}
+
+	public void OnPlayerHit(Vector3 hitPosition, Vector3 hitImpulse, GhostReactorManager manager, GameEntityId hitByEntityId)
+	{
+		GameEntity gameEntity = manager.gameEntityManager.GetGameEntity(hitByEntityId);
+		int num = 1;
+		if (gamePlayer.IsLocal())
+		{
+			GTPlayer instance = GTPlayer.Instance;
+			float magnitude = hitImpulse.magnitude;
+			if (magnitude > 0f)
+			{
+				instance.ApplyKnockback(hitImpulse / magnitude, magnitude, forceOffTheGround: true);
+			}
+		}
+		if (State != GRPlayerState.Alive)
+		{
+			return;
+		}
+		if (shieldHp > 0)
+		{
+			if (gameEntity != null)
+			{
+				GRAttributes component = gameEntity.GetComponent<GRAttributes>();
+				if (component != null)
+				{
+					num = component.CalculateFinalValueForAttribute(GRAttributeType.PlayerShieldDamage);
+				}
+			}
+			SetShieldHp(shieldHp - num);
+			if (shieldHp > 0)
+			{
+				if (shieldDamagedSound != null)
+				{
+					audioSource.PlayOneShot(shieldDamagedSound, shieldDamagedVolume);
+				}
+				shieldDamagedEffect.Play();
+			}
+			else
+			{
+				if (shieldDestroyedSound != null)
+				{
+					audioSource.PlayOneShot(shieldDestroyedSound, shieldDestroyedVolume);
+				}
+				shieldDestroyedEffect.Play();
+			}
+			RefreshPlayerVisuals();
+			return;
+		}
+		if (gameEntity != null)
+		{
+			GRAttributes component2 = gameEntity.GetComponent<GRAttributes>();
+			if (component2 != null)
+			{
+				num = component2.CalculateFinalValueForAttribute(GRAttributeType.PlayerDamage);
+			}
+		}
+		Debug.Log($"GRPlayer OnPlayerHit, hit by: {hitByEntityId.index} damage: {num}, state: {state}, hp: {hp}, shield hp: {shieldHp}");
+		PlayHitFx(hitPosition);
+		SetHp(hp - num);
+		RefreshDamageVignetteVisual();
+		if (hp <= 0)
+		{
+			ChangePlayerState(GRPlayerState.Ghost, manager);
+		}
+	}
+
+	public void OnPlayerRevive(GhostReactorManager manager)
+	{
+		SetHp(maxHp);
+		RefreshDamageVignetteVisual();
+		ChangePlayerState(GRPlayerState.Alive, manager);
+	}
+
+	public void ChangePlayerState(GRPlayerState newState, GhostReactorManager manager)
+	{
+		if (!NetworkSystem.Instance.InRoom)
+		{
+			newState = GRPlayerState.Alive;
+		}
+		if (state == newState)
+		{
+			return;
+		}
+		state = newState;
+		switch (state)
+		{
+		case GRPlayerState.Ghost:
+			SetHp(0);
+			SetShieldHp(0);
+			RefreshDamageVignetteVisual();
+			if (playerTurnedGhostEffect != null)
+			{
+				playerTurnedGhostEffect.Play();
+			}
+			playerTurnedGhostSoundBank.Play();
+			manager.ReportPlayerDeath(this);
+			IncrementDeaths(1);
+			break;
+		case GRPlayerState.Alive:
+			SetHp(maxHp);
+			RefreshDamageVignetteVisual();
+			IncrementRevives(1);
+			if (playerRevivedEffect != null)
+			{
+				playerRevivedEffect.Play();
+			}
+			if (audioSource != null && playerRevivedSound != null)
+			{
+				audioSource.PlayOneShot(playerRevivedSound, playerRevivedVolume);
+			}
+			break;
+		}
+		RefreshPlayerVisuals();
+		if (vrRig.isLocal)
+		{
+			vrRigs.Clear();
+			VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+			for (int i = 0; i < vrRigs.Count; i++)
+			{
+				vrRigs[i].GetComponent<GRPlayer>().RefreshPlayerVisuals();
+			}
+		}
+	}
+
+	public void RefreshPlayerVisuals()
+	{
+		RefreshDamageVignetteVisual();
+		switch (state)
+		{
+		case GRPlayerState.Alive:
+			gamePlayer.DisableGrabbing(disable: false);
+			if (badge != null)
+			{
+				badge.UnHide();
+			}
+			vrRig.ChangeMaterialLocal(0);
+			vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Default);
+			vrRig.SetInvisibleToLocalPlayer(invisible: false);
+			if (vrRig.isLocal)
+			{
+				CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(hideCosmetics: false);
+				GameLightingManager.instance.SetDesaturateAndTintEnabled(enable: false, Color.black);
+				Color ambientLightDynamic = Color.black;
+				GhostReactor instance = GhostReactor.instance;
+				if (instance != null && instance.zone != GTZone.customMaps)
+				{
+					ambientLightDynamic = instance.GetCurrLevelGenConfig().ambientLight;
+				}
+				GameLightingManager.instance.SetAmbientLightDynamic(ambientLightDynamic);
+			}
+			if (shieldHp > 0)
+			{
+				shieldHeadVisual.gameObject.SetActive(value: true);
+				shieldBodyVisual.gameObject.SetActive(value: true);
+				Color value = shieldColorNormal;
+				if ((shieldFlags & 1) != 0)
+				{
+					value = shieldColorLight;
+				}
+				else if ((shieldFlags & 2) != 0)
+				{
+					value = shieldColorStealth;
+				}
+				else if ((shieldFlags & 4) != 0)
+				{
+					value = shieldColorHeal;
+				}
+				Renderer component = shieldBodyVisual.GetComponent<Renderer>();
+				if (component != null)
+				{
+					component.material.SetColor("_BaseColor", value);
+				}
+				Renderer component2 = shieldHeadVisual.GetComponent<Renderer>();
+				if (component2 != null)
+				{
+					component2.material.SetColor("_BaseColor", value);
+				}
+			}
+			else
+			{
+				shieldHeadVisual.gameObject.SetActive(value: false);
+				shieldBodyVisual.gameObject.SetActive(value: false);
+			}
+			shieldGameLight.gameObject.SetActive((shieldFlags & 1) != 0);
+			break;
+		case GRPlayerState.Ghost:
+			if (vrRig.isLocal)
+			{
+				gamePlayer.RequestDropAllSnapped();
+			}
+			gamePlayer.DisableGrabbing(disable: true);
+			shieldHeadVisual.gameObject.SetActive(value: false);
+			shieldBodyVisual.gameObject.SetActive(value: false);
+			shieldGameLight.gameObject.SetActive(value: false);
+			if (badge != null)
+			{
+				badge.Hide();
+			}
+			if (vrRig.isLocal)
+			{
+				GamePlayerLocal.instance.OnUpdateInteract();
+				vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Skeleton);
+				vrRig.ChangeMaterialLocal(13);
+				vrRig.SetInvisibleToLocalPlayer(invisible: false);
+				CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(hideCosmetics: true);
+				GameLightingManager.instance.SetDesaturateAndTintEnabled(enable: true, deathTintColor);
+				GameLightingManager.instance.SetAmbientLightDynamic(deathAmbientLightColor);
+			}
+			else if (VRRigCache.Instance.localRig.GetComponent<GRPlayer>().State == GRPlayerState.Ghost)
+			{
+				vrRig.ChangeMaterialLocal(13);
+				vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Skeleton);
+				vrRig.SetInvisibleToLocalPlayer(invisible: false);
+			}
+			else
+			{
+				vrRig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Invisible);
+				vrRig.SetInvisibleToLocalPlayer(invisible: true);
+			}
+			break;
+		}
+	}
+
+	public static GRPlayer Get(int actorNumber)
+	{
+		if (!GamePlayer.TryGetGamePlayer(actorNumber, out var out_gamePlayer))
+		{
+			return null;
+		}
+		return out_gamePlayer.GetComponent<GRPlayer>();
+	}
+
+	public static GRPlayer Get(NetPlayer player)
+	{
+		if (player == null)
+		{
+			return null;
+		}
+		return Get(player.ActorNumber);
+	}
+
+	public static GRPlayer Get(VRRig vrRig)
+	{
+		if (!(vrRig != null))
+		{
+			return null;
+		}
+		return vrRig.GetComponent<GRPlayer>();
+	}
+
+	public static GRPlayer GetLocal()
+	{
+		return Get(VRRig.LocalRig);
+	}
+
+	public void AttachBadge(GRBadge grBadge)
+	{
+		badge = grBadge;
+		badge.transform.SetParent(badgeBodyAnchor);
+		badge.GetComponent<Rigidbody>().isKinematic = true;
+		badge.StartRetracting();
+	}
+
+	public bool CanActivateShield(int shieldHitPoints)
+	{
+		if (state == GRPlayerState.Alive)
+		{
+			return shieldHitPoints > 0;
+		}
+		return false;
+	}
+
+	public bool TryActivateShield(int shieldHitpoints, int shieldFlags)
+	{
+		if (state == GRPlayerState.Alive)
+		{
+			if (shieldHp <= 0 && shieldActivatedSound != null)
+			{
+				audioSource.PlayOneShot(shieldActivatedSound, shieldActivatedVolume);
+			}
+			SetShieldHp(Mathf.Min(shieldHitpoints, maxShieldHp));
+			this.shieldFlags = shieldFlags;
+			inStealthMode = (shieldFlags & 2) != 0;
+			if (inStealthMode)
+			{
+				if (damageEffects.stealthModeVisualRenderer != null)
+				{
+					damageEffects.stealthModeVisualRenderer.gameObject.SetActive(value: true);
+				}
+				shieldStealthModeEndTime = Time.timeAsDouble + (double)shieldStealthModeDuration;
+			}
+			if ((shieldFlags & 4) != 0)
+			{
+				SetHp(maxHp);
+			}
+			RefreshPlayerVisuals();
+			return true;
+		}
+		return false;
+	}
+
+	public void ClearStealthMode()
+	{
+		inStealthMode = false;
+		if (damageEffects.stealthModeVisualRenderer != null)
+		{
+			damageEffects.stealthModeVisualRenderer.gameObject.SetActive(value: false);
+		}
+	}
+
+	public void SerializeNetworkState(BinaryWriter writer, NetPlayer player)
+	{
+		writer.Write((byte)state);
+		writer.Write(hp);
+		writer.Write(shieldHp);
+		writer.Write(shiftJoinTime);
+		writer.Write((byte)(isEmployee ? 1u : 0u));
+		writer.Write(CurrentProgression.points);
+		writer.Write(CurrentProgression.redeemedPoints);
+		writer.Write(dropPodLevel);
+		writer.Write(dropPodChasisLevel);
+		for (int i = 0; i < 8; i++)
+		{
+			writer.Write(synchronizedSessionStats[i]);
+		}
+	}
+
+	public static void DeserializeNetworkStateAndBurn(BinaryReader reader, GRPlayer player, GhostReactorManager grManager)
+	{
+		GRPlayerState newState = (GRPlayerState)reader.ReadByte();
+		int num = reader.ReadInt32();
+		int num2 = reader.ReadInt32();
+		double num3 = reader.ReadDouble();
+		bool flag = reader.ReadByte() != 0;
+		int points = reader.ReadInt32();
+		int redeemedPoints = reader.ReadInt32();
+		int num4 = reader.ReadInt32();
+		int num5 = reader.ReadInt32();
+		for (int i = 0; i < 8; i++)
+		{
+			player.synchronizedSessionStats[i] = reader.ReadSingle();
+		}
+		if (player != null)
+		{
+			player.SetHp(num);
+			player.SetShieldHp(num2);
+			player.isEmployee = flag;
+			player.ChangePlayerState(newState, grManager);
+			player.RefreshPlayerVisuals();
+			if (!player.gamePlayer.IsLocal())
+			{
+				player.SetProgressionData(points, redeemedPoints);
+				player.dropPodLevel = num4;
+				player.dropPodChasisLevel = num5;
+			}
+			if (double.IsNaN(num3) || double.IsInfinity(num3))
+			{
+				player.shiftJoinTime = PhotonNetwork.Time;
+			}
+			else
+			{
+				player.shiftJoinTime = Math.Min(num3, PhotonNetwork.Time);
+			}
+		}
+		if (grManager != null)
+		{
+			grManager.SendMothershipId();
+		}
+	}
+
+	public void PlayHitFx(Vector3 attackLocation)
+	{
+		if (playerDamageAudioSource != null)
+		{
+			playerDamageAudioSource.PlayOneShot(playerDamageSound, playerDamageVolume);
+		}
+		if (bodyCenter != null)
+		{
+			Vector3 vector = attackLocation - bodyCenter.position;
+			vector.y = 0f;
+			Vector3 vector2 = vector.normalized * playerDamageOffsetDist;
+			if (playerDamageEffect != null)
+			{
+				playerDamageEffect.transform.position = bodyCenter.position + vector2;
+				playerDamageEffect.Play();
+			}
+			if (vrRig.isLocal)
+			{
+				Vector3 normalized = Vector3.ProjectOnPlane(GTPlayer.Instance.mainCamera.transform.forward, Vector3.up).normalized;
+				vector = Vector3.ProjectOnPlane(vector, Vector3.up).normalized;
+				float num = Vector3.SignedAngle(normalized, vector, Vector3.up);
+				damageEffects.radialDamageEffect.transform.localRotation = Quaternion.Euler(0f, 0f, 0f - num);
+				damageEffects.radialDamageEffect.Play();
+			}
+		}
+		if (gamePlayer == GamePlayerLocal.instance.gamePlayer)
+		{
+			GorillaTagger.Instance.StartVibration(forLeftController: true, GorillaTagger.Instance.tapHapticStrength, 0.5f);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, GorillaTagger.Instance.tapHapticStrength, 0.5f);
+		}
+	}
+
+	public void SendGameStartedTelemetry(float timeIntoShift, bool wasPlayerInAtStart, int currentFloor)
+	{
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		string titleNameFromLevel = GhostReactorProgression.GetTitleNameFromLevel(GhostReactorProgression.GetTitleLevel(CurrentProgression.redeemedPoints));
+		GorillaTelemetry.GhostReactorShiftStart(gameId, ShiftCredits, timeIntoShift, wasPlayerInAtStart, vrRigs.Count + 1, currentFloor, titleNameFromLevel);
+		wasPlayerInAtShiftStart = wasPlayerInAtStart;
+		ResetGameTelemetryTracking();
+	}
+
+	public void SendGameEndedTelemetry(bool isShiftActuallyEnding, ZoneClearReason zoneClearReason)
+	{
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		GorillaTelemetry.GhostReactorGameEnd(gameId, ShiftCredits, totalCoresCollectedByPlayer, totalCoresCollectedByGroup, totalCoresSpentByPlayer, totalCoresSpentByGroup, totalGatesUnlocked, totalDeaths, totalItemsPurchased, lastShiftCut, isShiftActuallyEnding, timeIntoShiftAtJoin, (float)(PhotonNetwork.Time - (double)gameStartTime), wasPlayerInAtShiftStart, zoneClearReason, maxNumberOfPlayersInShift, vrRigs.Count + 1, totalItemTypesHeldThisShift, totalRevives, numShiftsPlayed);
+		isFirstShift = true;
+	}
+
+	public void SendFloorStartedTelemetry(float timeIntoShift, bool wasPlayerInAtStart, int currentFloor, string floorPreset, string floorModifier)
+	{
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		string titleNameFromLevel = GhostReactorProgression.GetTitleNameFromLevel(GhostReactorProgression.GetTitleLevel(CurrentProgression.redeemedPoints));
+		GorillaTelemetry.GhostReactorFloorStart(gameId, ShiftCredits, timeIntoShift, wasPlayerInAtStart, vrRigs.Count + 1, titleNameFromLevel, currentFloor, floorPreset, floorModifier);
+		wasPlayerInAtShiftStart = wasPlayerInAtStart;
+	}
+
+	public void SendFloorEndedTelemetry(bool isShiftActuallyEnding, float shiftStartTime, ZoneClearReason zoneClearReason, int currentFloor, string floorPreset, string floorModifier, bool objectivesCompleted, string section, int xpGained)
+	{
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		GorillaTelemetry.GhostReactorFloorComplete(gameId, ShiftCredits, coresCollectedByPlayer, coresCollectedByGroup, coresSpentByPlayer, coresSpentByGroup, gatesUnlocked, deaths, itemsPurchased, lastShiftCut, isShiftActuallyEnding, timeIntoShiftAtJoin, (float)(PhotonNetwork.Time - (double)(timeIntoShiftAtJoin + shiftStartTime)), wasPlayerInAtShiftStart, zoneClearReason, maxNumberOfPlayersInShift, vrRigs.Count + 1, itemTypesHeldThisShift, revives, currentFloor, floorPreset, floorModifier, sentientCoresCollected, objectivesCompleted, section, xpGained);
+	}
+
+	public void SendToolPurchasedTelemetry(string toolName, int toolLevel, int coresSpent, int shinyRocksSpent)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorToolPurchased(gameId, toolName, toolLevel, coresSpent, shinyRocksSpent, floor, preset);
+	}
+
+	public void SendRankUpTelemetry(string newRank)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorRankUp(gameId, newRank, floor, preset);
+	}
+
+	public void SendToolUpgradeTelemetry(string upgradeType, string toolName, int newLevel, int juiceSpent, int griftSpent, int coresSpent)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorToolUpgrade(gameId, upgradeType, toolName, newLevel, juiceSpent, griftSpent, coresSpent, floor, preset);
+	}
+
+	public void SendSeedDepositedTelemetry(string unlockTime, int seedsInQueue)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorChaosSeedStart(gameId, unlockTime, seedsInQueue, floor, preset);
+	}
+
+	public void SendJuiceCollectedTelemetry(int juiceCollected, int coresProcessedByOverdrive)
+	{
+		GorillaTelemetry.GhostReactorChaosJuiceCollected(gameId, juiceCollected, coresProcessedByOverdrive);
+	}
+
+	public void SendOverdrivePurchasedTelemetry(int shinyRocksUsed, int seedsInQueue)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorOverdrivePurchased(gameId, shinyRocksUsed, seedsInQueue, floor, preset);
+	}
+
+	public void SendPodUpgradeTelemetry(string toolName, int level, int shinyRocksSpent, int juiceSpent)
+	{
+		GorillaTelemetry.GhostReactorPodUpgradePurchased(gameId, toolName, level, shinyRocksSpent, juiceSpent);
+	}
+
+	public void SendCreditsRefilledTelemetry(int shinyRocksSpent, int finalCredits)
+	{
+		int floor = -1;
+		string preset = "";
+		GhostReactor instance = GhostReactor.instance;
+		if (instance != null && instance.zone != GTZone.customMaps)
+		{
+			floor = instance.GetDepthLevel();
+			preset = instance.GetCurrLevelGenConfig().name;
+		}
+		GorillaTelemetry.GhostReactorCreditsRefillPurchased(gameId, shinyRocksSpent, finalCredits, floor, preset);
+	}
+
+	public void ResetTelemetryTracking(string newGameId, float timeSinceShiftStart)
+	{
+		gameId = newGameId;
+		coresCollectedByPlayer = 0;
+		coresCollectedByGroup = 0;
+		gatesUnlocked = 0;
+		deaths = 0;
+		caughtByAnomaly = false;
+		itemsPurchased = new List<string>();
+		levelsUnlocked = new List<string>();
+		sentientCoresCollected = 0;
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		maxNumberOfPlayersInShift = vrRigs.Count + 1;
+		timeIntoShiftAtJoin = timeSinceShiftStart;
+		itemsHeldThisShift.Clear();
+		itemTypesHeldThisShift.Clear();
+	}
+
+	public void ResetGameTelemetryTracking()
+	{
+		totalCoresCollectedByPlayer = 0;
+		totalCoresCollectedByGroup = 0;
+		totalGatesUnlocked = 0;
+		totalDeaths = 0;
+		totalItemsPurchased = new List<string>();
+		vrRigs.Clear();
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		maxNumberOfPlayersIngame = vrRigs.Count + 1;
+		totalItemsHeldThisShift.Clear();
+		totalItemTypesHeldThisShift.Clear();
+		numShiftsPlayed = 0;
+		isFirstShift = false;
+	}
+
+	public void IncrementCoresCollectedPlayer(int coreValue)
+	{
+		totalCoresCollectedByPlayer += coreValue;
+		coresCollectedByPlayer += coreValue;
+	}
+
+	public void IncrementCoresCollectedGroup(int coreValue)
+	{
+		totalCoresCollectedByGroup += coreValue;
+		coresCollectedByGroup += coreValue;
+	}
+
+	public void IncrementCoresSpentPlayer(int coreValue)
+	{
+		totalCoresSpentByPlayer += coreValue;
+		coresSpentByPlayer += coreValue;
+	}
+
+	public void IncrementCoresSpentGroup(int coreValue)
+	{
+		totalCoresSpentByGroup += coreValue;
+		coresSpentByGroup += coreValue;
+	}
+
+	public void IncrementChaosSeedsCollected(int numSeeds)
+	{
+		sentientCoresCollected += numSeeds;
+	}
+
+	public void IncrementGatesUnlocked(int numGatesUnlocked)
+	{
+		gatesUnlocked += numGatesUnlocked;
+		totalGatesUnlocked += numGatesUnlocked;
+	}
+
+	public void IncrementDeaths(int numDeaths)
+	{
+		deaths += numDeaths;
+		totalDeaths += numDeaths;
+	}
+
+	public void IncrementRevives(int numRevives)
+	{
+		revives += numRevives;
+		totalRevives += numRevives;
+	}
+
+	public void IncrementShiftsPlayed(int numShifts)
+	{
+		numShiftsPlayed += numShifts;
+	}
+
+	public void AddItemPurchased(string newItemPurchased)
+	{
+		itemsPurchased.Add(newItemPurchased);
+		totalItemsPurchased.Add(newItemPurchased);
+	}
+
+	public void GrabbedItem(GameEntityId id, string itemName)
+	{
+		if (itemsHeldThisShift.Contains(id))
+		{
+			return;
+		}
+		itemsHeldThisShift.Add(id);
+		if (itemTypesHeldThisShift.ContainsKey(itemName))
+		{
+			itemTypesHeldThisShift[itemName] += 1;
+		}
+		else
+		{
+			itemTypesHeldThisShift[itemName] = 1;
+		}
+		if (!totalItemsHeldThisShift.Contains(id))
+		{
+			totalItemsHeldThisShift.Add(id);
+			if (totalItemTypesHeldThisShift.ContainsKey(itemName))
+			{
+				totalItemTypesHeldThisShift[itemName] += 1;
+			}
+			else
+			{
+				totalItemTypesHeldThisShift[itemName] = 1;
+			}
+		}
+	}
+
+	public GRShuttle GetAssignedShuttle(bool isOnDrillovator)
+	{
+		_ = GhostReactor.instance;
+		GRShuttle drillShuttleForPlayer = GRElevatorManager._instance.GetDrillShuttleForPlayer(gamePlayer.rig.OwningNetPlayer.ActorNumber);
+		GRShuttle stagingShuttleForPlayer = GRElevatorManager._instance.GetStagingShuttleForPlayer(gamePlayer.rig.OwningNetPlayer.ActorNumber);
+		if (!isOnDrillovator)
+		{
+			return stagingShuttleForPlayer;
+		}
+		return drillShuttleForPlayer;
+	}
+
+	public void RefreshShuttles()
+	{
+		GRShuttle assignedShuttle = GetAssignedShuttle(isOnDrillovator: true);
+		if (assignedShuttle != null)
+		{
+			assignedShuttle.Refresh();
+		}
+		assignedShuttle = GetAssignedShuttle(isOnDrillovator: false);
+		if (assignedShuttle != null)
+		{
+			assignedShuttle.Refresh();
+		}
+	}
+
+	public static GRPlayer GetFromUserId(string userId)
+	{
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		for (int i = 0; i < tempRigs.Count; i++)
+		{
+			if (tempRigs[i].OwningNetPlayer != null && tempRigs[i].OwningNetPlayer.UserId == userId)
+			{
+				return Get(tempRigs[i].OwningNetPlayer);
+			}
+		}
+		return null;
+	}
+
+	[ContextMenu("Refresh Damage Vignette Visual")]
+	public void RefreshDamageVignetteVisual()
+	{
+		if (!vrRig.isLocal || currentHealthVisualValue == hp)
+		{
+			return;
+		}
+		currentHealthVisualValue = hp;
+		if (hp <= damageOverlayMaxHp && hp > 0)
+		{
+			if (lowHeathVisualCoroutine != null)
+			{
+				StopCoroutine(lowHeathVisualCoroutine);
+			}
+			damageEffects.lowHealthVisualRenderer.gameObject.SetActive(value: true);
+			lowHeathVisualCoroutine = StartCoroutine(LowHeathVisualCoroutine());
+		}
+		else
+		{
+			damageEffects.lowHealthVisualRenderer.gameObject.SetActive(value: false);
+		}
+	}
+
+	private IEnumerator LowHeathVisualCoroutine()
+	{
+		int index = hp - 1;
+		if (index >= 0 && index < damageOverlayValues.Count)
+		{
+			float startTime = Time.time;
+			while (Time.time - startTime < damageOverlayValues[index].effectDuration)
+			{
+				float time = Mathf.Clamp01((Time.time - startTime) / damageOverlayValues[index].effectDuration);
+				float num = damageOverlayValues[index].effectCurve.Evaluate(time);
+				Color tint = damageOverlayValues[index].tint;
+				tint.a *= num;
+				damageEffects.lowHealthVisualRenderer.GetPropertyBlock(lowHealthVisualPropertyBlock);
+				lowHealthVisualPropertyBlock.SetColor(lowHealthTintPropertyId, tint);
+				damageEffects.lowHealthVisualRenderer.SetPropertyBlock(lowHealthVisualPropertyBlock);
+				yield return null;
+			}
+		}
+	}
+
+	public void SetGooParticleSystemEnabled(bool bIsLeftHand, bool newEnableState)
+	{
+		if (vrRig != null)
+		{
+			vrRig.SetGooParticleSystemStatus(bIsLeftHand, newEnableState);
+		}
+	}
+
+	public void SetAsFrozen(float duration)
+	{
+		if (GorillaTagger.Instance.currentStatus == GorillaTagger.StatusEffect.Frozen)
+		{
+			return;
+		}
+		freezeDuration = duration;
+		if (gamePlayer.rig.OwningNetPlayer.IsLocal)
+		{
+			GorillaTagger.Instance.ApplyStatusEffect(GorillaTagger.StatusEffect.Frozen, duration);
+			GorillaTagger.Instance.StartVibration(forLeftController: true, GorillaTagger.Instance.taggedHapticStrength, GorillaTagger.Instance.taggedHapticDuration);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, GorillaTagger.Instance.taggedHapticStrength, GorillaTagger.Instance.taggedHapticDuration);
+			GorillaTagger.Instance.offlineVRRig.PlayTaggedEffect();
+			if (damageEffects.frozenVisualRenderer != null)
+			{
+				damageEffects.frozenVisualRenderer.gameObject.SetActive(value: true);
+			}
+			playerDamageAudioSource.PlayOneShot(playerFrozenSound, 1f);
+		}
+		gamePlayer.rig.UpdateFrozenEffect(enable: true);
+		Invoke("RemoveFrozen", duration);
+	}
+
+	public void RemoveFrozen()
+	{
+		gamePlayer.rig.UpdateFrozenEffect(enable: false);
+		freezeDuration = 0f;
+		if (damageEffects.frozenVisualRenderer != null)
+		{
+			damageEffects.frozenVisualRenderer.gameObject.SetActive(value: false);
+		}
+	}
+
+	public override void Tick()
+	{
+		if (lastPlayerPosition != Vector3.zero)
+		{
+			Vector3 position = vrRig.transform.position;
+			float magnitude = (lastPlayerPosition - position).magnitude;
+			IncrementSynchronizedSessionStat(SynchronizedSessionStat.DistanceTraveled, magnitude);
+		}
+		lastPlayerPosition = vrRig.transform.position;
+		if (freezeDuration > 0f)
+		{
+			gamePlayer.rig.UpdateFrozen(Time.deltaTime, freezeDuration);
+		}
+		if (inStealthMode && Time.timeAsDouble > shieldStealthModeEndTime)
+		{
+			ClearStealthMode();
+		}
+		GRShuttle.UpdateGRPlayerShuttle(this);
+		if (soak != null && soak.IsSoaking())
+		{
+			soak.OnUpdate();
+		}
+	}
+
+	public void SetSynchronizedSessionStat(SynchronizedSessionStat stat, float amt)
+	{
+		synchronizedSessionStats[(int)stat] = amt;
+	}
+
+	public void IncrementSynchronizedSessionStat(SynchronizedSessionStat stat, float amt)
+	{
+		synchronizedSessionStats[(int)stat] += amt;
+	}
+
+	public void ResetSynchronizedSessionStats()
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			synchronizedSessionStats[i] = 0f;
+		}
+	}
+
+	private void RequestSetMothershipUserData(string keyName, string value)
+	{
+		if (saveEquipmentInProgress)
+		{
+			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: request already in progress");
+			return;
+		}
+		saveEquipmentInProgress = true;
+		try
+		{
+			if (!MothershipClientApiUnity.SetUserDataValue(keyName, value, OnSetMothershipUserDataSuccess, OnSetMothershipUserDataFail))
+			{
+				Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: SetUserDataValue Fail");
+				OnSetMothershipDataComplete(success: false);
+			}
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: exception " + ex.Message);
+			OnSetMothershipDataComplete(success: false);
+		}
+	}
+
+	private void OnSetMothershipUserDataSuccess(SetUserDataResponse response)
+	{
+		GTDev.Log("GRPlayer OnSetMothershipUserDataSuccess");
+		OnSetMothershipDataComplete(success: true);
+		response.Dispose();
+	}
+
+	private void OnSetMothershipUserDataFail(MothershipError error, int status)
+	{
+		string text = ((error == null) ? status.ToString() : error.Message);
+		GTDev.LogError("GRPlayer OnSetMothershipUserDataFail: " + text);
+		OnSetMothershipDataComplete(success: false);
+		error?.Dispose();
+	}
+
+	private void OnSetMothershipDataComplete(bool success)
+	{
+		saveEquipmentInProgress = false;
+	}
+
+	public void RequestFetchMothershipUserData(string key)
+	{
+		if (hasPulledEquipment)
+		{
+			return;
+		}
+		try
+		{
+			if (!MothershipClientApiUnity.GetUserDataValue(key, OnGetMothershipFetchUserDataSuccess, OnGetMothershipFetchUserDataFail))
+			{
+				Debug.LogError("GRPlayer RequestFetchMothershipUserData failed ");
+			}
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("GRPlayer RequestFetchMothershipUserData exception " + ex.Message);
+		}
+	}
+
+	private void OnGetMothershipFetchUserDataSuccess(MothershipUserData response)
+	{
+		GTDev.Log("GRPlayer OnGetMothershipFetchUserDataSuccess");
+		bool flag = response != null && response.value != null && response.value.Length > 0;
+		if (response != null)
+		{
+		}
+		response?.Dispose();
+	}
+
+	private void OnGetMothershipFetchUserDataFail(MothershipError error, int status)
+	{
+		string text = ((error == null) ? status.ToString() : error.Message);
+		GTDev.LogError("GRPlayer OnGetMothershipFetchUserDataFail: " + text);
+		error?.Dispose();
+	}
+
+	public bool IsDropPodUnlocked()
+	{
+		return dropPodLevel > 0;
+	}
+
+	public int GetMaxDropFloor()
+	{
+		return (dropPodChasisLevel + dropPodLevel) switch
+		{
+			0 => 1, 
+			1 => 5, 
+			2 => 10, 
+			3 => 15, 
+			4 => 20, 
+			_ => 0, 
+		};
+	}
+
+	public void CollectShiftCut()
+	{
+		SetProgressionData(currentProgression.points + LastShiftCut, currentProgression.redeemedPoints, saveProgression: true);
+	}
+
+	public bool AttemptPromotion()
+	{
+		(int tier, int grade, int totalPointsToNextLevel, int partialPointsToNextLevel) gradePointDetails = GhostReactorProgression.GetGradePointDetails(CurrentProgression.redeemedPoints);
+		int item = gradePointDetails.totalPointsToNextLevel;
+		int item2 = gradePointDetails.partialPointsToNextLevel;
+		if (item - item2 < CurrentProgression.points - CurrentProgression.redeemedPoints)
+		{
+			SetProgressionData(currentProgression.points, currentProgression.points);
+			return true;
+		}
+		return false;
+	}
+
+	public void SetProgressionData(int _points, int _redeemedPoints, bool saveProgression = false)
+	{
+		if (_points >= 0 && _redeemedPoints >= 0)
+		{
+			currentProgression = new ProgressionData
+			{
+				points = _points,
+				redeemedPoints = _redeemedPoints
+			};
+			if (gamePlayer.IsLocal() && saveProgression)
+			{
+				SaveMyProgression();
+			}
+		}
+	}
+
+	public void LoadMyProgression()
+	{
+		GhostReactorProgression.instance.GetStartingProgression(this);
+	}
+
+	public void SaveMyProgression()
+	{
+		GhostReactorProgression.instance.SetProgression(LastShiftCut, this);
 	}
 }

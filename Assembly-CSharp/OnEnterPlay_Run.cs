@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -9,9 +9,11 @@ public class OnEnterPlay_Run : OnEnterPlay_Attribute
 	{
 		if (!method.IsStatic)
 		{
-			Debug.LogError(string.Format("Can't Run non-static method {0}.{1}", method.DeclaringType, method.Name));
-			return;
+			Debug.LogError($"Can't Run non-static method {method.DeclaringType}.{method.Name}");
 		}
-		method.Invoke(null, new object[0]);
+		else
+		{
+			method.Invoke(null, new object[0]);
+		}
 	}
 }

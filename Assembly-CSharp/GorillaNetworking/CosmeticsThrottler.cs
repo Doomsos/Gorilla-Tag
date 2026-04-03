@@ -1,254 +1,246 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class CosmeticsThrottler : MonoBehaviour, IGorillaSliceableSimple
 {
-	public class CosmeticsThrottler : MonoBehaviour, IGorillaSliceableSimple
+	public enum RigDrawState
 	{
-		private void Awake()
-		{
-			this._cosmeticSlots = 16;
-			VRRig[] allRigs = VRRigCache.Instance.GetAllRigs();
-			this._rigHelpers = new GorillaRigHelper[allRigs.Length];
-			for (int i = 0; i < allRigs.Length; i++)
-			{
-				this._rigHelpers[i] = new GorillaRigHelper
-				{
-					rig = allRigs[i],
-					state = CosmeticsThrottler.RigDrawState.Startup,
-					sqrDistance = 9999f,
-					prevSqrDistance = 9999f
-				};
-			}
-			RoomSystem.JoinedRoomEvent += new Action(this.UpdatePlayerCount);
-			RoomSystem.LeftRoomEvent += new Action(this.UpdatePlayerCount);
-		}
+		All = 0,
+		Partial = 1,
+		Min = 2,
+		Startup = -1
+	}
 
-		private void UpdatePlayerCount()
-		{
-			int num = NetworkSystem.Instance.AllNetPlayers.Length;
-			if (num < this.ThrottlePlayerCountThreshold && this.lastPlayerCount >= this.ThrottlePlayerCountThreshold)
-			{
-				this.EnableAllRenderers();
-			}
-			this.lastPlayerCount = num;
-		}
+	public float DrawAllDistance = 5f;
 
-		private void OnEnable()
-		{
-			GorillaSlicerSimpleManager.RegisterSliceable(this);
-		}
+	public float MaxDrawDistance = 10f;
 
-		private void OnDisable()
-		{
-			GorillaSlicerSimpleManager.UnregisterSliceable(this);
-		}
+	public bool DrawOnPlayerCount = true;
 
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.green;
-			Gizmos.DrawWireSphere(base.transform.position, this.DrawAllDistance);
-			Gizmos.color = Color.red;
-			Gizmos.DrawWireSphere(base.transform.position, this.MaxDrawDistance);
-		}
+	public int DrawAllCount = 6;
 
-		public void SliceUpdate()
+	public int DrawMaxCount = 14;
+
+	public int ThrottlePlayerCountThreshold = 11;
+
+	private int lastPlayerCount;
+
+	public CosmeticsController.CosmeticSlots[] ToggleSlots;
+
+	[SerializeField]
+	private GorillaRigHelper[] _rigHelpers;
+
+	private int _cosmeticSlots;
+
+	private float _update;
+
+	private Camera mainCamera;
+
+	private void Awake()
+	{
+		_cosmeticSlots = 16;
+		VRRig[] allRigs = VRRigCache.Instance.GetAllRigs();
+		_rigHelpers = new GorillaRigHelper[allRigs.Length];
+		for (int i = 0; i < allRigs.Length; i++)
 		{
-			if (this.lastPlayerCount < this.ThrottlePlayerCountThreshold)
+			_rigHelpers[i] = new GorillaRigHelper
 			{
-				return;
+				rig = allRigs[i],
+				state = RigDrawState.Startup,
+				sqrDistance = 9999f,
+				prevSqrDistance = 9999f
+			};
+		}
+		RoomSystem.JoinedRoomEvent += new Action(UpdatePlayerCount);
+		RoomSystem.LeftRoomEvent += new Action(UpdatePlayerCount);
+	}
+
+	private void UpdatePlayerCount()
+	{
+		int num = NetworkSystem.Instance.AllNetPlayers.Length;
+		if (num < ThrottlePlayerCountThreshold && lastPlayerCount >= ThrottlePlayerCountThreshold)
+		{
+			EnableAllRenderers();
+		}
+		lastPlayerCount = num;
+	}
+
+	private void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this);
+	}
+
+	private void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this);
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere(base.transform.position, DrawAllDistance);
+		Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere(base.transform.position, MaxDrawDistance);
+	}
+
+	public void SliceUpdate()
+	{
+		if (lastPlayerCount < ThrottlePlayerCountThreshold)
+		{
+			return;
+		}
+		if (mainCamera == null)
+		{
+			mainCamera = Camera.main;
+			return;
+		}
+		Vector3 position = base.transform.position;
+		for (int i = 0; i < _rigHelpers.Length; i++)
+		{
+			_rigHelpers[i].prevSqrDistance = _rigHelpers[i].sqrDistance;
+			if (!_rigHelpers[i].rig.isActiveAndEnabled || _rigHelpers[i].rig.isLocal)
+			{
+				_rigHelpers[i].sqrDistance = 9999f;
+				continue;
 			}
-			if (this.mainCamera == null)
+			Vector3 position2 = _rigHelpers[i].rig.transform.position;
+			if (mainCamera.WorldToScreenPoint(position2).z <= 0f)
 			{
-				this.mainCamera = Camera.main;
-				return;
+				_rigHelpers[i].sqrDistance = 9999f;
+				continue;
 			}
-			Vector3 position = base.transform.position;
-			for (int i = 0; i < this._rigHelpers.Length; i++)
+			float sqrMagnitude = (position2 - position).sqrMagnitude;
+			_rigHelpers[i].sqrDistance = sqrMagnitude;
+		}
+		Array.Sort(_rigHelpers);
+		float num = DrawAllDistance * DrawAllDistance;
+		float num2 = MaxDrawDistance * MaxDrawDistance;
+		for (int j = 0; j < _rigHelpers.Length; j++)
+		{
+			if (_rigHelpers[j].sqrDistance >= 9999f)
 			{
-				this._rigHelpers[i].prevSqrDistance = this._rigHelpers[i].sqrDistance;
-				if (!this._rigHelpers[i].rig.isActiveAndEnabled || this._rigHelpers[i].rig.isLocal)
+				_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.Min);
+				continue;
+			}
+			if (DrawOnPlayerCount)
+			{
+				if (j < DrawAllCount)
 				{
-					this._rigHelpers[i].sqrDistance = 9999f;
+					_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.All);
+					continue;
 				}
-				else
+				if (j >= DrawMaxCount)
 				{
-					Vector3 position2 = this._rigHelpers[i].rig.transform.position;
-					if (this.mainCamera.WorldToScreenPoint(position2).z <= 0f)
-					{
-						this._rigHelpers[i].sqrDistance = 9999f;
-					}
-					else
-					{
-						float sqrMagnitude = (position2 - position).sqrMagnitude;
-						this._rigHelpers[i].sqrDistance = sqrMagnitude;
-					}
+					_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.Min);
+					continue;
 				}
 			}
-			Array.Sort<GorillaRigHelper>(this._rigHelpers);
-			float num = this.DrawAllDistance * this.DrawAllDistance;
-			float num2 = this.MaxDrawDistance * this.MaxDrawDistance;
-			for (int j = 0; j < this._rigHelpers.Length; j++)
+			if (_rigHelpers[j].sqrDistance <= num)
 			{
-				if (this._rigHelpers[j].sqrDistance >= 9999f)
-				{
-					this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.Min);
-				}
-				else
-				{
-					if (this.DrawOnPlayerCount)
-					{
-						if (j < this.DrawAllCount)
-						{
-							this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.All);
-							goto IL_293;
-						}
-						if (j >= this.DrawMaxCount)
-						{
-							this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.Min);
-							goto IL_293;
-						}
-					}
-					if (this._rigHelpers[j].sqrDistance <= num)
-					{
-						this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.All);
-					}
-					else if (this._rigHelpers[j].sqrDistance <= num2)
-					{
-						this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.Partial);
-					}
-					else
-					{
-						this._rigHelpers[j] = this.UpdateRigState(this._rigHelpers[j], CosmeticsThrottler.RigDrawState.Min);
-					}
-				}
-				IL_293:;
+				_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.All);
+			}
+			else if (_rigHelpers[j].sqrDistance <= num2)
+			{
+				_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.Partial);
+			}
+			else
+			{
+				_rigHelpers[j] = UpdateRigState(_rigHelpers[j], RigDrawState.Min);
 			}
 		}
+	}
 
-		private GorillaRigHelper UpdateRigState(GorillaRigHelper helper, CosmeticsThrottler.RigDrawState newState)
+	private GorillaRigHelper UpdateRigState(GorillaRigHelper helper, RigDrawState newState)
+	{
+		RigDrawState state = helper.state;
+		if (newState == state)
 		{
-			CosmeticsThrottler.RigDrawState state = helper.state;
-			if (newState == state)
-			{
-				return helper;
-			}
-			switch (newState)
-			{
-			case CosmeticsThrottler.RigDrawState.All:
-				if (state != CosmeticsThrottler.RigDrawState.All)
-				{
-					this.ToggleRenderersOnRig(helper.rig, true);
-					helper.rig.ToggleMatParticles(true);
-				}
-				break;
-			case CosmeticsThrottler.RigDrawState.Partial:
-				if (state <= CosmeticsThrottler.RigDrawState.All)
-				{
-					this.ToggleRenderersOnRigForSlots(helper.rig, false, true);
-					helper.rig.ToggleMatParticles(false);
-				}
-				else if (state == CosmeticsThrottler.RigDrawState.Min)
-				{
-					this.ToggleRenderersOnRigForSlots(helper.rig, true, false);
-				}
-				break;
-			case CosmeticsThrottler.RigDrawState.Min:
-				if (state != CosmeticsThrottler.RigDrawState.Min)
-				{
-					this.ToggleRenderersOnRig(helper.rig, false);
-					helper.rig.ToggleMatParticles(false);
-				}
-				break;
-			}
-			helper.state = newState;
 			return helper;
 		}
-
-		private void ToggleRenderersOnRig(VRRig rig, bool toggle)
+		switch (newState)
 		{
-			CosmeticsController.CosmeticSet cosmeticSet = rig.cosmeticSet;
-			int num = cosmeticSet.items.Length;
-			for (int i = 0; i < num; i++)
+		case RigDrawState.All:
+			if (state != RigDrawState.All)
 			{
-				CosmeticItemInstance cosmeticItemInstance = rig.cosmeticsObjectRegistry.Cosmetic(cosmeticSet.items[i].displayName);
-				if (cosmeticItemInstance != null)
+				ToggleRenderersOnRig(helper.rig, toggle: true);
+				helper.rig.ToggleMatParticles(enabled: true);
+			}
+			break;
+		case RigDrawState.Partial:
+			if (state <= RigDrawState.All)
+			{
+				ToggleRenderersOnRigForSlots(helper.rig, toggle: false);
+				helper.rig.ToggleMatParticles(enabled: false);
+			}
+			else if (state == RigDrawState.Min)
+			{
+				ToggleRenderersOnRigForSlots(helper.rig, toggle: true, includesSlots: false);
+			}
+			break;
+		case RigDrawState.Min:
+			if (state != RigDrawState.Min)
+			{
+				ToggleRenderersOnRig(helper.rig, toggle: false);
+				helper.rig.ToggleMatParticles(enabled: false);
+			}
+			break;
+		}
+		helper.state = newState;
+		return helper;
+	}
+
+	private void ToggleRenderersOnRig(VRRig rig, bool toggle)
+	{
+		CosmeticsController.CosmeticSet cosmeticSet = rig.cosmeticSet;
+		int num = cosmeticSet.items.Length;
+		for (int i = 0; i < num; i++)
+		{
+			CosmeticItemInstance cosmeticItemInstance = rig.cosmeticsObjectRegistry.Cosmetic(cosmeticSet.items[i].displayName);
+			if (cosmeticItemInstance != null)
+			{
+				cosmeticItemInstance.ToggleRenderers(toggle);
+				cosmeticItemInstance.ToggleParticles(toggle);
+			}
+		}
+	}
+
+	private void ToggleRenderersOnRigForSlots(VRRig rig, bool toggle, bool includesSlots = true)
+	{
+		CosmeticsController.CosmeticSet cosmeticSet = rig.cosmeticSet;
+		int num = cosmeticSet.items.Length;
+		for (int i = 0; i < num; i++)
+		{
+			CosmeticItemInstance cosmeticItemInstance = rig.cosmeticsObjectRegistry.Cosmetic(cosmeticSet.items[i].displayName);
+			if (cosmeticItemInstance != null)
+			{
+				cosmeticItemInstance.ToggleParticles(toggle);
+				if (ContainsSlot(cosmeticItemInstance.ActiveSlot) == includesSlots)
 				{
 					cosmeticItemInstance.ToggleRenderers(toggle);
-					cosmeticItemInstance.ToggleParticles(toggle);
 				}
 			}
 		}
+	}
 
-		private void ToggleRenderersOnRigForSlots(VRRig rig, bool toggle, bool includesSlots = true)
+	private bool ContainsSlot(CosmeticsController.CosmeticSlots slot)
+	{
+		for (int i = 0; i < ToggleSlots.Length; i++)
 		{
-			CosmeticsController.CosmeticSet cosmeticSet = rig.cosmeticSet;
-			int num = cosmeticSet.items.Length;
-			for (int i = 0; i < num; i++)
+			if (ToggleSlots[i] == slot)
 			{
-				CosmeticItemInstance cosmeticItemInstance = rig.cosmeticsObjectRegistry.Cosmetic(cosmeticSet.items[i].displayName);
-				if (cosmeticItemInstance != null)
-				{
-					cosmeticItemInstance.ToggleParticles(toggle);
-					if (this.ContainsSlot(cosmeticItemInstance.ActiveSlot) == includesSlots)
-					{
-						cosmeticItemInstance.ToggleRenderers(toggle);
-					}
-				}
+				return true;
 			}
 		}
+		return false;
+	}
 
-		private bool ContainsSlot(CosmeticsController.CosmeticSlots slot)
+	public void EnableAllRenderers()
+	{
+		for (int i = 0; i < _rigHelpers.Length; i++)
 		{
-			for (int i = 0; i < this.ToggleSlots.Length; i++)
-			{
-				if (this.ToggleSlots[i] == slot)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public void EnableAllRenderers()
-		{
-			for (int i = 0; i < this._rigHelpers.Length; i++)
-			{
-				this.ToggleRenderersOnRig(this._rigHelpers[i].rig, true);
-			}
-		}
-
-		public float DrawAllDistance = 5f;
-
-		public float MaxDrawDistance = 10f;
-
-		public bool DrawOnPlayerCount = true;
-
-		public int DrawAllCount = 6;
-
-		public int DrawMaxCount = 14;
-
-		public int ThrottlePlayerCountThreshold = 11;
-
-		private int lastPlayerCount;
-
-		public CosmeticsController.CosmeticSlots[] ToggleSlots;
-
-		[SerializeField]
-		private GorillaRigHelper[] _rigHelpers;
-
-		private int _cosmeticSlots;
-
-		private float _update;
-
-		private Camera mainCamera;
-
-		public enum RigDrawState
-		{
-			All,
-			Partial,
-			Min,
-			Startup = -1
+			ToggleRenderersOnRig(_rigHelpers[i].rig, toggle: true);
 		}
 	}
 }

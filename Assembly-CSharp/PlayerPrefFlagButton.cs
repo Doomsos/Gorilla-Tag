@@ -1,45 +1,42 @@
-﻿using System;
 using UnityEngine;
 
 public class PlayerPrefFlagButton : GorillaPressableButton
 {
-	protected override void OnEnable()
+	private enum ButtonMode
 	{
-		base.OnEnable();
-		this.isOn = PlayerPrefFlags.Check(this.flag);
-		this.UpdateColor();
-	}
-
-	public override void ButtonActivation()
-	{
-		PlayerPrefFlagButton.ButtonMode buttonMode = this.mode;
-		if (buttonMode == PlayerPrefFlagButton.ButtonMode.SET_VALUE)
-		{
-			PlayerPrefFlags.Set(this.flag, this.value);
-			this.isOn = this.value;
-			this.UpdateColor();
-			return;
-		}
-		if (buttonMode != PlayerPrefFlagButton.ButtonMode.TOGGLE)
-		{
-			return;
-		}
-		this.isOn = PlayerPrefFlags.Flip(this.flag);
-		this.UpdateColor();
+		SET_VALUE,
+		TOGGLE
 	}
 
 	[SerializeField]
 	private PlayerPrefFlags.Flag flag;
 
 	[SerializeField]
-	private PlayerPrefFlagButton.ButtonMode mode;
+	private ButtonMode mode;
 
 	[SerializeField]
 	private bool value;
 
-	private enum ButtonMode
+	protected override void OnEnable()
 	{
-		SET_VALUE,
-		TOGGLE
+		base.OnEnable();
+		isOn = PlayerPrefFlags.Check(flag);
+		UpdateColor();
+	}
+
+	public override void ButtonActivation()
+	{
+		switch (mode)
+		{
+		case ButtonMode.SET_VALUE:
+			PlayerPrefFlags.Set(flag, value);
+			isOn = value;
+			UpdateColor();
+			break;
+		case ButtonMode.TOGGLE:
+			isOn = PlayerPrefFlags.Flip(flag);
+			UpdateColor();
+			break;
+		}
 	}
 }

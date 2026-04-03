@@ -1,36 +1,8 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class RaceCheckpoint : MonoBehaviour
 {
-	public void Init(RaceCheckpointManager manager, int index)
-	{
-		this.manager = manager;
-		this.checkpointIndex = index;
-		this.SetIsCorrectCheckpoint(index == 0);
-	}
-
-	public void SetIsCorrectCheckpoint(bool isCorrect)
-	{
-		this.isCorrect = isCorrect;
-		this.banner.sharedMaterial = (isCorrect ? this.activeCheckpointMat : this.wrongCheckpointMat);
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		if (other != GTPlayer.Instance.headCollider)
-		{
-			return;
-		}
-		if (this.isCorrect)
-		{
-			this.manager.OnCheckpointReached(this.checkpointIndex, this.checkpointSound);
-			return;
-		}
-		this.wrongCheckpointSound.Play();
-	}
-
 	[SerializeField]
 	private MeshRenderer banner;
 
@@ -51,4 +23,32 @@ public class RaceCheckpoint : MonoBehaviour
 	private int checkpointIndex;
 
 	private bool isCorrect;
+
+	public void Init(RaceCheckpointManager manager, int index)
+	{
+		this.manager = manager;
+		checkpointIndex = index;
+		SetIsCorrectCheckpoint(index == 0);
+	}
+
+	public void SetIsCorrectCheckpoint(bool isCorrect)
+	{
+		this.isCorrect = isCorrect;
+		banner.sharedMaterial = (isCorrect ? activeCheckpointMat : wrongCheckpointMat);
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (!(other != GTPlayer.Instance.headCollider))
+		{
+			if (isCorrect)
+			{
+				manager.OnCheckpointReached(checkpointIndex, checkpointSound);
+			}
+			else
+			{
+				wrongCheckpointSound.Play();
+			}
+		}
+	}
 }

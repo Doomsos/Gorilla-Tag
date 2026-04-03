@@ -1,87 +1,85 @@
-﻿using System;
 using UnityEngine;
 
-namespace CjLib
+namespace CjLib;
+
+public struct Vector3Spring
 {
-	public struct Vector3Spring
+	public static readonly int Stride = 32;
+
+	public Vector3 Value;
+
+	private float m_padding0;
+
+	public Vector3 Velocity;
+
+	private float m_padding1;
+
+	public void Reset()
 	{
-		public void Reset()
+		Value = Vector3.zero;
+		Velocity = Vector3.zero;
+	}
+
+	public void Reset(Vector3 initValue)
+	{
+		Value = initValue;
+		Velocity = Vector3.zero;
+	}
+
+	public void Reset(Vector3 initValue, Vector3 initVelocity)
+	{
+		Value = initValue;
+		Velocity = initVelocity;
+	}
+
+	public Vector3 TrackDampingRatio(Vector3 targetValue, float angularFrequency, float dampingRatio, float deltaTime)
+	{
+		if (angularFrequency < MathUtil.Epsilon)
 		{
-			this.Value = Vector3.zero;
-			this.Velocity = Vector3.zero;
+			Velocity = Vector3.zero;
+			return Value;
 		}
-
-		public void Reset(Vector3 initValue)
+		Vector3 vector = targetValue - Value;
+		float num = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
+		float num2 = angularFrequency * angularFrequency;
+		float num3 = deltaTime * num2;
+		float num4 = deltaTime * num3;
+		float num5 = 1f / (num + num4);
+		Vector3 vector2 = num * Value + deltaTime * Velocity + num4 * targetValue;
+		Vector3 vector3 = Velocity + num3 * vector;
+		Velocity = vector3 * num5;
+		Value = vector2 * num5;
+		if (Velocity.magnitude < MathUtil.Epsilon && vector.magnitude < MathUtil.Epsilon)
 		{
-			this.Value = initValue;
-			this.Velocity = Vector3.zero;
+			Velocity = Vector3.zero;
+			Value = targetValue;
 		}
+		return Value;
+	}
 
-		public void Reset(Vector3 initValue, Vector3 initVelocity)
+	public Vector3 TrackHalfLife(Vector3 targetValue, float frequencyHz, float halfLife, float deltaTime)
+	{
+		if (halfLife < MathUtil.Epsilon)
 		{
-			this.Value = initValue;
-			this.Velocity = initVelocity;
+			Velocity = Vector3.zero;
+			Value = targetValue;
+			return Value;
 		}
+		float num = frequencyHz * MathUtil.TwoPi;
+		float dampingRatio = 0.6931472f / (num * halfLife);
+		return TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
+	}
 
-		public Vector3 TrackDampingRatio(Vector3 targetValue, float angularFrequency, float dampingRatio, float deltaTime)
+	public Vector3 TrackExponential(Vector3 targetValue, float halfLife, float deltaTime)
+	{
+		if (halfLife < MathUtil.Epsilon)
 		{
-			if (angularFrequency < MathUtil.Epsilon)
-			{
-				this.Velocity = Vector3.zero;
-				return this.Value;
-			}
-			Vector3 a = targetValue - this.Value;
-			float num = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
-			float num2 = angularFrequency * angularFrequency;
-			float num3 = deltaTime * num2;
-			float num4 = deltaTime * num3;
-			float d = 1f / (num + num4);
-			Vector3 a2 = num * this.Value + deltaTime * this.Velocity + num4 * targetValue;
-			Vector3 a3 = this.Velocity + num3 * a;
-			this.Velocity = a3 * d;
-			this.Value = a2 * d;
-			if (this.Velocity.magnitude < MathUtil.Epsilon && a.magnitude < MathUtil.Epsilon)
-			{
-				this.Velocity = Vector3.zero;
-				this.Value = targetValue;
-			}
-			return this.Value;
+			Velocity = Vector3.zero;
+			Value = targetValue;
+			return Value;
 		}
-
-		public Vector3 TrackHalfLife(Vector3 targetValue, float frequencyHz, float halfLife, float deltaTime)
-		{
-			if (halfLife < MathUtil.Epsilon)
-			{
-				this.Velocity = Vector3.zero;
-				this.Value = targetValue;
-				return this.Value;
-			}
-			float num = frequencyHz * MathUtil.TwoPi;
-			float dampingRatio = 0.6931472f / (num * halfLife);
-			return this.TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
-		}
-
-		public Vector3 TrackExponential(Vector3 targetValue, float halfLife, float deltaTime)
-		{
-			if (halfLife < MathUtil.Epsilon)
-			{
-				this.Velocity = Vector3.zero;
-				this.Value = targetValue;
-				return this.Value;
-			}
-			float angularFrequency = 0.6931472f / halfLife;
-			float dampingRatio = 1f;
-			return this.TrackDampingRatio(targetValue, angularFrequency, dampingRatio, deltaTime);
-		}
-
-		public static readonly int Stride = 32;
-
-		public Vector3 Value;
-
-		private float m_padding0;
-
-		public Vector3 Velocity;
-
-		private float m_padding1;
+		float angularFrequency = 0.6931472f / halfLife;
+		float dampingRatio = 1f;
+		return TrackDampingRatio(targetValue, angularFrequency, dampingRatio, deltaTime);
 	}
 }

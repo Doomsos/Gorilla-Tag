@@ -1,11 +1,8 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class ReturnCurrentVersionRequest
 {
-	public class ReturnCurrentVersionRequest
-	{
-		public string CurrentVersion;
+	public string CurrentVersion;
 
-		public int? UpdatedSynchTest;
-	}
+	public int? UpdatedSynchTest;
 }

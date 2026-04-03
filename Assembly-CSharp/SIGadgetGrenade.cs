@@ -1,22 +1,33 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public abstract class SIGadgetGrenade : SIGadget
 {
+	public Action GrenadeFinished;
+
+	public Renderer grenadeRenderer;
+
+	[SerializeField]
+	protected ThrownGadget thrownGadget;
+
+	protected Rigidbody rb;
+
+	protected GameEntity parentEntity;
+
 	protected new virtual void OnEnable()
 	{
-		this.rb = base.GetComponent<Rigidbody>();
-		this.activatedLocally = false;
-		this.thrownGadget.OnActivated += this.HandleActivated;
-		this.thrownGadget.OnThrown += this.HandleThrown;
-		this.thrownGadget.OnHitSurface += this.HandleHitSurface;
+		rb = GetComponent<Rigidbody>();
+		activatedLocally = false;
+		thrownGadget.OnActivated += HandleActivated;
+		thrownGadget.OnThrown += HandleThrown;
+		thrownGadget.OnHitSurface += HandleHitSurface;
 	}
 
 	protected new virtual void OnDisable()
 	{
-		this.thrownGadget.OnActivated -= this.HandleActivated;
-		this.thrownGadget.OnThrown -= this.HandleThrown;
-		this.thrownGadget.OnHitSurface -= this.HandleHitSurface;
+		thrownGadget.OnActivated -= HandleActivated;
+		thrownGadget.OnThrown -= HandleThrown;
+		thrownGadget.OnHitSurface -= HandleHitSurface;
 	}
 
 	protected abstract void HandleActivated();
@@ -28,23 +39,12 @@ public abstract class SIGadgetGrenade : SIGadget
 	public override void OnEntityInit()
 	{
 		base.OnEntityInit();
-		GameEntityId entityIdFromNetId = this.gameEntity.manager.GetEntityIdFromNetId((int)this.gameEntity.createData);
-		this.parentEntity = this.gameEntity.manager.GetGameEntity(entityIdFromNetId);
-		SIGadgetHolsterDisk component = this.parentEntity.GetComponent<SIGadgetHolsterDisk>();
+		GameEntityId entityIdFromNetId = gameEntity.manager.GetEntityIdFromNetId((int)gameEntity.createData);
+		parentEntity = gameEntity.manager.GetGameEntity(entityIdFromNetId);
+		SIGadgetHolsterDisk component = parentEntity.GetComponent<SIGadgetHolsterDisk>();
 		if (component != null)
 		{
 			component.RegisterGadget(this);
 		}
 	}
-
-	public Action GrenadeFinished;
-
-	public Renderer grenadeRenderer;
-
-	[SerializeField]
-	protected ThrownGadget thrownGadget;
-
-	protected Rigidbody rb;
-
-	protected GameEntity parentEntity;
 }

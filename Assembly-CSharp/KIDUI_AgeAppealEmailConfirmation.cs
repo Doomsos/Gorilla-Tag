@@ -1,139 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
 public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 {
-	private void OnEnable()
-	{
-		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Combine(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(this.NotifyOfEmailResult));
-	}
-
-	private void OnDisable()
-	{
-		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Remove(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(this.NotifyOfEmailResult));
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
-	}
-
-	public void ShowAgeAppealConfirmationScreen(bool hasChallenge, int newAge, string emailToConfirm)
-	{
-		this.hasChallenge = hasChallenge;
-		this.newAgeToAppeal = newAge;
-		this._confirmText.text = (this.hasChallenge ? this.CONFIRM_PARENT_EMAIL : this.CONFIRM_YOUR_EMAIL);
-		this._emailText.text = emailToConfirm;
-		base.gameObject.SetActive(true);
-	}
-
-	public void OnConfirmPressed()
-	{
-		TelemetryData telemetryData = new TelemetryData
-		{
-			EventName = "kid_age_appeal_confirm_email",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"email_type",
-					this.hasChallenge ? "under_dac" : "over_dac"
-				},
-				{
-					"button_pressed",
-					"confirm"
-				}
-			}
-		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
-		if (this.hasChallenge)
-		{
-			this.StartAgeAppealChallengeEmail();
-			return;
-		}
-		this.StartAgeAppealEmail();
-	}
-
-	public void OnBackPressed()
-	{
-		TelemetryData telemetryData = new TelemetryData
-		{
-			EventName = "kid_age_appeal_confirm_email",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"email_type",
-					this.hasChallenge ? "under_dac" : "over_dac"
-				},
-				{
-					"button_pressed",
-					"go_back"
-				}
-			}
-		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
-		base.gameObject.SetActive(false);
-		this._ageAppealEmailScreen.ShowAgeAppealEmailScreen(this.hasChallenge, this.newAgeToAppeal);
-	}
-
-	private void StartAgeAppealChallengeEmail()
-	{
-		KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealChallengeEmail>d__16 <StartAgeAppealChallengeEmail>d__;
-		<StartAgeAppealChallengeEmail>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<StartAgeAppealChallengeEmail>d__.<>4__this = this;
-		<StartAgeAppealChallengeEmail>d__.<>1__state = -1;
-		<StartAgeAppealChallengeEmail>d__.<>t__builder.Start<KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealChallengeEmail>d__16>(ref <StartAgeAppealChallengeEmail>d__);
-	}
-
-	private Task StartAgeAppealEmail()
-	{
-		KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealEmail>d__17 <StartAgeAppealEmail>d__;
-		<StartAgeAppealEmail>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<StartAgeAppealEmail>d__.<>4__this = this;
-		<StartAgeAppealEmail>d__.<>1__state = -1;
-		<StartAgeAppealEmail>d__.<>t__builder.Start<KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealEmail>d__17>(ref <StartAgeAppealEmail>d__);
-		return <StartAgeAppealEmail>d__.<>t__builder.Task;
-	}
-
-	private void NotifyOfEmailResult(bool success)
-	{
-		if (this._successScreen == null)
-		{
-			Debug.LogError("[KID::AGE_APPEAL_EMAIL] _successScreen has not been set yet and is NULL. Cannot inform of result");
-			return;
-		}
-		this._hasCompletedSendEmailRequest = true;
-		if (success)
-		{
-			base.gameObject.SetActive(false);
-			this._successScreen.ShowSuccessScreenAppeal(this._emailText.text);
-			return;
-		}
-	}
-
-	private void ShowErrorScreen()
-	{
-		Debug.LogErrorFormat("[KID::UI::Setup] K-ID Confirmation Failed - Failed to send email", Array.Empty<object>());
-		base.gameObject.SetActive(false);
-		this._errorScreen.ShowAgeAppealEmailErrorScreen(this.hasChallenge, this.newAgeToAppeal, this._emailText.text);
-	}
-
 	[SerializeField]
 	private TMP_Text _confirmText;
 
@@ -161,4 +33,140 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 
 	[SerializeField]
 	private int _minimumDelay = 1000;
+
+	private void OnEnable()
+	{
+		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Combine(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(NotifyOfEmailResult));
+	}
+
+	private void OnDisable()
+	{
+		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Remove(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(NotifyOfEmailResult));
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+	}
+
+	public void ShowAgeAppealConfirmationScreen(bool hasChallenge, int newAge, string emailToConfirm)
+	{
+		this.hasChallenge = hasChallenge;
+		newAgeToAppeal = newAge;
+		_confirmText.text = (this.hasChallenge ? CONFIRM_PARENT_EMAIL : CONFIRM_YOUR_EMAIL);
+		_emailText.text = emailToConfirm;
+		base.gameObject.SetActive(value: true);
+	}
+
+	public void OnConfirmPressed()
+	{
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_age_appeal_confirm_email",
+			CustomTags = new string[3]
+			{
+				"kid_age_appeal",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string>
+			{
+				{
+					"email_type",
+					hasChallenge ? "under_dac" : "over_dac"
+				},
+				{ "button_pressed", "confirm" }
+			}
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		if (hasChallenge)
+		{
+			StartAgeAppealChallengeEmail();
+		}
+		else
+		{
+			StartAgeAppealEmail();
+		}
+	}
+
+	public void OnBackPressed()
+	{
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_age_appeal_confirm_email",
+			CustomTags = new string[3]
+			{
+				"kid_age_appeal",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string>
+			{
+				{
+					"email_type",
+					hasChallenge ? "under_dac" : "over_dac"
+				},
+				{ "button_pressed", "go_back" }
+			}
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		base.gameObject.SetActive(value: false);
+		_ageAppealEmailScreen.ShowAgeAppealEmailScreen(hasChallenge, newAgeToAppeal);
+	}
+
+	private async void StartAgeAppealChallengeEmail()
+	{
+		(bool success, string message) result = await KIDManager.SetAndSendEmail(_emailText.text);
+		Debug.Log($"[KID::UI::APPEAL_AGE_EMAIL] Email has been sent, awaiting minimum duration {_minimumDelay}");
+		do
+		{
+			await Task.Yield();
+		}
+		while (!_hasCompletedSendEmailRequest);
+		if (_minimumDelay > 0)
+		{
+			await Task.Delay(_minimumDelay);
+		}
+		if (!result.success)
+		{
+			base.gameObject.SetActive(value: false);
+			return;
+		}
+		Debug.Log("[KID::UI::APPEAL_AGE_EMAIL] Minimum duration passed, result is successful. Proceeding to Success screen");
+		base.gameObject.SetActive(value: false);
+		_successScreen.ShowSuccessScreenAppeal(_emailText.text);
+	}
+
+	private async Task StartAgeAppealEmail()
+	{
+		if (!(await KIDManager.TryAppealAge(_emailText.text, newAgeToAppeal)))
+		{
+			base.gameObject.SetActive(value: false);
+			_errorScreen.ShowAgeAppealEmailErrorScreen(hasChallenge, newAgeToAppeal, _emailText.text);
+		}
+		else
+		{
+			Debug.Log("[KID::UI::APPEAL_AGE_EMAIL] Age appeal succesful for [" + _emailText.text + "]. Proceeding tu Success screen");
+			base.gameObject.SetActive(value: false);
+			_successScreen.ShowSuccessScreenAppeal(_emailText.text);
+		}
+	}
+
+	private void NotifyOfEmailResult(bool success)
+	{
+		if (_successScreen == null)
+		{
+			Debug.LogError("[KID::AGE_APPEAL_EMAIL] _successScreen has not been set yet and is NULL. Cannot inform of result");
+			return;
+		}
+		_hasCompletedSendEmailRequest = true;
+		if (success)
+		{
+			base.gameObject.SetActive(value: false);
+			_successScreen.ShowSuccessScreenAppeal(_emailText.text);
+		}
+	}
+
+	private void ShowErrorScreen()
+	{
+		Debug.LogErrorFormat("[KID::UI::Setup] K-ID Confirmation Failed - Failed to send email");
+		base.gameObject.SetActive(value: false);
+		_errorScreen.ShowAgeAppealEmailErrorScreen(hasChallenge, newAgeToAppeal, _emailText.text);
+	}
 }

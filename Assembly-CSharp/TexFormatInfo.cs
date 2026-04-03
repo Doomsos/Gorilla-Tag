@@ -1,52 +1,23 @@
-﻿using System;
 using UnityEngine;
 
-public struct TexFormatInfo
+public struct TexFormatInfo(Texture2D tex2d)
 {
-	public TexFormatInfo(Texture2D tex2d)
-	{
-		this.width = tex2d.width;
-		this.height = tex2d.height;
-		this.format = tex2d.format;
-		this.filterMode = tex2d.filterMode;
-		this.isLinearColor = !tex2d.isDataSRGB;
-		this.mipmapCount = tex2d.mipmapCount;
-		this.isValid = true;
-	}
+	public bool isValid = true;
+
+	public int width = tex2d.width;
+
+	public int height = tex2d.height;
+
+	public TextureFormat format = tex2d.format;
+
+	public FilterMode filterMode = tex2d.filterMode;
+
+	public int mipmapCount = tex2d.mipmapCount;
+
+	public bool isLinearColor = !tex2d.isDataSRGB;
 
 	public override string ToString()
 	{
-		return string.Concat(new string[]
-		{
-			"TexFormatInfo(isValid: ",
-			this.isValid.ToString(),
-			", width: ",
-			this.width.ToString(),
-			", height: ",
-			this.height.ToString(),
-			", format: ",
-			this.format.ToString(),
-			", filterMode: ",
-			this.filterMode.ToString(),
-			", isLinearColor: ",
-			this.isLinearColor.ToString(),
-			", mipmapCount: ",
-			this.mipmapCount.ToString(),
-			")"
-		});
+		return "TexFormatInfo(isValid: " + isValid + ", width: " + width + ", height: " + height + ", format: " + format.ToString() + ", filterMode: " + filterMode.ToString() + ", isLinearColor: " + isLinearColor + ", mipmapCount: " + mipmapCount + ")";
 	}
-
-	public bool isValid;
-
-	public int width;
-
-	public int height;
-
-	public TextureFormat format;
-
-	public FilterMode filterMode;
-
-	public int mipmapCount;
-
-	public bool isLinearColor;
 }

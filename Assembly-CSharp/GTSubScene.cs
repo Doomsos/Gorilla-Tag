@@ -1,21 +1,23 @@
-﻿using System;
 using UnityEngine;
 
 public class GTSubScene : ScriptableObject
 {
+	[DragDropScenes]
+	public GTScene[] scenes = new GTScene[0];
+
 	public void SwitchToScene(int index)
 	{
-		this.scenes[index].LoadAsync();
+		scenes[index].LoadAsync();
 	}
 
 	public void SwitchToScene(GTScene scene)
 	{
-		for (int i = 0; i < this.scenes.Length; i++)
+		for (int i = 0; i < scenes.Length; i++)
 		{
-			GTScene gtscene = this.scenes[i];
-			if (!(scene == gtscene))
+			GTScene gTScene = scenes[i];
+			if (!(scene == gTScene))
 			{
-				gtscene.UnloadAsync();
+				gTScene.UnloadAsync();
 			}
 		}
 		scene.LoadAsync();
@@ -23,20 +25,17 @@ public class GTSubScene : ScriptableObject
 
 	public void LoadAll()
 	{
-		for (int i = 0; i < this.scenes.Length; i++)
+		for (int i = 0; i < scenes.Length; i++)
 		{
-			this.scenes[i].LoadAsync();
+			scenes[i].LoadAsync();
 		}
 	}
 
 	public void UnloadAll()
 	{
-		for (int i = 0; i < this.scenes.Length; i++)
+		for (int i = 0; i < scenes.Length; i++)
 		{
-			this.scenes[i].UnloadAsync();
+			scenes[i].UnloadAsync();
 		}
 	}
-
-	[DragDropScenes]
-	public GTScene[] scenes = new GTScene[0];
 }

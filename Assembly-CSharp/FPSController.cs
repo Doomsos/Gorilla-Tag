@@ -1,12 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 public class FPSController : MonoBehaviour
 {
-	[HideInInspector]
-	public event FPSController.OnStateChangeEventHandler OnStartEvent;
-
-	public event FPSController.OnStateChangeEventHandler OnStopEvent;
+	public delegate void OnStateChangeEventHandler();
 
 	public float baseMoveSpeed = 4f;
 
@@ -52,5 +48,8 @@ public class FPSController : MonoBehaviour
 
 	public LayerMask HandMask;
 
-	public delegate void OnStateChangeEventHandler();
+	[HideInInspector]
+	public event OnStateChangeEventHandler OnStartEvent;
+
+	public event OnStateChangeEventHandler OnStopEvent;
 }

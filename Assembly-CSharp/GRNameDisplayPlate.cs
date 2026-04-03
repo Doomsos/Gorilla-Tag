@@ -1,30 +1,28 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 
 public class GRNameDisplayPlate : MonoBehaviour
 {
+	public TMP_Text namePlateLabel;
+
 	public void RefreshPlayerName(VRRig vrRig)
 	{
-		GRPlayer x = GRPlayer.Get(vrRig);
-		if (vrRig != null && x != null)
+		GRPlayer gRPlayer = GRPlayer.Get(vrRig);
+		if (vrRig != null && gRPlayer != null)
 		{
-			if (!this.namePlateLabel.text.Equals(vrRig.playerNameVisible))
+			if (!namePlateLabel.text.Equals(vrRig.playerNameVisible))
 			{
-				this.namePlateLabel.text = vrRig.playerNameVisible;
-				return;
+				namePlateLabel.text = vrRig.playerNameVisible;
 			}
 		}
 		else
 		{
-			this.namePlateLabel.text = "";
+			namePlateLabel.text = "";
 		}
 	}
 
 	public void Clear()
 	{
-		this.namePlateLabel.text = "";
+		namePlateLabel.text = "";
 	}
-
-	public TMP_Text namePlateLabel;
 }

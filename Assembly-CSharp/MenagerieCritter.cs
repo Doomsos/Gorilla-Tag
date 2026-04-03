@@ -1,248 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
 public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 {
-	public Menagerie.CritterData CritterData
+	public enum MenagerieCritterState
 	{
-		get
-		{
-			return this._critterData;
-		}
-	}
-
-	public MenagerieSlot Slot
-	{
-		get
-		{
-			return this._slot;
-		}
-		set
-		{
-			if (value == this._slot)
-			{
-				return;
-			}
-			if (this._slot && this._slot.critter == this)
-			{
-				this._slot.critter = null;
-			}
-			this._slot = value;
-			if (this._slot)
-			{
-				this._slot.critter = this;
-			}
-		}
-	}
-
-	private void Update()
-	{
-		this.UpdateAnimation();
-	}
-
-	public void ApplyCritterData(Menagerie.CritterData critterData)
-	{
-		this._critterData = critterData;
-		this._critterConfiguration = this._critterData.GetConfiguration();
-		this._critterData.instance = this;
-		this._critterData.GetConfiguration().ApplyVisualsTo(this.visuals, false);
-		this.visuals.SetAppearance(this._critterData.appearance);
-		this._animRoot = this.visuals.bodyRoot;
-		this._bodyScale = this._animRoot.localScale;
-		this.PlayAnimation(this.heldAnimation, UnityEngine.Random.value);
-	}
-
-	private void PlayAnimation(CrittersAnim anim, float time = 0f)
-	{
-		this._currentAnim = anim;
-		this._currentAnimTime = time;
-		if (this._currentAnim == null)
-		{
-			this._animRoot.localPosition = Vector3.zero;
-			this._animRoot.localRotation = Quaternion.identity;
-			this._animRoot.localScale = this._bodyScale;
-		}
-	}
-
-	private void UpdateAnimation()
-	{
-		if (this._currentAnim != null)
-		{
-			this._currentAnimTime += Time.deltaTime * this._currentAnim.playSpeed;
-			this._currentAnimTime %= 1f;
-			float num = this._currentAnim.squashAmount.Evaluate(this._currentAnimTime);
-			float z = this._currentAnim.forwardOffset.Evaluate(this._currentAnimTime);
-			float x = this._currentAnim.horizontalOffset.Evaluate(this._currentAnimTime);
-			float y = this._currentAnim.verticalOffset.Evaluate(this._currentAnimTime);
-			this._animRoot.localPosition = Vector3.Scale(this._bodyScale, new Vector3(x, y, z));
-			float num2 = 1f - num;
-			num2 *= 0.5f;
-			num2 += 1f;
-			this._animRoot.localScale = Vector3.Scale(this._bodyScale, new Vector3(num2, num, num2));
-		}
-	}
-
-	public bool TwoHanded
-	{
-		get
-		{
-			return false;
-		}
-	}
-
-	public void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
-	{
-	}
-
-	public void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-	{
-		this.isHeld = true;
-		this.isHeldLeftHand = (grabbingHand == EquipmentInteractor.instance.leftHand);
-		if (this.grabbedHaptics)
-		{
-			CrittersManager.PlayHaptics(this.grabbedHaptics, this.grabbedHapticsStrength, this.isHeldLeftHand);
-		}
-		if (this.grabbedFX)
-		{
-			this.grabbedFX.SetActive(true);
-		}
-		EquipmentInteractor.instance.UpdateHandEquipment(this, this.isHeldLeftHand);
-		base.transform.parent = grabbingHand.transform;
-		this.isHeld = true;
-		this.heldBy = grabbingHand;
-		Action onDataChange = this.OnDataChange;
-		if (onDataChange == null)
-		{
-			return;
-		}
-		onDataChange();
-	}
-
-	public bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-	{
-		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)
-		{
-			return false;
-		}
-		if (EquipmentInteractor.instance.leftHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.leftHand)
-		{
-			return false;
-		}
-		if (this.grabbedHaptics)
-		{
-			CrittersManager.StopHaptics(this.isHeldLeftHand);
-		}
-		if (this.grabbedFX)
-		{
-			this.grabbedFX.SetActive(false);
-		}
-		EquipmentInteractor.instance.UpdateHandEquipment(null, this.isHeldLeftHand);
-		this.isHeld = false;
-		this.isHeldLeftHand = false;
-		Action<MenagerieCritter> onReleased = this.OnReleased;
-		if (onReleased != null)
-		{
-			onReleased(this);
-		}
-		Action onDataChange = this.OnDataChange;
-		if (onDataChange != null)
-		{
-			onDataChange();
-		}
-		this.ResetToTransform();
-		return true;
-	}
-
-	public void ResetToTransform()
-	{
-		base.transform.parent = this._slot.transform;
-		base.transform.localPosition = Vector3.zero;
-		base.transform.localRotation = quaternion.identity;
-	}
-
-	public void DropItemCleanup()
-	{
-	}
-
-	int IEyeScannable.scannableId
-	{
-		get
-		{
-			return base.gameObject.GetInstanceID();
-		}
-	}
-
-	Vector3 IEyeScannable.Position
-	{
-		get
-		{
-			return this.bodyCollider.bounds.center;
-		}
-	}
-
-	Bounds IEyeScannable.Bounds
-	{
-		get
-		{
-			return this.bodyCollider.bounds;
-		}
-	}
-
-	IList<KeyValueStringPair> IEyeScannable.Entries
-	{
-		get
-		{
-			return this.BuildEyeScannerData();
-		}
-	}
-
-	public void OnEnable()
-	{
-		EyeScannerMono.Register(this);
-	}
-
-	public void OnDisable()
-	{
-		EyeScannerMono.Unregister(this);
-	}
-
-	private IList<KeyValueStringPair> BuildEyeScannerData()
-	{
-		this.eyeScanData[0] = new KeyValueStringPair("Name", this._critterConfiguration.critterName);
-		this.eyeScanData[1] = new KeyValueStringPair("Type", this._critterConfiguration.animalType.ToString());
-		this.eyeScanData[2] = new KeyValueStringPair("Temperament", this._critterConfiguration.behaviour.temperament);
-		this.eyeScanData[3] = new KeyValueStringPair("Habitat", this._critterConfiguration.biome.GetHabitatDescription());
-		this.eyeScanData[4] = new KeyValueStringPair("Size", this.visuals.Appearance.size.ToString("0.00"));
-		this.eyeScanData[5] = new KeyValueStringPair("State", this.GetCurrentStateName());
-		return this.eyeScanData;
-	}
-
-	public event Action OnDataChange;
-
-	private string GetCurrentStateName()
-	{
-		if (!this.isHeld)
-		{
-			return "Content";
-		}
-		return "Happy";
-	}
-
-	GameObject IHoldableObject.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	string IHoldableObject.get_name()
-	{
-		return base.name;
-	}
-
-	void IHoldableObject.set_name(string value)
-	{
-		base.name = value;
+		Donating,
+		Displaying
 	}
 
 	public CritterVisuals visuals;
@@ -266,7 +32,7 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 
 	private Vector3 _bodyScale;
 
-	public MenagerieCritter.MenagerieCritterState currentState = MenagerieCritter.MenagerieCritterState.Displaying;
+	public MenagerieCritterState currentState = MenagerieCritterState.Displaying;
 
 	private CritterConfiguration _critterConfiguration;
 
@@ -286,9 +52,178 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 
 	private KeyValueStringPair[] eyeScanData = new KeyValueStringPair[6];
 
-	public enum MenagerieCritterState
+	public Menagerie.CritterData CritterData => _critterData;
+
+	public MenagerieSlot Slot
 	{
-		Donating,
-		Displaying
+		get
+		{
+			return _slot;
+		}
+		set
+		{
+			if (!(value == _slot))
+			{
+				if ((bool)_slot && _slot.critter == this)
+				{
+					_slot.critter = null;
+				}
+				_slot = value;
+				if ((bool)_slot)
+				{
+					_slot.critter = this;
+				}
+			}
+		}
+	}
+
+	public bool TwoHanded => false;
+
+	int IEyeScannable.scannableId => base.gameObject.GetInstanceID();
+
+	Vector3 IEyeScannable.Position => bodyCollider.bounds.center;
+
+	Bounds IEyeScannable.Bounds => bodyCollider.bounds;
+
+	IList<KeyValueStringPair> IEyeScannable.Entries => BuildEyeScannerData();
+
+	public event Action OnDataChange;
+
+	private void Update()
+	{
+		UpdateAnimation();
+	}
+
+	public void ApplyCritterData(Menagerie.CritterData critterData)
+	{
+		_critterData = critterData;
+		_critterConfiguration = _critterData.GetConfiguration();
+		_critterData.instance = this;
+		_critterData.GetConfiguration().ApplyVisualsTo(visuals, generateAppearance: false);
+		visuals.SetAppearance(_critterData.appearance);
+		_animRoot = visuals.bodyRoot;
+		_bodyScale = _animRoot.localScale;
+		PlayAnimation(heldAnimation, UnityEngine.Random.value);
+	}
+
+	private void PlayAnimation(CrittersAnim anim, float time = 0f)
+	{
+		_currentAnim = anim;
+		_currentAnimTime = time;
+		if (_currentAnim == null)
+		{
+			_animRoot.localPosition = Vector3.zero;
+			_animRoot.localRotation = Quaternion.identity;
+			_animRoot.localScale = _bodyScale;
+		}
+	}
+
+	private void UpdateAnimation()
+	{
+		if (_currentAnim != null)
+		{
+			_currentAnimTime += Time.deltaTime * _currentAnim.playSpeed;
+			_currentAnimTime %= 1f;
+			float num = _currentAnim.squashAmount.Evaluate(_currentAnimTime);
+			float z = _currentAnim.forwardOffset.Evaluate(_currentAnimTime);
+			float x = _currentAnim.horizontalOffset.Evaluate(_currentAnimTime);
+			float y = _currentAnim.verticalOffset.Evaluate(_currentAnimTime);
+			_animRoot.localPosition = Vector3.Scale(_bodyScale, new Vector3(x, y, z));
+			float num2 = 1f - num;
+			num2 *= 0.5f;
+			num2 += 1f;
+			_animRoot.localScale = Vector3.Scale(_bodyScale, new Vector3(num2, num, num2));
+		}
+	}
+
+	public void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
+	{
+	}
+
+	public void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		isHeld = true;
+		isHeldLeftHand = grabbingHand == EquipmentInteractor.instance.leftHand;
+		if ((bool)grabbedHaptics)
+		{
+			CrittersManager.PlayHaptics(grabbedHaptics, grabbedHapticsStrength, isHeldLeftHand);
+		}
+		if ((bool)grabbedFX)
+		{
+			grabbedFX.SetActive(value: true);
+		}
+		EquipmentInteractor.instance.UpdateHandEquipment(this, isHeldLeftHand);
+		base.transform.parent = grabbingHand.transform;
+		isHeld = true;
+		heldBy = grabbingHand;
+		this.OnDataChange?.Invoke();
+	}
+
+	public bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)
+		{
+			return false;
+		}
+		if (EquipmentInteractor.instance.leftHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.leftHand)
+		{
+			return false;
+		}
+		if ((bool)grabbedHaptics)
+		{
+			CrittersManager.StopHaptics(isHeldLeftHand);
+		}
+		if ((bool)grabbedFX)
+		{
+			grabbedFX.SetActive(value: false);
+		}
+		EquipmentInteractor.instance.UpdateHandEquipment(null, isHeldLeftHand);
+		isHeld = false;
+		isHeldLeftHand = false;
+		OnReleased?.Invoke(this);
+		this.OnDataChange?.Invoke();
+		ResetToTransform();
+		return true;
+	}
+
+	public void ResetToTransform()
+	{
+		base.transform.parent = _slot.transform;
+		base.transform.localPosition = Vector3.zero;
+		base.transform.localRotation = quaternion.identity;
+	}
+
+	public void DropItemCleanup()
+	{
+	}
+
+	public void OnEnable()
+	{
+		EyeScannerMono.Register(this);
+	}
+
+	public void OnDisable()
+	{
+		EyeScannerMono.Unregister(this);
+	}
+
+	private IList<KeyValueStringPair> BuildEyeScannerData()
+	{
+		eyeScanData[0] = new KeyValueStringPair("Name", _critterConfiguration.critterName);
+		eyeScanData[1] = new KeyValueStringPair("Type", _critterConfiguration.animalType.ToString());
+		eyeScanData[2] = new KeyValueStringPair("Temperament", _critterConfiguration.behaviour.temperament);
+		eyeScanData[3] = new KeyValueStringPair("Habitat", _critterConfiguration.biome.GetHabitatDescription());
+		eyeScanData[4] = new KeyValueStringPair("Size", visuals.Appearance.size.ToString("0.00"));
+		eyeScanData[5] = new KeyValueStringPair("State", GetCurrentStateName());
+		return eyeScanData;
+	}
+
+	private string GetCurrentStateName()
+	{
+		if (!isHeld)
+		{
+			return "Content";
+		}
+		return "Happy";
 	}
 }

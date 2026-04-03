@@ -1,37 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class HotPepperFace : MonoBehaviour
 {
-	public void PlayFX(float delay)
-	{
-		if (delay < 0f)
-		{
-			this.PlayFX();
-			return;
-		}
-		base.Invoke("PlayFX", delay);
-	}
-
-	public void PlayFX()
-	{
-		this._faceMesh.SetActive(true);
-		this._thermalSourceVolume.SetActive(true);
-		this._fireFX.Play();
-		this._flameSpeaker.GTPlay();
-		this._breathSpeaker.GTPlay();
-		base.Invoke("StopFX", this._effectLength);
-	}
-
-	public void StopFX()
-	{
-		this._faceMesh.SetActive(false);
-		this._thermalSourceVolume.SetActive(false);
-		this._fireFX.Stop();
-		this._flameSpeaker.GTStop();
-		this._breathSpeaker.GTStop();
-	}
-
 	[SerializeField]
 	private GameObject _faceMesh;
 
@@ -49,4 +19,35 @@ public class HotPepperFace : MonoBehaviour
 
 	[SerializeField]
 	private GameObject _thermalSourceVolume;
+
+	public void PlayFX(float delay)
+	{
+		if (delay < 0f)
+		{
+			PlayFX();
+		}
+		else
+		{
+			Invoke("PlayFX", delay);
+		}
+	}
+
+	public void PlayFX()
+	{
+		_faceMesh.SetActive(value: true);
+		_thermalSourceVolume.SetActive(value: true);
+		_fireFX.Play();
+		_flameSpeaker.GTPlay();
+		_breathSpeaker.GTPlay();
+		Invoke("StopFX", _effectLength);
+	}
+
+	public void StopFX()
+	{
+		_faceMesh.SetActive(value: false);
+		_thermalSourceVolume.SetActive(value: false);
+		_fireFX.Stop();
+		_flameSpeaker.GTStop();
+		_breathSpeaker.GTStop();
+	}
 }

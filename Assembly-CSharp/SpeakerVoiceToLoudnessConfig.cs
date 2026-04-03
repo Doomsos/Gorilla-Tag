@@ -1,60 +1,19 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using PlayFab;
 using UnityEngine;
 
 internal static class SpeakerVoiceToLoudnessConfig
 {
-	public static bool EnableLoudnessLimit
+	[Serializable]
+	private struct SerializedConfig
 	{
-		get
-		{
-			return SpeakerVoiceToLoudnessConfig.k_config.EnableLoudnessLimit;
-		}
+		public bool EnableLoudnessLimit;
+
+		public float LoudnessLimitThreshold;
 	}
 
-	public static float LoudnessLimitThreshold
-	{
-		get
-		{
-			return SpeakerVoiceToLoudnessConfig.k_config.LoudnessLimitThreshold;
-		}
-	}
-
-	[RuntimeInitializeOnLoadMethod]
-	private static void StaticLoad()
-	{
-		PlayFabTitleDataCache.RegisterOnLoad(new Action<PlayFabTitleDataCache>(SpeakerVoiceToLoudnessConfig.OnTitleDataCacheReady));
-	}
-
-	private static void OnTitleDataCacheReady(PlayFabTitleDataCache titleDataCache)
-	{
-		titleDataCache.GetTitleData("SpeakerVoiceToLoudnessConfig", new Action<string>(SpeakerVoiceToLoudnessConfig.OnTitleDataCacheResponse), new Action<PlayFabError>(SpeakerVoiceToLoudnessConfig.OnTitleDataCacheError), false);
-	}
-
-	private static void OnTitleDataCacheResponse(string json)
-	{
-		SpeakerVoiceToLoudnessConfig.SerializedConfig serializedConfig = default(SpeakerVoiceToLoudnessConfig.SerializedConfig);
-		try
-		{
-			serializedConfig = JsonUtility.FromJson<SpeakerVoiceToLoudnessConfig.SerializedConfig>(json);
-		}
-		catch (Exception exception)
-		{
-			Debug.LogException(exception);
-			serializedConfig = SpeakerVoiceToLoudnessConfig.k_config;
-		}
-		finally
-		{
-			SpeakerVoiceToLoudnessConfig.k_config = serializedConfig;
-		}
-	}
-
-	private static void OnTitleDataCacheError(PlayFabError errorMsg)
-	{
-	}
-
-	private static SpeakerVoiceToLoudnessConfig.SerializedConfig k_config = new SpeakerVoiceToLoudnessConfig.SerializedConfig
+	private static SerializedConfig k_config = new SerializedConfig
 	{
 		EnableLoudnessLimit = true,
 		LoudnessLimitThreshold = 0.5f
@@ -64,11 +23,40 @@ internal static class SpeakerVoiceToLoudnessConfig
 
 	private const string k_titleDataKey = "SpeakerVoiceToLoudnessConfig";
 
-	[Serializable]
-	private struct SerializedConfig
-	{
-		public bool EnableLoudnessLimit;
+	public static bool EnableLoudnessLimit => k_config.EnableLoudnessLimit;
 
-		public float LoudnessLimitThreshold;
+	public static float LoudnessLimitThreshold => k_config.LoudnessLimitThreshold;
+
+	[RuntimeInitializeOnLoadMethod]
+	private static void StaticLoad()
+	{
+		PlayFabTitleDataCache.RegisterOnLoad(OnTitleDataCacheReady);
+	}
+
+	private static void OnTitleDataCacheReady(PlayFabTitleDataCache titleDataCache)
+	{
+		titleDataCache.GetTitleData("SpeakerVoiceToLoudnessConfig", OnTitleDataCacheResponse, OnTitleDataCacheError);
+	}
+
+	private static void OnTitleDataCacheResponse(string json)
+	{
+		SerializedConfig serializedConfig = default(SerializedConfig);
+		try
+		{
+			serializedConfig = JsonUtility.FromJson<SerializedConfig>(json);
+		}
+		catch (Exception exception)
+		{
+			Debug.LogException(exception);
+			serializedConfig = k_config;
+		}
+		finally
+		{
+			k_config = serializedConfig;
+		}
+	}
+
+	private static void OnTitleDataCacheError(PlayFabError errorMsg)
+	{
 	}
 }

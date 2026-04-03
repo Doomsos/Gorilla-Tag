@@ -1,70 +1,68 @@
-﻿using System;
-
 public class GRToolScannable : GRScannable
 {
+	private GRTool tool;
+
+	private GRToolUpgradePiece upgradePiece;
+
+	private GRToolProgressionManager.ToolProgressionMetaData metadata;
+
 	public override void Start()
 	{
 		base.Start();
-		if (this.gameEntity != null)
+		if (gameEntity != null)
 		{
-			this.tool = this.gameEntity.GetComponent<GRTool>();
-			this.upgradePiece = this.gameEntity.GetComponent<GRToolUpgradePiece>();
+			tool = gameEntity.GetComponent<GRTool>();
+			upgradePiece = gameEntity.GetComponent<GRToolUpgradePiece>();
 		}
 	}
 
 	private void FetchMetadata(GhostReactor reactor)
 	{
-		if (this.metadata == null)
+		if (metadata == null)
 		{
 			GRToolProgressionManager.ToolParts toolParts = GRToolProgressionManager.ToolParts.None;
-			if (this.tool != null)
+			if (tool != null)
 			{
-				toolParts = GRUtils.GetToolPart(this.tool.toolType);
+				toolParts = GRUtils.GetToolPart(tool.toolType);
 			}
-			else if (this.upgradePiece != null)
+			else if (upgradePiece != null)
 			{
-				toolParts = this.upgradePiece.matchingUpgrade;
+				toolParts = upgradePiece.matchingUpgrade;
 			}
 			if (toolParts != GRToolProgressionManager.ToolParts.None)
 			{
-				this.metadata = reactor.toolProgression.GetPartMetadata(toolParts);
+				metadata = reactor.toolProgression.GetPartMetadata(toolParts);
 			}
 		}
 	}
 
 	public override string GetTitleText(GhostReactor reactor)
 	{
-		this.FetchMetadata(reactor);
-		if (this.metadata == null)
+		FetchMetadata(reactor);
+		if (metadata == null)
 		{
 			return "Unknown";
 		}
-		return this.metadata.name;
+		return metadata.name;
 	}
 
 	public override string GetBodyText(GhostReactor reactor)
 	{
-		this.FetchMetadata(reactor);
-		if (this.metadata == null)
+		FetchMetadata(reactor);
+		if (metadata == null)
 		{
 			return "Unknown";
 		}
-		return this.metadata.description;
+		return metadata.description;
 	}
 
 	public override string GetAnnotationText(GhostReactor reactor)
 	{
-		this.FetchMetadata(reactor);
-		if (this.metadata == null)
+		FetchMetadata(reactor);
+		if (metadata == null)
 		{
 			return "Unknown";
 		}
-		return this.metadata.annotation;
+		return metadata.annotation;
 	}
-
-	private GRTool tool;
-
-	private GRToolUpgradePiece upgradePiece;
-
-	private GRToolProgressionManager.ToolProgressionMetaData metadata;
 }

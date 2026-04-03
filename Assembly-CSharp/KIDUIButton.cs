@@ -1,4 +1,3 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,232 +7,6 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 
 public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
-	private XRUIInputModule InputModule
-	{
-		get
-		{
-			return EventSystem.current.currentInputModule as XRUIInputModule;
-		}
-	}
-
-	protected override void OnEnable()
-	{
-		base.OnEnable();
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-		}
-	}
-
-	private void PostUpdate()
-	{
-		if (!KIDUIButton._canTrigger)
-		{
-			KIDUIButton._canTrigger = !ControllerBehaviour.Instance.TriggerDown;
-		}
-		if (!base.interactable || !this.inside || !KIDUIButton._canTrigger)
-		{
-			return;
-		}
-		if (ControllerBehaviour.Instance && ControllerBehaviour.Instance.TriggerDown && !KIDUIButton._triggeredThisFrame)
-		{
-			string text = string.Concat(new string[]
-			{
-				"[",
-				base.transform.parent.parent.parent.name,
-				".",
-				base.transform.parent.parent.name,
-				".",
-				base.transform.parent.name,
-				".",
-				base.transform.name,
-				"]"
-			});
-			Debug.Log(string.Concat(new string[]
-			{
-				"[KID::UIBUTTON::DEBUG] ",
-				text,
-				" - STEAM - OnClick is pressed. Time: [",
-				Time.time.ToString(),
-				"]"
-			}), this);
-			Button.ButtonClickedEvent onClick = base.onClick;
-			if (onClick != null)
-			{
-				onClick.Invoke();
-			}
-			KIDUIButton._triggeredThisFrame = true;
-			KIDUIButton._canTrigger = false;
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (KIDUIButton._triggeredThisFrame)
-		{
-			string text = string.Concat(new string[]
-			{
-				"[",
-				base.transform.parent.parent.parent.name,
-				".",
-				base.transform.parent.parent.name,
-				".",
-				base.transform.parent.name,
-				".",
-				base.transform.name,
-				"]"
-			});
-			Debug.Log(string.Concat(new string[]
-			{
-				"[KID::UIBUTTON::DEBUG] ",
-				text,
-				" - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [",
-				Time.time.ToString(),
-				"]"
-			}), this);
-		}
-		KIDUIButton._triggeredThisFrame = false;
-	}
-
-	public override void OnPointerExit(PointerEventData eventData)
-	{
-		base.OnPointerExit(eventData);
-		this.inside = false;
-	}
-
-	public void ResetButton()
-	{
-		this.inside = false;
-		KIDUIButton._triggeredThisFrame = false;
-	}
-
-	protected override void OnDisable()
-	{
-		this.FixStuckPressedState();
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-		}
-	}
-
-	private void FixStuckPressedState()
-	{
-		this.InstantClearState();
-		this._buttonText.color = (base.interactable ? this._normalTextColor : this._disabledTextColor);
-		this.inside = false;
-		KIDUIButton._triggeredThisFrame = false;
-	}
-
-	protected override void DoStateTransition(Selectable.SelectionState state, bool instant)
-	{
-		base.DoStateTransition(state, instant);
-		switch (state)
-		{
-		default:
-			this._buttonText.color = this._normalTextColor;
-			this.SetIcons(true, false);
-			return;
-		case Selectable.SelectionState.Highlighted:
-			this._buttonText.color = this._highlightedTextColor;
-			this.SetIcons(false, true);
-			return;
-		case Selectable.SelectionState.Pressed:
-			this._buttonText.color = this._pressedTextColor;
-			this.SetIcons(true, false);
-			return;
-		case Selectable.SelectionState.Selected:
-			this._buttonText.color = this._selectedTextColor;
-			this.SetIcons(true, false);
-			return;
-		case Selectable.SelectionState.Disabled:
-			this._buttonText.color = this._disabledTextColor;
-			this.SetIcons(true, false);
-			return;
-		}
-	}
-
-	private void SetIcons(bool normalEnabled, bool highlightedEnabled)
-	{
-		if (this._normalIcon == null || this._highlightedIcon == null)
-		{
-			return;
-		}
-		GameObject normalIcon = this._normalIcon;
-		if (normalIcon != null)
-		{
-			normalIcon.SetActive(normalEnabled);
-		}
-		GameObject highlightedIcon = this._highlightedIcon;
-		if (highlightedIcon == null)
-		{
-			return;
-		}
-		highlightedIcon.SetActive(highlightedEnabled);
-	}
-
-	public override void OnPointerEnter(PointerEventData eventData)
-	{
-		base.OnPointerEnter(eventData);
-		this.inside = true;
-		if (!this.IsInteractable() || !this.IsActive())
-		{
-			return;
-		}
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance != null)
-		{
-			instance.PlaySound(KIDAudioManager.KIDSoundType.Hover);
-		}
-		Debug.Log("[KID::UIBUTTON::KIDAudioManager] Hover played");
-		XRRayInteractor xrrayInteractor = this.InputModule.GetInteractor(eventData.pointerId) as XRRayInteractor;
-		if (!xrrayInteractor)
-		{
-			return;
-		}
-		xrrayInteractor.xrController.SendHapticImpulse(this._highlightedVibrationStrength, this._highlightedVibrationDuration);
-	}
-
-	public override void OnPointerDown(PointerEventData eventData)
-	{
-		base.OnPointerDown(eventData);
-		this.inside = false;
-		if (!this.IsInteractable() || !this.IsActive())
-		{
-			return;
-		}
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance != null)
-		{
-			instance.PlaySound(this.onClickSound);
-		}
-		XRRayInteractor xrrayInteractor = this.InputModule.GetInteractor(eventData.pointerId) as XRRayInteractor;
-		if (!xrrayInteractor)
-		{
-			return;
-		}
-		xrrayInteractor.xrController.SendHapticImpulse(this._pressedVibrationStrength, this._pressedVibrationDuration);
-	}
-
-	public void SetText(string text)
-	{
-		this._buttonText.SetText(text);
-	}
-
-	public void SetFont(TMP_FontAsset font)
-	{
-		this._buttonText.font = font;
-	}
-
-	public string GetText()
-	{
-		return this._buttonText.text;
-	}
-
-	public void SetBorderImage(Sprite newImg)
-	{
-		this._borderImage.sprite = newImg;
-	}
-
 	[SerializeField]
 	private Image _borderImage;
 
@@ -336,4 +109,158 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 	private static bool _triggeredThisFrame = false;
 
 	private static bool _canTrigger = true;
+
+	private XRUIInputModule InputModule => EventSystem.current.currentInputModule as XRUIInputModule;
+
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction += PostUpdate;
+		}
+	}
+
+	private void PostUpdate()
+	{
+		if (!_canTrigger)
+		{
+			_canTrigger = !ControllerBehaviour.Instance.TriggerDown;
+		}
+		if (base.interactable && inside && _canTrigger && (bool)ControllerBehaviour.Instance && ControllerBehaviour.Instance.TriggerDown && !_triggeredThisFrame)
+		{
+			string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+			Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnClick is pressed. Time: [" + Time.time + "]", this);
+			base.onClick?.Invoke();
+			_triggeredThisFrame = true;
+			_canTrigger = false;
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (_triggeredThisFrame)
+		{
+			string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+			Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [" + Time.time + "]", this);
+		}
+		_triggeredThisFrame = false;
+	}
+
+	public override void OnPointerExit(PointerEventData eventData)
+	{
+		base.OnPointerExit(eventData);
+		inside = false;
+	}
+
+	public void ResetButton()
+	{
+		inside = false;
+		_triggeredThisFrame = false;
+	}
+
+	protected override void OnDisable()
+	{
+		FixStuckPressedState();
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction -= PostUpdate;
+		}
+	}
+
+	private void FixStuckPressedState()
+	{
+		InstantClearState();
+		_buttonText.color = (base.interactable ? _normalTextColor : _disabledTextColor);
+		inside = false;
+		_triggeredThisFrame = false;
+	}
+
+	protected override void DoStateTransition(SelectionState state, bool instant)
+	{
+		base.DoStateTransition(state, instant);
+		switch (state)
+		{
+		default:
+			_buttonText.color = _normalTextColor;
+			SetIcons(normalEnabled: true, highlightedEnabled: false);
+			break;
+		case SelectionState.Disabled:
+			_buttonText.color = _disabledTextColor;
+			SetIcons(normalEnabled: true, highlightedEnabled: false);
+			break;
+		case SelectionState.Highlighted:
+			_buttonText.color = _highlightedTextColor;
+			SetIcons(normalEnabled: false, highlightedEnabled: true);
+			break;
+		case SelectionState.Pressed:
+			_buttonText.color = _pressedTextColor;
+			SetIcons(normalEnabled: true, highlightedEnabled: false);
+			break;
+		case SelectionState.Selected:
+			_buttonText.color = _selectedTextColor;
+			SetIcons(normalEnabled: true, highlightedEnabled: false);
+			break;
+		}
+	}
+
+	private void SetIcons(bool normalEnabled, bool highlightedEnabled)
+	{
+		if (!(_normalIcon == null) && !(_highlightedIcon == null))
+		{
+			_normalIcon?.SetActive(normalEnabled);
+			_highlightedIcon?.SetActive(highlightedEnabled);
+		}
+	}
+
+	public override void OnPointerEnter(PointerEventData eventData)
+	{
+		base.OnPointerEnter(eventData);
+		inside = true;
+		if (IsInteractable() && IsActive())
+		{
+			KIDAudioManager.Instance?.PlaySound(KIDAudioManager.KIDSoundType.Hover);
+			Debug.Log("[KID::UIBUTTON::KIDAudioManager] Hover played");
+			XRRayInteractor xRRayInteractor = InputModule.GetInteractor(eventData.pointerId) as XRRayInteractor;
+			if ((bool)xRRayInteractor)
+			{
+				xRRayInteractor.xrController.SendHapticImpulse(_highlightedVibrationStrength, _highlightedVibrationDuration);
+			}
+		}
+	}
+
+	public override void OnPointerDown(PointerEventData eventData)
+	{
+		base.OnPointerDown(eventData);
+		inside = false;
+		if (IsInteractable() && IsActive())
+		{
+			KIDAudioManager.Instance?.PlaySound(onClickSound);
+			XRRayInteractor xRRayInteractor = InputModule.GetInteractor(eventData.pointerId) as XRRayInteractor;
+			if ((bool)xRRayInteractor)
+			{
+				xRRayInteractor.xrController.SendHapticImpulse(_pressedVibrationStrength, _pressedVibrationDuration);
+			}
+		}
+	}
+
+	public void SetText(string text)
+	{
+		_buttonText.SetText(text);
+	}
+
+	public void SetFont(TMP_FontAsset font)
+	{
+		_buttonText.font = font;
+	}
+
+	public string GetText()
+	{
+		return _buttonText.text;
+	}
+
+	public void SetBorderImage(Sprite newImg)
+	{
+		_borderImage.sprite = newImg;
+	}
 }

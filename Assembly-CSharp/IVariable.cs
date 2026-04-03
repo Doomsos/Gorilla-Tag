@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 public interface IVariable<T> : IVariable
 {
@@ -6,23 +6,21 @@ public interface IVariable<T> : IVariable
 	{
 		get
 		{
-			return this.Get();
+			return Get();
 		}
 		set
 		{
-			this.Set(value);
+			Set(value);
 		}
 	}
+
+	Type IVariable.ValueType => typeof(T);
 
 	T Get();
 
 	void Set(T value);
-
-	Type IVariable.ValueType
-	{
-		get
-		{
-			return typeof(T);
-		}
-	}
+}
+public interface IVariable
+{
+	Type ValueType { get; }
 }

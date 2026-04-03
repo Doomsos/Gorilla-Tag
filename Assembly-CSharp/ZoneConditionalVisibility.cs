@@ -1,80 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ZoneConditionalVisibility : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this.renderersOnly)
-		{
-			this.renderers = new List<Renderer>(32);
-			base.GetComponentsInChildren<Renderer>(false, this.renderers);
-		}
-	}
-
-	private void Start()
-	{
-		this.OnZoneChanged();
-		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
-	}
-
-	private void OnDestroy()
-	{
-		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.OnZoneChanged));
-	}
-
-	private void OnZoneChanged()
-	{
-		bool flag = (this.zones == null || this.zones.Length == 0) ? ZoneManagement.IsInZone(this.zone) : this.InAnyZone();
-		if (this.invisibleWhileLoaded)
-		{
-			if (this.renderersOnly)
-			{
-				for (int i = 0; i < this.renderers.Count; i++)
-				{
-					if (this.renderers[i] != null)
-					{
-						this.renderers[i].enabled = !flag;
-					}
-				}
-				return;
-			}
-			base.gameObject.SetActive(!flag);
-			return;
-		}
-		else
-		{
-			if (this.renderersOnly)
-			{
-				for (int j = 0; j < this.renderers.Count; j++)
-				{
-					if (this.renderers[j] != null)
-					{
-						this.renderers[j].enabled = flag;
-					}
-				}
-				return;
-			}
-			base.gameObject.SetActive(flag);
-			return;
-		}
-	}
-
-	private bool InAnyZone()
-	{
-		for (int i = 0; i < this.zones.Length; i++)
-		{
-			if (ZoneManagement.IsInZone(this.zones[i]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	[SerializeField]
 	private GTZone zone;
 
@@ -88,4 +17,74 @@ public class ZoneConditionalVisibility : MonoBehaviour
 	private bool renderersOnly;
 
 	private List<Renderer> renderers;
+
+	private void Awake()
+	{
+		if (renderersOnly)
+		{
+			renderers = new List<Renderer>(32);
+			GetComponentsInChildren(includeInactive: false, renderers);
+		}
+	}
+
+	private void Start()
+	{
+		OnZoneChanged();
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(OnZoneChanged));
+	}
+
+	private void OnDestroy()
+	{
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(OnZoneChanged));
+	}
+
+	private void OnZoneChanged()
+	{
+		bool flag = ((zones == null || zones.Length == 0) ? ZoneManagement.IsInZone(zone) : InAnyZone());
+		if (invisibleWhileLoaded)
+		{
+			if (renderersOnly)
+			{
+				for (int i = 0; i < renderers.Count; i++)
+				{
+					if (renderers[i] != null)
+					{
+						renderers[i].enabled = !flag;
+					}
+				}
+			}
+			else
+			{
+				base.gameObject.SetActive(!flag);
+			}
+		}
+		else if (renderersOnly)
+		{
+			for (int j = 0; j < renderers.Count; j++)
+			{
+				if (renderers[j] != null)
+				{
+					renderers[j].enabled = flag;
+				}
+			}
+		}
+		else
+		{
+			base.gameObject.SetActive(flag);
+		}
+	}
+
+	private bool InAnyZone()
+	{
+		for (int i = 0; i < zones.Length; i++)
+		{
+			if (ZoneManagement.IsInZone(zones[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }

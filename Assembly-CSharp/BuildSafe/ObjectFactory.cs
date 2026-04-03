@@ -1,18 +1,17 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public static class ObjectFactory
 {
-	public static class ObjectFactory
+	public static event Action<Component> componentWasAdded
 	{
-		public static event Action<Component> componentWasAdded
+		add
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
+		}
+		remove
+		{
 		}
 	}
 }

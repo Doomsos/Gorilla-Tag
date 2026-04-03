@@ -1,43 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 {
-	private void Awake()
-	{
-		this.animator = base.GetComponent<Animator>();
-		this.animationTrigger = Animator.StringToHash(this.animationTriggerName);
-		this.animationSelect = Animator.StringToHash(this.animationSelectName);
-	}
-
-	public void OnEnable()
-	{
-		if (this.animator != null)
-		{
-			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-			this.lastSliceUpdateTime = Time.time;
-		}
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void SliceUpdate()
-	{
-		float num = Time.time - this.lastSliceUpdateTime;
-		this.lastSliceUpdateTime = Time.time;
-		float num2 = 1f - Mathf.Exp(-this.animationChancePerSecond * num);
-		if (Random.value < num2)
-		{
-			float value = Time.time - (float)((int)Time.time);
-			this.animator.SetFloat(this.animationSelect, value);
-			this.animator.SetTrigger(this.animationTrigger);
-		}
-	}
-
 	[SerializeField]
 	private string animationTriggerName;
 
@@ -55,4 +20,38 @@ public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 	private Animator animator;
 
 	private float lastSliceUpdateTime;
+
+	private void Awake()
+	{
+		animator = GetComponent<Animator>();
+		animationTrigger = Animator.StringToHash(animationTriggerName);
+		animationSelect = Animator.StringToHash(animationSelectName);
+	}
+
+	public void OnEnable()
+	{
+		if (animator != null)
+		{
+			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+			lastSliceUpdateTime = Time.time;
+		}
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void SliceUpdate()
+	{
+		float num = Time.time - lastSliceUpdateTime;
+		lastSliceUpdateTime = Time.time;
+		float num2 = 1f - Mathf.Exp((0f - animationChancePerSecond) * num);
+		if (Random.value < num2)
+		{
+			float value = Time.time - (float)(int)Time.time;
+			animator.SetFloat(animationSelect, value);
+			animator.SetTrigger(animationTrigger);
+		}
+	}
 }

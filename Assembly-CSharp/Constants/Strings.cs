@@ -1,8 +1,5 @@
-﻿using System;
+namespace Constants;
 
-namespace Constants
+public static class Strings
 {
-	public static class Strings
-	{
-	}
 }

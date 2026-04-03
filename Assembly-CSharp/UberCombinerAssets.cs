@@ -1,34 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class UberCombinerAssets : ScriptableObject
 {
-	public static UberCombinerAssets Instance
-	{
-		get
-		{
-			UberCombinerAssets.gInstance == null;
-			return UberCombinerAssets.gInstance;
-		}
-	}
-
-	private void OnEnable()
-	{
-		this.Setup();
-	}
-
-	private void Setup()
-	{
-	}
-
-	public void ClearMaterialAssets()
-	{
-	}
-
-	public void ClearPrefabAssets()
-	{
-	}
-
 	[SerializeField]
 	private Object _rootFolder;
 
@@ -58,4 +31,30 @@ public class UberCombinerAssets : ScriptableObject
 	public string PrefabsFolderPath;
 
 	private static UberCombinerAssets gInstance;
+
+	public static UberCombinerAssets Instance
+	{
+		get
+		{
+			_ = gInstance == null;
+			return gInstance;
+		}
+	}
+
+	private void OnEnable()
+	{
+		Setup();
+	}
+
+	private void Setup()
+	{
+	}
+
+	public void ClearMaterialAssets()
+	{
+	}
+
+	public void ClearPrefabAssets()
+	{
+	}
 }

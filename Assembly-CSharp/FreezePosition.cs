@@ -1,25 +1,24 @@
-﻿using System;
 using UnityEngine;
 
 public class FreezePosition : MonoBehaviour
 {
+	public Transform target;
+
+	public Vector3 localPosition;
+
 	private void FixedUpdate()
 	{
-		if (this.target)
+		if ((bool)target)
 		{
-			this.target.localPosition = this.localPosition;
+			target.localPosition = localPosition;
 		}
 	}
 
 	private void LateUpdate()
 	{
-		if (this.target)
+		if ((bool)target)
 		{
-			this.target.localPosition = this.localPosition;
+			target.localPosition = localPosition;
 		}
 	}
-
-	public Transform target;
-
-	public Vector3 localPosition;
 }

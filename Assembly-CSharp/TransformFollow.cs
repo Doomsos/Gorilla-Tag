@@ -1,41 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 [DefaultExecutionOrder(100)]
 public class TransformFollow : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.prevPos = base.transform.position;
-		if (this.rotationOnly && base.transform.parent != null && base.transform.parent.GetComponent<TransformFollow>() != null)
-		{
-			this.forRigRecording = true;
-		}
-		if (this.forRigRecording)
-		{
-			this.parentFollow = base.transform.parent.GetComponent<TransformFollow>();
-		}
-	}
-
-	private void LateUpdate()
-	{
-		this.prevPos = base.transform.position;
-		if (!this.rotationOnly)
-		{
-			Vector3 a;
-			Quaternion rotation;
-			this.transformToFollow.GetPositionAndRotation(out a, out rotation);
-			base.transform.SetPositionAndRotation(a + rotation * this.offset, rotation);
-			return;
-		}
-		if (this.forRigRecording)
-		{
-			base.transform.localRotation = Quaternion.Inverse(this.parentFollow.transformToFollow.rotation) * this.transformToFollow.rotation;
-			return;
-		}
-		base.transform.rotation = this.transformToFollow.rotation;
-	}
-
 	public Transform transformToFollow;
 
 	public Vector3 offset;
@@ -47,4 +14,38 @@ public class TransformFollow : MonoBehaviour
 	private bool forRigRecording;
 
 	private TransformFollow parentFollow;
+
+	private void Awake()
+	{
+		prevPos = base.transform.position;
+		if (rotationOnly && base.transform.parent != null && base.transform.parent.GetComponent<TransformFollow>() != null)
+		{
+			forRigRecording = true;
+		}
+		if (forRigRecording)
+		{
+			parentFollow = base.transform.parent.GetComponent<TransformFollow>();
+		}
+	}
+
+	private void LateUpdate()
+	{
+		prevPos = base.transform.position;
+		if (rotationOnly)
+		{
+			if (forRigRecording)
+			{
+				base.transform.localRotation = Quaternion.Inverse(parentFollow.transformToFollow.rotation) * transformToFollow.rotation;
+			}
+			else
+			{
+				base.transform.rotation = transformToFollow.rotation;
+			}
+		}
+		else
+		{
+			transformToFollow.GetPositionAndRotation(out var position, out var rotation);
+			base.transform.SetPositionAndRotation(position + rotation * offset, rotation);
+		}
+	}
 }

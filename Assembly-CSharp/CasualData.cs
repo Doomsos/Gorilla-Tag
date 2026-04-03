@@ -1,9 +1,8 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 
-[NetworkStructWeaved(0)]
 [StructLayout(LayoutKind.Explicit)]
+[NetworkStructWeaved(0)]
 public struct CasualData : INetworkStruct
 {
 }

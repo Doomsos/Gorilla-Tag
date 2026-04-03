@@ -1,28 +1,28 @@
-﻿using System;
 using UnityEngine;
 
 public class CosmeticRefRegistry : MonoBehaviour
 {
+	private GameObject[] partsTable = new GameObject[9];
+
+	[SerializeField]
+	private CosmeticRefTarget[] builtInRefTargets;
+
 	private void Awake()
 	{
-		foreach (CosmeticRefTarget cosmeticRefTarget in this.builtInRefTargets)
+		CosmeticRefTarget[] array = builtInRefTargets;
+		foreach (CosmeticRefTarget cosmeticRefTarget in array)
 		{
-			this.Register(cosmeticRefTarget.id, cosmeticRefTarget.gameObject);
+			Register(cosmeticRefTarget.id, cosmeticRefTarget.gameObject);
 		}
 	}
 
 	public void Register(CosmeticRefID partID, GameObject part)
 	{
-		this.partsTable[(int)partID] = part;
+		partsTable[(int)partID] = part;
 	}
 
 	public GameObject Get(CosmeticRefID partID)
 	{
-		return this.partsTable[(int)partID];
+		return partsTable[(int)partID];
 	}
-
-	private GameObject[] partsTable = new GameObject[9];
-
-	[SerializeField]
-	private CosmeticRefTarget[] builtInRefTargets;
 }

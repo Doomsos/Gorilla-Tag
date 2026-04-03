@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaGameModes;
 using GorillaTag;
@@ -7,126 +6,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "ScriptableObjects/RoomSystemSettings", order = 2)]
 internal class RoomSystemSettings : ScriptableObject
 {
-	public ExpectedUsersDecayTimer ExpectedUsersTimer
-	{
-		get
-		{
-			return this.expectedUsersTimer;
-		}
-	}
-
-	public TickSystemTimer ResyncNetworkTimeTimer
-	{
-		get
-		{
-			return this.resyncNetworkTimeTimer;
-		}
-	}
-
-	public CallLimiterWithCooldown StatusEffectLimiter
-	{
-		get
-		{
-			return this.statusEffectLimiter;
-		}
-	}
-
-	public CallLimiterWithCooldown SoundEffectLimiter
-	{
-		get
-		{
-			return this.soundEffectLimiter;
-		}
-	}
-
-	public CallLimiterWithCooldown SoundEffectOtherLimiter
-	{
-		get
-		{
-			return this.soundEffectOtherLimiter;
-		}
-	}
-
-	public CallLimiterWithCooldown PlayerEffectLimiter
-	{
-		get
-		{
-			return this.playerEffectLimiter;
-		}
-	}
-
-	public CallLimiterWithCooldown LavaSyncLimiter
-	{
-		get
-		{
-			return this.lavaSyncLimiter;
-		}
-	}
-
-	public GameObject PlayerImpactEffect
-	{
-		get
-		{
-			return this.playerImpactEffect;
-		}
-	}
-
-	public List<RoomSystem.PlayerEffectConfig> PlayerEffects
-	{
-		get
-		{
-			return this.playerEffects;
-		}
-	}
-
-	public int PausedDCTimer
-	{
-		get
-		{
-			return this.pausedDCTimer;
-		}
-	}
-
-	public int GetRoomCount(bool privateRoom, bool sub)
-	{
-		if (privateRoom)
-		{
-			if (!sub)
-			{
-				return this.privateRoomCountZoneModeMapping.GetRoomCount();
-			}
-			return this.subsPrivateRoomCountZoneModeMapping.GetRoomCount();
-		}
-		else
-		{
-			if (!sub)
-			{
-				return this.publicRoomCountZoneModeMapping.GetRoomCount();
-			}
-			return this.subsPublicRoomCountZoneModeMapping.GetRoomCount();
-		}
-	}
-
-	public int GetRoomCount(GTZone zone, GameModeType mode, bool privateRoom, bool sub)
-	{
-		if (privateRoom)
-		{
-			if (!sub)
-			{
-				return this.privateRoomCountZoneModeMapping.GetRoomCount(zone, mode);
-			}
-			return this.subsPrivateRoomCountZoneModeMapping.GetRoomCount(zone, mode);
-		}
-		else
-		{
-			if (!sub)
-			{
-				return this.publicRoomCountZoneModeMapping.GetRoomCount(zone, mode);
-			}
-			return this.subsPublicRoomCountZoneModeMapping.GetRoomCount(zone, mode);
-		}
-	}
-
 	[SerializeField]
 	private ExpectedUsersDecayTimer expectedUsersTimer;
 
@@ -168,4 +47,58 @@ internal class RoomSystemSettings : ScriptableObject
 
 	[SerializeField]
 	private PrivateRoomCount subsPrivateRoomCountZoneModeMapping;
+
+	public ExpectedUsersDecayTimer ExpectedUsersTimer => expectedUsersTimer;
+
+	public TickSystemTimer ResyncNetworkTimeTimer => resyncNetworkTimeTimer;
+
+	public CallLimiterWithCooldown StatusEffectLimiter => statusEffectLimiter;
+
+	public CallLimiterWithCooldown SoundEffectLimiter => soundEffectLimiter;
+
+	public CallLimiterWithCooldown SoundEffectOtherLimiter => soundEffectOtherLimiter;
+
+	public CallLimiterWithCooldown PlayerEffectLimiter => playerEffectLimiter;
+
+	public CallLimiterWithCooldown LavaSyncLimiter => lavaSyncLimiter;
+
+	public GameObject PlayerImpactEffect => playerImpactEffect;
+
+	public List<RoomSystem.PlayerEffectConfig> PlayerEffects => playerEffects;
+
+	public int PausedDCTimer => pausedDCTimer;
+
+	public int GetRoomCount(bool privateRoom, bool sub)
+	{
+		if (privateRoom)
+		{
+			if (!sub)
+			{
+				return privateRoomCountZoneModeMapping.GetRoomCount();
+			}
+			return subsPrivateRoomCountZoneModeMapping.GetRoomCount();
+		}
+		if (!sub)
+		{
+			return publicRoomCountZoneModeMapping.GetRoomCount();
+		}
+		return subsPublicRoomCountZoneModeMapping.GetRoomCount();
+	}
+
+	public int GetRoomCount(GTZone zone, GameModeType mode, bool privateRoom, bool sub)
+	{
+		if (privateRoom)
+		{
+			if (!sub)
+			{
+				return privateRoomCountZoneModeMapping.GetRoomCount(zone, mode);
+			}
+			return subsPrivateRoomCountZoneModeMapping.GetRoomCount(zone, mode);
+		}
+		if (!sub)
+		{
+			return publicRoomCountZoneModeMapping.GetRoomCount(zone, mode);
+		}
+		return subsPublicRoomCountZoneModeMapping.GetRoomCount(zone, mode);
+	}
 }

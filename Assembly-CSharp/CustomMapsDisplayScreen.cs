@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading.Tasks;
 using GorillaTagScripts.VirtualStumpCustomMaps;
 using Modio;
@@ -7,447 +6,9 @@ using Modio.Mods;
 using Modio.Users;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class CustomMapsDisplayScreen : CustomMapsTerminalScreen
 {
-	public Mod currentMapMod { get; private set; }
-
-	public override void Initialize()
-	{
-	}
-
-	public override void Show()
-	{
-		base.Show();
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedIn.AddListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOLoggedOut.AddListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModIOUserChanged.AddListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModManagementEvent.RemoveListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
-		ModIOManager.OnModManagementEvent.AddListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
-		CustomMapManager.OnMapLoadStatusChanged.RemoveListener(new UnityAction<MapLoadStatus, int, string>(this.OnMapLoadProgress));
-		CustomMapManager.OnMapLoadStatusChanged.AddListener(new UnityAction<MapLoadStatus, int, string>(this.OnMapLoadProgress));
-		CustomMapManager.OnMapLoadComplete.RemoveListener(new UnityAction<bool>(this.OnMapLoadComplete));
-		CustomMapManager.OnMapLoadComplete.AddListener(new UnityAction<bool>(this.OnMapLoadComplete));
-		CustomMapManager.OnRoomMapChanged.RemoveListener(new UnityAction<ModId>(this.OnRoomMapChanged));
-		CustomMapManager.OnRoomMapChanged.AddListener(new UnityAction<ModId>(this.OnRoomMapChanged));
-		CustomMapManager.OnMapUnloadComplete.RemoveListener(new UnityAction(this.OnMapUnloaded));
-		CustomMapManager.OnMapUnloadComplete.AddListener(new UnityAction(this.OnMapUnloaded));
-		this.ResetToDefaultView();
-	}
-
-	public override void Hide()
-	{
-		base.Hide();
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModManagementEvent.RemoveListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
-		CustomMapManager.OnMapLoadStatusChanged.RemoveListener(new UnityAction<MapLoadStatus, int, string>(this.OnMapLoadProgress));
-		CustomMapManager.OnMapLoadComplete.RemoveListener(new UnityAction<bool>(this.OnMapLoadComplete));
-		CustomMapManager.OnRoomMapChanged.RemoveListener(new UnityAction<ModId>(this.OnRoomMapChanged));
-		CustomMapManager.OnMapUnloadComplete.RemoveListener(new UnityAction(this.OnMapUnloaded));
-	}
-
-	private void OnModIOLoggedIn()
-	{
-		if (this.currentMapMod.Creator == null)
-		{
-			this.RefreshCurrentMapMod();
-			return;
-		}
-		if (this.currentMapMod.IsHidden())
-		{
-			this.UpdateMapDetails(true);
-			return;
-		}
-		this.UpdateStatus(false);
-	}
-
-	private void OnModIOLoggedOut()
-	{
-		if (this.currentMapMod.IsHidden())
-		{
-			this.UpdateMapDetails(true);
-			return;
-		}
-		this.UpdateStatus(false);
-	}
-
-	private void OnModIOUserChanged(User user)
-	{
-		this.UpdateStatus(false);
-	}
-
-	private void HandleModManagementEvent(Mod mod, Modfile modfile, ModInstallationManagement.OperationType jobType, ModInstallationManagement.OperationPhase jobPhase)
-	{
-		if (base.isActiveAndEnabled && this.hasModProfile && this.GetModId() == mod.Id)
-		{
-			this.UpdateStatus(jobPhase == ModInstallationManagement.OperationPhase.Cancelled || jobPhase == ModInstallationManagement.OperationPhase.Failed);
-			if (jobPhase == ModInstallationManagement.OperationPhase.Failed)
-			{
-				this.modDescriptionText.gameObject.SetActive(false);
-				this.loadingMapLabelText.text = this.mapLoadingErrorString;
-				this.loadingMapLabelText.gameObject.SetActive(true);
-				this.loadingMapMessageText.text = this.mapLoadingErrorInvalidModFile;
-				this.loadingMapMessageText.gameObject.SetActive(true);
-			}
-		}
-	}
-
-	public void RetrieveModFromModIO(long id, bool forceUpdate = false, Action<Error, Mod> callback = null)
-	{
-		if (this.hasModProfile && this.GetModId()._id == id)
-		{
-			this.UpdateMapDetails(true);
-			return;
-		}
-		this.pendingModId = id;
-		ModIOManager.GetMod(new ModId(id), forceUpdate, (callback != null) ? callback : new Action<Error, Mod>(this.OnProfileReceived));
-	}
-
-	public void SetModProfile(Mod mod)
-	{
-		if (mod.Id != ModId.Null)
-		{
-			this.pendingModId = 0L;
-			this.currentMapMod = mod;
-			this.hasModProfile = true;
-			this.UpdateMapDetails(true);
-		}
-	}
-
-	private void RefreshCurrentMapMod()
-	{
-		if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.IsUnloading())
-		{
-			return;
-		}
-		if (this.hasModProfile)
-		{
-			long id = this.GetModId()._id;
-			this.hasModProfile = false;
-			this.currentMapMod = null;
-			this.ResetToDefaultView();
-			this.RetrieveModFromModIO(id, true, null);
-		}
-	}
-
-	private void OnProfileReceived(Error error, Mod mod)
-	{
-		if (error)
-		{
-			this.modDescriptionText.gameObject.SetActive(false);
-			this.errorText.text = string.Format("FAILED TO RETRIEVE MOD DETAILS FOR MOD: {0}", this.GetModId());
-			this.errorText.gameObject.SetActive(true);
-			return;
-		}
-		this.SetModProfile(mod);
-	}
-
-	private void ResetToDefaultView()
-	{
-		this.loadingMapLabelText.gameObject.SetActive(false);
-		this.loadingMapMessageText.gameObject.SetActive(false);
-		this.mapReadyText.gameObject.SetActive(false);
-		this.errorText.gameObject.SetActive(false);
-		this.modNameText.gameObject.SetActive(false);
-		this.modCreatorLabelText.gameObject.SetActive(false);
-		this.modCreatorText.gameObject.SetActive(false);
-		this.modDescriptionText.gameObject.SetActive(false);
-		this.mapScreenshotImage.gameObject.SetActive(false);
-		this.loadRoomMapPromptText.gameObject.SetActive(false);
-		this.hiddenRoomMapText.gameObject.SetActive(false);
-		this.outdatedText.gameObject.SetActive(false);
-		this.loadingText.gameObject.SetActive(true);
-		if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.IsUnloading())
-		{
-			ModId modId = new ModId(CustomMapLoader.IsMapLoaded() ? CustomMapLoader.LoadedMapModId : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
-			if (this.hasModProfile && this.GetModId() == modId)
-			{
-				this.UpdateMapDetails(true);
-				return;
-			}
-			this.RetrieveModFromModIO(modId, false, delegate(Error error, Mod mod)
-			{
-				this.OnProfileReceived(error, mod);
-			});
-			return;
-		}
-		else
-		{
-			if (CustomMapManager.GetRoomMapId() != ModId.Null)
-			{
-				this.OnRoomMapChanged(CustomMapManager.GetRoomMapId());
-				return;
-			}
-			if (this.hasModProfile)
-			{
-				this.UpdateMapDetails(true);
-			}
-			return;
-		}
-	}
-
-	private void UpdateMapDetails(bool refreshScreenState = true)
-	{
-		if (!this.hasModProfile)
-		{
-			return;
-		}
-		if (this.IsCurrentModHidden())
-		{
-			this.modNameText.text = this.hiddenMapTitle;
-			this.modDescriptionText.text = this.hiddenMapDesc;
-			this.modCreatorLabelText.gameObject.SetActive(false);
-			this.modCreatorText.text = "";
-			this.mapScreenshotImage.sprite = this.hiddenMapLogo;
-			this.mapScreenshotImage.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.modNameText.text = this.currentMapMod.Name;
-			this.modDescriptionText.text = this.currentMapMod.Description;
-			this.modCreatorText.text = this.currentMapMod.Creator.Username;
-			ModIOManager.GetModLogo(this.currentMapMod, new Action<Error, Texture2D>(this.OnGetModLogo));
-		}
-		this.UpdateStatus(false);
-		if (refreshScreenState)
-		{
-			this.loadingText.gameObject.SetActive(false);
-			this.loadingMapLabelText.gameObject.SetActive(false);
-			this.loadingMapMessageText.gameObject.SetActive(false);
-			this.loadRoomMapPromptText.gameObject.SetActive(false);
-			this.hiddenRoomMapText.gameObject.SetActive(false);
-			this.mapReadyText.gameObject.SetActive(false);
-			this.errorText.gameObject.SetActive(false);
-			this.modNameText.gameObject.SetActive(true);
-			this.modDescriptionText.gameObject.SetActive(true);
-			if (!this.IsCurrentModHidden())
-			{
-				this.modCreatorLabelText.gameObject.SetActive(true);
-				this.modCreatorText.gameObject.SetActive(true);
-			}
-			if (CustomMapLoader.IsMapLoaded())
-			{
-				ModId modId = new ModId(CustomMapLoader.LoadedMapModId);
-				if (this.GetModId() == modId)
-				{
-					this.OnMapLoadComplete_UIUpdate();
-					return;
-				}
-				this.RetrieveModFromModIO(modId, false, delegate(Error error, Mod mod)
-				{
-					this.OnProfileReceived(error, mod);
-				});
-				return;
-			}
-			else
-			{
-				if (CustomMapManager.IsLoading() && !this.mapLoadError)
-				{
-					this.modDescriptionText.gameObject.SetActive(false);
-					if (!CustomMapManager.IsUnloading())
-					{
-						this.loadingMapLabelText.text = this.mapLoadingString + " 0%";
-					}
-					else
-					{
-						this.loadingMapLabelText.text = this.mapUnloadingString;
-					}
-					this.loadingMapLabelText.gameObject.SetActive(true);
-					return;
-				}
-				if (CustomMapManager.IsUnloading())
-				{
-					this.modDescriptionText.gameObject.SetActive(false);
-					this.loadingMapLabelText.text = this.mapUnloadingString;
-					this.loadingMapLabelText.gameObject.SetActive(true);
-					return;
-				}
-				if (CustomMapManager.GetRoomMapId() != ModId.Null)
-				{
-					this.ShowLoadRoomMapPrompt();
-					return;
-				}
-				if (this.mapLoadError)
-				{
-					this.modDescriptionText.gameObject.SetActive(false);
-					this.loadingMapLabelText.gameObject.SetActive(true);
-					this.loadingMapMessageText.gameObject.SetActive(true);
-				}
-			}
-		}
-	}
-
-	private void OnGetModLogo(Error error, Texture2D modLogo)
-	{
-		if (error)
-		{
-			Debug.LogError(string.Format("[CustomMapsDetailsScreen::OnGetModLogo] Failed to retrieve logo for Mod {0}", this.GetModId()));
-			return;
-		}
-		this.mapScreenshotImage.sprite = Sprite.Create(modLogo, new Rect(0f, 0f, 320f, 180f), new Vector2(0.5f, 0.5f));
-		this.mapScreenshotImage.gameObject.SetActive(true);
-	}
-
-	private Task UpdateStatus(bool errorEncountered = false)
-	{
-		CustomMapsDisplayScreen.<UpdateStatus>d__49 <UpdateStatus>d__;
-		<UpdateStatus>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<UpdateStatus>d__.<>4__this = this;
-		<UpdateStatus>d__.errorEncountered = errorEncountered;
-		<UpdateStatus>d__.<>1__state = -1;
-		<UpdateStatus>d__.<>t__builder.Start<CustomMapsDisplayScreen.<UpdateStatus>d__49>(ref <UpdateStatus>d__);
-		return <UpdateStatus>d__.<>t__builder.Task;
-	}
-
-	public void OnMapLoadComplete(bool success)
-	{
-		if (success)
-		{
-			this.OnMapLoadComplete_UIUpdate();
-		}
-	}
-
-	private void OnMapLoadComplete_UIUpdate()
-	{
-		this.modDescriptionText.gameObject.SetActive(false);
-		this.loadingMapLabelText.gameObject.SetActive(false);
-		this.loadingMapMessageText.gameObject.SetActive(false);
-		this.loadRoomMapPromptText.gameObject.SetActive(false);
-		this.hiddenRoomMapText.gameObject.SetActive(false);
-		this.errorText.gameObject.SetActive(false);
-		this.mapReadyText.gameObject.SetActive(true);
-	}
-
-	private void OnMapUnloaded()
-	{
-		this.mapLoadError = false;
-		this.loadingMapMessageText.fontSize = 80f;
-		this.UpdateMapDetails(true);
-	}
-
-	private void OnRoomMapChanged(ModId roomMapID)
-	{
-		if (roomMapID == ModId.Null)
-		{
-			this.UpdateMapDetails(true);
-			return;
-		}
-		if (this.GetModId() != roomMapID)
-		{
-			this.RetrieveModFromModIO(roomMapID, false, new Action<Error, Mod>(this.OnRoomMapRetrieved));
-			return;
-		}
-		this.ShowLoadRoomMapPrompt();
-	}
-
-	private void OnRoomMapRetrieved(Error error, Mod mod)
-	{
-		this.OnProfileReceived(error, mod);
-		if (!error)
-		{
-			this.ShowLoadRoomMapPrompt();
-		}
-	}
-
-	private void ShowLoadRoomMapPrompt()
-	{
-		if (CustomMapManager.IsUnloading() || CustomMapManager.IsLoading() || CustomMapLoader.IsMapLoaded(this.GetModId()))
-		{
-			return;
-		}
-		this.modDescriptionText.gameObject.SetActive(false);
-		this.loadingText.gameObject.SetActive(false);
-		this.loadingMapLabelText.gameObject.SetActive(false);
-		this.mapReadyText.gameObject.SetActive(false);
-		this.hiddenRoomMapText.gameObject.SetActive(false);
-		this.loadRoomMapPromptText.gameObject.SetActive(false);
-		if (this.IsCurrentModHidden())
-		{
-			this.hiddenRoomMapText.gameObject.SetActive(true);
-			return;
-		}
-		this.loadRoomMapPromptText.gameObject.SetActive(true);
-	}
-
-	public void OnMapLoadProgress(MapLoadStatus loadStatus, int progress, string message)
-	{
-		if (loadStatus != MapLoadStatus.None)
-		{
-			this.mapLoadError = false;
-			this.loadingMapMessageText.fontSize = 80f;
-			this.hiddenRoomMapText.gameObject.SetActive(false);
-			this.loadRoomMapPromptText.gameObject.SetActive(false);
-			this.modDescriptionText.gameObject.SetActive(false);
-		}
-		switch (loadStatus)
-		{
-		case MapLoadStatus.Downloading:
-			this.loadingMapLabelText.text = this.mapAutoDownloadingString;
-			this.loadingMapLabelText.gameObject.SetActive(true);
-			this.loadingMapMessageText.gameObject.SetActive(false);
-			this.loadingMapMessageText.text = "";
-			return;
-		case MapLoadStatus.Loading:
-			this.loadingMapLabelText.text = this.mapLoadingString + " " + progress.ToString() + "%";
-			this.loadingMapLabelText.gameObject.SetActive(true);
-			this.loadingMapMessageText.text = message;
-			this.loadingMapMessageText.gameObject.SetActive(true);
-			return;
-		case MapLoadStatus.Unloading:
-			this.mapReadyText.gameObject.SetActive(false);
-			this.loadingMapLabelText.text = this.mapUnloadingString;
-			this.loadingMapLabelText.gameObject.SetActive(true);
-			this.loadingMapMessageText.gameObject.SetActive(false);
-			this.loadingMapMessageText.text = "";
-			return;
-		case MapLoadStatus.Error:
-			this.mapLoadError = true;
-			this.loadingMapLabelText.text = this.mapLoadingErrorString;
-			this.loadingMapLabelText.gameObject.SetActive(true);
-			if (CustomMapsTerminal.IsDriver)
-			{
-				this.loadingMapMessageText.text = message + "\n" + this.mapLoadingErrorDriverString;
-			}
-			else
-			{
-				this.loadingMapMessageText.text = message + "\n" + this.mapLoadingErrorNonDriverString;
-			}
-			if (this.loadingMapMessageText.text.Length > 150)
-			{
-				this.loadingMapMessageText.fontSize = 60f;
-			}
-			else
-			{
-				this.loadingMapMessageText.fontSize = 80f;
-			}
-			this.loadingMapMessageText.gameObject.SetActive(true);
-			return;
-		default:
-			return;
-		}
-	}
-
-	public ModId GetModId()
-	{
-		Mod currentMapMod = this.currentMapMod;
-		if (currentMapMod == null)
-		{
-			return ModId.Null;
-		}
-		return currentMapMod.Id;
-	}
-
-	public bool IsCurrentModHidden()
-	{
-		return this.hasModProfile && (this.currentMapMod.Creator == null || (!ModIOManager.IsLoggedIn() && this.currentMapMod.IsHidden()));
-	}
-
 	[SerializeField]
 	private SpriteRenderer mapScreenshotImage;
 
@@ -534,4 +95,440 @@ public class CustomMapsDisplayScreen : CustomMapsTerminalScreen
 	private bool mapLoadError;
 
 	private bool isFavorite;
+
+	public Mod currentMapMod { get; private set; }
+
+	public override void Initialize()
+	{
+	}
+
+	public override void Show()
+	{
+		base.Show();
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOLoggedOut.AddListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+		ModIOManager.OnModIOUserChanged.AddListener(OnModIOUserChanged);
+		ModIOManager.OnModManagementEvent.RemoveListener(HandleModManagementEvent);
+		ModIOManager.OnModManagementEvent.AddListener(HandleModManagementEvent);
+		CustomMapManager.OnMapLoadStatusChanged.RemoveListener(OnMapLoadProgress);
+		CustomMapManager.OnMapLoadStatusChanged.AddListener(OnMapLoadProgress);
+		CustomMapManager.OnMapLoadComplete.RemoveListener(OnMapLoadComplete);
+		CustomMapManager.OnMapLoadComplete.AddListener(OnMapLoadComplete);
+		CustomMapManager.OnRoomMapChanged.RemoveListener(OnRoomMapChanged);
+		CustomMapManager.OnRoomMapChanged.AddListener(OnRoomMapChanged);
+		CustomMapManager.OnMapUnloadComplete.RemoveListener(OnMapUnloaded);
+		CustomMapManager.OnMapUnloadComplete.AddListener(OnMapUnloaded);
+		ResetToDefaultView();
+	}
+
+	public override void Hide()
+	{
+		base.Hide();
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+		ModIOManager.OnModManagementEvent.RemoveListener(HandleModManagementEvent);
+		CustomMapManager.OnMapLoadStatusChanged.RemoveListener(OnMapLoadProgress);
+		CustomMapManager.OnMapLoadComplete.RemoveListener(OnMapLoadComplete);
+		CustomMapManager.OnRoomMapChanged.RemoveListener(OnRoomMapChanged);
+		CustomMapManager.OnMapUnloadComplete.RemoveListener(OnMapUnloaded);
+	}
+
+	private void OnModIOLoggedIn()
+	{
+		if (currentMapMod.Creator == null)
+		{
+			RefreshCurrentMapMod();
+		}
+		else if (currentMapMod.IsHidden())
+		{
+			UpdateMapDetails();
+		}
+		else
+		{
+			UpdateStatus();
+		}
+	}
+
+	private void OnModIOLoggedOut()
+	{
+		if (currentMapMod.IsHidden())
+		{
+			UpdateMapDetails();
+		}
+		else
+		{
+			UpdateStatus();
+		}
+	}
+
+	private void OnModIOUserChanged(User user)
+	{
+		UpdateStatus();
+	}
+
+	private void HandleModManagementEvent(Mod mod, Modfile modfile, ModInstallationManagement.OperationType jobType, ModInstallationManagement.OperationPhase jobPhase)
+	{
+		if (base.isActiveAndEnabled && hasModProfile && GetModId() == mod.Id)
+		{
+			UpdateStatus(jobPhase == ModInstallationManagement.OperationPhase.Cancelled || jobPhase == ModInstallationManagement.OperationPhase.Failed);
+			if (jobPhase == ModInstallationManagement.OperationPhase.Failed)
+			{
+				modDescriptionText.gameObject.SetActive(value: false);
+				loadingMapLabelText.text = mapLoadingErrorString;
+				loadingMapLabelText.gameObject.SetActive(value: true);
+				loadingMapMessageText.text = mapLoadingErrorInvalidModFile;
+				loadingMapMessageText.gameObject.SetActive(value: true);
+			}
+		}
+	}
+
+	public void RetrieveModFromModIO(long id, bool forceUpdate = false, Action<Error, Mod> callback = null)
+	{
+		if (hasModProfile && GetModId()._id == id)
+		{
+			UpdateMapDetails();
+			return;
+		}
+		pendingModId = id;
+		ModIOManager.GetMod(new ModId(id), forceUpdate, (callback != null) ? callback : new Action<Error, Mod>(OnProfileReceived));
+	}
+
+	public void SetModProfile(Mod mod)
+	{
+		if (mod.Id != ModId.Null)
+		{
+			pendingModId = 0L;
+			currentMapMod = mod;
+			hasModProfile = true;
+			UpdateMapDetails();
+		}
+	}
+
+	private void RefreshCurrentMapMod()
+	{
+		if (!CustomMapLoader.IsMapLoaded() && !CustomMapManager.IsLoading() && !CustomMapManager.IsUnloading() && hasModProfile)
+		{
+			long id = GetModId()._id;
+			hasModProfile = false;
+			currentMapMod = null;
+			ResetToDefaultView();
+			RetrieveModFromModIO(id, forceUpdate: true);
+		}
+	}
+
+	private void OnProfileReceived(Error error, Mod mod)
+	{
+		if ((bool)error)
+		{
+			modDescriptionText.gameObject.SetActive(value: false);
+			errorText.text = $"FAILED TO RETRIEVE MOD DETAILS FOR MOD: {GetModId()}";
+			errorText.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			SetModProfile(mod);
+		}
+	}
+
+	private void ResetToDefaultView()
+	{
+		loadingMapLabelText.gameObject.SetActive(value: false);
+		loadingMapMessageText.gameObject.SetActive(value: false);
+		mapReadyText.gameObject.SetActive(value: false);
+		errorText.gameObject.SetActive(value: false);
+		modNameText.gameObject.SetActive(value: false);
+		modCreatorLabelText.gameObject.SetActive(value: false);
+		modCreatorText.gameObject.SetActive(value: false);
+		modDescriptionText.gameObject.SetActive(value: false);
+		mapScreenshotImage.gameObject.SetActive(value: false);
+		loadRoomMapPromptText.gameObject.SetActive(value: false);
+		hiddenRoomMapText.gameObject.SetActive(value: false);
+		outdatedText.gameObject.SetActive(value: false);
+		loadingText.gameObject.SetActive(value: true);
+		if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.IsUnloading())
+		{
+			ModId modId = new ModId(CustomMapLoader.IsMapLoaded() ? ((long)CustomMapLoader.LoadedMapModId) : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
+			if (hasModProfile && GetModId() == modId)
+			{
+				UpdateMapDetails();
+				return;
+			}
+			RetrieveModFromModIO(modId, forceUpdate: false, delegate(Error error, Mod mod)
+			{
+				OnProfileReceived(error, mod);
+			});
+		}
+		else if (CustomMapManager.GetRoomMapId() != ModId.Null)
+		{
+			OnRoomMapChanged(CustomMapManager.GetRoomMapId());
+		}
+		else if (hasModProfile)
+		{
+			UpdateMapDetails();
+		}
+	}
+
+	private void UpdateMapDetails(bool refreshScreenState = true)
+	{
+		if (!hasModProfile)
+		{
+			return;
+		}
+		if (IsCurrentModHidden())
+		{
+			modNameText.text = hiddenMapTitle;
+			modDescriptionText.text = hiddenMapDesc;
+			modCreatorLabelText.gameObject.SetActive(value: false);
+			modCreatorText.text = "";
+			mapScreenshotImage.sprite = hiddenMapLogo;
+			mapScreenshotImage.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			modNameText.text = currentMapMod.Name;
+			modDescriptionText.text = currentMapMod.Description;
+			modCreatorText.text = currentMapMod.Creator.Username;
+			ModIOManager.GetModLogo(currentMapMod, OnGetModLogo);
+		}
+		UpdateStatus();
+		if (!refreshScreenState)
+		{
+			return;
+		}
+		loadingText.gameObject.SetActive(value: false);
+		loadingMapLabelText.gameObject.SetActive(value: false);
+		loadingMapMessageText.gameObject.SetActive(value: false);
+		loadRoomMapPromptText.gameObject.SetActive(value: false);
+		hiddenRoomMapText.gameObject.SetActive(value: false);
+		mapReadyText.gameObject.SetActive(value: false);
+		errorText.gameObject.SetActive(value: false);
+		modNameText.gameObject.SetActive(value: true);
+		modDescriptionText.gameObject.SetActive(value: true);
+		if (!IsCurrentModHidden())
+		{
+			modCreatorLabelText.gameObject.SetActive(value: true);
+			modCreatorText.gameObject.SetActive(value: true);
+		}
+		if (CustomMapLoader.IsMapLoaded())
+		{
+			ModId modId = new ModId(CustomMapLoader.LoadedMapModId);
+			if (GetModId() == modId)
+			{
+				OnMapLoadComplete_UIUpdate();
+				return;
+			}
+			RetrieveModFromModIO(modId, forceUpdate: false, delegate(Error error, Mod mod)
+			{
+				OnProfileReceived(error, mod);
+			});
+		}
+		else if (CustomMapManager.IsLoading() && !mapLoadError)
+		{
+			modDescriptionText.gameObject.SetActive(value: false);
+			if (!CustomMapManager.IsUnloading())
+			{
+				loadingMapLabelText.text = mapLoadingString + " 0%";
+			}
+			else
+			{
+				loadingMapLabelText.text = mapUnloadingString;
+			}
+			loadingMapLabelText.gameObject.SetActive(value: true);
+		}
+		else if (CustomMapManager.IsUnloading())
+		{
+			modDescriptionText.gameObject.SetActive(value: false);
+			loadingMapLabelText.text = mapUnloadingString;
+			loadingMapLabelText.gameObject.SetActive(value: true);
+		}
+		else if (CustomMapManager.GetRoomMapId() != ModId.Null)
+		{
+			ShowLoadRoomMapPrompt();
+		}
+		else if (mapLoadError)
+		{
+			modDescriptionText.gameObject.SetActive(value: false);
+			loadingMapLabelText.gameObject.SetActive(value: true);
+			loadingMapMessageText.gameObject.SetActive(value: true);
+		}
+	}
+
+	private void OnGetModLogo(Error error, Texture2D modLogo)
+	{
+		if ((bool)error)
+		{
+			Debug.LogError($"[CustomMapsDetailsScreen::OnGetModLogo] Failed to retrieve logo for Mod {GetModId()}");
+			return;
+		}
+		mapScreenshotImage.sprite = Sprite.Create(modLogo, new Rect(0f, 0f, 320f, 180f), new Vector2(0.5f, 0.5f));
+		mapScreenshotImage.gameObject.SetActive(value: true);
+	}
+
+	private async Task UpdateStatus(bool errorEncountered = false)
+	{
+		if (base.isActiveAndEnabled && currentMapMod != null)
+		{
+			outdatedText.gameObject.SetActive(value: false);
+			ModFileState modFileState = (errorEncountered ? ModFileState.FileOperationFailed : currentMapMod.File.State);
+			if ((uint)modFileState > 1u && modFileState == ModFileState.Installed)
+			{
+				bool item = (await ModIOManager.IsModOutdated(GetModId())).Item1;
+				outdatedText.gameObject.SetActive(item);
+			}
+		}
+	}
+
+	public void OnMapLoadComplete(bool success)
+	{
+		if (success)
+		{
+			OnMapLoadComplete_UIUpdate();
+		}
+	}
+
+	private void OnMapLoadComplete_UIUpdate()
+	{
+		modDescriptionText.gameObject.SetActive(value: false);
+		loadingMapLabelText.gameObject.SetActive(value: false);
+		loadingMapMessageText.gameObject.SetActive(value: false);
+		loadRoomMapPromptText.gameObject.SetActive(value: false);
+		hiddenRoomMapText.gameObject.SetActive(value: false);
+		errorText.gameObject.SetActive(value: false);
+		mapReadyText.gameObject.SetActive(value: true);
+	}
+
+	private void OnMapUnloaded()
+	{
+		mapLoadError = false;
+		loadingMapMessageText.fontSize = 80f;
+		UpdateMapDetails();
+	}
+
+	private void OnRoomMapChanged(ModId roomMapID)
+	{
+		if (roomMapID == ModId.Null)
+		{
+			UpdateMapDetails();
+		}
+		else if (GetModId() != roomMapID)
+		{
+			RetrieveModFromModIO(roomMapID, forceUpdate: false, OnRoomMapRetrieved);
+		}
+		else
+		{
+			ShowLoadRoomMapPrompt();
+		}
+	}
+
+	private void OnRoomMapRetrieved(Error error, Mod mod)
+	{
+		OnProfileReceived(error, mod);
+		if (!error)
+		{
+			ShowLoadRoomMapPrompt();
+		}
+	}
+
+	private void ShowLoadRoomMapPrompt()
+	{
+		if (!CustomMapManager.IsUnloading() && !CustomMapManager.IsLoading() && !CustomMapLoader.IsMapLoaded(GetModId()))
+		{
+			modDescriptionText.gameObject.SetActive(value: false);
+			loadingText.gameObject.SetActive(value: false);
+			loadingMapLabelText.gameObject.SetActive(value: false);
+			mapReadyText.gameObject.SetActive(value: false);
+			hiddenRoomMapText.gameObject.SetActive(value: false);
+			loadRoomMapPromptText.gameObject.SetActive(value: false);
+			if (IsCurrentModHidden())
+			{
+				hiddenRoomMapText.gameObject.SetActive(value: true);
+			}
+			else
+			{
+				loadRoomMapPromptText.gameObject.SetActive(value: true);
+			}
+		}
+	}
+
+	public void OnMapLoadProgress(MapLoadStatus loadStatus, int progress, string message)
+	{
+		if (loadStatus != MapLoadStatus.None)
+		{
+			mapLoadError = false;
+			loadingMapMessageText.fontSize = 80f;
+			hiddenRoomMapText.gameObject.SetActive(value: false);
+			loadRoomMapPromptText.gameObject.SetActive(value: false);
+			modDescriptionText.gameObject.SetActive(value: false);
+		}
+		switch (loadStatus)
+		{
+		case MapLoadStatus.Downloading:
+			loadingMapLabelText.text = mapAutoDownloadingString;
+			loadingMapLabelText.gameObject.SetActive(value: true);
+			loadingMapMessageText.gameObject.SetActive(value: false);
+			loadingMapMessageText.text = "";
+			break;
+		case MapLoadStatus.Loading:
+			loadingMapLabelText.text = mapLoadingString + " " + progress + "%";
+			loadingMapLabelText.gameObject.SetActive(value: true);
+			loadingMapMessageText.text = message;
+			loadingMapMessageText.gameObject.SetActive(value: true);
+			break;
+		case MapLoadStatus.Unloading:
+			mapReadyText.gameObject.SetActive(value: false);
+			loadingMapLabelText.text = mapUnloadingString;
+			loadingMapLabelText.gameObject.SetActive(value: true);
+			loadingMapMessageText.gameObject.SetActive(value: false);
+			loadingMapMessageText.text = "";
+			break;
+		case MapLoadStatus.Error:
+			mapLoadError = true;
+			loadingMapLabelText.text = mapLoadingErrorString;
+			loadingMapLabelText.gameObject.SetActive(value: true);
+			if (CustomMapsTerminal.IsDriver)
+			{
+				loadingMapMessageText.text = message + "\n" + mapLoadingErrorDriverString;
+			}
+			else
+			{
+				loadingMapMessageText.text = message + "\n" + mapLoadingErrorNonDriverString;
+			}
+			if (loadingMapMessageText.text.Length > 150)
+			{
+				loadingMapMessageText.fontSize = 60f;
+			}
+			else
+			{
+				loadingMapMessageText.fontSize = 80f;
+			}
+			loadingMapMessageText.gameObject.SetActive(value: true);
+			break;
+		}
+	}
+
+	public ModId GetModId()
+	{
+		return currentMapMod?.Id ?? ModId.Null;
+	}
+
+	public bool IsCurrentModHidden()
+	{
+		if (!hasModProfile)
+		{
+			return false;
+		}
+		if (!(currentMapMod.Creator == null))
+		{
+			if (!ModIOManager.IsLoggedIn())
+			{
+				return currentMapMod.IsHidden();
+			}
+			return false;
+		}
+		return true;
+	}
 }

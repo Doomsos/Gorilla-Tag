@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTagScripts;
 using UnityEngine;
@@ -7,249 +7,11 @@ using UnityEngine.Serialization;
 
 public class Flocking : MonoBehaviour
 {
-	public FlockingManager.FishArea FishArea { get; set; }
-
-	private void Awake()
+	public enum FishState
 	{
-		this.manager = base.GetComponentInParent<FlockingManager>();
-	}
-
-	private void Start()
-	{
-		this.speed = Random.Range(this.minSpeed, this.maxSpeed);
-		this.fishState = Flocking.FishState.patrol;
-	}
-
-	private void OnDisable()
-	{
-		FlockingManager flockingManager = this.manager;
-		flockingManager.onFoodDetected = (UnityAction<FlockingManager.FishFood>)Delegate.Remove(flockingManager.onFoodDetected, new UnityAction<FlockingManager.FishFood>(this.HandleOnFoodDetected));
-		FlockingManager flockingManager2 = this.manager;
-		flockingManager2.onFoodDestroyed = (UnityAction<BoxCollider>)Delegate.Remove(flockingManager2.onFoodDestroyed, new UnityAction<BoxCollider>(this.HandleOnFoodDestroyed));
-		FlockingUpdateManager.UnregisterFlocking(this);
-	}
-
-	public void InvokeUpdate()
-	{
-		if (this.manager == null)
-		{
-			this.manager = base.GetComponentInParent<FlockingManager>();
-		}
-		this.AvoidPlayerHands();
-		this.MaybeTurn();
-		switch (this.fishState)
-		{
-		case Flocking.FishState.flock:
-			this.Flock(this.FishArea.nextWaypoint);
-			this.SwitchState(Flocking.FishState.patrol);
-			break;
-		case Flocking.FishState.patrol:
-			if (Random.Range(0, 10) < 2)
-			{
-				this.SwitchState(Flocking.FishState.flock);
-			}
-			break;
-		case Flocking.FishState.followFood:
-			if (this.isTurning)
-			{
-				return;
-			}
-			if (this.isRealFood)
-			{
-				if ((double)Vector3.Distance(base.transform.position, this.projectileGameObject.transform.position) > this.FollowFoodStopDistance)
-				{
-					this.FollowFood();
-				}
-				else
-				{
-					this.followingFood = false;
-					this.Flock(this.projectileGameObject.transform.position);
-					this.feedingTimeStarted += Time.deltaTime;
-					if (this.feedingTimeStarted > this.eatFoodDuration)
-					{
-						this.SwitchState(Flocking.FishState.patrol);
-					}
-				}
-			}
-			else if (Vector3.Distance(base.transform.position, this.projectileGameObject.transform.position) > this.FollowFakeFoodStopDistance)
-			{
-				this.FollowFood();
-			}
-			else
-			{
-				this.followingFood = false;
-				this.SwitchState(Flocking.FishState.patrol);
-			}
-			break;
-		}
-		if (!this.followingFood)
-		{
-			base.transform.Translate(0f, 0f, this.speed * Time.deltaTime);
-		}
-		this.pos = base.transform.position;
-		this.rot = base.transform.rotation;
-	}
-
-	private void MaybeTurn()
-	{
-		if (!this.manager.IsInside(base.transform.position, this.FishArea))
-		{
-			this.Turn(this.FishArea.colliderCenter);
-			if (Vector3.Angle(this.FishArea.colliderCenter - base.transform.position, Vector3.forward) > 5f)
-			{
-				this.isTurning = true;
-				return;
-			}
-		}
-		else
-		{
-			this.isTurning = false;
-		}
-	}
-
-	private void Turn(Vector3 towardPoint)
-	{
-		this.isTurning = true;
-		Quaternion to = Quaternion.LookRotation(towardPoint - base.transform.position);
-		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
-	}
-
-	private void SwitchState(Flocking.FishState state)
-	{
-		this.fishState = state;
-	}
-
-	private void Flock(Vector3 nextGoal)
-	{
-		Vector3 a = Vector3.zero;
-		Vector3 vector = Vector3.zero;
-		float num = 1f;
-		int num2 = 0;
-		foreach (Flocking flocking in this.FishArea.fishList)
-		{
-			if (flocking.gameObject != base.gameObject)
-			{
-				float num3 = Vector3.Distance(flocking.transform.position, base.transform.position);
-				if (num3 <= this.maxNeighbourDistance)
-				{
-					a += flocking.transform.position;
-					num2++;
-					if (num3 < this.flockingAvoidanceDistance)
-					{
-						vector += base.transform.position - flocking.transform.position;
-					}
-					num += flocking.speed;
-				}
-			}
-		}
-		if (num2 > 0)
-		{
-			this.fishState = Flocking.FishState.flock;
-			a = a / (float)num2 + (nextGoal - base.transform.position);
-			this.speed = num / (float)num2;
-			this.speed = Mathf.Clamp(this.speed, this.minSpeed, this.maxSpeed);
-			Vector3 vector2 = a + vector - base.transform.position;
-			if (vector2 != Vector3.zero)
-			{
-				Quaternion to = Quaternion.LookRotation(vector2);
-				base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
-			}
-		}
-	}
-
-	private void HandleOnFoodDetected(FlockingManager.FishFood fishFood)
-	{
-		bool flag = false;
-		foreach (BoxCollider y in this.FishArea.colliders)
-		{
-			if (fishFood.collider == y)
-			{
-				flag = true;
-			}
-		}
-		if (!flag)
-		{
-			return;
-		}
-		this.SwitchState(Flocking.FishState.followFood);
-		this.feedingTimeStarted = 0f;
-		this.projectileGameObject = fishFood.slingshotProjectile.gameObject;
-		this.isRealFood = fishFood.isRealFood;
-	}
-
-	private void HandleOnFoodDestroyed(BoxCollider collider)
-	{
-		bool flag = false;
-		foreach (BoxCollider y in this.FishArea.colliders)
-		{
-			if (collider == y)
-			{
-				flag = true;
-			}
-		}
-		if (!flag)
-		{
-			return;
-		}
-		this.SwitchState(Flocking.FishState.patrol);
-		this.projectileGameObject = null;
-		this.followingFood = false;
-	}
-
-	private void FollowFood()
-	{
-		this.followingFood = true;
-		Quaternion to = Quaternion.LookRotation(this.projectileGameObject.transform.position - base.transform.position);
-		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
-		base.transform.position = Vector3.MoveTowards(base.transform.position, this.projectileGameObject.transform.position, this.speed * this.followFoodSpeedMult * Time.deltaTime);
-	}
-
-	private void AvoidPlayerHands()
-	{
-		foreach (GameObject gameObject in FlockingManager.avoidPoints)
-		{
-			Vector3 position = gameObject.transform.position;
-			if ((base.transform.position - position).IsShorterThan(this.avointPointRadius))
-			{
-				Vector3 randomPointInsideCollider = this.manager.GetRandomPointInsideCollider(this.FishArea);
-				this.Turn(randomPointInsideCollider);
-				this.speed = this.avoidHandSpeed;
-			}
-		}
-	}
-
-	internal void SetSyncPosRot(Vector3 syncPos, Quaternion syncRot)
-	{
-		if (this.manager == null)
-		{
-			this.manager = base.GetComponentInParent<FlockingManager>();
-		}
-		if (this.FishArea == null)
-		{
-			Debug.LogError("FISH AREA NULL");
-		}
-		if (syncRot.IsValid())
-		{
-			this.rot = syncRot;
-		}
-		float num = 10000f;
-		if (syncPos.IsValid(num))
-		{
-			this.pos = this.manager.RestrictPointToArea(syncPos, this.FishArea);
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (this.manager == null)
-		{
-			this.manager = base.GetComponentInParent<FlockingManager>();
-		}
-		FlockingManager flockingManager = this.manager;
-		flockingManager.onFoodDetected = (UnityAction<FlockingManager.FishFood>)Delegate.Combine(flockingManager.onFoodDetected, new UnityAction<FlockingManager.FishFood>(this.HandleOnFoodDetected));
-		FlockingManager flockingManager2 = this.manager;
-		flockingManager2.onFoodDestroyed = (UnityAction<BoxCollider>)Delegate.Combine(flockingManager2.onFoodDestroyed, new UnityAction<BoxCollider>(this.HandleOnFoodDestroyed));
-		FlockingUpdateManager.RegisterFlocking(this);
+		flock,
+		patrol,
+		followFood
 	}
 
 	[Tooltip("Speed is randomly generated from min and max speed")]
@@ -300,7 +62,7 @@ public class Flocking : MonoBehaviour
 
 	private UnityEvent<string, Transform> sendIdEvent;
 
-	private Flocking.FishState fishState;
+	private FishState fishState;
 
 	[HideInInspector]
 	public Vector3 pos;
@@ -318,10 +80,245 @@ public class Flocking : MonoBehaviour
 
 	private float cacheSpeed;
 
-	public enum FishState
+	public FlockingManager.FishArea FishArea { get; set; }
+
+	private void Awake()
 	{
-		flock,
-		patrol,
-		followFood
+		manager = GetComponentInParent<FlockingManager>();
+	}
+
+	private void Start()
+	{
+		speed = UnityEngine.Random.Range(minSpeed, maxSpeed);
+		fishState = FishState.patrol;
+	}
+
+	private void OnDisable()
+	{
+		FlockingManager flockingManager = manager;
+		flockingManager.onFoodDetected = (UnityAction<FlockingManager.FishFood>)Delegate.Remove(flockingManager.onFoodDetected, new UnityAction<FlockingManager.FishFood>(HandleOnFoodDetected));
+		FlockingManager flockingManager2 = manager;
+		flockingManager2.onFoodDestroyed = (UnityAction<BoxCollider>)Delegate.Remove(flockingManager2.onFoodDestroyed, new UnityAction<BoxCollider>(HandleOnFoodDestroyed));
+		FlockingUpdateManager.UnregisterFlocking(this);
+	}
+
+	public void InvokeUpdate()
+	{
+		if (manager == null)
+		{
+			manager = GetComponentInParent<FlockingManager>();
+		}
+		AvoidPlayerHands();
+		MaybeTurn();
+		switch (fishState)
+		{
+		case FishState.patrol:
+			if (UnityEngine.Random.Range(0, 10) < 2)
+			{
+				SwitchState(FishState.flock);
+			}
+			break;
+		case FishState.flock:
+			Flock(FishArea.nextWaypoint);
+			SwitchState(FishState.patrol);
+			break;
+		case FishState.followFood:
+			if (isTurning)
+			{
+				return;
+			}
+			if (isRealFood)
+			{
+				if ((double)Vector3.Distance(base.transform.position, projectileGameObject.transform.position) > FollowFoodStopDistance)
+				{
+					FollowFood();
+					break;
+				}
+				followingFood = false;
+				Flock(projectileGameObject.transform.position);
+				feedingTimeStarted += Time.deltaTime;
+				if (feedingTimeStarted > eatFoodDuration)
+				{
+					SwitchState(FishState.patrol);
+				}
+			}
+			else if (Vector3.Distance(base.transform.position, projectileGameObject.transform.position) > FollowFakeFoodStopDistance)
+			{
+				FollowFood();
+			}
+			else
+			{
+				followingFood = false;
+				SwitchState(FishState.patrol);
+			}
+			break;
+		}
+		if (!followingFood)
+		{
+			base.transform.Translate(0f, 0f, speed * Time.deltaTime);
+		}
+		pos = base.transform.position;
+		rot = base.transform.rotation;
+	}
+
+	private void MaybeTurn()
+	{
+		if (!manager.IsInside(base.transform.position, FishArea))
+		{
+			Turn(FishArea.colliderCenter);
+			if (Vector3.Angle(FishArea.colliderCenter - base.transform.position, Vector3.forward) > 5f)
+			{
+				isTurning = true;
+			}
+		}
+		else
+		{
+			isTurning = false;
+		}
+	}
+
+	private void Turn(Vector3 towardPoint)
+	{
+		isTurning = true;
+		Quaternion to = Quaternion.LookRotation(towardPoint - base.transform.position);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, rotationSpeed * Time.deltaTime);
+	}
+
+	private void SwitchState(FishState state)
+	{
+		fishState = state;
+	}
+
+	private void Flock(Vector3 nextGoal)
+	{
+		Vector3 zero = Vector3.zero;
+		Vector3 zero2 = Vector3.zero;
+		float num = 1f;
+		int num2 = 0;
+		foreach (Flocking fish in FishArea.fishList)
+		{
+			if (!(fish.gameObject != base.gameObject))
+			{
+				continue;
+			}
+			float num3 = Vector3.Distance(fish.transform.position, base.transform.position);
+			if (num3 <= maxNeighbourDistance)
+			{
+				zero += fish.transform.position;
+				num2++;
+				if (num3 < flockingAvoidanceDistance)
+				{
+					zero2 += base.transform.position - fish.transform.position;
+				}
+				num += fish.speed;
+			}
+		}
+		if (num2 > 0)
+		{
+			fishState = FishState.flock;
+			zero = zero / num2 + (nextGoal - base.transform.position);
+			speed = num / (float)num2;
+			speed = Mathf.Clamp(speed, minSpeed, maxSpeed);
+			Vector3 vector = zero + zero2 - base.transform.position;
+			if (vector != Vector3.zero)
+			{
+				Quaternion to = Quaternion.LookRotation(vector);
+				base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, rotationSpeed * Time.deltaTime);
+			}
+		}
+	}
+
+	private void HandleOnFoodDetected(FlockingManager.FishFood fishFood)
+	{
+		bool flag = false;
+		BoxCollider[] colliders = FishArea.colliders;
+		foreach (BoxCollider boxCollider in colliders)
+		{
+			if (fishFood.collider == boxCollider)
+			{
+				flag = true;
+			}
+		}
+		if (flag)
+		{
+			SwitchState(FishState.followFood);
+			feedingTimeStarted = 0f;
+			projectileGameObject = fishFood.slingshotProjectile.gameObject;
+			isRealFood = fishFood.isRealFood;
+		}
+	}
+
+	private void HandleOnFoodDestroyed(BoxCollider collider)
+	{
+		bool flag = false;
+		BoxCollider[] colliders = FishArea.colliders;
+		foreach (BoxCollider boxCollider in colliders)
+		{
+			if (collider == boxCollider)
+			{
+				flag = true;
+			}
+		}
+		if (flag)
+		{
+			SwitchState(FishState.patrol);
+			projectileGameObject = null;
+			followingFood = false;
+		}
+	}
+
+	private void FollowFood()
+	{
+		followingFood = true;
+		Quaternion to = Quaternion.LookRotation(projectileGameObject.transform.position - base.transform.position);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, rotationSpeed * Time.deltaTime);
+		base.transform.position = Vector3.MoveTowards(base.transform.position, projectileGameObject.transform.position, speed * followFoodSpeedMult * Time.deltaTime);
+	}
+
+	private void AvoidPlayerHands()
+	{
+		foreach (GameObject avoidPoint in FlockingManager.avoidPoints)
+		{
+			Vector3 position = avoidPoint.transform.position;
+			if ((base.transform.position - position).IsShorterThan(avointPointRadius))
+			{
+				Vector3 randomPointInsideCollider = manager.GetRandomPointInsideCollider(FishArea);
+				Turn(randomPointInsideCollider);
+				speed = avoidHandSpeed;
+			}
+		}
+	}
+
+	internal void SetSyncPosRot(Vector3 syncPos, Quaternion syncRot)
+	{
+		if (manager == null)
+		{
+			manager = GetComponentInParent<FlockingManager>();
+		}
+		if (FishArea == null)
+		{
+			Debug.LogError("FISH AREA NULL");
+		}
+		if (syncRot.IsValid())
+		{
+			rot = syncRot;
+		}
+		if (syncPos.IsValid(10000f))
+		{
+			pos = manager.RestrictPointToArea(syncPos, FishArea);
+		}
+	}
+
+	private void OnEnable()
+	{
+		if (manager == null)
+		{
+			manager = GetComponentInParent<FlockingManager>();
+		}
+		FlockingManager flockingManager = manager;
+		flockingManager.onFoodDetected = (UnityAction<FlockingManager.FishFood>)Delegate.Combine(flockingManager.onFoodDetected, new UnityAction<FlockingManager.FishFood>(HandleOnFoodDetected));
+		FlockingManager flockingManager2 = manager;
+		flockingManager2.onFoodDestroyed = (UnityAction<BoxCollider>)Delegate.Combine(flockingManager2.onFoodDestroyed, new UnityAction<BoxCollider>(HandleOnFoodDestroyed));
+		FlockingUpdateManager.RegisterFlocking(this);
 	}
 }

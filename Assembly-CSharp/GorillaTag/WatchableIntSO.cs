@@ -1,17 +1,9 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[CreateAssetMenu(fileName = "WatchableIntSO", menuName = "ScriptableObjects/WatchableIntSO")]
+public class WatchableIntSO : WatchableGenericSO<int>
 {
-	[CreateAssetMenu(fileName = "WatchableIntSO", menuName = "ScriptableObjects/WatchableIntSO")]
-	public class WatchableIntSO : WatchableGenericSO<int>
-	{
-		private int currentValue
-		{
-			get
-			{
-				return base.Value;
-			}
-		}
-	}
+	private int currentValue => base.Value;
 }

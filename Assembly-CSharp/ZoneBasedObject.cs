@@ -1,11 +1,12 @@
-﻿using System;
 using UnityEngine;
 
 public class ZoneBasedObject : MonoBehaviour
 {
+	public GTZone[] zones;
+
 	public bool IsLocalPlayerInZone()
 	{
-		GTZone[] array = this.zones;
+		GTZone[] array = zones;
 		for (int i = 0; i < array.Length; i++)
 		{
 			if (ZoneManagement.IsInZone(array[i]))
@@ -18,9 +19,11 @@ public class ZoneBasedObject : MonoBehaviour
 
 	public static ZoneBasedObject SelectRandomEligible(ZoneBasedObject[] objects, string overrideChoice = "")
 	{
+		ZoneBasedObject[] array;
 		if (overrideChoice != "")
 		{
-			foreach (ZoneBasedObject zoneBasedObject in objects)
+			array = objects;
+			foreach (ZoneBasedObject zoneBasedObject in array)
 			{
 				if (zoneBasedObject.gameObject.name == overrideChoice)
 				{
@@ -30,27 +33,27 @@ public class ZoneBasedObject : MonoBehaviour
 		}
 		ZoneBasedObject result = null;
 		int num = 0;
-		foreach (ZoneBasedObject zoneBasedObject2 in objects)
+		array = objects;
+		foreach (ZoneBasedObject zoneBasedObject2 in array)
 		{
-			if (zoneBasedObject2.gameObject.activeInHierarchy)
+			if (!zoneBasedObject2.gameObject.activeInHierarchy)
 			{
-				GTZone[] array = zoneBasedObject2.zones;
-				for (int j = 0; j < array.Length; j++)
+				continue;
+			}
+			GTZone[] array2 = zoneBasedObject2.zones;
+			for (int j = 0; j < array2.Length; j++)
+			{
+				if (ZoneManagement.IsInZone(array2[j]))
 				{
-					if (ZoneManagement.IsInZone(array[j]))
+					if (Random.Range(0, num) == 0)
 					{
-						if (Random.Range(0, num) == 0)
-						{
-							result = zoneBasedObject2;
-						}
-						num++;
-						break;
+						result = zoneBasedObject2;
 					}
+					num++;
+					break;
 				}
 			}
 		}
 		return result;
 	}
-
-	public GTZone[] zones;
 }

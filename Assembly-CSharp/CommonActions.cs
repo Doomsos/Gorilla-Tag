@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
@@ -6,7 +5,7 @@ public class CommonActions : MonoBehaviour
 {
 	public void LoadSavedOutfit(int index)
 	{
-		if (CosmeticsController.instance)
+		if ((bool)CosmeticsController.instance)
 		{
 			CosmeticsController.instance.LoadSavedOutfit(index);
 		}
@@ -14,17 +13,17 @@ public class CommonActions : MonoBehaviour
 
 	public void LoadPrevOutfit()
 	{
-		if (CosmeticsController.instance)
+		if ((bool)CosmeticsController.instance)
 		{
-			CosmeticsController.instance.PressWardrobeScrollOutfit(false);
+			CosmeticsController.instance.PressWardrobeScrollOutfit(forward: false);
 		}
 	}
 
 	public void LoadNextOutfit()
 	{
-		if (CosmeticsController.instance)
+		if ((bool)CosmeticsController.instance)
 		{
-			CosmeticsController.instance.PressWardrobeScrollOutfit(true);
+			CosmeticsController.instance.PressWardrobeScrollOutfit(forward: true);
 		}
 	}
 }

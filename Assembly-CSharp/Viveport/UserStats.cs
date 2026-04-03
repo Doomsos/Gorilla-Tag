@@ -1,327 +1,330 @@
-﻿using System;
+using System;
 using AOT;
 using Viveport.Internal;
 
-namespace Viveport
+namespace Viveport;
+
+public class UserStats
 {
-	public class UserStats
+	public enum LeaderBoardRequestType
 	{
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void IsReadyIl2cppCallback(int errorCode)
+		GlobalData,
+		GlobalDataAroundUser,
+		LocalData,
+		LocalDataAroundUser
+	}
+
+	public enum LeaderBoardTimeRange
+	{
+		AllTime,
+		Daily,
+		Weekly,
+		Monthly
+	}
+
+	public enum LeaderBoardSortMethod
+	{
+		None,
+		Ascending,
+		Descending
+	}
+
+	public enum LeaderBoardDiaplayType
+	{
+		None,
+		Numeric,
+		TimeSeconds,
+		TimeMilliSeconds
+	}
+
+	public enum LeaderBoardScoreMethod
+	{
+		None,
+		KeepBest,
+		ForceUpdate
+	}
+
+	public enum AchievementDisplayAttribute
+	{
+		Name,
+		Desc,
+		Hidden
+	}
+
+	private static Viveport.Internal.StatusCallback isReadyIl2cppCallback;
+
+	private static Viveport.Internal.StatusCallback downloadStatsIl2cppCallback;
+
+	private static Viveport.Internal.StatusCallback uploadStatsIl2cppCallback;
+
+	private static Viveport.Internal.StatusCallback downloadLeaderboardScoresIl2cppCallback;
+
+	private static Viveport.Internal.StatusCallback uploadLeaderboardScoreIl2cppCallback;
+
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void IsReadyIl2cppCallback(int errorCode)
+	{
+		isReadyIl2cppCallback(errorCode);
+	}
+
+	public static int IsReady(StatusCallback callback)
+	{
+		if (callback == null)
 		{
-			UserStats.isReadyIl2cppCallback(errorCode);
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static int IsReady(StatusCallback callback)
+		isReadyIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(IsReadyIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			UserStats.isReadyIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(UserStats.IsReadyIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.IsReady_64(new StatusCallback(UserStats.IsReadyIl2cppCallback));
-			}
-			return UserStats.IsReady(new StatusCallback(UserStats.IsReadyIl2cppCallback));
+			return Viveport.Internal.UserStats.IsReady_64(IsReadyIl2cppCallback);
 		}
+		return Viveport.Internal.UserStats.IsReady(IsReadyIl2cppCallback);
+	}
 
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void DownloadStatsIl2cppCallback(int errorCode)
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void DownloadStatsIl2cppCallback(int errorCode)
+	{
+		downloadStatsIl2cppCallback(errorCode);
+	}
+
+	public static int DownloadStats(StatusCallback callback)
+	{
+		if (callback == null)
 		{
-			UserStats.downloadStatsIl2cppCallback(errorCode);
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static int DownloadStats(StatusCallback callback)
+		downloadStatsIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(DownloadStatsIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			UserStats.downloadStatsIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(UserStats.DownloadStatsIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.DownloadStats_64(new StatusCallback(UserStats.DownloadStatsIl2cppCallback));
-			}
-			return UserStats.DownloadStats(new StatusCallback(UserStats.DownloadStatsIl2cppCallback));
+			return Viveport.Internal.UserStats.DownloadStats_64(DownloadStatsIl2cppCallback);
 		}
+		return Viveport.Internal.UserStats.DownloadStats(DownloadStatsIl2cppCallback);
+	}
 
-		public static int GetStat(string name, int defaultValue)
+	public static int GetStat(string name, int defaultValue)
+	{
+		int pnData = defaultValue;
+		if (IntPtr.Size == 8)
 		{
-			int result = defaultValue;
-			if (IntPtr.Size == 8)
-			{
-				UserStats.GetStat_64(name, ref result);
-			}
-			else
-			{
-				UserStats.GetStat(name, ref result);
-			}
-			return result;
+			Viveport.Internal.UserStats.GetStat_64(name, ref pnData);
 		}
-
-		public static float GetStat(string name, float defaultValue)
+		else
 		{
-			float result = defaultValue;
-			if (IntPtr.Size == 8)
-			{
-				UserStats.GetStat_64(name, ref result);
-			}
-			else
-			{
-				UserStats.GetStat(name, ref result);
-			}
-			return result;
+			Viveport.Internal.UserStats.GetStat(name, ref pnData);
 		}
+		return pnData;
+	}
 
-		public static void SetStat(string name, int value)
+	public static float GetStat(string name, float defaultValue)
+	{
+		float pfData = defaultValue;
+		if (IntPtr.Size == 8)
 		{
-			if (IntPtr.Size == 8)
-			{
-				UserStats.SetStat_64(name, value);
-				return;
-			}
-			UserStats.SetStat(name, value);
+			Viveport.Internal.UserStats.GetStat_64(name, ref pfData);
 		}
-
-		public static void SetStat(string name, float value)
+		else
 		{
-			if (IntPtr.Size == 8)
-			{
-				UserStats.SetStat_64(name, value);
-				return;
-			}
-			UserStats.SetStat(name, value);
+			Viveport.Internal.UserStats.GetStat(name, ref pfData);
 		}
+		return pfData;
+	}
 
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void UploadStatsIl2cppCallback(int errorCode)
+	public static void SetStat(string name, int value)
+	{
+		if (IntPtr.Size == 8)
 		{
-			UserStats.uploadStatsIl2cppCallback(errorCode);
+			Viveport.Internal.UserStats.SetStat_64(name, value);
 		}
-
-		public static int UploadStats(StatusCallback callback)
+		else
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			UserStats.uploadStatsIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(UserStats.UploadStatsIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.UploadStats_64(new StatusCallback(UserStats.UploadStatsIl2cppCallback));
-			}
-			return UserStats.UploadStats(new StatusCallback(UserStats.UploadStatsIl2cppCallback));
+			Viveport.Internal.UserStats.SetStat(name, value);
 		}
+	}
 
-		public static bool GetAchievement(string pchName)
+	public static void SetStat(string name, float value)
+	{
+		if (IntPtr.Size == 8)
 		{
-			int num = 0;
-			if (IntPtr.Size == 8)
-			{
-				UserStats.GetAchievement_64(pchName, ref num);
-			}
-			else
-			{
-				UserStats.GetAchievement(pchName, ref num);
-			}
-			return num == 1;
+			Viveport.Internal.UserStats.SetStat_64(name, value);
 		}
-
-		public static int GetAchievementUnlockTime(string pchName)
+		else
 		{
-			int result = 0;
-			if (IntPtr.Size == 8)
-			{
-				UserStats.GetAchievementUnlockTime_64(pchName, ref result);
-			}
-			else
-			{
-				UserStats.GetAchievementUnlockTime(pchName, ref result);
-			}
-			return result;
+			Viveport.Internal.UserStats.SetStat(name, value);
 		}
+	}
 
-		public static string GetAchievementIcon(string pchName)
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void UploadStatsIl2cppCallback(int errorCode)
+	{
+		uploadStatsIl2cppCallback(errorCode);
+	}
+
+	public static int UploadStats(StatusCallback callback)
+	{
+		if (callback == null)
 		{
-			return "";
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static string GetAchievementDisplayAttribute(string pchName, UserStats.AchievementDisplayAttribute attr)
+		uploadStatsIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(UploadStatsIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			return "";
+			return Viveport.Internal.UserStats.UploadStats_64(UploadStatsIl2cppCallback);
 		}
+		return Viveport.Internal.UserStats.UploadStats(UploadStatsIl2cppCallback);
+	}
 
-		public static string GetAchievementDisplayAttribute(string pchName, UserStats.AchievementDisplayAttribute attr, Locale locale)
+	public static bool GetAchievement(string pchName)
+	{
+		int pbAchieved = 0;
+		if (IntPtr.Size == 8)
 		{
-			return "";
+			Viveport.Internal.UserStats.GetAchievement_64(pchName, ref pbAchieved);
 		}
-
-		public static int SetAchievement(string pchName)
+		else
 		{
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.SetAchievement_64(pchName);
-			}
-			return UserStats.SetAchievement(pchName);
+			Viveport.Internal.UserStats.GetAchievement(pchName, ref pbAchieved);
 		}
+		return pbAchieved == 1;
+	}
 
-		public static int ClearAchievement(string pchName)
+	public static int GetAchievementUnlockTime(string pchName)
+	{
+		int punUnlockTime = 0;
+		if (IntPtr.Size == 8)
 		{
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.ClearAchievement_64(pchName);
-			}
-			return UserStats.ClearAchievement(pchName);
+			Viveport.Internal.UserStats.GetAchievementUnlockTime_64(pchName, ref punUnlockTime);
 		}
-
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void DownloadLeaderboardScoresIl2cppCallback(int errorCode)
+		else
 		{
-			UserStats.downloadLeaderboardScoresIl2cppCallback(errorCode);
+			Viveport.Internal.UserStats.GetAchievementUnlockTime(pchName, ref punUnlockTime);
 		}
+		return punUnlockTime;
+	}
 
-		public static int DownloadLeaderboardScores(StatusCallback callback, string pchLeaderboardName, UserStats.LeaderBoardRequestType eLeaderboardDataRequest, UserStats.LeaderBoardTimeRange eLeaderboardDataTimeRange, int nRangeStart, int nRangeEnd)
+	public static string GetAchievementIcon(string pchName)
+	{
+		return "";
+	}
+
+	public static string GetAchievementDisplayAttribute(string pchName, AchievementDisplayAttribute attr)
+	{
+		return "";
+	}
+
+	public static string GetAchievementDisplayAttribute(string pchName, AchievementDisplayAttribute attr, Locale locale)
+	{
+		return "";
+	}
+
+	public static int SetAchievement(string pchName)
+	{
+		if (IntPtr.Size == 8)
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			UserStats.downloadLeaderboardScoresIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(UserStats.DownloadLeaderboardScoresIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.DownloadLeaderboardScores_64(new StatusCallback(UserStats.DownloadLeaderboardScoresIl2cppCallback), pchLeaderboardName, (ELeaderboardDataRequest)eLeaderboardDataRequest, (ELeaderboardDataTimeRange)eLeaderboardDataTimeRange, nRangeStart, nRangeEnd);
-			}
-			return UserStats.DownloadLeaderboardScores(new StatusCallback(UserStats.DownloadLeaderboardScoresIl2cppCallback), pchLeaderboardName, (ELeaderboardDataRequest)eLeaderboardDataRequest, (ELeaderboardDataTimeRange)eLeaderboardDataTimeRange, nRangeStart, nRangeEnd);
+			return Viveport.Internal.UserStats.SetAchievement_64(pchName);
 		}
+		return Viveport.Internal.UserStats.SetAchievement(pchName);
+	}
 
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void UploadLeaderboardScoreIl2cppCallback(int errorCode)
+	public static int ClearAchievement(string pchName)
+	{
+		if (IntPtr.Size == 8)
 		{
-			UserStats.uploadLeaderboardScoreIl2cppCallback(errorCode);
+			return Viveport.Internal.UserStats.ClearAchievement_64(pchName);
 		}
+		return Viveport.Internal.UserStats.ClearAchievement(pchName);
+	}
 
-		public static int UploadLeaderboardScore(StatusCallback callback, string pchLeaderboardName, int nScore)
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void DownloadLeaderboardScoresIl2cppCallback(int errorCode)
+	{
+		downloadLeaderboardScoresIl2cppCallback(errorCode);
+	}
+
+	public static int DownloadLeaderboardScores(StatusCallback callback, string pchLeaderboardName, LeaderBoardRequestType eLeaderboardDataRequest, LeaderBoardTimeRange eLeaderboardDataTimeRange, int nRangeStart, int nRangeEnd)
+	{
+		if (callback == null)
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			UserStats.uploadLeaderboardScoreIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(UserStats.UploadLeaderboardScoreIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.UploadLeaderboardScore_64(new StatusCallback(UserStats.UploadLeaderboardScoreIl2cppCallback), pchLeaderboardName, nScore);
-			}
-			return UserStats.UploadLeaderboardScore(new StatusCallback(UserStats.UploadLeaderboardScoreIl2cppCallback), pchLeaderboardName, nScore);
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static Leaderboard GetLeaderboardScore(int index)
+		downloadLeaderboardScoresIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(DownloadLeaderboardScoresIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			LeaderboardEntry_t leaderboardEntry_t;
-			leaderboardEntry_t.m_nGlobalRank = 0;
-			leaderboardEntry_t.m_nScore = 0;
-			leaderboardEntry_t.m_pUserName = "";
-			if (IntPtr.Size == 8)
-			{
-				UserStats.GetLeaderboardScore_64(index, ref leaderboardEntry_t);
-			}
-			else
-			{
-				UserStats.GetLeaderboardScore(index, ref leaderboardEntry_t);
-			}
-			return new Leaderboard
-			{
-				Rank = leaderboardEntry_t.m_nGlobalRank,
-				Score = leaderboardEntry_t.m_nScore,
-				UserName = leaderboardEntry_t.m_pUserName
-			};
+			return Viveport.Internal.UserStats.DownloadLeaderboardScores_64(DownloadLeaderboardScoresIl2cppCallback, pchLeaderboardName, (ELeaderboardDataRequest)eLeaderboardDataRequest, (ELeaderboardDataTimeRange)eLeaderboardDataTimeRange, nRangeStart, nRangeEnd);
 		}
+		return Viveport.Internal.UserStats.DownloadLeaderboardScores(DownloadLeaderboardScoresIl2cppCallback, pchLeaderboardName, (ELeaderboardDataRequest)eLeaderboardDataRequest, (ELeaderboardDataTimeRange)eLeaderboardDataTimeRange, nRangeStart, nRangeEnd);
+	}
 
-		public static int GetLeaderboardScoreCount()
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void UploadLeaderboardScoreIl2cppCallback(int errorCode)
+	{
+		uploadLeaderboardScoreIl2cppCallback(errorCode);
+	}
+
+	public static int UploadLeaderboardScore(StatusCallback callback, string pchLeaderboardName, int nScore)
+	{
+		if (callback == null)
 		{
-			if (IntPtr.Size == 8)
-			{
-				return UserStats.GetLeaderboardScoreCount_64();
-			}
-			return UserStats.GetLeaderboardScoreCount();
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static UserStats.LeaderBoardSortMethod GetLeaderboardSortMethod()
+		uploadLeaderboardScoreIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(UploadLeaderboardScoreIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			if (IntPtr.Size == 8)
-			{
-				return (UserStats.LeaderBoardSortMethod)UserStats.GetLeaderboardSortMethod_64();
-			}
-			return (UserStats.LeaderBoardSortMethod)UserStats.GetLeaderboardSortMethod();
+			return Viveport.Internal.UserStats.UploadLeaderboardScore_64(UploadLeaderboardScoreIl2cppCallback, pchLeaderboardName, nScore);
 		}
+		return Viveport.Internal.UserStats.UploadLeaderboardScore(UploadLeaderboardScoreIl2cppCallback, pchLeaderboardName, nScore);
+	}
 
-		public static UserStats.LeaderBoardDiaplayType GetLeaderboardDisplayType()
+	public static Leaderboard GetLeaderboardScore(int index)
+	{
+		LeaderboardEntry_t pLeaderboardEntry = default(LeaderboardEntry_t);
+		pLeaderboardEntry.m_nGlobalRank = 0;
+		pLeaderboardEntry.m_nScore = 0;
+		pLeaderboardEntry.m_pUserName = "";
+		if (IntPtr.Size == 8)
 		{
-			if (IntPtr.Size == 8)
-			{
-				return (UserStats.LeaderBoardDiaplayType)UserStats.GetLeaderboardDisplayType_64();
-			}
-			return (UserStats.LeaderBoardDiaplayType)UserStats.GetLeaderboardDisplayType();
+			Viveport.Internal.UserStats.GetLeaderboardScore_64(index, ref pLeaderboardEntry);
 		}
-
-		private static StatusCallback isReadyIl2cppCallback;
-
-		private static StatusCallback downloadStatsIl2cppCallback;
-
-		private static StatusCallback uploadStatsIl2cppCallback;
-
-		private static StatusCallback downloadLeaderboardScoresIl2cppCallback;
-
-		private static StatusCallback uploadLeaderboardScoreIl2cppCallback;
-
-		public enum LeaderBoardRequestType
+		else
 		{
-			GlobalData,
-			GlobalDataAroundUser,
-			LocalData,
-			LocalDataAroundUser
+			Viveport.Internal.UserStats.GetLeaderboardScore(index, ref pLeaderboardEntry);
 		}
-
-		public enum LeaderBoardTimeRange
+		return new Leaderboard
 		{
-			AllTime,
-			Daily,
-			Weekly,
-			Monthly
-		}
+			Rank = pLeaderboardEntry.m_nGlobalRank,
+			Score = pLeaderboardEntry.m_nScore,
+			UserName = pLeaderboardEntry.m_pUserName
+		};
+	}
 
-		public enum LeaderBoardSortMethod
+	public static int GetLeaderboardScoreCount()
+	{
+		if (IntPtr.Size == 8)
 		{
-			None,
-			Ascending,
-			Descending
+			return Viveport.Internal.UserStats.GetLeaderboardScoreCount_64();
 		}
+		return Viveport.Internal.UserStats.GetLeaderboardScoreCount();
+	}
 
-		public enum LeaderBoardDiaplayType
+	public static LeaderBoardSortMethod GetLeaderboardSortMethod()
+	{
+		if (IntPtr.Size == 8)
 		{
-			None,
-			Numeric,
-			TimeSeconds,
-			TimeMilliSeconds
+			return (LeaderBoardSortMethod)Viveport.Internal.UserStats.GetLeaderboardSortMethod_64();
 		}
+		return (LeaderBoardSortMethod)Viveport.Internal.UserStats.GetLeaderboardSortMethod();
+	}
 
-		public enum LeaderBoardScoreMethod
+	public static LeaderBoardDiaplayType GetLeaderboardDisplayType()
+	{
+		if (IntPtr.Size == 8)
 		{
-			None,
-			KeepBest,
-			ForceUpdate
+			return (LeaderBoardDiaplayType)Viveport.Internal.UserStats.GetLeaderboardDisplayType_64();
 		}
-
-		public enum AchievementDisplayAttribute
-		{
-			Name,
-			Desc,
-			Hidden
-		}
+		return (LeaderBoardDiaplayType)Viveport.Internal.UserStats.GetLeaderboardDisplayType();
 	}
 }

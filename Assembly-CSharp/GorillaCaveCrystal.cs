@@ -1,30 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GorillaCaveCrystal : Tappable
 {
-	private void Awake()
-	{
-		if (this.tapScript == null)
-		{
-			this.tapScript = base.GetComponent<TapInnerGlow>();
-		}
-	}
-
-	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
-	{
-		this._tapStrength = tapStrength;
-		this.AnimateCrystal();
-	}
-
-	private void AnimateCrystal()
-	{
-		if (this.tapScript)
-		{
-			this.tapScript.Tap();
-		}
-	}
-
 	public bool overrideSoundAndMaterial;
 
 	public CrystalOctave octave;
@@ -58,4 +36,26 @@ public class GorillaCaveCrystal : Tappable
 
 	[NonSerialized]
 	private TimeSince _timeSinceLastTap;
+
+	private void Awake()
+	{
+		if (tapScript == null)
+		{
+			tapScript = GetComponent<TapInnerGlow>();
+		}
+	}
+
+	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
+	{
+		_tapStrength = tapStrength;
+		AnimateCrystal();
+	}
+
+	private void AnimateCrystal()
+	{
+		if ((bool)tapScript)
+		{
+			tapScript.Tap();
+		}
+	}
 }

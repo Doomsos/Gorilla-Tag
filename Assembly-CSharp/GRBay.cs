@@ -1,137 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class GRBay : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this.playerName != null)
-		{
-			this.playerName.text = null;
-		}
-		if (this.maxDropText != null)
-		{
-			this.maxDropText.text = null;
-		}
-	}
-
-	public void Setup(GhostReactor reactor)
-	{
-		this.reactor = reactor;
-		if (this.shuttleLoc != GRShuttleGroupLoc.Invalid && this.shuttleIndex >= 0 && this.shuttleIndex < 10)
-		{
-			this.unlockShuttle = GRElevatorManager._instance.GetPlayerShuttle(this.shuttleLoc, this.shuttleIndex);
-			if (this.unlockShuttle != null)
-			{
-				this.unlockShuttle.SetBay(this);
-			}
-		}
-		this.Refresh();
-	}
-
-	public void SetOpen(bool open)
-	{
-		if (this.hideWhenOpen != null)
-		{
-			for (int i = 0; i < this.hideWhenOpen.Count; i++)
-			{
-				if (this.hideWhenOpen[i] != null)
-				{
-					this.hideWhenOpen[i].SetActive(!open);
-				}
-				else
-				{
-					Debug.LogErrorFormat("Why is hideWhenOpen null {0} at {1}", new object[]
-					{
-						base.gameObject.name,
-						i
-					});
-				}
-			}
-		}
-		else
-		{
-			Debug.LogErrorFormat("Why is hideWhenOpen null {0}", new object[]
-			{
-				base.gameObject.name
-			});
-		}
-		if (this.hideWhenClosed != null)
-		{
-			for (int j = 0; j < this.hideWhenClosed.Count; j++)
-			{
-				if (this.hideWhenClosed[j] != null)
-				{
-					this.hideWhenClosed[j].SetActive(open);
-				}
-				else
-				{
-					Debug.LogErrorFormat("Why is hideWhenClosed null {0} at {1} ", new object[]
-					{
-						base.gameObject.name,
-						j
-					});
-				}
-			}
-		}
-		else
-		{
-			Debug.LogErrorFormat("Why is hideWhenClosed null {0}", new object[]
-			{
-				base.gameObject.name
-			});
-		}
-		if (this.bayDoorAnimation != null && this.isOpen != open)
-		{
-			if (open)
-			{
-				this.bayDoorAnimation.Play("BayDoor_Open");
-				this.bayDoorAnimation.PlayQueued("BayDoor_Open_Idle");
-			}
-			else
-			{
-				this.bayDoorAnimation.Play("BayDoor_Close");
-				this.bayDoorAnimation.PlayQueued("BayDoor_Close_Idle");
-			}
-		}
-		this.isOpen = open;
-	}
-
-	public void Refresh()
-	{
-		bool open = true;
-		if (this.unlockShuttle != null)
-		{
-			NetPlayer owner = this.unlockShuttle.GetOwner();
-			bool flag = owner != null && this.unlockShuttle.IsPodUnlocked();
-			open = (this.unlockShuttle.GetState() == GRShuttleState.Docked && flag);
-			if (this.playerName != null)
-			{
-				this.playerName.text = ((!flag) ? null : owner.SanitizedNickName);
-			}
-			if (this.maxDropText != null)
-			{
-				int num = this.unlockShuttle.GetMaxDropFloor() + 1;
-				this.maxDropText.text = ((!flag) ? null : num.ToString());
-			}
-			for (int i = 0; i < this.showWhenOwned.Count; i++)
-			{
-				this.showWhenOwned[i].SetActive(flag);
-			}
-			for (int j = 0; j < this.showWhenNotOwned.Count; j++)
-			{
-				this.showWhenNotOwned[j].SetActive(!flag);
-			}
-		}
-		else if (this.unlockByDrillLevel > 0)
-		{
-			open = ((this.reactor != null && this.reactor.GetDepthLevel() >= this.unlockByDrillLevel) || GhostReactorManager.bayUnlockEnabled);
-		}
-		this.SetOpen(open);
-	}
-
 	public List<GameObject> hideWhenOpen;
 
 	public List<GameObject> hideWhenClosed;
@@ -160,4 +33,113 @@ public class GRBay : MonoBehaviour
 	private GRShuttle unlockShuttle;
 
 	private GhostReactor reactor;
+
+	private void Awake()
+	{
+		if (playerName != null)
+		{
+			playerName.text = null;
+		}
+		if (maxDropText != null)
+		{
+			maxDropText.text = null;
+		}
+	}
+
+	public void Setup(GhostReactor reactor)
+	{
+		this.reactor = reactor;
+		if (shuttleLoc != GRShuttleGroupLoc.Invalid && shuttleIndex >= 0 && shuttleIndex < 10)
+		{
+			unlockShuttle = GRElevatorManager._instance.GetPlayerShuttle(shuttleLoc, shuttleIndex);
+			if (unlockShuttle != null)
+			{
+				unlockShuttle.SetBay(this);
+			}
+		}
+		Refresh();
+	}
+
+	public void SetOpen(bool open)
+	{
+		if (hideWhenOpen != null)
+		{
+			for (int i = 0; i < hideWhenOpen.Count; i++)
+			{
+				if (hideWhenOpen[i] != null)
+				{
+					hideWhenOpen[i].SetActive(!open);
+					continue;
+				}
+				Debug.LogErrorFormat("Why is hideWhenOpen null {0} at {1}", base.gameObject.name, i);
+			}
+		}
+		else
+		{
+			Debug.LogErrorFormat("Why is hideWhenOpen null {0}", base.gameObject.name);
+		}
+		if (hideWhenClosed != null)
+		{
+			for (int j = 0; j < hideWhenClosed.Count; j++)
+			{
+				if (hideWhenClosed[j] != null)
+				{
+					hideWhenClosed[j].SetActive(open);
+					continue;
+				}
+				Debug.LogErrorFormat("Why is hideWhenClosed null {0} at {1} ", base.gameObject.name, j);
+			}
+		}
+		else
+		{
+			Debug.LogErrorFormat("Why is hideWhenClosed null {0}", base.gameObject.name);
+		}
+		if (bayDoorAnimation != null && isOpen != open)
+		{
+			if (open)
+			{
+				bayDoorAnimation.Play("BayDoor_Open");
+				bayDoorAnimation.PlayQueued("BayDoor_Open_Idle");
+			}
+			else
+			{
+				bayDoorAnimation.Play("BayDoor_Close");
+				bayDoorAnimation.PlayQueued("BayDoor_Close_Idle");
+			}
+		}
+		isOpen = open;
+	}
+
+	public void Refresh()
+	{
+		bool open = true;
+		if (unlockShuttle != null)
+		{
+			NetPlayer owner = unlockShuttle.GetOwner();
+			bool flag = owner != null && unlockShuttle.IsPodUnlocked();
+			open = unlockShuttle.GetState() == GRShuttleState.Docked && flag;
+			if (playerName != null)
+			{
+				playerName.text = ((!flag) ? null : owner.SanitizedNickName);
+			}
+			if (maxDropText != null)
+			{
+				int num = unlockShuttle.GetMaxDropFloor() + 1;
+				maxDropText.text = ((!flag) ? null : num.ToString());
+			}
+			for (int i = 0; i < showWhenOwned.Count; i++)
+			{
+				showWhenOwned[i].SetActive(flag);
+			}
+			for (int j = 0; j < showWhenNotOwned.Count; j++)
+			{
+				showWhenNotOwned[j].SetActive(!flag);
+			}
+		}
+		else if (unlockByDrillLevel > 0)
+		{
+			open = (reactor != null && reactor.GetDepthLevel() >= unlockByDrillLevel) || GhostReactorManager.bayUnlockEnabled;
+		}
+		SetOpen(open);
+	}
 }

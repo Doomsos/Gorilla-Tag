@@ -1,21 +1,19 @@
-﻿using System;
 using UnityEngine;
 
-namespace PerformanceSystems
+namespace PerformanceSystems;
+
+public class TimeSliceControllerBehaviour : MonoBehaviour
 {
-	public class TimeSliceControllerBehaviour : MonoBehaviour
+	[SerializeField]
+	private TimeSliceControllerAsset _timeSliceControllerAsset;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-			this._timeSliceControllerAsset.InitializeReferenceTransformWithMainCam();
-		}
+		_timeSliceControllerAsset.InitializeReferenceTransformWithMainCam();
+	}
 
-		private void Update()
-		{
-			this._timeSliceControllerAsset.Update();
-		}
-
-		[SerializeField]
-		private TimeSliceControllerAsset _timeSliceControllerAsset;
+	private void Update()
+	{
+		_timeSliceControllerAsset.Update();
 	}
 }

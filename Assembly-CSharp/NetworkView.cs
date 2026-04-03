@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using Photon.Pun;
 using Photon.Realtime;
@@ -8,74 +7,58 @@ using UnityEngine;
 [NetworkBehaviourWeaved(0)]
 public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFacingInterface, IPunOwnershipCallbacks
 {
+	[SerializeField]
+	private PhotonView punView;
+
+	[SerializeField]
+	private PhotonView reliableView;
+
+	[SerializeField]
+	internal NetworkObject fusionView;
+
+	[SerializeField]
+	protected bool _sceneObject;
+
+	private bool _spawned;
+
+	private bool changingStatAuth;
+
 	public bool IsMine
 	{
 		get
 		{
-			return this.punView != null && this.punView.IsMine;
+			if (punView != null)
+			{
+				return punView.IsMine;
+			}
+			return false;
 		}
 	}
 
-	public bool IsValid
-	{
-		get
-		{
-			return this.punView != null;
-		}
-	}
+	public bool IsValid => punView != null;
 
-	public bool HasView
-	{
-		get
-		{
-			return this.punView != null;
-		}
-	}
+	public bool HasView => punView != null;
 
-	public bool IsRoomView
-	{
-		get
-		{
-			return this.punView.IsRoomView;
-		}
-	}
+	public bool IsRoomView => punView.IsRoomView;
 
-	public PhotonView GetView
-	{
-		get
-		{
-			return this.punView;
-		}
-	}
+	public PhotonView GetView => punView;
 
-	public NetPlayer Owner
-	{
-		get
-		{
-			return NetworkSystem.Instance.GetPlayer(this.punView.Owner);
-		}
-	}
+	public NetPlayer Owner => NetworkSystem.Instance.GetPlayer(punView.Owner);
 
-	public int ViewID
-	{
-		get
-		{
-			return this.punView.ViewID;
-		}
-	}
+	public int ViewID => punView.ViewID;
 
 	internal OwnershipOption OwnershipTransfer
 	{
 		get
 		{
-			return this.punView.OwnershipTransfer;
+			return punView.OwnershipTransfer;
 		}
 		set
 		{
-			this.punView.OwnershipTransfer = value;
-			if (this.reliableView != null)
+			punView.OwnershipTransfer = value;
+			if (reliableView != null)
 			{
-				this.reliableView.OwnershipTransfer = value;
+				reliableView.OwnershipTransfer = value;
 			}
 		}
 	}
@@ -84,14 +67,14 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 	{
 		get
 		{
-			return this.punView.OwnerActorNr;
+			return punView.OwnerActorNr;
 		}
 		set
 		{
-			this.punView.OwnerActorNr = value;
-			if (this.reliableView != null)
+			punView.OwnerActorNr = value;
+			if (reliableView != null)
 			{
-				this.reliableView.OwnerActorNr = value;
+				reliableView.OwnerActorNr = value;
 			}
 		}
 	}
@@ -100,56 +83,56 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 	{
 		get
 		{
-			return this.punView.ControllerActorNr;
+			return punView.ControllerActorNr;
 		}
 		set
 		{
-			this.punView.ControllerActorNr = value;
-			if (this.reliableView != null)
+			punView.ControllerActorNr = value;
+			if (reliableView != null)
 			{
-				this.reliableView.ControllerActorNr = value;
+				reliableView.ControllerActorNr = value;
 			}
 		}
 	}
 
 	private void GetViews()
 	{
-		PhotonView[] components = base.GetComponents<PhotonView>();
+		PhotonView[] components = GetComponents<PhotonView>();
 		if (components.Length > 1)
 		{
 			if (components[0].Synchronization == ViewSynchronization.UnreliableOnChange)
 			{
-				this.punView = components[0];
-				this.reliableView = components[1];
+				punView = components[0];
+				reliableView = components[1];
 			}
 			else if (components[0].Synchronization == ViewSynchronization.ReliableDeltaCompressed)
 			{
-				this.reliableView = components[0];
-				this.punView = components[1];
+				reliableView = components[0];
+				punView = components[1];
 			}
 		}
 		else
 		{
-			this.punView = components[0];
+			punView = components[0];
 		}
-		if (this.punView == null)
+		if (punView == null)
 		{
-			this.punView = base.GetComponent<PhotonView>();
+			punView = GetComponent<PhotonView>();
 		}
-		if (this.fusionView == null)
+		if (fusionView == null)
 		{
-			this.fusionView = base.GetComponent<NetworkObject>();
+			fusionView = GetComponent<NetworkObject>();
 		}
 	}
 
 	protected virtual void Awake()
 	{
-		this.GetViews();
+		GetViews();
 	}
 
 	protected virtual void Start()
 	{
-		if (this._sceneObject)
+		if (_sceneObject)
 		{
 			NetworkSystem.Instance.RegisterSceneNetworkItem(base.gameObject);
 		}
@@ -158,46 +141,45 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 	public void SendRPC(string method, NetPlayer targetPlayer, params object[] parameters)
 	{
 		Player playerRef = (targetPlayer as PunNetPlayer).PlayerRef;
-		this.punView.RPC(method, playerRef, parameters);
+		punView.RPC(method, playerRef, parameters);
 	}
 
 	public void SendRPC(string method, RpcTarget target, params object[] parameters)
 	{
-		this.punView.RPC(method, target, parameters);
+		punView.RPC(method, target, parameters);
 	}
 
 	public void SendRPC(string method, int target, params object[] parameters)
 	{
 		Room currentRoom = PhotonNetwork.CurrentRoom;
-		if (currentRoom == null || !currentRoom.Players.ContainsKey(target))
+		if (currentRoom != null && currentRoom.Players.ContainsKey(target))
 		{
-			return;
+			punView.RPC(method, currentRoom.Players[target], parameters);
 		}
-		this.punView.RPC(method, currentRoom.Players[target], parameters);
 	}
 
 	public override void Spawned()
 	{
 		base.Spawned();
-		this._spawned = true;
+		_spawned = true;
 	}
 
 	public void RequestOwnership()
 	{
-		this.GetView.RequestOwnership();
+		GetView.RequestOwnership();
 	}
 
 	public void ReleaseOwnership()
 	{
-		this.changingStatAuth = true;
+		changingStatAuth = true;
 		base.Object.ReleaseStateAuthority();
 	}
 
 	public virtual void StateAuthorityChanged()
 	{
-		if (this.changingStatAuth)
+		if (changingStatAuth)
 		{
-			this.changingStatAuth = false;
+			changingStatAuth = false;
 		}
 	}
 
@@ -214,7 +196,7 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
 	}
 
@@ -222,20 +204,4 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 	public override void CopyStateToBackingFields()
 	{
 	}
-
-	[SerializeField]
-	private PhotonView punView;
-
-	[SerializeField]
-	private PhotonView reliableView;
-
-	[SerializeField]
-	internal NetworkObject fusionView;
-
-	[SerializeField]
-	protected bool _sceneObject;
-
-	private bool _spawned;
-
-	private bool changingStatAuth;
 }

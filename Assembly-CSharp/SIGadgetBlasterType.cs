@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface SIGadgetBlasterType
 {
 	void OnUpdateAuthority(float dt);

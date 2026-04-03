@@ -1,54 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class GRBarrierOverloadable : MonoBehaviour
 {
-	private void OnEnable()
+	public enum State
 	{
-		this.tool.OnEnergyChange += this.OnEnergyChange;
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
-	}
-
-	private void OnEnergyChange(GRTool tool, int energyChange, GameEntityId chargingEntityId)
-	{
-		if (this.state == GRBarrierOverloadable.State.Active && tool.energy >= tool.GetEnergyMax())
-		{
-			this.SetState(GRBarrierOverloadable.State.Destroyed);
-			if (this.gameEntity.IsAuthority())
-			{
-				this.gameEntity.RequestState(this.gameEntity.id, 1L);
-			}
-		}
-	}
-
-	private void OnEntityStateChanged(long prevState, long nextState)
-	{
-		if (!this.gameEntity.IsAuthority())
-		{
-			this.SetState((GRBarrierOverloadable.State)nextState);
-		}
-	}
-
-	public void SetState(GRBarrierOverloadable.State newState)
-	{
-		if (this.state != newState)
-		{
-			this.state = newState;
-			GRBarrierOverloadable.State state = this.state;
-			if (state == GRBarrierOverloadable.State.Active)
-			{
-				this.meshRenderer.enabled = true;
-				this.collider.enabled = true;
-				return;
-			}
-			if (state != GRBarrierOverloadable.State.Destroyed)
-			{
-				return;
-			}
-			this.audioSource.Play();
-			this.meshRenderer.enabled = false;
-			this.collider.enabled = false;
-		}
+		Active,
+		Destroyed
 	}
 
 	public GRTool tool;
@@ -61,11 +18,51 @@ public class GRBarrierOverloadable : MonoBehaviour
 
 	public Collider collider;
 
-	private GRBarrierOverloadable.State state;
+	private State state;
 
-	public enum State
+	private void OnEnable()
 	{
-		Active,
-		Destroyed
+		tool.OnEnergyChange += OnEnergyChange;
+		gameEntity.OnStateChanged += OnEntityStateChanged;
+	}
+
+	private void OnEnergyChange(GRTool tool, int energyChange, GameEntityId chargingEntityId)
+	{
+		if (state == State.Active && tool.energy >= tool.GetEnergyMax())
+		{
+			SetState(State.Destroyed);
+			if (gameEntity.IsAuthority())
+			{
+				gameEntity.RequestState(gameEntity.id, 1L);
+			}
+		}
+	}
+
+	private void OnEntityStateChanged(long prevState, long nextState)
+	{
+		if (!gameEntity.IsAuthority())
+		{
+			SetState((State)nextState);
+		}
+	}
+
+	public void SetState(State newState)
+	{
+		if (state != newState)
+		{
+			state = newState;
+			switch (state)
+			{
+			case State.Active:
+				meshRenderer.enabled = true;
+				collider.enabled = true;
+				break;
+			case State.Destroyed:
+				audioSource.Play();
+				meshRenderer.enabled = false;
+				collider.enabled = false;
+				break;
+			}
+		}
 	}
 }

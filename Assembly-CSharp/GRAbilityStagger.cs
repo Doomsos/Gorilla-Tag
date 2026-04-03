@@ -1,74 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GRAbilityStagger : GRAbilityBase
 {
-	public void SetStunTime(float time)
-	{
-		this.stunTime = time;
-	}
-
-	public void SetStaggerVelocity(Vector3 vel)
-	{
-		float magnitude = vel.magnitude;
-		if (magnitude > 0f)
-		{
-			Vector3 a = vel / magnitude;
-			a.y = 0f;
-			vel = a * magnitude;
-		}
-		this.staggerMovement.InitFromVelocityAndDuration(vel, this.duration);
-	}
-
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
-	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-		this.staggerMovement.Setup(root);
-		this.staggerMovement.interpolationType = GRAbilityInterpolatedMovement.InterpType.EaseOut;
-	}
-
-	protected override void OnStart()
-	{
-		if (this.animData.Count > 0)
-		{
-			this.lastAnimIndex = AbilityHelperFunctions.RandomRangeUnique(0, this.animData.Count, this.lastAnimIndex);
-			this.duration = this.animData[this.lastAnimIndex].duration + this.stunTime;
-			this.PlayAnim(this.animData[this.lastAnimIndex].animName, 0.1f, this.animData[this.lastAnimIndex].speed);
-			this.animNameString = this.animData[this.lastAnimIndex].animName;
-		}
-		else
-		{
-			this.duration = 0.5f + this.stunTime;
-		}
-		this.agent.SetIsPathing(false, true);
-		this.agent.SetDisableNetworkSync(true);
-		this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.duration);
-		this.staggerMovement.Start();
-	}
-
-	protected override void OnStop()
-	{
-		this.agent.SetIsPathing(true, true);
-		this.agent.SetDisableNetworkSync(false);
-	}
-
-	public override bool IsDone()
-	{
-		return this.staggerMovement.IsDone();
-	}
-
-	protected override void OnUpdateShared(float dt)
-	{
-		this.staggerMovement.Update(dt);
-	}
-
-	public string GetAnimName()
-	{
-		return this.animNameString;
-	}
-
 	private float duration;
 
 	public List<AnimationData> animData;
@@ -80,4 +16,68 @@ public class GRAbilityStagger : GRAbilityBase
 	public GRAbilityInterpolatedMovement staggerMovement;
 
 	private float stunTime;
+
+	public void SetStunTime(float time)
+	{
+		stunTime = time;
+	}
+
+	public void SetStaggerVelocity(Vector3 vel)
+	{
+		float magnitude = vel.magnitude;
+		if (magnitude > 0f)
+		{
+			Vector3 vector = vel / magnitude;
+			vector.y = 0f;
+			vel = vector * magnitude;
+		}
+		staggerMovement.InitFromVelocityAndDuration(vel, duration);
+	}
+
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	{
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+		staggerMovement.Setup(root);
+		staggerMovement.interpolationType = GRAbilityInterpolatedMovement.InterpType.EaseOut;
+	}
+
+	protected override void OnStart()
+	{
+		if (animData.Count > 0)
+		{
+			lastAnimIndex = AbilityHelperFunctions.RandomRangeUnique(0, animData.Count, lastAnimIndex);
+			duration = animData[lastAnimIndex].duration + stunTime;
+			PlayAnim(animData[lastAnimIndex].animName, 0.1f, animData[lastAnimIndex].speed);
+			animNameString = animData[lastAnimIndex].animName;
+		}
+		else
+		{
+			duration = 0.5f + stunTime;
+		}
+		agent.SetIsPathing(isPathing: false, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: true);
+		staggerMovement.InitFromVelocityAndDuration(staggerMovement.velocity, duration);
+		staggerMovement.Start();
+	}
+
+	protected override void OnStop()
+	{
+		agent.SetIsPathing(isPathing: true, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: false);
+	}
+
+	public override bool IsDone()
+	{
+		return staggerMovement.IsDone();
+	}
+
+	protected override void OnUpdateShared(float dt)
+	{
+		staggerMovement.Update(dt);
+	}
+
+	public string GetAnimName()
+	{
+		return animNameString;
+	}
 }

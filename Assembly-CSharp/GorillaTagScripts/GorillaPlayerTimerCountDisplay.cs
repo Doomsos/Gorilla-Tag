@@ -1,93 +1,86 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class GorillaPlayerTimerCountDisplay : MonoBehaviour, ITickSystemTick
 {
-	public class GorillaPlayerTimerCountDisplay : MonoBehaviour, ITickSystemTick
+	[SerializeField]
+	private TMP_Text displayText;
+
+	private bool isInitialized;
+
+	public bool TickRunning { get; set; }
+
+	private void Start()
 	{
-		private void Start()
-		{
-			this.TryInit();
-		}
+		TryInit();
+	}
 
-		private void OnEnable()
-		{
-			this.TryInit();
-		}
+	private void OnEnable()
+	{
+		TryInit();
+	}
 
-		private void TryInit()
+	private void TryInit()
+	{
+		if (!isInitialized && !(PlayerTimerManager.instance == null))
 		{
-			if (this.isInitialized)
-			{
-				return;
-			}
-			if (PlayerTimerManager.instance == null)
-			{
-				return;
-			}
-			PlayerTimerManager.instance.OnTimerStopped.AddListener(new UnityAction<int, int>(this.OnTimerStopped));
-			PlayerTimerManager.instance.OnLocalTimerStarted.AddListener(new UnityAction(this.OnLocalTimerStarted));
-			this.displayText.text = "TIME: --.--.-";
-			if (PlayerTimerManager.instance.IsLocalTimerStarted() && !this.TickRunning)
+			PlayerTimerManager.instance.OnTimerStopped.AddListener(OnTimerStopped);
+			PlayerTimerManager.instance.OnLocalTimerStarted.AddListener(OnLocalTimerStarted);
+			displayText.text = "TIME: --.--.-";
+			if (PlayerTimerManager.instance.IsLocalTimerStarted() && !TickRunning)
 			{
 				TickSystem<object>.AddTickCallback(this);
 			}
-			this.isInitialized = true;
+			isInitialized = true;
 		}
+	}
 
-		private void OnDisable()
+	private void OnDisable()
+	{
+		if (PlayerTimerManager.instance != null)
 		{
-			if (PlayerTimerManager.instance != null)
-			{
-				PlayerTimerManager.instance.OnTimerStopped.RemoveListener(new UnityAction<int, int>(this.OnTimerStopped));
-				PlayerTimerManager.instance.OnLocalTimerStarted.RemoveListener(new UnityAction(this.OnLocalTimerStarted));
-			}
-			this.isInitialized = false;
-			if (this.TickRunning)
+			PlayerTimerManager.instance.OnTimerStopped.RemoveListener(OnTimerStopped);
+			PlayerTimerManager.instance.OnLocalTimerStarted.RemoveListener(OnLocalTimerStarted);
+		}
+		isInitialized = false;
+		if (TickRunning)
+		{
+			TickSystem<object>.RemoveTickCallback(this);
+		}
+	}
+
+	private void OnLocalTimerStarted()
+	{
+		if (!TickRunning)
+		{
+			TickSystem<object>.AddTickCallback(this);
+		}
+	}
+
+	private void OnTimerStopped(int actorNum, int timeDelta)
+	{
+		if (actorNum == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			double value = (double)(uint)timeDelta / 1000.0;
+			displayText.text = "TIME: " + TimeSpan.FromSeconds(value).ToString("mm\\:ss\\:f");
+			if (TickRunning)
 			{
 				TickSystem<object>.RemoveTickCallback(this);
 			}
 		}
+	}
 
-		private void OnLocalTimerStarted()
-		{
-			if (!this.TickRunning)
-			{
-				TickSystem<object>.AddTickCallback(this);
-			}
-		}
+	private void UpdateLatestTime()
+	{
+		float timeForPlayer = PlayerTimerManager.instance.GetTimeForPlayer(NetworkSystem.Instance.LocalPlayer.ActorNumber);
+		displayText.text = "TIME: " + TimeSpan.FromSeconds(timeForPlayer).ToString("mm\\:ss\\:f");
+	}
 
-		private void OnTimerStopped(int actorNum, int timeDelta)
-		{
-			if (actorNum == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				double value = timeDelta / 1000.0;
-				this.displayText.text = "TIME: " + TimeSpan.FromSeconds(value).ToString("mm\\:ss\\:f");
-				if (this.TickRunning)
-				{
-					TickSystem<object>.RemoveTickCallback(this);
-				}
-			}
-		}
-
-		private void UpdateLatestTime()
-		{
-			float timeForPlayer = PlayerTimerManager.instance.GetTimeForPlayer(NetworkSystem.Instance.LocalPlayer.ActorNumber);
-			this.displayText.text = "TIME: " + TimeSpan.FromSeconds((double)timeForPlayer).ToString("mm\\:ss\\:f");
-		}
-
-		public bool TickRunning { get; set; }
-
-		public void Tick()
-		{
-			this.UpdateLatestTime();
-		}
-
-		[SerializeField]
-		private TMP_Text displayText;
-
-		private bool isInitialized;
+	public void Tick()
+	{
+		UpdateLatestTime();
 	}
 }

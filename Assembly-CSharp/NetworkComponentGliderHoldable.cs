@@ -1,13 +1,12 @@
-﻿using System;
 using Fusion;
 
 [NetworkBehaviourWeaved(0)]
 public class NetworkComponentGliderHoldable : NetworkComponentCallbacks
 {
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]

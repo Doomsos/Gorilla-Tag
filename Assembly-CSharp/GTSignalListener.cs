@@ -1,67 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 public class GTSignalListener : MonoBehaviour
 {
-	public int rigActorID { get; private set; } = -1;
-
-	private void Awake()
-	{
-		this.OnListenerAwake();
-	}
-
-	private void OnEnable()
-	{
-		this.RefreshActorID();
-		this.OnListenerEnable();
-		GTSignalRelay.Register(this);
-	}
-
-	private void OnDisable()
-	{
-		GTSignalRelay.Unregister(this);
-		this.OnListenerDisable();
-	}
-
-	private void RefreshActorID()
-	{
-		this.rig = base.GetComponentInParent<VRRig>(true);
-		int rigActorID;
-		if (!(this.rig == null))
-		{
-			NetPlayer creator = this.rig.Creator;
-			rigActorID = ((creator != null) ? creator.ActorNumber : -1);
-		}
-		else
-		{
-			rigActorID = -1;
-		}
-		this.rigActorID = rigActorID;
-	}
-
-	public virtual bool IsReady()
-	{
-		return this._callLimits.CheckCallTime(Time.time);
-	}
-
-	protected virtual void OnListenerAwake()
-	{
-	}
-
-	protected virtual void OnListenerEnable()
-	{
-	}
-
-	protected virtual void OnListenerDisable()
-	{
-	}
-
-	public virtual void HandleSignalReceived(int sender, object[] args)
-	{
-	}
-
 	[Space]
 	public GTSignalID signal;
 
@@ -81,8 +24,56 @@ public class GTSignalListener : MonoBehaviour
 
 	[Space]
 	[SerializeField]
-	private CallLimiter _callLimits = new CallLimiter(10, 0.25f, 0.5f);
+	private CallLimiter _callLimits = new CallLimiter(10, 0.25f);
 
 	[Space]
 	public UnityEvent onSignalReceived;
+
+	[field: NonSerialized]
+	public int rigActorID { get; private set; } = -1;
+
+	private void Awake()
+	{
+		OnListenerAwake();
+	}
+
+	private void OnEnable()
+	{
+		RefreshActorID();
+		OnListenerEnable();
+		GTSignalRelay.Register(this);
+	}
+
+	private void OnDisable()
+	{
+		GTSignalRelay.Unregister(this);
+		OnListenerDisable();
+	}
+
+	private void RefreshActorID()
+	{
+		rig = GetComponentInParent<VRRig>(includeInactive: true);
+		rigActorID = ((rig == null) ? (-1) : (rig.Creator?.ActorNumber ?? (-1)));
+	}
+
+	public virtual bool IsReady()
+	{
+		return _callLimits.CheckCallTime(Time.time);
+	}
+
+	protected virtual void OnListenerAwake()
+	{
+	}
+
+	protected virtual void OnListenerEnable()
+	{
+	}
+
+	protected virtual void OnListenerDisable()
+	{
+	}
+
+	public virtual void HandleSignalReceived(int sender, object[] args)
+	{
+	}
 }

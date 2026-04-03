@@ -1,57 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class RotationAnimation : MonoBehaviour, ITickSystemTick
 {
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		Vector3 vector = Vector3.zero;
-		vector.x = this.amplitude.x * this.x.Evaluate((Time.time - this.baseTime) * this.period.x % 1f);
-		vector.y = this.amplitude.y * this.y.Evaluate((Time.time - this.baseTime) * this.period.y % 1f);
-		vector.z = this.amplitude.z * this.z.Evaluate((Time.time - this.baseTime) * this.period.z % 1f);
-		if (this.releaseSet)
-		{
-			float num = this.release.Evaluate(Time.time - this.releaseTime);
-			vector *= num;
-			if (num < Mathf.Epsilon)
-			{
-				base.enabled = false;
-			}
-		}
-		base.transform.localRotation = Quaternion.Euler(vector) * this.baseRotation;
-	}
-
-	private void Awake()
-	{
-		this.baseRotation = base.transform.localRotation;
-	}
-
-	private void OnEnable()
-	{
-		TickSystem<object>.AddTickCallback(this);
-		this.releaseSet = false;
-		this.baseTime = Time.time;
-	}
-
-	public void ReleaseToDisable()
-	{
-		this.releaseSet = true;
-		this.releaseTime = Time.time;
-	}
-
-	public void CancelRelease()
-	{
-		this.releaseSet = false;
-	}
-
-	private void OnDisable()
-	{
-		base.transform.localRotation = this.baseRotation;
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
 	[SerializeField]
 	private AnimationCurve x;
 
@@ -80,4 +30,53 @@ public class RotationAnimation : MonoBehaviour, ITickSystemTick
 	private float releaseTime;
 
 	private bool releaseSet;
+
+	public bool TickRunning { get; set; }
+
+	public void Tick()
+	{
+		Vector3 zero = Vector3.zero;
+		zero.x = amplitude.x * x.Evaluate((Time.time - baseTime) * period.x % 1f);
+		zero.y = amplitude.y * y.Evaluate((Time.time - baseTime) * period.y % 1f);
+		zero.z = amplitude.z * z.Evaluate((Time.time - baseTime) * period.z % 1f);
+		if (releaseSet)
+		{
+			float num = release.Evaluate(Time.time - releaseTime);
+			zero *= num;
+			if (num < Mathf.Epsilon)
+			{
+				base.enabled = false;
+			}
+		}
+		base.transform.localRotation = Quaternion.Euler(zero) * baseRotation;
+	}
+
+	private void Awake()
+	{
+		baseRotation = base.transform.localRotation;
+	}
+
+	private void OnEnable()
+	{
+		TickSystem<object>.AddTickCallback(this);
+		releaseSet = false;
+		baseTime = Time.time;
+	}
+
+	public void ReleaseToDisable()
+	{
+		releaseSet = true;
+		releaseTime = Time.time;
+	}
+
+	public void CancelRelease()
+	{
+		releaseSet = false;
+	}
+
+	private void OnDisable()
+	{
+		base.transform.localRotation = baseRotation;
+		TickSystem<object>.RemoveTickCallback(this);
+	}
 }

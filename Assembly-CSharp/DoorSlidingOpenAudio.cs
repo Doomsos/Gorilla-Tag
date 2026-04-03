@@ -1,8 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class DoorSlidingOpenAudio : MonoBehaviour, IBuildValidation, ITickSystemTick
 {
+	public GhostLabButton button;
+
+	public AudioSource audioSource;
+
 	bool ITickSystemTick.TickRunning { get; set; }
 
 	private void OnEnable()
@@ -17,12 +20,12 @@ public class DoorSlidingOpenAudio : MonoBehaviour, IBuildValidation, ITickSystem
 
 	public bool BuildValidationCheck()
 	{
-		if (this.button == null)
+		if (button == null)
 		{
 			Debug.LogError("reference button missing for doorslidingopenaudio", base.gameObject);
 			return false;
 		}
-		if (this.audioSource == null)
+		if (audioSource == null)
 		{
 			Debug.LogError("missing audio source on doorslidingopenaudio", base.gameObject);
 			return false;
@@ -32,23 +35,18 @@ public class DoorSlidingOpenAudio : MonoBehaviour, IBuildValidation, ITickSystem
 
 	void ITickSystemTick.Tick()
 	{
-		if (this.button.ghostLab.IsDoorMoving(this.button.forSingleDoor, this.button.buttonIndex))
+		if (button.ghostLab.IsDoorMoving(button.forSingleDoor, button.buttonIndex))
 		{
-			if (!this.audioSource.isPlaying)
+			if (!audioSource.isPlaying)
 			{
-				this.audioSource.time = 0f;
-				this.audioSource.GTPlay();
-				return;
+				audioSource.time = 0f;
+				audioSource.GTPlay();
 			}
 		}
-		else if (this.audioSource.isPlaying)
+		else if (audioSource.isPlaying)
 		{
-			this.audioSource.time = 0f;
-			this.audioSource.GTStop();
+			audioSource.time = 0f;
+			audioSource.GTStop();
 		}
 	}
-
-	public GhostLabButton button;
-
-	public AudioSource audioSource;
 }

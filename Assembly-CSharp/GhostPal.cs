@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using GorillaExtensions;
 using Photon.Pun;
@@ -6,71 +6,6 @@ using UnityEngine;
 
 public class GhostPal : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.rig = base.GetComponentInParent<VRRig>();
-		this.animator = base.GetComponentInChildren<Animator>();
-		this.trailingPosition = base.transform.position;
-		this.triggerAudioClipIndex = this.triggerAudioClips.GetRandomIndex<AudioClip>();
-	}
-
-	private IEnumerator BounceOnTrigger()
-	{
-		float startTime = Time.time;
-		while (Time.time - startTime < this.bounceOnTrigger[this.bounceOnTrigger.length - 1].time)
-		{
-			this.bounceHeight = this.bounceOnTrigger.Evaluate(Time.time - startTime);
-			yield return null;
-		}
-		this.bounceHeight = 0f;
-		yield break;
-	}
-
-	private void LateUpdate()
-	{
-		Vector3 position = this.rig.bodyTransform.position;
-		Vector3 vector = base.transform.parent.position - position;
-		float num = vector.y * 0.5f + this.orbitHeight;
-		vector.y = 0f;
-		float d = vector.magnitude + this.minDistanceFromPlayer;
-		vector = vector.normalized * d;
-		vector.y = num + this.bounceHeight;
-		double num2 = (double)this.orbitSpeed * (PhotonNetwork.InRoom ? ((PhotonNetwork.Time - (double)this.rig.OwningNetPlayer.UserId.GetStaticHash()) * (double)((this.rig.OwningNetPlayer.ActorNumber % 2 == 0) ? 1 : -1)) : Time.timeAsDouble);
-		Vector3 b = new Vector3(this.orbitRadius * (float)Math.Cos(num2), 0f, this.orbitRadius * (float)Math.Sin(num2));
-		Vector3 vector2 = position + vector + b;
-		Vector3 a = vector2 - this.rig.head.rigTarget.position;
-		if (Vector3.Dot(this.rig.head.rigTarget.forward, a.normalized) >= this.lookAtDotProductMin)
-		{
-			this.lookAtTime = Mathf.Min(this.lookAtTime + Time.deltaTime, Mathf.Max(this.rotateTowardsPlayerFromLookTime[this.rotateTowardsPlayerFromLookTime.length - 1].time, this.minLookTimeToTrigger));
-			if (this.lookAtTime >= this.minLookTimeToTrigger && !this.hasTriggered && this.bounceHeight == 0f)
-			{
-				this.animator.SetTrigger(this.friendlyAnimID);
-				this.bounceCoroutine = base.StartCoroutine(this.BounceOnTrigger());
-				this.triggerAudioSource.pitch = Random.Range(this.triggerAudioPitchMinMax.x, this.triggerAudioPitchMinMax.y);
-				this.triggerAudioSource.clip = this.triggerAudioClips[this.triggerAudioClipIndex];
-				this.triggerAudioSource.GTPlay();
-				this.triggerAudioClipIndex = (this.triggerAudioClipIndex + Random.Range(0, this.triggerAudioClips.Length - 1)) % this.triggerAudioClips.Length;
-				this.hasTriggered = true;
-			}
-		}
-		else
-		{
-			this.lookAtTime = Mathf.Max(this.lookAtTime - Time.deltaTime, 0f);
-			if (this.lookAtTime < this.minLookTimeToTrigger && this.hasTriggered && this.bounceHeight == 0f)
-			{
-				this.animator.SetTrigger(this.neutralAnimID);
-				this.hasTriggered = false;
-			}
-		}
-		if ((vector2 - this.trailingPosition).sqrMagnitude > 0.1f)
-		{
-			float t = 1f - Mathf.Exp(-this.faceMovementDirectionStrength * Time.deltaTime);
-			this.trailingPosition = Vector3.Lerp(this.trailingPosition, vector2, t);
-		}
-		Quaternion rotation = Quaternion.Slerp(Quaternion.LookRotation(vector2 - this.trailingPosition, Vector3.up), Quaternion.LookRotation(-a, Vector3.up), this.rotateTowardsPlayerFromLookTime.Evaluate(this.lookAtTime));
-		base.transform.SetPositionAndRotation(vector2, rotation);
-	}
-
 	[SerializeField]
 	private float minDistanceFromPlayer = 1f;
 
@@ -127,4 +62,68 @@ public class GhostPal : MonoBehaviour
 	private int neutralAnimID = Animator.StringToHash("Neutral");
 
 	private int friendlyAnimID = Animator.StringToHash("Friendly");
+
+	private void Awake()
+	{
+		rig = GetComponentInParent<VRRig>();
+		animator = GetComponentInChildren<Animator>();
+		trailingPosition = base.transform.position;
+		triggerAudioClipIndex = triggerAudioClips.GetRandomIndex();
+	}
+
+	private IEnumerator BounceOnTrigger()
+	{
+		float startTime = Time.time;
+		while (Time.time - startTime < bounceOnTrigger[bounceOnTrigger.length - 1].time)
+		{
+			bounceHeight = bounceOnTrigger.Evaluate(Time.time - startTime);
+			yield return null;
+		}
+		bounceHeight = 0f;
+	}
+
+	private void LateUpdate()
+	{
+		Vector3 position = rig.bodyTransform.position;
+		Vector3 vector = base.transform.parent.position - position;
+		float num = vector.y * 0.5f + orbitHeight;
+		vector.y = 0f;
+		float num2 = vector.magnitude + minDistanceFromPlayer;
+		vector = vector.normalized * num2;
+		vector.y = num + bounceHeight;
+		double num3 = (double)orbitSpeed * (PhotonNetwork.InRoom ? ((PhotonNetwork.Time - (double)rig.OwningNetPlayer.UserId.GetStaticHash()) * (double)((rig.OwningNetPlayer.ActorNumber % 2 == 0) ? 1 : (-1))) : Time.timeAsDouble);
+		Vector3 vector2 = new Vector3(orbitRadius * (float)Math.Cos(num3), 0f, orbitRadius * (float)Math.Sin(num3));
+		Vector3 vector3 = position + vector + vector2;
+		Vector3 vector4 = vector3 - rig.head.rigTarget.position;
+		if (Vector3.Dot(rig.head.rigTarget.forward, vector4.normalized) >= lookAtDotProductMin)
+		{
+			lookAtTime = Mathf.Min(lookAtTime + Time.deltaTime, Mathf.Max(rotateTowardsPlayerFromLookTime[rotateTowardsPlayerFromLookTime.length - 1].time, minLookTimeToTrigger));
+			if (lookAtTime >= minLookTimeToTrigger && !hasTriggered && bounceHeight == 0f)
+			{
+				animator.SetTrigger(friendlyAnimID);
+				bounceCoroutine = StartCoroutine(BounceOnTrigger());
+				triggerAudioSource.pitch = UnityEngine.Random.Range(triggerAudioPitchMinMax.x, triggerAudioPitchMinMax.y);
+				triggerAudioSource.clip = triggerAudioClips[triggerAudioClipIndex];
+				triggerAudioSource.GTPlay();
+				triggerAudioClipIndex = (triggerAudioClipIndex + UnityEngine.Random.Range(0, triggerAudioClips.Length - 1)) % triggerAudioClips.Length;
+				hasTriggered = true;
+			}
+		}
+		else
+		{
+			lookAtTime = Mathf.Max(lookAtTime - Time.deltaTime, 0f);
+			if (lookAtTime < minLookTimeToTrigger && hasTriggered && bounceHeight == 0f)
+			{
+				animator.SetTrigger(neutralAnimID);
+				hasTriggered = false;
+			}
+		}
+		if ((vector3 - trailingPosition).sqrMagnitude > 0.1f)
+		{
+			float t = 1f - Mathf.Exp((0f - faceMovementDirectionStrength) * Time.deltaTime);
+			trailingPosition = Vector3.Lerp(trailingPosition, vector3, t);
+		}
+		Quaternion rotation = Quaternion.Slerp(Quaternion.LookRotation(vector3 - trailingPosition, Vector3.up), Quaternion.LookRotation(-vector4, Vector3.up), rotateTowardsPlayerFromLookTime.Evaluate(lookAtTime));
+		base.transform.SetPositionAndRotation(vector3, rotation);
+	}
 }

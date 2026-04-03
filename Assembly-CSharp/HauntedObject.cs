@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using GorillaTagScripts;
 using UnityEngine;
@@ -7,104 +7,6 @@ using UnityEngine.Serialization;
 
 public class HauntedObject : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.lurkerGhost = GameObject.FindGameObjectWithTag("LurkerGhost");
-		LurkerGhost lurkerGhost;
-		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(out lurkerGhost))
-		{
-			LurkerGhost lurkerGhost2 = lurkerGhost;
-			lurkerGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(lurkerGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
-		}
-		this.wanderingGhost = GameObject.FindGameObjectWithTag("WanderingGhost");
-		WanderingGhost wanderingGhost;
-		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(out wanderingGhost))
-		{
-			WanderingGhost wanderingGhost2 = wanderingGhost;
-			wanderingGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(wanderingGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
-		}
-		this.animators = base.transform.GetComponentsInChildren<Animator>();
-	}
-
-	private void OnDestroy()
-	{
-		LurkerGhost lurkerGhost;
-		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(out lurkerGhost))
-		{
-			LurkerGhost lurkerGhost2 = lurkerGhost;
-			lurkerGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(lurkerGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
-		}
-		WanderingGhost wanderingGhost;
-		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(out wanderingGhost))
-		{
-			WanderingGhost wanderingGhost2 = wanderingGhost;
-			wanderingGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(wanderingGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
-		}
-	}
-
-	private void Start()
-	{
-		this.initialPos = base.transform.position;
-		this.passedTime = 0f;
-		this.lightPassedTime = 0f;
-	}
-
-	private void TriggerEffects(GameObject go)
-	{
-		if (base.gameObject != go)
-		{
-			return;
-		}
-		if (this.rattle)
-		{
-			base.StartCoroutine(this.Shake());
-		}
-		if (this.audioSource && this.hauntedSound)
-		{
-			this.audioSource.GTPlayOneShot(this.hauntedSound, 1f);
-		}
-		if (this.FBXprefab)
-		{
-			ObjectPools.instance.Instantiate(this.FBXprefab, base.transform.position, true);
-		}
-		if (this.TurnOffLight != null)
-		{
-			base.StartCoroutine(this.TurnOff());
-		}
-		foreach (Animator animator in this.animators)
-		{
-			if (animator)
-			{
-				animator.SetTrigger(HauntedObject._animHaunted);
-			}
-		}
-	}
-
-	private IEnumerator Shake()
-	{
-		while (this.passedTime < this.duration)
-		{
-			this.passedTime += Time.deltaTime;
-			base.transform.position = new Vector3(this.initialPos.x + Mathf.Sin(Time.time * this.speed) * this.amount, this.initialPos.y + Mathf.Sin(Time.time * this.speed) * this.amount, this.initialPos.z);
-			yield return null;
-		}
-		this.passedTime = 0f;
-		yield break;
-	}
-
-	private IEnumerator TurnOff()
-	{
-		this.TurnOffLight.gameObject.SetActive(false);
-		while (this.lightPassedTime < this.TurnOffDuration)
-		{
-			this.lightPassedTime += Time.deltaTime;
-			yield return null;
-		}
-		this.TurnOffLight.SetActive(true);
-		this.lightPassedTime = 0f;
-		yield break;
-	}
-
 	private static readonly int _animHaunted = Animator.StringToHash("Haunted");
 
 	private const string _lurkerGhost = "LurkerGhost";
@@ -145,4 +47,97 @@ public class HauntedObject : MonoBehaviour
 
 	[FormerlySerializedAs("rattlingSound")]
 	public AudioClip hauntedSound;
+
+	private void Awake()
+	{
+		lurkerGhost = GameObject.FindGameObjectWithTag("LurkerGhost");
+		if (lurkerGhost != null && lurkerGhost.TryGetComponent<LurkerGhost>(out var component))
+		{
+			LurkerGhost obj = component;
+			obj.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(obj.TriggerHauntedObjects, new UnityAction<GameObject>(TriggerEffects));
+		}
+		wanderingGhost = GameObject.FindGameObjectWithTag("WanderingGhost");
+		if (wanderingGhost != null && wanderingGhost.TryGetComponent<WanderingGhost>(out var component2))
+		{
+			WanderingGhost obj2 = component2;
+			obj2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(obj2.TriggerHauntedObjects, new UnityAction<GameObject>(TriggerEffects));
+		}
+		animators = base.transform.GetComponentsInChildren<Animator>();
+	}
+
+	private void OnDestroy()
+	{
+		if (lurkerGhost != null && lurkerGhost.TryGetComponent<LurkerGhost>(out var component))
+		{
+			LurkerGhost obj = component;
+			obj.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(obj.TriggerHauntedObjects, new UnityAction<GameObject>(TriggerEffects));
+		}
+		if (wanderingGhost != null && wanderingGhost.TryGetComponent<WanderingGhost>(out var component2))
+		{
+			WanderingGhost obj2 = component2;
+			obj2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(obj2.TriggerHauntedObjects, new UnityAction<GameObject>(TriggerEffects));
+		}
+	}
+
+	private void Start()
+	{
+		initialPos = base.transform.position;
+		passedTime = 0f;
+		lightPassedTime = 0f;
+	}
+
+	private void TriggerEffects(GameObject go)
+	{
+		if (base.gameObject != go)
+		{
+			return;
+		}
+		if (rattle)
+		{
+			StartCoroutine(Shake());
+		}
+		if ((bool)audioSource && (bool)hauntedSound)
+		{
+			audioSource.GTPlayOneShot(hauntedSound);
+		}
+		if ((bool)FBXprefab)
+		{
+			ObjectPools.instance.Instantiate(FBXprefab, base.transform.position);
+		}
+		if (TurnOffLight != null)
+		{
+			StartCoroutine(TurnOff());
+		}
+		Animator[] array = animators;
+		foreach (Animator animator in array)
+		{
+			if ((bool)animator)
+			{
+				animator.SetTrigger(_animHaunted);
+			}
+		}
+	}
+
+	private IEnumerator Shake()
+	{
+		while (passedTime < duration)
+		{
+			passedTime += Time.deltaTime;
+			base.transform.position = new Vector3(initialPos.x + Mathf.Sin(Time.time * speed) * amount, initialPos.y + Mathf.Sin(Time.time * speed) * amount, initialPos.z);
+			yield return null;
+		}
+		passedTime = 0f;
+	}
+
+	private IEnumerator TurnOff()
+	{
+		TurnOffLight.gameObject.SetActive(value: false);
+		while (lightPassedTime < TurnOffDuration)
+		{
+			lightPassedTime += Time.deltaTime;
+			yield return null;
+		}
+		TurnOffLight.SetActive(value: true);
+		lightPassedTime = 0f;
+	}
 }

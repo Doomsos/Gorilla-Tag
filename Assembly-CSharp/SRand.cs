@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -6,28 +6,42 @@ using UnityEngine;
 [Serializable]
 public struct SRand
 {
+	[SerializeField]
+	private uint _seed;
+
+	[SerializeField]
+	private uint _state;
+
+	private const double MAX_AS_DOUBLE = 268435456.0;
+
+	private const uint MAX_PLUS_ONE = 268435457u;
+
+	private const double STEP_SIZE = 3.725290298461914E-09;
+
+	private const float ONE_THIRD = 1f / 3f;
+
 	public SRand(int seed)
 	{
-		this._seed = (uint)seed;
-		this._state = this._seed;
+		_seed = (uint)seed;
+		_state = _seed;
 	}
 
 	public SRand(uint seed)
 	{
-		this._seed = seed;
-		this._state = this._seed;
+		_seed = seed;
+		_state = _seed;
 	}
 
 	public SRand(long seed)
 	{
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public SRand(DateTime seed)
 	{
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public SRand(string seed)
@@ -36,8 +50,8 @@ public struct SRand
 		{
 			throw new ArgumentException("Seed cannot be null or empty", "seed");
 		}
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public SRand(byte[] seed)
@@ -46,13 +60,13 @@ public struct SRand
 		{
 			throw new ArgumentException("Seed cannot be null or empty", "seed");
 		}
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public double NextDouble()
 	{
-		return this.NextState() % 268435457U * 3.725290298461914E-09;
+		return (double)(NextState() % 268435457) * 3.725290298461914E-09;
 	}
 
 	public double NextDouble(double max)
@@ -61,7 +75,7 @@ public struct SRand
 		{
 			return 0.0;
 		}
-		return this.NextDouble() * max;
+		return NextDouble() * max;
 	}
 
 	public double NextDouble(double min, double max)
@@ -71,38 +85,38 @@ public struct SRand
 		{
 			return min;
 		}
-		double num2 = this.NextDouble() * num;
+		double num2 = NextDouble() * num;
 		return min + num2;
 	}
 
 	public float NextFloat()
 	{
-		return (float)this.NextDouble();
+		return (float)NextDouble();
 	}
 
 	public float NextFloat(float max)
 	{
-		return (float)this.NextDouble((double)max);
+		return (float)NextDouble(max);
 	}
 
 	public float NextFloat(float min, float max)
 	{
-		return (float)this.NextDouble((double)min, (double)max);
+		return (float)NextDouble(min, max);
 	}
 
 	public bool NextBool()
 	{
-		return this.NextState() % 2U == 1U;
+		return NextState() % 2 == 1;
 	}
 
 	public uint NextUInt()
 	{
-		return this.NextState();
+		return NextState();
 	}
 
 	public int NextInt()
 	{
-		return (int)this.NextState();
+		return (int)NextState();
 	}
 
 	public int NextInt(int max)
@@ -111,7 +125,7 @@ public struct SRand
 		{
 			return 0;
 		}
-		return (int)((ulong)this.NextState() % (ulong)((long)max));
+		return (int)(NextState() % max);
 	}
 
 	public int NextInt(int min, int max)
@@ -121,7 +135,7 @@ public struct SRand
 		{
 			return min;
 		}
-		return min + this.NextInt(num);
+		return min + NextInt(num);
 	}
 
 	public int NextIntWithExclusion(int min, int max, int exclude)
@@ -131,7 +145,7 @@ public struct SRand
 		{
 			return min;
 		}
-		int num2 = min + 1 + this.NextInt(num);
+		int num2 = min + 1 + NextInt(num);
 		if (num2 > exclude)
 		{
 			return num2;
@@ -143,31 +157,35 @@ public struct SRand
 	{
 		if (exclude == exclude2)
 		{
-			return this.NextIntWithExclusion(min, max, exclude);
+			return NextIntWithExclusion(min, max, exclude);
 		}
 		int num = max - min - 2;
 		if (num <= 0)
 		{
 			return min;
 		}
-		int num2 = min + 2 + this.NextInt(num);
-		int num3;
-		int num4;
+		int num2 = min + 2 + NextInt(num);
+		int num5;
+		int num6;
 		if (exclude >= exclude2)
 		{
-			num3 = exclude2 + 1;
-			num4 = exclude;
+			int num3 = exclude2 + 1;
+			int num4 = exclude;
+			num5 = num3;
+			num6 = num4;
 		}
 		else
 		{
-			num3 = exclude + 1;
-			num4 = exclude2;
+			int num7 = exclude + 1;
+			int num4 = exclude2;
+			num5 = num7;
+			num6 = num4;
 		}
-		if (num2 <= num3)
+		if (num2 <= num5)
 		{
 			return num2 - 2;
 		}
-		if (num2 <= num4)
+		if (num2 <= num6)
 		{
 			return num2 - 1;
 		}
@@ -176,24 +194,24 @@ public struct SRand
 
 	public byte NextByte()
 	{
-		return (byte)(this.NextState() & 255U);
+		return (byte)(NextState() & 0xFF);
 	}
 
 	public Color32 NextColor32()
 	{
-		byte r = this.NextByte();
-		byte g = this.NextByte();
-		byte b = this.NextByte();
+		byte r = NextByte();
+		byte g = NextByte();
+		byte b = NextByte();
 		return new Color32(r, g, b, byte.MaxValue);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointInsideSphere(float radius)
 	{
-		float num = this.NextFloat() * 2f - 1f;
-		float num2 = this.NextFloat() * 2f - 1f;
-		float num3 = this.NextFloat() * 2f - 1f;
-		float num4 = MathF.Pow(this.NextFloat(), 0.33333334f);
+		float num = NextFloat() * 2f - 1f;
+		float num2 = NextFloat() * 2f - 1f;
+		float num3 = NextFloat() * 2f - 1f;
+		float num4 = MathF.Pow(NextFloat(), 1f / 3f);
 		float num5 = 1f / MathF.Sqrt(num * num + num2 * num2 + num3 * num3);
 		return new Vector3(num * num5 * num4 * radius, num2 * num5 * num4 * radius, num3 * num5 * num4 * radius);
 	}
@@ -201,9 +219,9 @@ public struct SRand
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointOnSphere(float radius)
 	{
-		float num = this.NextFloat() * 2f - 1f;
-		float num2 = this.NextFloat() * 2f - 1f;
-		float num3 = this.NextFloat() * 2f - 1f;
+		float num = NextFloat() * 2f - 1f;
+		float num2 = NextFloat() * 2f - 1f;
+		float num3 = NextFloat() * 2f - 1f;
 		float num4 = 1f / MathF.Sqrt(num * num + num2 * num2 + num3 * num3);
 		return new Vector3(num * num4 * radius, num2 * num4 * radius, num3 * num4 * radius);
 	}
@@ -211,77 +229,76 @@ public struct SRand
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointInsideBox(Vector3 extents)
 	{
-		float num = this.NextFloat() - 0.5f;
-		float num2 = this.NextFloat() - 0.5f;
-		float num3 = this.NextFloat() - 0.5f;
-		return new Vector3(num * extents.x, num2 * extents.y, num3 * extents.z);
+		float num = NextFloat() - 0.5f;
+		float num2 = NextFloat() - 0.5f;
+		return new Vector3(z: (NextFloat() - 0.5f) * extents.z, x: num * extents.x, y: num2 * extents.y);
 	}
 
 	public Color NextColor()
 	{
-		float r = this.NextFloat();
-		float g = this.NextFloat();
-		float b = this.NextFloat();
+		float r = NextFloat();
+		float g = NextFloat();
+		float b = NextFloat();
 		return new Color(r, g, b, 1f);
 	}
 
 	public void Shuffle<T>(T[] array)
 	{
-		int i = array.Length;
-		while (i > 1)
+		int num = array.Length;
+		while (num > 1)
 		{
-			int num = this.NextInt(i--);
-			int num2 = i;
+			int num2 = NextInt(num--);
 			int num3 = num;
-			T t = array[num];
-			T t2 = array[i];
-			array[num2] = t;
-			array[num3] = t2;
+			int num4 = num2;
+			T val = array[num2];
+			T val2 = array[num];
+			array[num3] = val;
+			array[num4] = val2;
 		}
 	}
 
 	public void Shuffle<T>(List<T> list)
 	{
-		int i = list.Count;
-		while (i > 1)
+		int count = list.Count;
+		while (count > 1)
 		{
-			int num = this.NextInt(i--);
-			int index = i;
+			int num = NextInt(count--);
+			int index = count;
 			int index2 = num;
-			T value = list[num];
-			T value2 = list[i];
-			list[index] = value;
-			list[index2] = value2;
+			T val = list[num];
+			T val2 = list[count];
+			T val3 = (list[index] = val);
+			val3 = (list[index2] = val2);
 		}
 	}
 
 	public void Reset()
 	{
-		this._state = this._seed;
+		_state = _seed;
 	}
 
 	public void Reset(int seed)
 	{
-		this._seed = (uint)seed;
-		this._state = this._seed;
+		_seed = (uint)seed;
+		_state = _seed;
 	}
 
 	public void Reset(uint seed)
 	{
-		this._seed = seed;
-		this._state = this._seed;
+		_seed = seed;
+		_state = _seed;
 	}
 
 	public void Reset(long seed)
 	{
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public void Reset(DateTime seed)
 	{
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public void Reset(string seed)
@@ -290,8 +307,8 @@ public struct SRand
 		{
 			throw new ArgumentException("Seed cannot be null or empty", "seed");
 		}
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	public void Reset(byte[] seed)
@@ -300,41 +317,34 @@ public struct SRand
 		{
 			throw new ArgumentException("Seed cannot be null or empty", "seed");
 		}
-		this._seed = (uint)StaticHash.Compute(seed);
-		this._state = this._seed;
+		_seed = (uint)StaticHash.Compute(seed);
+		_state = _seed;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private uint NextState()
 	{
-		return this._state = this.Mix(this._state + 184402071U);
+		return _state = Mix(_state + 184402071);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private uint Mix(uint x)
 	{
-		x = (x >> 17 ^ x) * 3982152891U;
-		x = (x >> 11 ^ x) * 2890668881U;
-		x = (x >> 15 ^ x) * 830770091U;
-		x = (x >> 14 ^ x);
+		x = ((x >> 17) ^ x) * 3982152891u;
+		x = ((x >> 11) ^ x) * 2890668881u;
+		x = ((x >> 15) ^ x) * 830770091;
+		x = (x >> 14) ^ x;
 		return x;
 	}
 
 	public override int GetHashCode()
 	{
-		return StaticHash.Compute((int)this._seed, (int)this._state);
+		return StaticHash.Compute((int)_seed, (int)_state);
 	}
 
 	public override string ToString()
 	{
-		return string.Format("{0} {{ {1}: {2:X8} {3}: {4:X8} }}", new object[]
-		{
-			"SRand",
-			"_seed",
-			this._seed,
-			"_state",
-			this._state
-		});
+		return string.Format("{0} {{ {1}: {2:X8} {3}: {4:X8} }}", "SRand", "_seed", _seed, "_state", _state);
 	}
 
 	public static SRand New()
@@ -371,18 +381,4 @@ public struct SRand
 	{
 		return new SRand(seed);
 	}
-
-	[SerializeField]
-	private uint _seed;
-
-	[SerializeField]
-	private uint _state;
-
-	private const double MAX_AS_DOUBLE = 268435456.0;
-
-	private const uint MAX_PLUS_ONE = 268435457U;
-
-	private const double STEP_SIZE = 3.725290298461914E-09;
-
-	private const float ONE_THIRD = 0.33333334f;
 }

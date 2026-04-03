@@ -1,65 +1,16 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class Oscillator : MonoBehaviour
 {
-	public void Init(Vector3 center, Vector3 radius, Vector3 frequency, Vector3 startPhase)
+	public enum WaveTypeEnum
 	{
-		this.Center = center;
-		this.Radius = radius;
-		this.Frequency = frequency;
-		this.Phase = startPhase;
+		Sine,
+		Square,
+		Triangle
 	}
 
-	private float SampleWave(float phase)
-	{
-		switch (this.WaveType)
-		{
-		case Oscillator.WaveTypeEnum.Sine:
-			return Mathf.Sin(phase);
-		case Oscillator.WaveTypeEnum.Square:
-			phase = Mathf.Repeat(phase, 6.2831855f);
-			if (phase >= 3.1415927f)
-			{
-				return -1f;
-			}
-			return 1f;
-		case Oscillator.WaveTypeEnum.Triangle:
-			phase = Mathf.Repeat(phase, 6.2831855f);
-			if (phase < 1.5707964f)
-			{
-				return phase / 1.5707964f;
-			}
-			if (phase < 3.1415927f)
-			{
-				return 1f - (phase - 1.5707964f) / 1.5707964f;
-			}
-			if (phase < 4.712389f)
-			{
-				return (3.1415927f - phase) / 1.5707964f;
-			}
-			return (phase - 4.712389f) / 1.5707964f - 1f;
-		default:
-			return 0f;
-		}
-	}
-
-	public void OnEnable()
-	{
-		this.m_initCenter = base.transform.position;
-	}
-
-	public void Update()
-	{
-		this.Phase += this.Frequency * 2f * 3.1415927f * Time.deltaTime;
-		Vector3 position = this.UseCenter ? this.Center : this.m_initCenter;
-		position.x += this.Radius.x * this.SampleWave(this.Phase.x);
-		position.y += this.Radius.y * this.SampleWave(this.Phase.y);
-		position.z += this.Radius.z * this.SampleWave(this.Phase.z);
-		base.transform.position = position;
-	}
-
-	public Oscillator.WaveTypeEnum WaveType;
+	public WaveTypeEnum WaveType;
 
 	private Vector3 m_initCenter;
 
@@ -73,10 +24,59 @@ public class Oscillator : MonoBehaviour
 
 	public Vector3 Phase;
 
-	public enum WaveTypeEnum
+	public void Init(Vector3 center, Vector3 radius, Vector3 frequency, Vector3 startPhase)
 	{
-		Sine,
-		Square,
-		Triangle
+		Center = center;
+		Radius = radius;
+		Frequency = frequency;
+		Phase = startPhase;
+	}
+
+	private float SampleWave(float phase)
+	{
+		switch (WaveType)
+		{
+		case WaveTypeEnum.Sine:
+			return Mathf.Sin(phase);
+		case WaveTypeEnum.Square:
+			phase = Mathf.Repeat(phase, MathF.PI * 2f);
+			if (!(phase < MathF.PI))
+			{
+				return -1f;
+			}
+			return 1f;
+		case WaveTypeEnum.Triangle:
+			phase = Mathf.Repeat(phase, MathF.PI * 2f);
+			if (phase < MathF.PI / 2f)
+			{
+				return phase / (MathF.PI / 2f);
+			}
+			if (phase < MathF.PI)
+			{
+				return 1f - (phase - MathF.PI / 2f) / (MathF.PI / 2f);
+			}
+			if (phase < 4.712389f)
+			{
+				return (MathF.PI - phase) / (MathF.PI / 2f);
+			}
+			return (phase - 4.712389f) / (MathF.PI / 2f) - 1f;
+		default:
+			return 0f;
+		}
+	}
+
+	public void OnEnable()
+	{
+		m_initCenter = base.transform.position;
+	}
+
+	public void Update()
+	{
+		Phase += Frequency * 2f * MathF.PI * Time.deltaTime;
+		Vector3 position = (UseCenter ? Center : m_initCenter);
+		position.x += Radius.x * SampleWave(Phase.x);
+		position.y += Radius.y * SampleWave(Phase.y);
+		position.z += Radius.z * SampleWave(Phase.z);
+		base.transform.position = position;
 	}
 }

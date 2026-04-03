@@ -1,40 +1,68 @@
-﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using GorillaNetworking;
 using PlayFab;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class TextureFromURL : MonoBehaviour
 {
-	private void OnEnable()
+	private enum Source
 	{
-		if (this.data.Length == 0)
-		{
-			return;
-		}
-		if (this.source == TextureFromURL.Source.TitleData)
-		{
-			this.LoadFromTitleData();
-			return;
-		}
-		this.applyRemoteTexture(this.data);
+		TitleData,
+		URL
 	}
 
-	private void LoadFromTitleData()
+	[SerializeField]
+	private Renderer _renderer;
+
+	[SerializeField]
+	private Source source;
+
+	[Tooltip("If Source is set to 'TitleData' Data should be the id of the title data entry that defines an image URL. If Source is set to 'URL' Data should be a URL that points to an image.")]
+	[SerializeField]
+	private string data;
+
+	private Texture2D texture;
+
+	private int maxTitleDataAttempts = 10;
+
+	private void OnEnable()
 	{
-		TextureFromURL.<LoadFromTitleData>d__7 <LoadFromTitleData>d__;
-		<LoadFromTitleData>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<LoadFromTitleData>d__.<>4__this = this;
-		<LoadFromTitleData>d__.<>1__state = -1;
-		<LoadFromTitleData>d__.<>t__builder.Start<TextureFromURL.<LoadFromTitleData>d__7>(ref <LoadFromTitleData>d__);
+		if (data.Length != 0)
+		{
+			if (source == Source.TitleData)
+			{
+				LoadFromTitleData();
+			}
+			else
+			{
+				applyRemoteTexture(data);
+			}
+		}
+	}
+
+	private async void LoadFromTitleData()
+	{
+		for (int attempt = 0; attempt < maxTitleDataAttempts; attempt++)
+		{
+			if (!(PlayFabTitleDataCache.Instance == null))
+			{
+				break;
+			}
+			await Task.Delay(1000);
+		}
+		if (PlayFabTitleDataCache.Instance != null)
+		{
+			PlayFabTitleDataCache.Instance.GetTitleData(data, OnTitleDataRequestComplete, OnPlayFabError);
+		}
 	}
 
 	private void OnDisable()
 	{
-		if (this.texture != null)
+		if (texture != null)
 		{
-			Object.Destroy(this.texture);
-			this.texture = null;
+			Object.Destroy(texture);
+			texture = null;
 		}
 	}
 
@@ -49,46 +77,30 @@ public class TextureFromURL : MonoBehaviour
 		{
 			imageUrl = imageUrl.Substring(1, imageUrl.Length - 2);
 		}
-		this.applyRemoteTexture(imageUrl);
+		applyRemoteTexture(imageUrl);
 	}
 
-	private void applyRemoteTexture(string imageUrl)
+	private async void applyRemoteTexture(string imageUrl)
 	{
-		TextureFromURL.<applyRemoteTexture>d__11 <applyRemoteTexture>d__;
-		<applyRemoteTexture>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<applyRemoteTexture>d__.<>4__this = this;
-		<applyRemoteTexture>d__.imageUrl = imageUrl;
-		<applyRemoteTexture>d__.<>1__state = -1;
-		<applyRemoteTexture>d__.<>t__builder.Start<TextureFromURL.<applyRemoteTexture>d__11>(ref <applyRemoteTexture>d__);
+		texture = await GetRemoteTexture(imageUrl);
+		if (texture != null)
+		{
+			_renderer.material.mainTexture = texture;
+		}
 	}
 
-	private Task<Texture2D> GetRemoteTexture(string url)
+	private async Task<Texture2D> GetRemoteTexture(string url)
 	{
-		TextureFromURL.<GetRemoteTexture>d__12 <GetRemoteTexture>d__;
-		<GetRemoteTexture>d__.<>t__builder = AsyncTaskMethodBuilder<Texture2D>.Create();
-		<GetRemoteTexture>d__.url = url;
-		<GetRemoteTexture>d__.<>1__state = -1;
-		<GetRemoteTexture>d__.<>t__builder.Start<TextureFromURL.<GetRemoteTexture>d__12>(ref <GetRemoteTexture>d__);
-		return <GetRemoteTexture>d__.<>t__builder.Task;
-	}
-
-	[SerializeField]
-	private Renderer _renderer;
-
-	[SerializeField]
-	private TextureFromURL.Source source;
-
-	[Tooltip("If Source is set to 'TitleData' Data should be the id of the title data entry that defines an image URL. If Source is set to 'URL' Data should be a URL that points to an image.")]
-	[SerializeField]
-	private string data;
-
-	private Texture2D texture;
-
-	private int maxTitleDataAttempts = 10;
-
-	private enum Source
-	{
-		TitleData,
-		URL
+		using UnityWebRequest wr = UnityWebRequestTexture.GetTexture(url);
+		UnityWebRequestAsyncOperation asyncOp = wr.SendWebRequest();
+		while (!asyncOp.isDone)
+		{
+			await Task.Delay(1000);
+		}
+		if (wr.result == UnityWebRequest.Result.Success)
+		{
+			return DownloadHandlerTexture.GetContent(wr);
+		}
+		return null;
 	}
 }

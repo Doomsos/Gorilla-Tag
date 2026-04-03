@@ -1,136 +1,130 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
-namespace UnityChan
+namespace UnityChan;
+
+public class AutoBlink : MonoBehaviour
 {
-	public class AutoBlink : MonoBehaviour
+	private enum Status
 	{
-		private void Awake()
-		{
-		}
+		Close,
+		HalfClose,
+		Open
+	}
 
-		private void Start()
-		{
-			this.ResetTimer();
-			base.StartCoroutine("RandomChange");
-		}
+	public bool isActive = true;
 
-		private void ResetTimer()
-		{
-			this.timeRemining = this.timeBlink;
-			this.timerStarted = false;
-		}
+	public SkinnedMeshRenderer ref_SMR_EYE_DEF;
 
-		private void Update()
+	public SkinnedMeshRenderer ref_SMR_EL_DEF;
+
+	public float ratio_Close = 85f;
+
+	public float ratio_HalfClose = 20f;
+
+	[HideInInspector]
+	public float ratio_Open;
+
+	private bool timerStarted;
+
+	private bool isBlink;
+
+	public float timeBlink = 0.4f;
+
+	private float timeRemining;
+
+	public float threshold = 0.3f;
+
+	public float interval = 3f;
+
+	private Status eyeStatus;
+
+	private void Awake()
+	{
+	}
+
+	private void Start()
+	{
+		ResetTimer();
+		StartCoroutine("RandomChange");
+	}
+
+	private void ResetTimer()
+	{
+		timeRemining = timeBlink;
+		timerStarted = false;
+	}
+
+	private void Update()
+	{
+		if (!timerStarted)
 		{
-			if (!this.timerStarted)
+			eyeStatus = Status.Close;
+			timerStarted = true;
+		}
+		if (timerStarted)
+		{
+			timeRemining -= Time.deltaTime;
+			if (timeRemining <= 0f)
 			{
-				this.eyeStatus = AutoBlink.Status.Close;
-				this.timerStarted = true;
+				eyeStatus = Status.Open;
+				ResetTimer();
 			}
-			if (this.timerStarted)
+			else if (timeRemining <= timeBlink * 0.3f)
 			{
-				this.timeRemining -= Time.deltaTime;
-				if (this.timeRemining <= 0f)
-				{
-					this.eyeStatus = AutoBlink.Status.Open;
-					this.ResetTimer();
-					return;
-				}
-				if (this.timeRemining <= this.timeBlink * 0.3f)
-				{
-					this.eyeStatus = AutoBlink.Status.HalfClose;
-				}
+				eyeStatus = Status.HalfClose;
 			}
 		}
+	}
 
-		private void LateUpdate()
+	private void LateUpdate()
+	{
+		if (isActive && isBlink)
 		{
-			if (this.isActive && this.isBlink)
+			switch (eyeStatus)
 			{
-				switch (this.eyeStatus)
-				{
-				case AutoBlink.Status.Close:
-					this.SetCloseEyes();
-					return;
-				case AutoBlink.Status.HalfClose:
-					this.SetHalfCloseEyes();
-					return;
-				case AutoBlink.Status.Open:
-					this.SetOpenEyes();
-					this.isBlink = false;
-					break;
-				default:
-					return;
-				}
+			case Status.Close:
+				SetCloseEyes();
+				break;
+			case Status.HalfClose:
+				SetHalfCloseEyes();
+				break;
+			case Status.Open:
+				SetOpenEyes();
+				isBlink = false;
+				break;
 			}
 		}
+	}
 
-		private void SetCloseEyes()
-		{
-			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_Close);
-			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_Close);
-		}
+	private void SetCloseEyes()
+	{
+		ref_SMR_EYE_DEF.SetBlendShapeWeight(6, ratio_Close);
+		ref_SMR_EL_DEF.SetBlendShapeWeight(6, ratio_Close);
+	}
 
-		private void SetHalfCloseEyes()
-		{
-			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_HalfClose);
-			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_HalfClose);
-		}
+	private void SetHalfCloseEyes()
+	{
+		ref_SMR_EYE_DEF.SetBlendShapeWeight(6, ratio_HalfClose);
+		ref_SMR_EL_DEF.SetBlendShapeWeight(6, ratio_HalfClose);
+	}
 
-		private void SetOpenEyes()
-		{
-			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_Open);
-			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_Open);
-		}
+	private void SetOpenEyes()
+	{
+		ref_SMR_EYE_DEF.SetBlendShapeWeight(6, ratio_Open);
+		ref_SMR_EL_DEF.SetBlendShapeWeight(6, ratio_Open);
+	}
 
-		private IEnumerator RandomChange()
+	private IEnumerator RandomChange()
+	{
+		while (true)
 		{
-			for (;;)
+			float num = Random.Range(0f, 1f);
+			if (!isBlink && num > threshold)
 			{
-				float num = Random.Range(0f, 1f);
-				if (!this.isBlink && num > this.threshold)
-				{
-					this.isBlink = true;
-				}
-				yield return new WaitForSeconds(this.interval);
+				isBlink = true;
 			}
-			yield break;
-		}
-
-		public bool isActive = true;
-
-		public SkinnedMeshRenderer ref_SMR_EYE_DEF;
-
-		public SkinnedMeshRenderer ref_SMR_EL_DEF;
-
-		public float ratio_Close = 85f;
-
-		public float ratio_HalfClose = 20f;
-
-		[HideInInspector]
-		public float ratio_Open;
-
-		private bool timerStarted;
-
-		private bool isBlink;
-
-		public float timeBlink = 0.4f;
-
-		private float timeRemining;
-
-		public float threshold = 0.3f;
-
-		public float interval = 3f;
-
-		private AutoBlink.Status eyeStatus;
-
-		private enum Status
-		{
-			Close,
-			HalfClose,
-			Open
+			yield return new WaitForSeconds(interval);
 		}
 	}
 }

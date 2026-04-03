@@ -1,155 +1,156 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaNetworking;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class PlayerTimerBoardLine : MonoBehaviour
 {
-	public class PlayerTimerBoardLine : MonoBehaviour
+	public string playerNameVisible;
+
+	public string playerTimeStr;
+
+	private float playerTimeSeconds;
+
+	public NetPlayer linePlayer;
+
+	public VRRig playerVRRig;
+
+	public PlayerTimerBoard parentBoard;
+
+	internal RigContainer rigContainer;
+
+	private string currentNickname;
+
+	public void ResetData()
 	{
-		public void ResetData()
-		{
-			this.linePlayer = null;
-			this.currentNickname = string.Empty;
-			this.playerTimeStr = string.Empty;
-			this.playerTimeSeconds = 0f;
-		}
+		linePlayer = null;
+		currentNickname = string.Empty;
+		playerTimeStr = string.Empty;
+		playerTimeSeconds = 0f;
+	}
 
-		public void SetLineData(NetPlayer netPlayer)
+	public void SetLineData(NetPlayer netPlayer)
+	{
+		if (netPlayer.InRoom && netPlayer != linePlayer)
 		{
-			if (!netPlayer.InRoom || netPlayer == this.linePlayer)
+			linePlayer = netPlayer;
+			if (VRRigCache.Instance.TryGetVrrig(netPlayer, out var playerRig))
 			{
-				return;
+				rigContainer = playerRig;
+				playerVRRig = playerRig.Rig;
 			}
-			this.linePlayer = netPlayer;
-			RigContainer rigContainer;
-			if (VRRigCache.Instance.TryGetVrrig(netPlayer, out rigContainer))
+			InitializeLine();
+		}
+	}
+
+	public void InitializeLine()
+	{
+		currentNickname = string.Empty;
+		UpdatePlayerText();
+		UpdateTimeText();
+	}
+
+	public void UpdateLine()
+	{
+		if (linePlayer != null)
+		{
+			if (playerNameVisible != playerVRRig.playerNameVisible)
 			{
-				this.rigContainer = rigContainer;
-				this.playerVRRig = rigContainer.Rig;
+				UpdatePlayerText();
+				parentBoard.IsDirty = true;
 			}
-			this.InitializeLine();
-		}
-
-		public void InitializeLine()
-		{
-			this.currentNickname = string.Empty;
-			this.UpdatePlayerText();
-			this.UpdateTimeText();
-		}
-
-		public void UpdateLine()
-		{
-			if (this.linePlayer != null)
+			string value = playerTimeStr;
+			UpdateTimeText();
+			if (!playerTimeStr.Equals(value))
 			{
-				if (this.playerNameVisible != this.playerVRRig.playerNameVisible)
+				parentBoard.IsDirty = true;
+			}
+		}
+	}
+
+	private void UpdatePlayerText()
+	{
+		try
+		{
+			if (rigContainer.IsNull() || playerVRRig.IsNull())
+			{
+				playerNameVisible = NormalizeName(linePlayer.NickName != currentNickname, linePlayer.NickName);
+				currentNickname = linePlayer.NickName;
+			}
+			else if (rigContainer.Initialized)
+			{
+				playerNameVisible = playerVRRig.playerNameVisible;
+			}
+			else if (currentNickname.IsNullOrEmpty() || GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(linePlayer.UserId))
+			{
+				playerNameVisible = NormalizeName(linePlayer.NickName != currentNickname, linePlayer.NickName);
+			}
+		}
+		catch (Exception)
+		{
+			playerNameVisible = linePlayer.DefaultName;
+			MonkeAgent.instance.SendReport("NmError", linePlayer.UserId, linePlayer.NickName);
+		}
+	}
+
+	private void UpdateTimeText()
+	{
+		if (linePlayer != null && PlayerTimerManager.instance != null)
+		{
+			playerTimeSeconds = PlayerTimerManager.instance.GetLastDurationForPlayer(linePlayer.ActorNumber);
+			if (playerTimeSeconds > 0f)
+			{
+				playerTimeStr = TimeSpan.FromSeconds(playerTimeSeconds).ToString("mm\\:ss\\:ff");
+			}
+			else
+			{
+				playerTimeStr = "--:--:--";
+			}
+		}
+		else
+		{
+			playerTimeStr = "--:--:--";
+		}
+	}
+
+	public string NormalizeName(bool doIt, string text)
+	{
+		if (doIt)
+		{
+			if (GorillaComputer.instance.CheckAutoBanListForName(text))
+			{
+				text = new string(Array.FindAll(text.ToCharArray(), (char c) => Utils.IsASCIILetterOrDigit(c)));
+				if (text.Length > 12)
 				{
-					this.UpdatePlayerText();
-					this.parentBoard.IsDirty = true;
+					text = text.Substring(0, 12);
 				}
-				string value = this.playerTimeStr;
-				this.UpdateTimeText();
-				if (!this.playerTimeStr.Equals(value))
-				{
-					this.parentBoard.IsDirty = true;
-				}
+				text = text.ToUpper();
+			}
+			else
+			{
+				text = "BADGORILLA";
+				MonkeAgent.instance.SendReport("evading the name ban", linePlayer.UserId, linePlayer.NickName);
 			}
 		}
+		return text;
+	}
 
-		private void UpdatePlayerText()
+	public static int CompareByTotalTime(PlayerTimerBoardLine lineA, PlayerTimerBoardLine lineB)
+	{
+		if (lineA.playerTimeSeconds > 0f && lineB.playerTimeSeconds > 0f)
 		{
-			try
-			{
-				if (this.rigContainer.IsNull() || this.playerVRRig.IsNull())
-				{
-					this.playerNameVisible = this.NormalizeName(this.linePlayer.NickName != this.currentNickname, this.linePlayer.NickName);
-					this.currentNickname = this.linePlayer.NickName;
-				}
-				else if (this.rigContainer.Initialized)
-				{
-					this.playerNameVisible = this.playerVRRig.playerNameVisible;
-				}
-				else if (this.currentNickname.IsNullOrEmpty() || GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(this.linePlayer.UserId))
-				{
-					this.playerNameVisible = this.NormalizeName(this.linePlayer.NickName != this.currentNickname, this.linePlayer.NickName);
-				}
-			}
-			catch (Exception)
-			{
-				this.playerNameVisible = this.linePlayer.DefaultName;
-				MonkeAgent.instance.SendReport("NmError", this.linePlayer.UserId, this.linePlayer.NickName);
-			}
+			return lineA.playerTimeSeconds.CompareTo(lineB.playerTimeSeconds);
 		}
-
-		private void UpdateTimeText()
+		if (lineA.playerTimeSeconds <= 0f)
 		{
-			if (this.linePlayer == null || !(PlayerTimerManager.instance != null))
-			{
-				this.playerTimeStr = "--:--:--";
-				return;
-			}
-			this.playerTimeSeconds = PlayerTimerManager.instance.GetLastDurationForPlayer(this.linePlayer.ActorNumber);
-			if (this.playerTimeSeconds > 0f)
-			{
-				this.playerTimeStr = TimeSpan.FromSeconds((double)this.playerTimeSeconds).ToString("mm\\:ss\\:ff");
-				return;
-			}
-			this.playerTimeStr = "--:--:--";
+			return 1;
 		}
-
-		public string NormalizeName(bool doIt, string text)
+		if (lineB.playerTimeSeconds <= 0f)
 		{
-			if (doIt)
-			{
-				if (GorillaComputer.instance.CheckAutoBanListForName(text))
-				{
-					text = new string(Array.FindAll<char>(text.ToCharArray(), (char c) => Utils.IsASCIILetterOrDigit(c)));
-					if (text.Length > 12)
-					{
-						text = text.Substring(0, 12);
-					}
-					text = text.ToUpper();
-				}
-				else
-				{
-					text = "BADGORILLA";
-					MonkeAgent.instance.SendReport("evading the name ban", this.linePlayer.UserId, this.linePlayer.NickName);
-				}
-			}
-			return text;
+			return -1;
 		}
-
-		public static int CompareByTotalTime(PlayerTimerBoardLine lineA, PlayerTimerBoardLine lineB)
-		{
-			if (lineA.playerTimeSeconds > 0f && lineB.playerTimeSeconds > 0f)
-			{
-				return lineA.playerTimeSeconds.CompareTo(lineB.playerTimeSeconds);
-			}
-			if (lineA.playerTimeSeconds <= 0f)
-			{
-				return 1;
-			}
-			if (lineB.playerTimeSeconds <= 0f)
-			{
-				return -1;
-			}
-			return 0;
-		}
-
-		public string playerNameVisible;
-
-		public string playerTimeStr;
-
-		private float playerTimeSeconds;
-
-		public NetPlayer linePlayer;
-
-		public VRRig playerVRRig;
-
-		public PlayerTimerBoard parentBoard;
-
-		internal RigContainer rigContainer;
-
-		private string currentNickname;
+		return 0;
 	}
 }

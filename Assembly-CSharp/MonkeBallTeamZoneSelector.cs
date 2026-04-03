@@ -1,16 +1,15 @@
-﻿using System;
 using UnityEngine;
 
 public class MonkeBallTeamZoneSelector : MonoBehaviour
 {
+	public int teamId;
+
 	private void OnTriggerEnter(Collider other)
 	{
-		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(other, true);
-		if (gamePlayer != null && gamePlayer.IsLocalPlayer() && gamePlayer.teamId != this.teamId)
+		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(other, bodyOnly: true);
+		if (gamePlayer != null && gamePlayer.IsLocalPlayer() && gamePlayer.teamId != teamId)
 		{
-			MonkeBallGame.Instance.RequestSetTeam(this.teamId);
+			MonkeBallGame.Instance.RequestSetTeam(teamId);
 		}
 	}
-
-	public int teamId;
 }

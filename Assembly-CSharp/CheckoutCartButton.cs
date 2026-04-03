@@ -1,53 +1,60 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaNetworking;
 using UnityEngine;
 
 public class CheckoutCartButton : GorillaPressableButton
 {
+	public CosmeticsController.CosmeticItem currentCosmeticItem;
+
+	[SerializeField]
+	private SpriteRenderer currentCosmeticSprite;
+
+	[SerializeField]
+	private Sprite blankSprite;
+
+	public string noCosmeticText;
+
 	public override void Start()
 	{
-		this.currentCosmeticItem = CosmeticsController.instance.nullItem;
+		currentCosmeticItem = CosmeticsController.instance.nullItem;
 	}
 
 	public override void UpdateColor()
 	{
-		if (this.currentCosmeticItem.itemName == "null")
+		if (currentCosmeticItem.itemName == "null")
 		{
-			if (this.buttonRenderer.IsNotNull())
+			if (buttonRenderer.IsNotNull())
 			{
-				this.buttonRenderer.material = this.unpressedMaterial;
+				buttonRenderer.material = unpressedMaterial;
 			}
-			if (this.myText.IsNotNull())
+			if (myText.IsNotNull())
 			{
-				this.myText.text = this.noCosmeticText;
+				myText.text = noCosmeticText;
 			}
-			if (this.myTmpText.IsNotNull())
+			if (myTmpText.IsNotNull())
 			{
-				this.myTmpText.text = this.noCosmeticText;
+				myTmpText.text = noCosmeticText;
 			}
-			if (this.myTmpText2.IsNotNull())
+			if (myTmpText2.IsNotNull())
 			{
-				this.myTmpText2.text = this.noCosmeticText;
-				return;
+				myTmpText2.text = noCosmeticText;
 			}
+		}
+		else if (isOn)
+		{
+			if (buttonRenderer.IsNotNull())
+			{
+				buttonRenderer.material = pressedMaterial;
+			}
+			SetOnText(myText.IsNotNull(), myTmpText.IsNotNull(), myTmpText2.IsNotNull());
 		}
 		else
 		{
-			if (this.isOn)
+			if (buttonRenderer.IsNotNull())
 			{
-				if (this.buttonRenderer.IsNotNull())
-				{
-					this.buttonRenderer.material = this.pressedMaterial;
-				}
-				this.SetOnText(this.myText.IsNotNull(), this.myTmpText.IsNotNull(), this.myTmpText2.IsNotNull());
-				return;
+				buttonRenderer.material = unpressedMaterial;
 			}
-			if (this.buttonRenderer.IsNotNull())
-			{
-				this.buttonRenderer.material = this.unpressedMaterial;
-			}
-			this.SetOffText(this.myText.IsNotNull(), this.myTmpText.IsNotNull(), this.myTmpText2.IsNotNull());
+			SetOffText(myText.IsNotNull(), myTmpText.IsNotNull(), myTmpText2.IsNotNull());
 		}
 	}
 
@@ -59,33 +66,23 @@ public class CheckoutCartButton : GorillaPressableButton
 
 	public void SetItem(CosmeticsController.CosmeticItem item, bool isCurrentItemToBuy)
 	{
-		this.currentCosmeticItem = item;
-		if (this.currentCosmeticSprite.IsNotNull())
+		currentCosmeticItem = item;
+		if (currentCosmeticSprite.IsNotNull())
 		{
-			this.currentCosmeticSprite.sprite = this.currentCosmeticItem.itemPicture;
+			currentCosmeticSprite.sprite = currentCosmeticItem.itemPicture;
 		}
-		this.isOn = isCurrentItemToBuy;
-		this.UpdateColor();
+		isOn = isCurrentItemToBuy;
+		UpdateColor();
 	}
 
 	public void ClearItem()
 	{
-		this.currentCosmeticItem = CosmeticsController.instance.nullItem;
-		if (this.currentCosmeticSprite.IsNotNull())
+		currentCosmeticItem = CosmeticsController.instance.nullItem;
+		if (currentCosmeticSprite.IsNotNull())
 		{
-			this.currentCosmeticSprite.sprite = this.blankSprite;
+			currentCosmeticSprite.sprite = blankSprite;
 		}
-		this.isOn = false;
-		this.UpdateColor();
+		isOn = false;
+		UpdateColor();
 	}
-
-	public CosmeticsController.CosmeticItem currentCosmeticItem;
-
-	[SerializeField]
-	private SpriteRenderer currentCosmeticSprite;
-
-	[SerializeField]
-	private Sprite blankSprite;
-
-	public string noCosmeticText;
 }

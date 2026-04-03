@@ -1,13 +1,12 @@
-﻿using System;
 using UnityEngine;
 
 public class AnimationEventController : MonoBehaviour
 {
+	public GameObject fxAttack;
+
 	public void TriggerAttackVFX()
 	{
-		this.fxAttack.SetActive(false);
-		this.fxAttack.SetActive(true);
+		fxAttack.SetActive(value: false);
+		fxAttack.SetActive(value: true);
 	}
-
-	public GameObject fxAttack;
 }

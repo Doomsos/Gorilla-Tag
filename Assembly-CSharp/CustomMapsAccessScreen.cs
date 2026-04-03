@@ -1,107 +1,9 @@
-﻿using System;
 using GorillaNetworking;
 using TMPro;
 using UnityEngine;
 
 public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 {
-	private void LateUpdate()
-	{
-		if (CustomMapsTerminal.GetDriverID() == -2)
-		{
-			return;
-		}
-		if (CustomMapsTerminal.IsDriver)
-		{
-			return;
-		}
-		if (GorillaComputer.instance == null)
-		{
-			return;
-		}
-		if (this.useNametags == GorillaComputer.instance.NametagsEnabled)
-		{
-			return;
-		}
-		this.useNametags = GorillaComputer.instance.NametagsEnabled;
-		this.SetDriverName();
-	}
-
-	public override void Initialize()
-	{
-	}
-
-	public override void Show()
-	{
-		base.Show();
-		if (this.displayedText == string.Empty)
-		{
-			this.displayedText = this.defaultText;
-		}
-		this.errorText.gameObject.SetActive(false);
-		this.terminalControlPromptText.gameObject.SetActive(true);
-		this.terminalControlPromptText.text = this.displayedText;
-	}
-
-	public override void Hide()
-	{
-		this.errorText.gameObject.SetActive(false);
-		this.terminalControlPromptText.gameObject.SetActive(false);
-		base.Hide();
-	}
-
-	public void Reset()
-	{
-		this.errorText.gameObject.SetActive(false);
-		this.terminalControlPromptText.gameObject.SetActive(true);
-		this.displayedText = this.defaultText;
-	}
-
-	public void SetDetailsScreenForDriver()
-	{
-		this.displayedText = this.detailsScreenText;
-	}
-
-	public void SetDriverName()
-	{
-		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
-		string str;
-		if (NetworkSystem.Instance.InRoom)
-		{
-			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID(CustomMapsTerminal.GetDriverID());
-			str = netPlayerByID.DefaultName;
-			if (this.useNametags && flag)
-			{
-				RigContainer rigContainer;
-				if (netPlayerByID.IsLocal)
-				{
-					str = netPlayerByID.NickName;
-				}
-				else if (VRRigCache.Instance.TryGetVrrig(netPlayerByID, out rigContainer))
-				{
-					str = rigContainer.Rig.playerNameVisible;
-				}
-			}
-		}
-		else
-		{
-			str = ((this.useNametags && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
-		}
-		this.displayedText = "TERMINAL CONTROLLED BY: " + str;
-		if (!this.isControlScreen)
-		{
-			this.displayedText += this.detailsScreenText;
-		}
-		this.terminalControlPromptText.text = this.displayedText;
-	}
-
-	public void DisplayError(string errorMessage)
-	{
-		this.terminalControlPromptText.gameObject.SetActive(false);
-		this.errorText.text = errorMessage;
-		this.errorText.gameObject.SetActive(true);
-	}
-
 	[SerializeField]
 	private TMP_Text errorText;
 
@@ -119,4 +21,88 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 	private string displayedText = string.Empty;
 
 	private bool useNametags;
+
+	private void LateUpdate()
+	{
+		if (CustomMapsTerminal.GetDriverID() != -2 && !CustomMapsTerminal.IsDriver && !(GorillaComputer.instance == null) && useNametags != GorillaComputer.instance.NametagsEnabled)
+		{
+			useNametags = GorillaComputer.instance.NametagsEnabled;
+			SetDriverName();
+		}
+	}
+
+	public override void Initialize()
+	{
+	}
+
+	public override void Show()
+	{
+		base.Show();
+		if (displayedText == string.Empty)
+		{
+			displayedText = defaultText;
+		}
+		errorText.gameObject.SetActive(value: false);
+		terminalControlPromptText.gameObject.SetActive(value: true);
+		terminalControlPromptText.text = displayedText;
+	}
+
+	public override void Hide()
+	{
+		errorText.gameObject.SetActive(value: false);
+		terminalControlPromptText.gameObject.SetActive(value: false);
+		base.Hide();
+	}
+
+	public void Reset()
+	{
+		errorText.gameObject.SetActive(value: false);
+		terminalControlPromptText.gameObject.SetActive(value: true);
+		displayedText = defaultText;
+	}
+
+	public void SetDetailsScreenForDriver()
+	{
+		displayedText = detailsScreenText;
+	}
+
+	public void SetDriverName()
+	{
+		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
+		string text;
+		if (NetworkSystem.Instance.InRoom)
+		{
+			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID(CustomMapsTerminal.GetDriverID());
+			text = netPlayerByID.DefaultName;
+			if (useNametags && flag)
+			{
+				RigContainer playerRig;
+				if (netPlayerByID.IsLocal)
+				{
+					text = netPlayerByID.NickName;
+				}
+				else if (VRRigCache.Instance.TryGetVrrig(netPlayerByID, out playerRig))
+				{
+					text = playerRig.Rig.playerNameVisible;
+				}
+			}
+		}
+		else
+		{
+			text = ((useNametags && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
+		}
+		displayedText = "TERMINAL CONTROLLED BY: " + text;
+		if (!isControlScreen)
+		{
+			displayedText += detailsScreenText;
+		}
+		terminalControlPromptText.text = displayedText;
+	}
+
+	public void DisplayError(string errorMessage)
+	{
+		terminalControlPromptText.gameObject.SetActive(value: false);
+		errorText.text = errorMessage;
+		errorText.gameObject.SetActive(value: true);
+	}
 }

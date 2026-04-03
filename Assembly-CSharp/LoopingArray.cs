@@ -1,78 +1,31 @@
-﻿using System;
 using GorillaTag;
 
 public class LoopingArray<T> : ObjectPoolEvents
 {
-	public int Length
+	public class Pool : ObjectPool<LoopingArray<T>>
 	{
-		get
+		private readonly int m_size;
+
+		private Pool(int amount)
+			: base(amount)
 		{
-			return this.m_length;
 		}
-	}
 
-	public int CurrentIndex
-	{
-		get
+		public Pool(int size, int amount)
+			: this(size, amount, amount)
 		{
-			return this.m_currentIndex;
 		}
-	}
 
-	public T this[int index]
-	{
-		get
+		public Pool(int size, int initialAmount, int maxAmount)
 		{
-			return this.m_array[index];
+			m_size = size;
+			InitializePool(initialAmount, maxAmount);
 		}
-		set
+
+		public override LoopingArray<T> CreateInstance()
 		{
-			this.m_array[index] = value;
+			return new LoopingArray<T>(m_size);
 		}
-	}
-
-	public LoopingArray() : this(0)
-	{
-	}
-
-	public LoopingArray(int capicity)
-	{
-		this.m_length = capicity;
-		this.m_array = new T[capicity];
-		this.Clear();
-	}
-
-	public int AddAndIncrement(in T value)
-	{
-		int currentIndex = this.m_currentIndex;
-		this.m_array[this.m_currentIndex] = value;
-		this.m_currentIndex = (this.m_currentIndex + 1) % this.m_length;
-		return currentIndex;
-	}
-
-	public int IncrementAndAdd(in T value)
-	{
-		this.m_currentIndex = (this.m_currentIndex + 1) % this.m_length;
-		this.m_array[this.m_currentIndex] = value;
-		return this.m_currentIndex;
-	}
-
-	public void Clear()
-	{
-		this.m_currentIndex = 0;
-		for (int i = 0; i < this.m_array.Length; i++)
-		{
-			this.m_array[i] = default(T);
-		}
-	}
-
-	void ObjectPoolEvents.OnTaken()
-	{
-		this.Clear();
-	}
-
-	void ObjectPoolEvents.OnReturned()
-	{
 	}
 
 	private int m_length;
@@ -81,27 +34,64 @@ public class LoopingArray<T> : ObjectPoolEvents
 
 	private T[] m_array;
 
-	public class Pool : ObjectPool<LoopingArray<T>>
+	public int Length => m_length;
+
+	public int CurrentIndex => m_currentIndex;
+
+	public T this[int index]
 	{
-		private Pool(int amount) : base(amount)
+		get
 		{
+			return m_array[index];
 		}
-
-		public Pool(int size, int amount) : this(size, amount, amount)
+		set
 		{
+			m_array[index] = value;
 		}
+	}
 
-		public Pool(int size, int initialAmount, int maxAmount)
+	public LoopingArray()
+		: this(0)
+	{
+	}
+
+	public LoopingArray(int capicity)
+	{
+		m_length = capicity;
+		m_array = new T[capicity];
+		Clear();
+	}
+
+	public int AddAndIncrement(in T value)
+	{
+		int currentIndex = m_currentIndex;
+		m_array[m_currentIndex] = value;
+		m_currentIndex = (m_currentIndex + 1) % m_length;
+		return currentIndex;
+	}
+
+	public int IncrementAndAdd(in T value)
+	{
+		m_currentIndex = (m_currentIndex + 1) % m_length;
+		m_array[m_currentIndex] = value;
+		return m_currentIndex;
+	}
+
+	public void Clear()
+	{
+		m_currentIndex = 0;
+		for (int i = 0; i < m_array.Length; i++)
 		{
-			this.m_size = size;
-			base.InitializePool(initialAmount, maxAmount);
+			m_array[i] = default(T);
 		}
+	}
 
-		public override LoopingArray<T> CreateInstance()
-		{
-			return new LoopingArray<T>(this.m_size);
-		}
+	void ObjectPoolEvents.OnTaken()
+	{
+		Clear();
+	}
 
-		private readonly int m_size;
+	void ObjectPoolEvents.OnReturned()
+	{
 	}
 }

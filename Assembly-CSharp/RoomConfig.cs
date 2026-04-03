@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
@@ -7,11 +6,31 @@ using Photon.Realtime;
 
 public class RoomConfig
 {
+	public const string Room_GameModePropKey = "gameMode";
+
+	public const string Room_PlatformPropKey = "platform";
+
+	public bool isPublic;
+
+	public bool isJoinable;
+
+	public byte MaxPlayers;
+
+	public ExitGames.Client.Photon.Hashtable CustomProps = new ExitGames.Client.Photon.Hashtable();
+
+	public bool createIfMissing;
+
+	public string[] joinFriendIDs;
+
 	public bool IsJoiningWithFriends
 	{
 		get
 		{
-			return this.joinFriendIDs != null && this.joinFriendIDs.Length != 0;
+			if (joinFriendIDs != null)
+			{
+				return joinFriendIDs.Length != 0;
+			}
+			return false;
 		}
 	}
 
@@ -25,39 +44,38 @@ public class RoomConfig
 				i--;
 			}
 		}
-		this.joinFriendIDs = new string[friendIDs.Count];
+		joinFriendIDs = new string[friendIDs.Count];
 		for (int j = 0; j < friendIDs.Count; j++)
 		{
-			this.joinFriendIDs[j] = friendIDs[j];
+			joinFriendIDs[j] = friendIDs[j];
 		}
 	}
 
 	public void ClearExpectedUsers()
 	{
-		if (this.joinFriendIDs == null || this.joinFriendIDs.Length == 0)
+		if (joinFriendIDs != null && joinFriendIDs.Length != 0)
 		{
-			return;
+			joinFriendIDs = new string[0];
 		}
-		this.joinFriendIDs = new string[0];
 	}
 
 	public RoomOptions ToPUNOpts()
 	{
 		return new RoomOptions
 		{
-			IsVisible = this.isPublic,
-			IsOpen = this.isJoinable,
-			MaxPlayers = this.MaxPlayers,
-			CustomRoomProperties = this.CustomProps,
+			IsVisible = isPublic,
+			IsOpen = isJoinable,
+			MaxPlayers = MaxPlayers,
+			CustomRoomProperties = CustomProps,
 			PublishUserId = true,
-			CustomRoomPropertiesForLobby = this.AutoCustomLobbyProps()
+			CustomRoomPropertiesForLobby = AutoCustomLobbyProps()
 		};
 	}
 
 	public void SetFusionOpts(NetworkRunner runnerInst)
 	{
-		runnerInst.SessionInfo.IsVisible = this.isPublic;
-		runnerInst.SessionInfo.IsOpen = this.isJoinable;
+		runnerInst.SessionInfo.IsVisible = isPublic;
+		runnerInst.SessionInfo.IsOpen = isJoinable;
 	}
 
 	public static RoomConfig SPConfig()
@@ -83,29 +101,13 @@ public class RoomConfig
 
 	private string[] AutoCustomLobbyProps()
 	{
-		string[] array = new string[this.CustomProps.Count];
+		string[] array = new string[CustomProps.Count];
 		int num = 0;
-		foreach (DictionaryEntry dictionaryEntry in this.CustomProps)
+		foreach (DictionaryEntry customProp in CustomProps)
 		{
-			array[num] = (string)dictionaryEntry.Key;
+			array[num] = (string)customProp.Key;
 			num++;
 		}
 		return array;
 	}
-
-	public const string Room_GameModePropKey = "gameMode";
-
-	public const string Room_PlatformPropKey = "platform";
-
-	public bool isPublic;
-
-	public bool isJoinable;
-
-	public byte MaxPlayers;
-
-	public Hashtable CustomProps = new Hashtable();
-
-	public bool createIfMissing;
-
-	public string[] joinFriendIDs;
 }

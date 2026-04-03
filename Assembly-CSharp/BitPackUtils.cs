@@ -1,8 +1,26 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public static class BitPackUtils
 {
+	private enum QAxis
+	{
+		X,
+		Y,
+		Z,
+		W
+	}
+
+	private const float STEP_1023 = 0.0009775171f;
+
+	private static readonly float[] kRadialLogLUT;
+
+	private const float QPackMax = 0.707107f;
+
+	private const float QPackScale = 361.33145f;
+
+	private const float QPackInvScale = 0.0027675421f;
+
 	public static ushort PackRelativePos16(Vector3 pos, Vector3 center, float radius)
 	{
 		Vector3 vector = pos - center;
@@ -12,7 +30,7 @@ public static class BitPackUtils
 			return 0;
 		}
 		float num = Mathf.Sqrt(sqrMagnitude);
-		float num2 = num.SafeDivide(radius, 1E-06f);
+		float num2 = num.SafeDivide(radius);
 		if (num2 == 0f)
 		{
 			return 0;
@@ -27,19 +45,19 @@ public static class BitPackUtils
 		float num3 = float.MaxValue;
 		float num4 = float.MaxValue;
 		float num5 = float.MaxValue;
-		uint num6 = 0U;
-		uint num7 = 0U;
-		uint num8 = 0U;
-		for (uint num9 = 0U; num9 < 32U; num9 += 1U)
+		uint num6 = 0u;
+		uint num7 = 0u;
+		uint num8 = 0u;
+		for (uint num9 = 0u; num9 < 32; num9++)
 		{
-			float num10 = BitPackUtils.kRadialLogLUT[(int)num9];
-			if (x.Approx1(1E-06f))
+			float num10 = kRadialLogLUT[num9];
+			if (x.Approx1())
 			{
-				num6 = 31U;
+				num6 = 31u;
 			}
-			else if (x.Approx0(1E-06f))
+			else if (x.Approx0())
 			{
-				num6 = 16U;
+				num6 = 16u;
 			}
 			else
 			{
@@ -50,13 +68,13 @@ public static class BitPackUtils
 					num6 = num9;
 				}
 			}
-			if (y.Approx1(1E-06f))
+			if (y.Approx1())
 			{
-				num7 = 31U;
+				num7 = 31u;
 			}
-			else if (y.Approx0(1E-06f))
+			else if (y.Approx0())
 			{
-				num7 = 16U;
+				num7 = 16u;
 			}
 			else
 			{
@@ -67,25 +85,24 @@ public static class BitPackUtils
 					num7 = num9;
 				}
 			}
-			if (z.Approx1(1E-06f))
+			if (z.Approx1())
 			{
-				num8 = 31U;
+				num8 = 31u;
+				continue;
 			}
-			else if (z.Approx0(1E-06f))
+			if (z.Approx0())
 			{
-				num8 = 16U;
+				num8 = 16u;
+				continue;
 			}
-			else
+			float num13 = Math.Abs(z - num10);
+			if (num13 < num5)
 			{
-				float num13 = Math.Abs(z - num10);
-				if (num13 < num5)
-				{
-					num5 = num13;
-					num8 = num9;
-				}
+				num5 = num13;
+				num8 = num9;
 			}
 		}
-		return (ushort)(num6 << 10 | num7 << 5 | num8);
+		return (ushort)((num6 << 10) | (num7 << 5) | num8);
 	}
 
 	public static Vector3 UnpackRelativePos16(ushort data, Vector3 center, float radius, bool snapToRadius = false)
@@ -94,16 +111,16 @@ public static class BitPackUtils
 		{
 			return Vector3.zero;
 		}
-		float num = BitPackUtils.kRadialLogLUT[(int)((uint)data >> 10 & 31U)];
-		float num2 = BitPackUtils.kRadialLogLUT[(int)((uint)data >> 5 & 31U)];
-		float num3 = BitPackUtils.kRadialLogLUT[(int)(data & 31)];
+		float num = kRadialLogLUT[(data >>> 10) & 0x1F];
+		float num2 = kRadialLogLUT[(data >>> 5) & 0x1F];
+		float num3 = kRadialLogLUT[data & 0x1F];
 		float num4 = num * radius;
 		float num5 = num2 * radius;
 		float num6 = num3 * radius;
 		if (snapToRadius)
 		{
 			float num7 = num4 * num4 + num5 * num5 + num6 * num6;
-			float num8 = radius * radius * 0.765625f;
+			float num8 = radius * radius * (49f / 64f);
 			if (num7 >= num8)
 			{
 				float num9 = 1f / Mathf.Sqrt(num7);
@@ -122,16 +139,16 @@ public static class BitPackUtils
 		uint num = (uint)Mathf.Clamp(vector.x * 1023f, 0f, 1023f);
 		uint num2 = (uint)Mathf.Clamp(vector.y * 1023f, 0f, 1023f);
 		uint num3 = (uint)Mathf.Clamp(vector.z * 1023f, 0f, 1023f);
-		return num << 20 | num2 << 10 | num3;
+		return (num << 20) | (num2 << 10) | num3;
 	}
 
 	public static Vector3 UnpackRelativePos(uint data, Vector3 min, Vector3 max)
 	{
 		Vector3 vector = max - min;
-		uint num = data >> 20 & 1023U;
-		uint num2 = data >> 10 & 1023U;
-		uint num3 = data & 1023U;
-		return new Vector3(num * 0.0009775171f * vector.x + min.x, num2 * 0.0009775171f * vector.y + min.y, num3 * 0.0009775171f * vector.z + min.z);
+		uint num = (data >> 20) & 0x3FF;
+		uint num2 = (data >> 10) & 0x3FF;
+		uint num3 = data & 0x3FF;
+		return new Vector3((float)num * 0.0009775171f * vector.x + min.x, (float)num2 * 0.0009775171f * vector.y + min.y, (float)num3 * 0.0009775171f * vector.z + min.z);
 	}
 
 	public static uint PackRotation(Quaternion q, bool normalize = true)
@@ -144,86 +161,64 @@ public static class BitPackUtils
 		float num2 = Mathf.Abs(q.y);
 		float num3 = Mathf.Abs(q.z);
 		float num4 = Mathf.Abs(q.w);
-		int num5;
-		if (num > num2 && num > num3 && num > num4)
-		{
-			num5 = 0;
-		}
-		else if (num2 > num3 && num2 > num4)
-		{
-			num5 = 1;
-		}
-		else if (num3 > num4)
-		{
-			num5 = 2;
-		}
-		else
-		{
-			num5 = 3;
-		}
+		int num5 = ((!(num > num2) || !(num > num3) || !(num > num4)) ? ((num2 > num3 && num2 > num4) ? 1 : ((!(num3 > num4)) ? 3 : 2)) : 0);
 		float num6 = Mathf.Sign(q[num5]);
-		Vector3 vector;
-		if (num5 == 0)
+		Vector3 vector = default(Vector3);
+		switch (num5)
 		{
+		case 0:
 			vector.x = q.y * num6;
 			vector.y = q.z * num6;
 			vector.z = q.w * num6;
-		}
-		else if (num5 == 1)
-		{
+			break;
+		case 1:
 			vector.x = q.x * num6;
 			vector.y = q.z * num6;
 			vector.z = q.w * num6;
-		}
-		else if (num5 == 2)
-		{
+			break;
+		case 2:
 			vector.x = q.x * num6;
 			vector.y = q.y * num6;
 			vector.z = q.w * num6;
-		}
-		else
-		{
+			break;
+		default:
 			vector.x = q.x * num6;
 			vector.y = q.y * num6;
 			vector.z = q.z * num6;
+			break;
 		}
 		uint num7 = (uint)((vector.x * 0.5f + 0.5f) * 1023f);
 		uint num8 = (uint)((vector.y * 0.5f + 0.5f) * 1023f);
 		uint num9 = (uint)((vector.z * 0.5f + 0.5f) * 1023f);
-		return (uint)(num5 << 30 | (int)((int)num7 << 20) | (int)((int)num8 << 10) | (int)num9);
+		return (uint)(num5 << 30) | (num7 << 20) | (num8 << 10) | num9;
 	}
 
 	public static Quaternion UnpackRotation(uint data)
 	{
 		uint num = data >> 30;
-		uint num2 = data >> 20 & 1023U;
-		uint num3 = data >> 10 & 1023U;
-		uint num4 = data & 1023U;
-		float num5 = num2 * 0.0009775171f * 2f - 1f;
-		float num6 = num3 * 0.0009775171f * 2f - 1f;
-		float num7 = num4 * 0.0009775171f * 2f - 1f;
+		uint num2 = (data >> 20) & 0x3FF;
+		uint num3 = (data >> 10) & 0x3FF;
+		uint num4 = data & 0x3FF;
+		float num5 = (float)num2 * 0.0009775171f * 2f - 1f;
+		float num6 = (float)num3 * 0.0009775171f * 2f - 1f;
+		float num7 = (float)num4 * 0.0009775171f * 2f - 1f;
 		float num8 = Mathf.Sqrt(1f - (num5 * num5 + num6 * num6 + num7 * num7));
-		if (num == 0U)
+		return num switch
 		{
-			return new Quaternion(num8, num5, num6, num7);
-		}
-		if (num == 1U)
-		{
-			return new Quaternion(num5, num8, num6, num7);
-		}
-		if (num == 2U)
-		{
-			return new Quaternion(num5, num6, num8, num7);
-		}
-		return new Quaternion(num5, num6, num7, num8);
+			0u => new Quaternion(num8, num5, num6, num7), 
+			1u => new Quaternion(num5, num8, num6, num7), 
+			2u => new Quaternion(num5, num6, num8, num7), 
+			_ => new Quaternion(num5, num6, num7, num8), 
+		};
 	}
 
 	static BitPackUtils()
 	{
+		kRadialLogLUT = new float[32];
 		for (int i = 0; i < 16; i++)
 		{
-			BitPackUtils.kRadialLogLUT[i + 16] = -Mathf.Log(1f - (float)i / 16f, 16f);
-			BitPackUtils.kRadialLogLUT[15 - i] = -BitPackUtils.kRadialLogLUT[i + 16];
+			kRadialLogLUT[i + 16] = 0f - Mathf.Log(1f - (float)i / 16f, 16f);
+			kRadialLogLUT[15 - i] = 0f - kRadialLogLUT[i + 16];
 		}
 	}
 
@@ -235,124 +230,123 @@ public static class BitPackUtils
 		float num3 = Mathf.Abs(q.z);
 		float num4 = Mathf.Abs(q.w);
 		float num5 = num;
-		BitPackUtils.QAxis qaxis = BitPackUtils.QAxis.X;
+		QAxis qAxis = QAxis.X;
 		if (num2 > num5)
 		{
 			num5 = num2;
-			qaxis = BitPackUtils.QAxis.Y;
+			qAxis = QAxis.Y;
 		}
 		if (num3 > num5)
 		{
 			num5 = num3;
-			qaxis = BitPackUtils.QAxis.Z;
+			qAxis = QAxis.Z;
 		}
 		if (num4 > num5)
 		{
-			qaxis = BitPackUtils.QAxis.W;
+			num5 = num4;
+			qAxis = QAxis.W;
 		}
 		bool flag;
 		float num6;
 		float num7;
 		float num8;
-		switch (qaxis)
+		switch (qAxis)
 		{
-		case BitPackUtils.QAxis.X:
-			flag = (q.x < 0f);
+		case QAxis.X:
+			flag = q.x < 0f;
 			num6 = q.y;
 			num7 = q.z;
 			num8 = q.w;
-			goto IL_11A;
-		case BitPackUtils.QAxis.Y:
-			flag = (q.y < 0f);
+			break;
+		case QAxis.Y:
+			flag = q.y < 0f;
 			num6 = q.x;
 			num7 = q.z;
 			num8 = q.w;
-			goto IL_11A;
-		case BitPackUtils.QAxis.Z:
-			flag = (q.z < 0f);
+			break;
+		case QAxis.Z:
+			flag = q.z < 0f;
 			num6 = q.x;
 			num7 = q.y;
 			num8 = q.w;
-			goto IL_11A;
+			break;
+		default:
+			flag = q.w < 0f;
+			num6 = q.x;
+			num7 = q.y;
+			num8 = q.z;
+			break;
 		}
-		flag = (q.w < 0f);
-		num6 = q.x;
-		num7 = q.y;
-		num8 = q.z;
-		IL_11A:
 		if (flag)
 		{
-			num6 = -num6;
-			num7 = -num7;
-			num8 = -num8;
+			num6 = 0f - num6;
+			num7 = 0f - num7;
+			num8 = 0f - num8;
 		}
 		int num9 = Mathf.Clamp(Mathf.RoundToInt((num6 + 0.707107f) * 361.33145f), 0, 511);
 		int num10 = Mathf.Clamp(Mathf.RoundToInt((num7 + 0.707107f) * 361.33145f), 0, 511);
 		int num11 = Mathf.Clamp(Mathf.RoundToInt((num8 + 0.707107f) * 361.33145f), 0, 511);
-		return (int)(num9 + (num10 << 9) + (num11 << 18) + ((int)qaxis << 27));
+		return num9 + (num10 << 9) + (num11 << 18) + ((int)qAxis << 27);
 	}
 
 	public static Quaternion UnpackQuaternionFromNetwork(int data)
 	{
-		float num = (float)(data & 511) * 0.0027675421f - 0.707107f;
-		float num2 = (float)(data >> 9 & 511) * 0.0027675421f - 0.707107f;
-		float num3 = (float)(data >> 18 & 511) * 0.0027675421f - 0.707107f;
+		float num = (float)(data & 0x1FF) * 0.0027675421f - 0.707107f;
+		float num2 = (float)((data >> 9) & 0x1FF) * 0.0027675421f - 0.707107f;
+		float num3 = (float)((data >> 18) & 0x1FF) * 0.0027675421f - 0.707107f;
 		float num4 = Mathf.Sqrt(Mathf.Abs(1f - (num * num + num2 * num2 + num3 * num3)));
-		switch (data >> 27 & 3)
+		return (QAxis)((data >> 27) & 3) switch
 		{
-		case 0:
-			return new Quaternion(num4, num, num2, num3);
-		case 1:
-			return new Quaternion(num, num4, num2, num3);
-		case 2:
-			return new Quaternion(num, num2, num4, num3);
-		}
-		return new Quaternion(num, num2, num3, num4);
+			QAxis.X => new Quaternion(num4, num, num2, num3), 
+			QAxis.Y => new Quaternion(num, num4, num2, num3), 
+			QAxis.Z => new Quaternion(num, num2, num4, num3), 
+			_ => new Quaternion(num, num2, num3, num4), 
+		};
 	}
 
 	public static long PackHandPosRotForNetwork(Vector3 localPos, Quaternion rot)
 	{
-		long num = (long)Mathf.Clamp(Mathf.RoundToInt(localPos.x * 512f) + 1024, 0, 2047);
-		long num2 = (long)Mathf.Clamp(Mathf.RoundToInt(localPos.y * 512f) + 1024, 0, 2047);
-		long num3 = (long)Mathf.Clamp(Mathf.RoundToInt(localPos.z * 512f) + 1024, 0, 2047);
-		long num4 = (long)BitPackUtils.PackQuaternionForNetwork(rot);
+		long num = Mathf.Clamp(Mathf.RoundToInt(localPos.x * 512f) + 1024, 0, 2047);
+		long num2 = Mathf.Clamp(Mathf.RoundToInt(localPos.y * 512f) + 1024, 0, 2047);
+		long num3 = Mathf.Clamp(Mathf.RoundToInt(localPos.z * 512f) + 1024, 0, 2047);
+		long num4 = PackQuaternionForNetwork(rot);
 		return num + (num2 << 11) + (num3 << 22) + (num4 << 33);
 	}
 
 	public static void UnpackHandPosRotFromNetwork(long data, out Vector3 localPos, out Quaternion handRot)
 	{
-		long num = data & 2047L;
-		long num2 = data >> 11 & 2047L;
-		long num3 = data >> 22 & 2047L;
-		localPos = new Vector3((float)(num - 1024L) * 0.001953125f, (float)(num2 - 1024L) * 0.001953125f, (float)(num3 - 1024L) * 0.001953125f);
+		long num = data & 0x7FF;
+		long num2 = (data >> 11) & 0x7FF;
+		long num3 = (data >> 22) & 0x7FF;
+		localPos = new Vector3((float)(num - 1024) * 0.001953125f, (float)(num2 - 1024) * 0.001953125f, (float)(num3 - 1024) * 0.001953125f);
 		int data2 = (int)(data >> 33);
-		handRot = BitPackUtils.UnpackQuaternionFromNetwork(data2);
+		handRot = UnpackQuaternionFromNetwork(data2);
 	}
 
 	public static long PackAnchoredPosRotForNetwork(Vector3 worldPos, Quaternion rot)
 	{
-		Vector3Int parityForWorldPos = BitPackUtils.GetParityForWorldPos(worldPos);
-		long num = (long)(parityForWorldPos.x + parityForWorldPos.y * 3 + parityForWorldPos.z * 9);
+		Vector3Int parityForWorldPos = GetParityForWorldPos(worldPos);
+		long num = parityForWorldPos.x + parityForWorldPos.y * 3 + parityForWorldPos.z * 9;
 		Vector3 vector = new Vector3((worldPos.x % 5f + 5f) % 5f, (worldPos.y % 5f + 5f) % 5f, (worldPos.z % 5f + 5f) % 5f);
-		long num2 = (long)Mathf.Clamp(Mathf.RoundToInt(vector.x * 102.3f), 0, 511);
-		long num3 = (long)Mathf.Clamp(Mathf.RoundToInt(vector.y * 102.3f), 0, 511);
-		long num4 = (long)Mathf.Clamp(Mathf.RoundToInt(vector.z * 102.3f), 0, 511);
-		long num5 = (long)BitPackUtils.PackQuaternionForNetwork(rot);
+		long num2 = Mathf.Clamp(Mathf.RoundToInt(vector.x * 102.3f), 0, 511);
+		long num3 = Mathf.Clamp(Mathf.RoundToInt(vector.y * 102.3f), 0, 511);
+		long num4 = Mathf.Clamp(Mathf.RoundToInt(vector.z * 102.3f), 0, 511);
+		long num5 = PackQuaternionForNetwork(rot);
 		return num + (num2 << 5) + (num3 << 14) + (num4 << 23) + (num5 << 32);
 	}
 
 	public static void UnpackAnchoredPosRotForNetwork(long packed, Vector3 anchorPos, out Vector3 pos, out Quaternion rot)
 	{
-		Vector3Int parityForWorldPos = BitPackUtils.GetParityForWorldPos(anchorPos);
-		long num = packed & 31L;
-		Vector3Int vector3Int = new Vector3Int((int)(num % 3L), (int)(num / 3L % 3L), (int)(num / 9L % 3L));
-		pos = new Vector3((float)(packed >> 5 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.x, parityForWorldPos.x, vector3Int.x), (float)(packed >> 14 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.y, parityForWorldPos.y, vector3Int.y), (float)(packed >> 23 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.z, parityForWorldPos.z, vector3Int.z));
-		rot = BitPackUtils.UnpackQuaternionFromNetwork((int)(packed >> 32));
+		Vector3Int parityForWorldPos = GetParityForWorldPos(anchorPos);
+		long num = packed & 0x1F;
+		Vector3Int vector3Int = new Vector3Int((int)(num % 3), (int)(num / 3 % 3), (int)(num / 9 % 3));
+		pos = new Vector3((float)((packed >> 5) & 0x1FF) / 102.3f + GetParityOffset(anchorPos.x, parityForWorldPos.x, vector3Int.x), (float)((packed >> 14) & 0x1FF) / 102.3f + GetParityOffset(anchorPos.y, parityForWorldPos.y, vector3Int.y), (float)((packed >> 23) & 0x1FF) / 102.3f + GetParityOffset(anchorPos.z, parityForWorldPos.z, vector3Int.z));
+		rot = UnpackQuaternionFromNetwork((int)(packed >> 32));
 	}
 
 	private static Vector3Int GetParityForWorldPos(Vector3 worldPos)
 	{
-		return new Vector3Int(BitPackUtils.GetParityForAxis(worldPos.x), BitPackUtils.GetParityForAxis(worldPos.y), BitPackUtils.GetParityForAxis(worldPos.z));
+		return new Vector3Int(GetParityForAxis(worldPos.x), GetParityForAxis(worldPos.y), GetParityForAxis(worldPos.z));
 	}
 
 	private static int GetParityForAxis(float axisPos)
@@ -371,24 +365,25 @@ public static class BitPackUtils
 		case -1:
 		case 2:
 			return num - 5f;
+		default:
+			return num;
 		}
-		return num;
 	}
 
 	public static long PackWorldPosForNetwork(Vector3 worldPos)
 	{
-		long num = (long)Mathf.Clamp(Mathf.RoundToInt(worldPos.x * 1024f) + 1048576, 0, 2097151);
-		long num2 = (long)Mathf.Clamp(Mathf.RoundToInt(worldPos.y * 1024f) + 1048576, 0, 2097151);
-		long num3 = (long)Mathf.Clamp(Mathf.RoundToInt(worldPos.z * 1024f) + 1048576, 0, 2097151);
+		long num = Mathf.Clamp(Mathf.RoundToInt(worldPos.x * 1024f) + 1048576, 0, 2097151);
+		long num2 = Mathf.Clamp(Mathf.RoundToInt(worldPos.y * 1024f) + 1048576, 0, 2097151);
+		long num3 = Mathf.Clamp(Mathf.RoundToInt(worldPos.z * 1024f) + 1048576, 0, 2097151);
 		return num + (num2 << 21) + (num3 << 42);
 	}
 
 	public static Vector3 UnpackWorldPosFromNetwork(long data)
 	{
-		float num = (float)(data & 2097151L);
-		long num2 = data >> 21 & 2097151L;
-		long num3 = data >> 42 & 2097151L;
-		return new Vector3((float)((long)num - 1048576L) * 0.0009765625f, (float)(num2 - 1048576L) * 0.0009765625f, (float)(num3 - 1048576L) * 0.0009765625f);
+		long num = data & 0x1FFFFF;
+		long num2 = (data >> 21) & 0x1FFFFF;
+		long num3 = (data >> 42) & 0x1FFFFF;
+		return new Vector3((float)(num - 1048576) * 0.0009765625f, (float)(num2 - 1048576) * 0.0009765625f, (float)(num3 - 1048576) * 0.0009765625f);
 	}
 
 	public static short PackColorForNetwork(Color col)
@@ -403,40 +398,22 @@ public static class BitPackUtils
 
 	public static long PackIntsIntoLong(int value1, int value2)
 	{
-		return ((long)value1 & (long)((ulong)-1)) | ((long)value2 & (long)((ulong)-1)) << 32;
+		return (value1 & 0xFFFFFFFFu) | ((value2 & 0xFFFFFFFFu) << 32);
 	}
 
 	public static int UnpackValue1FromLong(long value)
 	{
-		return (int)(value & (long)((ulong)-1));
+		return (int)(value & 0xFFFFFFFFu);
 	}
 
 	public static int UnpackValue2FromLong(long value)
 	{
-		return (int)(value >> 32 & (long)((ulong)-1));
+		return (int)((value >> 32) & 0xFFFFFFFFu);
 	}
 
 	public static void UnpackIntsFromLong(long value, out int value1, out int value2)
 	{
-		value1 = BitPackUtils.UnpackValue1FromLong(value);
-		value2 = BitPackUtils.UnpackValue2FromLong(value);
-	}
-
-	private const float STEP_1023 = 0.0009775171f;
-
-	private static readonly float[] kRadialLogLUT = new float[32];
-
-	private const float QPackMax = 0.707107f;
-
-	private const float QPackScale = 361.33145f;
-
-	private const float QPackInvScale = 0.0027675421f;
-
-	private enum QAxis
-	{
-		X,
-		Y,
-		Z,
-		W
+		value1 = UnpackValue1FromLong(value);
+		value2 = UnpackValue2FromLong(value);
 	}
 }

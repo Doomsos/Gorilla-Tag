@@ -1,7 +1,5 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using GameObjectScheduling;
 using Photon.Pun;
 using TMPro;
@@ -10,239 +8,6 @@ using UnityEngine.UI;
 
 public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 {
-	public override void OnEnable()
-	{
-		base.OnEnable();
-		this.FindQuestManager();
-		ProgressionController.OnQuestSelectionChanged += this.OnQuestSelectionChanged;
-		ProgressionController.OnProgressEvent += this.OnProgress;
-		ProgressionController.RequestProgressUpdate();
-		this.UpdateCountdownTimers();
-	}
-
-	public override void OnDisable()
-	{
-		base.OnDisable();
-		ProgressionController.OnQuestSelectionChanged -= this.OnQuestSelectionChanged;
-		ProgressionController.OnProgressEvent -= this.OnProgress;
-	}
-
-	private void FindQuestManager()
-	{
-		if (!this._questManager)
-		{
-			this._questManager = Object.FindAnyObjectByType<RotatingQuestsManager>();
-		}
-	}
-
-	private void UpdateCountdownTimers()
-	{
-		this._dailyCountdown.SetCountdownTime(this._questManager.DailyQuestCountdown);
-		this._weeklyCountdown.SetCountdownTime(this._questManager.WeeklyQuestCountdown);
-	}
-
-	private void OnQuestSelectionChanged()
-	{
-		this.UpdateCountdownTimers();
-	}
-
-	private void OnProgress()
-	{
-		this.UpdateQuestStatus();
-		this.UpdateProgressDisplays();
-	}
-
-	private void UpdateProgressDisplays()
-	{
-		ValueTuple<int, int, int> progressionData = ProgressionController.GetProgressionData();
-		int item = progressionData.Item1;
-		int item2 = progressionData.Item2;
-		this._weeklyProgress.SetProgress(item, ProgressionController.WeeklyCap);
-		if (!this._isUpdatingPointCount)
-		{
-			this._unclaimedPoints.text = item2.ToString();
-			this._claimButton.isOn = (item2 > 0);
-		}
-		bool flag = item2 > 0;
-		this._claimablePointsObject.SetActive(flag);
-		this._noClaimablePointsObject.SetActive(!flag);
-		this._badgeMount.position = (flag ? this._claimablePointsBadgePosition.position : this._noClaimablePointsBadgePosition.position);
-		this._claimButton.gameObject.SetActive(flag);
-	}
-
-	private void UpdateQuestStatus()
-	{
-		if (this._lastQuestChange >= RotatingQuestsManager.LastQuestChange)
-		{
-			return;
-		}
-		this.FindQuestManager();
-		if (this._quests.Count == 0 || this._lastQuestDailyID != RotatingQuestsManager.LastQuestDailyID)
-		{
-			this.BuildQuestList();
-		}
-		foreach (QuestDisplay questDisplay in this._quests)
-		{
-			if (questDisplay.IsChanged)
-			{
-				questDisplay.UpdateDisplay();
-			}
-		}
-		this._lastQuestChange = Time.frameCount;
-		this._lastQuestDailyID = RotatingQuestsManager.LastQuestDailyID;
-	}
-
-	public void RedeemProgress()
-	{
-		if (this._claimButton.isOn)
-		{
-			this._isUpdatingPointCount = true;
-			ValueTuple<int, int, int> progressionData = ProgressionController.GetProgressionData();
-			int item = progressionData.Item2;
-			int item2 = progressionData.Item3;
-			this._tempUnclaimedPoints = item;
-			this._tempTotalPoints = item2;
-			this._claimButton.isOn = false;
-			ProgressionController.RedeemProgress();
-			if (PhotonNetwork.InRoom)
-			{
-				base.photonView.RPC("BroadcastRedeemQuestPoints", RpcTarget.Others, new object[]
-				{
-					this._tempUnclaimedPoints
-				});
-			}
-			base.StartCoroutine(this.PerformPointRedemptionSequence());
-		}
-	}
-
-	private IEnumerator PerformPointRedemptionSequence()
-	{
-		while (this._tempUnclaimedPoints > 0)
-		{
-			this._tempUnclaimedPoints--;
-			this._tempTotalPoints++;
-			this._unclaimedPoints.text = this._tempUnclaimedPoints.ToString();
-			if (this._tempUnclaimedPoints == 0)
-			{
-				this._audioSource.PlayOneShot(this._claimPointFinalSFX);
-			}
-			else
-			{
-				this._audioSource.PlayOneShot(this._claimPointDefaultSFX);
-			}
-			yield return new WaitForSeconds(this._claimDelayPerPoint);
-		}
-		this._isUpdatingPointCount = false;
-		this.UpdateProgressDisplays();
-		yield break;
-	}
-
-	[PunRPC]
-	private void BroadcastRedeemQuestPoints(int redeemedPointCount, PhotonMessageInfo info)
-	{
-		MonkeAgent.IncrementRPCCall(info, "BroadcastRedeemQuestPoints");
-		RigContainer rigContainer;
-		if (new PhotonMessageInfoWrapped(info).Sender != null && VRRigCache.Instance.TryGetVrrig(info.Sender, out rigContainer))
-		{
-			if (!FXSystem.CheckCallSpam(rigContainer.Rig.fxSettings, 10, (double)Time.unscaledTime))
-			{
-				return;
-			}
-			redeemedPointCount = Mathf.Min(redeemedPointCount, 50);
-			Coroutine coroutine;
-			if (this.perPlayerRedemptionSequence.TryGetValue(info.Sender, out coroutine))
-			{
-				if (coroutine != null)
-				{
-					base.StopCoroutine(coroutine);
-				}
-				this.perPlayerRedemptionSequence.Remove(info.Sender);
-			}
-			if (base.gameObject.activeInHierarchy)
-			{
-				Coroutine value = base.StartCoroutine(this.PerformRemotePointRedemptionSequence(info.Sender, redeemedPointCount));
-				this.perPlayerRedemptionSequence.Add(info.Sender, value);
-			}
-		}
-	}
-
-	private IEnumerator PerformRemotePointRedemptionSequence(NetPlayer player, int redeemedPointCount)
-	{
-		while (redeemedPointCount > 0)
-		{
-			int num = redeemedPointCount;
-			redeemedPointCount = num - 1;
-			if (redeemedPointCount == 0)
-			{
-				this._audioSource.PlayOneShot(this._claimPointFinalSFX);
-			}
-			else
-			{
-				this._audioSource.PlayOneShot(this._claimPointDefaultSFX);
-			}
-			yield return new WaitForSeconds(this._claimDelayPerPoint);
-		}
-		this.perPlayerRedemptionSequence.Remove(player);
-		yield break;
-	}
-
-	private void BuildQuestList()
-	{
-		this.DestroyQuestList();
-		RotatingQuestsManager.RotatingQuestList quests = this._questManager.quests;
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in quests.DailyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
-			{
-				if (rotatingQuest.isQuestActive)
-				{
-					QuestDisplay questDisplay = Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._dailyQuestContainer);
-					questDisplay.quest = rotatingQuest;
-					this._quests.Add(questDisplay);
-				}
-			}
-		}
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup2 in quests.WeeklyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest2 in rotatingQuestGroup2.quests)
-			{
-				if (rotatingQuest2.isQuestActive)
-				{
-					QuestDisplay questDisplay2 = Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._weeklyQuestContainer);
-					questDisplay2.quest = rotatingQuest2;
-					this._quests.Add(questDisplay2);
-				}
-			}
-		}
-		foreach (QuestDisplay questDisplay3 in this._quests)
-		{
-			questDisplay3.UpdateDisplay();
-		}
-		if (!this._hasBuiltQuestList)
-		{
-			LayoutRebuilder.ForceRebuildLayoutImmediate(this._questContainerParent);
-			this._hasBuiltQuestList = true;
-			return;
-		}
-		LayoutRebuilder.MarkLayoutForRebuild(this._questContainerParent);
-	}
-
-	private void DestroyQuestList()
-	{
-		MonkeBusinessStation.<DestroyQuestList>g__DestroyChildren|40_0(this._dailyQuestContainer);
-		MonkeBusinessStation.<DestroyQuestList>g__DestroyChildren|40_0(this._weeklyQuestContainer);
-		this._quests.Clear();
-	}
-
-	[CompilerGenerated]
-	internal static void <DestroyQuestList>g__DestroyChildren|40_0(Transform parent)
-	{
-		for (int i = parent.childCount - 1; i >= 0; i--)
-		{
-			Object.Destroy(parent.GetChild(i).gameObject);
-		}
-	}
-
 	[SerializeField]
 	private RectTransform _questContainerParent;
 
@@ -317,4 +82,224 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 	private bool _hasBuiltQuestList;
 
 	private Dictionary<NetPlayer, Coroutine> perPlayerRedemptionSequence = new Dictionary<NetPlayer, Coroutine>();
+
+	public override void OnEnable()
+	{
+		base.OnEnable();
+		FindQuestManager();
+		ProgressionController.OnQuestSelectionChanged += OnQuestSelectionChanged;
+		ProgressionController.OnProgressEvent += OnProgress;
+		ProgressionController.RequestProgressUpdate();
+		UpdateCountdownTimers();
+	}
+
+	public override void OnDisable()
+	{
+		base.OnDisable();
+		ProgressionController.OnQuestSelectionChanged -= OnQuestSelectionChanged;
+		ProgressionController.OnProgressEvent -= OnProgress;
+	}
+
+	private void FindQuestManager()
+	{
+		if (!_questManager)
+		{
+			_questManager = Object.FindAnyObjectByType<RotatingQuestsManager>();
+		}
+	}
+
+	private void UpdateCountdownTimers()
+	{
+		_dailyCountdown.SetCountdownTime(_questManager.DailyQuestCountdown);
+		_weeklyCountdown.SetCountdownTime(_questManager.WeeklyQuestCountdown);
+	}
+
+	private void OnQuestSelectionChanged()
+	{
+		UpdateCountdownTimers();
+	}
+
+	private void OnProgress()
+	{
+		UpdateQuestStatus();
+		UpdateProgressDisplays();
+	}
+
+	private void UpdateProgressDisplays()
+	{
+		var (progress, num, _) = ProgressionController.GetProgressionData();
+		_weeklyProgress.SetProgress(progress, ProgressionController.WeeklyCap);
+		if (!_isUpdatingPointCount)
+		{
+			_unclaimedPoints.text = num.ToString();
+			_claimButton.isOn = num > 0;
+		}
+		bool flag = num > 0;
+		_claimablePointsObject.SetActive(flag);
+		_noClaimablePointsObject.SetActive(!flag);
+		_badgeMount.position = (flag ? _claimablePointsBadgePosition.position : _noClaimablePointsBadgePosition.position);
+		_claimButton.gameObject.SetActive(flag);
+	}
+
+	private void UpdateQuestStatus()
+	{
+		if (_lastQuestChange >= RotatingQuestsManager.LastQuestChange)
+		{
+			return;
+		}
+		FindQuestManager();
+		if (_quests.Count == 0 || _lastQuestDailyID != RotatingQuestsManager.LastQuestDailyID)
+		{
+			BuildQuestList();
+		}
+		foreach (QuestDisplay quest in _quests)
+		{
+			if (quest.IsChanged)
+			{
+				quest.UpdateDisplay();
+			}
+		}
+		_lastQuestChange = Time.frameCount;
+		_lastQuestDailyID = RotatingQuestsManager.LastQuestDailyID;
+	}
+
+	public void RedeemProgress()
+	{
+		if (_claimButton.isOn)
+		{
+			_isUpdatingPointCount = true;
+			(int weekly, int unclaimed, int total) progressionData = ProgressionController.GetProgressionData();
+			int item = progressionData.unclaimed;
+			int item2 = progressionData.total;
+			_tempUnclaimedPoints = item;
+			_tempTotalPoints = item2;
+			_claimButton.isOn = false;
+			ProgressionController.RedeemProgress();
+			if (PhotonNetwork.InRoom)
+			{
+				base.photonView.RPC("BroadcastRedeemQuestPoints", RpcTarget.Others, _tempUnclaimedPoints);
+			}
+			StartCoroutine(PerformPointRedemptionSequence());
+		}
+	}
+
+	private IEnumerator PerformPointRedemptionSequence()
+	{
+		while (_tempUnclaimedPoints > 0)
+		{
+			_tempUnclaimedPoints--;
+			_tempTotalPoints++;
+			_unclaimedPoints.text = _tempUnclaimedPoints.ToString();
+			if (_tempUnclaimedPoints == 0)
+			{
+				_audioSource.PlayOneShot(_claimPointFinalSFX);
+			}
+			else
+			{
+				_audioSource.PlayOneShot(_claimPointDefaultSFX);
+			}
+			yield return new WaitForSeconds(_claimDelayPerPoint);
+		}
+		_isUpdatingPointCount = false;
+		UpdateProgressDisplays();
+	}
+
+	[PunRPC]
+	private void BroadcastRedeemQuestPoints(int redeemedPointCount, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "BroadcastRedeemQuestPoints");
+		if (new PhotonMessageInfoWrapped(info).Sender == null || !VRRigCache.Instance.TryGetVrrig(info.Sender, out var playerRig) || !FXSystem.CheckCallSpam(playerRig.Rig.fxSettings, 10, Time.unscaledTime))
+		{
+			return;
+		}
+		redeemedPointCount = Mathf.Min(redeemedPointCount, 50);
+		if (perPlayerRedemptionSequence.TryGetValue(info.Sender, out var value))
+		{
+			if (value != null)
+			{
+				StopCoroutine(value);
+			}
+			perPlayerRedemptionSequence.Remove(info.Sender);
+		}
+		if (base.gameObject.activeInHierarchy)
+		{
+			Coroutine value2 = StartCoroutine(PerformRemotePointRedemptionSequence(info.Sender, redeemedPointCount));
+			perPlayerRedemptionSequence.Add(info.Sender, value2);
+		}
+	}
+
+	private IEnumerator PerformRemotePointRedemptionSequence(NetPlayer player, int redeemedPointCount)
+	{
+		while (redeemedPointCount > 0)
+		{
+			redeemedPointCount--;
+			if (redeemedPointCount == 0)
+			{
+				_audioSource.PlayOneShot(_claimPointFinalSFX);
+			}
+			else
+			{
+				_audioSource.PlayOneShot(_claimPointDefaultSFX);
+			}
+			yield return new WaitForSeconds(_claimDelayPerPoint);
+		}
+		perPlayerRedemptionSequence.Remove(player);
+	}
+
+	private void BuildQuestList()
+	{
+		DestroyQuestList();
+		RotatingQuestsManager.RotatingQuestList quests = _questManager.quests;
+		foreach (RotatingQuestsManager.RotatingQuestGroup dailyQuest in quests.DailyQuests)
+		{
+			foreach (RotatingQuest quest in dailyQuest.quests)
+			{
+				if (quest.isQuestActive)
+				{
+					QuestDisplay questDisplay = Object.Instantiate(_questDisplayPrefab, _dailyQuestContainer);
+					questDisplay.quest = quest;
+					_quests.Add(questDisplay);
+				}
+			}
+		}
+		foreach (RotatingQuestsManager.RotatingQuestGroup weeklyQuest in quests.WeeklyQuests)
+		{
+			foreach (RotatingQuest quest2 in weeklyQuest.quests)
+			{
+				if (quest2.isQuestActive)
+				{
+					QuestDisplay questDisplay2 = Object.Instantiate(_questDisplayPrefab, _weeklyQuestContainer);
+					questDisplay2.quest = quest2;
+					_quests.Add(questDisplay2);
+				}
+			}
+		}
+		foreach (QuestDisplay quest3 in _quests)
+		{
+			quest3.UpdateDisplay();
+		}
+		if (!_hasBuiltQuestList)
+		{
+			LayoutRebuilder.ForceRebuildLayoutImmediate(_questContainerParent);
+			_hasBuiltQuestList = true;
+		}
+		else
+		{
+			LayoutRebuilder.MarkLayoutForRebuild(_questContainerParent);
+		}
+	}
+
+	private void DestroyQuestList()
+	{
+		DestroyChildren(_dailyQuestContainer);
+		DestroyChildren(_weeklyQuestContainer);
+		_quests.Clear();
+		static void DestroyChildren(Transform parent)
+		{
+			for (int num = parent.childCount - 1; num >= 0; num--)
+			{
+				Object.Destroy(parent.GetChild(num).gameObject);
+			}
+		}
+	}
 }

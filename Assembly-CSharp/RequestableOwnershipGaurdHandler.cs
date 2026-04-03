@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExitGames.Client.Photon;
@@ -10,36 +10,43 @@ using Photon.Realtime;
 
 internal class RequestableOwnershipGaurdHandler : IPunOwnershipCallbacks, IInRoomCallbacks, INetworkRunnerCallbacks, IPublicFacingInterface
 {
+	private static HashSet<NetworkView> gaurdedViews;
+
+	private static readonly RequestableOwnershipGaurdHandler callbackInstance;
+
+	private static Dictionary<NetworkView, RequestableOwnershipGuard> guardingLookup;
+
 	static RequestableOwnershipGaurdHandler()
 	{
-		PhotonNetwork.AddCallbackTarget(RequestableOwnershipGaurdHandler.callbackInstance);
+		gaurdedViews = new HashSet<NetworkView>();
+		callbackInstance = new RequestableOwnershipGaurdHandler();
+		guardingLookup = new Dictionary<NetworkView, RequestableOwnershipGuard>();
+		PhotonNetwork.AddCallbackTarget(callbackInstance);
 	}
 
 	internal static void RegisterView(NetworkView view, RequestableOwnershipGuard guard)
 	{
-		if (view == null || RequestableOwnershipGaurdHandler.gaurdedViews.Contains(view))
+		if (!(view == null) && !gaurdedViews.Contains(view))
 		{
-			return;
+			gaurdedViews.Add(view);
+			guardingLookup.Add(view, guard);
 		}
-		RequestableOwnershipGaurdHandler.gaurdedViews.Add(view);
-		RequestableOwnershipGaurdHandler.guardingLookup.Add(view, guard);
 	}
 
 	internal static void RemoveView(NetworkView view)
 	{
-		if (view == null)
+		if (!(view == null))
 		{
-			return;
+			gaurdedViews.Remove(view);
+			guardingLookup.Remove(view);
 		}
-		RequestableOwnershipGaurdHandler.gaurdedViews.Remove(view);
-		RequestableOwnershipGaurdHandler.guardingLookup.Remove(view);
 	}
 
 	internal static void RegisterViews(NetworkView[] views, RequestableOwnershipGuard guard)
 	{
 		for (int i = 0; i < views.Length; i++)
 		{
-			RequestableOwnershipGaurdHandler.RegisterView(views[i], guard);
+			RegisterView(views[i], guard);
 		}
 	}
 
@@ -47,52 +54,48 @@ internal class RequestableOwnershipGaurdHandler : IPunOwnershipCallbacks, IInRoo
 	{
 		for (int i = 0; i < views.Length; i++)
 		{
-			RequestableOwnershipGaurdHandler.RemoveView(views[i]);
+			RemoveView(views[i]);
 		}
 	}
 
 	void IPunOwnershipCallbacks.OnOwnershipTransfered(PhotonView targetView, Player previousOwner)
 	{
-		NetworkView networkView = RequestableOwnershipGaurdHandler.gaurdedViews.FirstOrDefault((NetworkView p) => p.GetView == targetView);
-		RequestableOwnershipGuard requestableOwnershipGuard;
-		if (networkView.IsNull() || !RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, out requestableOwnershipGuard) || requestableOwnershipGuard.IsNull())
+		NetworkView networkView = gaurdedViews.FirstOrDefault((NetworkView p) => p.GetView == targetView);
+		if (!networkView.IsNull() && guardingLookup.TryGetValue(networkView, out var value) && !value.IsNull())
 		{
-			return;
-		}
-		NetPlayer currentOwner = requestableOwnershipGuard.currentOwner;
-		Player player = (currentOwner != null) ? currentOwner.GetPlayerRef() : null;
-		int num = (player != null) ? player.ActorNumber : 0;
-		if (num == 0 || previousOwner != player)
-		{
-			GTDev.LogWarning<string>("Ownership transferred but the previous owner didn't initiate the request, Switching back", null);
-			targetView.OwnerActorNr = num;
-			targetView.ControllerActorNr = num;
+			Player player = value.currentOwner?.GetPlayerRef();
+			int num = player?.ActorNumber ?? 0;
+			if (num == 0 || previousOwner != player)
+			{
+				GTDev.LogWarning("Ownership transferred but the previous owner didn't initiate the request, Switching back");
+				targetView.OwnerActorNr = num;
+				targetView.ControllerActorNr = num;
+			}
 		}
 	}
 
 	void IInRoomCallbacks.OnMasterClientSwitched(Player newMasterClient)
 	{
-		this.OnHostChangedShared();
+		OnHostChangedShared();
 	}
 
 	public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
 	{
-		this.OnHostChangedShared();
+		OnHostChangedShared();
 	}
 
 	private void OnHostChangedShared()
 	{
-		foreach (NetworkView networkView in RequestableOwnershipGaurdHandler.gaurdedViews)
+		foreach (NetworkView gaurdedView in gaurdedViews)
 		{
-			RequestableOwnershipGuard requestableOwnershipGuard;
-			if (!RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, out requestableOwnershipGuard))
+			if (!guardingLookup.TryGetValue(gaurdedView, out var value))
 			{
 				break;
 			}
-			if (networkView.Owner != null && requestableOwnershipGuard.currentOwner != null && !object.Equals(networkView.Owner, requestableOwnershipGuard.currentOwner))
+			if (gaurdedView.Owner != null && value.currentOwner != null && !object.Equals(gaurdedView.Owner, value.currentOwner))
 			{
-				networkView.OwnerActorNr = requestableOwnershipGuard.currentOwner.ActorNumber;
-				networkView.ControllerActorNr = requestableOwnershipGuard.currentOwner.ActorNumber;
+				gaurdedView.OwnerActorNr = value.currentOwner.ActorNumber;
+				gaurdedView.ControllerActorNr = value.currentOwner.ActorNumber;
 			}
 		}
 	}
@@ -192,10 +195,4 @@ internal class RequestableOwnershipGaurdHandler : IPunOwnershipCallbacks, IInRoo
 	public void OnSceneLoadStart(NetworkRunner runner)
 	{
 	}
-
-	private static HashSet<NetworkView> gaurdedViews = new HashSet<NetworkView>();
-
-	private static readonly RequestableOwnershipGaurdHandler callbackInstance = new RequestableOwnershipGaurdHandler();
-
-	private static Dictionary<NetworkView, RequestableOwnershipGuard> guardingLookup = new Dictionary<NetworkView, RequestableOwnershipGuard>();
 }

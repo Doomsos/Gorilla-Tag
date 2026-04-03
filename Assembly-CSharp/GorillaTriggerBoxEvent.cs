@@ -1,29 +1,18 @@
-﻿using System;
 using UnityEngine.Events;
 
 public class GorillaTriggerBoxEvent : GorillaTriggerBox
 {
+	public UnityEvent onBoxTriggered;
+
+	public UnityEvent onBoxExited;
+
 	public override void OnBoxTriggered()
 	{
-		UnityEvent unityEvent = this.onBoxTriggered;
-		if (unityEvent == null)
-		{
-			return;
-		}
-		unityEvent.Invoke();
+		onBoxTriggered?.Invoke();
 	}
 
 	public override void OnBoxExited()
 	{
-		UnityEvent unityEvent = this.onBoxExited;
-		if (unityEvent == null)
-		{
-			return;
-		}
-		unityEvent.Invoke();
+		onBoxExited?.Invoke();
 	}
-
-	public UnityEvent onBoxTriggered;
-
-	public UnityEvent onBoxExited;
 }

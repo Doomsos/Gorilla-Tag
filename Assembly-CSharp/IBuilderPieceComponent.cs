@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface IBuilderPieceComponent
 {
 	void OnPieceCreate(int pieceType, int pieceId);

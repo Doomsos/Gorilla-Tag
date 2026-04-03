@@ -1,208 +1,79 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ProximityEffect : MonoBehaviour, ITickSystemTick
 {
-	private void Awake()
+	[Serializable]
+	private class ProximityEvent
 	{
-		this.rig = base.GetComponentInParent<VRRig>();
-		this.enableVisualization = false;
-		if (this.visualizer)
-		{
-			Object.Destroy(this.visualizer);
-		}
-	}
+		[SerializeField]
+		[Range(0f, 1f)]
+		[Tooltip("High-threshold events will only fire if the alignment score is above this value.")]
+		private float highThreshold = 0.5f;
 
-	public void AddReceiver(IProximityEffectReceiver receiver)
-	{
-		if (this.receivers == null)
+		[SerializeField]
+		[Tooltip("Wait this many seconds before activating the high-threshold events.")]
+		private float highThresholdBufferTime;
+
+		[SerializeField]
+		[Range(0f, 1f)]
+		[Tooltip("Low-threshold events will only fire if the alignment score is below this value.")]
+		private float lowThreshold = 0.3f;
+
+		[SerializeField]
+		[Tooltip("Wait this many seconds before activating the low-threshold events.")]
+		private float lowThresholdBufferTime;
+
+		public UnityEvent onThresholdHigh;
+
+		public UnityEvent onThresholdLow;
+
+		private bool wasAboveThreshold;
+
+		private bool wasBelowThreshold = true;
+
+		private float lastThresholdTime = -100f;
+
+		public bool Evaluate(float score)
 		{
-			this.receivers = new List<IProximityEffectReceiver>
+			if (score >= highThreshold)
 			{
-				receiver
-			};
-			return;
-		}
-		if (!this.receivers.Contains(receiver))
-		{
-			this.receivers.Add(receiver);
-		}
-	}
-
-	public void RemoveReceiver(IProximityEffectReceiver receiver)
-	{
-		this.receivers.Remove(receiver);
-	}
-
-	private void StartCalculating()
-	{
-		this.centerTransform.position = (this.leftTransform.position + this.rightTransform.position) / 2f;
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private void StopCalculating()
-	{
-		ProximityEffect.ProximityEvent[] array = this.events;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].ResetAllEvents();
-		}
-		ContinuousPropertyArray continuousPropertyArray = this.continuousProperties;
-		if (continuousPropertyArray != null)
-		{
-			continuousPropertyArray.ApplyAll(0f);
-		}
-		UnityEvent<float> unityEvent = this.onScoreCalculated;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke(0f);
-		}
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	private void OnEnable()
-	{
-		if (this.triggersToActivate == 0)
-		{
-			this.StartCalculating();
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.triggersToActivate == 0)
-		{
-			this.StopCalculating();
-		}
-	}
-
-	public void AddTrigger()
-	{
-		if (this.numTriggers < this.triggersToActivate)
-		{
-			this.numTriggers++;
-			if (this.numTriggers == this.triggersToActivate)
-			{
-				this.StartCalculating();
+				if (!wasAboveThreshold && Time.time - lastThresholdTime >= highThresholdBufferTime)
+				{
+					onThresholdHigh?.Invoke();
+					wasAboveThreshold = true;
+					wasBelowThreshold = false;
+				}
+				if (wasAboveThreshold)
+				{
+					lastThresholdTime = Time.time;
+				}
+				return true;
 			}
-		}
-	}
-
-	public void RemoveTrigger()
-	{
-		if (this.numTriggers > 0)
-		{
-			if (this.numTriggers == this.triggersToActivate)
+			if (score < lowThreshold)
 			{
-				this.StopCalculating();
+				if (!wasBelowThreshold && Time.time - lastThresholdTime >= lowThresholdBufferTime)
+				{
+					onThresholdLow?.Invoke();
+					wasAboveThreshold = false;
+					wasBelowThreshold = true;
+				}
+				if (wasBelowThreshold)
+				{
+					lastThresholdTime = Time.time;
+				}
 			}
-			this.numTriggers--;
+			return false;
 		}
-	}
 
-	private void CalculateProximityScores()
-	{
-		float num;
-		float num2;
-		float num3;
-		Vector3 vector;
-		this.CalculateProximityScores(true, out num, out num2, out num3, out vector);
-	}
-
-	private void CalculateProximityScores(out float distance, out float alignment, out float parallel, out Vector3 midpoint)
-	{
-		this.CalculateProximityScores(false, out distance, out alignment, out parallel, out midpoint);
-	}
-
-	private void CalculateProximityScores(bool drawGizmos, out float distance, out float alignment, out float parallel, out Vector3 midpoint)
-	{
-		float d = (this.rig != null) ? this.rig.scaleFactor : 1f;
-		Vector3 position = this.leftTransform.position;
-		Vector3 position2 = this.rightTransform.position;
-		Vector3 forward = this.leftTransform.forward;
-		Vector3 forward2 = this.rightTransform.forward;
-		Vector3 a = (position2 - position) / d;
-		float magnitude = a.magnitude;
-		Vector3 vector = a / magnitude;
-		distance = this.scoreCurves.distanceModifierCurve.Evaluate(magnitude);
-		alignment = this.scoreCurves.alignmentModifierCurve.Evaluate(-Vector3.Dot(forward, forward2));
-		parallel = this.scoreCurves.parallelModifierCurve.Evaluate((Vector3.Dot(forward, vector) + Vector3.Dot(forward2, -vector)) / 2f);
-		midpoint = position + 0.5f * a;
-	}
-
-	private void MoveTransform(Transform target, float score, Vector3 midpoint)
-	{
-		Vector3 vector;
-		Quaternion a;
-		target.GetPositionAndRotation(out vector, out a);
-		Vector3 vector2 = Vector3.Lerp(vector, midpoint, ProximityEffect.<MoveTransform>g__ExpT|40_0(this.positionCTLerpSpeed));
-		if (this.rotateCT)
+		public void ResetAllEvents()
 		{
-			Vector3 vector3 = (vector2 - vector) / Time.deltaTime;
-			if (vector3 != Vector3.zero)
-			{
-				Quaternion b = Quaternion.LookRotation(vector3);
-				Quaternion a2 = Quaternion.LookRotation(vector2 - this.rig.syncPos);
-				Quaternion rotation = Quaternion.Slerp(a, Quaternion.Slerp(a2, b, vector3.magnitude), ProximityEffect.<MoveTransform>g__ExpT|40_0(this.rotationCTLerpSpeed));
-				target.SetPositionAndRotation(vector2, rotation);
-			}
+			wasAboveThreshold = false;
+			wasBelowThreshold = true;
 		}
-		else
-		{
-			target.position = vector2;
-		}
-		if (this.scaleCT)
-		{
-			target.localScale = Vector3.Lerp(target.localScale, score * this.scaleCTMult * Vector3.one, ProximityEffect.<MoveTransform>g__ExpT|40_0(this.scaleCTLerpSpeed));
-		}
-	}
-
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		float num;
-		float num2;
-		float num3;
-		Vector3 midpoint;
-		this.CalculateProximityScores(out num, out num2, out num3, out midpoint);
-		if (this.receivers != null)
-		{
-			for (int i = 0; i < this.receivers.Count; i++)
-			{
-				this.receivers[i].OnProximityCalculated(num, num2, num3);
-			}
-		}
-		float num4 = num * num2 * num3;
-		ContinuousPropertyArray continuousPropertyArray = this.continuousProperties;
-		if (continuousPropertyArray != null)
-		{
-			continuousPropertyArray.ApplyAll(num4);
-		}
-		UnityEvent<float> unityEvent = this.onScoreCalculated;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke(num4);
-		}
-		if (this.centerTransform != null)
-		{
-			this.MoveTransform(this.centerTransform, num4, midpoint);
-		}
-		this.anyAboveThreshold = false;
-		foreach (ProximityEffect.ProximityEvent proximityEvent in this.events)
-		{
-			this.anyAboveThreshold = (proximityEvent.Evaluate(num4) || this.anyAboveThreshold);
-		}
-	}
-
-	[CompilerGenerated]
-	internal static float <MoveTransform>g__ExpT|40_0(float speed)
-	{
-		return 1f - Mathf.Exp(-speed * Time.deltaTime);
 	}
 
 	[SerializeField]
@@ -257,7 +128,7 @@ public class ProximityEffect : MonoBehaviour, ITickSystemTick
 	private UnityEvent<float> onScoreCalculated;
 
 	[SerializeField]
-	private ProximityEffect.ProximityEvent[] events;
+	private ProximityEvent[] events;
 
 	[Header("Editor Only")]
 	[SerializeField]
@@ -289,81 +160,170 @@ public class ProximityEffect : MonoBehaviour, ITickSystemTick
 
 	private int numTriggers;
 
-	[Serializable]
-	private class ProximityEvent
+	public bool TickRunning { get; set; }
+
+	private void Awake()
 	{
-		public bool Evaluate(float score)
+		rig = GetComponentInParent<VRRig>();
+		enableVisualization = false;
+		if ((bool)visualizer)
 		{
-			if (score >= this.highThreshold)
-			{
-				if (!this.wasAboveThreshold && Time.time - this.lastThresholdTime >= this.highThresholdBufferTime)
-				{
-					UnityEvent unityEvent = this.onThresholdHigh;
-					if (unityEvent != null)
-					{
-						unityEvent.Invoke();
-					}
-					this.wasAboveThreshold = true;
-					this.wasBelowThreshold = false;
-				}
-				if (this.wasAboveThreshold)
-				{
-					this.lastThresholdTime = Time.time;
-				}
-				return true;
-			}
-			if (score < this.lowThreshold)
-			{
-				if (!this.wasBelowThreshold && Time.time - this.lastThresholdTime >= this.lowThresholdBufferTime)
-				{
-					UnityEvent unityEvent2 = this.onThresholdLow;
-					if (unityEvent2 != null)
-					{
-						unityEvent2.Invoke();
-					}
-					this.wasAboveThreshold = false;
-					this.wasBelowThreshold = true;
-				}
-				if (this.wasBelowThreshold)
-				{
-					this.lastThresholdTime = Time.time;
-				}
-			}
-			return false;
+			UnityEngine.Object.Destroy(visualizer);
 		}
+	}
 
-		public void ResetAllEvents()
+	public void AddReceiver(IProximityEffectReceiver receiver)
+	{
+		if (receivers == null)
 		{
-			this.wasAboveThreshold = false;
-			this.wasBelowThreshold = true;
+			receivers = new List<IProximityEffectReceiver> { receiver };
 		}
+		else if (!receivers.Contains(receiver))
+		{
+			receivers.Add(receiver);
+		}
+	}
 
-		[SerializeField]
-		[Range(0f, 1f)]
-		[Tooltip("High-threshold events will only fire if the alignment score is above this value.")]
-		private float highThreshold = 0.5f;
+	public void RemoveReceiver(IProximityEffectReceiver receiver)
+	{
+		receivers.Remove(receiver);
+	}
 
-		[SerializeField]
-		[Tooltip("Wait this many seconds before activating the high-threshold events.")]
-		private float highThresholdBufferTime;
+	private void StartCalculating()
+	{
+		centerTransform.position = (leftTransform.position + rightTransform.position) / 2f;
+		TickSystem<object>.AddTickCallback(this);
+	}
 
-		[SerializeField]
-		[Range(0f, 1f)]
-		[Tooltip("Low-threshold events will only fire if the alignment score is below this value.")]
-		private float lowThreshold = 0.3f;
+	private void StopCalculating()
+	{
+		ProximityEvent[] array = events;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].ResetAllEvents();
+		}
+		continuousProperties?.ApplyAll(0f);
+		onScoreCalculated?.Invoke(0f);
+		TickSystem<object>.RemoveTickCallback(this);
+	}
 
-		[SerializeField]
-		[Tooltip("Wait this many seconds before activating the low-threshold events.")]
-		private float lowThresholdBufferTime;
+	private void OnEnable()
+	{
+		if (triggersToActivate == 0)
+		{
+			StartCalculating();
+		}
+	}
 
-		public UnityEvent onThresholdHigh;
+	private void OnDisable()
+	{
+		if (triggersToActivate == 0)
+		{
+			StopCalculating();
+		}
+	}
 
-		public UnityEvent onThresholdLow;
+	public void AddTrigger()
+	{
+		if (numTriggers < triggersToActivate)
+		{
+			numTriggers++;
+			if (numTriggers == triggersToActivate)
+			{
+				StartCalculating();
+			}
+		}
+	}
 
-		private bool wasAboveThreshold;
+	public void RemoveTrigger()
+	{
+		if (numTriggers > 0)
+		{
+			if (numTriggers == triggersToActivate)
+			{
+				StopCalculating();
+			}
+			numTriggers--;
+		}
+	}
 
-		private bool wasBelowThreshold = true;
+	private void CalculateProximityScores()
+	{
+		CalculateProximityScores(drawGizmos: true, out var _, out var _, out var _, out var _);
+	}
 
-		private float lastThresholdTime = -100f;
+	private void CalculateProximityScores(out float distance, out float alignment, out float parallel, out Vector3 midpoint)
+	{
+		CalculateProximityScores(drawGizmos: false, out distance, out alignment, out parallel, out midpoint);
+	}
+
+	private void CalculateProximityScores(bool drawGizmos, out float distance, out float alignment, out float parallel, out Vector3 midpoint)
+	{
+		float num = ((rig != null) ? rig.scaleFactor : 1f);
+		Vector3 position = leftTransform.position;
+		Vector3 position2 = rightTransform.position;
+		Vector3 forward = leftTransform.forward;
+		Vector3 forward2 = rightTransform.forward;
+		Vector3 vector = (position2 - position) / num;
+		float magnitude = vector.magnitude;
+		Vector3 vector2 = vector / magnitude;
+		distance = scoreCurves.distanceModifierCurve.Evaluate(magnitude);
+		alignment = scoreCurves.alignmentModifierCurve.Evaluate(0f - Vector3.Dot(forward, forward2));
+		parallel = scoreCurves.parallelModifierCurve.Evaluate((Vector3.Dot(forward, vector2) + Vector3.Dot(forward2, -vector2)) / 2f);
+		midpoint = position + 0.5f * vector;
+	}
+
+	private void MoveTransform(Transform target, float score, Vector3 midpoint)
+	{
+		target.GetPositionAndRotation(out var position, out var rotation);
+		Vector3 vector = Vector3.Lerp(position, midpoint, ExpT(positionCTLerpSpeed));
+		if (rotateCT)
+		{
+			Vector3 vector2 = (vector - position) / Time.deltaTime;
+			if (vector2 != Vector3.zero)
+			{
+				Quaternion b = Quaternion.LookRotation(vector2);
+				Quaternion a = Quaternion.LookRotation(vector - rig.syncPos);
+				Quaternion rotation2 = Quaternion.Slerp(rotation, Quaternion.Slerp(a, b, vector2.magnitude), ExpT(rotationCTLerpSpeed));
+				target.SetPositionAndRotation(vector, rotation2);
+			}
+		}
+		else
+		{
+			target.position = vector;
+		}
+		if (scaleCT)
+		{
+			target.localScale = Vector3.Lerp(target.localScale, score * scaleCTMult * Vector3.one, ExpT(scaleCTLerpSpeed));
+		}
+		static float ExpT(float speed)
+		{
+			return 1f - Mathf.Exp((0f - speed) * Time.deltaTime);
+		}
+	}
+
+	public void Tick()
+	{
+		CalculateProximityScores(out var distance, out var alignment, out var parallel, out var midpoint);
+		if (receivers != null)
+		{
+			for (int i = 0; i < receivers.Count; i++)
+			{
+				receivers[i].OnProximityCalculated(distance, alignment, parallel);
+			}
+		}
+		float num = distance * alignment * parallel;
+		continuousProperties?.ApplyAll(num);
+		onScoreCalculated?.Invoke(num);
+		if (centerTransform != null)
+		{
+			MoveTransform(centerTransform, num, midpoint);
+		}
+		anyAboveThreshold = false;
+		ProximityEvent[] array = events;
+		foreach (ProximityEvent proximityEvent in array)
+		{
+			anyAboveThreshold = proximityEvent.Evaluate(num) || anyAboveThreshold;
+		}
 	}
 }

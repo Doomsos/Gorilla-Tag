@@ -1,42 +1,41 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[RequireComponent(typeof(VRRigCollection))]
+public class CosmeticCameraDisableNotifier : MonoBehaviour
 {
-	[RequireComponent(typeof(VRRigCollection))]
-	public class CosmeticCameraDisableNotifier : MonoBehaviour
+	private VRRigCollection _vrrigCollection;
+
+	[SerializeField]
+	private Camera _cosmeticCamera;
+
+	private void Awake()
 	{
-		private void Awake()
+		if (!TryGetComponent<VRRigCollection>(out _vrrigCollection))
 		{
-			if (!base.TryGetComponent<VRRigCollection>(out this._vrrigCollection))
-			{
-				this._vrrigCollection = this.AddComponent<VRRigCollection>();
-			}
-			VRRigCollection vrrigCollection = this._vrrigCollection;
-			vrrigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection.playerEnteredCollection, new Action<RigContainer>(this.PlayerEnteredTryOnSpace));
-			VRRigCollection vrrigCollection2 = this._vrrigCollection;
-			vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.PlayerLeftTryOnSpace));
+			_vrrigCollection = this.AddComponent<VRRigCollection>();
 		}
+		VRRigCollection vrrigCollection = _vrrigCollection;
+		vrrigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection.playerEnteredCollection, new Action<RigContainer>(PlayerEnteredTryOnSpace));
+		VRRigCollection vrrigCollection2 = _vrrigCollection;
+		vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(PlayerLeftTryOnSpace));
+	}
 
-		private void PlayerEnteredTryOnSpace(RigContainer playerRig)
+	private void PlayerEnteredTryOnSpace(RigContainer playerRig)
+	{
+		if (playerRig.Rig.isLocal)
 		{
-			if (playerRig.Rig.isLocal)
-			{
-				this._cosmeticCamera.enabled = false;
-			}
+			_cosmeticCamera.enabled = false;
 		}
+	}
 
-		private void PlayerLeftTryOnSpace(RigContainer playerRig)
+	private void PlayerLeftTryOnSpace(RigContainer playerRig)
+	{
+		if (playerRig.Rig.isLocal)
 		{
-			if (playerRig.Rig.isLocal)
-			{
-				this._cosmeticCamera.enabled = true;
-			}
+			_cosmeticCamera.enabled = true;
 		}
-
-		private VRRigCollection _vrrigCollection;
-
-		[SerializeField]
-		private Camera _cosmeticCamera;
 	}
 }

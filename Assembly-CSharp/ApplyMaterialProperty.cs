@@ -1,178 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class ApplyMaterialProperty : MonoBehaviour
 {
-	private void Start()
-	{
-		this.UpdateShaderPropertyIds();
-		if (this.applyOnStart)
-		{
-			this.Apply();
-		}
-	}
-
-	public void Apply()
-	{
-		if (!this._renderer)
-		{
-			this._renderer = base.GetComponent<Renderer>();
-		}
-		ApplyMaterialProperty.ApplyMode applyMode = this.mode;
-		if (applyMode == ApplyMaterialProperty.ApplyMode.MaterialInstance)
-		{
-			this.ApplyMaterialInstance();
-			return;
-		}
-		if (applyMode != ApplyMaterialProperty.ApplyMode.MaterialPropertyBlock)
-		{
-			return;
-		}
-		this.ApplyMaterialPropertyBlock();
-	}
-
-	public void SetColor(string propertyName, Color color)
-	{
-		this.SetColor(Shader.PropertyToID(propertyName), color);
-	}
-
-	public void SetColor(int propertyId, Color color)
-	{
-		ApplyMaterialProperty.CustomMaterialData orCreateData = this.GetOrCreateData(propertyId, null);
-		orCreateData.dataType = ApplyMaterialProperty.SuportedTypes.Color;
-		orCreateData.color = color;
-	}
-
-	public void SetFloat(string propertyName, float value)
-	{
-		this.SetFloat(Shader.PropertyToID(propertyName), value);
-	}
-
-	public void SetFloat(int propertyId, float value)
-	{
-		ApplyMaterialProperty.CustomMaterialData orCreateData = this.GetOrCreateData(propertyId, null);
-		orCreateData.dataType = ApplyMaterialProperty.SuportedTypes.Float;
-		orCreateData.@float = value;
-	}
-
-	private ApplyMaterialProperty.CustomMaterialData GetOrCreateData(int id, string propertyName)
-	{
-		for (int i = 0; i < this.customData.Count; i++)
-		{
-			if (this.customData[i].id == id)
-			{
-				return this.customData[i];
-			}
-		}
-		ApplyMaterialProperty.CustomMaterialData customMaterialData = new ApplyMaterialProperty.CustomMaterialData(id, propertyName);
-		this.customData.Add(customMaterialData);
-		return customMaterialData;
-	}
-
-	private void ApplyMaterialInstance()
-	{
-		if (!this._instance)
-		{
-			this._instance = base.GetComponent<MaterialInstance>();
-			if (this._instance == null)
-			{
-				this._instance = base.gameObject.AddComponent<MaterialInstance>();
-			}
-		}
-		Material material = this.targetMaterial = this._instance.Material;
-		for (int i = 0; i < this.customData.Count; i++)
-		{
-			switch (this.customData[i].dataType)
-			{
-			case ApplyMaterialProperty.SuportedTypes.Color:
-				material.SetColor(this.customData[i].id, this.customData[i].color);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Float:
-				material.SetFloat(this.customData[i].id, this.customData[i].@float);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector2:
-				material.SetVector(this.customData[i].id, this.customData[i].vector2);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector3:
-				material.SetVector(this.customData[i].id, this.customData[i].vector3);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector4:
-				material.SetVector(this.customData[i].id, this.customData[i].vector4);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Texture2D:
-				material.SetTexture(this.customData[i].id, this.customData[i].texture2D);
-				break;
-			}
-		}
-		this._renderer.SetPropertyBlock(this._block);
-	}
-
-	private void ApplyMaterialPropertyBlock()
-	{
-		if (this._block == null)
-		{
-			this._block = new MaterialPropertyBlock();
-		}
-		this._renderer.GetPropertyBlock(this._block);
-		for (int i = 0; i < this.customData.Count; i++)
-		{
-			switch (this.customData[i].dataType)
-			{
-			case ApplyMaterialProperty.SuportedTypes.Color:
-				this._block.SetColor(this.customData[i].id, this.customData[i].color);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Float:
-				this._block.SetFloat(this.customData[i].id, this.customData[i].@float);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector2:
-				this._block.SetVector(this.customData[i].id, this.customData[i].vector2);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector3:
-				this._block.SetVector(this.customData[i].id, this.customData[i].vector3);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Vector4:
-				this._block.SetVector(this.customData[i].id, this.customData[i].vector4);
-				break;
-			case ApplyMaterialProperty.SuportedTypes.Texture2D:
-				this._block.SetTexture(this.customData[i].id, this.customData[i].texture2D);
-				break;
-			}
-		}
-		this._renderer.SetPropertyBlock(this._block);
-	}
-
-	private void UpdateShaderPropertyIds()
-	{
-		for (int i = 0; i < this.customData.Count; i++)
-		{
-			if (this.customData[i] != null && !string.IsNullOrEmpty(this.customData[i].name))
-			{
-				this.customData[i].id = Shader.PropertyToID(this.customData[i].name);
-			}
-		}
-	}
-
-	public ApplyMaterialProperty.ApplyMode mode = ApplyMaterialProperty.ApplyMode.MaterialPropertyBlock;
-
-	[FormerlySerializedAs("materialToApplyBlock")]
-	public Material targetMaterial;
-
-	[SerializeField]
-	private MaterialInstance _instance;
-
-	[SerializeField]
-	private Renderer _renderer;
-
-	public List<ApplyMaterialProperty.CustomMaterialData> customData;
-
-	[SerializeField]
-	private bool applyOnStart;
-
-	[NonSerialized]
-	private MaterialPropertyBlock _block;
-
 	public enum ApplyMode
 	{
 		MaterialInstance,
@@ -192,42 +24,11 @@ public class ApplyMaterialProperty : MonoBehaviour
 	[Serializable]
 	public class CustomMaterialData
 	{
-		public CustomMaterialData(string propertyName)
-		{
-			this.name = propertyName;
-			this.id = Shader.PropertyToID(propertyName);
-			this.dataType = ApplyMaterialProperty.SuportedTypes.Color;
-			this.color = default(Color);
-			this.@float = 0f;
-			this.vector2 = default(Vector2);
-			this.vector3 = default(Vector3);
-			this.vector4 = default(Vector4);
-			this.texture2D = null;
-		}
-
-		public CustomMaterialData(int propertyId, string propertyName)
-		{
-			this.name = propertyName;
-			this.id = propertyId;
-			this.dataType = ApplyMaterialProperty.SuportedTypes.Color;
-			this.color = default(Color);
-			this.@float = 0f;
-			this.vector2 = default(Vector2);
-			this.vector3 = default(Vector3);
-			this.vector4 = default(Vector4);
-			this.texture2D = null;
-		}
-
-		public override int GetHashCode()
-		{
-			return new ValueTuple<int, ApplyMaterialProperty.SuportedTypes, Color, float, Vector2, Vector3, Vector4, ValueTuple<Texture2D>>(this.id, this.dataType, this.color, this.@float, this.vector2, this.vector3, this.vector4, new ValueTuple<Texture2D>(this.texture2D)).GetHashCode();
-		}
-
 		public string name;
 
 		public int id;
 
-		public ApplyMaterialProperty.SuportedTypes dataType;
+		public SuportedTypes dataType;
 
 		public Color color;
 
@@ -240,5 +41,202 @@ public class ApplyMaterialProperty : MonoBehaviour
 		public Vector4 vector4;
 
 		public Texture2D texture2D;
+
+		public CustomMaterialData(string propertyName)
+		{
+			name = propertyName;
+			id = Shader.PropertyToID(propertyName);
+			dataType = SuportedTypes.Color;
+			color = default(Color);
+			@float = 0f;
+			vector2 = default(Vector2);
+			vector3 = default(Vector3);
+			vector4 = default(Vector4);
+			texture2D = null;
+		}
+
+		public CustomMaterialData(int propertyId, string propertyName)
+		{
+			name = propertyName;
+			id = propertyId;
+			dataType = SuportedTypes.Color;
+			color = default(Color);
+			@float = 0f;
+			vector2 = default(Vector2);
+			vector3 = default(Vector3);
+			vector4 = default(Vector4);
+			texture2D = null;
+		}
+
+		public override int GetHashCode()
+		{
+			return (id, dataType, color, @float, vector2, vector3, vector4, texture2D).GetHashCode();
+		}
+	}
+
+	public ApplyMode mode = ApplyMode.MaterialPropertyBlock;
+
+	[FormerlySerializedAs("materialToApplyBlock")]
+	public Material targetMaterial;
+
+	[SerializeField]
+	private MaterialInstance _instance;
+
+	[SerializeField]
+	private Renderer _renderer;
+
+	public List<CustomMaterialData> customData;
+
+	[SerializeField]
+	private bool applyOnStart;
+
+	[NonSerialized]
+	private MaterialPropertyBlock _block;
+
+	private void Start()
+	{
+		UpdateShaderPropertyIds();
+		if (applyOnStart)
+		{
+			Apply();
+		}
+	}
+
+	public void Apply()
+	{
+		if (!_renderer)
+		{
+			_renderer = GetComponent<Renderer>();
+		}
+		switch (mode)
+		{
+		case ApplyMode.MaterialInstance:
+			ApplyMaterialInstance();
+			break;
+		case ApplyMode.MaterialPropertyBlock:
+			ApplyMaterialPropertyBlock();
+			break;
+		}
+	}
+
+	public void SetColor(string propertyName, Color color)
+	{
+		SetColor(Shader.PropertyToID(propertyName), color);
+	}
+
+	public void SetColor(int propertyId, Color color)
+	{
+		CustomMaterialData orCreateData = GetOrCreateData(propertyId, null);
+		orCreateData.dataType = SuportedTypes.Color;
+		orCreateData.color = color;
+	}
+
+	public void SetFloat(string propertyName, float value)
+	{
+		SetFloat(Shader.PropertyToID(propertyName), value);
+	}
+
+	public void SetFloat(int propertyId, float value)
+	{
+		CustomMaterialData orCreateData = GetOrCreateData(propertyId, null);
+		orCreateData.dataType = SuportedTypes.Float;
+		orCreateData.@float = value;
+	}
+
+	private CustomMaterialData GetOrCreateData(int id, string propertyName)
+	{
+		for (int i = 0; i < customData.Count; i++)
+		{
+			if (customData[i].id == id)
+			{
+				return customData[i];
+			}
+		}
+		CustomMaterialData customMaterialData = new CustomMaterialData(id, propertyName);
+		customData.Add(customMaterialData);
+		return customMaterialData;
+	}
+
+	private void ApplyMaterialInstance()
+	{
+		if (!_instance)
+		{
+			_instance = GetComponent<MaterialInstance>();
+			if (_instance == null)
+			{
+				_instance = base.gameObject.AddComponent<MaterialInstance>();
+			}
+		}
+		Material material = (targetMaterial = _instance.Material);
+		for (int i = 0; i < customData.Count; i++)
+		{
+			switch (customData[i].dataType)
+			{
+			case SuportedTypes.Color:
+				material.SetColor(customData[i].id, customData[i].color);
+				break;
+			case SuportedTypes.Float:
+				material.SetFloat(customData[i].id, customData[i].@float);
+				break;
+			case SuportedTypes.Vector2:
+				material.SetVector(customData[i].id, customData[i].vector2);
+				break;
+			case SuportedTypes.Vector3:
+				material.SetVector(customData[i].id, customData[i].vector3);
+				break;
+			case SuportedTypes.Vector4:
+				material.SetVector(customData[i].id, customData[i].vector4);
+				break;
+			case SuportedTypes.Texture2D:
+				material.SetTexture(customData[i].id, customData[i].texture2D);
+				break;
+			}
+		}
+		_renderer.SetPropertyBlock(_block);
+	}
+
+	private void ApplyMaterialPropertyBlock()
+	{
+		if (_block == null)
+		{
+			_block = new MaterialPropertyBlock();
+		}
+		_renderer.GetPropertyBlock(_block);
+		for (int i = 0; i < customData.Count; i++)
+		{
+			switch (customData[i].dataType)
+			{
+			case SuportedTypes.Color:
+				_block.SetColor(customData[i].id, customData[i].color);
+				break;
+			case SuportedTypes.Float:
+				_block.SetFloat(customData[i].id, customData[i].@float);
+				break;
+			case SuportedTypes.Vector2:
+				_block.SetVector(customData[i].id, customData[i].vector2);
+				break;
+			case SuportedTypes.Vector3:
+				_block.SetVector(customData[i].id, customData[i].vector3);
+				break;
+			case SuportedTypes.Vector4:
+				_block.SetVector(customData[i].id, customData[i].vector4);
+				break;
+			case SuportedTypes.Texture2D:
+				_block.SetTexture(customData[i].id, customData[i].texture2D);
+				break;
+			}
+		}
+		_renderer.SetPropertyBlock(_block);
+	}
+
+	private void UpdateShaderPropertyIds()
+	{
+		for (int i = 0; i < customData.Count; i++)
+		{
+			if (customData[i] != null && !string.IsNullOrEmpty(customData[i].name))
+			{
+				customData[i].id = Shader.PropertyToID(customData[i].name);
+			}
+		}
 	}
 }

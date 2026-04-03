@@ -1,45 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 [RequireComponent(typeof(GorillaVelocityEstimator))]
 public class VelocityBasedActivator : MonoBehaviour
 {
-	private void Start()
-	{
-		this.velocityEstimator = base.GetComponent<GorillaVelocityEstimator>();
-	}
-
-	private void Update()
-	{
-		this.k += this.velocityEstimator.linearVelocity.sqrMagnitude;
-		this.k = Mathf.Max(this.k - Time.deltaTime * this.decay, 0f);
-		if (!this.active && this.k > this.threshold)
-		{
-			this.activate(true);
-		}
-		if (this.active && this.k < this.threshold)
-		{
-			this.activate(false);
-		}
-	}
-
-	private void activate(bool v)
-	{
-		this.active = v;
-		for (int i = 0; i < this.activationTargets.Length; i++)
-		{
-			this.activationTargets[i].SetActive(v);
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.active)
-		{
-			this.activate(false);
-		}
-	}
-
 	[SerializeField]
 	private GameObject[] activationTargets;
 
@@ -54,4 +17,40 @@ public class VelocityBasedActivator : MonoBehaviour
 
 	[SerializeField]
 	private float threshold = 1f;
+
+	private void Start()
+	{
+		velocityEstimator = GetComponent<GorillaVelocityEstimator>();
+	}
+
+	private void Update()
+	{
+		k += velocityEstimator.linearVelocity.sqrMagnitude;
+		k = Mathf.Max(k - Time.deltaTime * decay, 0f);
+		if (!active && k > threshold)
+		{
+			activate(v: true);
+		}
+		if (active && k < threshold)
+		{
+			activate(v: false);
+		}
+	}
+
+	private void activate(bool v)
+	{
+		active = v;
+		for (int i = 0; i < activationTargets.Length; i++)
+		{
+			activationTargets[i].SetActive(v);
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (active)
+		{
+			activate(v: false);
+		}
+	}
 }

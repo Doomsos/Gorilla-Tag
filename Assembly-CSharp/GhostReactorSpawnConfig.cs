@@ -1,12 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "GhostReactorSpawnConfig", menuName = "ScriptableObjects/GhostReactorSpawnConfig")]
 public class GhostReactorSpawnConfig : ScriptableObject
 {
-	public List<GhostReactorSpawnConfig.EntitySpawnGroup> entitySpawnGroups;
-
 	public enum SpawnPointType
 	{
 		Enemy,
@@ -26,7 +24,7 @@ public class GhostReactorSpawnConfig : ScriptableObject
 	[Serializable]
 	public struct EntitySpawnGroup
 	{
-		public GhostReactorSpawnConfig.SpawnPointType spawnPointType;
+		public SpawnPointType spawnPointType;
 
 		public GameEntity entity;
 
@@ -34,4 +32,6 @@ public class GhostReactorSpawnConfig : ScriptableObject
 
 		public int spawnCount;
 	}
+
+	public List<EntitySpawnGroup> entitySpawnGroups;
 }

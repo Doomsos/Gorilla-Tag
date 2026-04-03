@@ -1,32 +1,30 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderAttachEdge : MonoBehaviour
 {
-	public class BuilderAttachEdge : MonoBehaviour
+	public Transform center;
+
+	public float length;
+
+	private void Awake()
 	{
-		private void Awake()
+		if (center == null)
 		{
-			if (this.center == null)
-			{
-				this.center = base.transform;
-			}
+			center = base.transform;
 		}
+	}
 
-		protected virtual void OnDrawGizmosSelected()
+	protected virtual void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.green;
+		Transform transform = center;
+		if (transform == null)
 		{
-			Gizmos.color = Color.green;
-			Transform transform = this.center;
-			if (transform == null)
-			{
-				transform = base.transform;
-			}
-			Vector3 a = transform.rotation * Vector3.right;
-			Gizmos.DrawLine(transform.position - a * this.length * 0.5f, transform.position + a * this.length * 0.5f);
+			transform = base.transform;
 		}
-
-		public Transform center;
-
-		public float length;
+		Vector3 vector = transform.rotation * Vector3.right;
+		Gizmos.DrawLine(transform.position - vector * length * 0.5f, transform.position + vector * length * 0.5f);
 	}
 }

@@ -1,56 +1,10 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SITouchscreenButtonContainer : MonoBehaviour
 {
-	public bool isUsable { get; private set; }
-
-	private void Start()
-	{
-		if (Application.isPlaying && this.button != null && this.button.buttonMode == SITouchscreenButton.ButtonMode.Toggle)
-		{
-			this.button.buttonToggled.AddListener(new UnityAction<SITouchscreenButton.SITouchscreenButtonType, int, int, bool>(this.OnToggleStateChanged));
-			this.UpdateToggleVisual(this.button.IsToggledOn);
-		}
-	}
-
-	private void OnToggleStateChanged(SITouchscreenButton.SITouchscreenButtonType type, int data, int actorNr, bool isToggledOn)
-	{
-		this.UpdateToggleVisual(isToggledOn);
-	}
-
-	public void UpdateToggleVisual()
-	{
-		this.UpdateToggleVisual(this.button.IsToggledOn);
-	}
-
-	private void UpdateToggleVisual(bool isToggledOn)
-	{
-		if (this._cachedForegroundColor.r < 0f)
-		{
-			this._cachedForegroundColor = this.foreGround.color;
-		}
-		this.foreGround.color = (isToggledOn ? this.toggleOnColor : this.toggleOffColor);
-		this.buttonText.text = (isToggledOn ? this.toggleOnText : this.toggleOffText);
-	}
-
-	public void SetUsable(bool newIsUsable)
-	{
-		if (this._cachedForegroundColor.r < 0f)
-		{
-			this._cachedForegroundColor = this.foreGround.color;
-		}
-		this.isUsable = newIsUsable;
-		if (this.button.buttonMode == SITouchscreenButton.ButtonMode.Normal)
-		{
-			this.foreGround.color = (newIsUsable ? this._cachedForegroundColor : Color.gray);
-		}
-		this.button.isUsable = newIsUsable;
-	}
-
 	public SITouchscreenButton.SITouchscreenButtonType type;
 
 	public string buttonTextString;
@@ -86,4 +40,49 @@ public class SITouchscreenButtonContainer : MonoBehaviour
 
 	[NonSerialized]
 	private Color _cachedForegroundColor = new Color(-1f, -1f, -1f);
+
+	public bool isUsable { get; private set; }
+
+	private void Start()
+	{
+		if (Application.isPlaying && button != null && button.buttonMode == SITouchscreenButton.ButtonMode.Toggle)
+		{
+			button.buttonToggled.AddListener(OnToggleStateChanged);
+			UpdateToggleVisual(button.IsToggledOn);
+		}
+	}
+
+	private void OnToggleStateChanged(SITouchscreenButton.SITouchscreenButtonType type, int data, int actorNr, bool isToggledOn)
+	{
+		UpdateToggleVisual(isToggledOn);
+	}
+
+	public void UpdateToggleVisual()
+	{
+		UpdateToggleVisual(button.IsToggledOn);
+	}
+
+	private void UpdateToggleVisual(bool isToggledOn)
+	{
+		if (_cachedForegroundColor.r < 0f)
+		{
+			_cachedForegroundColor = foreGround.color;
+		}
+		foreGround.color = (isToggledOn ? toggleOnColor : toggleOffColor);
+		buttonText.text = (isToggledOn ? toggleOnText : toggleOffText);
+	}
+
+	public void SetUsable(bool newIsUsable)
+	{
+		if (_cachedForegroundColor.r < 0f)
+		{
+			_cachedForegroundColor = foreGround.color;
+		}
+		isUsable = newIsUsable;
+		if (button.buttonMode == SITouchscreenButton.ButtonMode.Normal)
+		{
+			foreGround.color = (newIsUsable ? _cachedForegroundColor : Color.gray);
+		}
+		button.isUsable = newIsUsable;
+	}
 }

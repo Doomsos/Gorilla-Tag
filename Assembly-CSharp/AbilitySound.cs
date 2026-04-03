@@ -1,68 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class AbilitySound
 {
-	public bool IsValid()
+	public enum SoundSelectMode
 	{
-		return this.sounds != null && this.sounds.Count > 0;
-	}
-
-	public void UpdateNextSound()
-	{
-		AbilitySound.SoundSelectMode soundSelectMode = this.soundSelectMode;
-		if (soundSelectMode == AbilitySound.SoundSelectMode.Sequential)
-		{
-			this.nextSound = (this.nextSound + 1) % this.sounds.Count;
-			return;
-		}
-		if (soundSelectMode != AbilitySound.SoundSelectMode.Random)
-		{
-			return;
-		}
-		this.nextSound = Random.Range(0, this.sounds.Count);
-	}
-
-	public void Play(AudioSource audioSourceIn)
-	{
-		this.usedAudioSource = ((audioSourceIn != null) ? audioSourceIn : this.audioSource);
-		if (this.sounds != null && this.sounds.Count > 0 && this.usedAudioSource != null)
-		{
-			if (this.nextSound < 0)
-			{
-				this.UpdateNextSound();
-			}
-			AudioClip audioClip = this.sounds[this.nextSound];
-			this.UpdateNextSound();
-			if (audioClip != null)
-			{
-				this.usedAudioSource.clip = audioClip;
-				this.usedAudioSource.volume = this.volume;
-				this.usedAudioSource.pitch = this.pitch;
-				this.usedAudioSource.loop = this.loop;
-				if (this.delay <= 0f)
-				{
-					this.usedAudioSource.Play();
-				}
-				else
-				{
-					this.usedAudioSource.PlayDelayed(this.delay);
-				}
-				this.currentSound = audioClip;
-			}
-		}
-	}
-
-	public void Stop()
-	{
-		if (this.usedAudioSource != null && this.usedAudioSource.clip == this.currentSound)
-		{
-			this.usedAudioSource.Stop();
-			this.currentSound = null;
-			this.usedAudioSource = null;
-		}
+		Sequential,
+		Random
 	}
 
 	public float volume = 1f;
@@ -83,11 +29,68 @@ public class AbilitySound
 
 	private int nextSound = -1;
 
-	public AbilitySound.SoundSelectMode soundSelectMode;
+	public SoundSelectMode soundSelectMode;
 
-	public enum SoundSelectMode
+	public bool IsValid()
 	{
-		Sequential,
-		Random
+		if (sounds != null)
+		{
+			return sounds.Count > 0;
+		}
+		return false;
+	}
+
+	public void UpdateNextSound()
+	{
+		switch (soundSelectMode)
+		{
+		case SoundSelectMode.Sequential:
+			nextSound = (nextSound + 1) % sounds.Count;
+			break;
+		case SoundSelectMode.Random:
+			nextSound = UnityEngine.Random.Range(0, sounds.Count);
+			break;
+		}
+	}
+
+	public void Play(AudioSource audioSourceIn)
+	{
+		usedAudioSource = ((audioSourceIn != null) ? audioSourceIn : audioSource);
+		if (sounds == null || sounds.Count <= 0 || !(usedAudioSource != null))
+		{
+			return;
+		}
+		if (nextSound < 0)
+		{
+			UpdateNextSound();
+		}
+		AudioClip audioClip = sounds[nextSound];
+		UpdateNextSound();
+		if (audioClip != null)
+		{
+			usedAudioSource.clip = audioClip;
+			usedAudioSource.volume = volume;
+			usedAudioSource.pitch = pitch;
+			usedAudioSource.loop = loop;
+			if (delay <= 0f)
+			{
+				usedAudioSource.Play();
+			}
+			else
+			{
+				usedAudioSource.PlayDelayed(delay);
+			}
+			currentSound = audioClip;
+		}
+	}
+
+	public void Stop()
+	{
+		if (usedAudioSource != null && usedAudioSource.clip == currentSound)
+		{
+			usedAudioSource.Stop();
+			currentSound = null;
+			usedAudioSource = null;
+		}
 	}
 }

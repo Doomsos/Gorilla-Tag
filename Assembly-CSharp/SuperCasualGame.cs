@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using GorillaGameModes;
 using Photon.Pun;
@@ -45,8 +44,7 @@ public sealed class SuperCasualGame : GorillaGameManager
 
 	public override string GameModeNameRoomLabel()
 	{
-		string result;
-		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_SUPER_CASUAL_ROOM_LABEL", out result, "(SUPER CASUAL GAME)"))
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_SUPER_CASUAL_ROOM_LABEL", out var result, "(SUPER CASUAL GAME)"))
 		{
 			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_SUPER_CASUAL_ROOM_LABEL]");
 		}
@@ -56,13 +54,12 @@ public sealed class SuperCasualGame : GorillaGameManager
 	public override void StartPlaying()
 	{
 		base.StartPlaying();
-		VRRig.LocalRig.EnableSuperInfectionHands(true);
-		for (int i = 0; i < this.currentNetPlayerArray.Length; i++)
+		VRRig.LocalRig.EnableSuperInfectionHands(on: true);
+		for (int i = 0; i < currentNetPlayerArray.Length; i++)
 		{
-			RigContainer rigContainer;
-			if (VRRigCache.Instance.TryGetVrrig(this.currentNetPlayerArray[i], out rigContainer))
+			if (VRRigCache.Instance.TryGetVrrig(currentNetPlayerArray[i], out var playerRig))
 			{
-				rigContainer.Rig.EnableSuperInfectionHands(true);
+				playerRig.Rig.EnableSuperInfectionHands(on: true);
 			}
 		}
 	}
@@ -70,16 +67,15 @@ public sealed class SuperCasualGame : GorillaGameManager
 	public override void StopPlaying()
 	{
 		base.StopPlaying();
-		VRRig.LocalRig.EnableSuperInfectionHands(false);
+		VRRig.LocalRig.EnableSuperInfectionHands(on: false);
 	}
 
 	public override void OnPlayerEnteredRoom(NetPlayer newPlayer)
 	{
 		base.OnPlayerEnteredRoom(newPlayer);
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(newPlayer, out rigContainer))
+		if (VRRigCache.Instance.TryGetVrrig(newPlayer, out var playerRig))
 		{
-			rigContainer.Rig.EnableSuperInfectionHands(true);
+			playerRig.Rig.EnableSuperInfectionHands(on: true);
 		}
 	}
 }

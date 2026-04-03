@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -9,9 +9,11 @@ public class OnEnterPlay_SetNull : OnEnterPlay_Attribute
 	{
 		if (!field.IsStatic)
 		{
-			Debug.LogError(string.Format("Can't SetNull non-static field {0}.{1}", field.DeclaringType, field.Name));
-			return;
+			Debug.LogError($"Can't SetNull non-static field {field.DeclaringType}.{field.Name}");
 		}
-		field.SetValue(null, null);
+		else
+		{
+			field.SetValue(null, null);
+		}
 	}
 }

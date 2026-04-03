@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,86 +7,51 @@ using UnityEngine;
 [AddComponentMenu("Scripts/MRTK/Core/MaterialInstance")]
 public class MaterialInstance : MonoBehaviour
 {
-	public Material AcquireMaterial(Object owner = null, bool instance = true)
-	{
-		if (owner != null)
-		{
-			this.materialOwners.Add(owner);
-		}
-		if (instance)
-		{
-			this.AcquireInstances();
-		}
-		Material[] array = this.instanceMaterials;
-		if (array != null && array.Length != 0)
-		{
-			return this.instanceMaterials[0];
-		}
-		return null;
-	}
+	private Renderer cachedRenderer;
 
-	public Material[] AcquireMaterials(Object owner = null, bool instance = true)
-	{
-		if (owner != null)
-		{
-			this.materialOwners.Add(owner);
-		}
-		if (instance)
-		{
-			this.AcquireInstances();
-		}
-		base.gameObject.GetComponent<Material>();
-		return this.instanceMaterials;
-	}
+	[SerializeField]
+	[HideInInspector]
+	private Material[] defaultMaterials;
 
-	public void ReleaseMaterial(Object owner, bool autoDestroy = true)
-	{
-		this.materialOwners.Remove(owner);
-		if (autoDestroy && this.materialOwners.Count == 0)
-		{
-			MaterialInstance.DestroySafe(this);
-			if (!base.gameObject.activeInHierarchy)
-			{
-				this.RestoreRenderer();
-			}
-		}
-	}
+	private Material[] instanceMaterials;
 
-	public Material Material
-	{
-		get
-		{
-			return this.AcquireMaterial(null, true);
-		}
-	}
+	private Material[] cachedSharedMaterials;
 
-	public Material[] Materials
-	{
-		get
-		{
-			return this.AcquireMaterials(null, true);
-		}
-	}
+	private bool initialized;
+
+	private bool materialsInstanced;
+
+	[SerializeField]
+	[Tooltip("Whether to use a cached copy of cachedRenderer.sharedMaterials or call sharedMaterials on the Renderer directly. Enabling the option will lead to better performance but you must turn it off before modifying sharedMaterials of the Renderer.")]
+	private bool cacheSharedMaterialsFromRenderer;
+
+	private readonly HashSet<Object> materialOwners = new HashSet<Object>();
+
+	private const string instancePostfix = " (Instance)";
+
+	public Material Material => AcquireMaterial();
+
+	public Material[] Materials => AcquireMaterials();
 
 	public bool CacheSharedMaterialsFromRenderer
 	{
 		get
 		{
-			return this.cacheSharedMaterialsFromRenderer;
+			return cacheSharedMaterialsFromRenderer;
 		}
 		set
 		{
-			if (this.cacheSharedMaterialsFromRenderer != value)
+			if (cacheSharedMaterialsFromRenderer != value)
 			{
 				if (value)
 				{
-					this.cachedSharedMaterials = this.CachedRenderer.sharedMaterials;
+					cachedSharedMaterials = CachedRenderer.sharedMaterials;
 				}
 				else
 				{
-					this.cachedSharedMaterials = null;
+					cachedSharedMaterials = null;
 				}
-				this.cacheSharedMaterialsFromRenderer = value;
+				cacheSharedMaterialsFromRenderer = value;
 			}
 		}
 	}
@@ -96,15 +60,15 @@ public class MaterialInstance : MonoBehaviour
 	{
 		get
 		{
-			if (this.cachedRenderer == null)
+			if (cachedRenderer == null)
 			{
-				this.cachedRenderer = base.GetComponent<Renderer>();
-				if (this.CacheSharedMaterialsFromRenderer)
+				cachedRenderer = GetComponent<Renderer>();
+				if (CacheSharedMaterialsFromRenderer)
 				{
-					this.cachedSharedMaterials = this.cachedRenderer.sharedMaterials;
+					cachedSharedMaterials = cachedRenderer.sharedMaterials;
 				}
 			}
-			return this.cachedRenderer;
+			return cachedRenderer;
 		}
 	}
 
@@ -112,106 +76,141 @@ public class MaterialInstance : MonoBehaviour
 	{
 		get
 		{
-			if (this.CacheSharedMaterialsFromRenderer)
+			if (CacheSharedMaterialsFromRenderer)
 			{
-				if (this.cachedSharedMaterials == null)
+				if (cachedSharedMaterials == null)
 				{
-					this.cachedSharedMaterials = this.cachedRenderer.sharedMaterials;
+					cachedSharedMaterials = cachedRenderer.sharedMaterials;
 				}
-				return this.cachedSharedMaterials;
+				return cachedSharedMaterials;
 			}
-			return this.cachedRenderer.sharedMaterials;
+			return cachedRenderer.sharedMaterials;
 		}
 		set
 		{
-			if (this.CacheSharedMaterialsFromRenderer)
+			if (CacheSharedMaterialsFromRenderer)
 			{
-				this.cachedSharedMaterials = value;
+				cachedSharedMaterials = value;
 			}
-			this.cachedRenderer.sharedMaterials = value;
+			cachedRenderer.sharedMaterials = value;
+		}
+	}
+
+	public Material AcquireMaterial(Object owner = null, bool instance = true)
+	{
+		if (owner != null)
+		{
+			materialOwners.Add(owner);
+		}
+		if (instance)
+		{
+			AcquireInstances();
+		}
+		Material[] array = instanceMaterials;
+		if (array != null && array.Length != 0)
+		{
+			return instanceMaterials[0];
+		}
+		return null;
+	}
+
+	public Material[] AcquireMaterials(Object owner = null, bool instance = true)
+	{
+		if (owner != null)
+		{
+			materialOwners.Add(owner);
+		}
+		if (instance)
+		{
+			AcquireInstances();
+		}
+		base.gameObject.GetComponent<Material>();
+		return instanceMaterials;
+	}
+
+	public void ReleaseMaterial(Object owner, bool autoDestroy = true)
+	{
+		materialOwners.Remove(owner);
+		if (autoDestroy && materialOwners.Count == 0)
+		{
+			DestroySafe(this);
+			if (!base.gameObject.activeInHierarchy)
+			{
+				RestoreRenderer();
+			}
 		}
 	}
 
 	private void Awake()
 	{
-		this.Initialize();
+		Initialize();
 	}
 
 	private void OnDestroy()
 	{
-		this.RestoreRenderer();
+		RestoreRenderer();
 	}
 
 	private void RestoreRenderer()
 	{
-		if (this.CachedRenderer != null && this.defaultMaterials != null)
+		if (CachedRenderer != null && defaultMaterials != null)
 		{
-			this.CachedRendererSharedMaterials = this.defaultMaterials;
+			CachedRendererSharedMaterials = defaultMaterials;
 		}
-		MaterialInstance.DestroyMaterials(this.instanceMaterials);
-		this.instanceMaterials = null;
+		DestroyMaterials(instanceMaterials);
+		instanceMaterials = null;
 	}
 
 	private void Initialize()
 	{
-		if (!this.initialized && this.CachedRenderer != null)
+		if (!initialized && CachedRenderer != null)
 		{
-			if (!MaterialInstance.HasValidMaterial(this.defaultMaterials))
+			if (!HasValidMaterial(defaultMaterials))
 			{
-				this.defaultMaterials = this.CachedRendererSharedMaterials;
+				defaultMaterials = CachedRendererSharedMaterials;
 			}
-			else if (!this.materialsInstanced)
+			else if (!materialsInstanced)
 			{
-				this.CachedRendererSharedMaterials = this.defaultMaterials;
+				CachedRendererSharedMaterials = defaultMaterials;
 			}
-			this.initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void AcquireInstances()
 	{
-		if (this.CachedRenderer != null && !MaterialInstance.MaterialsMatch(this.CachedRendererSharedMaterials, this.instanceMaterials))
+		if (CachedRenderer != null && !MaterialsMatch(CachedRendererSharedMaterials, instanceMaterials))
 		{
-			this.CreateInstances();
+			CreateInstances();
 		}
 	}
 
 	private void CreateInstances()
 	{
-		this.Initialize();
-		MaterialInstance.DestroyMaterials(this.instanceMaterials);
-		this.instanceMaterials = MaterialInstance.InstanceMaterials(this.defaultMaterials);
-		if (this.CachedRenderer != null && this.instanceMaterials != null)
+		Initialize();
+		DestroyMaterials(instanceMaterials);
+		instanceMaterials = InstanceMaterials(defaultMaterials);
+		if (CachedRenderer != null && instanceMaterials != null)
 		{
-			this.CachedRendererSharedMaterials = this.instanceMaterials;
+			CachedRendererSharedMaterials = instanceMaterials;
 		}
-		this.materialsInstanced = true;
+		materialsInstanced = true;
 	}
 
 	private static bool MaterialsMatch(Material[] a, Material[] b)
 	{
-		int? num = (a != null) ? new int?(a.Length) : null;
-		int? num2 = (b != null) ? new int?(b.Length) : null;
-		if (!(num.GetValueOrDefault() == num2.GetValueOrDefault() & num != null == (num2 != null)))
+		if (a?.Length != b?.Length)
 		{
 			return false;
 		}
-		int num3 = 0;
-		for (;;)
+		for (int i = 0; i < a?.Length; i++)
 		{
-			int num4 = num3;
-			num2 = ((a != null) ? new int?(a.Length) : null);
-			if (!(num4 < num2.GetValueOrDefault() & num2 != null))
+			if (a[i] != b[i])
 			{
-				return true;
+				return false;
 			}
-			if (a[num3] != b[num3])
-			{
-				break;
-			}
-			num3++;
 		}
-		return false;
+		return true;
 	}
 
 	private static Material[] InstanceMaterials(Material[] source)
@@ -225,13 +224,12 @@ public class MaterialInstance : MonoBehaviour
 		{
 			if (source[i] != null)
 			{
-				if (MaterialInstance.IsInstanceMaterial(source[i]))
+				if (IsInstanceMaterial(source[i]))
 				{
 					Debug.LogWarning("A material (" + source[i].name + ") which is already instanced was instanced multiple times.");
 				}
 				array[i] = new Material(source[i]);
-				Material material = array[i];
-				material.name += " (Instance)";
+				array[i].name += " (Instance)";
 			}
 		}
 		return array;
@@ -243,14 +241,18 @@ public class MaterialInstance : MonoBehaviour
 		{
 			for (int i = 0; i < materials.Length; i++)
 			{
-				MaterialInstance.DestroySafe(materials[i]);
+				DestroySafe(materials[i]);
 			}
 		}
 	}
 
 	private static bool IsInstanceMaterial(Material material)
 	{
-		return material != null && material.name.Contains(" (Instance)");
+		if (material != null)
+		{
+			return material.name.Contains(" (Instance)");
+		}
+		return false;
 	}
 
 	private static bool HasValidMaterial(Material[] materials)
@@ -275,26 +277,4 @@ public class MaterialInstance : MonoBehaviour
 			Object.Destroy(toDestroy);
 		}
 	}
-
-	private Renderer cachedRenderer;
-
-	[SerializeField]
-	[HideInInspector]
-	private Material[] defaultMaterials;
-
-	private Material[] instanceMaterials;
-
-	private Material[] cachedSharedMaterials;
-
-	private bool initialized;
-
-	private bool materialsInstanced;
-
-	[SerializeField]
-	[Tooltip("Whether to use a cached copy of cachedRenderer.sharedMaterials or call sharedMaterials on the Renderer directly. Enabling the option will lead to better performance but you must turn it off before modifying sharedMaterials of the Renderer.")]
-	private bool cacheSharedMaterialsFromRenderer;
-
-	private readonly HashSet<Object> materialOwners = new HashSet<Object>();
-
-	private const string instancePostfix = " (Instance)";
 }

@@ -1,10 +1,17 @@
-﻿using System;
 using GorillaNetworking;
 using Photon.Pun;
 using UnityEngine;
 
 public class DebugAutoNamePlayer : MonoBehaviour
 {
+	private float m_authorityPollTimer;
+
+	private float m_joinDelayTimer;
+
+	private bool m_lastIsZoneAuthority;
+
+	private GTZone m_lastZone;
+
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 	private static void Init()
 	{
@@ -24,48 +31,39 @@ public class DebugAutoNamePlayer : MonoBehaviour
 
 	private void OnRoomJoined()
 	{
-		this.m_lastZone = DebugAutoNamePlayer.GetPrimaryZone();
-		this.m_lastIsZoneAuthority = DebugAutoNamePlayer.GetIsZoneAuthority(this.m_lastZone);
-		this.m_joinDelayTimer = 2f;
-		this.ApplyAutoName();
+		m_lastZone = GetPrimaryZone();
+		m_lastIsZoneAuthority = GetIsZoneAuthority(m_lastZone);
+		m_joinDelayTimer = 2f;
+		ApplyAutoName();
 	}
 
 	private void OnPlayersChanged()
 	{
-		if (!RoomSystem.JoinedRoom)
+		if (RoomSystem.JoinedRoom)
 		{
-			return;
+			ApplyAutoName();
 		}
-		this.ApplyAutoName();
 	}
 
 	private void OnZoneChange(ZoneData[] zones)
 	{
-		if (!RoomSystem.JoinedRoom)
+		if (RoomSystem.JoinedRoom)
 		{
-			return;
+			m_lastZone = GetPrimaryZone();
+			m_lastIsZoneAuthority = GetIsZoneAuthority(m_lastZone);
+			ApplyAutoName();
 		}
-		this.m_lastZone = DebugAutoNamePlayer.GetPrimaryZone();
-		this.m_lastIsZoneAuthority = DebugAutoNamePlayer.GetIsZoneAuthority(this.m_lastZone);
-		this.ApplyAutoName();
 	}
 
 	private void ApplyAutoName()
 	{
-		string platformCode = DebugAutoNamePlayer.GetPlatformCode();
+		string platformCode = GetPlatformCode();
 		int localPlayerID = NetworkSystem.Instance.LocalPlayerID;
-		string text = NetworkSystem.Instance.IsMasterClient ? "MC" : "C";
-		GTZone primaryZone = DebugAutoNamePlayer.GetPrimaryZone();
-		string text2 = DebugAutoNamePlayer.GetIsZoneAuthority(primaryZone) ? "ZA" : "Z";
+		string text = (NetworkSystem.Instance.IsMasterClient ? "MC" : "C");
+		GTZone primaryZone = GetPrimaryZone();
+		string text2 = (GetIsZoneAuthority(primaryZone) ? "ZA" : "Z");
 		string text3 = primaryZone.ToString().ToUpper();
-		string text4 = string.Format("{0}_{1}_{2}_{3}_{4}", new object[]
-		{
-			platformCode,
-			localPlayerID,
-			text,
-			text2,
-			text3
-		});
+		string text4 = $"{platformCode}_{localPlayerID}_{text}_{text2}_{text3}";
 		if (text4.Length > 20)
 		{
 			text4 = text4.Substring(0, 20);
@@ -79,12 +77,7 @@ public class DebugAutoNamePlayer : MonoBehaviour
 		}
 		if (NetworkSystem.Instance.InRoom)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
-			{
-				PlayerPrefs.GetFloat("redValue", 0f),
-				PlayerPrefs.GetFloat("greenValue", 0f),
-				PlayerPrefs.GetFloat("blueValue", 0f)
-			});
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, PlayerPrefs.GetFloat("redValue", 0f), PlayerPrefs.GetFloat("greenValue", 0f), PlayerPrefs.GetFloat("blueValue", 0f));
 		}
 	}
 
@@ -106,19 +99,15 @@ public class DebugAutoNamePlayer : MonoBehaviour
 			return false;
 		}
 		NetPlayer localPlayer = NetworkSystem.Instance.LocalPlayer;
-		return localPlayer != null && managerForZone.IsAuthorityPlayer(localPlayer);
+		if (localPlayer == null)
+		{
+			return false;
+		}
+		return managerForZone.IsAuthorityPlayer(localPlayer);
 	}
 
 	private static string GetPlatformCode()
 	{
 		return "ST";
 	}
-
-	private float m_authorityPollTimer;
-
-	private float m_joinDelayTimer;
-
-	private bool m_lastIsZoneAuthority;
-
-	private GTZone m_lastZone;
 }

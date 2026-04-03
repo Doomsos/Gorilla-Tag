@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
@@ -15,7 +15,7 @@ public static class VectorMath
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static void SetXYZ(this Vector3 v, float f)
+	public static void SetXYZ(this ref Vector3 v, float f)
 	{
 		v.x = f;
 		v.y = f;
@@ -92,37 +92,32 @@ public static class VectorMath
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Vector3 Max(this Vector3 v)
 	{
-		float num = Math.Max(Math.Max(v.x, v.y), v.z);
-		v.x = num;
-		v.y = num;
-		v.z = num;
+		v.z = (v.y = (v.x = Math.Max(Math.Max(v.x, v.y), v.z)));
 		return v;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Vector3 Max(this Vector3 v, float max)
 	{
-		float num = Math.Max(Math.Max(Math.Max(v.x, v.y), v.z), max);
-		v.x = num;
-		v.y = num;
-		v.z = num;
+		v.z = (v.y = (v.x = Math.Max(Math.Max(Math.Max(v.x, v.y), v.z), max)));
 		return v;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static float3 Max(this float3 v)
 	{
-		float num = Math.Max(v.x, Math.Max(v.y, v.z));
-		v.x = num;
-		v.y = num;
-		v.z = num;
+		v.z = (v.y = (v.x = Math.Max(v.x, Math.Max(v.y, v.z))));
 		return v;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsFinite(this Vector3 v)
 	{
-		return float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z);
+		if (float.IsFinite(v.x) && float.IsFinite(v.y))
+		{
+			return float.IsFinite(v.z);
+		}
+		return false;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

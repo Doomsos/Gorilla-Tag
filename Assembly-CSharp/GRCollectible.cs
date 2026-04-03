@@ -1,16 +1,24 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GRCollectible : MonoBehaviour, IGameEntityComponent
 {
+	public GameEntity entity;
+
+	public int energyValue = 100;
+
+	public ProgressionManager.CoreType type;
+
+	public Action OnCollected;
+
 	private void Awake()
 	{
 	}
 
 	public void OnEntityInit()
 	{
-		GameEntityManager manager = this.entity.manager;
-		GameEntity gameEntity = manager.GetGameEntity(manager.GetEntityIdFromNetId((int)this.entity.createData));
+		GameEntityManager manager = entity.manager;
+		GameEntity gameEntity = manager.GetGameEntity(manager.GetEntityIdFromNetId((int)entity.createData));
 		if (gameEntity != null)
 		{
 			GRCollectibleDispenser component = gameEntity.GetComponent<GRCollectibleDispenser>();
@@ -31,19 +39,6 @@ public class GRCollectible : MonoBehaviour, IGameEntityComponent
 
 	public void InvokeOnCollected()
 	{
-		Action onCollected = this.OnCollected;
-		if (onCollected == null)
-		{
-			return;
-		}
-		onCollected();
+		OnCollected?.Invoke();
 	}
-
-	public GameEntity entity;
-
-	public int energyValue = 100;
-
-	public ProgressionManager.CoreType type;
-
-	public Action OnCollected;
 }

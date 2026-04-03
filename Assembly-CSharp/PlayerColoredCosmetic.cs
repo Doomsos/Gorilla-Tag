@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
@@ -6,61 +6,53 @@ using UnityEngine.Pool;
 
 public class PlayerColoredCosmetic : MonoBehaviour
 {
-	public void Awake()
+	[Serializable]
+	private struct ColoringRule
 	{
-		for (int i = 0; i < this.coloringRules.Length; i++)
-		{
-			this.coloringRules[i].Init();
-		}
-	}
+		[SerializeField]
+		private string shaderColorProperty;
 
-	private void InitIfNeeded()
-	{
-		if (!this.didInit)
+		private int hashId;
+
+		[SerializeField]
+		private Renderer meshRenderer;
+
+		[SerializeField]
+		private int materialIndex;
+
+		private Material instancedMaterial;
+
+		private Material defaultMaterial;
+
+		public void Init()
 		{
-			this.didInit = true;
-			this.rig = base.GetComponentInParent<VRRig>();
-			if (this.rig == null && GorillaTagger.Instance != null)
+			hashId = Shader.PropertyToID(shaderColorProperty);
+			if (meshRenderer == null)
 			{
-				this.rig = GorillaTagger.Instance.offlineVRRig;
+				Debug.LogError("ERROR!!!  ColoringRule.Init: Default meshRenderer cannot be null! Path=" + meshRenderer.transform.GetPathQ());
 			}
-			this.particleMains = new ParticleSystem.MainModule[this.particleSystems.Length];
-			for (int i = 0; i < this.particleSystems.Length; i++)
+			List<Material> value;
+			using (CollectionPool<List<Material>, Material>.Get(out value))
 			{
-				this.particleMains[i] = this.particleSystems[i].main;
+				meshRenderer.GetSharedMaterials(value);
+				if (materialIndex < 0 || materialIndex >= value.Count)
+				{
+					Debug.LogError("ERROR!!!  " + $"ColoringRule.Init: Material index {materialIndex} is out of range! Path=" + meshRenderer.transform.GetPathQ(), meshRenderer);
+				}
+				defaultMaterial = value[materialIndex];
+				if (defaultMaterial == null)
+				{
+					Debug.LogError("ERROR!!!  ColoringRule.Init: Default material cannot be null! Path=" + meshRenderer.transform.GetPathQ(), meshRenderer);
+				}
+				instancedMaterial = new Material(value[materialIndex]);
+				value[materialIndex] = instancedMaterial;
+				meshRenderer.SetSharedMaterials(value);
 			}
 		}
-	}
 
-	private void OnEnable()
-	{
-		this.InitIfNeeded();
-		if (this.rig != null)
+		public void Apply(Color color)
 		{
-			this.rig.OnColorChanged += this.UpdateColor;
-			this.UpdateColor(this.rig.playerColor);
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.rig != null)
-		{
-			this.rig.OnColorChanged -= this.UpdateColor;
-		}
-	}
-
-	public void UpdateColor(Color color)
-	{
-		this.InitIfNeeded();
-		Color color2 = Color.Lerp(color, this.lerpToColor, this.lerpStrength);
-		for (int i = 0; i < this.coloringRules.Length; i++)
-		{
-			this.coloringRules[i].Apply(color2);
-		}
-		for (int j = 0; j < this.particleSystems.Length; j++)
-		{
-			this.particleMains[j].startColor = color2;
+			instancedMaterial.SetColor(hashId, color);
 		}
 	}
 
@@ -80,60 +72,68 @@ public class PlayerColoredCosmetic : MonoBehaviour
 	private float lerpStrength;
 
 	[SerializeField]
-	private PlayerColoredCosmetic.ColoringRule[] coloringRules;
+	private ColoringRule[] coloringRules;
 
 	[SerializeField]
 	private ParticleSystem[] particleSystems;
 
 	private ParticleSystem.MainModule[] particleMains;
 
-	[Serializable]
-	private struct ColoringRule
+	public void Awake()
 	{
-		public void Init()
+		for (int i = 0; i < coloringRules.Length; i++)
 		{
-			this.hashId = Shader.PropertyToID(this.shaderColorProperty);
-			if (this.meshRenderer == null)
+			coloringRules[i].Init();
+		}
+	}
+
+	private void InitIfNeeded()
+	{
+		if (!didInit)
+		{
+			didInit = true;
+			rig = GetComponentInParent<VRRig>();
+			if (rig == null && GorillaTagger.Instance != null)
 			{
-				Debug.LogError("ERROR!!!  ColoringRule.Init: Default meshRenderer cannot be null! Path=" + this.meshRenderer.transform.GetPathQ());
+				rig = GorillaTagger.Instance.offlineVRRig;
 			}
-			List<Material> list;
-			using (CollectionPool<List<Material>, Material>.Get(out list))
+			particleMains = new ParticleSystem.MainModule[particleSystems.Length];
+			for (int i = 0; i < particleSystems.Length; i++)
 			{
-				this.meshRenderer.GetSharedMaterials(list);
-				if (this.materialIndex < 0 || this.materialIndex >= list.Count)
-				{
-					Debug.LogError("ERROR!!!  " + string.Format("ColoringRule.Init: Material index {0} is out of range! Path=", this.materialIndex) + this.meshRenderer.transform.GetPathQ(), this.meshRenderer);
-				}
-				this.defaultMaterial = list[this.materialIndex];
-				if (this.defaultMaterial == null)
-				{
-					Debug.LogError("ERROR!!!  ColoringRule.Init: Default material cannot be null! Path=" + this.meshRenderer.transform.GetPathQ(), this.meshRenderer);
-				}
-				this.instancedMaterial = new Material(list[this.materialIndex]);
-				list[this.materialIndex] = this.instancedMaterial;
-				this.meshRenderer.SetSharedMaterials(list);
+				particleMains[i] = particleSystems[i].main;
 			}
 		}
+	}
 
-		public void Apply(Color color)
+	private void OnEnable()
+	{
+		InitIfNeeded();
+		if (rig != null)
 		{
-			this.instancedMaterial.SetColor(this.hashId, color);
+			rig.OnColorChanged += UpdateColor;
+			UpdateColor(rig.playerColor);
 		}
+	}
 
-		[SerializeField]
-		private string shaderColorProperty;
+	private void OnDisable()
+	{
+		if (rig != null)
+		{
+			rig.OnColorChanged -= UpdateColor;
+		}
+	}
 
-		private int hashId;
-
-		[SerializeField]
-		private Renderer meshRenderer;
-
-		[SerializeField]
-		private int materialIndex;
-
-		private Material instancedMaterial;
-
-		private Material defaultMaterial;
+	public void UpdateColor(Color color)
+	{
+		InitIfNeeded();
+		Color color2 = Color.Lerp(color, lerpToColor, lerpStrength);
+		for (int i = 0; i < coloringRules.Length; i++)
+		{
+			coloringRules[i].Apply(color2);
+		}
+		for (int j = 0; j < particleSystems.Length; j++)
+		{
+			particleMains[j].startColor = color2;
+		}
 	}
 }

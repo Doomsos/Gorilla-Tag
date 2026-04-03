@@ -1,50 +1,50 @@
-﻿using System;
-
 public struct SIUpgradeSet
 {
+	private int backingBits;
+
 	public void Clear()
 	{
-		this.backingBits = 0;
+		backingBits = 0;
 	}
 
 	public SIUpgradeSet(int bits)
 	{
-		this.backingBits = bits;
+		backingBits = bits;
 	}
 
 	public int GetBits()
 	{
-		return this.backingBits;
+		return backingBits;
 	}
 
 	public void SetBits(int bits)
 	{
-		this.backingBits = bits;
+		backingBits = bits;
 	}
 
 	public long GetCreateData(SIPlayer player)
 	{
-		return (long)this.backingBits << 32 | (long)player.ActorNr;
+		return ((long)backingBits << 32) | player.ActorNr;
 	}
 
 	public void Add(SIUpgradeType upgrade)
 	{
-		this.backingBits |= 1 << upgrade.GetNodeId();
+		backingBits |= 1 << upgrade.GetNodeId();
 	}
 
 	public void Add(int nodeId)
 	{
-		this.backingBits |= 1 << nodeId;
+		backingBits |= 1 << nodeId;
 	}
 
 	public void Remove(SIUpgradeType upgrade)
 	{
-		this.backingBits &= ~(1 << upgrade.GetNodeId());
+		backingBits &= ~(1 << upgrade.GetNodeId());
 	}
 
 	public bool Contains(SIUpgradeType upgrade)
 	{
-		return (this.backingBits & 1 << upgrade.GetNodeId()) != 0;
+		return (backingBits & (1 << upgrade.GetNodeId())) != 0;
 	}
 
 	public bool ContainsAny(params SIUpgradeType[] upgrades)
@@ -54,31 +54,29 @@ public struct SIUpgradeSet
 		{
 			num |= 1 << self.GetNodeId();
 		}
-		return (this.backingBits & num) != 0;
+		return (backingBits & num) != 0;
 	}
 
 	public string GetString(SITechTreePageId pageId)
 	{
 		string text = "";
-		int i = this.backingBits;
-		int num = 0;
+		int num = backingBits;
+		int num2 = 0;
 		bool flag = true;
-		while (i > 0)
+		while (num > 0)
 		{
-			if ((i & 1) != 0)
+			if ((num & 1) != 0)
 			{
 				if (!flag)
 				{
 					text += "|";
 				}
-				text += SIUpgradeTypeSystem.GetUpgradeType((int)pageId, num).ToString();
+				text += SIUpgradeTypeSystem.GetUpgradeType((int)pageId, num2);
 				flag = false;
 			}
-			i >>= 1;
-			num++;
+			num >>= 1;
+			num2++;
 		}
 		return text;
 	}
-
-	private int backingBits;
 }

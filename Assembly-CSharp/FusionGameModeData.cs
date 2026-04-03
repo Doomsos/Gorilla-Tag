@@ -1,13 +1,14 @@
-﻿using System;
 using Fusion;
 
 [NetworkBehaviourWeaved(0)]
 public abstract class FusionGameModeData : NetworkBehaviour
 {
+	protected INetworkStruct data;
+
 	public abstract object Data { get; set; }
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
 	}
 
@@ -15,6 +16,4 @@ public abstract class FusionGameModeData : NetworkBehaviour
 	public override void CopyStateToBackingFields()
 	{
 	}
-
-	protected INetworkStruct data;
 }

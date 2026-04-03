@@ -1,28 +1,36 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ObjectHierarchyFlattenerManager : MonoBehaviourPostTick
 {
+	public static ObjectHierarchyFlattenerManager instance;
+
+	[OnEnterPlay_Set(false)]
+	public static bool hasInstance = false;
+
+	public static List<ObjectHierarchyFlattener> alloHF = new List<ObjectHierarchyFlattener>();
+
 	protected void Awake()
 	{
-		if (ObjectHierarchyFlattenerManager.hasInstance && ObjectHierarchyFlattenerManager.instance != this)
+		if (hasInstance && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		ObjectHierarchyFlattenerManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	public static void CreateManager()
 	{
-		ObjectHierarchyFlattenerManager.SetInstance(new GameObject("ObjectHierarchyFlattenerManager").AddComponent<ObjectHierarchyFlattenerManager>());
+		SetInstance(new GameObject("ObjectHierarchyFlattenerManager").AddComponent<ObjectHierarchyFlattenerManager>());
 	}
 
 	private static void SetInstance(ObjectHierarchyFlattenerManager manager)
 	{
-		ObjectHierarchyFlattenerManager.instance = manager;
-		ObjectHierarchyFlattenerManager.hasInstance = true;
+		instance = manager;
+		hasInstance = true;
 		if (Application.isPlaying)
 		{
 			Object.DontDestroyOnLoad(manager);
@@ -31,40 +39,33 @@ public class ObjectHierarchyFlattenerManager : MonoBehaviourPostTick
 
 	public static void RegisterOHF(ObjectHierarchyFlattener rbWI)
 	{
-		if (!ObjectHierarchyFlattenerManager.hasInstance)
+		if (!hasInstance)
 		{
-			ObjectHierarchyFlattenerManager.CreateManager();
+			CreateManager();
 		}
-		if (!ObjectHierarchyFlattenerManager.alloHF.Contains(rbWI))
+		if (!alloHF.Contains(rbWI))
 		{
-			ObjectHierarchyFlattenerManager.alloHF.Add(rbWI);
+			alloHF.Add(rbWI);
 		}
 	}
 
 	public static void UnregisterOHF(ObjectHierarchyFlattener rbWI)
 	{
-		if (!ObjectHierarchyFlattenerManager.hasInstance)
+		if (!hasInstance)
 		{
-			ObjectHierarchyFlattenerManager.CreateManager();
+			CreateManager();
 		}
-		if (ObjectHierarchyFlattenerManager.alloHF.Contains(rbWI))
+		if (alloHF.Contains(rbWI))
 		{
-			ObjectHierarchyFlattenerManager.alloHF.Remove(rbWI);
+			alloHF.Remove(rbWI);
 		}
 	}
 
 	public override void PostTick()
 	{
-		for (int i = 0; i < ObjectHierarchyFlattenerManager.alloHF.Count; i++)
+		for (int i = 0; i < alloHF.Count; i++)
 		{
-			ObjectHierarchyFlattenerManager.alloHF[i].InvokeLateUpdate();
+			alloHF[i].InvokeLateUpdate();
 		}
 	}
-
-	public static ObjectHierarchyFlattenerManager instance;
-
-	[OnEnterPlay_Set(false)]
-	public static bool hasInstance = false;
-
-	public static List<ObjectHierarchyFlattener> alloHF = new List<ObjectHierarchyFlattener>();
 }

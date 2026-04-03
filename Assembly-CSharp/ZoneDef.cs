@@ -1,26 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class ZoneDef : MonoBehaviour
 {
-	public GroupJoinZoneAB groupZoneAB
-	{
-		get
-		{
-			return new GroupJoinZoneAB
-			{
-				a = this.groupZone,
-				b = this.groupZoneB
-			};
-		}
-	}
-
-	public bool IsSameZone(ZoneDef other)
-	{
-		return !(other == null) && this.zoneId == other.zoneId && this.subZoneId == other.subZoneId;
-	}
-
 	public GTZone zoneId;
 
 	[FormerlySerializedAs("subZoneType")]
@@ -39,4 +21,23 @@ public class ZoneDef : MonoBehaviour
 	public bool trackExit;
 
 	public bool trackStay = true;
+
+	public GroupJoinZoneAB groupZoneAB => new GroupJoinZoneAB
+	{
+		a = groupZone,
+		b = groupZoneB
+	};
+
+	public bool IsSameZone(ZoneDef other)
+	{
+		if (other == null)
+		{
+			return false;
+		}
+		if (zoneId == other.zoneId)
+		{
+			return subZoneId == other.subZoneId;
+		}
+		return false;
+	}
 }

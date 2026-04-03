@@ -1,30 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class PlayFabAuthenticatorSettings
 {
-	static PlayFabAuthenticatorSettings()
-	{
-		PlayFabAuthenticatorSettings.Load("PlayFabAuthenticatorSettings");
-	}
-
-	public static void Load(string path)
-	{
-		PlayFabAuthenticatorSettingsScriptableObject playFabAuthenticatorSettingsScriptableObject = Resources.Load<PlayFabAuthenticatorSettingsScriptableObject>(path);
-		PlayFabAuthenticatorSettings.TitleId = playFabAuthenticatorSettingsScriptableObject.TitleId;
-		PlayFabAuthenticatorSettings.AuthApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.AuthApiBaseUrl;
-		PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.DailyQuestsApiBaseUrl;
-		PlayFabAuthenticatorSettings.FriendApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.FriendApiBaseUrl;
-		PlayFabAuthenticatorSettings.HpPromoApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.HpPromoApiBaseUrl;
-		PlayFabAuthenticatorSettings.IapApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.IapApiBaseUrl;
-		PlayFabAuthenticatorSettings.KidApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.KidApiBaseUrl;
-		PlayFabAuthenticatorSettings.MmrApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.MmrApiBaseUrl;
-		PlayFabAuthenticatorSettings.ModerationApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.ModerationApiBaseUrl;
-		PlayFabAuthenticatorSettings.ProgressionApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.ProgressionApiBaseUrl;
-		PlayFabAuthenticatorSettings.TitleDataApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.TitleDataApiBaseUrl;
-		PlayFabAuthenticatorSettings.VotingApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.VotingApiBaseUrl;
-	}
-
 	public static string TitleId;
 
 	public static string AuthApiBaseUrl;
@@ -48,4 +25,26 @@ public class PlayFabAuthenticatorSettings
 	public static string TitleDataApiBaseUrl;
 
 	public static string VotingApiBaseUrl;
+
+	static PlayFabAuthenticatorSettings()
+	{
+		Load("PlayFabAuthenticatorSettings");
+	}
+
+	public static void Load(string path)
+	{
+		PlayFabAuthenticatorSettingsScriptableObject playFabAuthenticatorSettingsScriptableObject = Resources.Load<PlayFabAuthenticatorSettingsScriptableObject>(path);
+		TitleId = playFabAuthenticatorSettingsScriptableObject.TitleId;
+		AuthApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.AuthApiBaseUrl;
+		DailyQuestsApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.DailyQuestsApiBaseUrl;
+		FriendApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.FriendApiBaseUrl;
+		HpPromoApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.HpPromoApiBaseUrl;
+		IapApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.IapApiBaseUrl;
+		KidApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.KidApiBaseUrl;
+		MmrApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.MmrApiBaseUrl;
+		ModerationApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.ModerationApiBaseUrl;
+		ProgressionApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.ProgressionApiBaseUrl;
+		TitleDataApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.TitleDataApiBaseUrl;
+		VotingApiBaseUrl = playFabAuthenticatorSettingsScriptableObject.VotingApiBaseUrl;
+	}
 }

@@ -1,25 +1,9 @@
-﻿using System;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 
 public static class NetworkSystemRaiseEvent
 {
-	public static void RaiseEvent(byte code, object data)
-	{
-		PhotonNetwork.RaiseEvent(code, data, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-	}
-
-	public static void RaiseEvent(byte code, object data, NetEventOptions options, bool reliable)
-	{
-		PhotonNetwork.RaiseEvent(code, data, new RaiseEventOptions
-		{
-			TargetActors = options.TargetActors,
-			Receivers = (ReceiverGroup)options.Reciever,
-			Flags = options.Flags
-		}, reliable ? SendOptions.SendReliable : SendOptions.SendUnreliable);
-	}
-
 	public static readonly NetEventOptions neoOthers = new NetEventOptions
 	{
 		Reciever = NetEventOptions.RecieverTarget.others
@@ -34,4 +18,18 @@ public static class NetworkSystemRaiseEvent
 	{
 		TargetActors = new int[1]
 	};
+
+	public static void RaiseEvent(byte code, object data)
+	{
+		PhotonNetwork.RaiseEvent(code, data, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+	}
+
+	public static void RaiseEvent(byte code, object data, NetEventOptions options, bool reliable)
+	{
+		RaiseEventOptions raiseEventOptions = new RaiseEventOptions();
+		raiseEventOptions.TargetActors = options.TargetActors;
+		raiseEventOptions.Receivers = (ReceiverGroup)options.Reciever;
+		raiseEventOptions.Flags = options.Flags;
+		PhotonNetwork.RaiseEvent(code, data, raiseEventOptions, reliable ? SendOptions.SendReliable : SendOptions.SendUnreliable);
+	}
 }

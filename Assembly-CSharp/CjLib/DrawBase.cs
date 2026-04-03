@@ -1,32 +1,30 @@
-﻿using System;
 using UnityEngine;
 
-namespace CjLib
+namespace CjLib;
+
+public abstract class DrawBase : MonoBehaviour
 {
-	public abstract class DrawBase : MonoBehaviour
+	public Color WireframeColor = Color.white;
+
+	public Color ShadededColor = Color.gray;
+
+	public bool Wireframe;
+
+	public DebugUtil.Style Style = DebugUtil.Style.FlatShaded;
+
+	public bool DepthTest = true;
+
+	private void Update()
 	{
-		private void Update()
+		if (Style != DebugUtil.Style.Wireframe)
 		{
-			if (this.Style != DebugUtil.Style.Wireframe)
-			{
-				this.Draw(this.ShadededColor, this.Style, this.DepthTest);
-			}
-			if (this.Style == DebugUtil.Style.Wireframe || this.Wireframe)
-			{
-				this.Draw(this.WireframeColor, DebugUtil.Style.Wireframe, this.DepthTest);
-			}
+			Draw(ShadededColor, Style, DepthTest);
 		}
-
-		protected abstract void Draw(Color color, DebugUtil.Style style, bool depthTest);
-
-		public Color WireframeColor = Color.white;
-
-		public Color ShadededColor = Color.gray;
-
-		public bool Wireframe;
-
-		public DebugUtil.Style Style = DebugUtil.Style.FlatShaded;
-
-		public bool DepthTest = true;
+		if (Style == DebugUtil.Style.Wireframe || Wireframe)
+		{
+			Draw(WireframeColor, DebugUtil.Style.Wireframe, DepthTest);
+		}
 	}
+
+	protected abstract void Draw(Color color, DebugUtil.Style style, bool depthTest);
 }

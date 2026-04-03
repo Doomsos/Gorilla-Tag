@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -10,470 +9,23 @@ using UnityEngine.UI;
 
 public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 {
-	public SIScreenRegion ScreenRegion
+	public enum FailReason
 	{
-		get
-		{
-			return this.screenRegion;
-		}
+		NotEnoughRocks,
+		ResourcesFull,
+		Unknown
 	}
 
-	public bool IsAuthority
+	public enum ResourceCollectorTerminalState
 	{
-		get
-		{
-			return this.SIManager.gameEntityManager.IsAuthority();
-		}
-	}
-
-	public SIPlayer ActivePlayer
-	{
-		get
-		{
-			return this.parentTerminal.activePlayer;
-		}
-	}
-
-	public SuperInfectionManager SIManager
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager;
-		}
-	}
-
-	private void CollectButtonColliders()
-	{
-		SIResourceCollection.<>c__DisplayClass45_0 CS$<>8__locals1;
-		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SIResourceCollection.<CollectButtonColliders>g__RemoveButtonsInside|45_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
-		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
-		SIResourceCollection.<CollectButtonColliders>g__RemoveButtonsInside|45_2(new GameObject[]
-		{
-			this.helpScreen
-		}, ref CS$<>8__locals1);
-		this._nonPopupButtonColliders = (from b in CS$<>8__locals1.buttons
-		select b.GetComponent<Collider>()).ToList<Collider>();
-	}
-
-	private void SetNonPopupButtonsEnabled(bool enable)
-	{
-		foreach (Collider collider in this._nonPopupButtonColliders)
-		{
-			collider.enabled = enable;
-		}
-	}
-
-	public void Initialize()
-	{
-		if (this.initialized)
-		{
-			return;
-		}
-		this.initialized = true;
-		if (this.parentTerminal == null)
-		{
-			this.parentTerminal = base.GetComponentInParent<SICombinedTerminal>();
-		}
-		this.screenData = new Dictionary<SIResourceCollection.ResourceCollectorTerminalState, GameObject>();
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan, this.waitingForScanScreen);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.CurrentResources, this.currentResourcesScreen);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.HelpScreen, this.helpScreen);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.PurchaseRemote, this.purchasingRemote);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart, this.purchasingStart);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.PurchaseInProgress, this.purchaseInProgress);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.PurchaseSuccess, this.purchasingSuccess);
-		this.screenData.Add(SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure, this.purchasingFailure);
-		this.Reset();
-	}
-
-	public void Reset()
-	{
-		this.currentState = SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-		this.lastState = this.currentState;
-		this.SetScreenVisibility(this.currentState, this.lastState);
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy)
-		{
-			this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan, SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan);
-		}
-		stream.SendNext(this.currentHelpButtonPageIndex);
-		stream.SendNext((int)this.currentState);
-		stream.SendNext((int)this.lastState);
-	}
-
-	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.currentHelpButtonPageIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, this.helpPopupScreens.Length - 1);
-		this.UpdateHelpButtonPage(this.currentHelpButtonPageIndex);
-		SIResourceCollection.ResourceCollectorTerminalState resourceCollectorTerminalState = (SIResourceCollection.ResourceCollectorTerminalState)stream.ReceiveNext();
-		SIResourceCollection.ResourceCollectorTerminalState resourceCollectorTerminalState2 = (SIResourceCollection.ResourceCollectorTerminalState)stream.ReceiveNext();
-		if (!Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState2))
-		{
-			resourceCollectorTerminalState = SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-			resourceCollectorTerminalState2 = SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-		}
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState2))
-		{
-			this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan, SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(resourceCollectorTerminalState, resourceCollectorTerminalState2);
-	}
-
-	public void ZoneDataSerializeWrite(BinaryWriter writer)
-	{
-		writer.Write(this.currentHelpButtonPageIndex);
-		writer.Write((int)this.currentState);
-		writer.Write((int)this.lastState);
-	}
-
-	public void ZoneDataSerializeRead(BinaryReader reader)
-	{
-		this.currentHelpButtonPageIndex = Mathf.Clamp(reader.ReadInt32(), 0, this.helpPopupScreens.Length - 1);
-		this.UpdateHelpButtonPage(this.currentHelpButtonPageIndex);
-		SIResourceCollection.ResourceCollectorTerminalState resourceCollectorTerminalState = (SIResourceCollection.ResourceCollectorTerminalState)reader.ReadInt32();
-		SIResourceCollection.ResourceCollectorTerminalState resourceCollectorTerminalState2 = (SIResourceCollection.ResourceCollectorTerminalState)reader.ReadInt32();
-		if (!Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState2))
-		{
-			resourceCollectorTerminalState = SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-			resourceCollectorTerminalState2 = SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-		}
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(SIResourceCollection.ResourceCollectorTerminalState), resourceCollectorTerminalState2))
-		{
-			this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan, SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(resourceCollectorTerminalState, resourceCollectorTerminalState2);
-	}
-
-	public bool PopupActive()
-	{
-		return this.IsPopupState(this.currentState);
-	}
-
-	public bool IsPopupState(SIResourceCollection.ResourceCollectorTerminalState state)
-	{
-		return state == SIResourceCollection.ResourceCollectorTerminalState.HelpScreen || state == SIResourceCollection.ResourceCollectorTerminalState.PurchaseInProgress || state == SIResourceCollection.ResourceCollectorTerminalState.PurchaseRemote || state == SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart || state == SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure || state == SIResourceCollection.ResourceCollectorTerminalState.PurchaseSuccess;
-	}
-
-	public bool HasHelpButton(SIResourceCollection.ResourceCollectorTerminalState state)
-	{
-		return state == SIResourceCollection.ResourceCollectorTerminalState.CurrentResources || state == SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan;
-	}
-
-	public void UpdateState(SIResourceCollection.ResourceCollectorTerminalState newState, SIResourceCollection.ResourceCollectorTerminalState newLastState)
-	{
-		if (!this.IsPopupState(newLastState))
-		{
-			this.currentState = newLastState;
-		}
-		this.UpdateState(newState);
-	}
-
-	public void UpdateState(SIResourceCollection.ResourceCollectorTerminalState newState)
-	{
-		if (!this.IsPopupState(this.currentState))
-		{
-			this.lastState = this.currentState;
-		}
-		this.currentState = newState;
-		this.SetScreenVisibility(this.currentState, this.lastState);
-		switch (this.currentState)
-		{
-		case SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan:
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseInProgress:
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseSuccess:
-			break;
-		case SIResourceCollection.ResourceCollectorTerminalState.CurrentResources:
-			this.currentResourcesResourceCounts.text = this.FormattedPlayerResourceCount(this.ActivePlayer);
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.HelpScreen:
-			this.UpdateHelpButtonPage(this.currentHelpButtonPageIndex);
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseRemote:
-			if (this.ActivePlayer != null && this.ActivePlayer == SIPlayer.LocalPlayer)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart);
-			}
-			this.currentResourceCountsLocal.text = this.FormattedPlayerResourceCountWithMax(this.ActivePlayer);
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart:
-			if (this.ActivePlayer != null && this.ActivePlayer != SIPlayer.LocalPlayer)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseRemote);
-			}
-			else
-			{
-				this.shinyRockInfo.text = "PRICE: 500 SHINY ROCKS\n\nYOU HAVE:\n" + ProgressionManager.Instance.GetShinyRocksTotal().ToString() + " SHINY ROCKS";
-			}
-			this.currentResourceCountsLocal.text = this.FormattedPlayerResourceCountWithMax(this.ActivePlayer);
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure:
-			switch (this.failureReason)
-			{
-			case SIResourceCollection.FailReason.NotEnoughRocks:
-				this.failureReasonText.text = "NOT ENOUGH SHINY ROCKS! PLEASE TRY AGAIN LATER, OR PURCHASE MORE SHINY ROCKS!";
-				return;
-			case SIResourceCollection.FailReason.ResourcesFull:
-				this.failureReasonText.text = "YOU ARE ALREADY AT MAX RESOURCES! DONATE YOUR SHINY ROCKS TO A GOOD CAUSE INSTEAD OF US, KNUCKLEHEAD!";
-				return;
-			case SIResourceCollection.FailReason.Unknown:
-				this.failureReasonText.text = "UHHHHH SOMETHING WENT WRONG, I'M NOT SURE WHAT, SORRY TRY AGAIN LATER MAYBE!";
-				break;
-			default:
-				return;
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public string FormattedPlayerResourceCount(SIPlayer player)
-	{
-		return string.Concat(new string[]
-		{
-			this.GetFormattedResource(player, SIResource.ResourceType.TechPoint),
-			"\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.StrangeWood),
-			"\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.WeirdGear),
-			"\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.VibratingSpring),
-			"\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.BouncySand),
-			"\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.FloppyMetal)
-		});
-	}
-
-	public string FormattedPlayerResourceCountWithMax(SIPlayer player)
-	{
-		return string.Concat(new string[]
-		{
-			this.GetFormattedResource(player, SIResource.ResourceType.StrangeWood),
-			" -> 20\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.WeirdGear),
-			" -> 20\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.VibratingSpring),
-			" -> 20\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.BouncySand),
-			" -> 20\n",
-			this.GetFormattedResource(player, SIResource.ResourceType.FloppyMetal),
-			" -> 20"
-		});
-	}
-
-	private string GetFormattedResource(SIPlayer player, SIResource.ResourceType resource)
-	{
-		int resourceMaxCap = SIProgression.Instance.GetResourceMaxCap(resource);
-		if (resourceMaxCap == 2147483647)
-		{
-			return player.CurrentProgression.resourceArray[(int)resource].ToString();
-		}
-		return string.Format("{0}/{1}", player.CurrentProgression.resourceArray[(int)resource], resourceMaxCap);
-	}
-
-	public void UpdateHelpButtonPage(int helpButtonPageIndex)
-	{
-		for (int i = 0; i < this.helpPopupScreens.Length; i++)
-		{
-			this.helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
-		}
-	}
-
-	public void SetScreenVisibility(SIResourceCollection.ResourceCollectorTerminalState currentState, SIResourceCollection.ResourceCollectorTerminalState lastState)
-	{
-		bool flag = this.IsPopupState(currentState);
-		this.background.color = ((currentState == SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan) ? Color.white : ((this.ActivePlayer != null && this.ActivePlayer.gamePlayer.IsLocal()) ? this.active : this.notActive));
-		foreach (SIResourceCollection.ResourceCollectorTerminalState resourceCollectorTerminalState in this.screenData.Keys)
-		{
-			bool flag2 = resourceCollectorTerminalState == currentState || (flag && resourceCollectorTerminalState == lastState);
-			if (this.screenData[resourceCollectorTerminalState].activeSelf != flag2)
-			{
-				this.screenData[resourceCollectorTerminalState].SetActive(flag2);
-			}
-		}
-		if (this.popupScreen.activeSelf != flag)
-		{
-			this.popupScreen.SetActive(flag);
-		}
-		this.SetNonPopupButtonsEnabled(!flag);
-	}
-
-	public void PlayerHandScanned(int actorNr)
-	{
-		this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.CurrentResources);
-	}
-
-	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
-	{
-		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (this.ActivePlayer == null || this.ActivePlayer != SIPlayer.LocalPlayer))
-		{
-			this.parentTerminal.PlayWrongPlayerBuzz(this.uiCenter);
-		}
-		else
-		{
-			this.soundBankPlayer.Play();
-		}
-		if (actorNr == SIPlayer.LocalPlayer.ActorNr && this.ActivePlayer == SIPlayer.LocalPlayer && this.currentState == SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart && buttonType == SITouchscreenButton.SITouchscreenButtonType.Confirm)
-		{
-			bool flag = ProgressionManager.Instance.GetShinyRocksTotal() >= 500;
-			bool flag2 = SIProgression.ResourcesMaxed();
-			if (flag && !flag2)
-			{
-				ProgressionManager.Instance.PurchaseResources(delegate(ProgressionManager.UserInventory userInventoryResponse)
-				{
-					SIProgression.Instance.SendPurchaseResourcesData();
-					ProgressionManager.Instance.RefreshUserInventory();
-					this.TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType.Collect, -1, SIPlayer.LocalPlayer.ActorNr);
-				}, delegate(string error)
-				{
-					SIResourceCollection.FailReason data2;
-					if (!(error == "Not enough Shiny Rocks to complete this purchase"))
-					{
-						if (!(error == "already maxed resources"))
-						{
-							data2 = SIResourceCollection.FailReason.Unknown;
-						}
-						else
-						{
-							data2 = SIResourceCollection.FailReason.ResourcesFull;
-						}
-					}
-					else
-					{
-						data2 = SIResourceCollection.FailReason.NotEnoughRocks;
-					}
-					this.TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType.OverrideFailure, (int)data2, SIPlayer.LocalPlayer.ActorNr);
-				});
-			}
-			else
-			{
-				buttonType = SITouchscreenButton.SITouchscreenButtonType.OverrideFailure;
-				if (!flag)
-				{
-					data = 0;
-				}
-				else if (flag2)
-				{
-					data = 1;
-				}
-				else
-				{
-					data = 2;
-				}
-			}
-		}
-		if (!this.IsAuthority)
-		{
-			this.parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.ResourceCollection);
-			return;
-		}
-		if (this.ActivePlayer == null || actorNr != this.ActivePlayer.ActorNr)
-		{
-			return;
-		}
-		this.soundBankPlayer.Play();
-		switch (this.currentState)
-		{
-		case SIResourceCollection.ResourceCollectorTerminalState.WaitingForScan:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.HelpScreen);
-			}
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.CurrentResources:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Purchase)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart);
-			}
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.HelpScreen:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-			{
-				this.currentHelpButtonPageIndex = 0;
-				this.UpdateState(this.lastState);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Next)
-			{
-				this.currentHelpButtonPageIndex = Mathf.Clamp(this.currentHelpButtonPageIndex + 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.currentHelpButtonPageIndex);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.currentHelpButtonPageIndex = Mathf.Clamp(this.currentHelpButtonPageIndex - 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.currentHelpButtonPageIndex);
-			}
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseRemote:
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseStart:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Confirm)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseInProgress);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Cancel)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.CurrentResources);
-				return;
-			}
-			this.failureReason = (SIResourceCollection.FailReason)data;
-			this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure);
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseInProgress:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.OverrideFailure)
-			{
-				this.failureReason = (SIResourceCollection.FailReason)data;
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Collect)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.PurchaseSuccess);
-			}
-			return;
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseSuccess:
-		case SIResourceCollection.ResourceCollectorTerminalState.PurchaseFailure:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-			{
-				this.UpdateState(SIResourceCollection.ResourceCollectorTerminalState.CurrentResources);
-			}
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
-	{
-	}
-
-	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
-	{
-	}
-
-	GameObject ITouchScreenStation.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	[CompilerGenerated]
-	internal static void <CollectButtonColliders>g__RemoveButtonsInside|45_2(GameObject[] roots, ref SIResourceCollection.<>c__DisplayClass45_0 A_1)
-	{
-		for (int i = 0; i < roots.Length; i++)
-		{
-			foreach (SITouchscreenButton item in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
-			{
-				A_1.buttons.Remove(item);
-			}
-		}
+		WaitingForScan,
+		CurrentResources,
+		HelpScreen,
+		PurchaseRemote,
+		PurchaseStart,
+		PurchaseInProgress,
+		PurchaseSuccess,
+		PurchaseFailure
 	}
 
 	public const int REFILL_PURCHASE_SHINY_ROCK_COST = 500;
@@ -482,9 +34,9 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 
 	private const string appendToMax = " -> 20";
 
-	public SIResourceCollection.ResourceCollectorTerminalState currentState;
+	public ResourceCollectorTerminalState currentState;
 
-	public SIResourceCollection.ResourceCollectorTerminalState lastState;
+	public ResourceCollectorTerminalState lastState;
 
 	public int resourceDepositedCount;
 
@@ -534,7 +86,7 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 
 	public const string failureUnknown = "UHHHHH SOMETHING WENT WRONG, I'M NOT SURE WHAT, SORRY TRY AGAIN LATER MAYBE!";
 
-	private SIResourceCollection.FailReason failureReason;
+	private FailReason failureReason;
 
 	public Image background;
 
@@ -544,7 +96,7 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 
 	public TextMeshProUGUI currentResourcesResourceCounts;
 
-	private Dictionary<SIResourceCollection.ResourceCollectorTerminalState, GameObject> screenData;
+	private Dictionary<ResourceCollectorTerminalState, GameObject> screenData;
 
 	private bool initialized;
 
@@ -555,22 +107,389 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 	[SerializeField]
 	private List<Collider> _nonPopupButtonColliders;
 
-	public enum FailReason
+	public SIScreenRegion ScreenRegion => screenRegion;
+
+	public bool IsAuthority => SIManager.gameEntityManager.IsAuthority();
+
+	public SIPlayer ActivePlayer => parentTerminal.activePlayer;
+
+	public SuperInfectionManager SIManager => parentTerminal.superInfection.siManager;
+
+	private void CollectButtonColliders()
 	{
-		NotEnoughRocks,
-		ResourcesFull,
-		Unknown
+		List<SITouchscreenButton> buttons = GetComponentsInChildren<SITouchscreenButton>(includeInactive: true).ToList();
+		RemoveButtonsInside((from d in GetComponentsInChildren<DestroyIfNotBeta>()
+			select d.gameObject).ToArray());
+		RemoveButtonsInside(new GameObject[1] { helpScreen });
+		_nonPopupButtonColliders = buttons.Select((SITouchscreenButton b) => b.GetComponent<Collider>()).ToList();
+		void RemoveButtonsInside(GameObject[] roots)
+		{
+			for (int i = 0; i < roots.Length; i++)
+			{
+				SITouchscreenButton[] componentsInChildren = roots[i].GetComponentsInChildren<SITouchscreenButton>(includeInactive: true);
+				foreach (SITouchscreenButton item in componentsInChildren)
+				{
+					buttons.Remove(item);
+				}
+			}
+		}
 	}
 
-	public enum ResourceCollectorTerminalState
+	private void SetNonPopupButtonsEnabled(bool enable)
 	{
-		WaitingForScan,
-		CurrentResources,
-		HelpScreen,
-		PurchaseRemote,
-		PurchaseStart,
-		PurchaseInProgress,
-		PurchaseSuccess,
-		PurchaseFailure
+		foreach (Collider nonPopupButtonCollider in _nonPopupButtonColliders)
+		{
+			nonPopupButtonCollider.enabled = enable;
+		}
+	}
+
+	public void Initialize()
+	{
+		if (!initialized)
+		{
+			initialized = true;
+			if (parentTerminal == null)
+			{
+				parentTerminal = GetComponentInParent<SICombinedTerminal>();
+			}
+			screenData = new Dictionary<ResourceCollectorTerminalState, GameObject>();
+			screenData.Add(ResourceCollectorTerminalState.WaitingForScan, waitingForScanScreen);
+			screenData.Add(ResourceCollectorTerminalState.CurrentResources, currentResourcesScreen);
+			screenData.Add(ResourceCollectorTerminalState.HelpScreen, helpScreen);
+			screenData.Add(ResourceCollectorTerminalState.PurchaseRemote, purchasingRemote);
+			screenData.Add(ResourceCollectorTerminalState.PurchaseStart, purchasingStart);
+			screenData.Add(ResourceCollectorTerminalState.PurchaseInProgress, purchaseInProgress);
+			screenData.Add(ResourceCollectorTerminalState.PurchaseSuccess, purchasingSuccess);
+			screenData.Add(ResourceCollectorTerminalState.PurchaseFailure, purchasingFailure);
+			Reset();
+		}
+	}
+
+	public void Reset()
+	{
+		currentState = ResourceCollectorTerminalState.WaitingForScan;
+		lastState = currentState;
+		SetScreenVisibility(currentState, lastState);
+	}
+
+	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy)
+		{
+			UpdateState(ResourceCollectorTerminalState.WaitingForScan, ResourceCollectorTerminalState.WaitingForScan);
+		}
+		stream.SendNext(currentHelpButtonPageIndex);
+		stream.SendNext((int)currentState);
+		stream.SendNext((int)lastState);
+	}
+
+	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		currentHelpButtonPageIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, helpPopupScreens.Length - 1);
+		UpdateHelpButtonPage(currentHelpButtonPageIndex);
+		ResourceCollectorTerminalState resourceCollectorTerminalState = (ResourceCollectorTerminalState)stream.ReceiveNext();
+		ResourceCollectorTerminalState resourceCollectorTerminalState2 = (ResourceCollectorTerminalState)stream.ReceiveNext();
+		if (!Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState2))
+		{
+			resourceCollectorTerminalState = ResourceCollectorTerminalState.WaitingForScan;
+			resourceCollectorTerminalState2 = ResourceCollectorTerminalState.WaitingForScan;
+		}
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState2))
+		{
+			UpdateState(ResourceCollectorTerminalState.WaitingForScan, ResourceCollectorTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(resourceCollectorTerminalState, resourceCollectorTerminalState2);
+		}
+	}
+
+	public void ZoneDataSerializeWrite(BinaryWriter writer)
+	{
+		writer.Write(currentHelpButtonPageIndex);
+		writer.Write((int)currentState);
+		writer.Write((int)lastState);
+	}
+
+	public void ZoneDataSerializeRead(BinaryReader reader)
+	{
+		currentHelpButtonPageIndex = Mathf.Clamp(reader.ReadInt32(), 0, helpPopupScreens.Length - 1);
+		UpdateHelpButtonPage(currentHelpButtonPageIndex);
+		ResourceCollectorTerminalState resourceCollectorTerminalState = (ResourceCollectorTerminalState)reader.ReadInt32();
+		ResourceCollectorTerminalState resourceCollectorTerminalState2 = (ResourceCollectorTerminalState)reader.ReadInt32();
+		if (!Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState2))
+		{
+			resourceCollectorTerminalState = ResourceCollectorTerminalState.WaitingForScan;
+			resourceCollectorTerminalState2 = ResourceCollectorTerminalState.WaitingForScan;
+		}
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState) || !Enum.IsDefined(typeof(ResourceCollectorTerminalState), resourceCollectorTerminalState2))
+		{
+			UpdateState(ResourceCollectorTerminalState.WaitingForScan, ResourceCollectorTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(resourceCollectorTerminalState, resourceCollectorTerminalState2);
+		}
+	}
+
+	public bool PopupActive()
+	{
+		return IsPopupState(currentState);
+	}
+
+	public bool IsPopupState(ResourceCollectorTerminalState state)
+	{
+		if (state != ResourceCollectorTerminalState.HelpScreen && state != ResourceCollectorTerminalState.PurchaseInProgress && state != ResourceCollectorTerminalState.PurchaseRemote && state != ResourceCollectorTerminalState.PurchaseStart && state != ResourceCollectorTerminalState.PurchaseFailure)
+		{
+			return state == ResourceCollectorTerminalState.PurchaseSuccess;
+		}
+		return true;
+	}
+
+	public bool HasHelpButton(ResourceCollectorTerminalState state)
+	{
+		if (state != ResourceCollectorTerminalState.CurrentResources)
+		{
+			return state == ResourceCollectorTerminalState.WaitingForScan;
+		}
+		return true;
+	}
+
+	public void UpdateState(ResourceCollectorTerminalState newState, ResourceCollectorTerminalState newLastState)
+	{
+		if (!IsPopupState(newLastState))
+		{
+			currentState = newLastState;
+		}
+		UpdateState(newState);
+	}
+
+	public void UpdateState(ResourceCollectorTerminalState newState)
+	{
+		if (!IsPopupState(currentState))
+		{
+			lastState = currentState;
+		}
+		currentState = newState;
+		SetScreenVisibility(currentState, lastState);
+		switch (currentState)
+		{
+		case ResourceCollectorTerminalState.CurrentResources:
+			currentResourcesResourceCounts.text = FormattedPlayerResourceCount(ActivePlayer);
+			break;
+		case ResourceCollectorTerminalState.HelpScreen:
+			UpdateHelpButtonPage(currentHelpButtonPageIndex);
+			break;
+		case ResourceCollectorTerminalState.PurchaseStart:
+			if (ActivePlayer != null && ActivePlayer != SIPlayer.LocalPlayer)
+			{
+				UpdateState(ResourceCollectorTerminalState.PurchaseRemote);
+			}
+			else
+			{
+				shinyRockInfo.text = "PRICE: 500 SHINY ROCKS\n\nYOU HAVE:\n" + ProgressionManager.Instance.GetShinyRocksTotal() + " SHINY ROCKS";
+			}
+			currentResourceCountsLocal.text = FormattedPlayerResourceCountWithMax(ActivePlayer);
+			break;
+		case ResourceCollectorTerminalState.PurchaseRemote:
+			if (ActivePlayer != null && ActivePlayer == SIPlayer.LocalPlayer)
+			{
+				UpdateState(ResourceCollectorTerminalState.PurchaseStart);
+			}
+			currentResourceCountsLocal.text = FormattedPlayerResourceCountWithMax(ActivePlayer);
+			break;
+		case ResourceCollectorTerminalState.PurchaseFailure:
+			switch (failureReason)
+			{
+			case FailReason.NotEnoughRocks:
+				failureReasonText.text = "NOT ENOUGH SHINY ROCKS! PLEASE TRY AGAIN LATER, OR PURCHASE MORE SHINY ROCKS!";
+				break;
+			case FailReason.ResourcesFull:
+				failureReasonText.text = "YOU ARE ALREADY AT MAX RESOURCES! DONATE YOUR SHINY ROCKS TO A GOOD CAUSE INSTEAD OF US, KNUCKLEHEAD!";
+				break;
+			case FailReason.Unknown:
+				failureReasonText.text = "UHHHHH SOMETHING WENT WRONG, I'M NOT SURE WHAT, SORRY TRY AGAIN LATER MAYBE!";
+				break;
+			}
+			break;
+		case ResourceCollectorTerminalState.WaitingForScan:
+		case ResourceCollectorTerminalState.PurchaseInProgress:
+		case ResourceCollectorTerminalState.PurchaseSuccess:
+			break;
+		}
+	}
+
+	public string FormattedPlayerResourceCount(SIPlayer player)
+	{
+		return GetFormattedResource(player, SIResource.ResourceType.TechPoint) + "\n" + GetFormattedResource(player, SIResource.ResourceType.StrangeWood) + "\n" + GetFormattedResource(player, SIResource.ResourceType.WeirdGear) + "\n" + GetFormattedResource(player, SIResource.ResourceType.VibratingSpring) + "\n" + GetFormattedResource(player, SIResource.ResourceType.BouncySand) + "\n" + GetFormattedResource(player, SIResource.ResourceType.FloppyMetal);
+	}
+
+	public string FormattedPlayerResourceCountWithMax(SIPlayer player)
+	{
+		return GetFormattedResource(player, SIResource.ResourceType.StrangeWood) + " -> 20\n" + GetFormattedResource(player, SIResource.ResourceType.WeirdGear) + " -> 20\n" + GetFormattedResource(player, SIResource.ResourceType.VibratingSpring) + " -> 20\n" + GetFormattedResource(player, SIResource.ResourceType.BouncySand) + " -> 20\n" + GetFormattedResource(player, SIResource.ResourceType.FloppyMetal) + " -> 20";
+	}
+
+	private string GetFormattedResource(SIPlayer player, SIResource.ResourceType resource)
+	{
+		int resourceMaxCap = SIProgression.Instance.GetResourceMaxCap(resource);
+		if (resourceMaxCap == int.MaxValue)
+		{
+			return player.CurrentProgression.resourceArray[(int)resource].ToString();
+		}
+		return $"{player.CurrentProgression.resourceArray[(int)resource]}/{resourceMaxCap}";
+	}
+
+	public void UpdateHelpButtonPage(int helpButtonPageIndex)
+	{
+		for (int i = 0; i < helpPopupScreens.Length; i++)
+		{
+			helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
+		}
+	}
+
+	public void SetScreenVisibility(ResourceCollectorTerminalState currentState, ResourceCollectorTerminalState lastState)
+	{
+		bool flag = IsPopupState(currentState);
+		background.color = ((currentState == ResourceCollectorTerminalState.WaitingForScan) ? Color.white : ((ActivePlayer != null && ActivePlayer.gamePlayer.IsLocal()) ? active : notActive));
+		foreach (ResourceCollectorTerminalState key in screenData.Keys)
+		{
+			bool flag2 = key == currentState || (flag && key == lastState);
+			if (screenData[key].activeSelf != flag2)
+			{
+				screenData[key].SetActive(flag2);
+			}
+		}
+		if (popupScreen.activeSelf != flag)
+		{
+			popupScreen.SetActive(flag);
+		}
+		SetNonPopupButtonsEnabled(!flag);
+	}
+
+	public void PlayerHandScanned(int actorNr)
+	{
+		UpdateState(ResourceCollectorTerminalState.CurrentResources);
+	}
+
+	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
+	{
+		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (ActivePlayer == null || ActivePlayer != SIPlayer.LocalPlayer))
+		{
+			parentTerminal.PlayWrongPlayerBuzz(uiCenter);
+		}
+		else
+		{
+			soundBankPlayer.Play();
+		}
+		if (actorNr == SIPlayer.LocalPlayer.ActorNr && ActivePlayer == SIPlayer.LocalPlayer && currentState == ResourceCollectorTerminalState.PurchaseStart && buttonType == SITouchscreenButton.SITouchscreenButtonType.Confirm)
+		{
+			bool flag = ProgressionManager.Instance.GetShinyRocksTotal() >= 500;
+			bool flag2 = SIProgression.ResourcesMaxed();
+			if (flag && !flag2)
+			{
+				ProgressionManager.Instance.PurchaseResources(delegate
+				{
+					SIProgression.Instance.SendPurchaseResourcesData();
+					ProgressionManager.Instance.RefreshUserInventory();
+					TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType.Collect, -1, SIPlayer.LocalPlayer.ActorNr);
+				}, delegate(string error)
+				{
+					FailReason data2 = ((!(error == "Not enough Shiny Rocks to complete this purchase")) ? ((error == "already maxed resources") ? FailReason.ResourcesFull : FailReason.Unknown) : FailReason.NotEnoughRocks);
+					TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType.OverrideFailure, (int)data2, SIPlayer.LocalPlayer.ActorNr);
+				});
+			}
+			else
+			{
+				buttonType = SITouchscreenButton.SITouchscreenButtonType.OverrideFailure;
+				data = (flag ? (flag2 ? 1 : 2) : 0);
+			}
+		}
+		if (!IsAuthority)
+		{
+			parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.ResourceCollection);
+		}
+		else
+		{
+			if (ActivePlayer == null || actorNr != ActivePlayer.ActorNr)
+			{
+				return;
+			}
+			soundBankPlayer.Play();
+			switch (currentState)
+			{
+			case ResourceCollectorTerminalState.WaitingForScan:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(ResourceCollectorTerminalState.HelpScreen);
+				}
+				break;
+			case ResourceCollectorTerminalState.CurrentResources:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Purchase)
+				{
+					UpdateState(ResourceCollectorTerminalState.PurchaseStart);
+				}
+				break;
+			case ResourceCollectorTerminalState.PurchaseRemote:
+			case ResourceCollectorTerminalState.PurchaseStart:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.Confirm:
+					UpdateState(ResourceCollectorTerminalState.PurchaseInProgress);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Cancel:
+					UpdateState(ResourceCollectorTerminalState.CurrentResources);
+					break;
+				default:
+					failureReason = (FailReason)data;
+					UpdateState(ResourceCollectorTerminalState.PurchaseFailure);
+					break;
+				}
+				break;
+			case ResourceCollectorTerminalState.PurchaseInProgress:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.OverrideFailure:
+					failureReason = (FailReason)data;
+					UpdateState(ResourceCollectorTerminalState.PurchaseFailure);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Collect:
+					UpdateState(ResourceCollectorTerminalState.PurchaseSuccess);
+					break;
+				}
+				break;
+			case ResourceCollectorTerminalState.PurchaseSuccess:
+			case ResourceCollectorTerminalState.PurchaseFailure:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
+				{
+					UpdateState(ResourceCollectorTerminalState.CurrentResources);
+				}
+				break;
+			case ResourceCollectorTerminalState.HelpScreen:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.Exit:
+					currentHelpButtonPageIndex = 0;
+					UpdateState(lastState);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Next:
+					currentHelpButtonPageIndex = Mathf.Clamp(currentHelpButtonPageIndex + 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(currentHelpButtonPageIndex);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Back:
+					currentHelpButtonPageIndex = Mathf.Clamp(currentHelpButtonPageIndex - 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(currentHelpButtonPageIndex);
+					break;
+				}
+				break;
+			}
+		}
+	}
+
+	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
+	{
+	}
+
+	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
+	{
 	}
 }

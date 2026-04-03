@@ -1,12 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class SIScannableHand : MonoBehaviour
 {
+	public SIPlayer parentPlayer;
+
 	private void Awake()
 	{
-		this.parentPlayer = base.GetComponentInParent<SIPlayer>();
+		parentPlayer = GetComponentInParent<SIPlayer>();
 	}
-
-	public SIPlayer parentPlayer;
 }

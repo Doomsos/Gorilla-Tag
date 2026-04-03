@@ -1,481 +1,9 @@
-﻿using System;
+using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class SIGadgetStilt : SIGadget
 {
-	public bool TriggerToExtend { get; private set; }
-
-	public bool hasMotor { get; private set; }
-
-	public bool StickToAdjustLength { get; private set; }
-
-	public bool CanTag { get; private set; }
-
-	public bool CanStun { get; private set; }
-
-	private void Awake()
-	{
-		this.tipDefaultOffset = this.tip.transform.localPosition;
-		this.hasMotor = (this.motorTransform != null);
-		this.hasEndB = (this.stiltEndB != null);
-		this.hasEndC = (this.stiltEndC != null);
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this.OnGrabbed));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnSnapped = (Action)Delegate.Combine(gameEntity2.OnSnapped, new Action(this.OnSnapped));
-		GameEntity gameEntity3 = this.gameEntity;
-		gameEntity3.OnReleased = (Action)Delegate.Combine(gameEntity3.OnReleased, new Action(this.OnReleased));
-		GameEntity gameEntity4 = this.gameEntity;
-		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this.OnUnsnapped));
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
-	}
-
-	private void DisableCurrentStilt()
-	{
-		if (this.currentStiltID != StiltID.None)
-		{
-			GTPlayer.Instance.DisableStilt(this.currentStiltID);
-			this.currentStiltID = StiltID.None;
-		}
-		if (this.currentStiltIDB != StiltID.None)
-		{
-			GTPlayer.Instance.DisableStilt(this.currentStiltIDB);
-			this.currentStiltIDB = StiltID.None;
-		}
-		if (this.currentStiltIDC != StiltID.None)
-		{
-			GTPlayer.Instance.DisableStilt(this.currentStiltIDC);
-			this.currentStiltIDC = StiltID.None;
-		}
-	}
-
-	private void OnGrabbed()
-	{
-		this.DisableCurrentStilt();
-		this.HandleStartInteraction();
-		if (this.IsEquippedLocal())
-		{
-			this.activatedLocally = true;
-			if (this.gameEntity.heldByHandIndex == 0)
-			{
-				this.currentStiltID = StiltID.Held_Left;
-				GTPlayer.Instance.EnableStilt(this.currentStiltID, true, this.stiltEnd.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				if (this.hasEndB)
-				{
-					this.currentStiltIDB = StiltID.Held_Left2;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDB, true, this.stiltEndB.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-				if (this.hasEndC)
-				{
-					this.currentStiltIDC = StiltID.Held_Left3;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDC, true, this.stiltEndC.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-			}
-			else
-			{
-				this.currentStiltID = StiltID.Held_Right;
-				GTPlayer.Instance.EnableStilt(this.currentStiltID, false, this.stiltEnd.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				if (this.hasEndB)
-				{
-					this.currentStiltIDB = StiltID.Held_Right2;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDB, false, this.stiltEndB.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-				if (this.hasEndC)
-				{
-					this.currentStiltIDC = StiltID.Held_Right3;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDC, false, this.stiltEndC.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-			}
-		}
-		else
-		{
-			this.activatedLocally = false;
-		}
-		this.wasSnappedByLocalJoint = SnapJointType.None;
-	}
-
-	private void OnReleased()
-	{
-		this.DisableCurrentStilt();
-		this.HandleStopInteraction();
-		if (this.gameEntity.WasLastHeldByLocalPlayer() && this.TriggerToExtend && !Mathf.Approximately(this.targetLength, this.retractedLength))
-		{
-			this.targetLength = this.retractedLength;
-			this.gameEntity.RequestState(this.gameEntity.id, this.PackStateForNetwork());
-		}
-	}
-
-	private void OnSnapped()
-	{
-		this.DisableCurrentStilt();
-		this.HandleStartInteraction();
-		if (this.IsEquippedLocal())
-		{
-			this.wasSnappedByLocalJoint = this.gameEntity.snappedJoint;
-			if (this.wasSnappedByLocalJoint == SnapJointType.HandL)
-			{
-				this.currentStiltID = StiltID.Snapped_Left;
-				GTPlayer.Instance.EnableStilt(this.currentStiltID, true, this.stiltEnd.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				if (this.hasEndB)
-				{
-					this.currentStiltIDB = StiltID.Snapped_Left2;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDB, true, this.stiltEndB.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-				if (this.hasEndC)
-				{
-					this.currentStiltIDC = StiltID.Snapped_Left3;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDC, true, this.stiltEndC.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-					return;
-				}
-			}
-			else if (this.wasSnappedByLocalJoint == SnapJointType.HandR)
-			{
-				this.currentStiltID = StiltID.Snapped_Right;
-				GTPlayer.Instance.EnableStilt(this.currentStiltID, false, this.stiltEnd.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				if (this.hasEndB)
-				{
-					this.currentStiltIDB = StiltID.Snapped_Right2;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDB, false, this.stiltEndB.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-				}
-				if (this.hasEndC)
-				{
-					this.currentStiltIDC = StiltID.Snapped_Right3;
-					GTPlayer.Instance.EnableStilt(this.currentStiltIDC, false, this.stiltEndC.position, this.maxArmLength, this.CanTag, this.CanStun, 0f, null);
-					return;
-				}
-			}
-		}
-		else
-		{
-			this.wasSnappedByLocalJoint = SnapJointType.None;
-		}
-	}
-
-	private void OnUnsnapped()
-	{
-		this.DisableCurrentStilt();
-		this.HandleStopInteraction();
-		if (this.wasSnappedByLocalJoint == SnapJointType.HandL)
-		{
-			this.wasSnappedByLocalJoint = SnapJointType.None;
-			return;
-		}
-		if (this.wasSnappedByLocalJoint == SnapJointType.HandR)
-		{
-			this.wasSnappedByLocalJoint = SnapJointType.None;
-		}
-	}
-
-	private void OnDestroy()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this.DisableCurrentStilt();
-		if (this.attachedVRRig != null)
-		{
-			VRRig vrrig = this.attachedVRRig;
-			vrrig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vrrig.OnMaterialIndexChanged, new Action<int, int>(this.HandleVRRigMaterialIndexChanged));
-		}
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		if (base.IsBlocked(SIExclusionType.AffectsLocalMovement))
-		{
-			this.DisableCurrentStilt();
-			return;
-		}
-		bool isSpinning = this.IsSpinning;
-		bool flag = false;
-		if (this.currentStiltID != StiltID.None)
-		{
-			bool flag2 = !this.TriggerToExtend || this.CheckInput();
-			this.IsSpinning = (this.hasMotor && this.CheckInput());
-			bool flag3 = false;
-			float oldLength = this.targetLength;
-			if (this.IsSpinning)
-			{
-				this.SpinMotor(dt);
-				flag = true;
-			}
-			if (flag2)
-			{
-				if (this.StickToAdjustLength)
-				{
-					Vector2 joystickInput = base.GetJoystickInput();
-					if (Mathf.Abs(joystickInput.y) > 0.75f && Mathf.Abs(joystickInput.x) < 0.5f)
-					{
-						this.currentExtendedLength = Mathf.Clamp(this.currentExtendedLength + joystickInput.y * this.lengthChangeSpeed * Time.deltaTime, this.retractedLength, this.maxLength);
-					}
-				}
-				if (!Mathf.Approximately(this.targetLength, this.currentExtendedLength))
-				{
-					this.targetLength = this.currentExtendedLength;
-				}
-				if (!Mathf.Approximately(this.targetLength, this.lastSentLength) && Time.time > this.nextAdjustmentSendTime)
-				{
-					this.nextAdjustmentSendTime = Time.time + this.adjustmentSendRate;
-					this.lastSentLength = this.targetLength;
-					flag3 = true;
-				}
-			}
-			else if (!Mathf.Approximately(this.targetLength, this.retractedLength))
-			{
-				this.targetLength = this.retractedLength;
-				this.lastSentLength = this.targetLength;
-				flag3 = true;
-			}
-			if (flag3 || this.IsSpinning != isSpinning)
-			{
-				this.CheckPlaySounds(oldLength, this.targetLength);
-				this.gameEntity.RequestState(this.gameEntity.id, this.PackStateForNetwork());
-			}
-		}
-		if (this.hasMotor && !flag && this.motorAudio.isPlaying)
-		{
-			this.motorAudio.Stop();
-		}
-		isSpinning = this.IsSpinning;
-		this.UpdateEndPoints(this.IsSpinning);
-	}
-
-	private long PackStateForNetwork()
-	{
-		long num = 0L;
-		if (this.IsSpinning)
-		{
-			num |= 1L;
-		}
-		else if (this.hasMotor)
-		{
-			long num2 = (long)Mathf.RoundToInt(this.currentMotorAngle);
-			num |= num2 << 1;
-		}
-		long num3 = (long)Mathf.Clamp(Mathf.RoundToInt(this.targetLength * 1000f), 0, 3000);
-		return num | num3 << 10;
-	}
-
-	private void UnpackStateFromNetwork(long state)
-	{
-		this.IsSpinning = ((state & 1L) != 0L);
-		if (this.hasMotor && !this.IsSpinning)
-		{
-			this.currentMotorAngle = (float)(state >> 1 & 511L);
-			this.motorTransform.localRotation = Quaternion.AngleAxis(this.currentMotorAngle, Vector3.right);
-		}
-		int num = (int)(state >> 10 & 4095L);
-		this.targetLength = Mathf.Clamp((float)num * 0.001f, this.retractedLength, this.maxLength);
-	}
-
-	private void SpinMotor(float dt)
-	{
-		SuperInfectionManager activeSuperInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
-		float num = (activeSuperInfectionManager != null && activeSuperInfectionManager.IsSupercharged) ? 1.5f : 1f;
-		this.currentMotorAngle = (this.currentMotorAngle + this.rotateSpeedFactor * num * dt) % 360f;
-		this.motorTransform.localRotation = Quaternion.AngleAxis(this.currentMotorAngle, Vector3.right);
-		if (!this.motorAudio.isPlaying)
-		{
-			this.motorAudio.Play();
-		}
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		base.OnUpdateRemote(dt);
-		if (this.hasMotor)
-		{
-			if (this.IsSpinning && (this.gameEntity.heldByActorNumber >= 0 || this.gameEntity.snappedByActorNumber >= 0))
-			{
-				this.SpinMotor(dt);
-			}
-			else if (this.motorAudio.isPlaying)
-			{
-				this.motorAudio.Stop();
-			}
-		}
-		this.UpdateEndPoints(false);
-	}
-
-	private bool CheckInput()
-	{
-		return this.buttonActivatable.CheckInput(0.25f);
-	}
-
-	public override SIUpgradeSet FilterUpgradeNodes(SIUpgradeSet upgrades)
-	{
-		if (this.restrictedUpgrades.Length == 0)
-		{
-			return upgrades;
-		}
-		SIUpgradeSet result = default(SIUpgradeSet);
-		foreach (SIUpgradeType upgrade in this.restrictedUpgrades)
-		{
-			if (upgrades.Contains(upgrade))
-			{
-				result.Add(upgrade);
-			}
-		}
-		return result;
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this.CanTag = withUpgrades.Contains(SIUpgradeType.Stilt_Tag_Tip);
-		this.CanStun = withUpgrades.Contains(SIUpgradeType.Stilt_Stun_Tip);
-		this.TriggerToExtend = (this.buttonActivatable != null && withUpgrades.Contains(SIUpgradeType.Stilt_Retractable));
-		this.StickToAdjustLength = (this.TriggerToExtend && withUpgrades.Contains(SIUpgradeType.Stilt_Adjustable_Length));
-		this.extendSpeed = (withUpgrades.Contains(SIUpgradeType.Stilt_Retract_Speed) ? this.extendSpeedUpgraded : this.extendSpeedNormal);
-		this.retractSpeed = (withUpgrades.Contains(SIUpgradeType.Stilt_Retract_Speed) ? this.retractSpeedUpgraded : this.retractSpeedNormal);
-		this.maxLength = ((this.TriggerToExtend && withUpgrades.Contains(SIUpgradeType.Stilt_Max_Length)) ? this.maxLengthUpgraded : this.maxLengthNormal);
-		this.currentExtendedLength = this.maxLength;
-		this.targetLength = (this.TriggerToExtend ? this.retractedLength : this.currentExtendedLength);
-		this.currentLength = this.targetLength;
-		this.ApplyCurrentLength();
-	}
-
-	private void UpdateEndPoints(bool force)
-	{
-		if (!force && Mathf.Approximately(this.currentLength, this.targetLength))
-		{
-			return;
-		}
-		float num = (this.targetLength > this.currentLength) ? this.extendSpeed : this.retractSpeed;
-		this.currentLength = Mathf.MoveTowards(this.currentLength, this.targetLength, num * Time.deltaTime);
-		this.ApplyCurrentLength();
-		if (this.currentStiltID != StiltID.None)
-		{
-			GTPlayer.Instance.UpdateStiltOffset(this.currentStiltID, this.stiltEnd.position);
-		}
-		if (this.currentStiltIDB != StiltID.None)
-		{
-			GTPlayer.Instance.UpdateStiltOffset(this.currentStiltIDB, this.stiltEndB.position);
-		}
-		if (this.currentStiltIDC != StiltID.None)
-		{
-			GTPlayer.Instance.UpdateStiltOffset(this.currentStiltIDC, this.stiltEndC.position);
-		}
-	}
-
-	private void ApplyCurrentLength()
-	{
-		this.tip.transform.localPosition = this.offsetDir * this.currentLength + this.tipDefaultOffset;
-		Vector3 localScale = this.midpoint.transform.localScale;
-		localScale.z = this.currentLength;
-		this.midpoint.transform.localScale = localScale;
-	}
-
-	private void OnEntityStateChanged(long oldState, long newState)
-	{
-		if (this.IsEquippedLocal())
-		{
-			return;
-		}
-		float oldLength = this.targetLength;
-		this.UnpackStateFromNetwork(newState);
-		this.CheckPlaySounds(oldLength, this.targetLength);
-	}
-
-	private void CheckPlaySounds(float oldLength, float newLength)
-	{
-		if (Mathf.Approximately(oldLength, newLength))
-		{
-			return;
-		}
-		if (Mathf.Approximately(newLength, this.retractedLength))
-		{
-			this.retractSoundBank.Play();
-			return;
-		}
-		if (Mathf.Approximately(oldLength, this.retractedLength))
-		{
-			this.extendSoundBank.Play();
-		}
-	}
-
-	private void HandleStartInteraction()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this.attachedPlayerActorNr = this.gameEntity.AttachedPlayerActorNr;
-		this.attachedNetPlayer = NetworkSystem.Instance.GetPlayer(this.attachedPlayerActorNr);
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this.attachedPlayerActorNr, out gamePlayer))
-		{
-			return;
-		}
-		if (this.attachedVRRig != null)
-		{
-			VRRig vrrig = this.attachedVRRig;
-			vrrig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vrrig.OnMaterialIndexChanged, new Action<int, int>(this.HandleVRRigMaterialIndexChanged));
-		}
-		this.attachedVRRig = gamePlayer.rig;
-		VRRig vrrig2 = this.attachedVRRig;
-		vrrig2.OnMaterialIndexChanged = (Action<int, int>)Delegate.Combine(vrrig2.OnMaterialIndexChanged, new Action<int, int>(this.HandleVRRigMaterialIndexChanged));
-		int num = this.isTagged ? 2 : 0;
-		if (num != this.attachedVRRig.setMatIndex)
-		{
-			this.HandleVRRigMaterialIndexChanged(num, this.attachedVRRig.setMatIndex);
-		}
-	}
-
-	private void HandleStopInteraction()
-	{
-		this.attachedPlayerActorNr = -1;
-		this.attachedNetPlayer = null;
-		if (this.attachedVRRig != null)
-		{
-			VRRig vrrig = this.attachedVRRig;
-			vrrig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vrrig.OnMaterialIndexChanged, new Action<int, int>(this.HandleVRRigMaterialIndexChanged));
-		}
-		this.attachedVRRig = null;
-		if (this.isTagged)
-		{
-			this.HandleVRRigMaterialIndexChanged(2, 0);
-		}
-	}
-
-	private void HandleVRRigMaterialIndexChanged(int oldMatIndex, int newMatIndex)
-	{
-		if (this.attachedPlayerActorNr != -1 && (newMatIndex == 2 || newMatIndex == 1) && this.CanTag)
-		{
-			SuperInfectionGame superInfectionGame = GorillaGameManager.instance as SuperInfectionGame;
-			if (superInfectionGame != null)
-			{
-				this.isTagged = (this.attachedNetPlayer != null && superInfectionGame.IsInfected(this.attachedNetPlayer));
-				if (this.matDest)
-				{
-					this.matDest.sharedMaterial = this.tagActivatedMat;
-				}
-				if (this.skinnedMatDest)
-				{
-					this.skinnedMatDest.sharedMaterial = this.tagActivatedMat;
-					goto IL_C5;
-				}
-				goto IL_C5;
-			}
-		}
-		this.isTagged = false;
-		if (this.matDest)
-		{
-			this.matDest.sharedMaterial = this.defaultMat;
-		}
-		if (this.skinnedMatDest)
-		{
-			this.skinnedMatDest.sharedMaterial = this.defaultMat;
-		}
-		IL_C5:
-		GameObject[] array = this.tagActivatedObjects;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(this.isTagged);
-		}
-	}
-
 	[SerializeField]
 	private GameButtonActivatable buttonActivatable;
 
@@ -596,4 +124,463 @@ public class SIGadgetStilt : SIGadget
 	private VRRig attachedVRRig;
 
 	private bool isTagged;
+
+	public bool TriggerToExtend { get; private set; }
+
+	public bool hasMotor { get; private set; }
+
+	public bool StickToAdjustLength { get; private set; }
+
+	public bool CanTag { get; private set; }
+
+	public bool CanStun { get; private set; }
+
+	private void Awake()
+	{
+		tipDefaultOffset = tip.transform.localPosition;
+		hasMotor = motorTransform != null;
+		hasEndB = stiltEndB != null;
+		hasEndC = stiltEndC != null;
+		GameEntity obj = gameEntity;
+		obj.OnGrabbed = (Action)Delegate.Combine(obj.OnGrabbed, new Action(OnGrabbed));
+		GameEntity obj2 = gameEntity;
+		obj2.OnSnapped = (Action)Delegate.Combine(obj2.OnSnapped, new Action(OnSnapped));
+		GameEntity obj3 = gameEntity;
+		obj3.OnReleased = (Action)Delegate.Combine(obj3.OnReleased, new Action(OnReleased));
+		GameEntity obj4 = gameEntity;
+		obj4.OnUnsnapped = (Action)Delegate.Combine(obj4.OnUnsnapped, new Action(OnUnsnapped));
+		gameEntity.OnStateChanged += OnEntityStateChanged;
+	}
+
+	private void DisableCurrentStilt()
+	{
+		if (currentStiltID != StiltID.None)
+		{
+			GTPlayer.Instance.DisableStilt(currentStiltID);
+			currentStiltID = StiltID.None;
+		}
+		if (currentStiltIDB != StiltID.None)
+		{
+			GTPlayer.Instance.DisableStilt(currentStiltIDB);
+			currentStiltIDB = StiltID.None;
+		}
+		if (currentStiltIDC != StiltID.None)
+		{
+			GTPlayer.Instance.DisableStilt(currentStiltIDC);
+			currentStiltIDC = StiltID.None;
+		}
+	}
+
+	private void OnGrabbed()
+	{
+		DisableCurrentStilt();
+		HandleStartInteraction();
+		if (IsEquippedLocal())
+		{
+			activatedLocally = true;
+			if (gameEntity.heldByHandIndex == 0)
+			{
+				currentStiltID = StiltID.Held_Left;
+				GTPlayer.Instance.EnableStilt(currentStiltID, isLeftHand: true, stiltEnd.position, maxArmLength, CanTag, CanStun);
+				if (hasEndB)
+				{
+					currentStiltIDB = StiltID.Held_Left2;
+					GTPlayer.Instance.EnableStilt(currentStiltIDB, isLeftHand: true, stiltEndB.position, maxArmLength, CanTag, CanStun);
+				}
+				if (hasEndC)
+				{
+					currentStiltIDC = StiltID.Held_Left3;
+					GTPlayer.Instance.EnableStilt(currentStiltIDC, isLeftHand: true, stiltEndC.position, maxArmLength, CanTag, CanStun);
+				}
+			}
+			else
+			{
+				currentStiltID = StiltID.Held_Right;
+				GTPlayer.Instance.EnableStilt(currentStiltID, isLeftHand: false, stiltEnd.position, maxArmLength, CanTag, CanStun);
+				if (hasEndB)
+				{
+					currentStiltIDB = StiltID.Held_Right2;
+					GTPlayer.Instance.EnableStilt(currentStiltIDB, isLeftHand: false, stiltEndB.position, maxArmLength, CanTag, CanStun);
+				}
+				if (hasEndC)
+				{
+					currentStiltIDC = StiltID.Held_Right3;
+					GTPlayer.Instance.EnableStilt(currentStiltIDC, isLeftHand: false, stiltEndC.position, maxArmLength, CanTag, CanStun);
+				}
+			}
+		}
+		else
+		{
+			activatedLocally = false;
+		}
+		wasSnappedByLocalJoint = SnapJointType.None;
+	}
+
+	private void OnReleased()
+	{
+		DisableCurrentStilt();
+		HandleStopInteraction();
+		if (gameEntity.WasLastHeldByLocalPlayer() && TriggerToExtend && !Mathf.Approximately(targetLength, retractedLength))
+		{
+			targetLength = retractedLength;
+			gameEntity.RequestState(gameEntity.id, PackStateForNetwork());
+		}
+	}
+
+	private void OnSnapped()
+	{
+		DisableCurrentStilt();
+		HandleStartInteraction();
+		if (IsEquippedLocal())
+		{
+			wasSnappedByLocalJoint = gameEntity.snappedJoint;
+			if (wasSnappedByLocalJoint == SnapJointType.HandL)
+			{
+				currentStiltID = StiltID.Snapped_Left;
+				GTPlayer.Instance.EnableStilt(currentStiltID, isLeftHand: true, stiltEnd.position, maxArmLength, CanTag, CanStun);
+				if (hasEndB)
+				{
+					currentStiltIDB = StiltID.Snapped_Left2;
+					GTPlayer.Instance.EnableStilt(currentStiltIDB, isLeftHand: true, stiltEndB.position, maxArmLength, CanTag, CanStun);
+				}
+				if (hasEndC)
+				{
+					currentStiltIDC = StiltID.Snapped_Left3;
+					GTPlayer.Instance.EnableStilt(currentStiltIDC, isLeftHand: true, stiltEndC.position, maxArmLength, CanTag, CanStun);
+				}
+			}
+			else if (wasSnappedByLocalJoint == SnapJointType.HandR)
+			{
+				currentStiltID = StiltID.Snapped_Right;
+				GTPlayer.Instance.EnableStilt(currentStiltID, isLeftHand: false, stiltEnd.position, maxArmLength, CanTag, CanStun);
+				if (hasEndB)
+				{
+					currentStiltIDB = StiltID.Snapped_Right2;
+					GTPlayer.Instance.EnableStilt(currentStiltIDB, isLeftHand: false, stiltEndB.position, maxArmLength, CanTag, CanStun);
+				}
+				if (hasEndC)
+				{
+					currentStiltIDC = StiltID.Snapped_Right3;
+					GTPlayer.Instance.EnableStilt(currentStiltIDC, isLeftHand: false, stiltEndC.position, maxArmLength, CanTag, CanStun);
+				}
+			}
+		}
+		else
+		{
+			wasSnappedByLocalJoint = SnapJointType.None;
+		}
+	}
+
+	private void OnUnsnapped()
+	{
+		DisableCurrentStilt();
+		HandleStopInteraction();
+		if (wasSnappedByLocalJoint == SnapJointType.HandL)
+		{
+			wasSnappedByLocalJoint = SnapJointType.None;
+		}
+		else if (wasSnappedByLocalJoint == SnapJointType.HandR)
+		{
+			wasSnappedByLocalJoint = SnapJointType.None;
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			DisableCurrentStilt();
+			if (attachedVRRig != null)
+			{
+				VRRig vRRig = attachedVRRig;
+				vRRig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vRRig.OnMaterialIndexChanged, new Action<int, int>(HandleVRRigMaterialIndexChanged));
+			}
+		}
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		if (IsBlocked(SIExclusionType.AffectsLocalMovement))
+		{
+			DisableCurrentStilt();
+			return;
+		}
+		bool isSpinning = IsSpinning;
+		bool flag = false;
+		if (currentStiltID != StiltID.None)
+		{
+			bool num = !TriggerToExtend || CheckInput();
+			IsSpinning = hasMotor && CheckInput();
+			bool flag2 = false;
+			float oldLength = targetLength;
+			if (IsSpinning)
+			{
+				SpinMotor(dt);
+				flag = true;
+			}
+			if (num)
+			{
+				if (StickToAdjustLength)
+				{
+					Vector2 joystickInput = GetJoystickInput();
+					if (Mathf.Abs(joystickInput.y) > 0.75f && Mathf.Abs(joystickInput.x) < 0.5f)
+					{
+						currentExtendedLength = Mathf.Clamp(currentExtendedLength + joystickInput.y * lengthChangeSpeed * Time.deltaTime, retractedLength, maxLength);
+					}
+				}
+				if (!Mathf.Approximately(targetLength, currentExtendedLength))
+				{
+					targetLength = currentExtendedLength;
+				}
+				if (!Mathf.Approximately(targetLength, lastSentLength) && Time.time > nextAdjustmentSendTime)
+				{
+					nextAdjustmentSendTime = Time.time + adjustmentSendRate;
+					lastSentLength = targetLength;
+					flag2 = true;
+				}
+			}
+			else if (!Mathf.Approximately(targetLength, retractedLength))
+			{
+				targetLength = retractedLength;
+				lastSentLength = targetLength;
+				flag2 = true;
+			}
+			if (flag2 || IsSpinning != isSpinning)
+			{
+				CheckPlaySounds(oldLength, targetLength);
+				gameEntity.RequestState(gameEntity.id, PackStateForNetwork());
+			}
+		}
+		if (hasMotor && !flag && motorAudio.isPlaying)
+		{
+			motorAudio.Stop();
+		}
+		isSpinning = IsSpinning;
+		UpdateEndPoints(IsSpinning);
+	}
+
+	private long PackStateForNetwork()
+	{
+		long num = 0L;
+		if (IsSpinning)
+		{
+			num |= 1;
+		}
+		else if (hasMotor)
+		{
+			long num2 = Mathf.RoundToInt(currentMotorAngle);
+			num |= num2 << 1;
+		}
+		long num3 = Mathf.Clamp(Mathf.RoundToInt(targetLength * 1000f), 0, 3000);
+		return num | (num3 << 10);
+	}
+
+	private void UnpackStateFromNetwork(long state)
+	{
+		IsSpinning = (state & 1) != 0;
+		if (hasMotor && !IsSpinning)
+		{
+			currentMotorAngle = (state >> 1) & 0x1FF;
+			motorTransform.localRotation = Quaternion.AngleAxis(currentMotorAngle, Vector3.right);
+		}
+		int num = (int)((state >> 10) & 0xFFF);
+		targetLength = Mathf.Clamp((float)num * 0.001f, retractedLength, maxLength);
+	}
+
+	private void SpinMotor(float dt)
+	{
+		SuperInfectionManager activeSuperInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
+		float num = (((object)activeSuperInfectionManager != null && activeSuperInfectionManager.IsSupercharged) ? 1.5f : 1f);
+		currentMotorAngle = (currentMotorAngle + rotateSpeedFactor * num * dt) % 360f;
+		motorTransform.localRotation = Quaternion.AngleAxis(currentMotorAngle, Vector3.right);
+		if (!motorAudio.isPlaying)
+		{
+			motorAudio.Play();
+		}
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		base.OnUpdateRemote(dt);
+		if (hasMotor)
+		{
+			if (IsSpinning && (gameEntity.heldByActorNumber >= 0 || gameEntity.snappedByActorNumber >= 0))
+			{
+				SpinMotor(dt);
+			}
+			else if (motorAudio.isPlaying)
+			{
+				motorAudio.Stop();
+			}
+		}
+		UpdateEndPoints(force: false);
+	}
+
+	private bool CheckInput()
+	{
+		return buttonActivatable.CheckInput();
+	}
+
+	public override SIUpgradeSet FilterUpgradeNodes(SIUpgradeSet upgrades)
+	{
+		if (restrictedUpgrades.Length == 0)
+		{
+			return upgrades;
+		}
+		SIUpgradeSet result = default(SIUpgradeSet);
+		SIUpgradeType[] array = restrictedUpgrades;
+		foreach (SIUpgradeType upgrade in array)
+		{
+			if (upgrades.Contains(upgrade))
+			{
+				result.Add(upgrade);
+			}
+		}
+		return result;
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		CanTag = withUpgrades.Contains(SIUpgradeType.Stilt_Tag_Tip);
+		CanStun = withUpgrades.Contains(SIUpgradeType.Stilt_Stun_Tip);
+		TriggerToExtend = buttonActivatable != null && withUpgrades.Contains(SIUpgradeType.Stilt_Retractable);
+		StickToAdjustLength = TriggerToExtend && withUpgrades.Contains(SIUpgradeType.Stilt_Adjustable_Length);
+		extendSpeed = (withUpgrades.Contains(SIUpgradeType.Stilt_Retract_Speed) ? extendSpeedUpgraded : extendSpeedNormal);
+		retractSpeed = (withUpgrades.Contains(SIUpgradeType.Stilt_Retract_Speed) ? retractSpeedUpgraded : retractSpeedNormal);
+		maxLength = ((TriggerToExtend && withUpgrades.Contains(SIUpgradeType.Stilt_Max_Length)) ? maxLengthUpgraded : maxLengthNormal);
+		currentExtendedLength = maxLength;
+		targetLength = (TriggerToExtend ? retractedLength : currentExtendedLength);
+		currentLength = targetLength;
+		ApplyCurrentLength();
+	}
+
+	private void UpdateEndPoints(bool force)
+	{
+		if (force || !Mathf.Approximately(currentLength, targetLength))
+		{
+			float num = ((targetLength > currentLength) ? extendSpeed : retractSpeed);
+			currentLength = Mathf.MoveTowards(currentLength, targetLength, num * Time.deltaTime);
+			ApplyCurrentLength();
+			if (currentStiltID != StiltID.None)
+			{
+				GTPlayer.Instance.UpdateStiltOffset(currentStiltID, stiltEnd.position);
+			}
+			if (currentStiltIDB != StiltID.None)
+			{
+				GTPlayer.Instance.UpdateStiltOffset(currentStiltIDB, stiltEndB.position);
+			}
+			if (currentStiltIDC != StiltID.None)
+			{
+				GTPlayer.Instance.UpdateStiltOffset(currentStiltIDC, stiltEndC.position);
+			}
+		}
+	}
+
+	private void ApplyCurrentLength()
+	{
+		tip.transform.localPosition = offsetDir * currentLength + tipDefaultOffset;
+		Vector3 localScale = midpoint.transform.localScale;
+		localScale.z = currentLength;
+		midpoint.transform.localScale = localScale;
+	}
+
+	private void OnEntityStateChanged(long oldState, long newState)
+	{
+		if (!IsEquippedLocal())
+		{
+			float oldLength = targetLength;
+			UnpackStateFromNetwork(newState);
+			CheckPlaySounds(oldLength, targetLength);
+		}
+	}
+
+	private void CheckPlaySounds(float oldLength, float newLength)
+	{
+		if (!Mathf.Approximately(oldLength, newLength))
+		{
+			if (Mathf.Approximately(newLength, retractedLength))
+			{
+				retractSoundBank.Play();
+			}
+			else if (Mathf.Approximately(oldLength, retractedLength))
+			{
+				extendSoundBank.Play();
+			}
+		}
+	}
+
+	private void HandleStartInteraction()
+	{
+		if (ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
+		attachedPlayerActorNr = gameEntity.AttachedPlayerActorNr;
+		attachedNetPlayer = NetworkSystem.Instance.GetPlayer(attachedPlayerActorNr);
+		if (GamePlayer.TryGetGamePlayer(attachedPlayerActorNr, out var out_gamePlayer))
+		{
+			if (attachedVRRig != null)
+			{
+				VRRig vRRig = attachedVRRig;
+				vRRig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vRRig.OnMaterialIndexChanged, new Action<int, int>(HandleVRRigMaterialIndexChanged));
+			}
+			attachedVRRig = out_gamePlayer.rig;
+			VRRig vRRig2 = attachedVRRig;
+			vRRig2.OnMaterialIndexChanged = (Action<int, int>)Delegate.Combine(vRRig2.OnMaterialIndexChanged, new Action<int, int>(HandleVRRigMaterialIndexChanged));
+			int num = (isTagged ? 2 : 0);
+			if (num != attachedVRRig.setMatIndex)
+			{
+				HandleVRRigMaterialIndexChanged(num, attachedVRRig.setMatIndex);
+			}
+		}
+	}
+
+	private void HandleStopInteraction()
+	{
+		attachedPlayerActorNr = -1;
+		attachedNetPlayer = null;
+		if (attachedVRRig != null)
+		{
+			VRRig vRRig = attachedVRRig;
+			vRRig.OnMaterialIndexChanged = (Action<int, int>)Delegate.Remove(vRRig.OnMaterialIndexChanged, new Action<int, int>(HandleVRRigMaterialIndexChanged));
+		}
+		attachedVRRig = null;
+		if (isTagged)
+		{
+			HandleVRRigMaterialIndexChanged(2, 0);
+		}
+	}
+
+	private void HandleVRRigMaterialIndexChanged(int oldMatIndex, int newMatIndex)
+	{
+		if (attachedPlayerActorNr != -1 && (newMatIndex == 2 || newMatIndex == 1) && CanTag && GorillaGameManager.instance is SuperInfectionGame superInfectionGame)
+		{
+			isTagged = attachedNetPlayer != null && superInfectionGame.IsInfected(attachedNetPlayer);
+			if ((bool)matDest)
+			{
+				matDest.sharedMaterial = tagActivatedMat;
+			}
+			if ((bool)skinnedMatDest)
+			{
+				skinnedMatDest.sharedMaterial = tagActivatedMat;
+			}
+		}
+		else
+		{
+			isTagged = false;
+			if ((bool)matDest)
+			{
+				matDest.sharedMaterial = defaultMat;
+			}
+			if ((bool)skinnedMatDest)
+			{
+				skinnedMatDest.sharedMaterial = defaultMat;
+			}
+		}
+		GameObject[] array = tagActivatedObjects;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(isTagged);
+		}
+	}
 }

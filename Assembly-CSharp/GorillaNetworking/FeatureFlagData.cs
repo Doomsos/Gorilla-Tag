@@ -1,17 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+[Serializable]
+internal class FeatureFlagData
 {
-	[Serializable]
-	internal class FeatureFlagData
-	{
-		public string name;
+	public string name;
 
-		public int value;
+	public int value;
 
-		public string valueType;
+	public string valueType;
 
-		public List<string> alwaysOnForUsers;
-	}
+	public List<string> alwaysOnForUsers;
 }

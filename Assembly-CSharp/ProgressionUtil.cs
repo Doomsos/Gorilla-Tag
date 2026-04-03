@@ -1,24 +1,21 @@
-﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using PlayFab;
 
 public class ProgressionUtil
 {
-	public static Task WaitForMothershipSessionToken()
+	public static async Task WaitForMothershipSessionToken()
 	{
-		ProgressionUtil.<WaitForMothershipSessionToken>d__0 <WaitForMothershipSessionToken>d__;
-		<WaitForMothershipSessionToken>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForMothershipSessionToken>d__.<>1__state = -1;
-		<WaitForMothershipSessionToken>d__.<>t__builder.Start<ProgressionUtil.<WaitForMothershipSessionToken>d__0>(ref <WaitForMothershipSessionToken>d__);
-		return <WaitForMothershipSessionToken>d__.<>t__builder.Task;
+		while (!MothershipClientContext.IsClientLoggedIn())
+		{
+			await Task.Delay(1000);
+		}
 	}
 
-	public static Task WaitForPlayFabSessionTicket()
+	public static async Task WaitForPlayFabSessionTicket()
 	{
-		ProgressionUtil.<WaitForPlayFabSessionTicket>d__1 <WaitForPlayFabSessionTicket>d__;
-		<WaitForPlayFabSessionTicket>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForPlayFabSessionTicket>d__.<>1__state = -1;
-		<WaitForPlayFabSessionTicket>d__.<>t__builder.Start<ProgressionUtil.<WaitForPlayFabSessionTicket>d__1>(ref <WaitForPlayFabSessionTicket>d__);
-		return <WaitForPlayFabSessionTicket>d__.<>t__builder.Task;
+		while (!PlayFabClientAPI.IsClientLoggedIn())
+		{
+			await Task.Delay(1000);
+		}
 	}
 }

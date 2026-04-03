@@ -1,213 +1,205 @@
-﻿using System;
 using UnityEngine;
-using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class Flower : MonoBehaviour
 {
-	public class Flower : MonoBehaviour
+	public enum FlowerState
 	{
-		public bool IsWatered { get; private set; }
+		None = -1,
+		Healthy,
+		Middle,
+		Wilted
+	}
 
-		private void Awake()
+	private Animator anim;
+
+	private SkinnedMeshRenderer meshRenderer;
+
+	[HideInInspector]
+	public GorillaTimer timer;
+
+	private BeePerchPoint perchPoint;
+
+	public ParticleSystem wateredFx;
+
+	public ParticleSystem sparkleFx;
+
+	public GameObject meshStatesGameObject;
+
+	public GameObject[] meshStates;
+
+	private static readonly int healthy_to_middle = Animator.StringToHash("healthy_to_middle");
+
+	private static readonly int middle_to_healthy = Animator.StringToHash("middle_to_healthy");
+
+	private static readonly int wilted_to_middle = Animator.StringToHash("wilted_to_middle");
+
+	private static readonly int middle_to_wilted = Animator.StringToHash("middle_to_wilted");
+
+	private FlowerState currentState;
+
+	private string id;
+
+	private bool shouldUpdateVisuals;
+
+	private FlowerState lastState;
+
+	public bool IsWatered { get; private set; }
+
+	private void Awake()
+	{
+		shouldUpdateVisuals = true;
+		anim = GetComponent<Animator>();
+		timer = GetComponent<GorillaTimer>();
+		perchPoint = GetComponent<BeePerchPoint>();
+		timer.onTimerStopped.AddListener(HandleOnFlowerTimerEnded);
+		currentState = FlowerState.None;
+		wateredFx = wateredFx.GetComponent<ParticleSystem>();
+		IsWatered = false;
+		meshRenderer = GetComponent<SkinnedMeshRenderer>();
+		meshRenderer.enabled = false;
+		anim.enabled = false;
+	}
+
+	private void OnDestroy()
+	{
+		timer.onTimerStopped.RemoveListener(HandleOnFlowerTimerEnded);
+	}
+
+	public void WaterFlower(bool isWatered = false)
+	{
+		IsWatered = isWatered;
+		switch (currentState)
 		{
-			this.shouldUpdateVisuals = true;
-			this.anim = base.GetComponent<Animator>();
-			this.timer = base.GetComponent<GorillaTimer>();
-			this.perchPoint = base.GetComponent<BeePerchPoint>();
-			this.timer.onTimerStopped.AddListener(new UnityAction<GorillaTimer>(this.HandleOnFlowerTimerEnded));
-			this.currentState = Flower.FlowerState.None;
-			this.wateredFx = this.wateredFx.GetComponent<ParticleSystem>();
-			this.IsWatered = false;
-			this.meshRenderer = base.GetComponent<SkinnedMeshRenderer>();
-			this.meshRenderer.enabled = false;
-			this.anim.enabled = false;
+		case FlowerState.None:
+			UpdateFlowerState(FlowerState.Healthy);
+			break;
+		case FlowerState.Middle:
+			if (isWatered)
+			{
+				UpdateFlowerState(FlowerState.Healthy, isWatered: true);
+			}
+			else
+			{
+				UpdateFlowerState(FlowerState.Wilted);
+			}
+			break;
+		case FlowerState.Healthy:
+			if (!isWatered)
+			{
+				UpdateFlowerState(FlowerState.Middle);
+			}
+			break;
+		case FlowerState.Wilted:
+			if (isWatered)
+			{
+				UpdateFlowerState(FlowerState.Middle, isWatered: true);
+			}
+			break;
 		}
+	}
 
-		private void OnDestroy()
+	public void UpdateFlowerState(FlowerState newState, bool isWatered = false, bool updateVisual = true)
+	{
+		if (FlowersManager.Instance.IsMine)
 		{
-			this.timer.onTimerStopped.RemoveListener(new UnityAction<GorillaTimer>(this.HandleOnFlowerTimerEnded));
+			timer.RestartTimer();
 		}
-
-		public void WaterFlower(bool isWatered = false)
+		ChangeState(newState);
+		if ((bool)perchPoint)
 		{
-			this.IsWatered = isWatered;
-			switch (this.currentState)
-			{
-			case Flower.FlowerState.None:
-				this.UpdateFlowerState(Flower.FlowerState.Healthy, false, true);
-				return;
-			case Flower.FlowerState.Healthy:
-				if (!isWatered)
-				{
-					this.UpdateFlowerState(Flower.FlowerState.Middle, false, true);
-					return;
-				}
-				break;
-			case Flower.FlowerState.Middle:
-				if (isWatered)
-				{
-					this.UpdateFlowerState(Flower.FlowerState.Healthy, true, true);
-					return;
-				}
-				this.UpdateFlowerState(Flower.FlowerState.Wilted, false, true);
-				return;
-			case Flower.FlowerState.Wilted:
-				if (isWatered)
-				{
-					this.UpdateFlowerState(Flower.FlowerState.Middle, true, true);
-				}
-				break;
-			default:
-				return;
-			}
+			perchPoint.enabled = currentState == FlowerState.Healthy;
 		}
-
-		public void UpdateFlowerState(Flower.FlowerState newState, bool isWatered = false, bool updateVisual = true)
+		if (updateVisual)
 		{
-			if (FlowersManager.Instance.IsMine)
-			{
-				this.timer.RestartTimer();
-			}
-			this.ChangeState(newState);
-			if (this.perchPoint)
-			{
-				this.perchPoint.enabled = (this.currentState == Flower.FlowerState.Healthy);
-			}
-			if (updateVisual)
-			{
-				this.LocalUpdateFlowers(newState, isWatered);
-			}
+			LocalUpdateFlowers(newState, isWatered);
 		}
+	}
 
-		private void LocalUpdateFlowers(Flower.FlowerState state, bool isWatered = false)
+	private void LocalUpdateFlowers(FlowerState state, bool isWatered = false)
+	{
+		GameObject[] array = meshStates;
+		for (int i = 0; i < array.Length; i++)
 		{
-			GameObject[] array = this.meshStates;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].SetActive(false);
-			}
-			if (!this.shouldUpdateVisuals)
-			{
-				this.meshStates[(int)this.currentState].SetActive(true);
-				return;
-			}
-			if (isWatered && this.wateredFx)
-			{
-				this.wateredFx.Play();
-			}
-			this.meshRenderer.enabled = true;
-			this.anim.enabled = true;
-			switch (state)
-			{
-			case Flower.FlowerState.Healthy:
-				this.anim.SetTrigger(Flower.middle_to_healthy);
-				return;
-			case Flower.FlowerState.Middle:
-				if (this.lastState == Flower.FlowerState.Wilted)
-				{
-					this.anim.SetTrigger(Flower.wilted_to_middle);
-					return;
-				}
-				this.anim.SetTrigger(Flower.healthy_to_middle);
-				return;
-			case Flower.FlowerState.Wilted:
-				this.anim.SetTrigger(Flower.middle_to_wilted);
-				return;
-			default:
-				return;
-			}
+			array[i].SetActive(value: false);
 		}
-
-		private void HandleOnFlowerTimerEnded(GorillaTimer _timer)
+		if (!shouldUpdateVisuals)
 		{
-			if (!FlowersManager.Instance.IsMine)
+			meshStates[(int)currentState].SetActive(value: true);
+			return;
+		}
+		if (isWatered && (bool)wateredFx)
+		{
+			wateredFx.Play();
+		}
+		meshRenderer.enabled = true;
+		anim.enabled = true;
+		switch (state)
+		{
+		case FlowerState.Healthy:
+			anim.SetTrigger(middle_to_healthy);
+			break;
+		case FlowerState.Middle:
+			if (lastState == FlowerState.Wilted)
 			{
-				return;
+				anim.SetTrigger(wilted_to_middle);
 			}
-			if (this.timer == _timer)
+			else
 			{
-				this.WaterFlower(false);
+				anim.SetTrigger(healthy_to_middle);
 			}
+			break;
+		case FlowerState.Wilted:
+			anim.SetTrigger(middle_to_wilted);
+			break;
 		}
+	}
 
-		private void ChangeState(Flower.FlowerState state)
+	private void HandleOnFlowerTimerEnded(GorillaTimer _timer)
+	{
+		if (FlowersManager.Instance.IsMine && timer == _timer)
 		{
-			this.lastState = this.currentState;
-			this.currentState = state;
+			WaterFlower();
 		}
+	}
 
-		public Flower.FlowerState GetCurrentState()
-		{
-			return this.currentState;
-		}
+	private void ChangeState(FlowerState state)
+	{
+		lastState = currentState;
+		currentState = state;
+	}
 
-		public void OnAnimationIsDone(int state)
+	public FlowerState GetCurrentState()
+	{
+		return currentState;
+	}
+
+	public void OnAnimationIsDone(int state)
+	{
+		if (meshRenderer.enabled)
 		{
-			if (this.meshRenderer.enabled)
+			for (int i = 0; i < meshStates.Length; i++)
 			{
-				for (int i = 0; i < this.meshStates.Length; i++)
-				{
-					bool active = i == (int)this.currentState;
-					this.meshStates[i].SetActive(active);
-				}
-				this.anim.enabled = false;
-				this.meshRenderer.enabled = false;
+				bool active = i == (int)currentState;
+				meshStates[i].SetActive(active);
 			}
+			anim.enabled = false;
+			meshRenderer.enabled = false;
 		}
+	}
 
-		public void UpdateVisuals(bool enable)
+	public void UpdateVisuals(bool enable)
+	{
+		shouldUpdateVisuals = enable;
+		meshStatesGameObject.SetActive(enable);
+	}
+
+	public void AnimCatch()
+	{
+		if (anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
 		{
-			this.shouldUpdateVisuals = enable;
-			this.meshStatesGameObject.SetActive(enable);
-		}
-
-		public void AnimCatch()
-		{
-			if (this.anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
-			{
-				this.OnAnimationIsDone(0);
-			}
-		}
-
-		private Animator anim;
-
-		private SkinnedMeshRenderer meshRenderer;
-
-		[HideInInspector]
-		public GorillaTimer timer;
-
-		private BeePerchPoint perchPoint;
-
-		public ParticleSystem wateredFx;
-
-		public ParticleSystem sparkleFx;
-
-		public GameObject meshStatesGameObject;
-
-		public GameObject[] meshStates;
-
-		private static readonly int healthy_to_middle = Animator.StringToHash("healthy_to_middle");
-
-		private static readonly int middle_to_healthy = Animator.StringToHash("middle_to_healthy");
-
-		private static readonly int wilted_to_middle = Animator.StringToHash("wilted_to_middle");
-
-		private static readonly int middle_to_wilted = Animator.StringToHash("middle_to_wilted");
-
-		private Flower.FlowerState currentState;
-
-		private string id;
-
-		private bool shouldUpdateVisuals;
-
-		private Flower.FlowerState lastState;
-
-		public enum FlowerState
-		{
-			None = -1,
-			Healthy,
-			Middle,
-			Wilted
+			OnAnimationIsDone(0);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 using AA;
@@ -7,7 +7,6 @@ using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaTagScripts;
 using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -15,1057 +14,92 @@ using UnityEngine.XR;
 [NetworkBehaviourWeaved(11)]
 public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardCallbacks
 {
-	private bool OutOfBounds
+	private enum GliderState
 	{
-		get
+		LocallyHeld,
+		LocallyDropped,
+		RemoteSyncing
+	}
+
+	private class HoldingHand
+	{
+		public bool active;
+
+		public Transform transform;
+
+		public Vector3 holdLocalPos;
+
+		public Vector3 handleLocalPos;
+
+		public Quaternion localHoldRotation;
+
+		public void Activate(Transform handTransform, Transform gliderTransform, Vector3 worldGrabPoint)
 		{
-			return this.maxDistanceRespawnOrigin != null && (this.maxDistanceRespawnOrigin.position - base.transform.position).sqrMagnitude > this.maxDistanceBeforeRespawn * this.maxDistanceBeforeRespawn;
+			active = true;
+			transform = handTransform.transform;
+			holdLocalPos = handTransform.InverseTransformPoint(worldGrabPoint);
+			handleLocalPos = gliderTransform.InverseTransformVector(gliderTransform.position - worldGrabPoint);
+			localHoldRotation = Quaternion.Inverse(handTransform.rotation) * gliderTransform.rotation;
+		}
+
+		public void Deactivate()
+		{
+			active = false;
+			transform = null;
+			holdLocalPos = Vector3.zero;
+			handleLocalPos = Vector3.zero;
+			localHoldRotation = Quaternion.identity;
 		}
 	}
 
-	protected override void Awake()
+	[StructLayout(LayoutKind.Explicit, Size = 44)]
+	[NetworkStructWeaved(11)]
+	internal struct SyncedState : INetworkStruct
 	{
-		base.Awake();
-		base.transform.parent = null;
-		this.defaultMaxDistanceBeforeRespawn = this.maxDistanceBeforeRespawn;
-		this.spawnPosition = (this.skyJungleSpawnPostion = base.transform.position);
-		this.spawnRotation = (this.skyJungleSpawnRotation = base.transform.rotation);
-		this.skyJungleRespawnOrigin = this.maxDistanceRespawnOrigin;
-		this.syncedState.Init(this.spawnPosition, this.spawnRotation);
-		this.rb = base.GetComponent<Rigidbody>();
-		this.yaw = base.transform.rotation.eulerAngles.y;
-		this.oneHandRotationRateExp = Mathf.Exp(this.oneHandHoldRotationRate);
-		this.twoHandRotationRateExp = Mathf.Exp(this.twoHandHoldRotationRate);
-		this.subtlePlayerPitchRateExp = Mathf.Exp(this.subtlePlayerPitchRate);
-		this.subtlePlayerRollRateExp = Mathf.Exp(this.subtlePlayerRollRate);
-		this.accelSmoothingFollowRateExp = Mathf.Exp(this.accelSmoothingFollowRate);
-		this.networkSyncFollowRateExp = Mathf.Exp(this.networkSyncFollowRate);
-		this.ownershipGuard.AddCallbackTarget(this);
-		this.calmAudio.volume = 0f;
-		this.activeAudio.volume = 0f;
-		this.whistlingAudio.volume = 0f;
-	}
+		[FieldOffset(0)]
+		public int riderId;
 
-	private void OnDestroy()
-	{
-		NetworkBehaviourUtils.InternalOnDestroy(this);
-		if (this.ownershipGuard != null)
+		[FieldOffset(4)]
+		public byte materialIndex;
+
+		[FieldOffset(8)]
+		public byte audioLevel;
+
+		[FieldOffset(12)]
+		public NetworkBool tagged;
+
+		[FieldOffset(16)]
+		public Vector3 position;
+
+		[FieldOffset(28)]
+		public Quaternion rotation;
+
+		public void Init(Vector3 defaultPosition, Quaternion defaultRotation)
 		{
-			this.ownershipGuard.RemoveCallbackTarget(this);
+			riderId = -1;
+			materialIndex = 0;
+			audioLevel = 0;
+			position = defaultPosition;
+			rotation = defaultRotation;
 		}
-	}
 
-	internal override void OnEnable()
-	{
-		NetworkBehaviourUtils.InternalOnEnable(this);
-		base.OnEnable();
-	}
-
-	internal override void OnDisable()
-	{
-		NetworkBehaviourUtils.InternalOnDisable(this);
-		this.Respawn();
-		base.OnDisable();
-	}
-
-	public void Respawn()
-	{
-		if ((base.IsValid && base.IsMine) || !NetworkSystem.Instance.InRoom)
+		public SyncedState(int id = -1)
 		{
-			if (EquipmentInteractor.instance != null)
-			{
-				if (EquipmentInteractor.instance.leftHandHeldEquipment == this)
-				{
-					this.OnRelease(null, EquipmentInteractor.instance.leftHand);
-				}
-				if (EquipmentInteractor.instance.rightHandHeldEquipment == this)
-				{
-					this.OnRelease(null, EquipmentInteractor.instance.rightHand);
-				}
-			}
-			this.rb.isKinematic = true;
-			base.transform.position = this.spawnPosition;
-			base.transform.rotation = this.spawnRotation;
-			this.lastHeldTime = -1f;
-			this.syncedState.Init(this.spawnPosition, this.spawnRotation);
+			riderId = id;
+			materialIndex = 0;
+			audioLevel = 0;
+			tagged = default(NetworkBool);
+			position = default(Vector3);
+			rotation = default(Quaternion);
 		}
 	}
 
-	public void CustomMapLoad(Transform placeholderTransform, float respawnDistance)
+	[Serializable]
+	private struct CosmeticMaterialOverride
 	{
-		this.maxDistanceRespawnOrigin = placeholderTransform;
-		this.spawnPosition = placeholderTransform.position;
-		this.spawnRotation = placeholderTransform.rotation;
-		this.maxDistanceBeforeRespawn = respawnDistance;
-		this.Respawn();
-	}
+		public string cosmeticName;
 
-	public void CustomMapUnload()
-	{
-		this.maxDistanceRespawnOrigin = this.skyJungleRespawnOrigin;
-		this.spawnPosition = this.skyJungleSpawnPostion;
-		this.spawnRotation = this.skyJungleSpawnRotation;
-		this.maxDistanceBeforeRespawn = this.defaultMaxDistanceBeforeRespawn;
-		this.Respawn();
-	}
-
-	public override bool TwoHanded
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	public override void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
-	{
-		if (!base.IsMine && NetworkSystem.Instance.InRoom && !this.pendingOwnershipRequest && this.syncedState.riderId == -1)
-		{
-			this.ownershipGuard.RequestOwnershipImmediately(delegate
-			{
-				this.pendingOwnershipRequest = false;
-			});
-			this.pendingOwnershipRequest = true;
-			if (this.reenableOwnershipRequestCoroutine != null)
-			{
-				base.StopCoroutine(this.reenableOwnershipRequestCoroutine);
-			}
-			this.reenableOwnershipRequestCoroutine = base.StartCoroutine(this.ReenableOwnershipRequest());
-		}
-	}
-
-	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-	{
-		if (base.IsMine || !NetworkSystem.Instance.InRoom || this.pendingOwnershipRequest)
-		{
-			this.OnGrabAuthority(pointGrabbed, grabbingHand);
-			return;
-		}
-		if (NetworkSystem.Instance.InRoom && !base.IsMine && !this.pendingOwnershipRequest && this.syncedState.riderId == -1)
-		{
-			this.ownershipGuard.RequestOwnershipImmediately(delegate
-			{
-				this.pendingOwnershipRequest = false;
-			});
-			this.pendingOwnershipRequest = true;
-			if (this.reenableOwnershipRequestCoroutine != null)
-			{
-				base.StopCoroutine(this.reenableOwnershipRequestCoroutine);
-			}
-			this.reenableOwnershipRequestCoroutine = base.StartCoroutine(this.ReenableOwnershipRequest());
-			this.OnGrabAuthority(pointGrabbed, grabbingHand);
-		}
-	}
-
-	public void OnGrabAuthority(InteractionPoint pointGrabbed, GameObject grabbingHand)
-	{
-		if (!base.IsMine && NetworkSystem.Instance.InRoom && !this.pendingOwnershipRequest)
-		{
-			return;
-		}
-		bool flag = grabbingHand == EquipmentInteractor.instance.leftHand;
-		if ((flag && !EquipmentInteractor.instance.isLeftGrabbing) || (!flag && !EquipmentInteractor.instance.isRightGrabbing))
-		{
-			return;
-		}
-		if (this.riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			this.riderId = NetworkSystem.Instance.LocalPlayer.ActorNumber;
-			this.cachedRig = this.getNewHolderRig(this.riderId);
-		}
-		EquipmentInteractor.instance.UpdateHandEquipment(this, flag);
-		GorillaTagger.Instance.StartVibration(flag, GorillaTagger.Instance.tapHapticStrength / 8f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
-		Vector3 worldGrabPoint = this.ClosestPointInHandle(grabbingHand.transform.position, pointGrabbed);
-		if (flag)
-		{
-			this.leftHold.Activate(grabbingHand.transform, base.transform, worldGrabPoint);
-		}
-		else
-		{
-			this.rightHold.Activate(grabbingHand.transform, base.transform, worldGrabPoint);
-		}
-		if (this.leftHold.active && this.rightHold.active)
-		{
-			Vector3 handsVector = this.GetHandsVector(this.leftHold.transform.position, this.rightHold.transform.position, GTPlayer.Instance.headCollider.transform.position, true);
-			this.twoHandRotationOffsetAxis = Vector3.Cross(handsVector, base.transform.right).normalized;
-			if ((double)this.twoHandRotationOffsetAxis.sqrMagnitude < 0.001)
-			{
-				this.twoHandRotationOffsetAxis = base.transform.right;
-				this.twoHandRotationOffsetAngle = 0f;
-			}
-			else
-			{
-				this.twoHandRotationOffsetAngle = Vector3.SignedAngle(handsVector, base.transform.right, this.twoHandRotationOffsetAxis);
-			}
-		}
-		this.rb.isKinematic = true;
-		this.rb.useGravity = false;
-		this.ridersMaterialOverideIndex = 0;
-		if (this.cosmeticMaterialOverrides.Length != 0)
-		{
-			VRRig offlineVRRig = this.cachedRig;
-			if (offlineVRRig == null)
-			{
-				offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-			}
-			if (offlineVRRig != null)
-			{
-				for (int i = 0; i < this.cosmeticMaterialOverrides.Length; i++)
-				{
-					if (this.cosmeticMaterialOverrides[i].cosmeticName != null && offlineVRRig.cosmeticSet != null && offlineVRRig.cosmeticSet.HasItem(this.cosmeticMaterialOverrides[i].cosmeticName))
-					{
-						this.ridersMaterialOverideIndex = i + 1;
-						break;
-					}
-				}
-			}
-		}
-		this.infectedState = false;
-		if (GorillaGameManager.instance as GorillaTagManager != null)
-		{
-			this.infectedState = this.syncedState.tagged;
-		}
-		if (this.infectedState)
-		{
-			this.leafMesh.material = this.GetInfectedMaterial();
-		}
-		else
-		{
-			this.leafMesh.material = this.GetMaterialFromIndex((byte)this.ridersMaterialOverideIndex);
-		}
-		if (EquipmentInteractor.instance.rightHandHeldEquipment != null && EquipmentInteractor.instance.rightHandHeldEquipment.GetType() == typeof(GliderHoldable) && EquipmentInteractor.instance.leftHandHeldEquipment != null && EquipmentInteractor.instance.leftHandHeldEquipment.GetType() == typeof(GliderHoldable) && EquipmentInteractor.instance.leftHandHeldEquipment != EquipmentInteractor.instance.rightHandHeldEquipment)
-		{
-			this.holdingTwoGliders = true;
-		}
-	}
-
-	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-	{
-		this.holdingTwoGliders = false;
-		bool flag = releasingHand == EquipmentInteractor.instance.leftHand;
-		if (this.leftHold.active && this.rightHold.active)
-		{
-			if (flag)
-			{
-				this.rightHold.Activate(this.rightHold.transform, base.transform, this.ClosestPointInHandle(this.rightHold.transform.position, this.handle));
-			}
-			else
-			{
-				this.leftHold.Activate(this.leftHold.transform, base.transform, this.ClosestPointInHandle(this.leftHold.transform.position, this.handle));
-			}
-		}
-		Vector3 averageVelocity = GTPlayer.Instance.GetHandVelocityTracker(flag).GetAverageVelocity(true, 0.15f, false);
-		(flag ? this.leftHold : this.rightHold).Deactivate();
-		EquipmentInteractor.instance.UpdateHandEquipment(null, flag);
-		if (!this.leftHold.active && !this.rightHold.active)
-		{
-			this.gliderState = GliderHoldable.GliderState.LocallyDropped;
-			this.audioLevel = 0f;
-			this.riderId = -1;
-			this.cachedRig = null;
-			this.subtlePlayerPitch = 0f;
-			this.subtlePlayerRoll = 0f;
-			this.leftHoldPositionLocal = null;
-			this.rightHoldPositionLocal = null;
-			this.ridersMaterialOverideIndex = 0;
-			if (base.IsMine || !NetworkSystem.Instance.InRoom)
-			{
-				this.rb.isKinematic = false;
-				this.rb.useGravity = true;
-				this.rb.linearVelocity = averageVelocity;
-				this.syncedState.riderId = -1;
-				this.syncedState.tagged = false;
-				this.syncedState.materialIndex = 0;
-				this.syncedState.position = base.transform.position;
-				this.syncedState.rotation = base.transform.rotation;
-				this.syncedState.audioLevel = 0;
-			}
-			this.leafMesh.material = this.baseLeafMaterial;
-		}
-		return true;
-	}
-
-	public override void DropItemCleanup()
-	{
-	}
-
-	public void FixedUpdate()
-	{
-		if (!base.IsMine && NetworkSystem.Instance.InRoom && !this.pendingOwnershipRequest)
-		{
-			return;
-		}
-		GTPlayer instance = GTPlayer.Instance;
-		if (this.holdingTwoGliders)
-		{
-			instance.AddForce(Physics.gravity, ForceMode.Acceleration);
-			return;
-		}
-		if (this.leftHold.active || this.rightHold.active)
-		{
-			float fixedDeltaTime = Time.fixedDeltaTime;
-			this.previousVelocity = this.currentVelocity;
-			this.currentVelocity = instance.RigidbodyVelocity;
-			float magnitude = this.currentVelocity.magnitude;
-			this.accelerationAverage.AddSample((this.currentVelocity - this.previousVelocity) / Time.fixedDeltaTime, Time.fixedTime);
-			float rollAngle180Wrapping = this.GetRollAngle180Wrapping();
-			float angle = this.liftIncreaseVsRoll.Evaluate(Mathf.Clamp01(Mathf.Abs(rollAngle180Wrapping / 180f))) * this.liftIncreaseVsRollMaxAngle;
-			Vector3 vector = Vector3.RotateTowards(this.currentVelocity, Quaternion.AngleAxis(angle, -base.transform.right) * base.transform.forward * magnitude, this.pitchVelocityFollowRateAngle * 0.017453292f * fixedDeltaTime, this.pitchVelocityFollowRateMagnitude * fixedDeltaTime);
-			Vector3 a = vector - this.currentVelocity;
-			float num = this.NormalizeAngle180(Vector3.SignedAngle(Vector3.ProjectOnPlane(this.currentVelocity, base.transform.right), base.transform.forward, base.transform.right));
-			if (num > 90f)
-			{
-				num = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num));
-			}
-			else if (num < -90f)
-			{
-				num = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num));
-			}
-			float time = Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, num));
-			Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, this.pitch));
-			float d = this.liftVsAttack.Evaluate(time);
-			instance.AddForce(a * d, ForceMode.VelocityChange);
-			float num2 = this.dragVsAttack.Evaluate(time);
-			float num3 = (this.syncedState.riderId != -1 && this.syncedState.materialIndex == 1) ? (this.dragVsSpeedMaxSpeed + this.infectedSpeedIncrease) : this.dragVsSpeedMaxSpeed;
-			float num4 = this.dragVsSpeed.Evaluate(Mathf.Clamp01(magnitude / num3));
-			float d2 = Mathf.Clamp01(num2 * this.attackDragFactor + num4 * this.dragVsSpeedDragFactor);
-			instance.AddForce(-this.currentVelocity * d2, ForceMode.Acceleration);
-			if (this.pitch > 0f && this.currentVelocity.y > 0f && (this.currentVelocity - this.previousVelocity).y > 0f)
-			{
-				float a2 = Mathf.InverseLerp(0f, this.pullUpLiftActivationVelocity, this.currentVelocity.y);
-				float b = Mathf.InverseLerp(0f, this.pullUpLiftActivationAcceleration, (this.currentVelocity - this.previousVelocity).y / fixedDeltaTime);
-				float d3 = Mathf.Min(a2, b);
-				instance.AddForce(-Physics.gravity * this.pullUpLiftBonus * d3, ForceMode.Acceleration);
-			}
-			if (Vector3.Dot(vector, Physics.gravity) > 0f)
-			{
-				instance.AddForce(-Physics.gravity * this.gravityCompensation, ForceMode.Acceleration);
-				return;
-			}
-		}
-		else
-		{
-			Vector3 a3 = this.WindResistanceForceOffset(base.transform.up, Vector3.down);
-			Vector3 position = base.transform.position - a3 * this.gravityUprightTorqueMultiplier;
-			this.rb.AddForceAtPosition(-this.fallingGravityReduction * Physics.gravity * this.rb.mass, position, ForceMode.Force);
-		}
-	}
-
-	public void LateUpdate()
-	{
-		float deltaTime = Time.deltaTime;
-		if (base.IsMine || !NetworkSystem.Instance.InRoom || this.pendingOwnershipRequest)
-		{
-			this.AuthorityUpdate(deltaTime);
-			return;
-		}
-		this.RemoteSyncUpdate(deltaTime);
-	}
-
-	private void AuthorityUpdate(float dt)
-	{
-		if (!this.leftHold.active && !this.rightHold.active)
-		{
-			this.AuthorityUpdateUnheld(dt);
-		}
-		else if (this.leftHold.active || this.rightHold.active)
-		{
-			this.AuthorityUpdateHeld(dt);
-		}
-		this.syncedState.audioLevel = (byte)Mathf.FloorToInt(255f * this.audioLevel);
-	}
-
-	private void AuthorityUpdateHeld(float dt)
-	{
-		if (this.gliderState != GliderHoldable.GliderState.LocallyHeld)
-		{
-			this.gliderState = GliderHoldable.GliderState.LocallyHeld;
-		}
-		this.rb.isKinematic = true;
-		this.lastHeldTime = Time.time;
-		if (this.leftHold.active)
-		{
-			this.leftHold.holdLocalPos = Vector3.Lerp(Vector3.zero, this.leftHold.holdLocalPos, Mathf.Exp(-5f * dt));
-		}
-		if (this.rightHold.active)
-		{
-			this.rightHold.holdLocalPos = Vector3.Lerp(Vector3.zero, this.rightHold.holdLocalPos, Mathf.Exp(-5f * dt));
-		}
-		Vector3 a = Vector3.zero;
-		if (this.leftHold.active && this.rightHold.active)
-		{
-			a = (this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos)) * 0.5f;
-		}
-		else if (this.leftHold.active)
-		{
-			a = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos);
-		}
-		else if (this.rightHold.active)
-		{
-			a = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos);
-		}
-		this.UpdateGliderPosition();
-		float magnitude = this.currentVelocity.magnitude;
-		if (this.setMaxHandSlipDuringFlight && magnitude > this.maxSlipOverrideSpeedThreshold)
-		{
-			if (this.leftHold.active)
-			{
-				GTPlayer.Instance.SetLeftMaximumSlipThisFrame();
-			}
-			if (this.rightHold.active)
-			{
-				GTPlayer.Instance.SetRightMaximumSlipThisFrame();
-			}
-		}
-		bool flag = false;
-		GorillaTagManager gorillaTagManager = GorillaGameManager.instance as GorillaTagManager;
-		if (gorillaTagManager != null)
-		{
-			flag = gorillaTagManager.IsInfected(NetworkSystem.Instance.LocalPlayer);
-		}
-		bool flag2 = flag != this.infectedState;
-		this.infectedState = flag;
-		if (flag2)
-		{
-			if (this.infectedState)
-			{
-				this.leafMesh.material = this.GetInfectedMaterial();
-			}
-			else
-			{
-				this.leafMesh.material = this.GetMaterialFromIndex(this.syncedState.materialIndex);
-			}
-		}
-		Vector3 average = this.accelerationAverage.GetAverage();
-		this.accelerationSmoothed = Mathf.Lerp(average.magnitude, this.accelerationSmoothed, Mathf.Exp(-this.accelSmoothingFollowRateExp * dt));
-		float num = Mathf.InverseLerp(this.hapticMaxSpeedInputRange.x, this.hapticMaxSpeedInputRange.y, magnitude);
-		float num2 = Mathf.InverseLerp(this.hapticAccelInputRange.x, this.hapticAccelInputRange.y, this.accelerationSmoothed);
-		float num3 = Mathf.InverseLerp(this.hapticSpeedInputRange.x, this.hapticSpeedInputRange.y, magnitude);
-		this.UpdateAudioSource(this.calmAudio, num * this.audioVolumeMultiplier);
-		this.UpdateAudioSource(this.activeAudio, num2 * num * this.audioVolumeMultiplier);
-		if (this.infectedState)
-		{
-			this.UpdateAudioSource(this.whistlingAudio, Mathf.InverseLerp(this.whistlingAudioSpeedInputRange.x, this.whistlingAudioSpeedInputRange.y, magnitude) * num2 * num * this.audioVolumeMultiplier);
-		}
-		else
-		{
-			this.UpdateAudioSource(this.whistlingAudio, 0f);
-		}
-		float amplitude = Mathf.Max(num2 * this.hapticAccelOutputMax * num, num3 * this.hapticSpeedOutputMax);
-		if (this.rightHold.active)
-		{
-			GorillaTagger.Instance.DoVibration(XRNode.RightHand, amplitude, dt);
-		}
-		if (this.leftHold.active)
-		{
-			GorillaTagger.Instance.DoVibration(XRNode.LeftHand, amplitude, dt);
-		}
-		Vector3 origin = this.handle.transform.position + this.handle.transform.rotation * new Vector3(0f, 0f, 1f);
-		if (Time.frameCount % 2 == 0)
-		{
-			Vector3 direction = this.handle.transform.rotation * new Vector3(-0.707f, 0f, 0.707f);
-			RaycastHit raycastHit;
-			if (this.leftWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction), out raycastHit, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
-			{
-				this.leftWhooshStartTime = Time.time;
-				this.leftWhooshHitPoint = raycastHit.point;
-				this.leftWhooshAudio.GTStop();
-				this.leftWhooshAudio.volume = Mathf.Lerp(this.whooshVolumeOutput.x, this.whooshVolumeOutput.y, Mathf.InverseLerp(this.whooshSpeedThresholdInput.x, this.whooshSpeedThresholdInput.y, magnitude));
-				this.leftWhooshAudio.GTPlay();
-			}
-		}
-		else
-		{
-			Vector3 direction2 = this.handle.transform.rotation * new Vector3(0.707f, 0f, 0.707f);
-			RaycastHit raycastHit2;
-			if (this.rightWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction2), out raycastHit2, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
-			{
-				this.rightWhooshStartTime = Time.time;
-				this.rightWhooshHitPoint = raycastHit2.point;
-				this.rightWhooshAudio.GTStop();
-				this.rightWhooshAudio.volume = Mathf.Lerp(this.whooshVolumeOutput.x, this.whooshVolumeOutput.y, Mathf.InverseLerp(this.whooshSpeedThresholdInput.x, this.whooshSpeedThresholdInput.y, magnitude));
-				this.rightWhooshAudio.GTPlay();
-			}
-		}
-		Vector3 headCenterPosition = GTPlayer.Instance.HeadCenterPosition;
-		if (this.leftWhooshStartTime > Time.time - this.whooshSoundDuration)
-		{
-			this.leftWhooshAudio.transform.position = this.leftWhooshHitPoint;
-		}
-		else
-		{
-			this.leftWhooshAudio.transform.localPosition = new Vector3(-this.whooshAudioPositionOffset.x, this.whooshAudioPositionOffset.y, this.whooshAudioPositionOffset.z);
-		}
-		if (this.rightWhooshStartTime > Time.time - this.whooshSoundDuration)
-		{
-			this.rightWhooshAudio.transform.position = this.rightWhooshHitPoint;
-		}
-		else
-		{
-			this.rightWhooshAudio.transform.localPosition = new Vector3(this.whooshAudioPositionOffset.x, this.whooshAudioPositionOffset.y, this.whooshAudioPositionOffset.z);
-		}
-		if (this.extendTagRangeInFlight)
-		{
-			float tagRadiusOverrideThisFrame = Mathf.Lerp(this.tagRangeOutput.x, this.tagRangeOutput.y, Mathf.InverseLerp(this.tagRangeSpeedInput.x, this.tagRangeSpeedInput.y, magnitude));
-			GorillaTagger.Instance.SetTagRadiusOverrideThisFrame(tagRadiusOverrideThisFrame);
-			if (this.debugDrawTagRange)
-			{
-				GorillaTagger.Instance.DebugDrawTagCasts(Color.yellow);
-			}
-		}
-		Vector3 normalized = Vector3.ProjectOnPlane(base.transform.right, Vector3.up).normalized;
-		Vector3 normalized2 = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
-		float num4 = -Vector3.Dot(a - this.handle.transform.position, normalized2);
-		Vector3 b = this.handle.transform.position - normalized2 * (this.riderPosRange.y * 0.5f + this.riderPosRangeOffset + num4);
-		float num5 = Vector3.Dot(headCenterPosition - b, normalized);
-		float num6 = Vector3.Dot(headCenterPosition - b, normalized2);
-		num5 /= this.riderPosRange.x * 0.5f;
-		num6 /= this.riderPosRange.y * 0.5f;
-		this.riderPosition.x = Mathf.Sign(num5) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(this.riderPosRangeNormalizedDeadzone.x, 1f, Mathf.Abs(num5)));
-		this.riderPosition.y = Mathf.Sign(num6) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(this.riderPosRangeNormalizedDeadzone.y, 1f, Mathf.Abs(num6)));
-		Vector3 vector;
-		Vector3 vector2;
-		if (this.leftHold.active && this.rightHold.active)
-		{
-			vector = this.leftHold.transform.position;
-			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
-			vector2 = this.rightHold.transform.position;
-			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
-		}
-		else if (this.leftHold.active)
-		{
-			vector = this.leftHold.transform.position;
-			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
-			Vector3 vector3 = vector + this.leftHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
-			if (this.rightHoldPositionLocal != null)
-			{
-				this.rightHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector3), this.rightHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
-				vector2 = GTPlayer.Instance.transform.TransformPoint(this.rightHoldPositionLocal.Value);
-			}
-			else
-			{
-				vector2 = vector3;
-				this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
-			}
-		}
-		else
-		{
-			vector2 = this.rightHold.transform.position;
-			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
-			Vector3 vector4 = vector2 + this.rightHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
-			if (this.leftHoldPositionLocal != null)
-			{
-				this.leftHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector4), this.leftHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
-				vector = GTPlayer.Instance.transform.TransformPoint(this.leftHoldPositionLocal.Value);
-			}
-			else
-			{
-				vector = vector4;
-				this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
-			}
-		}
-		Vector3 forward;
-		Vector3 vector5;
-		this.GetHandsOrientationVectors(vector, vector2, GTPlayer.Instance.headCollider.transform, false, out forward, out vector5);
-		float num7 = this.riderPosition.y * this.riderPosDirectPitchMax;
-		if (!this.leftHold.active || !this.rightHold.active)
-		{
-			num7 *= this.oneHandPitchMultiplier;
-		}
-		Spring.CriticalSpringDamperExact(ref this.pitch, ref this.pitchVel, num7, 0f, this.pitchHalfLife, dt);
-		this.pitch = Mathf.Clamp(this.pitch, this.pitchMinMax.x, this.pitchMinMax.y);
-		Quaternion rhs = Quaternion.AngleAxis(this.pitch, Vector3.right);
-		this.twoHandRotationOffsetAngle = Mathf.Lerp(0f, this.twoHandRotationOffsetAngle, Mathf.Exp(-8f * dt));
-		Vector3 upwards = this.twoHandGliderInversionOnYawInsteadOfRoll ? vector5 : Vector3.up;
-		Quaternion lhs = Quaternion.AngleAxis(this.twoHandRotationOffsetAngle, this.twoHandRotationOffsetAxis) * Quaternion.LookRotation(forward, upwards) * Quaternion.AngleAxis(-90f, Vector3.up);
-		float num8 = (this.leftHold.active && this.rightHold.active) ? this.twoHandRotationRateExp : this.oneHandRotationRateExp;
-		base.transform.rotation = Quaternion.Slerp(lhs * rhs, base.transform.rotation, Mathf.Exp(-num8 * dt));
-		if (this.subtlePlayerPitchActive || this.subtlePlayerRollActive)
-		{
-			float a2 = Mathf.InverseLerp(this.subtlePlayerRotationSpeedRampMinMax.x, this.subtlePlayerRotationSpeedRampMinMax.y, this.currentVelocity.magnitude);
-			Quaternion rhs2 = Quaternion.identity;
-			if (this.subtlePlayerRollActive)
-			{
-				float num9 = this.GetRollAngle180Wrapping();
-				if (num9 > 90f)
-				{
-					num9 = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num9));
-				}
-				else if (num9 < -90f)
-				{
-					num9 = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num9));
-				}
-				Vector3 normalized3 = new Vector3(this.currentVelocity.x, 0f, this.currentVelocity.z).normalized;
-				Vector3 vector6 = new Vector3(average.x, 0f, average.z);
-				float num10 = Vector3.Dot(vector6 - Vector3.Dot(vector6, normalized3) * normalized3, Vector3.Cross(normalized3, Vector3.up));
-				this.turnAccelerationSmoothed = Mathf.Lerp(num10, this.turnAccelerationSmoothed, Mathf.Exp(-this.accelSmoothingFollowRateExp * dt));
-				float b2 = 0f;
-				if (num10 * num9 > 0f)
-				{
-					b2 = Mathf.InverseLerp(this.subtlePlayerRollAccelMinMax.x, this.subtlePlayerRollAccelMinMax.y, Mathf.Abs(this.turnAccelerationSmoothed));
-				}
-				float a3 = num9 * this.subtlePlayerRollFactor * Mathf.Min(a2, b2);
-				this.subtlePlayerRoll = Mathf.Lerp(a3, this.subtlePlayerRoll, Mathf.Exp(-this.subtlePlayerRollRateExp * dt));
-				rhs2 = Quaternion.AngleAxis(this.subtlePlayerRoll, base.transform.forward);
-			}
-			Quaternion lhs2 = Quaternion.identity;
-			if (this.subtlePlayerPitchActive)
-			{
-				float a4 = this.pitch * this.subtlePlayerPitchFactor * Mathf.Min(a2, 1f);
-				this.subtlePlayerPitch = Mathf.Lerp(a4, this.subtlePlayerPitch, Mathf.Exp(-this.subtlePlayerPitchRateExp * dt));
-				lhs2 = Quaternion.AngleAxis(this.subtlePlayerPitch, -base.transform.right);
-			}
-			Quaternion quaternion = lhs2 * rhs2;
-			GTPlayerTransform.ApplyRotationOverride(quaternion, Time.frameCount);
-		}
-		this.UpdateGliderPosition();
-		if (this.syncedState.riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			this.riderId = (this.syncedState.riderId = NetworkSystem.Instance.LocalPlayer.ActorNumber);
-			this.cachedRig = this.getNewHolderRig(this.riderId);
-		}
-		this.syncedState.tagged = this.infectedState;
-		this.syncedState.materialIndex = (byte)this.ridersMaterialOverideIndex;
-		if (this.cachedRig != null)
-		{
-			this.syncedState.position = this.cachedRig.transform.InverseTransformPoint(base.transform.position);
-			this.syncedState.rotation = Quaternion.Inverse(this.cachedRig.transform.rotation) * base.transform.rotation;
-		}
-		else
-		{
-			Debug.LogError("Glider failed to get a reference to the local player's VRRig while the player was flying", this);
-		}
-		this.audioLevel = num2 * num;
-		if (this.OutOfBounds)
-		{
-			this.Respawn();
-		}
-		if (this.leftHold.active && EquipmentInteractor.instance.leftHandHeldEquipment != this)
-		{
-			this.OnRelease(null, EquipmentInteractor.instance.leftHand);
-		}
-		if (this.rightHold.active && EquipmentInteractor.instance.rightHandHeldEquipment != this)
-		{
-			this.OnRelease(null, EquipmentInteractor.instance.rightHand);
-		}
-	}
-
-	private void AuthorityUpdateUnheld(float dt)
-	{
-		this.syncedState.position = base.transform.position;
-		this.syncedState.rotation = base.transform.rotation;
-		if (this.gliderState != GliderHoldable.GliderState.LocallyDropped)
-		{
-			this.gliderState = GliderHoldable.GliderState.LocallyDropped;
-			this.syncedState.riderId = -1;
-			this.syncedState.materialIndex = 0;
-			this.syncedState.tagged = false;
-			this.leafMesh.material = this.baseLeafMaterial;
-		}
-		if (this.audioLevel * this.audioVolumeMultiplier > 0.001f)
-		{
-			this.audioLevel = Mathf.Lerp(0f, this.audioLevel, Mathf.Exp(-2f * dt));
-			this.UpdateAudioSource(this.calmAudio, this.audioLevel * this.audioVolumeMultiplier);
-			this.UpdateAudioSource(this.activeAudio, this.audioLevel * this.audioVolumeMultiplier);
-			this.UpdateAudioSource(this.whistlingAudio, this.audioLevel * this.audioVolumeMultiplier);
-		}
-		if (this.OutOfBounds || (this.lastHeldTime > 0f && this.lastHeldTime < Time.time - this.maxDroppedTimeToRespawn))
-		{
-			this.Respawn();
-		}
-	}
-
-	private void RemoteSyncUpdate(float dt)
-	{
-		this.rb.isKinematic = true;
-		int num = this.syncedState.riderId;
-		bool flag = this.riderId != num;
-		if (flag)
-		{
-			this.riderId = num;
-			this.cachedRig = this.getNewHolderRig(this.riderId);
-		}
-		if (this.riderId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			this.cachedRig = null;
-			this.syncedState.riderId = -1;
-			this.syncedState.materialIndex = 0;
-			this.syncedState.audioLevel = 0;
-		}
-		if (this.syncedState.riderId == -1)
-		{
-			base.transform.position = Vector3.Lerp(this.syncedState.position, base.transform.position, Mathf.Exp(-this.networkSyncFollowRateExp * dt));
-			base.transform.rotation = Quaternion.Slerp(this.syncedState.rotation, base.transform.rotation, Mathf.Exp(-this.networkSyncFollowRateExp * dt));
-		}
-		else if (this.cachedRig != null)
-		{
-			this.positionLocalToVRRig = Vector3.Lerp(this.syncedState.position, this.positionLocalToVRRig, Mathf.Exp(-this.networkSyncFollowRateExp * dt));
-			this.rotationLocalToVRRig = Quaternion.Slerp(this.syncedState.rotation, this.rotationLocalToVRRig, Mathf.Exp(-this.networkSyncFollowRateExp * dt));
-			base.transform.position = this.cachedRig.transform.TransformPoint(this.positionLocalToVRRig);
-			base.transform.rotation = this.cachedRig.transform.rotation * this.rotationLocalToVRRig;
-		}
-		bool flag2 = false;
-		if (GorillaGameManager.instance as GorillaTagManager != null)
-		{
-			flag2 = this.syncedState.tagged;
-		}
-		bool flag3 = flag2 != this.infectedState;
-		this.infectedState = flag2;
-		if (flag3 || flag)
-		{
-			if (this.infectedState)
-			{
-				this.leafMesh.material = this.GetInfectedMaterial();
-			}
-			else
-			{
-				this.leafMesh.material = this.GetMaterialFromIndex(this.syncedState.materialIndex);
-			}
-		}
-		float num2 = Mathf.Clamp01((float)this.syncedState.audioLevel / 255f);
-		if (this.audioLevel != num2)
-		{
-			this.audioLevel = num2;
-			if (this.syncedState.riderId != -1 && this.syncedState.tagged)
-			{
-				this.UpdateAudioSource(this.calmAudio, this.audioLevel * this.infectedAudioVolumeMultiplier);
-				this.UpdateAudioSource(this.activeAudio, this.audioLevel * this.infectedAudioVolumeMultiplier);
-				this.UpdateAudioSource(this.whistlingAudio, this.audioLevel * this.infectedAudioVolumeMultiplier);
-				return;
-			}
-			this.UpdateAudioSource(this.calmAudio, this.audioLevel * this.audioVolumeMultiplier);
-			this.UpdateAudioSource(this.activeAudio, this.audioLevel * this.audioVolumeMultiplier);
-			this.UpdateAudioSource(this.whistlingAudio, 0f);
-		}
-	}
-
-	private VRRig getNewHolderRig(int riderId)
-	{
-		if (riderId >= 0)
-		{
-			NetPlayer netPlayer;
-			if (riderId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				netPlayer = NetworkSystem.Instance.LocalPlayer;
-			}
-			else
-			{
-				netPlayer = NetworkSystem.Instance.GetPlayer(riderId);
-			}
-			RigContainer rigContainer;
-			if (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out rigContainer))
-			{
-				return rigContainer.Rig;
-			}
-		}
-		return null;
-	}
-
-	private Vector3 ClosestPointInHandle(Vector3 startingPoint, InteractionPoint interactionPoint)
-	{
-		CapsuleCollider component = interactionPoint.GetComponent<CapsuleCollider>();
-		Vector3 vector = startingPoint;
-		if (component != null)
-		{
-			Vector3 point = (component.direction == 0) ? Vector3.right : ((component.direction == 1) ? Vector3.up : Vector3.forward);
-			Vector3 vector2 = component.transform.rotation * point;
-			Vector3 vector3 = component.transform.position + component.transform.rotation * component.center;
-			float d = Mathf.Clamp(Vector3.Dot(vector - vector3, vector2), -component.height * 0.5f, component.height * 0.5f);
-			vector = vector3 + vector2 * d;
-		}
-		return vector;
-	}
-
-	private void UpdateGliderPosition()
-	{
-		if (this.leftHold.active && this.rightHold.active)
-		{
-			Vector3 a = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + base.transform.TransformVector(this.leftHold.handleLocalPos);
-			Vector3 b = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos) + base.transform.TransformVector(this.rightHold.handleLocalPos);
-			base.transform.position = (a + b) * 0.5f;
-			return;
-		}
-		if (this.leftHold.active)
-		{
-			base.transform.position = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + base.transform.TransformVector(this.leftHold.handleLocalPos);
-			return;
-		}
-		if (this.rightHold.active)
-		{
-			base.transform.position = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos) + base.transform.TransformVector(this.rightHold.handleLocalPos);
-		}
-	}
-
-	private Vector3 GetHandsVector(Vector3 leftHandPos, Vector3 rightHandPos, Vector3 headPos, bool flipBasedOnFacingDir)
-	{
-		Vector3 vector = rightHandPos - leftHandPos;
-		Vector3 rhs = (rightHandPos + leftHandPos) * 0.5f - headPos;
-		Vector3 normalized = Vector3.Cross(Vector3.up, rhs).normalized;
-		if (flipBasedOnFacingDir && Vector3.Dot(vector, normalized) < 0f)
-		{
-			vector = -vector;
-		}
-		return vector;
-	}
-
-	private void GetHandsOrientationVectors(Vector3 leftHandPos, Vector3 rightHandPos, Transform head, bool flipBasedOnFacingDir, out Vector3 handsVector, out Vector3 handsUpVector)
-	{
-		handsVector = rightHandPos - leftHandPos;
-		float magnitude = handsVector.magnitude;
-		handsVector /= Mathf.Max(magnitude, 0.001f);
-		Vector3 position = head.position;
-		float d = 1f;
-		Vector3 planeNormal = (Vector3.Dot(head.right, handsVector) < 0f) ? handsVector : (-handsVector);
-		Vector3 normalized = Vector3.ProjectOnPlane(-head.forward, planeNormal).normalized;
-		Vector3 a = normalized * d + position;
-		Vector3 a2 = (leftHandPos + rightHandPos) * 0.5f;
-		Vector3 a3 = Vector3.ProjectOnPlane(a2 - head.position, Vector3.up);
-		float magnitude2 = a3.magnitude;
-		a3 /= Mathf.Max(magnitude2, 0.001f);
-		Vector3 normalized2 = Vector3.ProjectOnPlane(-base.transform.forward, Vector3.up).normalized;
-		Vector3 a4 = -a3 * d + position;
-		float num = Vector3.Dot(normalized2, -a3);
-		float num2 = Vector3.Dot(normalized2, normalized);
-		if (Vector3.Dot(base.transform.up, Vector3.up) < 0f)
-		{
-			num = Mathf.Abs(num);
-			num2 = Mathf.Abs(num2);
-		}
-		num = Mathf.Max(num, 0f);
-		num2 = Mathf.Max(num2, 0f);
-		Vector3 b = (a4 * num + a * num2) / Mathf.Max(num + num2, 0.001f);
-		Vector3 vector = a2 - b;
-		Vector3 normalized3 = Vector3.Cross(Vector3.up, vector).normalized;
-		if (flipBasedOnFacingDir && Vector3.Dot(handsVector, normalized3) < 0f)
-		{
-			handsVector = -handsVector;
-		}
-		handsUpVector = Vector3.Cross(Vector3.ProjectOnPlane(vector, Vector3.up), handsVector).normalized;
-	}
-
-	private Material GetMaterialFromIndex(byte materialIndex)
-	{
-		if (materialIndex < 1 || (int)materialIndex > this.cosmeticMaterialOverrides.Length)
-		{
-			return this.baseLeafMaterial;
-		}
-		return this.cosmeticMaterialOverrides[(int)(materialIndex - 1)].material;
-	}
-
-	private float GetRollAngle180Wrapping()
-	{
-		Vector3 normalized = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
-		float angle = Vector3.SignedAngle(Vector3.Cross(Vector3.up, normalized).normalized, base.transform.right, base.transform.forward);
-		return this.NormalizeAngle180(angle);
-	}
-
-	private float SignedAngleInPlane(Vector3 from, Vector3 to, Vector3 normal)
-	{
-		from = Vector3.ProjectOnPlane(from, normal);
-		to = Vector3.ProjectOnPlane(to, normal);
-		return Vector3.SignedAngle(from, to, normal);
-	}
-
-	private float NormalizeAngle180(float angle)
-	{
-		angle = (angle + 180f) % 360f;
-		if (angle < 0f)
-		{
-			angle += 360f;
-		}
-		return angle - 180f;
-	}
-
-	private void UpdateAudioSource(AudioSource source, float level)
-	{
-		source.volume = level;
-		if (!source.isPlaying && level > 0.01f)
-		{
-			source.GTPlay();
-			return;
-		}
-		if (source.isPlaying && level < 0.01f && this.syncedState.riderId == -1)
-		{
-			source.GTStop();
-		}
-	}
-
-	private Material GetInfectedMaterial()
-	{
-		if (GorillaGameManager.instance is GorillaFreezeTagManager)
-		{
-			return this.frozenLeafMaterial;
-		}
-		return this.infectedLeafMaterial;
-	}
-
-	public void OnTriggerStay(Collider other)
-	{
-		GliderWindVolume component = other.GetComponent<GliderWindVolume>();
-		if (component == null)
-		{
-			return;
-		}
-		if (!base.IsMine && NetworkSystem.Instance.InRoom && !this.pendingOwnershipRequest)
-		{
-			return;
-		}
-		if (Time.frameCount == this.windVolumeForceAppliedFrame)
-		{
-			return;
-		}
-		if (this.leftHold.active || this.rightHold.active)
-		{
-			Vector3 accelFromVelocity = component.GetAccelFromVelocity(GTPlayer.Instance.RigidbodyVelocity);
-			GTPlayer.Instance.AddForce(accelFromVelocity, ForceMode.Acceleration);
-			this.windVolumeForceAppliedFrame = Time.frameCount;
-			return;
-		}
-		Vector3 accelFromVelocity2 = component.GetAccelFromVelocity(this.rb.linearVelocity);
-		Vector3 a = this.WindResistanceForceOffset(base.transform.up, component.WindDirection);
-		Vector3 position = base.transform.position + a * this.windUprightTorqueMultiplier;
-		this.rb.AddForceAtPosition(accelFromVelocity2 * this.rb.mass, position, ForceMode.Force);
-		this.windVolumeForceAppliedFrame = Time.frameCount;
-	}
-
-	private Vector3 WindResistanceForceOffset(Vector3 upDir, Vector3 windDir)
-	{
-		if (Vector3.Dot(upDir, windDir) < 0f)
-		{
-			upDir *= -1f;
-		}
-		return Vector3.ProjectOnPlane(upDir - windDir, upDir);
-	}
-
-	[Networked]
-	[NetworkedWeaved(0, 11)]
-	internal unsafe GliderHoldable.SyncedState Data
-	{
-		get
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GliderHoldable.Data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			return *(GliderHoldable.SyncedState*)(this.Ptr + 0);
-		}
-		set
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GliderHoldable.Data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			*(GliderHoldable.SyncedState*)(this.Ptr + 0) = value;
-		}
-	}
-
-	public override void ReadDataFusion()
-	{
-		int num = this.syncedState.riderId;
-		this.syncedState = this.Data;
-		if (num != this.syncedState.riderId)
-		{
-			this.positionLocalToVRRig = this.syncedState.position;
-			this.rotationLocalToVRRig = this.syncedState.rotation;
-		}
-	}
-
-	public override void WriteDataFusion()
-	{
-		this.Data = this.syncedState;
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		Player sender = info.Sender;
-		PunNetPlayer punNetPlayer = (PunNetPlayer)this.ownershipGuard.actualOwner;
-		if (sender != ((punNetPlayer != null) ? punNetPlayer.PlayerRef : null))
-		{
-			return;
-		}
-		int num = this.syncedState.riderId;
-		this.syncedState.riderId = (int)stream.ReceiveNext();
-		this.syncedState.tagged = (bool)stream.ReceiveNext();
-		this.syncedState.materialIndex = (byte)stream.ReceiveNext();
-		this.syncedState.audioLevel = (byte)stream.ReceiveNext();
-		Vector3 vector = (Vector3)stream.ReceiveNext();
-		ref this.syncedState.position.SetValueSafe(vector);
-		Quaternion quaternion = (Quaternion)stream.ReceiveNext();
-		ref this.syncedState.rotation.SetValueSafe(quaternion);
-		if (num != this.syncedState.riderId)
-		{
-			this.positionLocalToVRRig = this.syncedState.position;
-			this.rotationLocalToVRRig = this.syncedState.rotation;
-		}
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		object sender = info.Sender;
-		NetPlayer actualOwner = this.ownershipGuard.actualOwner;
-		if (!sender.Equals((actualOwner != null) ? actualOwner.GetPlayerRef() : null))
-		{
-			return;
-		}
-		stream.SendNext(this.syncedState.riderId);
-		stream.SendNext(this.syncedState.tagged);
-		stream.SendNext(this.syncedState.materialIndex);
-		stream.SendNext(this.syncedState.audioLevel);
-		stream.SendNext(this.syncedState.position);
-		stream.SendNext(this.syncedState.rotation);
-	}
-
-	private IEnumerator ReenableOwnershipRequest()
-	{
-		yield return new WaitForSeconds(3f);
-		this.pendingOwnershipRequest = false;
-		yield break;
-	}
-
-	public void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
-	{
-		if (toPlayer == NetworkSystem.Instance.LocalPlayer)
-		{
-			this.pendingOwnershipRequest = false;
-			if (!this.leftHold.active && !this.rightHold.active && (this.spawnPosition - base.transform.position).sqrMagnitude > 1f)
-			{
-				this.rb.isKinematic = false;
-				this.rb.WakeUp();
-				this.lastHeldTime = Time.time;
-			}
-		}
-	}
-
-	public bool OnOwnershipRequest(NetPlayer fromPlayer)
-	{
-		return !base.IsMine || !NetworkSystem.Instance.InRoom || (!this.leftHold.active && !this.rightHold.active);
-	}
-
-	public void OnMyOwnerLeft()
-	{
-	}
-
-	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)
-	{
-		return false;
-	}
-
-	public void OnMyCreatorLeft()
-	{
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.Data = this._Data;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._Data = this.Data;
+		public Material material;
 	}
 
 	[Header("Flight Settings")]
@@ -1250,7 +284,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 	private Material frozenLeafMaterial;
 
 	[SerializeField]
-	private GliderHoldable.CosmeticMaterialOverride[] cosmeticMaterialOverrides;
+	private CosmeticMaterialOverride[] cosmeticMaterialOverrides;
 
 	[Header("Network Syncing")]
 	[SerializeField]
@@ -1312,11 +346,11 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 
 	private float defaultMaxDistanceBeforeRespawn = 180f;
 
-	private GliderHoldable.HoldingHand leftHold = new GliderHoldable.HoldingHand();
+	private HoldingHand leftHold = new HoldingHand();
 
-	private GliderHoldable.HoldingHand rightHold = new GliderHoldable.HoldingHand();
+	private HoldingHand rightHold = new HoldingHand();
 
-	private GliderHoldable.SyncedState syncedState;
+	private SyncedState syncedState;
 
 	private Vector3 twoHandRotationOffsetAxis = Vector3.forward;
 
@@ -1350,7 +384,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 
 	private const float accelAveragingWindow = 0.1f;
 
-	private AverageVector3 accelerationAverage = new AverageVector3(0.1f);
+	private AverageVector3 accelerationAverage = new AverageVector3();
 
 	private float accelerationSmoothed;
 
@@ -1404,7 +438,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 
 	private bool holdingTwoGliders;
 
-	private GliderHoldable.GliderState gliderState;
+	private GliderState gliderState;
 
 	private float audioLevel;
 
@@ -1418,93 +452,1030 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 11)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private GliderHoldable.SyncedState _Data;
+	private SyncedState _Data;
 
-	private enum GliderState
+	private bool OutOfBounds
 	{
-		LocallyHeld,
-		LocallyDropped,
-		RemoteSyncing
+		get
+		{
+			if (maxDistanceRespawnOrigin != null)
+			{
+				return (maxDistanceRespawnOrigin.position - base.transform.position).sqrMagnitude > maxDistanceBeforeRespawn * maxDistanceBeforeRespawn;
+			}
+			return false;
+		}
 	}
 
-	private class HoldingHand
+	public override bool TwoHanded => true;
+
+	[Networked]
+	[NetworkedWeaved(0, 11)]
+	internal unsafe SyncedState Data
 	{
-		public void Activate(Transform handTransform, Transform gliderTransform, Vector3 worldGrabPoint)
+		get
 		{
-			this.active = true;
-			this.transform = handTransform.transform;
-			this.holdLocalPos = handTransform.InverseTransformPoint(worldGrabPoint);
-			this.handleLocalPos = gliderTransform.InverseTransformVector(gliderTransform.position - worldGrabPoint);
-			this.localHoldRotation = Quaternion.Inverse(handTransform.rotation) * gliderTransform.rotation;
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GliderHoldable.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(SyncedState*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
-
-		public void Deactivate()
+		set
 		{
-			this.active = false;
-			this.transform = null;
-			this.holdLocalPos = Vector3.zero;
-			this.handleLocalPos = Vector3.zero;
-			this.localHoldRotation = Quaternion.identity;
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GliderHoldable.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(SyncedState*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
 		}
-
-		public bool active;
-
-		public Transform transform;
-
-		public Vector3 holdLocalPos;
-
-		public Vector3 handleLocalPos;
-
-		public Quaternion localHoldRotation;
 	}
 
-	[NetworkStructWeaved(11)]
-	[StructLayout(LayoutKind.Explicit, Size = 44)]
-	internal struct SyncedState : INetworkStruct
+	protected override void Awake()
 	{
-		public void Init(Vector3 defaultPosition, Quaternion defaultRotation)
-		{
-			this.riderId = -1;
-			this.materialIndex = 0;
-			this.audioLevel = 0;
-			this.position = defaultPosition;
-			this.rotation = defaultRotation;
-		}
-
-		public SyncedState(int id = -1)
-		{
-			this.riderId = id;
-			this.materialIndex = 0;
-			this.audioLevel = 0;
-			this.tagged = default(NetworkBool);
-			this.position = default(Vector3);
-			this.rotation = default(Quaternion);
-		}
-
-		[FieldOffset(0)]
-		public int riderId;
-
-		[FieldOffset(4)]
-		public byte materialIndex;
-
-		[FieldOffset(8)]
-		public byte audioLevel;
-
-		[FieldOffset(12)]
-		public NetworkBool tagged;
-
-		[FieldOffset(16)]
-		public Vector3 position;
-
-		[FieldOffset(28)]
-		public Quaternion rotation;
+		base.Awake();
+		base.transform.parent = null;
+		defaultMaxDistanceBeforeRespawn = maxDistanceBeforeRespawn;
+		spawnPosition = (skyJungleSpawnPostion = base.transform.position);
+		spawnRotation = (skyJungleSpawnRotation = base.transform.rotation);
+		skyJungleRespawnOrigin = maxDistanceRespawnOrigin;
+		syncedState.Init(spawnPosition, spawnRotation);
+		rb = GetComponent<Rigidbody>();
+		yaw = base.transform.rotation.eulerAngles.y;
+		oneHandRotationRateExp = Mathf.Exp(oneHandHoldRotationRate);
+		twoHandRotationRateExp = Mathf.Exp(twoHandHoldRotationRate);
+		subtlePlayerPitchRateExp = Mathf.Exp(subtlePlayerPitchRate);
+		subtlePlayerRollRateExp = Mathf.Exp(subtlePlayerRollRate);
+		accelSmoothingFollowRateExp = Mathf.Exp(accelSmoothingFollowRate);
+		networkSyncFollowRateExp = Mathf.Exp(networkSyncFollowRate);
+		ownershipGuard.AddCallbackTarget(this);
+		calmAudio.volume = 0f;
+		activeAudio.volume = 0f;
+		whistlingAudio.volume = 0f;
 	}
 
-	[Serializable]
-	private struct CosmeticMaterialOverride
+	private void OnDestroy()
 	{
-		public string cosmeticName;
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		if (ownershipGuard != null)
+		{
+			ownershipGuard.RemoveCallbackTarget(this);
+		}
+	}
 
-		public Material material;
+	internal override void OnEnable()
+	{
+		NetworkBehaviourUtils.InternalOnEnable(this);
+		base.OnEnable();
+	}
+
+	internal override void OnDisable()
+	{
+		NetworkBehaviourUtils.InternalOnDisable(this);
+		Respawn();
+		base.OnDisable();
+	}
+
+	public void Respawn()
+	{
+		if ((!base.IsValid || !base.IsMine) && NetworkSystem.Instance.InRoom)
+		{
+			return;
+		}
+		if (EquipmentInteractor.instance != null)
+		{
+			if (EquipmentInteractor.instance.leftHandHeldEquipment == this)
+			{
+				OnRelease(null, EquipmentInteractor.instance.leftHand);
+			}
+			if (EquipmentInteractor.instance.rightHandHeldEquipment == this)
+			{
+				OnRelease(null, EquipmentInteractor.instance.rightHand);
+			}
+		}
+		rb.isKinematic = true;
+		base.transform.position = spawnPosition;
+		base.transform.rotation = spawnRotation;
+		lastHeldTime = -1f;
+		syncedState.Init(spawnPosition, spawnRotation);
+	}
+
+	public void CustomMapLoad(Transform placeholderTransform, float respawnDistance)
+	{
+		maxDistanceRespawnOrigin = placeholderTransform;
+		spawnPosition = placeholderTransform.position;
+		spawnRotation = placeholderTransform.rotation;
+		maxDistanceBeforeRespawn = respawnDistance;
+		Respawn();
+	}
+
+	public void CustomMapUnload()
+	{
+		maxDistanceRespawnOrigin = skyJungleRespawnOrigin;
+		spawnPosition = skyJungleSpawnPostion;
+		spawnRotation = skyJungleSpawnRotation;
+		maxDistanceBeforeRespawn = defaultMaxDistanceBeforeRespawn;
+		Respawn();
+	}
+
+	public override void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
+	{
+		if (!base.IsMine && NetworkSystem.Instance.InRoom && !pendingOwnershipRequest && syncedState.riderId == -1)
+		{
+			ownershipGuard.RequestOwnershipImmediately(delegate
+			{
+				pendingOwnershipRequest = false;
+			});
+			pendingOwnershipRequest = true;
+			if (reenableOwnershipRequestCoroutine != null)
+			{
+				StopCoroutine(reenableOwnershipRequestCoroutine);
+			}
+			reenableOwnershipRequestCoroutine = StartCoroutine(ReenableOwnershipRequest());
+		}
+	}
+
+	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		if (base.IsMine || !NetworkSystem.Instance.InRoom || pendingOwnershipRequest)
+		{
+			OnGrabAuthority(pointGrabbed, grabbingHand);
+		}
+		else if (NetworkSystem.Instance.InRoom && !base.IsMine && !pendingOwnershipRequest && syncedState.riderId == -1)
+		{
+			ownershipGuard.RequestOwnershipImmediately(delegate
+			{
+				pendingOwnershipRequest = false;
+			});
+			pendingOwnershipRequest = true;
+			if (reenableOwnershipRequestCoroutine != null)
+			{
+				StopCoroutine(reenableOwnershipRequestCoroutine);
+			}
+			reenableOwnershipRequestCoroutine = StartCoroutine(ReenableOwnershipRequest());
+			OnGrabAuthority(pointGrabbed, grabbingHand);
+		}
+	}
+
+	public void OnGrabAuthority(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		if (!base.IsMine && NetworkSystem.Instance.InRoom && !pendingOwnershipRequest)
+		{
+			return;
+		}
+		bool flag = grabbingHand == EquipmentInteractor.instance.leftHand;
+		if ((flag && !EquipmentInteractor.instance.isLeftGrabbing) || (!flag && !EquipmentInteractor.instance.isRightGrabbing))
+		{
+			return;
+		}
+		if (riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			riderId = NetworkSystem.Instance.LocalPlayer.ActorNumber;
+			cachedRig = getNewHolderRig(riderId);
+		}
+		EquipmentInteractor.instance.UpdateHandEquipment(this, flag);
+		GorillaTagger.Instance.StartVibration(flag, GorillaTagger.Instance.tapHapticStrength / 8f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
+		Vector3 worldGrabPoint = ClosestPointInHandle(grabbingHand.transform.position, pointGrabbed);
+		if (flag)
+		{
+			leftHold.Activate(grabbingHand.transform, base.transform, worldGrabPoint);
+		}
+		else
+		{
+			rightHold.Activate(grabbingHand.transform, base.transform, worldGrabPoint);
+		}
+		if (leftHold.active && rightHold.active)
+		{
+			Vector3 handsVector = GetHandsVector(leftHold.transform.position, rightHold.transform.position, GTPlayer.Instance.headCollider.transform.position, flipBasedOnFacingDir: true);
+			twoHandRotationOffsetAxis = Vector3.Cross(handsVector, base.transform.right).normalized;
+			if ((double)twoHandRotationOffsetAxis.sqrMagnitude < 0.001)
+			{
+				twoHandRotationOffsetAxis = base.transform.right;
+				twoHandRotationOffsetAngle = 0f;
+			}
+			else
+			{
+				twoHandRotationOffsetAngle = Vector3.SignedAngle(handsVector, base.transform.right, twoHandRotationOffsetAxis);
+			}
+		}
+		rb.isKinematic = true;
+		rb.useGravity = false;
+		ridersMaterialOverideIndex = 0;
+		if (cosmeticMaterialOverrides.Length != 0)
+		{
+			VRRig offlineVRRig = cachedRig;
+			if (offlineVRRig == null)
+			{
+				offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+			}
+			if (offlineVRRig != null)
+			{
+				for (int i = 0; i < cosmeticMaterialOverrides.Length; i++)
+				{
+					if (cosmeticMaterialOverrides[i].cosmeticName != null && offlineVRRig.cosmeticSet != null && offlineVRRig.cosmeticSet.HasItem(cosmeticMaterialOverrides[i].cosmeticName))
+					{
+						ridersMaterialOverideIndex = i + 1;
+						break;
+					}
+				}
+			}
+		}
+		infectedState = false;
+		if (GorillaGameManager.instance as GorillaTagManager != null)
+		{
+			infectedState = syncedState.tagged;
+		}
+		if (infectedState)
+		{
+			leafMesh.material = GetInfectedMaterial();
+		}
+		else
+		{
+			leafMesh.material = GetMaterialFromIndex((byte)ridersMaterialOverideIndex);
+		}
+		if (EquipmentInteractor.instance.rightHandHeldEquipment != null && EquipmentInteractor.instance.rightHandHeldEquipment.GetType() == typeof(GliderHoldable) && EquipmentInteractor.instance.leftHandHeldEquipment != null && EquipmentInteractor.instance.leftHandHeldEquipment.GetType() == typeof(GliderHoldable) && EquipmentInteractor.instance.leftHandHeldEquipment != EquipmentInteractor.instance.rightHandHeldEquipment)
+		{
+			holdingTwoGliders = true;
+		}
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		holdingTwoGliders = false;
+		bool flag = releasingHand == EquipmentInteractor.instance.leftHand;
+		if (leftHold.active && rightHold.active)
+		{
+			if (flag)
+			{
+				rightHold.Activate(rightHold.transform, base.transform, ClosestPointInHandle(rightHold.transform.position, handle));
+			}
+			else
+			{
+				leftHold.Activate(leftHold.transform, base.transform, ClosestPointInHandle(leftHold.transform.position, handle));
+			}
+		}
+		Vector3 averageVelocity = GTPlayer.Instance.GetHandVelocityTracker(flag).GetAverageVelocity(worldSpace: true);
+		(flag ? leftHold : rightHold).Deactivate();
+		EquipmentInteractor.instance.UpdateHandEquipment(null, flag);
+		if (!leftHold.active && !rightHold.active)
+		{
+			gliderState = GliderState.LocallyDropped;
+			audioLevel = 0f;
+			riderId = -1;
+			cachedRig = null;
+			subtlePlayerPitch = 0f;
+			subtlePlayerRoll = 0f;
+			leftHoldPositionLocal = null;
+			rightHoldPositionLocal = null;
+			ridersMaterialOverideIndex = 0;
+			if (base.IsMine || !NetworkSystem.Instance.InRoom)
+			{
+				rb.isKinematic = false;
+				rb.useGravity = true;
+				rb.linearVelocity = averageVelocity;
+				syncedState.riderId = -1;
+				syncedState.tagged = false;
+				syncedState.materialIndex = 0;
+				syncedState.position = base.transform.position;
+				syncedState.rotation = base.transform.rotation;
+				syncedState.audioLevel = 0;
+			}
+			leafMesh.material = baseLeafMaterial;
+		}
+		return true;
+	}
+
+	public override void DropItemCleanup()
+	{
+	}
+
+	public void FixedUpdate()
+	{
+		if (!base.IsMine && NetworkSystem.Instance.InRoom && !pendingOwnershipRequest)
+		{
+			return;
+		}
+		GTPlayer instance = GTPlayer.Instance;
+		if (holdingTwoGliders)
+		{
+			instance.AddForce(Physics.gravity, ForceMode.Acceleration);
+		}
+		else if (leftHold.active || rightHold.active)
+		{
+			float fixedDeltaTime = Time.fixedDeltaTime;
+			previousVelocity = currentVelocity;
+			currentVelocity = instance.RigidbodyVelocity;
+			float magnitude = currentVelocity.magnitude;
+			accelerationAverage.AddSample((currentVelocity - previousVelocity) / Time.fixedDeltaTime, Time.fixedTime);
+			float rollAngle180Wrapping = GetRollAngle180Wrapping();
+			float angle = liftIncreaseVsRoll.Evaluate(Mathf.Clamp01(Mathf.Abs(rollAngle180Wrapping / 180f))) * liftIncreaseVsRollMaxAngle;
+			Vector3 vector = Vector3.RotateTowards(currentVelocity, Quaternion.AngleAxis(angle, -base.transform.right) * base.transform.forward * magnitude, pitchVelocityFollowRateAngle * (MathF.PI / 180f) * fixedDeltaTime, pitchVelocityFollowRateMagnitude * fixedDeltaTime);
+			Vector3 vector2 = vector - currentVelocity;
+			float num = NormalizeAngle180(Vector3.SignedAngle(Vector3.ProjectOnPlane(currentVelocity, base.transform.right), base.transform.forward, base.transform.right));
+			if (num > 90f)
+			{
+				num = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num));
+			}
+			else if (num < -90f)
+			{
+				num = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num));
+			}
+			float time = Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, num));
+			Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, pitch));
+			float num2 = liftVsAttack.Evaluate(time);
+			instance.AddForce(vector2 * num2, ForceMode.VelocityChange);
+			float num3 = dragVsAttack.Evaluate(time);
+			float num4 = ((syncedState.riderId != -1 && syncedState.materialIndex == 1) ? (dragVsSpeedMaxSpeed + infectedSpeedIncrease) : dragVsSpeedMaxSpeed);
+			float num5 = dragVsSpeed.Evaluate(Mathf.Clamp01(magnitude / num4));
+			float num6 = Mathf.Clamp01(num3 * attackDragFactor + num5 * dragVsSpeedDragFactor);
+			instance.AddForce(-currentVelocity * num6, ForceMode.Acceleration);
+			if (pitch > 0f && currentVelocity.y > 0f && (currentVelocity - previousVelocity).y > 0f)
+			{
+				float a = Mathf.InverseLerp(0f, pullUpLiftActivationVelocity, currentVelocity.y);
+				float b = Mathf.InverseLerp(0f, pullUpLiftActivationAcceleration, (currentVelocity - previousVelocity).y / fixedDeltaTime);
+				float num7 = Mathf.Min(a, b);
+				instance.AddForce(-Physics.gravity * pullUpLiftBonus * num7, ForceMode.Acceleration);
+			}
+			if (Vector3.Dot(vector, Physics.gravity) > 0f)
+			{
+				instance.AddForce(-Physics.gravity * gravityCompensation, ForceMode.Acceleration);
+			}
+		}
+		else
+		{
+			Vector3 vector3 = WindResistanceForceOffset(base.transform.up, Vector3.down);
+			Vector3 position = base.transform.position - vector3 * gravityUprightTorqueMultiplier;
+			rb.AddForceAtPosition((0f - fallingGravityReduction) * Physics.gravity * rb.mass, position, ForceMode.Force);
+		}
+	}
+
+	public void LateUpdate()
+	{
+		float deltaTime = Time.deltaTime;
+		if (base.IsMine || !NetworkSystem.Instance.InRoom || pendingOwnershipRequest)
+		{
+			AuthorityUpdate(deltaTime);
+		}
+		else
+		{
+			RemoteSyncUpdate(deltaTime);
+		}
+	}
+
+	private void AuthorityUpdate(float dt)
+	{
+		if (!leftHold.active && !rightHold.active)
+		{
+			AuthorityUpdateUnheld(dt);
+		}
+		else if (leftHold.active || rightHold.active)
+		{
+			AuthorityUpdateHeld(dt);
+		}
+		syncedState.audioLevel = (byte)Mathf.FloorToInt(255f * audioLevel);
+	}
+
+	private void AuthorityUpdateHeld(float dt)
+	{
+		if (gliderState != GliderState.LocallyHeld)
+		{
+			gliderState = GliderState.LocallyHeld;
+		}
+		rb.isKinematic = true;
+		lastHeldTime = Time.time;
+		if (leftHold.active)
+		{
+			leftHold.holdLocalPos = Vector3.Lerp(Vector3.zero, leftHold.holdLocalPos, Mathf.Exp(-5f * dt));
+		}
+		if (rightHold.active)
+		{
+			rightHold.holdLocalPos = Vector3.Lerp(Vector3.zero, rightHold.holdLocalPos, Mathf.Exp(-5f * dt));
+		}
+		Vector3 vector = Vector3.zero;
+		if (leftHold.active && rightHold.active)
+		{
+			vector = (leftHold.transform.TransformPoint(leftHold.holdLocalPos) + rightHold.transform.TransformPoint(rightHold.holdLocalPos)) * 0.5f;
+		}
+		else if (leftHold.active)
+		{
+			vector = leftHold.transform.TransformPoint(leftHold.holdLocalPos);
+		}
+		else if (rightHold.active)
+		{
+			vector = rightHold.transform.TransformPoint(rightHold.holdLocalPos);
+		}
+		UpdateGliderPosition();
+		float magnitude = currentVelocity.magnitude;
+		if (setMaxHandSlipDuringFlight && magnitude > maxSlipOverrideSpeedThreshold)
+		{
+			if (leftHold.active)
+			{
+				GTPlayer.Instance.SetLeftMaximumSlipThisFrame();
+			}
+			if (rightHold.active)
+			{
+				GTPlayer.Instance.SetRightMaximumSlipThisFrame();
+			}
+		}
+		bool flag = false;
+		GorillaTagManager gorillaTagManager = GorillaGameManager.instance as GorillaTagManager;
+		if (gorillaTagManager != null)
+		{
+			flag = gorillaTagManager.IsInfected(NetworkSystem.Instance.LocalPlayer);
+		}
+		bool num = flag != infectedState;
+		infectedState = flag;
+		if (num)
+		{
+			if (infectedState)
+			{
+				leafMesh.material = GetInfectedMaterial();
+			}
+			else
+			{
+				leafMesh.material = GetMaterialFromIndex(syncedState.materialIndex);
+			}
+		}
+		Vector3 average = accelerationAverage.GetAverage();
+		accelerationSmoothed = Mathf.Lerp(average.magnitude, accelerationSmoothed, Mathf.Exp((0f - accelSmoothingFollowRateExp) * dt));
+		float num2 = Mathf.InverseLerp(hapticMaxSpeedInputRange.x, hapticMaxSpeedInputRange.y, magnitude);
+		float num3 = Mathf.InverseLerp(hapticAccelInputRange.x, hapticAccelInputRange.y, accelerationSmoothed);
+		float num4 = Mathf.InverseLerp(hapticSpeedInputRange.x, hapticSpeedInputRange.y, magnitude);
+		UpdateAudioSource(calmAudio, num2 * audioVolumeMultiplier);
+		UpdateAudioSource(activeAudio, num3 * num2 * audioVolumeMultiplier);
+		if (infectedState)
+		{
+			UpdateAudioSource(whistlingAudio, Mathf.InverseLerp(whistlingAudioSpeedInputRange.x, whistlingAudioSpeedInputRange.y, magnitude) * num3 * num2 * audioVolumeMultiplier);
+		}
+		else
+		{
+			UpdateAudioSource(whistlingAudio, 0f);
+		}
+		float amplitude = Mathf.Max(num3 * hapticAccelOutputMax * num2, num4 * hapticSpeedOutputMax);
+		if (rightHold.active)
+		{
+			GorillaTagger.Instance.DoVibration(XRNode.RightHand, amplitude, dt);
+		}
+		if (leftHold.active)
+		{
+			GorillaTagger.Instance.DoVibration(XRNode.LeftHand, amplitude, dt);
+		}
+		Vector3 origin = handle.transform.position + handle.transform.rotation * new Vector3(0f, 0f, 1f);
+		if (Time.frameCount % 2 == 0)
+		{
+			Vector3 direction = handle.transform.rotation * new Vector3(-0.707f, 0f, 0.707f);
+			if (leftWhooshStartTime < Time.time - whooshSoundRetriggerThreshold && magnitude > whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction), out var hitInfo, whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+			{
+				leftWhooshStartTime = Time.time;
+				leftWhooshHitPoint = hitInfo.point;
+				leftWhooshAudio.GTStop();
+				leftWhooshAudio.volume = Mathf.Lerp(whooshVolumeOutput.x, whooshVolumeOutput.y, Mathf.InverseLerp(whooshSpeedThresholdInput.x, whooshSpeedThresholdInput.y, magnitude));
+				leftWhooshAudio.GTPlay();
+			}
+		}
+		else
+		{
+			Vector3 direction2 = handle.transform.rotation * new Vector3(0.707f, 0f, 0.707f);
+			if (rightWhooshStartTime < Time.time - whooshSoundRetriggerThreshold && magnitude > whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction2), out var hitInfo2, whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+			{
+				rightWhooshStartTime = Time.time;
+				rightWhooshHitPoint = hitInfo2.point;
+				rightWhooshAudio.GTStop();
+				rightWhooshAudio.volume = Mathf.Lerp(whooshVolumeOutput.x, whooshVolumeOutput.y, Mathf.InverseLerp(whooshSpeedThresholdInput.x, whooshSpeedThresholdInput.y, magnitude));
+				rightWhooshAudio.GTPlay();
+			}
+		}
+		Vector3 headCenterPosition = GTPlayer.Instance.HeadCenterPosition;
+		if (leftWhooshStartTime > Time.time - whooshSoundDuration)
+		{
+			leftWhooshAudio.transform.position = leftWhooshHitPoint;
+		}
+		else
+		{
+			leftWhooshAudio.transform.localPosition = new Vector3(0f - whooshAudioPositionOffset.x, whooshAudioPositionOffset.y, whooshAudioPositionOffset.z);
+		}
+		if (rightWhooshStartTime > Time.time - whooshSoundDuration)
+		{
+			rightWhooshAudio.transform.position = rightWhooshHitPoint;
+		}
+		else
+		{
+			rightWhooshAudio.transform.localPosition = new Vector3(whooshAudioPositionOffset.x, whooshAudioPositionOffset.y, whooshAudioPositionOffset.z);
+		}
+		if (extendTagRangeInFlight)
+		{
+			float tagRadiusOverrideThisFrame = Mathf.Lerp(tagRangeOutput.x, tagRangeOutput.y, Mathf.InverseLerp(tagRangeSpeedInput.x, tagRangeSpeedInput.y, magnitude));
+			GorillaTagger.Instance.SetTagRadiusOverrideThisFrame(tagRadiusOverrideThisFrame);
+			if (debugDrawTagRange)
+			{
+				GorillaTagger.Instance.DebugDrawTagCasts(Color.yellow);
+			}
+		}
+		Vector3 normalized = Vector3.ProjectOnPlane(base.transform.right, Vector3.up).normalized;
+		Vector3 normalized2 = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
+		float num5 = 0f - Vector3.Dot(vector - handle.transform.position, normalized2);
+		Vector3 vector2 = handle.transform.position - normalized2 * (riderPosRange.y * 0.5f + riderPosRangeOffset + num5);
+		float num6 = Vector3.Dot(headCenterPosition - vector2, normalized);
+		float num7 = Vector3.Dot(headCenterPosition - vector2, normalized2);
+		num6 /= riderPosRange.x * 0.5f;
+		num7 /= riderPosRange.y * 0.5f;
+		riderPosition.x = Mathf.Sign(num6) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(riderPosRangeNormalizedDeadzone.x, 1f, Mathf.Abs(num6)));
+		riderPosition.y = Mathf.Sign(num7) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(riderPosRangeNormalizedDeadzone.y, 1f, Mathf.Abs(num7)));
+		Vector3 vector3;
+		Vector3 vector4;
+		if (leftHold.active && rightHold.active)
+		{
+			vector3 = leftHold.transform.position;
+			leftHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector3);
+			vector4 = rightHold.transform.position;
+			rightHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector4);
+		}
+		else if (leftHold.active)
+		{
+			vector3 = leftHold.transform.position;
+			leftHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector3);
+			Vector3 vector5 = vector3 + leftHold.transform.forward * oneHandSimulatedHoldOffset.x;
+			if (rightHoldPositionLocal.HasValue)
+			{
+				rightHoldPositionLocal = Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector5), rightHoldPositionLocal.Value, Mathf.Exp(-5f * dt));
+				vector4 = GTPlayer.Instance.transform.TransformPoint(rightHoldPositionLocal.Value);
+			}
+			else
+			{
+				vector4 = vector5;
+				rightHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector4);
+			}
+		}
+		else
+		{
+			vector4 = rightHold.transform.position;
+			rightHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector4);
+			Vector3 vector6 = vector4 + rightHold.transform.forward * oneHandSimulatedHoldOffset.x;
+			if (leftHoldPositionLocal.HasValue)
+			{
+				leftHoldPositionLocal = Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector6), leftHoldPositionLocal.Value, Mathf.Exp(-5f * dt));
+				vector3 = GTPlayer.Instance.transform.TransformPoint(leftHoldPositionLocal.Value);
+			}
+			else
+			{
+				vector3 = vector6;
+				leftHoldPositionLocal = GTPlayer.Instance.transform.InverseTransformPoint(vector3);
+			}
+		}
+		GetHandsOrientationVectors(vector3, vector4, GTPlayer.Instance.headCollider.transform, flipBasedOnFacingDir: false, out var handsVector, out var handsUpVector);
+		float num8 = riderPosition.y * riderPosDirectPitchMax;
+		if (!leftHold.active || !rightHold.active)
+		{
+			num8 *= oneHandPitchMultiplier;
+		}
+		Spring.CriticalSpringDamperExact(ref pitch, ref pitchVel, num8, 0f, pitchHalfLife, dt);
+		pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
+		Quaternion quaternion = Quaternion.AngleAxis(pitch, Vector3.right);
+		twoHandRotationOffsetAngle = Mathf.Lerp(0f, twoHandRotationOffsetAngle, Mathf.Exp(-8f * dt));
+		Vector3 upwards = (twoHandGliderInversionOnYawInsteadOfRoll ? handsUpVector : Vector3.up);
+		Quaternion quaternion2 = Quaternion.AngleAxis(twoHandRotationOffsetAngle, twoHandRotationOffsetAxis) * Quaternion.LookRotation(handsVector, upwards) * Quaternion.AngleAxis(-90f, Vector3.up);
+		float num9 = ((leftHold.active && rightHold.active) ? twoHandRotationRateExp : oneHandRotationRateExp);
+		base.transform.rotation = Quaternion.Slerp(quaternion2 * quaternion, base.transform.rotation, Mathf.Exp((0f - num9) * dt));
+		if (subtlePlayerPitchActive || subtlePlayerRollActive)
+		{
+			float a = Mathf.InverseLerp(subtlePlayerRotationSpeedRampMinMax.x, subtlePlayerRotationSpeedRampMinMax.y, currentVelocity.magnitude);
+			Quaternion quaternion3 = Quaternion.identity;
+			if (subtlePlayerRollActive)
+			{
+				float num10 = GetRollAngle180Wrapping();
+				if (num10 > 90f)
+				{
+					num10 = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num10));
+				}
+				else if (num10 < -90f)
+				{
+					num10 = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num10));
+				}
+				Vector3 normalized3 = new Vector3(currentVelocity.x, 0f, currentVelocity.z).normalized;
+				Vector3 vector7 = new Vector3(average.x, 0f, average.z);
+				float num11 = Vector3.Dot(vector7 - Vector3.Dot(vector7, normalized3) * normalized3, Vector3.Cross(normalized3, Vector3.up));
+				turnAccelerationSmoothed = Mathf.Lerp(num11, turnAccelerationSmoothed, Mathf.Exp((0f - accelSmoothingFollowRateExp) * dt));
+				float b = 0f;
+				if (num11 * num10 > 0f)
+				{
+					b = Mathf.InverseLerp(subtlePlayerRollAccelMinMax.x, subtlePlayerRollAccelMinMax.y, Mathf.Abs(turnAccelerationSmoothed));
+				}
+				float a2 = num10 * subtlePlayerRollFactor * Mathf.Min(a, b);
+				subtlePlayerRoll = Mathf.Lerp(a2, subtlePlayerRoll, Mathf.Exp((0f - subtlePlayerRollRateExp) * dt));
+				quaternion3 = Quaternion.AngleAxis(subtlePlayerRoll, base.transform.forward);
+			}
+			Quaternion quaternion4 = Quaternion.identity;
+			if (subtlePlayerPitchActive)
+			{
+				float a3 = pitch * subtlePlayerPitchFactor * Mathf.Min(a, 1f);
+				subtlePlayerPitch = Mathf.Lerp(a3, subtlePlayerPitch, Mathf.Exp((0f - subtlePlayerPitchRateExp) * dt));
+				quaternion4 = Quaternion.AngleAxis(subtlePlayerPitch, -base.transform.right);
+			}
+			GTPlayerTransform.ApplyRotationOverride(quaternion4 * quaternion3, Time.frameCount);
+		}
+		UpdateGliderPosition();
+		if (syncedState.riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			riderId = (syncedState.riderId = NetworkSystem.Instance.LocalPlayer.ActorNumber);
+			cachedRig = getNewHolderRig(riderId);
+		}
+		syncedState.tagged = infectedState;
+		syncedState.materialIndex = (byte)ridersMaterialOverideIndex;
+		if (cachedRig != null)
+		{
+			syncedState.position = cachedRig.transform.InverseTransformPoint(base.transform.position);
+			syncedState.rotation = Quaternion.Inverse(cachedRig.transform.rotation) * base.transform.rotation;
+		}
+		else
+		{
+			Debug.LogError("Glider failed to get a reference to the local player's VRRig while the player was flying", this);
+		}
+		audioLevel = num3 * num2;
+		if (OutOfBounds)
+		{
+			Respawn();
+		}
+		if (leftHold.active && EquipmentInteractor.instance.leftHandHeldEquipment != this)
+		{
+			OnRelease(null, EquipmentInteractor.instance.leftHand);
+		}
+		if (rightHold.active && EquipmentInteractor.instance.rightHandHeldEquipment != this)
+		{
+			OnRelease(null, EquipmentInteractor.instance.rightHand);
+		}
+	}
+
+	private void AuthorityUpdateUnheld(float dt)
+	{
+		syncedState.position = base.transform.position;
+		syncedState.rotation = base.transform.rotation;
+		if (gliderState != GliderState.LocallyDropped)
+		{
+			gliderState = GliderState.LocallyDropped;
+			syncedState.riderId = -1;
+			syncedState.materialIndex = 0;
+			syncedState.tagged = false;
+			leafMesh.material = baseLeafMaterial;
+		}
+		if (audioLevel * audioVolumeMultiplier > 0.001f)
+		{
+			audioLevel = Mathf.Lerp(0f, audioLevel, Mathf.Exp(-2f * dt));
+			UpdateAudioSource(calmAudio, audioLevel * audioVolumeMultiplier);
+			UpdateAudioSource(activeAudio, audioLevel * audioVolumeMultiplier);
+			UpdateAudioSource(whistlingAudio, audioLevel * audioVolumeMultiplier);
+		}
+		if (OutOfBounds || (lastHeldTime > 0f && lastHeldTime < Time.time - maxDroppedTimeToRespawn))
+		{
+			Respawn();
+		}
+	}
+
+	private void RemoteSyncUpdate(float dt)
+	{
+		rb.isKinematic = true;
+		int num = syncedState.riderId;
+		bool flag = riderId != num;
+		if (flag)
+		{
+			riderId = num;
+			cachedRig = getNewHolderRig(riderId);
+		}
+		if (riderId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			cachedRig = null;
+			syncedState.riderId = -1;
+			syncedState.materialIndex = 0;
+			syncedState.audioLevel = 0;
+		}
+		if (syncedState.riderId == -1)
+		{
+			base.transform.position = Vector3.Lerp(syncedState.position, base.transform.position, Mathf.Exp((0f - networkSyncFollowRateExp) * dt));
+			base.transform.rotation = Quaternion.Slerp(syncedState.rotation, base.transform.rotation, Mathf.Exp((0f - networkSyncFollowRateExp) * dt));
+		}
+		else if (cachedRig != null)
+		{
+			positionLocalToVRRig = Vector3.Lerp(syncedState.position, positionLocalToVRRig, Mathf.Exp((0f - networkSyncFollowRateExp) * dt));
+			rotationLocalToVRRig = Quaternion.Slerp(syncedState.rotation, rotationLocalToVRRig, Mathf.Exp((0f - networkSyncFollowRateExp) * dt));
+			base.transform.position = cachedRig.transform.TransformPoint(positionLocalToVRRig);
+			base.transform.rotation = cachedRig.transform.rotation * rotationLocalToVRRig;
+		}
+		bool flag2 = false;
+		if (GorillaGameManager.instance as GorillaTagManager != null)
+		{
+			flag2 = syncedState.tagged;
+		}
+		bool num2 = flag2 != infectedState;
+		infectedState = flag2;
+		if (num2 || flag)
+		{
+			if (infectedState)
+			{
+				leafMesh.material = GetInfectedMaterial();
+			}
+			else
+			{
+				leafMesh.material = GetMaterialFromIndex(syncedState.materialIndex);
+			}
+		}
+		float num3 = Mathf.Clamp01((float)(int)syncedState.audioLevel / 255f);
+		if (audioLevel != num3)
+		{
+			audioLevel = num3;
+			if (syncedState.riderId != -1 && (bool)syncedState.tagged)
+			{
+				UpdateAudioSource(calmAudio, audioLevel * infectedAudioVolumeMultiplier);
+				UpdateAudioSource(activeAudio, audioLevel * infectedAudioVolumeMultiplier);
+				UpdateAudioSource(whistlingAudio, audioLevel * infectedAudioVolumeMultiplier);
+			}
+			else
+			{
+				UpdateAudioSource(calmAudio, audioLevel * audioVolumeMultiplier);
+				UpdateAudioSource(activeAudio, audioLevel * audioVolumeMultiplier);
+				UpdateAudioSource(whistlingAudio, 0f);
+			}
+		}
+	}
+
+	private VRRig getNewHolderRig(int riderId)
+	{
+		if (riderId >= 0)
+		{
+			NetPlayer netPlayer = null;
+			netPlayer = ((riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber) ? NetworkSystem.Instance.GetPlayer(riderId) : NetworkSystem.Instance.LocalPlayer);
+			if (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out var playerRig))
+			{
+				return playerRig.Rig;
+			}
+		}
+		return null;
+	}
+
+	private Vector3 ClosestPointInHandle(Vector3 startingPoint, InteractionPoint interactionPoint)
+	{
+		CapsuleCollider component = interactionPoint.GetComponent<CapsuleCollider>();
+		Vector3 vector = startingPoint;
+		if (component != null)
+		{
+			Vector3 vector2 = ((component.direction == 0) ? Vector3.right : ((component.direction == 1) ? Vector3.up : Vector3.forward));
+			Vector3 vector3 = component.transform.rotation * vector2;
+			Vector3 vector4 = component.transform.position + component.transform.rotation * component.center;
+			float num = Mathf.Clamp(Vector3.Dot(vector - vector4, vector3), (0f - component.height) * 0.5f, component.height * 0.5f);
+			vector = vector4 + vector3 * num;
+		}
+		return vector;
+	}
+
+	private void UpdateGliderPosition()
+	{
+		if (leftHold.active && rightHold.active)
+		{
+			Vector3 vector = leftHold.transform.TransformPoint(leftHold.holdLocalPos) + base.transform.TransformVector(leftHold.handleLocalPos);
+			Vector3 vector2 = rightHold.transform.TransformPoint(rightHold.holdLocalPos) + base.transform.TransformVector(rightHold.handleLocalPos);
+			base.transform.position = (vector + vector2) * 0.5f;
+		}
+		else if (leftHold.active)
+		{
+			base.transform.position = leftHold.transform.TransformPoint(leftHold.holdLocalPos) + base.transform.TransformVector(leftHold.handleLocalPos);
+		}
+		else if (rightHold.active)
+		{
+			base.transform.position = rightHold.transform.TransformPoint(rightHold.holdLocalPos) + base.transform.TransformVector(rightHold.handleLocalPos);
+		}
+	}
+
+	private Vector3 GetHandsVector(Vector3 leftHandPos, Vector3 rightHandPos, Vector3 headPos, bool flipBasedOnFacingDir)
+	{
+		Vector3 vector = rightHandPos - leftHandPos;
+		Vector3 rhs = (rightHandPos + leftHandPos) * 0.5f - headPos;
+		Vector3 normalized = Vector3.Cross(Vector3.up, rhs).normalized;
+		if (flipBasedOnFacingDir && Vector3.Dot(vector, normalized) < 0f)
+		{
+			vector = -vector;
+		}
+		return vector;
+	}
+
+	private void GetHandsOrientationVectors(Vector3 leftHandPos, Vector3 rightHandPos, Transform head, bool flipBasedOnFacingDir, out Vector3 handsVector, out Vector3 handsUpVector)
+	{
+		handsVector = rightHandPos - leftHandPos;
+		float magnitude = handsVector.magnitude;
+		handsVector /= Mathf.Max(magnitude, 0.001f);
+		Vector3 position = head.position;
+		float num = 1f;
+		Vector3 planeNormal = ((Vector3.Dot(head.right, handsVector) < 0f) ? handsVector : (-handsVector));
+		Vector3 normalized = Vector3.ProjectOnPlane(-head.forward, planeNormal).normalized;
+		Vector3 vector = normalized * num + position;
+		Vector3 vector2 = (leftHandPos + rightHandPos) * 0.5f;
+		Vector3 vector3 = Vector3.ProjectOnPlane(vector2 - head.position, Vector3.up);
+		float magnitude2 = vector3.magnitude;
+		vector3 /= Mathf.Max(magnitude2, 0.001f);
+		Vector3 normalized2 = Vector3.ProjectOnPlane(-base.transform.forward, Vector3.up).normalized;
+		Vector3 vector4 = -vector3 * num + position;
+		float num2 = Vector3.Dot(normalized2, -vector3);
+		float num3 = Vector3.Dot(normalized2, normalized);
+		if (Vector3.Dot(base.transform.up, Vector3.up) < 0f)
+		{
+			num2 = Mathf.Abs(num2);
+			num3 = Mathf.Abs(num3);
+		}
+		num2 = Mathf.Max(num2, 0f);
+		num3 = Mathf.Max(num3, 0f);
+		Vector3 vector5 = (vector4 * num2 + vector * num3) / Mathf.Max(num2 + num3, 0.001f);
+		Vector3 vector6 = vector2 - vector5;
+		Vector3 normalized3 = Vector3.Cross(Vector3.up, vector6).normalized;
+		if (flipBasedOnFacingDir && Vector3.Dot(handsVector, normalized3) < 0f)
+		{
+			handsVector = -handsVector;
+		}
+		handsUpVector = Vector3.Cross(Vector3.ProjectOnPlane(vector6, Vector3.up), handsVector).normalized;
+	}
+
+	private Material GetMaterialFromIndex(byte materialIndex)
+	{
+		if (materialIndex < 1 || materialIndex > cosmeticMaterialOverrides.Length)
+		{
+			return baseLeafMaterial;
+		}
+		return cosmeticMaterialOverrides[materialIndex - 1].material;
+	}
+
+	private float GetRollAngle180Wrapping()
+	{
+		Vector3 normalized = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
+		float angle = Vector3.SignedAngle(Vector3.Cross(Vector3.up, normalized).normalized, base.transform.right, base.transform.forward);
+		return NormalizeAngle180(angle);
+	}
+
+	private float SignedAngleInPlane(Vector3 from, Vector3 to, Vector3 normal)
+	{
+		from = Vector3.ProjectOnPlane(from, normal);
+		to = Vector3.ProjectOnPlane(to, normal);
+		return Vector3.SignedAngle(from, to, normal);
+	}
+
+	private float NormalizeAngle180(float angle)
+	{
+		angle = (angle + 180f) % 360f;
+		if (angle < 0f)
+		{
+			angle += 360f;
+		}
+		return angle - 180f;
+	}
+
+	private void UpdateAudioSource(AudioSource source, float level)
+	{
+		source.volume = level;
+		if (!source.isPlaying && level > 0.01f)
+		{
+			source.GTPlay();
+		}
+		else if (source.isPlaying && level < 0.01f && syncedState.riderId == -1)
+		{
+			source.GTStop();
+		}
+	}
+
+	private Material GetInfectedMaterial()
+	{
+		if (GorillaGameManager.instance is GorillaFreezeTagManager)
+		{
+			return frozenLeafMaterial;
+		}
+		return infectedLeafMaterial;
+	}
+
+	public void OnTriggerStay(Collider other)
+	{
+		GliderWindVolume component = other.GetComponent<GliderWindVolume>();
+		if (!(component == null) && (base.IsMine || !NetworkSystem.Instance.InRoom || pendingOwnershipRequest) && Time.frameCount != windVolumeForceAppliedFrame)
+		{
+			if (leftHold.active || rightHold.active)
+			{
+				Vector3 accelFromVelocity = component.GetAccelFromVelocity(GTPlayer.Instance.RigidbodyVelocity);
+				GTPlayer.Instance.AddForce(accelFromVelocity, ForceMode.Acceleration);
+				windVolumeForceAppliedFrame = Time.frameCount;
+			}
+			else
+			{
+				Vector3 accelFromVelocity2 = component.GetAccelFromVelocity(rb.linearVelocity);
+				Vector3 vector = WindResistanceForceOffset(base.transform.up, component.WindDirection);
+				Vector3 position = base.transform.position + vector * windUprightTorqueMultiplier;
+				rb.AddForceAtPosition(accelFromVelocity2 * rb.mass, position, ForceMode.Force);
+				windVolumeForceAppliedFrame = Time.frameCount;
+			}
+		}
+	}
+
+	private Vector3 WindResistanceForceOffset(Vector3 upDir, Vector3 windDir)
+	{
+		if (Vector3.Dot(upDir, windDir) < 0f)
+		{
+			upDir *= -1f;
+		}
+		return Vector3.ProjectOnPlane(upDir - windDir, upDir);
+	}
+
+	public override void ReadDataFusion()
+	{
+		int num = syncedState.riderId;
+		syncedState = Data;
+		if (num != syncedState.riderId)
+		{
+			positionLocalToVRRig = syncedState.position;
+			rotationLocalToVRRig = syncedState.rotation;
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		Data = syncedState;
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == ((PunNetPlayer)ownershipGuard.actualOwner)?.PlayerRef)
+		{
+			int num = syncedState.riderId;
+			syncedState.riderId = (int)stream.ReceiveNext();
+			syncedState.tagged = (bool)stream.ReceiveNext();
+			syncedState.materialIndex = (byte)stream.ReceiveNext();
+			syncedState.audioLevel = (byte)stream.ReceiveNext();
+			syncedState.position.SetValueSafe((Vector3)stream.ReceiveNext());
+			syncedState.rotation.SetValueSafe((Quaternion)stream.ReceiveNext());
+			if (num != syncedState.riderId)
+			{
+				positionLocalToVRRig = syncedState.position;
+				rotationLocalToVRRig = syncedState.rotation;
+			}
+		}
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender.Equals(ownershipGuard.actualOwner?.GetPlayerRef()))
+		{
+			stream.SendNext(syncedState.riderId);
+			stream.SendNext((bool)syncedState.tagged);
+			stream.SendNext(syncedState.materialIndex);
+			stream.SendNext(syncedState.audioLevel);
+			stream.SendNext(syncedState.position);
+			stream.SendNext(syncedState.rotation);
+		}
+	}
+
+	private IEnumerator ReenableOwnershipRequest()
+	{
+		yield return new WaitForSeconds(3f);
+		pendingOwnershipRequest = false;
+	}
+
+	public void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
+	{
+		if (toPlayer == NetworkSystem.Instance.LocalPlayer)
+		{
+			pendingOwnershipRequest = false;
+			if (!leftHold.active && !rightHold.active && (spawnPosition - base.transform.position).sqrMagnitude > 1f)
+			{
+				rb.isKinematic = false;
+				rb.WakeUp();
+				lastHeldTime = Time.time;
+			}
+		}
+	}
+
+	public bool OnOwnershipRequest(NetPlayer fromPlayer)
+	{
+		if (base.IsMine && NetworkSystem.Instance.InRoom && (leftHold.active || rightHold.active))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public void OnMyOwnerLeft()
+	{
+	}
+
+	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)
+	{
+		return false;
+	}
+
+	public void OnMyCreatorLeft()
+	{
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

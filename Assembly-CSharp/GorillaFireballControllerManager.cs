@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -7,44 +6,56 @@ using Valve.VR;
 
 public class GorillaFireballControllerManager : MonoBehaviour
 {
+	public InputDevice leftHand;
+
+	public InputDevice rightHand;
+
+	public bool hasInitialized;
+
+	public float leftHandLastState;
+
+	public float rightHandLastState;
+
+	public float throwingThreshold = 0.9f;
+
 	private void Update()
 	{
-		if (!this.hasInitialized)
+		if (!hasInitialized)
 		{
-			this.hasInitialized = true;
+			hasInitialized = true;
 			List<InputDevice> list = new List<InputDevice>();
 			List<InputDevice> list2 = new List<InputDevice>();
 			InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, list);
 			InputDevices.GetDevicesAtXRNode(XRNode.RightHand, list2);
 			if (list.Count == 1)
 			{
-				this.leftHand = list[0];
+				leftHand = list[0];
 			}
 			if (list2.Count == 1)
 			{
-				this.rightHand = list2[0];
+				rightHand = list2[0];
 			}
 		}
 		float axis = SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(SteamVR_Input_Sources.LeftHand);
-		if (this.leftHandLastState <= this.throwingThreshold && axis > this.throwingThreshold)
+		if (leftHandLastState <= throwingThreshold && axis > throwingThreshold)
 		{
-			this.CreateFireball(true);
+			CreateFireball(isLeftHand: true);
 		}
-		else if (this.leftHandLastState >= this.throwingThreshold && axis < this.throwingThreshold)
+		else if (leftHandLastState >= throwingThreshold && axis < throwingThreshold)
 		{
-			this.TryThrowFireball(true);
+			TryThrowFireball(isLeftHand: true);
 		}
-		this.leftHandLastState = axis;
+		leftHandLastState = axis;
 		axis = SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(SteamVR_Input_Sources.RightHand);
-		if (this.rightHandLastState <= this.throwingThreshold && axis > this.throwingThreshold)
+		if (rightHandLastState <= throwingThreshold && axis > throwingThreshold)
 		{
-			this.CreateFireball(false);
+			CreateFireball(isLeftHand: false);
 		}
-		else if (this.rightHandLastState >= this.throwingThreshold && axis < this.throwingThreshold)
+		else if (rightHandLastState >= throwingThreshold && axis < throwingThreshold)
 		{
-			this.TryThrowFireball(false);
+			TryThrowFireball(isLeftHand: false);
 		}
-		this.rightHandLastState = axis;
+		rightHandLastState = axis;
 	}
 
 	public void TryThrowFireball(bool isLeftHand)
@@ -52,9 +63,8 @@ public class GorillaFireballControllerManager : MonoBehaviour
 		if (isLeftHand && GorillaPlaySpace.Instance.myVRRig.leftHandTransform.GetComponentInChildren<GorillaFireball>() != null)
 		{
 			GorillaPlaySpace.Instance.myVRRig.leftHandTransform.GetComponentInChildren<GorillaFireball>().ThrowThisThingo();
-			return;
 		}
-		if (!isLeftHand && GorillaPlaySpace.Instance.myVRRig.rightHandTransform.GetComponentInChildren<GorillaFireball>() != null)
+		else if (!isLeftHand && GorillaPlaySpace.Instance.myVRRig.rightHandTransform.GetComponentInChildren<GorillaFireball>() != null)
 		{
 			GorillaPlaySpace.Instance.myVRRig.rightHandTransform.GetComponentInChildren<GorillaFireball>().ThrowThisThingo();
 		}
@@ -76,16 +86,4 @@ public class GorillaFireballControllerManager : MonoBehaviour
 		}
 		PhotonNetwork.Instantiate("GorillaPrefabs/GorillaFireball", position, Quaternion.identity, 0, array);
 	}
-
-	public InputDevice leftHand;
-
-	public InputDevice rightHand;
-
-	public bool hasInitialized;
-
-	public float leftHandLastState;
-
-	public float rightHandLastState;
-
-	public float throwingThreshold = 0.9f;
 }

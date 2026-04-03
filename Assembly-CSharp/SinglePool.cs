@@ -1,96 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class SinglePool : IGorillaSimpleBackgroundWorker
 {
-	public void SimpleWork()
-	{
-		int count = this.inactivePool.Count;
-		if (count >= this.initAmountToPool)
-		{
-			return;
-		}
-		GameObject gameObject = Object.Instantiate<GameObject>(this.objectToPool, this.gameObject.transform, true);
-		gameObject.name = this.objectToPool.name + "(PoolIndex=" + count.ToString() + ")";
-		gameObject.SetActive(false);
-		this.inactivePool.Push(gameObject);
-		this.amountAllocatedToPool++;
-		int instanceID = gameObject.GetInstanceID();
-		this.pooledObjects.Add(instanceID);
-		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-	}
-
-	private void PrivAllocPooledObjects()
-	{
-		if (this.inactivePool.Count == 0)
-		{
-			this.SimpleWork();
-			return;
-		}
-		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-	}
-
-	public void Initialize(GameObject gameObject_)
-	{
-		this.gameObject = gameObject_;
-		this.activePool = new Dictionary<int, GameObject>(this.initAmountToPool);
-		this.inactivePool = new Stack<GameObject>(this.initAmountToPool);
-		this.pooledObjects = new HashSet<int>();
-		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-	}
-
-	public GameObject Instantiate(bool setActive = true)
-	{
-		if (this.inactivePool.Count == 0)
-		{
-			Debug.LogWarning("Pool '" + this.objectToPool.name + "'is expanding consider changing initial pool size");
-			this.PrivAllocPooledObjects();
-		}
-		GameObject gameObject = this.inactivePool.Pop();
-		int instanceID = gameObject.GetInstanceID();
-		gameObject.SetActive(setActive);
-		this.activePool.Add(instanceID, gameObject);
-		return gameObject;
-	}
-
-	public void Destroy(GameObject obj)
-	{
-		int instanceID = obj.GetInstanceID();
-		if (!this.activePool.ContainsKey(instanceID))
-		{
-			return;
-		}
-		if (!this.pooledObjects.Contains(instanceID))
-		{
-			return;
-		}
-		obj.SetActive(false);
-		this.inactivePool.Push(obj);
-		this.activePool.Remove(instanceID);
-	}
-
-	public int PoolGUID()
-	{
-		return PoolUtils.GameObjHashCode(this.objectToPool);
-	}
-
-	public int GetTotalCount()
-	{
-		return this.pooledObjects.Count;
-	}
-
-	public int GetActiveCount()
-	{
-		return this.activePool.Count;
-	}
-
-	public int GetInactiveCount()
-	{
-		return this.inactivePool.Count;
-	}
-
 	public GameObject objectToPool;
 
 	public int initAmountToPool = 8;
@@ -104,4 +18,86 @@ public class SinglePool : IGorillaSimpleBackgroundWorker
 	private GameObject gameObject;
 
 	private int amountAllocatedToPool;
+
+	public void SimpleWork()
+	{
+		int count = inactivePool.Count;
+		if (count < initAmountToPool)
+		{
+			GameObject gameObject = UnityEngine.Object.Instantiate(objectToPool, this.gameObject.transform, worldPositionStays: true);
+			gameObject.name = objectToPool.name + "(PoolIndex=" + count + ")";
+			gameObject.SetActive(value: false);
+			inactivePool.Push(gameObject);
+			amountAllocatedToPool++;
+			int instanceID = gameObject.GetInstanceID();
+			pooledObjects.Add(instanceID);
+			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+		}
+	}
+
+	private void PrivAllocPooledObjects()
+	{
+		if (inactivePool.Count == 0)
+		{
+			SimpleWork();
+		}
+		else
+		{
+			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+		}
+	}
+
+	public void Initialize(GameObject gameObject_)
+	{
+		gameObject = gameObject_;
+		activePool = new Dictionary<int, GameObject>(initAmountToPool);
+		inactivePool = new Stack<GameObject>(initAmountToPool);
+		pooledObjects = new HashSet<int>();
+		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+	}
+
+	public GameObject Instantiate(bool setActive = true)
+	{
+		if (inactivePool.Count == 0)
+		{
+			Debug.LogWarning("Pool '" + objectToPool.name + "'is expanding consider changing initial pool size");
+			PrivAllocPooledObjects();
+		}
+		GameObject gameObject = inactivePool.Pop();
+		int instanceID = gameObject.GetInstanceID();
+		gameObject.SetActive(setActive);
+		activePool.Add(instanceID, gameObject);
+		return gameObject;
+	}
+
+	public void Destroy(GameObject obj)
+	{
+		int instanceID = obj.GetInstanceID();
+		if (activePool.ContainsKey(instanceID) && pooledObjects.Contains(instanceID))
+		{
+			obj.SetActive(value: false);
+			inactivePool.Push(obj);
+			activePool.Remove(instanceID);
+		}
+	}
+
+	public int PoolGUID()
+	{
+		return PoolUtils.GameObjHashCode(objectToPool);
+	}
+
+	public int GetTotalCount()
+	{
+		return pooledObjects.Count;
+	}
+
+	public int GetActiveCount()
+	{
+		return activePool.Count;
+	}
+
+	public int GetInactiveCount()
+	{
+		return inactivePool.Count;
+	}
 }

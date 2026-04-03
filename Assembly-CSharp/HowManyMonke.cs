@@ -1,63 +1,25 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading.Tasks;
+using GorillaNetworking;
+using Newtonsoft.Json;
 using PlayFab;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class HowManyMonke : MonoBehaviour
 {
-	public static float RecheckDelay
+	private enum State
 	{
-		get
-		{
-			return Mathf.Max((float)HowManyMonke.recheckDelay / 1000f, 1f);
-		}
+		READY,
+		TD_LOOKUP,
+		HMM_LOOKUP
 	}
 
-	public void Start()
+	private class CCUResponse
 	{
-		HowManyMonke.<Start>d__11 <Start>d__;
-		<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Start>d__.<>4__this = this;
-		<Start>d__.<>1__state = -1;
-		<Start>d__.<>t__builder.Start<HowManyMonke.<Start>d__11>(ref <Start>d__);
-	}
+		public int CCUTotal;
 
-	private Task FetchRecheckDelay()
-	{
-		HowManyMonke.<FetchRecheckDelay>d__12 <FetchRecheckDelay>d__;
-		<FetchRecheckDelay>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<FetchRecheckDelay>d__.<>4__this = this;
-		<FetchRecheckDelay>d__.<>1__state = -1;
-		<FetchRecheckDelay>d__.<>t__builder.Start<HowManyMonke.<FetchRecheckDelay>d__12>(ref <FetchRecheckDelay>d__);
-		return <FetchRecheckDelay>d__.<>t__builder.Task;
-	}
-
-	private void onTDError(PlayFabError error)
-	{
-		this.state = HowManyMonke.State.READY;
-		HowManyMonke.recheckDelay = 0;
-	}
-
-	private void onTD(string obj)
-	{
-		this.state = HowManyMonke.State.READY;
-		if (int.TryParse(obj, out HowManyMonke.recheckDelay))
-		{
-			HowManyMonke.recheckDelay *= 1000;
-			return;
-		}
-		HowManyMonke.recheckDelay = 0;
-	}
-
-	private Task<int> FetchThisMany()
-	{
-		HowManyMonke.<FetchThisMany>d__15 <FetchThisMany>d__;
-		<FetchThisMany>d__.<>t__builder = AsyncTaskMethodBuilder<int>.Create();
-		<FetchThisMany>d__.<>4__this = this;
-		<FetchThisMany>d__.<>1__state = -1;
-		<FetchThisMany>d__.<>t__builder.Start<HowManyMonke.<FetchThisMany>d__15>(ref <FetchThisMany>d__);
-		return <FetchThisMany>d__.<>t__builder.Task;
+		public string ErrorMessage;
 	}
 
 	private const string preLog = "[GT/HowManyMonke]  ";
@@ -71,24 +33,88 @@ public class HowManyMonke : MonoBehaviour
 	[SerializeField]
 	private string titleDataKey;
 
-	private HowManyMonke.State state;
+	private State state;
 
 	private static int recheckDelay;
 
 	[SerializeField]
 	private string CCUEndpoint;
 
-	private enum State
+	public static float RecheckDelay => Mathf.Max((float)recheckDelay / 1000f, 1f);
+
+	public async void Start()
 	{
-		READY,
-		TD_LOOKUP,
-		HMM_LOOKUP
+		state = State.READY;
+		await Task.Delay(1000);
+		Debug.Log("[GT/HowManyMonke]  " + $"Checking NetworkSystem.Instance: {NetworkSystem.Instance}");
+		while (NetworkSystem.Instance == null)
+		{
+			await Task.Delay(1000);
+			Debug.Log("[GT/HowManyMonke]  " + $"Re-Checking NetworkSystem.Instance: {NetworkSystem.Instance}");
+		}
+		ThisMany = await FetchThisMany();
+		if (OnCheck != null)
+		{
+			OnCheck(ThisMany);
+		}
+		Debug.Log("[GT/HowManyMonke]  " + $"Fetch Complete: {ThisMany}");
+		await FetchRecheckDelay();
+		while (Application.isPlaying && recheckDelay > 0)
+		{
+			await Task.Delay(recheckDelay);
+			if (OnCheck != null)
+			{
+				ThisMany = await FetchThisMany();
+				OnCheck(ThisMany);
+				await FetchRecheckDelay();
+			}
+		}
 	}
 
-	private class CCUResponse
+	private async Task FetchRecheckDelay()
 	{
-		public int CCUTotal;
+		state = State.TD_LOOKUP;
+		PlayFabTitleDataCache.Instance.GetTitleData(titleDataKey, onTD, onTDError);
+		while (state != State.READY)
+		{
+			await Task.Yield();
+		}
+	}
 
-		public string ErrorMessage;
+	private void onTDError(PlayFabError error)
+	{
+		state = State.READY;
+		recheckDelay = 0;
+	}
+
+	private void onTD(string obj)
+	{
+		state = State.READY;
+		if (int.TryParse(obj, out recheckDelay))
+		{
+			recheckDelay *= 1000;
+		}
+		else
+		{
+			recheckDelay = 0;
+		}
+	}
+
+	private async Task<int> FetchThisMany()
+	{
+		if (recheckDelay < 0)
+		{
+			return NetworkSystem.Instance.GlobalPlayerCount();
+		}
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.ModerationApiBaseUrl + CCUEndpoint, "POST")
+		{
+			downloadHandler = new DownloadHandlerBuffer()
+		};
+		await request.SendWebRequest();
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			return JsonConvert.DeserializeObject<CCUResponse>(request.downloadHandler.text).CCUTotal;
+		}
+		return NetworkSystem.Instance.GlobalPlayerCount();
 	}
 }

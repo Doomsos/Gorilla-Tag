@@ -1,39 +1,33 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct AnimHashId
 {
-	public string text
-	{
-		get
-		{
-			return this._text;
-		}
-	}
+	[SerializeField]
+	private string _text;
 
-	public int hash
-	{
-		get
-		{
-			return this._hash;
-		}
-	}
+	[NonSerialized]
+	private int _hash;
+
+	public string text => _text;
+
+	public int hash => _hash;
 
 	public AnimHashId(string text)
 	{
-		this._text = text;
-		this._hash = Animator.StringToHash(text);
+		_text = text;
+		_hash = Animator.StringToHash(text);
 	}
 
 	public override string ToString()
 	{
-		return this._text;
+		return _text;
 	}
 
 	public override int GetHashCode()
 	{
-		return this._hash;
+		return _hash;
 	}
 
 	public static implicit operator int(AnimHashId h)
@@ -45,10 +39,4 @@ public struct AnimHashId
 	{
 		return new AnimHashId(s);
 	}
-
-	[SerializeField]
-	private string _text;
-
-	[NonSerialized]
-	private int _hash;
 }

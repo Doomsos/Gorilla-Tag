@@ -1,17 +1,14 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public enum JoinType
 {
-	public enum JoinType
-	{
-		Solo,
-		JoinWithNearby,
-		JoinWithParty,
-		JoinWithElevator,
-		ForceJoinWithParty,
-		FollowingNearby,
-		FollowingParty,
-		FriendStationPublic,
-		FriendStationPrivate
-	}
+	Solo,
+	JoinWithNearby,
+	JoinWithParty,
+	JoinWithElevator,
+	ForceJoinWithParty,
+	FollowingNearby,
+	FollowingParty,
+	FriendStationPublic,
+	FriendStationPrivate
 }

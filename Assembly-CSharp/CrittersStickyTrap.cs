@@ -1,35 +1,40 @@
-﻿using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
 public class CrittersStickyTrap : CrittersToolThrowable
 {
+	[Header("Sticky Trap")]
+	public bool stickOnImpact = true;
+
+	public int subStickyGooIndex = -1;
+
+	private bool isStuck;
+
 	public override void Initialize()
 	{
 		base.Initialize();
-		this.TogglePhysics(!this.isStuck);
+		TogglePhysics(!isStuck);
 	}
 
 	public override void OnDisable()
 	{
 		base.OnDisable();
-		this.isStuck = false;
+		isStuck = false;
 	}
 
 	public override void SetImpulse()
 	{
-		if (this.isOnPlayer || this.isSceneActor)
+		if (!isOnPlayer && !isSceneActor)
 		{
-			return;
-		}
-		this.localLastImpulse = this.lastImpulseTime;
-		base.MoveActor(this.lastImpulsePosition, this.lastImpulseQuaternion, this.parentActorId >= 0, false, true);
-		this.TogglePhysics(this.usesRB && this.parentActorId == -1 && !this.isStuck);
-		if (!this.rb.isKinematic)
-		{
-			this.rb.linearVelocity = this.lastImpulseVelocity;
-			this.rb.angularVelocity = this.lastImpulseAngularVelocity;
+			localLastImpulse = lastImpulseTime;
+			MoveActor(lastImpulsePosition, lastImpulseQuaternion, parentActorId >= 0, updateImpulses: false);
+			TogglePhysics(usesRB && parentActorId == -1 && !isStuck);
+			if (!rb.isKinematic)
+			{
+				rb.linearVelocity = lastImpulseVelocity;
+				rb.angularVelocity = lastImpulseAngularVelocity;
+			}
 		}
 	}
 
@@ -37,88 +42,78 @@ public class CrittersStickyTrap : CrittersToolThrowable
 	{
 		if (CrittersManager.instance.LocalAuthority())
 		{
-			if (this.stickOnImpact)
+			if (stickOnImpact)
 			{
-				this.rb.isKinematic = true;
-				this.isStuck = true;
-				this.updatedSinceLastFrame = true;
-				base.UpdateImpulses(false, true);
+				rb.isKinematic = true;
+				isStuck = true;
+				updatedSinceLastFrame = true;
+				UpdateImpulses(local: false, updateTime: true);
 			}
-			CrittersStickyGoo crittersStickyGoo = (CrittersStickyGoo)CrittersManager.instance.SpawnActor(CrittersActor.CrittersActorType.StickyGoo, this.subStickyGooIndex);
-			if (crittersStickyGoo == null)
+			CrittersStickyGoo crittersStickyGoo = (CrittersStickyGoo)CrittersManager.instance.SpawnActor(CrittersActorType.StickyGoo, subStickyGooIndex);
+			if (!(crittersStickyGoo == null))
 			{
-				return;
+				CrittersManager.instance.TriggerEvent(CrittersManager.CritterEvent.StickyDeployed, actorId, base.transform.position, Quaternion.LookRotation(hitNormal));
+				Vector3 forward = base.transform.forward;
+				forward -= hitNormal * Vector3.Dot(hitNormal, forward);
+				crittersStickyGoo.MoveActor(hitPosition, Quaternion.LookRotation(forward, hitNormal));
+				crittersStickyGoo.SetImpulseVelocity(Vector3.zero, Vector3.zero);
+				UpdateImpulses(local: true);
 			}
-			CrittersManager.instance.TriggerEvent(CrittersManager.CritterEvent.StickyDeployed, this.actorId, base.transform.position, Quaternion.LookRotation(hitNormal));
-			Vector3 vector = base.transform.forward;
-			vector -= hitNormal * Vector3.Dot(hitNormal, vector);
-			crittersStickyGoo.MoveActor(hitPosition, Quaternion.LookRotation(vector, hitNormal), false, true, true);
-			crittersStickyGoo.SetImpulseVelocity(Vector3.zero, Vector3.zero);
-			base.UpdateImpulses(true, false);
 		}
 	}
 
 	protected override void OnImpactCritter(CrittersPawn impactedCritter)
 	{
-		this.OnImpact(impactedCritter.transform.position, impactedCritter.transform.up);
+		OnImpact(impactedCritter.transform.position, impactedCritter.transform.up);
 	}
 
 	protected override void OnPickedUp()
 	{
-		if (this.isStuck)
+		if (isStuck)
 		{
-			this.isStuck = false;
-			this.updatedSinceLastFrame = true;
+			isStuck = false;
+			updatedSinceLastFrame = true;
 		}
 	}
 
 	public override void SendDataByCrittersActorType(PhotonStream stream)
 	{
 		base.SendDataByCrittersActorType(stream);
-		stream.SendNext(this.isStuck);
+		stream.SendNext(isStuck);
 	}
 
 	public override bool UpdateSpecificActor(PhotonStream stream)
 	{
-		bool flag;
-		if (!(base.UpdateSpecificActor(stream) & CrittersManager.ValidateDataType<bool>(stream.ReceiveNext(), out flag)))
+		if (!(base.UpdateSpecificActor(stream) & CrittersManager.ValidateDataType<bool>(stream.ReceiveNext(), out var dataAsType)))
 		{
 			return false;
 		}
-		this.isStuck = flag;
-		this.TogglePhysics(!this.isStuck);
+		isStuck = dataAsType;
+		TogglePhysics(!isStuck);
 		return true;
 	}
 
 	public override int AddActorDataToList(ref List<object> objList)
 	{
 		base.AddActorDataToList(ref objList);
-		objList.Add(this.isStuck);
-		return this.TotalActorDataLength();
+		objList.Add(isStuck);
+		return TotalActorDataLength();
 	}
 
 	public override int TotalActorDataLength()
 	{
-		return base.BaseActorDataLength() + 1;
+		return BaseActorDataLength() + 1;
 	}
 
 	public override int UpdateFromRPC(object[] data, int startingIndex)
 	{
 		startingIndex += base.UpdateFromRPC(data, startingIndex);
-		bool flag;
-		if (!CrittersManager.ValidateDataType<bool>(data[startingIndex], out flag))
+		if (!CrittersManager.ValidateDataType<bool>(data[startingIndex], out var dataAsType))
 		{
-			return this.TotalActorDataLength();
+			return TotalActorDataLength();
 		}
-		this.isStuck = flag;
-		this.TogglePhysics(!this.isStuck);
-		return this.TotalActorDataLength();
+		isStuck = dataAsType;
+		TogglePhysics(!isStuck);
+		return TotalActorDataLength();
 	}
-
-	[Header("Sticky Trap")]
-	public bool stickOnImpact = true;
-
-	public int subStickyGooIndex = -1;
-
-	private bool isStuck;
 }

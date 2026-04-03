@@ -1,38 +1,19 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class GRBonusEntry
 {
-	private GRBonusEntry()
+	public enum GRBonusType
 	{
-		GRBonusEntry.idCounter++;
-		this.id = GRBonusEntry.idCounter;
-	}
-
-	public int id { get; private set; }
-
-	public int GetBonusValue()
-	{
-		return (int)(this.bonusValue * 100f);
-	}
-
-	public override string ToString()
-	{
-		bool flag = this.customBonus != null;
-		return string.Format("GRBonusEntry BonusType {0} AttributeType {1} BonusValue {2} Id {3} CustomBonusSet {4}", new object[]
-		{
-			this.bonusType,
-			this.attributeType,
-			this.bonusValue,
-			this.id,
-			flag
-		});
+		None,
+		Additive,
+		Multiplicative
 	}
 
 	private static int idCounter;
 
-	public GRBonusEntry.GRBonusType bonusType;
+	public GRBonusType bonusType;
 
 	public GRAttributeType attributeType;
 
@@ -41,10 +22,22 @@ public class GRBonusEntry
 
 	public Func<int, GRBonusEntry, int> customBonus;
 
-	public enum GRBonusType
+	public int id { get; private set; }
+
+	private GRBonusEntry()
 	{
-		None,
-		Additive,
-		Multiplicative
+		idCounter++;
+		id = idCounter;
+	}
+
+	public int GetBonusValue()
+	{
+		return (int)(bonusValue * 100f);
+	}
+
+	public override string ToString()
+	{
+		bool flag = customBonus != null;
+		return $"GRBonusEntry BonusType {bonusType} AttributeType {attributeType} BonusValue {bonusValue} Id {id} CustomBonusSet {flag}";
 	}
 }

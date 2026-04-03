@@ -1,139 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class GRAbilityAttackJump : GRAbilityBase
 {
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	private enum State
 	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-		this.target = null;
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-	}
-
-	protected override void OnStart()
-	{
-		this.PlayAnim(this.animName, 0.1f, this.animSpeed);
-		this.startTime = Time.timeAsDouble;
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-		this.agent.SetIsPathing(false, true);
-		this.agent.SetDisableNetworkSync(true);
-		this.state = GRAbilityAttackJump.State.Tell;
-	}
-
-	protected override void OnStop()
-	{
-		this.agent.SetIsPathing(true, true);
-		this.agent.SetDisableNetworkSync(false);
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-	}
-
-	public override bool IsDone()
-	{
-		return Time.timeAsDouble - this.startTime >= (double)this.duration;
-	}
-
-	protected override void OnUpdateShared(float dt)
-	{
-		double num = (double)((float)Time.timeAsDouble) - this.startTime;
-		switch (this.state)
-		{
-		case GRAbilityAttackJump.State.Tell:
-			if (num > (double)this.jumpTime)
-			{
-				this.targetPos = this.agent.transform.position + this.agent.transform.forward * 0.5f;
-				if (this.target != null)
-				{
-					Vector3 a = this.target.transform.position - this.agent.transform.position;
-					this.targetPos = this.agent.transform.position + a * this.jumpLengthScale;
-					this.targetPos.y = this.target.transform.position.y;
-				}
-				float num2 = this.attackLandTime - this.jumpTime;
-				num2 = Mathf.Max(0.1f, num2);
-				this.initialPos = this.agent.transform.position;
-				Vector3 vector = this.targetPos - this.initialPos;
-				float y = vector.y;
-				vector.y = 0f;
-				float num3 = num2;
-				float y2 = 0f;
-				if (num3 > 0f)
-				{
-					Vector3 gravity = Physics.gravity;
-					y2 = (y - 0.5f * gravity.y * num3 * num3) / num3;
-				}
-				this.initialVel = vector / num2;
-				this.initialVel.y = y2;
-				if (this.damageTrigger != null)
-				{
-					this.damageTrigger.SetActive(true);
-				}
-				this.PlayAnim(this.jumpAnimName, 0.1f, this.animSpeed);
-				this.jumpSound.Play(null);
-				this.state = GRAbilityAttackJump.State.Jump;
-			}
-			break;
-		case GRAbilityAttackJump.State.Jump:
-		{
-			float d = (float)(num - (double)this.jumpTime);
-			Vector3 position = this.initialPos + this.initialVel * d + 0.5f * Physics.gravity * d * d;
-			this.root.position = position;
-			if (num > (double)this.attackLandTime)
-			{
-				if (this.damageTrigger != null)
-				{
-					this.damageTrigger.SetActive(false);
-				}
-				if (this.doReturnPhase)
-				{
-					float num4 = this.attackReturnTime - this.attackLandTime;
-					num4 = Mathf.Max(0.1f, num4);
-					Vector3 a2 = this.initialPos;
-					this.initialPos = this.agent.transform.position;
-					this.initialVel = (a2 - this.initialPos) / num4;
-					this.state = GRAbilityAttackJump.State.Return;
-				}
-				else
-				{
-					this.state = GRAbilityAttackJump.State.Done;
-				}
-			}
-			break;
-		}
-		case GRAbilityAttackJump.State.Return:
-		{
-			float d2 = (float)(num - (double)this.attackLandTime);
-			Vector3 position2 = this.initialPos + this.initialVel * d2;
-			this.root.position = position2;
-			if (num > (double)this.attackReturnTime)
-			{
-				this.state = GRAbilityAttackJump.State.Done;
-			}
-			break;
-		}
-		}
-		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
-	}
-
-	public void SetTargetPlayer(NetPlayer targetPlayer)
-	{
-		this.target = null;
-		if (targetPlayer != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(targetPlayer.ActorNumber);
-			if (grplayer != null && grplayer.State == GRPlayer.GRPlayerState.Alive)
-			{
-				this.target = grplayer.transform;
-			}
-		}
+		Tell,
+		Jump,
+		Return,
+		Done
 	}
 
 	public float duration;
@@ -162,7 +38,7 @@ public class GRAbilityAttackJump : GRAbilityBase
 
 	private Transform target;
 
-	private GRAbilityAttackJump.State state;
+	private State state;
 
 	public Vector3 targetPos;
 
@@ -170,11 +46,134 @@ public class GRAbilityAttackJump : GRAbilityBase
 
 	public Vector3 initialVel;
 
-	private enum State
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
-		Tell,
-		Jump,
-		Return,
-		Done
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+		target = null;
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+	}
+
+	protected override void OnStart()
+	{
+		PlayAnim(animName, 0.1f, animSpeed);
+		startTime = Time.timeAsDouble;
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+		agent.SetIsPathing(isPathing: false, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: true);
+		state = State.Tell;
+	}
+
+	protected override void OnStop()
+	{
+		agent.SetIsPathing(isPathing: true, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: false);
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+	}
+
+	public override bool IsDone()
+	{
+		return Time.timeAsDouble - startTime >= (double)duration;
+	}
+
+	protected override void OnUpdateShared(float dt)
+	{
+		double num = (double)(float)Time.timeAsDouble - startTime;
+		switch (state)
+		{
+		case State.Tell:
+			if (num > (double)jumpTime)
+			{
+				targetPos = agent.transform.position + agent.transform.forward * 0.5f;
+				if (target != null)
+				{
+					Vector3 vector = target.transform.position - agent.transform.position;
+					targetPos = agent.transform.position + vector * jumpLengthScale;
+					targetPos.y = target.transform.position.y;
+				}
+				float b = attackLandTime - jumpTime;
+				b = Mathf.Max(0.1f, b);
+				initialPos = agent.transform.position;
+				Vector3 vector2 = targetPos - initialPos;
+				float y = vector2.y;
+				vector2.y = 0f;
+				float num3 = b;
+				float y2 = 0f;
+				if (num3 > 0f)
+				{
+					y2 = (y - 0.5f * Physics.gravity.y * num3 * num3) / num3;
+				}
+				initialVel = vector2 / b;
+				initialVel.y = y2;
+				if (damageTrigger != null)
+				{
+					damageTrigger.SetActive(value: true);
+				}
+				PlayAnim(jumpAnimName, 0.1f, animSpeed);
+				jumpSound.Play(null);
+				state = State.Jump;
+			}
+			break;
+		case State.Jump:
+		{
+			float num4 = (float)(num - (double)jumpTime);
+			Vector3 position2 = initialPos + initialVel * num4 + 0.5f * Physics.gravity * num4 * num4;
+			root.position = position2;
+			if (num > (double)attackLandTime)
+			{
+				if (damageTrigger != null)
+				{
+					damageTrigger.SetActive(value: false);
+				}
+				if (doReturnPhase)
+				{
+					float b2 = attackReturnTime - attackLandTime;
+					b2 = Mathf.Max(0.1f, b2);
+					Vector3 vector3 = initialPos;
+					initialPos = agent.transform.position;
+					initialVel = (vector3 - initialPos) / b2;
+					state = State.Return;
+				}
+				else
+				{
+					state = State.Done;
+				}
+			}
+			break;
+		}
+		case State.Return:
+		{
+			float num2 = (float)(num - (double)attackLandTime);
+			Vector3 position = initialPos + initialVel * num2;
+			root.position = position;
+			if (num > (double)attackReturnTime)
+			{
+				state = State.Done;
+			}
+			break;
+		}
+		}
+		GameAgent.UpdateFacingTarget(root, agent.navAgent, target, maxTurnSpeed);
+	}
+
+	public void SetTargetPlayer(NetPlayer targetPlayer)
+	{
+		target = null;
+		if (targetPlayer != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (gRPlayer != null && gRPlayer.State == GRPlayer.GRPlayerState.Alive)
+			{
+				target = gRPlayer.transform;
+			}
+		}
 	}
 }

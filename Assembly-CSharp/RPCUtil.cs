@@ -1,20 +1,42 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 internal class RPCUtil
 {
+	private struct RPCCallID(string nameOfFunction, int senderId) : IEquatable<RPCCallID>
+	{
+		private int _senderID = senderId;
+
+		private string _nameOfFunction = nameOfFunction;
+
+		public readonly int SenderID => _senderID;
+
+		public readonly string NameOfFunction => _nameOfFunction;
+
+		bool IEquatable<RPCCallID>.Equals(RPCCallID other)
+		{
+			if (other.NameOfFunction.Equals(NameOfFunction))
+			{
+				return other.SenderID.Equals(SenderID);
+			}
+			return false;
+		}
+	}
+
+	private static Dictionary<RPCCallID, float> RPCCallLog = new Dictionary<RPCCallID, float>();
+
 	public static bool NotSpam(string id, PhotonMessageInfoWrapped info, float delay)
 	{
-		RPCUtil.RPCCallID key = new RPCUtil.RPCCallID(id, info.senderID);
-		if (!RPCUtil.RPCCallLog.ContainsKey(key))
+		RPCCallID key = new RPCCallID(id, info.senderID);
+		if (!RPCCallLog.ContainsKey(key))
 		{
-			RPCUtil.RPCCallLog.Add(key, Time.time);
+			RPCCallLog.Add(key, Time.time);
 			return true;
 		}
-		if (Time.time - RPCUtil.RPCCallLog[key] > delay)
+		if (Time.time - RPCCallLog[key] > delay)
 		{
-			RPCUtil.RPCCallLog[key] = Time.time;
+			RPCCallLog[key] = Time.time;
 			return true;
 		}
 		return false;
@@ -22,47 +44,23 @@ internal class RPCUtil
 
 	public static bool SafeValue(float v)
 	{
-		return !float.IsNaN(v) && float.IsFinite(v);
+		if (float.IsNaN(v))
+		{
+			return false;
+		}
+		return float.IsFinite(v);
 	}
 
 	public static bool SafeValue(float v, float min, float max)
 	{
-		return RPCUtil.SafeValue(v) && v <= max && v >= min;
-	}
-
-	private static Dictionary<RPCUtil.RPCCallID, float> RPCCallLog = new Dictionary<RPCUtil.RPCCallID, float>();
-
-	private struct RPCCallID : IEquatable<RPCUtil.RPCCallID>
-	{
-		public RPCCallID(string nameOfFunction, int senderId)
+		if (!SafeValue(v))
 		{
-			this._senderID = senderId;
-			this._nameOfFunction = nameOfFunction;
+			return false;
 		}
-
-		public readonly int SenderID
+		if (v <= max)
 		{
-			get
-			{
-				return this._senderID;
-			}
+			return v >= min;
 		}
-
-		public readonly string NameOfFunction
-		{
-			get
-			{
-				return this._nameOfFunction;
-			}
-		}
-
-		bool IEquatable<RPCUtil.RPCCallID>.Equals(RPCUtil.RPCCallID other)
-		{
-			return other.NameOfFunction.Equals(this.NameOfFunction) && other.SenderID.Equals(this.SenderID);
-		}
-
-		private int _senderID;
-
-		private string _nameOfFunction;
+		return false;
 	}
 }

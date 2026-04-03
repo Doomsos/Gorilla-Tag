@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -7,655 +7,39 @@ using UnityEngine;
 
 public class SIGadgetTentacleArm : SIGadget, ICallBack, IEnergyGadget
 {
-	public bool isAnchored { get; private set; }
-
-	public bool isHoldingHand { get; private set; }
-
-	private void Awake()
+	private class HeldPlayerCallback : ICallBack
 	{
-		this._fps_holding_base = this.FuelPerSecond_Holding;
-		this._fps_recharging_base = this.FuelPerSecond_Recharging;
-		this._grabCost_base = this.FuelCost_Grab;
-		this._jumpCost_base = this.FuelCost_JumpSpeed;
-		this._jumpSpeed_base = this.MaxTentacleJumpSpeed;
-		this._grabAngle_base = this.MaxGrabAngle;
-		this._wall_angle_dot = Mathf.Cos(0.017453292f * this.WallAngle);
-		this.tentacleMat = new Material(this.tentacleRenderer.sharedMaterial);
-		this.tentacleRenderer.sharedMaterial = this.tentacleMat;
-		if (this.tentacleRenderer2 != null)
+		private SIGadgetTentacleArm parent;
+
+		private VRRig heldRig;
+
+		private TakeMyHand_HandLink heldHandLink;
+
+		public HeldPlayerCallback(SIGadgetTentacleArm parent)
 		{
-			this.hasTentacle2 = true;
-			this.tentacleMat2 = new Material(this.tentacleRenderer2.sharedMaterial);
-			this.tentacleRenderer2.sharedMaterial = this.tentacleMat2;
+			this.parent = parent;
 		}
-		this._gaugeMatPropBlock = new MaterialPropertyBlock();
-		if (this.m_gaugeMatSlots == null)
+
+		public void Register(VRRig heldPlayer, TakeMyHand_HandLink heldHandLink)
 		{
-			this.m_gaugeMatSlots = Array.Empty<GTRendererMatSlot>();
+			Unregister();
+			heldRig = heldPlayer;
+			this.heldHandLink = heldHandLink;
+			heldPlayer.AddLateUpdateCallback(this);
 		}
-		int num = 0;
-		for (int i = 0; i < this.m_gaugeMatSlots.Length; i++)
+
+		public void Unregister()
 		{
-			if (this.m_gaugeMatSlots[i].TryInitialize())
+			if (heldRig != null)
 			{
-				this.m_gaugeMatSlots[num] = this.m_gaugeMatSlots[i];
-				num++;
+				heldRig.RemoveLateUpdateCallback(this);
 			}
+			heldRig = null;
 		}
-		if (num != this.m_gaugeMatSlots.Length)
-		{
-			Array.Resize<GTRendererMatSlot>(ref this.m_gaugeMatSlots, num);
-		}
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this.OnGrabbed));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnSnapped = (Action)Delegate.Combine(gameEntity2.OnSnapped, new Action(this.OnSnapped));
-		GameEntity gameEntity3 = this.gameEntity;
-		gameEntity3.OnReleased = (Action)Delegate.Combine(gameEntity3.OnReleased, new Action(this.OnReleased));
-		GameEntity gameEntity4 = this.gameEntity;
-		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this.OnUnsnapped));
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
-		this.heldPlayerCallback = new SIGadgetTentacleArm.HeldPlayerCallback(this);
-	}
 
-	private void Start()
-	{
-		this.clawVisualPos = this.claw.transform.position;
-		this.clawVisualRot = this.claw.transform.rotation;
-		this.clawReleasedVisual.SetActive(false);
-		this.CallBack();
-	}
-
-	private void OnDestroy()
-	{
-		if (this.hasRigCallback)
+		public void CallBack()
 		{
-			this.hasRigCallback = false;
-			this.rigForCallback.RemoveLateUpdateCallback(this);
-		}
-		if (this.hasGravityOverride)
-		{
-			GTPlayer.Instance.UnsetGravityOverride(this);
-			this.hasGravityOverride = false;
-		}
-		this.heldPlayerCallback.Unregister();
-	}
-
-	private void OnGrabbed()
-	{
-		this.isLeftHanded = (this.gameEntity.heldByHandIndex == 0);
-		GamePlayer gamePlayer;
-		if (GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			this.hasRigCallback = true;
-			this.rigForCallback = gamePlayer.rig;
-			this.rigForCallback.AddLateUpdateCallback(this);
-		}
-	}
-
-	private void OnSnapped()
-	{
-		this.isLeftHanded = (this.gameEntity.snappedJoint == SnapJointType.HandL);
-		GamePlayer gamePlayer;
-		if (GamePlayer.TryGetGamePlayer(this.gameEntity.snappedByActorNumber, out gamePlayer))
-		{
-			this.hasRigCallback = true;
-			this.rigForCallback = gamePlayer.rig;
-			this.rigForCallback.AddLateUpdateCallback(this);
-		}
-	}
-
-	private void OnReleased()
-	{
-		this.ClearClawAnchor();
-		if (this.hasRigCallback)
-		{
-			this.hasRigCallback = false;
-			this.rigForCallback.RemoveLateUpdateCallback(this);
-		}
-	}
-
-	private void OnUnsnapped()
-	{
-		if (this.hasRigCallback)
-		{
-			this.hasRigCallback = false;
-			this.rigForCallback.RemoveLateUpdateCallback(this);
-		}
-	}
-
-	private bool CheckInput()
-	{
-		return this.buttonActivatable.CheckInput(0.25f);
-	}
-
-	private Vector3 GetIdealClawPosition(VRRig rig)
-	{
-		Vector3 position = rig.bodyTransform.position;
-		position.y += 0.05f;
-		Vector3 position2 = base.transform.position;
-		Vector3 a = position2 - position;
-		return position2 + a * this.LengthFactor + base.transform.forward * this.tentacleForwardAdjustment;
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		bool flag = this.CheckInput();
-		if (this.isGripBroken)
-		{
-			if (flag)
-			{
-				flag = false;
-			}
-			else
-			{
-				this.isGripBroken = false;
-			}
-		}
-		Vector3 position = base.transform.position;
-		Vector3 idealClawPosition = this.GetIdealClawPosition(VRRig.LocalRig);
-		Quaternion rotation = base.transform.rotation;
-		float num = 0.15f;
-		bool flag2 = this.isLowFuel;
-		if ((this.knownSafePosition - idealClawPosition).IsLongerThan(1f))
-		{
-			Vector3 position2 = GTPlayer.Instance.headCollider.transform.position;
-			Ray ray = new Ray(position2, idealClawPosition - position2);
-			RaycastHit raycastHit;
-			if (Physics.SphereCast(ray, num, out raycastHit, (idealClawPosition - position2).magnitude, this.worldCollisionLayers))
-			{
-				this.knownSafePosition = ray.origin + ray.direction * (raycastHit.distance - num * 2.01f);
-			}
-			else
-			{
-				this.knownSafePosition = position;
-			}
-		}
-		if ((this.isAnchored || this.isHoldingHand) && !flag)
-		{
-			GorillaTagger.Instance.StartVibration(this.isLeftHanded, this.hapticStrengthOnRelease, this.hapticDurationOnRelease);
-			this.ClearClawAnchor();
-		}
-		else
-		{
-			if (this.isAnchored)
-			{
-				this.currentFuel = Mathf.Max(0f, this.currentFuel - dt * this._current_grab_fps);
-				this.isLowFuel = (this.currentFuel < this._lowFuelThreshold);
-				if (this.isLowFuel && !flag2)
-				{
-					this.lowFuelSound.Play();
-				}
-				this.UpdateFuelGauge();
-				if (this.currentFuel == 0f)
-				{
-					this.isGripBroken = true;
-					flag = false;
-					this.ClearClawAnchor();
-					this.detachFailSound.Play();
-				}
-				else
-				{
-					Vector3 position3 = GTPlayer.Instance.transform.position;
-					this.clawHoldAdjustment -= position3 - this.lastRequestedPlayerPosition;
-					Vector3 vector = this.clawAnchorPosition - (idealClawPosition + this.clawHoldAdjustment);
-					ref vector.ClampThisMagnitudeSafe(this.MaxTentacleJumpSpeed * dt);
-					GTPlayer.Instance.RequestTentacleMove(this.isLeftHanded, vector);
-					GTPlayer.Instance.TentacleActiveAtFrame = Time.frameCount + 1;
-					this.lastRequestedPlayerPosition = position3 + vector;
-					if ((this.clawAnchorPosition - base.transform.position).IsLongerThan(this.maxTentacleLength))
-					{
-						this.isGripBroken = true;
-						this.ClearClawAnchor();
-						this.detachFailSound.Play();
-					}
-					else
-					{
-						this.clawVisualPos = this.clawAnchorPosition;
-						this.clawVisualRot = this.clawAnchorRotation;
-					}
-				}
-				this.wasGrabPressed = flag;
-				return;
-			}
-			if (this.isHoldingHand)
-			{
-				TakeMyHand_HandLink takeMyHand_HandLink = this.isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink;
-				if (takeMyHand_HandLink.IsLinkActive())
-				{
-					Vector3 position4 = (this.isLeftHanded ? VRRig.LocalRig.leftHand : VRRig.LocalRig.rightHand).overrideTarget.position;
-					takeMyHand_HandLink.TentacleOffset = idealClawPosition - position4;
-				}
-				else
-				{
-					this.isGripBroken = true;
-					this.ClearClawAnchor();
-					this.detachFailSound.Play();
-				}
-				this.wasGrabPressed = flag;
-				return;
-			}
-		}
-		RaycastHit raycastHit2;
-		bool flag3 = Physics.SphereCast(new Ray(this.knownSafePosition, idealClawPosition - this.knownSafePosition), num, out raycastHit2, (idealClawPosition - this.knownSafePosition).magnitude, this.worldCollisionLayers);
-		Vector3 vector2 = idealClawPosition;
-		Quaternion quaternion = rotation;
-		bool flag4 = false;
-		bool flag5 = this.currentFuel < this.FuelCost_Grab + this.FuelPerSecond_Holding;
-		if (flag5 && flag)
-		{
-			this.isGripBroken = true;
-			flag = false;
-			this.attachFailSound.Play();
-		}
-		if (flag3)
-		{
-			if (!flag5)
-			{
-				float num2 = Vector3.Dot(raycastHit2.normal, Vector3.up);
-				if (num2 >= this._min_grab_dot)
-				{
-					this._current_grab_fps = ((num2 >= this._wall_angle_dot) ? this.FuelPerSecond_Holding : (this.FuelPerSecond_Holding * this.FuelCost_Wall_Multiplier));
-					flag4 = true;
-					if (GTPlayer.Instance.GetSlidePercentage(raycastHit2) > 0.5f)
-					{
-						if (!this.canHoldSlipperyWalls)
-						{
-							flag4 = false;
-							if (flag && !this.hasFailedToGrab)
-							{
-								this.attachFailSound.Play();
-								this.hasFailedToGrab = true;
-							}
-						}
-						else
-						{
-							this._current_grab_fps *= this.FuelCost_Slippery_Multiplier;
-						}
-					}
-				}
-				else if (flag && !this.hasFailedToGrab)
-				{
-					this.attachFailSound.Play();
-					this.hasFailedToGrab = true;
-				}
-			}
-			this.knownSafePosition += (idealClawPosition - this.knownSafePosition).normalized * (raycastHit2.distance - num * 2.01f);
-			vector2 = raycastHit2.point + raycastHit2.normal * 0.1f;
-		}
-		else
-		{
-			this.knownSafePosition = idealClawPosition;
-		}
-		if (flag && flag4)
-		{
-			vector2 = raycastHit2.point + raycastHit2.normal * 0.01f;
-			quaternion = Quaternion.LookRotation(-raycastHit2.normal, rotation * Vector3.up);
-			this.SetClawAnchor(vector2, quaternion, vector2 - idealClawPosition);
-			GorillaTagger.Instance.StartVibration(this.isLeftHanded, this.hapticStrengthOnGrab, this.hapticDurationOnGrab);
-			this.currentFuel -= this.FuelCost_Grab;
-		}
-		else
-		{
-			if (flag && !this.wasGrabPressed && (!GorillaComputer.instance.IsPlayerInVirtualStump() || !CustomMapManager.WantsHoldingHandsDisabled()))
-			{
-				TakeMyHand_HandLink takeMyHand_HandLink2 = this.isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink;
-				Vector3 position5 = (this.isLeftHanded ? VRRig.LocalRig.leftHand : VRRig.LocalRig.rightHand).overrideTarget.position;
-				foreach (VRRig vrrig in VRRigCache.ActiveRigs)
-				{
-					if (!vrrig.isLocal)
-					{
-						if (vrrig.leftHandLink.interactionPoint.OverlapCheck(vector2) && vrrig.leftHandLink.CanBeGrabbed())
-						{
-							if (takeMyHand_HandLink2.TentacleTryCreateLink(vrrig.leftHandLink))
-							{
-								this.isHoldingHand = true;
-								this.clawHoldingVisual.SetActive(true);
-								this.clawReleasedVisual.SetActive(false);
-								takeMyHand_HandLink2.TentacleOffset = idealClawPosition - position5;
-								this.heldPlayerCallback.Register(vrrig, vrrig.leftHandLink);
-								this.gameEntity.RequestState(this.gameEntity.id, this.GetStateLong());
-								break;
-							}
-						}
-						else if (vrrig.rightHandLink.interactionPoint.OverlapCheck(vector2) && vrrig.rightHandLink.CanBeGrabbed() && takeMyHand_HandLink2.TentacleTryCreateLink(vrrig.rightHandLink))
-						{
-							this.isHoldingHand = true;
-							this.clawHoldingVisual.SetActive(true);
-							this.clawReleasedVisual.SetActive(false);
-							takeMyHand_HandLink2.TentacleOffset = idealClawPosition - position5;
-							this.heldPlayerCallback.Register(vrrig, vrrig.rightHandLink);
-							this.gameEntity.RequestState(this.gameEntity.id, this.GetStateLong());
-							break;
-						}
-					}
-				}
-			}
-			Vector3 axis = Quaternion.AngleAxis(Time.time * 180f, Vector3.forward) * Vector3.up;
-			if (flag4)
-			{
-				quaternion = Quaternion.Lerp(rotation, Quaternion.LookRotation(-raycastHit2.normal, rotation * Vector3.up), 0.75f);
-				quaternion *= Quaternion.AngleAxis(5f, axis);
-			}
-			else
-			{
-				quaternion *= Quaternion.AngleAxis(20f, axis);
-				vector2.y += 0.05f * Mathf.Cos(Time.time * 2f);
-			}
-		}
-		this.clawVisualPos = vector2;
-		this.clawVisualRot = quaternion;
-		if (!this.isAnchored)
-		{
-			this.isLowFuel = (this.currentFuel < this.FuelCost_Grab);
-		}
-		this.wasGrabPressed = flag;
-		this.UpdateFuelGauge();
-	}
-
-	private void UpdateFuelGauge()
-	{
-		float value = this.currentFuel / this.fuelSize;
-		for (int i = 0; i < this.m_gaugeMatSlots.Length; i++)
-		{
-			this._gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, value);
-			this.m_gaugeMatSlots[i].renderer.SetPropertyBlock(this._gaugeMatPropBlock, this.m_gaugeMatSlots[i].slot);
-		}
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		if (this.isAnchored)
-		{
-			return;
-		}
-		VRRig attachedPlayerRig = base.GetAttachedPlayerRig();
-		if (attachedPlayerRig == null)
-		{
-			return;
-		}
-		Vector3 idealClawPosition = this.GetIdealClawPosition(attachedPlayerRig);
-		Quaternion rotation = base.transform.rotation;
-		Vector3 position = base.transform.position;
-		if ((this.knownSafePosition - idealClawPosition).IsLongerThan(1f))
-		{
-			this.knownSafePosition = position;
-		}
-		if (this.isHoldingHand)
-		{
-			TakeMyHand_HandLink takeMyHand_HandLink = this.isLeftHanded ? attachedPlayerRig.leftHandLink : attachedPlayerRig.rightHandLink;
-			Vector3 position2 = (this.isLeftHanded ? attachedPlayerRig.leftHand : attachedPlayerRig.rightHand).rigTarget.position;
-			takeMyHand_HandLink.TentacleOffset = idealClawPosition - position2;
-			return;
-		}
-		float num = 0.15f;
-		RaycastHit raycastHit;
-		bool flag = Physics.SphereCast(new Ray(this.knownSafePosition, idealClawPosition - this.knownSafePosition), num, out raycastHit, (idealClawPosition - this.knownSafePosition).magnitude, this.worldCollisionLayers);
-		Vector3 axis = Quaternion.AngleAxis(Time.time * 180f, Vector3.forward) * Vector3.up;
-		Vector3 vector = idealClawPosition;
-		Quaternion lhs = rotation;
-		if (flag)
-		{
-			this.knownSafePosition += (idealClawPosition - this.knownSafePosition).normalized * (raycastHit.distance - num * 2.01f);
-			vector = raycastHit.point + raycastHit.normal * 0.1f;
-			lhs *= Quaternion.AngleAxis(5f, axis);
-		}
-		else
-		{
-			this.knownSafePosition = idealClawPosition;
-			lhs *= Quaternion.AngleAxis(20f, axis);
-			vector.y += 0.05f * Mathf.Cos(Time.time * 2f);
-		}
-		this.clawVisualPos = vector;
-		this.clawVisualRot = lhs;
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this.FuelPerSecond_Holding = this._fps_holding_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
-		this.FuelPerSecond_Recharging = this._fps_recharging_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Charge_Rate) ? 1.2f : 1f);
-		this.FuelCost_Grab = this._grabCost_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
-		this.FuelCost_JumpSpeed = this._jumpCost_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
-		this.MaxGrabAngle = (withUpgrades.Contains(SIUpgradeType.Tentacle_Power_Claw) ? 180f : this._grabAngle_base);
-		this.MaxTentacleJumpSpeed = this._jumpSpeed_base;
-		this._min_grab_dot = Mathf.Cos(0.017453292f * this.MaxGrabAngle);
-		this._lowFuelThreshold = this.FuelCost_Grab + this.FuelPerSecond_Holding;
-	}
-
-	private long GetStateLong()
-	{
-		if (this.isAnchored)
-		{
-			return 4611686018427387904L | BitPackUtils.PackAnchoredPosRotForNetwork(this.clawAnchorPosition, this.clawAnchorRotation);
-		}
-		if (this.isHoldingHand)
-		{
-			TakeMyHand_HandLink takeMyHand_HandLink = this.isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink;
-			NetPlayer grabbedPlayer = takeMyHand_HandLink.grabbedPlayer;
-			int num = (grabbedPlayer != null) ? grabbedPlayer.ActorNumber : 0;
-			return long.MinValue | (takeMyHand_HandLink.grabbedHandIsLeft ? 2305843009213693952L : 0L) | (long)num;
-		}
-		return 0L;
-	}
-
-	private void SetClawAnchor(Vector3 clawPosition, Quaternion clawRotation, Vector3 adjustment)
-	{
-		if (!this.isAnchored)
-		{
-			this.attachSound.Play();
-		}
-		this.hasFailedToGrab = false;
-		this.isAnchored = true;
-		this.clawHoldAdjustment = adjustment;
-		this.clawAnchorPosition = clawPosition;
-		this.clawAnchorRotation = clawRotation;
-		this.clawHoldingVisual.SetActive(true);
-		this.clawReleasedVisual.SetActive(false);
-		if (this.IsEquippedLocal())
-		{
-			this.lastRequestedPlayerPosition = GTPlayer.Instance.transform.position;
-			GTPlayer.Instance.SetGravityOverride(this, new Action<GTPlayer>(this.GravityOverrideFunction));
-			this.hasGravityOverride = true;
-			SIPlayer.LocalPlayer.OnKnockback += this.OnKnockback;
-			this.gameEntity.RequestState(this.gameEntity.id, this.GetStateLong());
-		}
-	}
-
-	private void ClearClawAnchor()
-	{
-		if (this.isAnchored || this.isHoldingHand)
-		{
-			this.detachSound.Play();
-		}
-		this.hasFailedToGrab = false;
-		this.isAnchored = false;
-		this.clawHoldingVisual.SetActive(false);
-		this.clawReleasedVisual.SetActive(true);
-		if (this.isHoldingHand && this.IsEquippedLocal())
-		{
-			(this.isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink).BreakLink();
-		}
-		this.isHoldingHand = false;
-		if (this.hasGravityOverride)
-		{
-			GTPlayer.Instance.UnsetGravityOverride(this);
-			this.hasGravityOverride = false;
-		}
-		if (this.IsEquippedLocal() && !base.IsBlocked(SIExclusionType.AffectsLocalMovement))
-		{
-			Vector3 averagedVelocity = GTPlayer.Instance.AveragedVelocity;
-			float num = averagedVelocity.magnitude;
-			if (this.FuelCost_JumpSpeed > 0f)
-			{
-				num = Mathf.Min(num, this.currentFuel / this.FuelCost_JumpSpeed * this.MaxTentacleJumpSpeed);
-			}
-			num = Mathf.Min(num, this.MaxTentacleJumpSpeed);
-			this.currentFuel -= num / this.MaxTentacleJumpSpeed * this.FuelCost_JumpSpeed;
-			if (averagedVelocity.IsLongerThan(num))
-			{
-				GTPlayer.Instance.SetVelocity(averagedVelocity.normalized * num);
-			}
-			else
-			{
-				GTPlayer.Instance.SetVelocity(averagedVelocity);
-			}
-			SIPlayer.LocalPlayer.OnKnockback -= this.OnKnockback;
-			this.gameEntity.RequestState(this.gameEntity.id, this.GetStateLong());
-		}
-	}
-
-	private void OnKnockback(Vector3 knockbackVector)
-	{
-		if (this.isAnchored)
-		{
-			this.isGripBroken = true;
-			this.ClearClawAnchor();
-		}
-	}
-
-	private void GravityOverrideFunction(GTPlayer player)
-	{
-	}
-
-	private void OnEntityStateChanged(long oldState, long newState)
-	{
-		if (this.IsEquippedLocal() || this.activatedLocally)
-		{
-			return;
-		}
-		if ((newState & -9223372036854775808L) != 0L)
-		{
-			this.isHoldingHand = true;
-			this.clawHoldingVisual.SetActive(true);
-			this.clawReleasedVisual.SetActive(false);
-			GamePlayer gamePlayer;
-			if (GamePlayer.TryGetGamePlayer((int)newState, out gamePlayer))
-			{
-				this.heldPlayerCallback.Register(gamePlayer.rig, ((newState & 2305843009213693952L) != 0L) ? gamePlayer.rig.leftHandLink : gamePlayer.rig.rightHandLink);
-				return;
-			}
-		}
-		else if (newState != 0L)
-		{
-			int attachedPlayerActorNr = this.gameEntity.AttachedPlayerActorNr;
-			GamePlayer gamePlayer2;
-			if (attachedPlayerActorNr >= 1 && GamePlayer.TryGetGamePlayer(attachedPlayerActorNr, out gamePlayer2))
-			{
-				Vector3 clawPosition;
-				Quaternion clawRotation;
-				BitPackUtils.UnpackAnchoredPosRotForNetwork(newState, gamePlayer2.rig.transform.position, out clawPosition, out clawRotation);
-				this.SetClawAnchor(clawPosition, clawRotation, Vector3.zero);
-				this.clawVisualPos = this.clawAnchorPosition;
-				this.clawVisualRot = this.clawAnchorRotation;
-				return;
-			}
-		}
-		else
-		{
-			this.ClearClawAnchor();
-		}
-	}
-
-	public override void OnEntityInit()
-	{
-		this.currentFuel = 10f;
-	}
-
-	public static Vector3 GetPlaneIntersection(Vector3 p1Pos, Vector3 p1Norm, Vector3 p2Pos, Vector3 p2Norm, Vector3 refPoint)
-	{
-		Vector3 normalized = Vector3.Cross(p1Norm, p2Norm).normalized;
-		float num = Vector3.Dot(p1Pos, p1Norm);
-		float num2 = Vector3.Dot(p2Pos, p2Norm);
-		float num3 = Vector3.Dot(p1Norm, p2Norm);
-		float num4 = 1f - num3 * num3;
-		if (Mathf.Abs(num4) < 0.001f)
-		{
-			return refPoint;
-		}
-		float d = (num - num2 * num3) / num4;
-		float d2 = (num2 - num * num3) / num4;
-		Vector3 vector = d * p1Norm + d2 * p2Norm;
-		return vector + Vector3.Project(refPoint - vector, normalized);
-	}
-
-	public static Vector3 SplineSample(float theta, Vector3 startDir, Vector3 endPos, Vector3 endDir)
-	{
-		float num = 1f - theta;
-		float t = Mathf.Lerp(theta * theta, 1f - num * num, theta);
-		Vector3 a = startDir * theta;
-		Vector3 b = endPos + endDir * num;
-		return Vector3.Lerp(a, b, t);
-	}
-
-	private void UpdateTentacle(Material material, Transform tentacle, Transform anchor)
-	{
-		Vector3 vector = Vector3.forward * this.LengthFactor;
-		material.SetVector(this.tentacleStartDir_HASH, vector);
-		Vector3 vector2 = tentacle.InverseTransformPoint(anchor.position);
-		material.SetVector(this.tentacleEnd_HASH, vector2);
-		Vector3 vector3 = -tentacle.InverseTransformDirection(anchor.forward) * this.LengthFactor;
-		material.SetVector(this.tentacleEndDir_HASH, vector3);
-		Vector3 vector4 = SIGadgetTentacleArm.SplineSample(0.25f, vector, vector2, vector3);
-		Vector3 a = SIGadgetTentacleArm.SplineSample(0.26f, vector, vector2, vector3);
-		Vector3 vector5 = SIGadgetTentacleArm.SplineSample(0.75f, vector, vector2, vector3);
-		Vector3 a2 = SIGadgetTentacleArm.SplineSample(0.76f, vector, vector2, vector3);
-		Vector3 planeIntersection = SIGadgetTentacleArm.GetPlaneIntersection(vector4, (a - vector4).normalized, vector5, (a2 - vector5).normalized, Quaternion.AngleAxis(90f, Vector3.forward) * vector2.WithZ(0f).normalized);
-		material.SetVector(this.tentacleRingOrigin_HASH, planeIntersection);
-	}
-
-	public void CallBack()
-	{
-		this.lastCallbackFrame = Time.frameCount;
-		if (this.isHoldingHand && this.lastHeldCallbackFrame != this.lastCallbackFrame)
-		{
-			return;
-		}
-		this.claw.transform.localPosition = Vector3.MoveTowards(this.claw.transform.localPosition, this.claw.transform.parent.InverseTransformPoint(this.clawVisualPos), this.ClawMaxBlendSpeed * Time.deltaTime);
-		this.claw.transform.localRotation = Quaternion.RotateTowards(this.claw.transform.localRotation, this.claw.transform.parent.InverseTransformRotation(this.clawVisualRot), this.ClawMaxRotBlendSpeed * Time.deltaTime);
-		this.UpdateTentacle(this.tentacleMat, this.tentacleRenderer.transform, this.tentacleAnchor);
-		if (this.hasTentacle2)
-		{
-			this.UpdateTentacle(this.tentacleMat2, this.tentacleRenderer2.transform, this.tentacleAnchor2);
-		}
-	}
-
-	private void UpdateTentacleHoldingHandPos(TakeMyHand_HandLink heldHandLink)
-	{
-		if (!this.isHoldingHand)
-		{
-			this.heldPlayerCallback.Unregister();
-			return;
-		}
-		this.lastHeldCallbackFrame = Time.frameCount;
-		this.clawVisualPos = heldHandLink.LinkPosition;
-		this.clawVisualRot = heldHandLink.transform.rotation * Quaternion.AngleAxis(90f, Vector3.right);
-		if (this.lastHeldCallbackFrame == this.lastCallbackFrame)
-		{
-			this.CallBack();
-		}
-	}
-
-	public bool UsesEnergy
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	public bool IsFull
-	{
-		get
-		{
-			return this.currentFuel >= this.fuelSize;
-		}
-	}
-
-	public void UpdateRecharge(float dt)
-	{
-		if (!this.isAnchored)
-		{
-			this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.FuelPerSecond_Recharging, 0f, this.fuelSize);
+			parent.UpdateTentacleHoldingHandPos(heldHandLink);
 		}
 	}
 
@@ -821,7 +205,7 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack, IEnergyGadget
 
 	private float _lowFuelThreshold;
 
-	private SIGadgetTentacleArm.HeldPlayerCallback heldPlayerCallback;
+	private HeldPlayerCallback heldPlayerCallback;
 
 	private bool hasRigCallback;
 
@@ -837,45 +221,639 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack, IEnergyGadget
 
 	private const long Anchored_Bit = 4611686018427387904L;
 
-	private const long HoldingHand_Bit = -9223372036854775808L;
+	private const long HoldingHand_Bit = long.MinValue;
 
 	private int lastCallbackFrame;
 
 	private int lastHeldCallbackFrame;
 
-	private class HeldPlayerCallback : ICallBack
+	public bool isAnchored { get; private set; }
+
+	public bool isHoldingHand { get; private set; }
+
+	public bool UsesEnergy => true;
+
+	public bool IsFull => currentFuel >= fuelSize;
+
+	private void Awake()
 	{
-		public HeldPlayerCallback(SIGadgetTentacleArm parent)
+		_fps_holding_base = FuelPerSecond_Holding;
+		_fps_recharging_base = FuelPerSecond_Recharging;
+		_grabCost_base = FuelCost_Grab;
+		_jumpCost_base = FuelCost_JumpSpeed;
+		_jumpSpeed_base = MaxTentacleJumpSpeed;
+		_grabAngle_base = MaxGrabAngle;
+		_wall_angle_dot = Mathf.Cos(MathF.PI / 180f * WallAngle);
+		tentacleMat = new Material(tentacleRenderer.sharedMaterial);
+		tentacleRenderer.sharedMaterial = tentacleMat;
+		if (tentacleRenderer2 != null)
 		{
-			this.parent = parent;
+			hasTentacle2 = true;
+			tentacleMat2 = new Material(tentacleRenderer2.sharedMaterial);
+			tentacleRenderer2.sharedMaterial = tentacleMat2;
 		}
-
-		public void Register(VRRig heldPlayer, TakeMyHand_HandLink heldHandLink)
+		_gaugeMatPropBlock = new MaterialPropertyBlock();
+		if (m_gaugeMatSlots == null)
 		{
-			this.Unregister();
-			this.heldRig = heldPlayer;
-			this.heldHandLink = heldHandLink;
-			heldPlayer.AddLateUpdateCallback(this);
+			m_gaugeMatSlots = Array.Empty<GTRendererMatSlot>();
 		}
-
-		public void Unregister()
+		int num = 0;
+		for (int i = 0; i < m_gaugeMatSlots.Length; i++)
 		{
-			if (this.heldRig != null)
+			if (m_gaugeMatSlots[i].TryInitialize())
 			{
-				this.heldRig.RemoveLateUpdateCallback(this);
+				m_gaugeMatSlots[num] = m_gaugeMatSlots[i];
+				num++;
 			}
-			this.heldRig = null;
 		}
-
-		public void CallBack()
+		if (num != m_gaugeMatSlots.Length)
 		{
-			this.parent.UpdateTentacleHoldingHandPos(this.heldHandLink);
+			Array.Resize(ref m_gaugeMatSlots, num);
 		}
+		GameEntity obj = gameEntity;
+		obj.OnGrabbed = (Action)Delegate.Combine(obj.OnGrabbed, new Action(OnGrabbed));
+		GameEntity obj2 = gameEntity;
+		obj2.OnSnapped = (Action)Delegate.Combine(obj2.OnSnapped, new Action(OnSnapped));
+		GameEntity obj3 = gameEntity;
+		obj3.OnReleased = (Action)Delegate.Combine(obj3.OnReleased, new Action(OnReleased));
+		GameEntity obj4 = gameEntity;
+		obj4.OnUnsnapped = (Action)Delegate.Combine(obj4.OnUnsnapped, new Action(OnUnsnapped));
+		gameEntity.OnStateChanged += OnEntityStateChanged;
+		heldPlayerCallback = new HeldPlayerCallback(this);
+	}
 
-		private SIGadgetTentacleArm parent;
+	private void Start()
+	{
+		clawVisualPos = claw.transform.position;
+		clawVisualRot = claw.transform.rotation;
+		clawReleasedVisual.SetActive(value: false);
+		CallBack();
+	}
 
-		private VRRig heldRig;
+	private void OnDestroy()
+	{
+		if (hasRigCallback)
+		{
+			hasRigCallback = false;
+			rigForCallback.RemoveLateUpdateCallback(this);
+		}
+		if (hasGravityOverride)
+		{
+			GTPlayer.Instance.UnsetGravityOverride(this);
+			hasGravityOverride = false;
+		}
+		heldPlayerCallback.Unregister();
+	}
 
-		private TakeMyHand_HandLink heldHandLink;
+	private void OnGrabbed()
+	{
+		isLeftHanded = gameEntity.heldByHandIndex == 0;
+		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			hasRigCallback = true;
+			rigForCallback = out_gamePlayer.rig;
+			rigForCallback.AddLateUpdateCallback(this);
+		}
+	}
+
+	private void OnSnapped()
+	{
+		isLeftHanded = gameEntity.snappedJoint == SnapJointType.HandL;
+		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out var out_gamePlayer))
+		{
+			hasRigCallback = true;
+			rigForCallback = out_gamePlayer.rig;
+			rigForCallback.AddLateUpdateCallback(this);
+		}
+	}
+
+	private void OnReleased()
+	{
+		ClearClawAnchor();
+		if (hasRigCallback)
+		{
+			hasRigCallback = false;
+			rigForCallback.RemoveLateUpdateCallback(this);
+		}
+	}
+
+	private void OnUnsnapped()
+	{
+		if (hasRigCallback)
+		{
+			hasRigCallback = false;
+			rigForCallback.RemoveLateUpdateCallback(this);
+		}
+	}
+
+	private bool CheckInput()
+	{
+		return buttonActivatable.CheckInput();
+	}
+
+	private Vector3 GetIdealClawPosition(VRRig rig)
+	{
+		Vector3 position = rig.bodyTransform.position;
+		position.y += 0.05f;
+		Vector3 position2 = base.transform.position;
+		Vector3 vector = position2 - position;
+		return position2 + vector * LengthFactor + base.transform.forward * tentacleForwardAdjustment;
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		bool flag = CheckInput();
+		if (isGripBroken)
+		{
+			if (flag)
+			{
+				flag = false;
+			}
+			else
+			{
+				isGripBroken = false;
+			}
+		}
+		Vector3 position = base.transform.position;
+		Vector3 idealClawPosition = GetIdealClawPosition(VRRig.LocalRig);
+		Quaternion rotation = base.transform.rotation;
+		float num = 0.15f;
+		bool flag2 = isLowFuel;
+		if ((knownSafePosition - idealClawPosition).IsLongerThan(1f))
+		{
+			Vector3 position2 = GTPlayer.Instance.headCollider.transform.position;
+			Ray ray = new Ray(position2, idealClawPosition - position2);
+			if (Physics.SphereCast(ray, num, out var hitInfo, (idealClawPosition - position2).magnitude, worldCollisionLayers))
+			{
+				knownSafePosition = ray.origin + ray.direction * (hitInfo.distance - num * 2.01f);
+			}
+			else
+			{
+				knownSafePosition = position;
+			}
+		}
+		if ((isAnchored || isHoldingHand) && !flag)
+		{
+			GorillaTagger.Instance.StartVibration(isLeftHanded, hapticStrengthOnRelease, hapticDurationOnRelease);
+			ClearClawAnchor();
+		}
+		else
+		{
+			if (isAnchored)
+			{
+				currentFuel = Mathf.Max(0f, currentFuel - dt * _current_grab_fps);
+				isLowFuel = currentFuel < _lowFuelThreshold;
+				if (isLowFuel && !flag2)
+				{
+					lowFuelSound.Play();
+				}
+				UpdateFuelGauge();
+				if (currentFuel == 0f)
+				{
+					isGripBroken = true;
+					flag = false;
+					ClearClawAnchor();
+					detachFailSound.Play();
+				}
+				else
+				{
+					Vector3 position3 = GTPlayer.Instance.transform.position;
+					clawHoldAdjustment -= position3 - lastRequestedPlayerPosition;
+					Vector3 v = clawAnchorPosition - (idealClawPosition + clawHoldAdjustment);
+					v.ClampThisMagnitudeSafe(MaxTentacleJumpSpeed * dt);
+					GTPlayer.Instance.RequestTentacleMove(isLeftHanded, v);
+					GTPlayer.Instance.TentacleActiveAtFrame = Time.frameCount + 1;
+					lastRequestedPlayerPosition = position3 + v;
+					if ((clawAnchorPosition - base.transform.position).IsLongerThan(maxTentacleLength))
+					{
+						isGripBroken = true;
+						ClearClawAnchor();
+						detachFailSound.Play();
+					}
+					else
+					{
+						clawVisualPos = clawAnchorPosition;
+						clawVisualRot = clawAnchorRotation;
+					}
+				}
+				wasGrabPressed = flag;
+				return;
+			}
+			if (isHoldingHand)
+			{
+				TakeMyHand_HandLink takeMyHand_HandLink = (isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink);
+				if (takeMyHand_HandLink.IsLinkActive())
+				{
+					Vector3 position4 = (isLeftHanded ? VRRig.LocalRig.leftHand : VRRig.LocalRig.rightHand).overrideTarget.position;
+					takeMyHand_HandLink.TentacleOffset = idealClawPosition - position4;
+				}
+				else
+				{
+					isGripBroken = true;
+					ClearClawAnchor();
+					detachFailSound.Play();
+				}
+				wasGrabPressed = flag;
+				return;
+			}
+		}
+		RaycastHit hitInfo2;
+		bool num2 = Physics.SphereCast(new Ray(knownSafePosition, idealClawPosition - knownSafePosition), num, out hitInfo2, (idealClawPosition - knownSafePosition).magnitude, worldCollisionLayers);
+		Vector3 vector = idealClawPosition;
+		Quaternion clawRotation = rotation;
+		bool flag3 = false;
+		bool flag4 = currentFuel < FuelCost_Grab + FuelPerSecond_Holding;
+		if (flag4 && flag)
+		{
+			isGripBroken = true;
+			flag = false;
+			attachFailSound.Play();
+		}
+		if (num2)
+		{
+			if (!flag4)
+			{
+				float num3 = Vector3.Dot(hitInfo2.normal, Vector3.up);
+				if (num3 >= _min_grab_dot)
+				{
+					_current_grab_fps = ((num3 >= _wall_angle_dot) ? FuelPerSecond_Holding : (FuelPerSecond_Holding * FuelCost_Wall_Multiplier));
+					flag3 = true;
+					if (GTPlayer.Instance.GetSlidePercentage(hitInfo2) > 0.5f)
+					{
+						if (!canHoldSlipperyWalls)
+						{
+							flag3 = false;
+							if (flag && !hasFailedToGrab)
+							{
+								attachFailSound.Play();
+								hasFailedToGrab = true;
+							}
+						}
+						else
+						{
+							_current_grab_fps *= FuelCost_Slippery_Multiplier;
+						}
+					}
+				}
+				else if (flag && !hasFailedToGrab)
+				{
+					attachFailSound.Play();
+					hasFailedToGrab = true;
+				}
+			}
+			knownSafePosition += (idealClawPosition - knownSafePosition).normalized * (hitInfo2.distance - num * 2.01f);
+			vector = hitInfo2.point + hitInfo2.normal * 0.1f;
+		}
+		else
+		{
+			knownSafePosition = idealClawPosition;
+		}
+		if (flag && flag3)
+		{
+			vector = hitInfo2.point + hitInfo2.normal * 0.01f;
+			clawRotation = Quaternion.LookRotation(-hitInfo2.normal, rotation * Vector3.up);
+			SetClawAnchor(vector, clawRotation, vector - idealClawPosition);
+			GorillaTagger.Instance.StartVibration(isLeftHanded, hapticStrengthOnGrab, hapticDurationOnGrab);
+			currentFuel -= FuelCost_Grab;
+		}
+		else
+		{
+			if (flag && !wasGrabPressed && (!GorillaComputer.instance.IsPlayerInVirtualStump() || !CustomMapManager.WantsHoldingHandsDisabled()))
+			{
+				TakeMyHand_HandLink takeMyHand_HandLink2 = (isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink);
+				Vector3 position5 = (isLeftHanded ? VRRig.LocalRig.leftHand : VRRig.LocalRig.rightHand).overrideTarget.position;
+				foreach (VRRig activeRig in VRRigCache.ActiveRigs)
+				{
+					if (activeRig.isLocal)
+					{
+						continue;
+					}
+					if (activeRig.leftHandLink.interactionPoint.OverlapCheck(vector) && activeRig.leftHandLink.CanBeGrabbed())
+					{
+						if (takeMyHand_HandLink2.TentacleTryCreateLink(activeRig.leftHandLink))
+						{
+							isHoldingHand = true;
+							clawHoldingVisual.SetActive(value: true);
+							clawReleasedVisual.SetActive(value: false);
+							takeMyHand_HandLink2.TentacleOffset = idealClawPosition - position5;
+							heldPlayerCallback.Register(activeRig, activeRig.leftHandLink);
+							gameEntity.RequestState(gameEntity.id, GetStateLong());
+							break;
+						}
+					}
+					else if (activeRig.rightHandLink.interactionPoint.OverlapCheck(vector) && activeRig.rightHandLink.CanBeGrabbed() && takeMyHand_HandLink2.TentacleTryCreateLink(activeRig.rightHandLink))
+					{
+						isHoldingHand = true;
+						clawHoldingVisual.SetActive(value: true);
+						clawReleasedVisual.SetActive(value: false);
+						takeMyHand_HandLink2.TentacleOffset = idealClawPosition - position5;
+						heldPlayerCallback.Register(activeRig, activeRig.rightHandLink);
+						gameEntity.RequestState(gameEntity.id, GetStateLong());
+						break;
+					}
+				}
+			}
+			Vector3 axis = Quaternion.AngleAxis(Time.time * 180f, Vector3.forward) * Vector3.up;
+			if (flag3)
+			{
+				clawRotation = Quaternion.Lerp(rotation, Quaternion.LookRotation(-hitInfo2.normal, rotation * Vector3.up), 0.75f);
+				clawRotation *= Quaternion.AngleAxis(5f, axis);
+			}
+			else
+			{
+				clawRotation *= Quaternion.AngleAxis(20f, axis);
+				vector.y += 0.05f * Mathf.Cos(Time.time * 2f);
+			}
+		}
+		clawVisualPos = vector;
+		clawVisualRot = clawRotation;
+		if (!isAnchored)
+		{
+			isLowFuel = currentFuel < FuelCost_Grab;
+		}
+		wasGrabPressed = flag;
+		UpdateFuelGauge();
+	}
+
+	private void UpdateFuelGauge()
+	{
+		float value = currentFuel / fuelSize;
+		for (int i = 0; i < m_gaugeMatSlots.Length; i++)
+		{
+			_gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, value);
+			m_gaugeMatSlots[i].renderer.SetPropertyBlock(_gaugeMatPropBlock, m_gaugeMatSlots[i].slot);
+		}
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		if (isAnchored)
+		{
+			return;
+		}
+		VRRig attachedPlayerRig = GetAttachedPlayerRig();
+		if (attachedPlayerRig == null)
+		{
+			return;
+		}
+		Vector3 idealClawPosition = GetIdealClawPosition(attachedPlayerRig);
+		Quaternion rotation = base.transform.rotation;
+		Vector3 position = base.transform.position;
+		if ((knownSafePosition - idealClawPosition).IsLongerThan(1f))
+		{
+			knownSafePosition = position;
+		}
+		if (isHoldingHand)
+		{
+			TakeMyHand_HandLink obj = (isLeftHanded ? attachedPlayerRig.leftHandLink : attachedPlayerRig.rightHandLink);
+			Vector3 position2 = (isLeftHanded ? attachedPlayerRig.leftHand : attachedPlayerRig.rightHand).rigTarget.position;
+			obj.TentacleOffset = idealClawPosition - position2;
+			return;
+		}
+		float num = 0.15f;
+		RaycastHit hitInfo;
+		bool num2 = Physics.SphereCast(new Ray(knownSafePosition, idealClawPosition - knownSafePosition), num, out hitInfo, (idealClawPosition - knownSafePosition).magnitude, worldCollisionLayers);
+		Vector3 axis = Quaternion.AngleAxis(Time.time * 180f, Vector3.forward) * Vector3.up;
+		Vector3 vector = idealClawPosition;
+		Quaternion quaternion = rotation;
+		if (num2)
+		{
+			knownSafePosition += (idealClawPosition - knownSafePosition).normalized * (hitInfo.distance - num * 2.01f);
+			vector = hitInfo.point + hitInfo.normal * 0.1f;
+			quaternion *= Quaternion.AngleAxis(5f, axis);
+		}
+		else
+		{
+			knownSafePosition = idealClawPosition;
+			quaternion *= Quaternion.AngleAxis(20f, axis);
+			vector.y += 0.05f * Mathf.Cos(Time.time * 2f);
+		}
+		clawVisualPos = vector;
+		clawVisualRot = quaternion;
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		FuelPerSecond_Holding = _fps_holding_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
+		FuelPerSecond_Recharging = _fps_recharging_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Charge_Rate) ? 1.2f : 1f);
+		FuelCost_Grab = _grabCost_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
+		FuelCost_JumpSpeed = _jumpCost_base * (withUpgrades.Contains(SIUpgradeType.Tentacle_Efficiency) ? 0.8f : 1f);
+		MaxGrabAngle = (withUpgrades.Contains(SIUpgradeType.Tentacle_Power_Claw) ? 180f : _grabAngle_base);
+		MaxTentacleJumpSpeed = _jumpSpeed_base;
+		_min_grab_dot = Mathf.Cos(MathF.PI / 180f * MaxGrabAngle);
+		_lowFuelThreshold = FuelCost_Grab + FuelPerSecond_Holding;
+	}
+
+	private long GetStateLong()
+	{
+		if (isAnchored)
+		{
+			return 0x4000000000000000L | BitPackUtils.PackAnchoredPosRotForNetwork(clawAnchorPosition, clawAnchorRotation);
+		}
+		if (isHoldingHand)
+		{
+			TakeMyHand_HandLink takeMyHand_HandLink = (isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink);
+			int num = takeMyHand_HandLink.grabbedPlayer?.ActorNumber ?? 0;
+			return long.MinValue | (takeMyHand_HandLink.grabbedHandIsLeft ? 2305843009213693952L : 0) | num;
+		}
+		return 0L;
+	}
+
+	private void SetClawAnchor(Vector3 clawPosition, Quaternion clawRotation, Vector3 adjustment)
+	{
+		if (!isAnchored)
+		{
+			attachSound.Play();
+		}
+		hasFailedToGrab = false;
+		isAnchored = true;
+		clawHoldAdjustment = adjustment;
+		clawAnchorPosition = clawPosition;
+		clawAnchorRotation = clawRotation;
+		clawHoldingVisual.SetActive(value: true);
+		clawReleasedVisual.SetActive(value: false);
+		if (IsEquippedLocal())
+		{
+			lastRequestedPlayerPosition = GTPlayer.Instance.transform.position;
+			GTPlayer.Instance.SetGravityOverride(this, GravityOverrideFunction);
+			hasGravityOverride = true;
+			SIPlayer.LocalPlayer.OnKnockback += OnKnockback;
+			gameEntity.RequestState(gameEntity.id, GetStateLong());
+		}
+	}
+
+	private void ClearClawAnchor()
+	{
+		if (isAnchored || isHoldingHand)
+		{
+			detachSound.Play();
+		}
+		hasFailedToGrab = false;
+		isAnchored = false;
+		clawHoldingVisual.SetActive(value: false);
+		clawReleasedVisual.SetActive(value: true);
+		if (isHoldingHand && IsEquippedLocal())
+		{
+			(isLeftHanded ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink).BreakLink();
+		}
+		isHoldingHand = false;
+		if (hasGravityOverride)
+		{
+			GTPlayer.Instance.UnsetGravityOverride(this);
+			hasGravityOverride = false;
+		}
+		if (IsEquippedLocal() && !IsBlocked(SIExclusionType.AffectsLocalMovement))
+		{
+			Vector3 averagedVelocity = GTPlayer.Instance.AveragedVelocity;
+			float a = averagedVelocity.magnitude;
+			if (FuelCost_JumpSpeed > 0f)
+			{
+				a = Mathf.Min(a, currentFuel / FuelCost_JumpSpeed * MaxTentacleJumpSpeed);
+			}
+			a = Mathf.Min(a, MaxTentacleJumpSpeed);
+			currentFuel -= a / MaxTentacleJumpSpeed * FuelCost_JumpSpeed;
+			if (averagedVelocity.IsLongerThan(a))
+			{
+				GTPlayer.Instance.SetVelocity(averagedVelocity.normalized * a);
+			}
+			else
+			{
+				GTPlayer.Instance.SetVelocity(averagedVelocity);
+			}
+			SIPlayer.LocalPlayer.OnKnockback -= OnKnockback;
+			gameEntity.RequestState(gameEntity.id, GetStateLong());
+		}
+	}
+
+	private void OnKnockback(Vector3 knockbackVector)
+	{
+		if (isAnchored)
+		{
+			isGripBroken = true;
+			ClearClawAnchor();
+		}
+	}
+
+	private void GravityOverrideFunction(GTPlayer player)
+	{
+	}
+
+	private void OnEntityStateChanged(long oldState, long newState)
+	{
+		if (IsEquippedLocal() || activatedLocally)
+		{
+			return;
+		}
+		if ((newState & long.MinValue) != 0L)
+		{
+			isHoldingHand = true;
+			clawHoldingVisual.SetActive(value: true);
+			clawReleasedVisual.SetActive(value: false);
+			if (GamePlayer.TryGetGamePlayer((int)newState, out var out_gamePlayer))
+			{
+				heldPlayerCallback.Register(out_gamePlayer.rig, ((newState & 0x2000000000000000L) != 0L) ? out_gamePlayer.rig.leftHandLink : out_gamePlayer.rig.rightHandLink);
+			}
+		}
+		else if (newState != 0L)
+		{
+			int attachedPlayerActorNr = gameEntity.AttachedPlayerActorNr;
+			if (attachedPlayerActorNr >= 1 && GamePlayer.TryGetGamePlayer(attachedPlayerActorNr, out var out_gamePlayer2))
+			{
+				BitPackUtils.UnpackAnchoredPosRotForNetwork(newState, out_gamePlayer2.rig.transform.position, out var pos, out var rot);
+				SetClawAnchor(pos, rot, Vector3.zero);
+				clawVisualPos = clawAnchorPosition;
+				clawVisualRot = clawAnchorRotation;
+			}
+		}
+		else
+		{
+			ClearClawAnchor();
+		}
+	}
+
+	public override void OnEntityInit()
+	{
+		currentFuel = 10f;
+	}
+
+	public static Vector3 GetPlaneIntersection(Vector3 p1Pos, Vector3 p1Norm, Vector3 p2Pos, Vector3 p2Norm, Vector3 refPoint)
+	{
+		Vector3 normalized = Vector3.Cross(p1Norm, p2Norm).normalized;
+		float num = Vector3.Dot(p1Pos, p1Norm);
+		float num2 = Vector3.Dot(p2Pos, p2Norm);
+		float num3 = Vector3.Dot(p1Norm, p2Norm);
+		float num4 = 1f - num3 * num3;
+		if (Mathf.Abs(num4) < 0.001f)
+		{
+			return refPoint;
+		}
+		float num5 = (num - num2 * num3) / num4;
+		float num6 = (num2 - num * num3) / num4;
+		Vector3 vector = num5 * p1Norm + num6 * p2Norm;
+		return vector + Vector3.Project(refPoint - vector, normalized);
+	}
+
+	public static Vector3 SplineSample(float theta, Vector3 startDir, Vector3 endPos, Vector3 endDir)
+	{
+		float num = 1f - theta;
+		float t = Mathf.Lerp(theta * theta, 1f - num * num, theta);
+		Vector3 a = startDir * theta;
+		Vector3 b = endPos + endDir * num;
+		return Vector3.Lerp(a, b, t);
+	}
+
+	private void UpdateTentacle(Material material, Transform tentacle, Transform anchor)
+	{
+		Vector3 vector = Vector3.forward * LengthFactor;
+		material.SetVector(tentacleStartDir_HASH, vector);
+		Vector3 vector2 = tentacle.InverseTransformPoint(anchor.position);
+		material.SetVector(tentacleEnd_HASH, vector2);
+		Vector3 vector3 = -tentacle.InverseTransformDirection(anchor.forward) * LengthFactor;
+		material.SetVector(tentacleEndDir_HASH, vector3);
+		Vector3 vector4 = SplineSample(0.25f, vector, vector2, vector3);
+		Vector3 vector5 = SplineSample(0.26f, vector, vector2, vector3);
+		Vector3 vector6 = SplineSample(0.75f, vector, vector2, vector3);
+		Vector3 vector7 = SplineSample(0.76f, vector, vector2, vector3);
+		Vector3 planeIntersection = GetPlaneIntersection(vector4, (vector5 - vector4).normalized, vector6, (vector7 - vector6).normalized, Quaternion.AngleAxis(90f, Vector3.forward) * vector2.WithZ(0f).normalized);
+		material.SetVector(tentacleRingOrigin_HASH, planeIntersection);
+	}
+
+	public void CallBack()
+	{
+		lastCallbackFrame = Time.frameCount;
+		if (!isHoldingHand || lastHeldCallbackFrame == lastCallbackFrame)
+		{
+			claw.transform.localPosition = Vector3.MoveTowards(claw.transform.localPosition, claw.transform.parent.InverseTransformPoint(clawVisualPos), ClawMaxBlendSpeed * Time.deltaTime);
+			claw.transform.localRotation = Quaternion.RotateTowards(claw.transform.localRotation, claw.transform.parent.InverseTransformRotation(clawVisualRot), ClawMaxRotBlendSpeed * Time.deltaTime);
+			UpdateTentacle(tentacleMat, tentacleRenderer.transform, tentacleAnchor);
+			if (hasTentacle2)
+			{
+				UpdateTentacle(tentacleMat2, tentacleRenderer2.transform, tentacleAnchor2);
+			}
+		}
+	}
+
+	private void UpdateTentacleHoldingHandPos(TakeMyHand_HandLink heldHandLink)
+	{
+		if (!isHoldingHand)
+		{
+			heldPlayerCallback.Unregister();
+			return;
+		}
+		lastHeldCallbackFrame = Time.frameCount;
+		clawVisualPos = heldHandLink.LinkPosition;
+		clawVisualRot = heldHandLink.transform.rotation * Quaternion.AngleAxis(90f, Vector3.right);
+		if (lastHeldCallbackFrame == lastCallbackFrame)
+		{
+			CallBack();
+		}
+	}
+
+	public void UpdateRecharge(float dt)
+	{
+		if (!isAnchored)
+		{
+			currentFuel = Mathf.Clamp(currentFuel + dt * FuelPerSecond_Recharging, 0f, fuelSize);
+		}
 	}
 }

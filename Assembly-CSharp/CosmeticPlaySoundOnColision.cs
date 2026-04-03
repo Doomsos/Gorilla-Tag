@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using GorillaLocomotion;
@@ -7,79 +6,6 @@ using UnityEngine.Events;
 
 public class CosmeticPlaySoundOnColision : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.transferrableObject = base.GetComponentInParent<TransferrableObject>();
-		this.soundLookup = new Dictionary<int, int>();
-		this.audioSource = base.GetComponent<AudioSource>();
-		for (int i = 0; i < this.soundIdRemappings.Length; i++)
-		{
-			this.soundLookup.Add(this.soundIdRemappings[i].SoundIn, this.soundIdRemappings[i].SoundOut);
-		}
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		GorillaSurfaceOverride gorillaSurfaceOverride;
-		if (this.speed >= this.minSpeed && other.TryGetComponent<GorillaSurfaceOverride>(out gorillaSurfaceOverride))
-		{
-			int soundIndex;
-			if (this.soundLookup.TryGetValue(gorillaSurfaceOverride.overrideIndex, out soundIndex))
-			{
-				this.playSound(soundIndex, this.invokeEventOnOverideSound);
-				return;
-			}
-			this.playSound(this.defaultSound, this.invokeEventOnDefaultSound);
-		}
-	}
-
-	private void playSound(int soundIndex, bool invokeEvent)
-	{
-		if (soundIndex > -1 && soundIndex < GTPlayer.Instance.materialData.Count)
-		{
-			if (this.audioSource.isPlaying)
-			{
-				this.audioSource.GTStop();
-				if (this.invokeEventsOnAllClients || this.transferrableObject.IsMyItem())
-				{
-					this.OnStopPlayback.Invoke();
-				}
-				if (this.crWaitForStopPlayback != null)
-				{
-					base.StopCoroutine(this.crWaitForStopPlayback);
-					this.crWaitForStopPlayback = null;
-				}
-			}
-			this.audioSource.clip = GTPlayer.Instance.materialData[soundIndex].audio;
-			this.audioSource.GTPlay();
-			if (invokeEvent && (this.invokeEventsOnAllClients || this.transferrableObject.IsMyItem()))
-			{
-				this.OnStartPlayback.Invoke();
-				this.crWaitForStopPlayback = base.StartCoroutine(this.waitForStopPlayback());
-			}
-		}
-	}
-
-	private IEnumerator waitForStopPlayback()
-	{
-		while (this.audioSource.isPlaying)
-		{
-			yield return null;
-		}
-		if (this.invokeEventsOnAllClients || this.transferrableObject.IsMyItem())
-		{
-			this.OnStopPlayback.Invoke();
-		}
-		this.crWaitForStopPlayback = null;
-		yield break;
-	}
-
-	private void FixedUpdate()
-	{
-		this.speed = Vector3.Distance(base.transform.position, this.previousFramePosition) * Time.fixedDeltaTime * 100f;
-		this.previousFramePosition = base.transform.position;
-	}
-
 	[GorillaSoundLookup]
 	[SerializeField]
 	private int defaultSound = 1;
@@ -116,4 +42,77 @@ public class CosmeticPlaySoundOnColision : MonoBehaviour
 
 	[SerializeField]
 	private bool invokeEventOnDefaultSound;
+
+	private void Awake()
+	{
+		transferrableObject = GetComponentInParent<TransferrableObject>();
+		soundLookup = new Dictionary<int, int>();
+		audioSource = GetComponent<AudioSource>();
+		for (int i = 0; i < soundIdRemappings.Length; i++)
+		{
+			soundLookup.Add(soundIdRemappings[i].SoundIn, soundIdRemappings[i].SoundOut);
+		}
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (speed >= minSpeed && other.TryGetComponent<GorillaSurfaceOverride>(out var component))
+		{
+			if (soundLookup.TryGetValue(component.overrideIndex, out var value))
+			{
+				playSound(value, invokeEventOnOverideSound);
+			}
+			else
+			{
+				playSound(defaultSound, invokeEventOnDefaultSound);
+			}
+		}
+	}
+
+	private void playSound(int soundIndex, bool invokeEvent)
+	{
+		if (soundIndex <= -1 || soundIndex >= GTPlayer.Instance.materialData.Count)
+		{
+			return;
+		}
+		if (audioSource.isPlaying)
+		{
+			audioSource.GTStop();
+			if (invokeEventsOnAllClients || transferrableObject.IsMyItem())
+			{
+				OnStopPlayback.Invoke();
+			}
+			if (crWaitForStopPlayback != null)
+			{
+				StopCoroutine(crWaitForStopPlayback);
+				crWaitForStopPlayback = null;
+			}
+		}
+		audioSource.clip = GTPlayer.Instance.materialData[soundIndex].audio;
+		audioSource.GTPlay();
+		if (invokeEvent && (invokeEventsOnAllClients || transferrableObject.IsMyItem()))
+		{
+			OnStartPlayback.Invoke();
+			crWaitForStopPlayback = StartCoroutine(waitForStopPlayback());
+		}
+	}
+
+	private IEnumerator waitForStopPlayback()
+	{
+		while (audioSource.isPlaying)
+		{
+			yield return null;
+		}
+		if (invokeEventsOnAllClients || transferrableObject.IsMyItem())
+		{
+			OnStopPlayback.Invoke();
+		}
+		crWaitForStopPlayback = null;
+	}
+
+	private void FixedUpdate()
+	{
+		speed = Vector3.Distance(base.transform.position, previousFramePosition) * Time.fixedDeltaTime * 100f;
+		previousFramePosition = base.transform.position;
+	}
 }

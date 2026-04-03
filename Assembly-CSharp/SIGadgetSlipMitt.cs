@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Drawing;
 using GorillaLocomotion;
 using UnityEngine;
@@ -8,226 +8,12 @@ using UnityEngine;
 [RequireComponent(typeof(GameButtonActivatable))]
 public class SIGadgetSlipMitt : SIGadget
 {
-	private int _HandIndex
+	private enum EState
 	{
-		get
-		{
-			if ((this.m_snappable.snappedToJoint != null && this.m_snappable.snappedToJoint.jointType == SnapJointType.HandL) || this.gameEntity.heldByHandIndex == 0)
-			{
-				return 0;
-			}
-			if ((this.m_snappable.snappedToJoint != null && this.m_snappable.snappedToJoint.jointType == SnapJointType.HandR) || this.gameEntity.heldByHandIndex == 1)
-			{
-				return 1;
-			}
-			return -1;
-		}
-	}
-
-	private void Start()
-	{
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this._HandleStartInteraction));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnSnapped = (Action)Delegate.Combine(gameEntity2.OnSnapped, new Action(this._HandleStartInteraction));
-		GameEntity gameEntity3 = this.gameEntity;
-		gameEntity3.OnReleased = (Action)Delegate.Combine(gameEntity3.OnReleased, new Action(this._HandleStopInteraction));
-		GameEntity gameEntity4 = this.gameEntity;
-		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this._HandleStopInteraction));
-		foreach (AudioClip audioClip in this.m_clips)
-		{
-			if (audioClip)
-			{
-				audioClip.LoadAudioData();
-			}
-		}
-	}
-
-	private void OnDestroy()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnGrabbed = (Action)Delegate.Remove(gameEntity.OnGrabbed, new Action(this._HandleStartInteraction));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnSnapped = (Action)Delegate.Remove(gameEntity2.OnSnapped, new Action(this._HandleStartInteraction));
-		GameEntity gameEntity3 = this.gameEntity;
-		gameEntity3.OnReleased = (Action)Delegate.Remove(gameEntity3.OnReleased, new Action(this._HandleStopInteraction));
-		GameEntity gameEntity4 = this.gameEntity;
-		gameEntity4.OnUnsnapped = (Action)Delegate.Remove(gameEntity4.OnUnsnapped, new Action(this._HandleStopInteraction));
-	}
-
-	private void _HandleStartInteraction()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this._attachedPlayerActorNr = this.gameEntity.AttachedPlayerActorNr;
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this._attachedPlayerActorNr, out gamePlayer))
-		{
-			return;
-		}
-		this._attachedVRRig = gamePlayer.rig;
-	}
-
-	private void _HandleStopInteraction()
-	{
-		this._attachedPlayerActorNr = -1;
-		this._attachedVRRig = null;
-		if (!this.gameEntity.IsAuthority())
-		{
-			return;
-		}
-		this.SetStateAuthority(SIGadgetSlipMitt.EState.Idle);
-	}
-
-	protected void FixedUpdate()
-	{
-		if ((!this.IsEquippedLocal() && !this.activatedLocally) || ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this._wasActivated = this._isActivated;
-		this._isActivated = this._CheckInput();
-		if (Time.unscaledTime < this._airGrabTime + this.m_slipperySurfacesTime)
-		{
-			GTPlayer.Instance.SetMaximumSlipThisFrame();
-		}
-		SIGadgetSlipMitt.EState state = this._state;
-		if (state != SIGadgetSlipMitt.EState.Idle)
-		{
-			if (state != SIGadgetSlipMitt.EState.Slip)
-			{
-				return;
-			}
-			if (!this._isActivated)
-			{
-				this.SetStateAuthority(SIGadgetSlipMitt.EState.Idle);
-				GTPlayer.Instance.UnsetGravityOverride(this);
-				return;
-			}
-			this._airReleaseSpeed = 0f;
-			if (this._HandIndex == 0)
-			{
-				GTPlayer.Instance.SetLeftMaximumSlipThisFrame();
-				this._attachedHandState = GTPlayer.Instance.LeftHand;
-				return;
-			}
-			GTPlayer.Instance.SetRightMaximumSlipThisFrame();
-			this._attachedHandState = GTPlayer.Instance.RightHand;
-		}
-		else if (this._isActivated && !base.IsBlocked(SIExclusionType.AffectsLocalMovement))
-		{
-			this._PlayHaptic(0.1f);
-			GTPlayer.Instance.SetGravityOverride(this, new Action<GTPlayer>(this._HandleGTPlayerOnUpdateGravity));
-			this.SetStateAuthority(SIGadgetSlipMitt.EState.Slip);
-			return;
-		}
-	}
-
-	private void _HandleGTPlayerOnUpdateGravity(GTPlayer gtPlayer)
-	{
-		Transform handFollower = this._attachedHandState.handFollower;
-		Ray ray = new Ray(handFollower.position, handFollower.forward);
-		int value = gtPlayer.locomotionEnabledLayers.value;
-		float maxDistance = 1f;
-		float d = 20f;
-		int num = Physics.RaycastNonAlloc(ray, this._raycastHitResults, maxDistance, value, QueryTriggerInteraction.Ignore);
-		RaycastHit[] raycastHitResults = this._raycastHitResults;
-		Vector3 gravity = Physics.gravity;
-		Vector3 vector = ray.direction * d;
-		Vector3 a = (num > 0) ? vector : gravity;
-		Draw.ingame.Arrow(ray.origin, ray.origin + ray.direction);
-		gtPlayer.AddForce(a * gtPlayer.scale, ForceMode.Acceleration);
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		base.OnUpdateRemote(dt);
-		SIGadgetSlipMitt.EState estate = (SIGadgetSlipMitt.EState)this.gameEntity.GetState();
-		if (estate != this._state)
-		{
-			this._SetStateShared(estate);
-		}
-	}
-
-	private static bool _CanChangeState(long newStateIndex)
-	{
-		return newStateIndex >= 0L && newStateIndex < 3L;
-	}
-
-	private void SetStateAuthority(SIGadgetSlipMitt.EState newState)
-	{
-		this._SetStateShared(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void _SetStateShared(SIGadgetSlipMitt.EState newState)
-	{
-		if (newState == this._state || !SIGadgetSlipMitt._CanChangeState((long)newState))
-		{
-			return;
-		}
-		this._state = newState;
-		SIGadgetSlipMitt.EState state = this._state;
-		if (state != SIGadgetSlipMitt.EState.Idle)
-		{
-		}
-	}
-
-	private bool _CheckInput()
-	{
-		float sensitivity = this._wasActivated ? this.m_inputDeactivateThreshold : this.m_inputActivateThreshold;
-		return this.m_buttonActivatable.CheckInput(sensitivity);
-	}
-
-	private void _DoAirGrab()
-	{
-		float magnitude = GamePlayerLocal.instance.GetHandVelocity(this._HandIndex).magnitude;
-	}
-
-	private void _DoDash()
-	{
-		this._airGrabTime = Time.unscaledTime;
-		Vector3 handVelocity = GamePlayerLocal.instance.GetHandVelocity(this._HandIndex);
-		float num = this._CalculateDashSpeed(handVelocity.magnitude);
-		GTPlayer instance = GTPlayer.Instance;
-		instance.SetMaximumSlipThisFrame();
-		instance.SetVelocity(handVelocity.normalized * -num);
-		this._PlayHaptic(2f);
-		this.SetStateAuthority(SIGadgetSlipMitt.EState.DashUsed);
-	}
-
-	private float _CalculateDashSpeed(float currentYankSpeed)
-	{
-		float time = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
-		float t = this.m_speedMappingCurve.Evaluate(time);
-		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, t);
-	}
-
-	private void _PlayHaptic(float strengthMultiplier)
-	{
-		bool forLeftController;
-		if (base.FindAttachedHand(out forLeftController))
-		{
-			GorillaTagger.Instance.StartVibration(forLeftController, GorillaTagger.Instance.tapHapticStrength * strengthMultiplier, GorillaTagger.Instance.tapHapticDuration);
-		}
-	}
-
-	private void _PlayAudio(int index)
-	{
-		this.m_audioSource.clip = this.m_clips[index];
-		this.m_audioSource.volume = this.m_clipVolumes[index];
-		this.m_audioSource.GTPlay();
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this._maxDashSpeed = (withUpgrades.Contains(SIUpgradeType.Dash_Yoyo_Speed) ? this.m_maxDashSpeedUpgraded : this.m_maxDashSpeedDefault);
+		Idle,
+		Slip,
+		DashUsed,
+		Count
 	}
 
 	private const string preLog = "[SIGadgetSlipMitt]  ";
@@ -323,15 +109,227 @@ public class SIGadgetSlipMitt : SIGadget
 
 	private bool _isTagged;
 
-	private SIGadgetSlipMitt.EState _state;
+	private EState _state;
 
 	private RaycastHit[] _raycastHitResults = new RaycastHit[1];
 
-	private enum EState
+	private int _HandIndex
 	{
-		Idle,
-		Slip,
-		DashUsed,
-		Count
+		get
+		{
+			if ((m_snappable.snappedToJoint != null && m_snappable.snappedToJoint.jointType == SnapJointType.HandL) || gameEntity.heldByHandIndex == 0)
+			{
+				return 0;
+			}
+			if ((m_snappable.snappedToJoint != null && m_snappable.snappedToJoint.jointType == SnapJointType.HandR) || gameEntity.heldByHandIndex == 1)
+			{
+				return 1;
+			}
+			return -1;
+		}
+	}
+
+	private void Start()
+	{
+		GameEntity obj = gameEntity;
+		obj.OnGrabbed = (Action)Delegate.Combine(obj.OnGrabbed, new Action(_HandleStartInteraction));
+		GameEntity obj2 = gameEntity;
+		obj2.OnSnapped = (Action)Delegate.Combine(obj2.OnSnapped, new Action(_HandleStartInteraction));
+		GameEntity obj3 = gameEntity;
+		obj3.OnReleased = (Action)Delegate.Combine(obj3.OnReleased, new Action(_HandleStopInteraction));
+		GameEntity obj4 = gameEntity;
+		obj4.OnUnsnapped = (Action)Delegate.Combine(obj4.OnUnsnapped, new Action(_HandleStopInteraction));
+		AudioClip[] clips = m_clips;
+		foreach (AudioClip audioClip in clips)
+		{
+			if ((bool)audioClip)
+			{
+				audioClip.LoadAudioData();
+			}
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			GameEntity obj = gameEntity;
+			obj.OnGrabbed = (Action)Delegate.Remove(obj.OnGrabbed, new Action(_HandleStartInteraction));
+			GameEntity obj2 = gameEntity;
+			obj2.OnSnapped = (Action)Delegate.Remove(obj2.OnSnapped, new Action(_HandleStartInteraction));
+			GameEntity obj3 = gameEntity;
+			obj3.OnReleased = (Action)Delegate.Remove(obj3.OnReleased, new Action(_HandleStopInteraction));
+			GameEntity obj4 = gameEntity;
+			obj4.OnUnsnapped = (Action)Delegate.Remove(obj4.OnUnsnapped, new Action(_HandleStopInteraction));
+		}
+	}
+
+	private void _HandleStartInteraction()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			_attachedPlayerActorNr = gameEntity.AttachedPlayerActorNr;
+			if (GamePlayer.TryGetGamePlayer(_attachedPlayerActorNr, out var out_gamePlayer))
+			{
+				_attachedVRRig = out_gamePlayer.rig;
+			}
+		}
+	}
+
+	private void _HandleStopInteraction()
+	{
+		_attachedPlayerActorNr = -1;
+		_attachedVRRig = null;
+		if (gameEntity.IsAuthority())
+		{
+			SetStateAuthority(EState.Idle);
+		}
+	}
+
+	protected void FixedUpdate()
+	{
+		if ((!IsEquippedLocal() && !activatedLocally) || ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
+		_wasActivated = _isActivated;
+		_isActivated = _CheckInput();
+		if (Time.unscaledTime < _airGrabTime + m_slipperySurfacesTime)
+		{
+			GTPlayer.Instance.SetMaximumSlipThisFrame();
+		}
+		switch (_state)
+		{
+		case EState.Idle:
+			if (_isActivated && !IsBlocked(SIExclusionType.AffectsLocalMovement))
+			{
+				_PlayHaptic(0.1f);
+				GTPlayer.Instance.SetGravityOverride(this, _HandleGTPlayerOnUpdateGravity);
+				SetStateAuthority(EState.Slip);
+			}
+			break;
+		case EState.Slip:
+			if (!_isActivated)
+			{
+				SetStateAuthority(EState.Idle);
+				GTPlayer.Instance.UnsetGravityOverride(this);
+				break;
+			}
+			_airReleaseSpeed = 0f;
+			if (_HandIndex == 0)
+			{
+				GTPlayer.Instance.SetLeftMaximumSlipThisFrame();
+				_attachedHandState = GTPlayer.Instance.LeftHand;
+			}
+			else
+			{
+				GTPlayer.Instance.SetRightMaximumSlipThisFrame();
+				_attachedHandState = GTPlayer.Instance.RightHand;
+			}
+			break;
+		}
+	}
+
+	private void _HandleGTPlayerOnUpdateGravity(GTPlayer gtPlayer)
+	{
+		Transform handFollower = _attachedHandState.handFollower;
+		Ray ray = new Ray(handFollower.position, handFollower.forward);
+		int value = gtPlayer.locomotionEnabledLayers.value;
+		float maxDistance = 1f;
+		float num = 20f;
+		int num2 = Physics.RaycastNonAlloc(ray, _raycastHitResults, maxDistance, value, QueryTriggerInteraction.Ignore);
+		_ = ref _raycastHitResults[0];
+		Vector3 gravity = Physics.gravity;
+		Vector3 vector = ray.direction * num;
+		Vector3 vector2 = ((num2 > 0) ? vector : gravity);
+		Draw.ingame.Arrow(ray.origin, ray.origin + ray.direction);
+		gtPlayer.AddForce(vector2 * gtPlayer.scale, ForceMode.Acceleration);
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		base.OnUpdateRemote(dt);
+		EState eState = (EState)gameEntity.GetState();
+		if (eState != _state)
+		{
+			_SetStateShared(eState);
+		}
+	}
+
+	private static bool _CanChangeState(long newStateIndex)
+	{
+		if (newStateIndex >= 0)
+		{
+			return newStateIndex < 3;
+		}
+		return false;
+	}
+
+	private void SetStateAuthority(EState newState)
+	{
+		_SetStateShared(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void _SetStateShared(EState newState)
+	{
+		if (newState != _state && _CanChangeState((long)newState))
+		{
+			_state = newState;
+			if (_state != EState.Idle)
+			{
+				_ = 1;
+			}
+		}
+	}
+
+	private bool _CheckInput()
+	{
+		float sensitivity = (_wasActivated ? m_inputDeactivateThreshold : m_inputActivateThreshold);
+		return m_buttonActivatable.CheckInput(sensitivity);
+	}
+
+	private void _DoAirGrab()
+	{
+		_ = GamePlayerLocal.instance.GetHandVelocity(_HandIndex).magnitude;
+	}
+
+	private void _DoDash()
+	{
+		_airGrabTime = Time.unscaledTime;
+		Vector3 handVelocity = GamePlayerLocal.instance.GetHandVelocity(_HandIndex);
+		float num = _CalculateDashSpeed(handVelocity.magnitude);
+		GTPlayer instance = GTPlayer.Instance;
+		instance.SetMaximumSlipThisFrame();
+		instance.SetVelocity(handVelocity.normalized * (0f - num));
+		_PlayHaptic(2f);
+		SetStateAuthority(EState.DashUsed);
+	}
+
+	private float _CalculateDashSpeed(float currentYankSpeed)
+	{
+		float time = Mathf.InverseLerp(m_yankMinSpeed, m_yankMaxSpeed, currentYankSpeed);
+		float t = m_speedMappingCurve.Evaluate(time);
+		return Mathf.Lerp(m_minDashSpeed, _maxDashSpeed, t);
+	}
+
+	private void _PlayHaptic(float strengthMultiplier)
+	{
+		if (FindAttachedHand(out var isLeft))
+		{
+			GorillaTagger.Instance.StartVibration(isLeft, GorillaTagger.Instance.tapHapticStrength * strengthMultiplier, GorillaTagger.Instance.tapHapticDuration);
+		}
+	}
+
+	private void _PlayAudio(int index)
+	{
+		m_audioSource.clip = m_clips[index];
+		m_audioSource.volume = m_clipVolumes[index];
+		m_audioSource.GTPlay();
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		_maxDashSpeed = (withUpgrades.Contains(SIUpgradeType.Dash_Yoyo_Speed) ? m_maxDashSpeedUpgraded : m_maxDashSpeedDefault);
 	}
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaLocomotion;
 using TMPro;
@@ -7,173 +6,6 @@ using UnityEngine.Serialization;
 
 public class HoverboardVisual : MonoBehaviour, ICallBack
 {
-	public Color boardColor { get; private set; }
-
-	private void Awake()
-	{
-		Material[] sharedMaterials = this.boardMesh.sharedMaterials;
-		this.colorMaterial = new Material(sharedMaterials[1]);
-		sharedMaterials[1] = this.colorMaterial;
-		this.boardMesh.sharedMaterials = sharedMaterials;
-	}
-
-	public bool IsHeld { get; private set; }
-
-	public bool IsLeftHanded { get; private set; }
-
-	public Vector3 NominalLocalPosition { get; private set; }
-
-	public Quaternion NominalLocalRotation { get; private set; }
-
-	private Transform NominalParentTransform
-	{
-		get
-		{
-			if (!this.IsHeld)
-			{
-				return base.transform.parent;
-			}
-			return (this.IsLeftHanded ? this.parentRig.leftHand : this.parentRig.rightHand).rigTarget.transform;
-		}
-	}
-
-	public void SetIsHeld(bool isHeldLeftHanded, Vector3 localPosition, Quaternion localRotation, Color boardColor)
-	{
-		if (!this.isCallbackActive)
-		{
-			this.parentRig.AddLateUpdateCallback(this);
-			this.isCallbackActive = true;
-		}
-		this.IsHeld = true;
-		base.gameObject.SetActive(true);
-		this.IsLeftHanded = isHeldLeftHanded;
-		this.NominalLocalPosition = localPosition;
-		this.NominalLocalRotation = localRotation;
-		Transform nominalParentTransform = this.NominalParentTransform;
-		this.interpolatedLocalPosition = nominalParentTransform.InverseTransformPoint(base.transform.position);
-		this.interpolatedLocalRotation = nominalParentTransform.InverseTransformRotation(base.transform.rotation);
-		this.positionLerpSpeed = (this.interpolatedLocalPosition - this.NominalLocalPosition).magnitude / this.lerpIntoHandDuration;
-		float num;
-		Vector3 vector;
-		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(out num, out vector);
-		this.rotationLerpSpeed = num / this.lerpIntoHandDuration;
-		if (this.parentRig.isLocal)
-		{
-			GTPlayer.Instance.SetHoverActive(true);
-		}
-		this.colorMaterial.color = boardColor;
-		this.boardColor = boardColor;
-	}
-
-	public void SetNotHeld(bool isLeftHanded)
-	{
-		this.IsLeftHanded = isLeftHanded;
-		this.SetNotHeld();
-	}
-
-	public void SetNotHeld()
-	{
-		bool isHeld = this.IsHeld;
-		base.gameObject.SetActive(false);
-		this.IsHeld = false;
-		this.interpolatedLocalPosition = base.transform.localPosition;
-		this.interpolatedLocalRotation = base.transform.localRotation;
-		this.positionLerpSpeed = (this.interpolatedLocalPosition - this.NominalLocalPosition).magnitude / this.lerpIntoHandDuration;
-		float num;
-		Vector3 vector;
-		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(out num, out vector);
-		this.rotationLerpSpeed = num / this.lerpIntoHandDuration;
-		if (!isHeld)
-		{
-			base.transform.position = base.transform.parent.TransformPoint(this.NominalLocalPosition);
-			base.transform.rotation = base.transform.parent.TransformRotation(this.NominalLocalRotation);
-		}
-		if (this.parentRig.isLocal)
-		{
-			GTPlayer.Instance.SetHoverActive(false);
-		}
-		this.hoverboardAudio.Stop();
-	}
-
-	void ICallBack.CallBack()
-	{
-		Transform nominalParentTransform = this.NominalParentTransform;
-		if ((this.interpolatedLocalPosition - this.NominalLocalPosition).IsShorterThan(0.01f))
-		{
-			base.transform.position = nominalParentTransform.TransformPoint(this.NominalLocalPosition);
-			base.transform.rotation = nominalParentTransform.TransformRotation(this.NominalLocalRotation);
-			if (!this.IsHeld)
-			{
-				this.parentRig.RemoveLateUpdateCallback(this);
-				this.isCallbackActive = false;
-			}
-		}
-		else
-		{
-			this.interpolatedLocalPosition = Vector3.MoveTowards(this.interpolatedLocalPosition, this.NominalLocalPosition, this.positionLerpSpeed * Time.deltaTime);
-			this.interpolatedLocalRotation = Quaternion.RotateTowards(this.interpolatedLocalRotation, this.NominalLocalRotation, this.rotationLerpSpeed * Time.deltaTime);
-			base.transform.position = nominalParentTransform.TransformPoint(this.interpolatedLocalPosition);
-			base.transform.rotation = nominalParentTransform.TransformRotation(this.interpolatedLocalRotation);
-		}
-		if (this.IsHeld)
-		{
-			if (this.parentRig.isLocal)
-			{
-				GTPlayer.Instance.SetHoverboardPosRot(base.transform.position, base.transform.rotation);
-				return;
-			}
-			this.hoverboardAudio.UpdateAudioLoop(this.parentRig.LatestVelocity().magnitude, 0f, 0f, 0f);
-		}
-	}
-
-	public void PlayGrindHaptic()
-	{
-		if (this.IsHeld)
-		{
-			GorillaTagger.Instance.StartVibration(this.IsLeftHanded, this.grindHapticStrength, this.grindHapticDuration);
-		}
-	}
-
-	public void PlayCarveHaptic(float carveForce)
-	{
-		if (this.IsHeld)
-		{
-			GorillaTagger.Instance.StartVibration(this.IsLeftHanded, carveForce * this.carveHapticStrength, this.carveHapticDuration);
-		}
-	}
-
-	public void ProxyGrabHandle(bool isLeftHand)
-	{
-		EquipmentInteractor.instance.UpdateHandEquipment(this.handlePosition, isLeftHand);
-	}
-
-	public void DropFreeBoard()
-	{
-		FreeHoverboardManager.instance.SendDropBoardRPC(base.transform.position, base.transform.rotation, this.velocityEstimator.linearVelocity, this.velocityEstimator.angularVelocity, this.boardColor);
-	}
-
-	public void SetRaceDisplay(string text)
-	{
-		if (string.IsNullOrEmpty(text))
-		{
-			this.racePositionReadout.gameObject.SetActive(false);
-			return;
-		}
-		this.racePositionReadout.gameObject.SetActive(true);
-		this.racePositionReadout.text = text;
-	}
-
-	public void SetRaceLapsDisplay(string text)
-	{
-		if (string.IsNullOrEmpty(text))
-		{
-			this.raceLapsReadout.gameObject.SetActive(false);
-			return;
-		}
-		this.raceLapsReadout.gameObject.SetActive(true);
-		this.raceLapsReadout.text = text;
-	}
-
 	[SerializeField]
 	private VRRig parentRig;
 
@@ -225,4 +57,169 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 	private float rotationLerpSpeed;
 
 	private bool isCallbackActive;
+
+	public Color boardColor { get; private set; }
+
+	public bool IsHeld { get; private set; }
+
+	public bool IsLeftHanded { get; private set; }
+
+	public Vector3 NominalLocalPosition { get; private set; }
+
+	public Quaternion NominalLocalRotation { get; private set; }
+
+	private Transform NominalParentTransform
+	{
+		get
+		{
+			if (!IsHeld)
+			{
+				return base.transform.parent;
+			}
+			return (IsLeftHanded ? parentRig.leftHand : parentRig.rightHand).rigTarget.transform;
+		}
+	}
+
+	private void Awake()
+	{
+		Material[] sharedMaterials = boardMesh.sharedMaterials;
+		colorMaterial = new Material(sharedMaterials[1]);
+		sharedMaterials[1] = colorMaterial;
+		boardMesh.sharedMaterials = sharedMaterials;
+	}
+
+	public void SetIsHeld(bool isHeldLeftHanded, Vector3 localPosition, Quaternion localRotation, Color boardColor)
+	{
+		if (!isCallbackActive)
+		{
+			parentRig.AddLateUpdateCallback(this);
+			isCallbackActive = true;
+		}
+		IsHeld = true;
+		base.gameObject.SetActive(value: true);
+		IsLeftHanded = isHeldLeftHanded;
+		NominalLocalPosition = localPosition;
+		NominalLocalRotation = localRotation;
+		Transform nominalParentTransform = NominalParentTransform;
+		interpolatedLocalPosition = nominalParentTransform.InverseTransformPoint(base.transform.position);
+		interpolatedLocalRotation = nominalParentTransform.InverseTransformRotation(base.transform.rotation);
+		positionLerpSpeed = (interpolatedLocalPosition - NominalLocalPosition).magnitude / lerpIntoHandDuration;
+		(Quaternion.Inverse(interpolatedLocalRotation) * NominalLocalRotation).ToAngleAxis(out var angle, out var _);
+		rotationLerpSpeed = angle / lerpIntoHandDuration;
+		if (parentRig.isLocal)
+		{
+			GTPlayer.Instance.SetHoverActive(enable: true);
+		}
+		colorMaterial.color = boardColor;
+		this.boardColor = boardColor;
+	}
+
+	public void SetNotHeld(bool isLeftHanded)
+	{
+		IsLeftHanded = isLeftHanded;
+		SetNotHeld();
+	}
+
+	public void SetNotHeld()
+	{
+		bool isHeld = IsHeld;
+		base.gameObject.SetActive(value: false);
+		IsHeld = false;
+		interpolatedLocalPosition = base.transform.localPosition;
+		interpolatedLocalRotation = base.transform.localRotation;
+		positionLerpSpeed = (interpolatedLocalPosition - NominalLocalPosition).magnitude / lerpIntoHandDuration;
+		(Quaternion.Inverse(interpolatedLocalRotation) * NominalLocalRotation).ToAngleAxis(out var angle, out var _);
+		rotationLerpSpeed = angle / lerpIntoHandDuration;
+		if (!isHeld)
+		{
+			base.transform.position = base.transform.parent.TransformPoint(NominalLocalPosition);
+			base.transform.rotation = base.transform.parent.TransformRotation(NominalLocalRotation);
+		}
+		if (parentRig.isLocal)
+		{
+			GTPlayer.Instance.SetHoverActive(enable: false);
+		}
+		hoverboardAudio.Stop();
+	}
+
+	void ICallBack.CallBack()
+	{
+		Transform nominalParentTransform = NominalParentTransform;
+		if ((interpolatedLocalPosition - NominalLocalPosition).IsShorterThan(0.01f))
+		{
+			base.transform.position = nominalParentTransform.TransformPoint(NominalLocalPosition);
+			base.transform.rotation = nominalParentTransform.TransformRotation(NominalLocalRotation);
+			if (!IsHeld)
+			{
+				parentRig.RemoveLateUpdateCallback(this);
+				isCallbackActive = false;
+			}
+		}
+		else
+		{
+			interpolatedLocalPosition = Vector3.MoveTowards(interpolatedLocalPosition, NominalLocalPosition, positionLerpSpeed * Time.deltaTime);
+			interpolatedLocalRotation = Quaternion.RotateTowards(interpolatedLocalRotation, NominalLocalRotation, rotationLerpSpeed * Time.deltaTime);
+			base.transform.position = nominalParentTransform.TransformPoint(interpolatedLocalPosition);
+			base.transform.rotation = nominalParentTransform.TransformRotation(interpolatedLocalRotation);
+		}
+		if (IsHeld)
+		{
+			if (parentRig.isLocal)
+			{
+				GTPlayer.Instance.SetHoverboardPosRot(base.transform.position, base.transform.rotation);
+			}
+			else
+			{
+				hoverboardAudio.UpdateAudioLoop(parentRig.LatestVelocity().magnitude, 0f, 0f, 0f);
+			}
+		}
+	}
+
+	public void PlayGrindHaptic()
+	{
+		if (IsHeld)
+		{
+			GorillaTagger.Instance.StartVibration(IsLeftHanded, grindHapticStrength, grindHapticDuration);
+		}
+	}
+
+	public void PlayCarveHaptic(float carveForce)
+	{
+		if (IsHeld)
+		{
+			GorillaTagger.Instance.StartVibration(IsLeftHanded, carveForce * carveHapticStrength, carveHapticDuration);
+		}
+	}
+
+	public void ProxyGrabHandle(bool isLeftHand)
+	{
+		EquipmentInteractor.instance.UpdateHandEquipment(handlePosition, isLeftHand);
+	}
+
+	public void DropFreeBoard()
+	{
+		FreeHoverboardManager.instance.SendDropBoardRPC(base.transform.position, base.transform.rotation, velocityEstimator.linearVelocity, velocityEstimator.angularVelocity, boardColor);
+	}
+
+	public void SetRaceDisplay(string text)
+	{
+		if (string.IsNullOrEmpty(text))
+		{
+			racePositionReadout.gameObject.SetActive(value: false);
+			return;
+		}
+		racePositionReadout.gameObject.SetActive(value: true);
+		racePositionReadout.text = text;
+	}
+
+	public void SetRaceLapsDisplay(string text)
+	{
+		if (string.IsNullOrEmpty(text))
+		{
+			raceLapsReadout.gameObject.SetActive(value: false);
+			return;
+		}
+		raceLapsReadout.gameObject.SetActive(value: true);
+		raceLapsReadout.text = text;
+	}
 }

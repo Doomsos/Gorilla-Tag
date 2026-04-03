@@ -1,19 +1,18 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaCameraClipPlaneOverrideTrigger : GorillaTriggerBox
 {
+	private Camera mainCamera;
+
+	public float clipPlaneFarDistanceOverride;
+
 	private void Awake()
 	{
-		this.mainCamera = Camera.main;
+		mainCamera = Camera.main;
 	}
 
 	public override void OnBoxTriggered()
 	{
-		this.mainCamera.farClipPlane = this.clipPlaneFarDistanceOverride;
+		mainCamera.farClipPlane = clipPlaneFarDistanceOverride;
 	}
-
-	private Camera mainCamera;
-
-	public float clipPlaneFarDistanceOverride;
 }

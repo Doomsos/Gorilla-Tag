@@ -1,81 +1,8 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class BuilderSizeLayerChanger : MonoBehaviour
 {
-	public int SizeLayerMask
-	{
-		get
-		{
-			int num = 0;
-			if (this.affectLayerA)
-			{
-				num |= 1;
-			}
-			if (this.affectLayerB)
-			{
-				num |= 2;
-			}
-			if (this.affectLayerC)
-			{
-				num |= 4;
-			}
-			if (this.affectLayerD)
-			{
-				num |= 8;
-			}
-			return num;
-		}
-	}
-
-	private void Awake()
-	{
-		this.minScale = Mathf.Max(this.minScale, 0.01f);
-	}
-
-	public void OnTriggerEnter(Collider other)
-	{
-		if (other != GTPlayer.Instance.bodyCollider)
-		{
-			return;
-		}
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		if (offlineVRRig == null)
-		{
-			return;
-		}
-		if (this.applyOnTriggerEnter)
-		{
-			if (offlineVRRig.sizeManager.currentSizeLayerMaskValue != this.SizeLayerMask && this.fxForLayerChange != null)
-			{
-				ObjectPools.instance.Instantiate(this.fxForLayerChange, offlineVRRig.transform.position, true);
-			}
-			offlineVRRig.sizeManager.currentSizeLayerMaskValue = this.SizeLayerMask;
-		}
-	}
-
-	public void OnTriggerExit(Collider other)
-	{
-		if (other != GTPlayer.Instance.bodyCollider)
-		{
-			return;
-		}
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		if (offlineVRRig == null)
-		{
-			return;
-		}
-		if (this.applyOnTriggerExit)
-		{
-			if (offlineVRRig.sizeManager.currentSizeLayerMaskValue != this.SizeLayerMask && this.fxForLayerChange != null)
-			{
-				ObjectPools.instance.Instantiate(this.fxForLayerChange, offlineVRRig.transform.position, true);
-			}
-			offlineVRRig.sizeManager.currentSizeLayerMaskValue = this.SizeLayerMask;
-		}
-	}
-
 	public float maxScale;
 
 	public float minScale;
@@ -98,4 +25,68 @@ public class BuilderSizeLayerChanger : MonoBehaviour
 
 	[SerializeField]
 	private GameObject fxForLayerChange;
+
+	public int SizeLayerMask
+	{
+		get
+		{
+			int num = 0;
+			if (affectLayerA)
+			{
+				num |= 1;
+			}
+			if (affectLayerB)
+			{
+				num |= 2;
+			}
+			if (affectLayerC)
+			{
+				num |= 4;
+			}
+			if (affectLayerD)
+			{
+				num |= 8;
+			}
+			return num;
+		}
+	}
+
+	private void Awake()
+	{
+		minScale = Mathf.Max(minScale, 0.01f);
+	}
+
+	public void OnTriggerEnter(Collider other)
+	{
+		if (other != GTPlayer.Instance.bodyCollider)
+		{
+			return;
+		}
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		if (!(offlineVRRig == null) && applyOnTriggerEnter)
+		{
+			if (offlineVRRig.sizeManager.currentSizeLayerMaskValue != SizeLayerMask && fxForLayerChange != null)
+			{
+				ObjectPools.instance.Instantiate(fxForLayerChange, offlineVRRig.transform.position);
+			}
+			offlineVRRig.sizeManager.currentSizeLayerMaskValue = SizeLayerMask;
+		}
+	}
+
+	public void OnTriggerExit(Collider other)
+	{
+		if (other != GTPlayer.Instance.bodyCollider)
+		{
+			return;
+		}
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		if (!(offlineVRRig == null) && applyOnTriggerExit)
+		{
+			if (offlineVRRig.sizeManager.currentSizeLayerMaskValue != SizeLayerMask && fxForLayerChange != null)
+			{
+				ObjectPools.instance.Instantiate(fxForLayerChange, offlineVRRig.transform.position);
+			}
+			offlineVRRig.sizeManager.currentSizeLayerMaskValue = SizeLayerMask;
+		}
+	}
 }

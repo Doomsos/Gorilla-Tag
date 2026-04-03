@@ -1,9 +1,21 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class CameraShaker : MonoBehaviour
 {
+	private bool rumbling;
+
+	private float stopTime;
+
+	private bool rollOff;
+
+	private float magnitude;
+
+	private float duration;
+
+	private Vector2 freqRange;
+
 	private static event Action<float, float, Vector2, bool, Transform, float> ShakeRequested;
 
 	private static event Action HaltRequested;
@@ -12,7 +24,7 @@ public class CameraShaker : MonoBehaviour
 	{
 		if (CameraShaker.ShakeRequested != null)
 		{
-			CameraShaker.ShakeRequested(duration, magnitude, new Vector2(0.02f, 0.1f), true, null, 0f);
+			CameraShaker.ShakeRequested(duration, magnitude, new Vector2(0.02f, 0.1f), arg4: true, null, 0f);
 		}
 	}
 
@@ -20,7 +32,7 @@ public class CameraShaker : MonoBehaviour
 	{
 		if (CameraShaker.ShakeRequested != null)
 		{
-			CameraShaker.ShakeRequested(duration, magnitude, freqRange, true, null, 0f);
+			CameraShaker.ShakeRequested(duration, magnitude, freqRange, arg4: true, null, 0f);
 		}
 	}
 
@@ -50,66 +62,53 @@ public class CameraShaker : MonoBehaviour
 
 	private void OnEnable()
 	{
-		CameraShaker.ShakeRequested += this._ShakeRequested;
-		CameraShaker.HaltRequested += this._HaltRequested;
+		ShakeRequested += _ShakeRequested;
+		HaltRequested += _HaltRequested;
 	}
 
 	private void _ShakeRequested(float _duration, float _magnitude, Vector2 _freqRange, bool _rollOff, Transform source, float distance)
 	{
-		this.stopTime = Time.time + _duration;
-		this.duration = _duration;
-		this.magnitude = _magnitude;
-		this.freqRange = _freqRange;
-		this.rollOff = _rollOff;
-		if (!this.rumbling && (source == null || (base.transform.position - source.transform.position).sqrMagnitude < distance * distance))
+		stopTime = Time.time + _duration;
+		duration = _duration;
+		magnitude = _magnitude;
+		freqRange = _freqRange;
+		rollOff = _rollOff;
+		if (!rumbling && (source == null || (base.transform.position - source.transform.position).sqrMagnitude < distance * distance))
 		{
-			base.StartCoroutine(this.crRumble());
+			StartCoroutine(crRumble());
 		}
 	}
 
 	private void _HaltRequested()
 	{
-		this.stopTime = Time.time;
+		stopTime = Time.time;
 	}
 
 	private void OnDisable()
 	{
-		CameraShaker.ShakeRequested -= this._ShakeRequested;
-		CameraShaker.HaltRequested -= this._HaltRequested;
+		ShakeRequested -= _ShakeRequested;
+		HaltRequested -= _HaltRequested;
 	}
 
 	private void OnDestroy()
 	{
-		CameraShaker.ShakeRequested -= this._ShakeRequested;
-		CameraShaker.HaltRequested -= this._HaltRequested;
+		ShakeRequested -= _ShakeRequested;
+		HaltRequested -= _HaltRequested;
 	}
 
 	private IEnumerator crRumble()
 	{
-		this.rumbling = true;
-		while (this.stopTime > Time.time)
+		rumbling = true;
+		while (stopTime > Time.time)
 		{
-			Vector3 vector = Random.insideUnitSphere * this.magnitude;
-			if (this.rollOff)
+			Vector3 vector = UnityEngine.Random.insideUnitSphere * magnitude;
+			if (rollOff)
 			{
-				vector *= (this.stopTime - Time.time) / this.duration;
+				vector *= (stopTime - Time.time) / duration;
 			}
 			base.transform.localPosition += vector;
-			yield return new WaitForSeconds(Random.Range(this.freqRange.x, this.freqRange.y));
+			yield return new WaitForSeconds(UnityEngine.Random.Range(freqRange.x, freqRange.y));
 		}
-		this.rumbling = false;
-		yield break;
+		rumbling = false;
 	}
-
-	private bool rumbling;
-
-	private float stopTime;
-
-	private bool rollOff;
-
-	private float magnitude;
-
-	private float duration;
-
-	private Vector2 freqRange;
 }

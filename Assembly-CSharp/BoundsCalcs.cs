@@ -1,29 +1,39 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class BoundsCalcs : MonoBehaviour
 {
+	public MeshFilter[] optionalTargets = new MeshFilter[0];
+
+	public bool useRootMeshOnly;
+
+	[Space]
+	public List<BoundsInfo> elements = new List<BoundsInfo>();
+
+	[Space]
+	public BoundsInfo composite;
+
+	[Space]
+	private StateHash _state;
+
+	private static MeshFilter[] singleMesh = new MeshFilter[1];
+
 	public void Compute()
 	{
 		MeshFilter[] array;
-		if (this.useRootMeshOnly)
+		if (!useRootMeshOnly)
 		{
-			BoundsCalcs.singleMesh[0] = base.GetComponent<MeshFilter>();
-			array = BoundsCalcs.singleMesh;
-		}
-		else if (this.optionalTargets != null && this.optionalTargets.Length != 0)
-		{
-			array = base.GetComponentsInChildren<MeshFilter>().Concat(this.optionalTargets).ToArray<MeshFilter>();
+			array = ((optionalTargets == null || optionalTargets.Length == 0) ? GetComponentsInChildren<MeshFilter>() : GetComponentsInChildren<MeshFilter>().Concat(optionalTargets).ToArray());
 		}
 		else
 		{
-			array = base.GetComponentsInChildren<MeshFilter>();
+			singleMesh[0] = GetComponent<MeshFilter>();
+			array = singleMesh;
 		}
 		List<Mesh> list = new List<Mesh>((array.Length + 1) / 2);
 		List<Vector3> list2 = new List<Vector3>(array.Length * 512);
-		this.elements.Clear();
+		elements.Clear();
 		for (int i = 0; i < array.Length; i++)
 		{
 			Matrix4x4 localToWorldMatrix = array[i].transform.localToWorldMatrix;
@@ -40,25 +50,10 @@ public class BoundsCalcs : MonoBehaviour
 				vertices[j] = localToWorldMatrix.MultiplyPoint3x4(vertices[j]);
 			}
 			BoundsInfo item = BoundsInfo.ComputeBounds(vertices);
-			this.elements.Add(item);
+			elements.Add(item);
 			list2.AddRange(vertices);
 		}
-		this.composite = BoundsInfo.ComputeBounds(list2.ToArray());
-		list.ForEach(new Action<Mesh>(Object.DestroyImmediate));
+		composite = BoundsInfo.ComputeBounds(list2.ToArray());
+		list.ForEach(Object.DestroyImmediate);
 	}
-
-	public MeshFilter[] optionalTargets = new MeshFilter[0];
-
-	public bool useRootMeshOnly;
-
-	[Space]
-	public List<BoundsInfo> elements = new List<BoundsInfo>();
-
-	[Space]
-	public BoundsInfo composite;
-
-	[Space]
-	private StateHash _state;
-
-	private static MeshFilter[] singleMesh = new MeshFilter[1];
 }

@@ -1,9 +1,13 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewLegalAgreementAsset", menuName = "Gorilla Tag/Legal Agreement Asset")]
 public class LegalAgreementTextAsset : ScriptableObject
 {
+	public enum PostAcceptAction
+	{
+		NONE
+	}
+
 	public string title;
 
 	public string playFabKey;
@@ -15,12 +19,7 @@ public class LegalAgreementTextAsset : ScriptableObject
 
 	public bool optional;
 
-	public LegalAgreementTextAsset.PostAcceptAction optInAction;
+	public PostAcceptAction optInAction;
 
 	public string confirmString;
-
-	public enum PostAcceptAction
-	{
-		NONE
-	}
 }

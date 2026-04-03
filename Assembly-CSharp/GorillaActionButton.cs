@@ -1,15 +1,14 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class GorillaActionButton : GorillaPressableButton
 {
+	[SerializeField]
+	public UnityEvent onPress;
+
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		this.onPress.Invoke();
+		onPress.Invoke();
 	}
-
-	[SerializeField]
-	public UnityEvent onPress;
 }

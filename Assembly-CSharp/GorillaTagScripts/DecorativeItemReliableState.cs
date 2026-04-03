@@ -1,49 +1,45 @@
-﻿using System;
 using GorillaExtensions;
 using Photon.Pun;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class DecorativeItemReliableState : MonoBehaviour, IPunObservable
 {
-	public class DecorativeItemReliableState : MonoBehaviour, IPunObservable
+	public bool isSnapped;
+
+	public Vector3 snapPosition = Vector3.zero;
+
+	public Vector3 respawnPosition = Vector3.zero;
+
+	public Quaternion respawnRotation = Quaternion.identity;
+
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+		if (stream.IsWriting)
 		{
-			if (stream.IsWriting)
-			{
-				stream.SendNext(this.isSnapped);
-				stream.SendNext(this.snapPosition);
-				stream.SendNext(this.respawnPosition);
-				stream.SendNext(this.respawnRotation);
-				return;
-			}
-			this.isSnapped = (bool)stream.ReceiveNext();
-			this.snapPosition = (Vector3)stream.ReceiveNext();
-			this.respawnPosition = (Vector3)stream.ReceiveNext();
-			this.respawnRotation = (Quaternion)stream.ReceiveNext();
-			float num = 10000f;
-			if (!this.snapPosition.IsValid(num))
-			{
-				this.snapPosition = Vector3.zero;
-			}
-			num = 10000f;
-			if (!this.respawnPosition.IsValid(num))
-			{
-				this.respawnPosition = Vector3.zero;
-			}
-			if (!this.respawnRotation.IsValid())
-			{
-				this.respawnRotation = quaternion.identity;
-			}
+			stream.SendNext(isSnapped);
+			stream.SendNext(snapPosition);
+			stream.SendNext(respawnPosition);
+			stream.SendNext(respawnRotation);
+			return;
 		}
-
-		public bool isSnapped;
-
-		public Vector3 snapPosition = Vector3.zero;
-
-		public Vector3 respawnPosition = Vector3.zero;
-
-		public Quaternion respawnRotation = Quaternion.identity;
+		isSnapped = (bool)stream.ReceiveNext();
+		snapPosition = (Vector3)stream.ReceiveNext();
+		respawnPosition = (Vector3)stream.ReceiveNext();
+		respawnRotation = (Quaternion)stream.ReceiveNext();
+		if (!snapPosition.IsValid(10000f))
+		{
+			snapPosition = Vector3.zero;
+		}
+		if (!respawnPosition.IsValid(10000f))
+		{
+			respawnPosition = Vector3.zero;
+		}
+		if (!respawnRotation.IsValid())
+		{
+			respawnRotation = quaternion.identity;
+		}
 	}
 }

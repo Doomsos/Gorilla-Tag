@@ -1,13 +1,11 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderTestTools : MonoBehaviour
 {
-	public class BuilderTestTools : MonoBehaviour
+	public void Awake()
 	{
-		public void Awake()
-		{
-			Object.Destroy(this);
-		}
+		Object.Destroy(this);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
@@ -8,33 +8,84 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "BuilderPieceSet01", menuName = "Gorilla Tag/Builder/PieceSet", order = 0)]
 public class BuilderPieceSet : ScriptableObject
 {
-	public string SetName
+	public enum BuilderPieceCategory
 	{
-		get
+		FLAT = 0,
+		TALL = 1,
+		HALF_HEIGHT = 2,
+		BEAM = 3,
+		SLOPE = 4,
+		OVERSIZED = 5,
+		SPECIAL_DISPLAY = 6,
+		FUNCTIONAL = 18,
+		DECORATIVE = 19,
+		MISC = 20
+	}
+
+	[Serializable]
+	public class BuilderPieceSubset
+	{
+		[Tooltip("(Optional) Text to put on the shelf button if not the set name")]
+		public string shelfButtonName;
+
+		public LocalizedString localizedShelfButtonName;
+
+		public BuilderPieceCategory pieceCategory;
+
+		public List<PieceInfo> pieceInfos;
+
+		public string GetShelfButtonName()
 		{
-			return this.setName;
+			return shelfButtonName;
 		}
 	}
 
-	public int GetIntIdentifier()
+	[Serializable]
+	public struct PieceInfo
 	{
-		return this.playfabID.GetStaticHash();
+		public BuilderPiece piecePrefab;
+
+		[Tooltip("(Optional) should this piece use a materialID other than the set's materialID")]
+		public bool overrideSetMaterial;
+
+		[Tooltip("material type string should match an entry in this prefab's BuilderMaterialOptions\nIf multiple are in the list the piece will cycle through materials when spawned\nTo have each variant on the shelf create a new pieceInfo for each color")]
+		public string[] pieceMaterialTypes;
 	}
 
-	public DateTime GetScheduleDateTime()
+	public class BuilderDisplayGroup
 	{
-		if (this.isScheduled)
+		public string displayName;
+
+		public List<BuilderPieceSubset> pieceSubsets;
+
+		public string defaultMaterial;
+
+		public int setID;
+
+		public string uniqueGroupID;
+
+		public BuilderDisplayGroup()
 		{
-			try
-			{
-				return DateTime.Parse(this.scheduledDate, CultureInfo.InvariantCulture);
-			}
-			catch
-			{
-				return DateTime.MinValue;
-			}
+			displayName = string.Empty;
+			pieceSubsets = new List<BuilderPieceSubset>();
+			defaultMaterial = string.Empty;
+			setID = -1;
+			uniqueGroupID = string.Empty;
 		}
-		return DateTime.MinValue;
+
+		public BuilderDisplayGroup(string groupName, string material, int inSetID, string groupID)
+		{
+			displayName = groupName;
+			pieceSubsets = new List<BuilderPieceSubset>();
+			defaultMaterial = material;
+			setID = inSetID;
+			uniqueGroupID = groupID;
+		}
+
+		public int GetDisplayGroupIdentifier()
+		{
+			return uniqueGroupID.GetStaticHash();
+		}
 	}
 
 	[Tooltip("Display Name - Fallback for Localization")]
@@ -61,85 +112,28 @@ public class BuilderPieceSet : ScriptableObject
 	public string scheduledDate = "1/1/0001 00:00:00";
 
 	[Tooltip("A group of pieces on the same shelf")]
-	public List<BuilderPieceSet.BuilderPieceSubset> subsets;
+	public List<BuilderPieceSubset> subsets;
 
-	public enum BuilderPieceCategory
+	public string SetName => setName;
+
+	public int GetIntIdentifier()
 	{
-		FLAT,
-		TALL,
-		HALF_HEIGHT,
-		BEAM,
-		SLOPE,
-		OVERSIZED,
-		SPECIAL_DISPLAY,
-		FUNCTIONAL = 18,
-		DECORATIVE,
-		MISC
+		return playfabID.GetStaticHash();
 	}
 
-	[Serializable]
-	public class BuilderPieceSubset
+	public DateTime GetScheduleDateTime()
 	{
-		public string GetShelfButtonName()
+		if (isScheduled)
 		{
-			return this.shelfButtonName;
+			try
+			{
+				return DateTime.Parse(scheduledDate, CultureInfo.InvariantCulture);
+			}
+			catch
+			{
+				return DateTime.MinValue;
+			}
 		}
-
-		[Tooltip("(Optional) Text to put on the shelf button if not the set name")]
-		public string shelfButtonName;
-
-		public LocalizedString localizedShelfButtonName;
-
-		public BuilderPieceSet.BuilderPieceCategory pieceCategory;
-
-		public List<BuilderPieceSet.PieceInfo> pieceInfos;
-	}
-
-	[Serializable]
-	public struct PieceInfo
-	{
-		public BuilderPiece piecePrefab;
-
-		[Tooltip("(Optional) should this piece use a materialID other than the set's materialID")]
-		public bool overrideSetMaterial;
-
-		[Tooltip("material type string should match an entry in this prefab's BuilderMaterialOptions\nIf multiple are in the list the piece will cycle through materials when spawned\nTo have each variant on the shelf create a new pieceInfo for each color")]
-		public string[] pieceMaterialTypes;
-	}
-
-	public class BuilderDisplayGroup
-	{
-		public BuilderDisplayGroup()
-		{
-			this.displayName = string.Empty;
-			this.pieceSubsets = new List<BuilderPieceSet.BuilderPieceSubset>();
-			this.defaultMaterial = string.Empty;
-			this.setID = -1;
-			this.uniqueGroupID = string.Empty;
-		}
-
-		public BuilderDisplayGroup(string groupName, string material, int inSetID, string groupID)
-		{
-			this.displayName = groupName;
-			this.pieceSubsets = new List<BuilderPieceSet.BuilderPieceSubset>();
-			this.defaultMaterial = material;
-			this.setID = inSetID;
-			this.uniqueGroupID = groupID;
-		}
-
-		public int GetDisplayGroupIdentifier()
-		{
-			return this.uniqueGroupID.GetStaticHash();
-		}
-
-		public string displayName;
-
-		public List<BuilderPieceSet.BuilderPieceSubset> pieceSubsets;
-
-		public string defaultMaterial;
-
-		public int setID;
-
-		public string uniqueGroupID;
+		return DateTime.MinValue;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GorillaSurfaceOverride : MonoBehaviour
@@ -10,8 +10,8 @@ public class GorillaSurfaceOverride : MonoBehaviour
 
 	public float extraVelMaxMultiplier = 1f;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float slidePercentageOverride = -1f;
 
 	public bool sendOnTapEvent;

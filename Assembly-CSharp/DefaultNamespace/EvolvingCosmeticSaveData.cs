@@ -1,136 +1,92 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using GorillaTag.Scripts.Utilities;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace DefaultNamespace;
+
+public class EvolvingCosmeticSaveData
 {
-	[NullableContext(1)]
-	[Nullable(0)]
-	public class EvolvingCosmeticSaveData
+	public readonly Dictionary<string, int> SelectedIndices = new Dictionary<string, int>();
+
+	private static EvolvingCosmeticSaveData? s_instance;
+
+	public const string PlayerPrefsKey = "EvolvingCosmeticSaveData";
+
+	public static EvolvingCosmeticSaveData Instance => s_instance ?? (s_instance = new EvolvingCosmeticSaveData());
+
+	private EvolvingCosmeticSaveData()
 	{
-		public static EvolvingCosmeticSaveData Instance
+		string text = PlayerPrefs.GetString("EvolvingCosmeticSaveData");
+		if (text != null)
 		{
-			get
+			ReadFromJson(text);
+		}
+	}
+
+	public string Write()
+	{
+		JsonSerializer jsonSerializer = new JsonSerializer();
+		using TextWriter textWriter = new StringWriterWithEncoding(Encoding.UTF8);
+		using JsonWriter jsonWriter = new JsonTextWriter(textWriter);
+		jsonSerializer.Serialize(jsonWriter, this);
+		return textWriter.ToString();
+	}
+
+	private void ReadFromJson(string json)
+	{
+		using TextReader reader = new StringReader(json);
+		using JsonReader jsonReader = new JsonTextReader(reader);
+		while (jsonReader.Read())
+		{
+			if (jsonReader.TokenType == JsonToken.PropertyName && (string)jsonReader.Value == "SelectedIndices")
 			{
-				EvolvingCosmeticSaveData result;
-				if ((result = EvolvingCosmeticSaveData.s_instance) == null)
-				{
-					result = (EvolvingCosmeticSaveData.s_instance = new EvolvingCosmeticSaveData());
-				}
-				return result;
+				ReadSelectedIndices(jsonReader);
 			}
 		}
+	}
 
-		private EvolvingCosmeticSaveData()
+	private void ReadSelectedIndices(JsonReader reader)
+	{
+		int num = 0;
+		string text = null;
+		do
 		{
-			string @string = PlayerPrefs.GetString("EvolvingCosmeticSaveData");
-			if (@string != null)
+			if (!reader.Read())
 			{
-				this.ReadFromJson(@string);
+				throw new Exception("Json read error");
+			}
+			switch (reader.TokenType)
+			{
+			case JsonToken.StartObject:
+				num++;
+				break;
+			case JsonToken.EndObject:
+				num--;
+				break;
+			case JsonToken.PropertyName:
+				if (text != null)
+				{
+					throw new Exception("Json read error");
+				}
+				text = (reader.Value as string) ?? throw new Exception("Json read error");
+				break;
+			case JsonToken.Integer:
+				if (text == null)
+				{
+					throw new Exception("Json read error");
+				}
+				if (!(reader.Value is long num2))
+				{
+					throw new Exception("Json read error");
+				}
+				SelectedIndices[text] = (int)num2;
+				break;
 			}
 		}
-
-		public string Write()
-		{
-			JsonSerializer jsonSerializer = new JsonSerializer();
-			string result;
-			using (TextWriter textWriter = new StringWriterWithEncoding(Encoding.UTF8))
-			{
-				using (JsonWriter jsonWriter = new JsonTextWriter(textWriter))
-				{
-					jsonSerializer.Serialize(jsonWriter, this);
-					result = textWriter.ToString();
-				}
-			}
-			return result;
-		}
-
-		private void ReadFromJson(string json)
-		{
-			using (TextReader textReader = new StringReader(json))
-			{
-				using (JsonReader jsonReader = new JsonTextReader(textReader))
-				{
-					while (jsonReader.Read())
-					{
-						if (jsonReader.TokenType == JsonToken.PropertyName && (string)jsonReader.Value == "SelectedIndices")
-						{
-							this.ReadSelectedIndices(jsonReader);
-						}
-					}
-				}
-			}
-		}
-
-		private void ReadSelectedIndices(JsonReader reader)
-		{
-			int num = 0;
-			string text = null;
-			while (reader.Read())
-			{
-				JsonToken tokenType = reader.TokenType;
-				if (tokenType <= JsonToken.PropertyName)
-				{
-					if (tokenType != JsonToken.StartObject)
-					{
-						if (tokenType == JsonToken.PropertyName)
-						{
-							if (text != null)
-							{
-								throw new Exception("Json read error");
-							}
-							string text2 = reader.Value as string;
-							if (text2 == null)
-							{
-								throw new Exception("Json read error");
-							}
-							text = text2;
-						}
-					}
-					else
-					{
-						num++;
-					}
-				}
-				else if (tokenType != JsonToken.Integer)
-				{
-					if (tokenType == JsonToken.EndObject)
-					{
-						num--;
-					}
-				}
-				else
-				{
-					if (text == null)
-					{
-						throw new Exception("Json read error");
-					}
-					object value = reader.Value;
-					if (!(value is long))
-					{
-						throw new Exception("Json read error");
-					}
-					long num2 = (long)value;
-					this.SelectedIndices[text] = (int)num2;
-				}
-				if (num <= 0)
-				{
-					return;
-				}
-			}
-			throw new Exception("Json read error");
-		}
-
-		public readonly Dictionary<string, int> SelectedIndices = new Dictionary<string, int>();
-
-		[Nullable(2)]
-		private static EvolvingCosmeticSaveData s_instance;
-
-		public const string PlayerPrefsKey = "EvolvingCosmeticSaveData";
+		while (num > 0);
 	}
 }

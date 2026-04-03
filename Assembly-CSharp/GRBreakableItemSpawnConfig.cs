@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -6,27 +6,45 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GhostReactorBreakableItemSpawnConfig", menuName = "ScriptableObjects/GhostReactorBreakableItemSpawnConfig")]
 public class GRBreakableItemSpawnConfig : ScriptableObject
 {
+	[Serializable]
+	public struct ItemProbability
+	{
+		public GameEntity entity;
+
+		public float probability;
+	}
+
+	[SerializeField]
+	[Range(0f, 1f)]
+	public float spawnAnythingProbability = 0.2f;
+
+	public List<ItemProbability> perItemProbabilities = new List<ItemProbability>();
+
+	[SerializeField]
+	[ReadOnly]
+	private float precomputedItemTotalWeight;
+
 	public bool TryForRandomItem(GameEntity spawnFromEntity, out GameEntity entity, int sanity = 0)
 	{
-		GRBreakableItemSpawnConfig @override = this.GetOverride(spawnFromEntity);
-		if (sanity <= 5 && @override != null)
+		GRBreakableItemSpawnConfig gRBreakableItemSpawnConfig = GetOverride(spawnFromEntity);
+		if (sanity <= 5 && gRBreakableItemSpawnConfig != null)
 		{
-			return @override.TryForRandomItem(spawnFromEntity, out entity, sanity + 1);
+			return gRBreakableItemSpawnConfig.TryForRandomItem(spawnFromEntity, out entity, sanity + 1);
 		}
 		if (sanity > 5)
 		{
 			Debug.LogError("Circular override loop");
 		}
-		if (Random.Range(0f, 1f) < this.spawnAnythingProbability)
+		if (UnityEngine.Random.Range(0f, 1f) < spawnAnythingProbability)
 		{
-			float num = Random.Range(0f, this.precomputedItemTotalWeight);
+			float num = UnityEngine.Random.Range(0f, precomputedItemTotalWeight);
 			float num2 = 0f;
-			for (int i = 0; i < this.perItemProbabilities.Count; i++)
+			for (int i = 0; i < perItemProbabilities.Count; i++)
 			{
-				num2 += this.perItemProbabilities[i].probability;
-				if (num2 > num || i == this.perItemProbabilities.Count - 1)
+				num2 += perItemProbabilities[i].probability;
+				if (num2 > num || i == perItemProbabilities.Count - 1)
 				{
-					entity = this.perItemProbabilities[i].entity;
+					entity = perItemProbabilities[i].entity;
 					return true;
 				}
 			}
@@ -37,25 +55,25 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 
 	public bool TryForRandomItem(GhostReactor reactor, ref SRand srand, out GameEntity entity, int sanity = 0)
 	{
-		GRBreakableItemSpawnConfig @override = this.GetOverride(reactor);
-		if (sanity <= 5 && @override != null)
+		GRBreakableItemSpawnConfig gRBreakableItemSpawnConfig = GetOverride(reactor);
+		if (sanity <= 5 && gRBreakableItemSpawnConfig != null)
 		{
-			return @override.TryForRandomItem(reactor, ref srand, out entity, sanity + 1);
+			return gRBreakableItemSpawnConfig.TryForRandomItem(reactor, ref srand, out entity, sanity + 1);
 		}
 		if (sanity > 5)
 		{
 			Debug.LogError("Circular override loop");
 		}
-		if (srand.NextFloat(0f, 1f) < this.spawnAnythingProbability)
+		if (srand.NextFloat(0f, 1f) < spawnAnythingProbability)
 		{
-			float num = srand.NextFloat(0f, this.precomputedItemTotalWeight);
+			float num = srand.NextFloat(0f, precomputedItemTotalWeight);
 			float num2 = 0f;
-			for (int i = 0; i < this.perItemProbabilities.Count; i++)
+			for (int i = 0; i < perItemProbabilities.Count; i++)
 			{
-				num2 += this.perItemProbabilities[i].probability;
-				if (num2 > num || i == this.perItemProbabilities.Count - 1)
+				num2 += perItemProbabilities[i].probability;
+				if (num2 > num || i == perItemProbabilities.Count - 1)
 				{
-					entity = this.perItemProbabilities[i].entity;
+					entity = perItemProbabilities[i].entity;
 					return true;
 				}
 			}
@@ -71,7 +89,7 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		{
 			return null;
 		}
-		return this.GetOverride(ghostReactorManager.reactor);
+		return GetOverride(ghostReactorManager.reactor);
 	}
 
 	private GRBreakableItemSpawnConfig GetOverride(GhostReactor reactor)
@@ -90,28 +108,10 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 
 	private void OnValidate()
 	{
-		this.precomputedItemTotalWeight = 0f;
-		for (int i = 0; i < this.perItemProbabilities.Count; i++)
+		precomputedItemTotalWeight = 0f;
+		for (int i = 0; i < perItemProbabilities.Count; i++)
 		{
-			this.precomputedItemTotalWeight += this.perItemProbabilities[i].probability;
+			precomputedItemTotalWeight += perItemProbabilities[i].probability;
 		}
-	}
-
-	[SerializeField]
-	[Range(0f, 1f)]
-	public float spawnAnythingProbability = 0.2f;
-
-	public List<GRBreakableItemSpawnConfig.ItemProbability> perItemProbabilities = new List<GRBreakableItemSpawnConfig.ItemProbability>();
-
-	[SerializeField]
-	[ReadOnly]
-	private float precomputedItemTotalWeight;
-
-	[Serializable]
-	public struct ItemProbability
-	{
-		public GameEntity entity;
-
-		public float probability;
 	}
 }

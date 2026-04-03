@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using CjLib;
 using Unity.Collections;
@@ -6,9 +5,15 @@ using UnityEngine;
 
 public class GRNoiseEventManager : MonoBehaviourTick
 {
+	private List<GameNoiseEvent> noiseEvents = new List<GameNoiseEvent>();
+
+	public static GRNoiseEventManager instance;
+
+	public float debugMeshScale = 1f;
+
 	public void Awake()
 	{
-		GRNoiseEventManager.instance = this;
+		instance = this;
 	}
 
 	private void Start()
@@ -17,10 +22,10 @@ public class GRNoiseEventManager : MonoBehaviourTick
 
 	public override void Tick()
 	{
-		this.RemoveExpiredEvents();
+		RemoveExpiredEvents();
 		if (GhostReactorManager.noiseDebugEnabled)
 		{
-			this.RenderDebug();
+			RenderDebug();
 		}
 	}
 
@@ -38,28 +43,30 @@ public class GRNoiseEventManager : MonoBehaviourTick
 			duration = duration,
 			magnitude = magnitude
 		};
-		int num = this.FindUnusedEventEntry();
+		int num = FindUnusedEventEntry();
 		if (num == -1)
 		{
-			this.noiseEvents.Add(gameNoiseEvent);
-			return;
+			noiseEvents.Add(gameNoiseEvent);
 		}
-		this.noiseEvents[num] = gameNoiseEvent;
+		else
+		{
+			noiseEvents[num] = gameNoiseEvent;
+		}
 	}
 
 	public List<GameNoiseEvent> GetNoiseEventsInRadius(Vector3 origin, float radius)
 	{
 		List<GameNoiseEvent> list = new List<GameNoiseEvent>();
 		float num = radius * radius;
-		foreach (GameNoiseEvent gameNoiseEvent in this.noiseEvents)
+		foreach (GameNoiseEvent noiseEvent in noiseEvents)
 		{
-			if (gameNoiseEvent.IsValid())
+			if (noiseEvent.IsValid())
 			{
-				float sqrMagnitude = (gameNoiseEvent.position - origin).sqrMagnitude;
-				float num2 = gameNoiseEvent.magnitude * gameNoiseEvent.magnitude;
+				float sqrMagnitude = (noiseEvent.position - origin).sqrMagnitude;
+				float num2 = noiseEvent.magnitude * noiseEvent.magnitude;
 				if (sqrMagnitude < num * num2)
 				{
-					list.Add(gameNoiseEvent);
+					list.Add(noiseEvent);
 				}
 			}
 		}
@@ -72,21 +79,22 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		float num = radius * radius;
 		double num2 = -1.0;
 		int num3 = -1;
-		for (int i = 0; i < this.noiseEvents.Count; i++)
+		for (int i = 0; i < noiseEvents.Count; i++)
 		{
-			GameNoiseEvent gameNoiseEvent = this.noiseEvents[i];
-			if (gameNoiseEvent.IsValid())
+			GameNoiseEvent gameNoiseEvent = noiseEvents[i];
+			if (!gameNoiseEvent.IsValid())
 			{
-				float sqrMagnitude = (gameNoiseEvent.position - origin).sqrMagnitude;
-				float num4 = gameNoiseEvent.magnitude * gameNoiseEvent.magnitude;
-				if (sqrMagnitude < num * num4)
+				continue;
+			}
+			float sqrMagnitude = (gameNoiseEvent.position - origin).sqrMagnitude;
+			float num4 = gameNoiseEvent.magnitude * gameNoiseEvent.magnitude;
+			if (sqrMagnitude < num * num4)
+			{
+				double num5 = timeAsDouble - gameNoiseEvent.eventTime;
+				if (num3 < 0 || num5 < num2)
 				{
-					double num5 = timeAsDouble - gameNoiseEvent.eventTime;
-					if (num3 < 0 || num5 < num2)
-					{
-						num3 = i;
-						num2 = num5;
-					}
+					num3 = i;
+					num2 = num5;
 				}
 			}
 		}
@@ -95,7 +103,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 			outEvent = default(GameNoiseEvent);
 			return false;
 		}
-		outEvent = this.noiseEvents[num3];
+		outEvent = noiseEvents[num3];
 		return true;
 	}
 
@@ -103,13 +111,13 @@ public class GRNoiseEventManager : MonoBehaviourTick
 	{
 		int num = 0;
 		float num2 = 5f;
-		for (int i = 0; i < this.noiseEvents.Count; i++)
+		for (int i = 0; i < noiseEvents.Count; i++)
 		{
-			GameNoiseEvent gameNoiseEvent = this.noiseEvents[i];
+			GameNoiseEvent gameNoiseEvent = noiseEvents[i];
 			if (gameNoiseEvent.IsValid())
 			{
-				float radius = this.debugMeshScale * gameNoiseEvent.magnitude * num2;
-				DebugUtil.DrawSphere(gameNoiseEvent.position, radius, 8, 6, Color.green, true, DebugUtil.Style.Wireframe);
+				float radius = debugMeshScale * gameNoiseEvent.magnitude * num2;
+				DebugUtil.DrawSphere(gameNoiseEvent.position, radius, 8, 6, Color.green);
 				num++;
 			}
 		}
@@ -117,19 +125,13 @@ public class GRNoiseEventManager : MonoBehaviourTick
 
 	private void RemoveExpiredEvents()
 	{
-		for (int i = 0; i < this.noiseEvents.Count; i++)
+		for (int i = 0; i < noiseEvents.Count; i++)
 		{
-			if (!this.noiseEvents[i].IsValid())
+			if (!noiseEvents[i].IsValid())
 			{
-				this.noiseEvents.RemoveAtSwapBack(i);
+				noiseEvents.RemoveAtSwapBack(i);
 				i--;
 			}
 		}
 	}
-
-	private List<GameNoiseEvent> noiseEvents = new List<GameNoiseEvent>();
-
-	public static GRNoiseEventManager instance;
-
-	public float debugMeshScale = 1f;
 }

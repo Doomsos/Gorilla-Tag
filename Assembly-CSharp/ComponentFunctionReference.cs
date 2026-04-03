@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Sirenix.OdinInspector;
@@ -7,96 +7,91 @@ using UnityEngine;
 [Serializable]
 public sealed class ComponentFunctionReference<TResult>
 {
-	public bool IsValid
+	[Serializable]
+	private struct MethodRef(UnityEngine.Object obj, MethodInfo m)
 	{
-		get
-		{
-			return this._selection.component || !string.IsNullOrEmpty(this._selection.methodName);
-		}
-	}
+		public UnityEngine.Object component = obj;
 
-	private IEnumerable<ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>> GetMethodOptions()
-	{
-		if (this._target == null)
-		{
-			yield break;
-		}
-		yield return new ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>("NONE", default(ComponentFunctionReference<TResult>.MethodRef));
-		Type type = typeof(GameObject);
-		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-		foreach (MethodInfo methodInfo in type.GetMethods(flags))
-		{
-			if (methodInfo.GetParameters().Length == 0 && methodInfo.ReturnType == typeof(TResult))
-			{
-				string text = type.Name + "/" + methodInfo.Name;
-				yield return new ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>(text, new ComponentFunctionReference<TResult>.MethodRef(this._target, methodInfo));
-			}
-		}
-		MethodInfo[] array = null;
-		foreach (Component comp in this._target.GetComponents<Component>())
-		{
-			type = comp.GetType();
-			foreach (MethodInfo methodInfo2 in type.GetMethods(flags))
-			{
-				if (methodInfo2.GetParameters().Length == 0 && methodInfo2.ReturnType == typeof(TResult))
-				{
-					string text2 = type.Name + "/" + methodInfo2.Name;
-					yield return new ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>(text2, new ComponentFunctionReference<TResult>.MethodRef(comp, methodInfo2));
-				}
-			}
-			array = null;
-			comp = null;
-		}
-		Component[] array2 = null;
-		yield break;
-	}
-
-	public TResult Invoke()
-	{
-		if (this._cached == null)
-		{
-			this.Cache();
-		}
-		if (this._cached == null)
-		{
-			return default(TResult);
-		}
-		return this._cached();
-	}
-
-	public void Cache()
-	{
-		this._cached = null;
-		if (this._selection.component == null || string.IsNullOrEmpty(this._selection.methodName))
-		{
-			return;
-		}
-		MethodInfo method = this._selection.component.GetType().GetMethod(this._selection.methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-		if (method != null)
-		{
-			this._cached = (Func<TResult>)Delegate.CreateDelegate(typeof(Func<TResult>), this._selection.component, method);
-		}
+		public string methodName = m.Name;
 	}
 
 	[SerializeField]
 	private GameObject _target;
 
 	[SerializeField]
-	private ComponentFunctionReference<TResult>.MethodRef _selection;
+	private MethodRef _selection;
 
 	private Func<TResult> _cached;
 
-	[Serializable]
-	private struct MethodRef
+	public bool IsValid
 	{
-		public MethodRef(Object obj, MethodInfo m)
+		get
 		{
-			this.component = obj;
-			this.methodName = m.Name;
+			if (!_selection.component)
+			{
+				return !string.IsNullOrEmpty(_selection.methodName);
+			}
+			return true;
 		}
+	}
 
-		public Object component;
+	private IEnumerable<ValueDropdownItem<MethodRef>> GetMethodOptions()
+	{
+		if (_target == null)
+		{
+			yield break;
+		}
+		yield return new ValueDropdownItem<MethodRef>("NONE", default(MethodRef));
+		Type type = typeof(GameObject);
+		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+		MethodInfo[] methods = type.GetMethods(flags);
+		foreach (MethodInfo methodInfo in methods)
+		{
+			if (methodInfo.GetParameters().Length == 0 && methodInfo.ReturnType == typeof(TResult))
+			{
+				string text = type.Name + "/" + methodInfo.Name;
+				yield return new ValueDropdownItem<MethodRef>(text, new MethodRef(_target, methodInfo));
+			}
+		}
+		Component[] components = _target.GetComponents<Component>();
+		foreach (Component comp in components)
+		{
+			type = comp.GetType();
+			methods = type.GetMethods(flags);
+			foreach (MethodInfo methodInfo2 in methods)
+			{
+				if (methodInfo2.GetParameters().Length == 0 && methodInfo2.ReturnType == typeof(TResult))
+				{
+					string text2 = type.Name + "/" + methodInfo2.Name;
+					yield return new ValueDropdownItem<MethodRef>(text2, new MethodRef(comp, methodInfo2));
+				}
+			}
+		}
+	}
 
-		public string methodName;
+	public TResult Invoke()
+	{
+		if (_cached == null)
+		{
+			Cache();
+		}
+		if (_cached == null)
+		{
+			return default(TResult);
+		}
+		return _cached();
+	}
+
+	public void Cache()
+	{
+		_cached = null;
+		if (!(_selection.component == null) && !string.IsNullOrEmpty(_selection.methodName))
+		{
+			MethodInfo method = _selection.component.GetType().GetMethod(_selection.methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+			if (method != null)
+			{
+				_cached = (Func<TResult>)Delegate.CreateDelegate(typeof(Func<TResult>), _selection.component, method);
+			}
+		}
 	}
 }

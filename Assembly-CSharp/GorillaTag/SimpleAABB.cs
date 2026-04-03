@@ -1,27 +1,25 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class SimpleAABB : MonoBehaviour
 {
-	public class SimpleAABB : MonoBehaviour
+	[SerializeField]
+	private Vector3 m_center;
+
+	[SerializeField]
+	private Vector3 m_size;
+
+	private Bounds m_bounds;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-			this.m_bounds = new Bounds(this.m_center, this.m_size);
-		}
+		m_bounds = new Bounds(m_center, m_size);
+	}
 
-		public bool IsInBounds(Vector3 point)
-		{
-			Vector3 point2 = base.transform.InverseTransformPoint(point);
-			return this.m_bounds.Contains(point2);
-		}
-
-		[SerializeField]
-		private Vector3 m_center;
-
-		[SerializeField]
-		private Vector3 m_size;
-
-		private Bounds m_bounds;
+	public bool IsInBounds(Vector3 point)
+	{
+		Vector3 point2 = base.transform.InverseTransformPoint(point);
+		return m_bounds.Contains(point2);
 	}
 }

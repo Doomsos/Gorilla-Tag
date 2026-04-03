@@ -1,25 +1,23 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class PurchaseCurrencyButton : GorillaPressableButton
 {
+	public string purchaseCurrencySize;
+
+	public float buttonFadeTime = 0.25f;
+
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		ATM_Manager.instance.PressCurrencyPurchaseButton(this.purchaseCurrencySize);
-		base.StartCoroutine(this.ButtonColorUpdate());
+		ATM_Manager.instance.PressCurrencyPurchaseButton(purchaseCurrencySize);
+		StartCoroutine(ButtonColorUpdate());
 	}
 
 	private IEnumerator ButtonColorUpdate()
 	{
-		this.buttonRenderer.sharedMaterial = this.pressedMaterial;
-		yield return new WaitForSeconds(this.buttonFadeTime);
-		this.buttonRenderer.sharedMaterial = this.unpressedMaterial;
-		yield break;
+		buttonRenderer.sharedMaterial = pressedMaterial;
+		yield return new WaitForSeconds(buttonFadeTime);
+		buttonRenderer.sharedMaterial = unpressedMaterial;
 	}
-
-	public string purchaseCurrencySize;
-
-	public float buttonFadeTime = 0.25f;
 }

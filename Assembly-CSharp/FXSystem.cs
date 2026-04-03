@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
@@ -11,9 +10,8 @@ public static class FXSystem
 		if (settings.forLocalRig)
 		{
 			context.OnPlayFX();
-			return;
 		}
-		if (FXSystem.CheckCallSpam(settings, (int)fxType, info.SentServerTime))
+		else if (CheckCallSpam(settings, (int)fxType, info.SentServerTime))
 		{
 			context.OnPlayFX();
 		}
@@ -28,7 +26,7 @@ public static class FXSystem
 				return;
 			}
 		}
-		FXSystem.PlayFXForRig(fxType, context, info);
+		PlayFXForRig(fxType, context, info);
 	}
 
 	public static void PlayFX<T>(FXType fxType, IFXContextParems<T> context, T args, PhotonMessageInfoWrapped info) where T : FXSArgs
@@ -37,9 +35,8 @@ public static class FXSystem
 		if (settings.forLocalRig)
 		{
 			context.OnPlayFX(args);
-			return;
 		}
-		if (FXSystem.CheckCallSpam(settings, (int)fxType, info.SentServerTime))
+		else if (CheckCallSpam(settings, (int)fxType, info.SentServerTime))
 		{
 			context.OnPlayFX(args);
 		}
@@ -48,16 +45,16 @@ public static class FXSystem
 	public static void PlayFXForRig<T>(FXType fxType, IFXEffectContext<T> context, PhotonMessageInfoWrapped info) where T : IFXEffectContextObject
 	{
 		FXSystemSettings settings = context.settings;
-		if (!settings.forLocalRig && !FXSystem.CheckCallSpam(settings, (int)fxType, info.SentServerTime))
+		if (settings.forLocalRig || CheckCallSpam(settings, (int)fxType, info.SentServerTime))
 		{
-			return;
+			PlayFX(context.effectContext);
 		}
-		FXSystem.PlayFX(context.effectContext);
 	}
 
 	public static void PlayFX(IFXEffectContextObject effectContext)
 	{
 		effectContext.OnTriggerActions();
+		GameObject gameObject = null;
 		List<int> prefabPoolIds = effectContext.PrefabPoolIds;
 		if (prefabPoolIds != null)
 		{
@@ -67,24 +64,23 @@ public static class FXSystem
 				int num = prefabPoolIds[i];
 				if (num != -1)
 				{
-					GameObject gameObject = ObjectPools.instance.Instantiate(num, effectContext.Position, effectContext.Rotation, false);
-					gameObject.SetActive(true);
+					gameObject = ObjectPools.instance.Instantiate(num, effectContext.Position, effectContext.Rotation, setActive: false);
+					gameObject.SetActive(value: true);
 					effectContext.OnPlayVisualFX(num, gameObject);
 				}
 			}
 		}
 		AudioSource soundSource = effectContext.SoundSource;
-		if (soundSource.IsNull())
+		if (!soundSource.IsNull())
 		{
-			return;
-		}
-		AudioClip sound = effectContext.Sound;
-		if (sound.IsNotNull())
-		{
-			soundSource.volume = effectContext.Volume;
-			soundSource.pitch = effectContext.Pitch;
-			soundSource.GTPlayOneShot(sound, 1f);
-			effectContext.OnPlaySoundFX(soundSource);
+			AudioClip sound = effectContext.Sound;
+			if (sound.IsNotNull())
+			{
+				soundSource.volume = effectContext.Volume;
+				soundSource.pitch = effectContext.Pitch;
+				soundSource.GTPlayOneShot(sound);
+				effectContext.OnPlaySoundFX(soundSource);
+			}
 		}
 	}
 

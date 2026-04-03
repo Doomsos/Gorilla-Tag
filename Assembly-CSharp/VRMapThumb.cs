@@ -1,73 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.XR;
 
 [Serializable]
 public class VRMapThumb : VRMap
 {
-	public override void Initialize()
-	{
-		this.closedAngle1Quat = Quaternion.Euler(this.closedAngle1);
-		this.closedAngle2Quat = Quaternion.Euler(this.closedAngle2);
-		this.startingAngle1Quat = Quaternion.Euler(this.startingAngle1);
-		this.startingAngle2Quat = Quaternion.Euler(this.startingAngle2);
-	}
-
-	public override void MapMyFinger(float lerpValue)
-	{
-		this.calcT = 0f;
-		if (this.vrTargetNode == XRNode.LeftHand)
-		{
-			this.primaryButtonPress = ControllerInputPoller.instance.leftControllerPrimaryButton;
-			this.primaryButtonTouch = ControllerInputPoller.instance.leftControllerPrimaryButtonTouch;
-			this.secondaryButtonPress = ControllerInputPoller.instance.leftControllerSecondaryButton;
-			this.secondaryButtonTouch = ControllerInputPoller.instance.leftControllerSecondaryButtonTouch;
-		}
-		else
-		{
-			this.primaryButtonPress = ControllerInputPoller.instance.rightControllerPrimaryButton;
-			this.primaryButtonTouch = ControllerInputPoller.instance.rightControllerPrimaryButtonTouch;
-			this.secondaryButtonPress = ControllerInputPoller.instance.rightControllerSecondaryButton;
-			this.secondaryButtonTouch = ControllerInputPoller.instance.rightControllerSecondaryButtonTouch;
-		}
-		if (this.primaryButtonPress || this.secondaryButtonPress)
-		{
-			this.calcT = 1f;
-		}
-		else if (this.primaryButtonTouch || this.secondaryButtonTouch)
-		{
-			this.calcT = 0.1f;
-		}
-		this.LerpFinger(lerpValue, false);
-	}
-
-	public override void LerpFinger(float lerpValue, bool isOther)
-	{
-		if (isOther)
-		{
-			this.currentAngle1 = Mathf.Lerp(this.currentAngle1, this.calcT, lerpValue);
-			this.currentAngle2 = Mathf.Lerp(this.currentAngle2, this.calcT, lerpValue);
-			this.myTempInt = (int)(this.currentAngle1 * 10.1f);
-			if (this.myTempInt != this.lastAngle1)
-			{
-				this.lastAngle1 = this.myTempInt;
-				this.fingerBone1.localRotation = this.angle1Table[this.lastAngle1];
-			}
-			this.myTempInt = (int)(this.currentAngle2 * 10.1f);
-			if (this.myTempInt != this.lastAngle2)
-			{
-				this.lastAngle2 = this.myTempInt;
-				this.fingerBone2.localRotation = this.angle2Table[this.lastAngle2];
-				return;
-			}
-		}
-		else
-		{
-			this.fingerBone1.localRotation = Quaternion.Lerp(this.fingerBone1.localRotation, Quaternion.Lerp(this.startingAngle1Quat, this.closedAngle1Quat, this.calcT), lerpValue);
-			this.fingerBone2.localRotation = Quaternion.Lerp(this.fingerBone2.localRotation, Quaternion.Lerp(this.startingAngle2Quat, this.closedAngle2Quat, this.calcT), lerpValue);
-		}
-	}
-
 	public InputFeatureUsage inputAxis;
 
 	public bool primaryButtonTouch;
@@ -113,4 +50,66 @@ public class VRMapThumb : VRMap
 	private InputDevice tempDevice;
 
 	private int myTempInt;
+
+	public override void Initialize()
+	{
+		closedAngle1Quat = Quaternion.Euler(closedAngle1);
+		closedAngle2Quat = Quaternion.Euler(closedAngle2);
+		startingAngle1Quat = Quaternion.Euler(startingAngle1);
+		startingAngle2Quat = Quaternion.Euler(startingAngle2);
+	}
+
+	public override void MapMyFinger(float lerpValue)
+	{
+		calcT = 0f;
+		if (vrTargetNode == XRNode.LeftHand)
+		{
+			primaryButtonPress = ControllerInputPoller.instance.leftControllerPrimaryButton;
+			primaryButtonTouch = ControllerInputPoller.instance.leftControllerPrimaryButtonTouch;
+			secondaryButtonPress = ControllerInputPoller.instance.leftControllerSecondaryButton;
+			secondaryButtonTouch = ControllerInputPoller.instance.leftControllerSecondaryButtonTouch;
+		}
+		else
+		{
+			primaryButtonPress = ControllerInputPoller.instance.rightControllerPrimaryButton;
+			primaryButtonTouch = ControllerInputPoller.instance.rightControllerPrimaryButtonTouch;
+			secondaryButtonPress = ControllerInputPoller.instance.rightControllerSecondaryButton;
+			secondaryButtonTouch = ControllerInputPoller.instance.rightControllerSecondaryButtonTouch;
+		}
+		if (primaryButtonPress || secondaryButtonPress)
+		{
+			calcT = 1f;
+		}
+		else if (primaryButtonTouch || secondaryButtonTouch)
+		{
+			calcT = 0.1f;
+		}
+		LerpFinger(lerpValue, isOther: false);
+	}
+
+	public override void LerpFinger(float lerpValue, bool isOther)
+	{
+		if (isOther)
+		{
+			currentAngle1 = Mathf.Lerp(currentAngle1, calcT, lerpValue);
+			currentAngle2 = Mathf.Lerp(currentAngle2, calcT, lerpValue);
+			myTempInt = (int)(currentAngle1 * 10.1f);
+			if (myTempInt != lastAngle1)
+			{
+				lastAngle1 = myTempInt;
+				fingerBone1.localRotation = angle1Table[lastAngle1];
+			}
+			myTempInt = (int)(currentAngle2 * 10.1f);
+			if (myTempInt != lastAngle2)
+			{
+				lastAngle2 = myTempInt;
+				fingerBone2.localRotation = angle2Table[lastAngle2];
+			}
+		}
+		else
+		{
+			fingerBone1.localRotation = Quaternion.Lerp(fingerBone1.localRotation, Quaternion.Lerp(startingAngle1Quat, closedAngle1Quat, calcT), lerpValue);
+			fingerBone2.localRotation = Quaternion.Lerp(fingerBone2.localRotation, Quaternion.Lerp(startingAngle2Quat, closedAngle2Quat, calcT), lerpValue);
+		}
+	}
 }

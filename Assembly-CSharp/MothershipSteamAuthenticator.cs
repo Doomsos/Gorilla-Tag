@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using Steamworks;
 using UnityEngine;
@@ -10,29 +10,21 @@ public class MothershipSteamAuthenticator : MonoBehaviour
 		MothershipClientApiUnity.StartLoginWithSteam(delegate(PlayerSteamBeginLoginResponse resp)
 		{
 			string nonce = resp.Nonce;
-			this.GetAuthTicketForWebApi(nonce, delegate(string ticket)
+			GetAuthTicketForWebApi(nonce, delegate(string ticket)
 			{
-				MothershipClientApiUnity.CompleteLoginWithSteam(nonce, ticket, delegate(LoginResponse successResp)
+				MothershipClientApiUnity.CompleteLoginWithSteam(nonce, ticket, delegate
 				{
 					Debug.Log("Logged in to Mothership with Steam");
 				}, delegate(MothershipError finalError, int finalErrorCode)
 				{
-					Debug.LogFormat("Could not log into Mothership with Steam {0} {1}", new object[]
-					{
-						finalError,
-						finalErrorCode
-					});
+					Debug.LogFormat("Could not log into Mothership with Steam {0} {1}", finalError, finalErrorCode);
 				});
-			}, delegate(EResult error)
+			}, delegate
 			{
 			});
 		}, delegate(MothershipError error, int errorcode)
 		{
-			Debug.LogFormat("Couldn't start mothership auth for steam {0} {1}", new object[]
-			{
-				error,
-				errorcode
-			});
+			Debug.LogFormat("Couldn't start mothership auth for steam {0} {1}", error, errorcode);
 		});
 	}
 
@@ -41,50 +33,33 @@ public class MothershipSteamAuthenticator : MonoBehaviour
 		HAuthTicket ticketHandle = HAuthTicket.Invalid;
 		Callback<GetAuthSessionTicketResponse_t> ticketCallback = null;
 		byte[] ticketBlob = new byte[1024];
-		uint ticketSize = 0U;
+		uint ticketSize = 0u;
 		ticketCallback = Callback<GetAuthSessionTicketResponse_t>.Create(delegate(GetAuthSessionTicketResponse_t response)
 		{
-			if (response.m_hAuthTicket != ticketHandle)
+			if (!(response.m_hAuthTicket != ticketHandle))
 			{
-				return;
-			}
-			ticketCallback.Dispose();
-			ticketCallback = null;
-			if (response.m_eResult != EResult.k_EResultOK)
-			{
-				Action<EResult> failureCallback3 = failureCallback;
-				if (failureCallback3 == null)
+				ticketCallback.Dispose();
+				ticketCallback = null;
+				if (response.m_eResult != EResult.k_EResultOK)
 				{
-					return;
+					failureCallback?.Invoke(response.m_eResult);
 				}
-				failureCallback3(response.m_eResult);
-				return;
-			}
-			else
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (uint num = 0U; num < ticketSize; num += 1U)
+				else
 				{
-					stringBuilder.AppendFormat("{0:x2}", ticketBlob[(int)num]);
+					StringBuilder stringBuilder = new StringBuilder();
+					for (uint num = 0u; num < ticketSize; num++)
+					{
+						stringBuilder.AppendFormat("{0:x2}", ticketBlob[num]);
+					}
+					successCallback?.Invoke(stringBuilder.ToString());
 				}
-				Action<string> successCallback2 = successCallback;
-				if (successCallback2 == null)
-				{
-					return;
-				}
-				successCallback2(stringBuilder.ToString());
-				return;
 			}
 		});
-		SteamNetworkingIdentity steamNetworkingIdentity = default(SteamNetworkingIdentity);
-		ticketHandle = SteamUser.GetAuthSessionTicket(ticketBlob, ticketBlob.Length, out ticketSize, ref steamNetworkingIdentity);
+		SteamNetworkingIdentity pSteamNetworkingIdentity = default(SteamNetworkingIdentity);
+		ticketHandle = SteamUser.GetAuthSessionTicket(ticketBlob, ticketBlob.Length, out ticketSize, ref pSteamNetworkingIdentity);
 		if (ticketHandle == HAuthTicket.Invalid)
 		{
-			Action<EResult> failureCallback2 = failureCallback;
-			if (failureCallback2 != null)
-			{
-				failureCallback2(EResult.k_EResultFail);
-			}
+			failureCallback?.Invoke(EResult.k_EResultFail);
 		}
 		return ticketHandle;
 	}
@@ -95,46 +70,29 @@ public class MothershipSteamAuthenticator : MonoBehaviour
 		Callback<GetTicketForWebApiResponse_t> ticketCallback = null;
 		ticketCallback = Callback<GetTicketForWebApiResponse_t>.Create(delegate(GetTicketForWebApiResponse_t response)
 		{
-			if (response.m_hAuthTicket != ticketHandle)
+			if (!(response.m_hAuthTicket != ticketHandle))
 			{
-				return;
-			}
-			ticketCallback.Dispose();
-			ticketCallback = null;
-			if (response.m_eResult != EResult.k_EResultOK)
-			{
-				Action<EResult> failureCallback3 = failureCallback;
-				if (failureCallback3 == null)
+				ticketCallback.Dispose();
+				ticketCallback = null;
+				if (response.m_eResult != EResult.k_EResultOK)
 				{
-					return;
+					failureCallback?.Invoke(response.m_eResult);
 				}
-				failureCallback3(response.m_eResult);
-				return;
-			}
-			else
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (int i = 0; i < response.m_cubTicket; i++)
+				else
 				{
-					stringBuilder.AppendFormat("{0:x2}", response.m_rgubTicket[i]);
+					StringBuilder stringBuilder = new StringBuilder();
+					for (int i = 0; i < response.m_cubTicket; i++)
+					{
+						stringBuilder.AppendFormat("{0:x2}", response.m_rgubTicket[i]);
+					}
+					successCallback?.Invoke(stringBuilder.ToString());
 				}
-				Action<string> successCallback2 = successCallback;
-				if (successCallback2 == null)
-				{
-					return;
-				}
-				successCallback2(stringBuilder.ToString());
-				return;
 			}
 		});
 		ticketHandle = SteamUser.GetAuthTicketForWebApi(authenticatorId);
 		if (ticketHandle == HAuthTicket.Invalid)
 		{
-			Action<EResult> failureCallback2 = failureCallback;
-			if (failureCallback2 != null)
-			{
-				failureCallback2(EResult.k_EResultFail);
-			}
+			failureCallback?.Invoke(EResult.k_EResultFail);
 		}
 		return ticketHandle;
 	}

@@ -1,8 +1,18 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GTContactManager : MonoBehaviour
 {
+	public const int MAX_CONTACTS = 32;
+
+	public static Matrix4x4[] ShaderData = new Matrix4x4[32];
+
+	private static GTContactPoint[] _gContactPoints = InitContactPoints(32);
+
+	private static int gNextFree = 0;
+
+	private static SRand gRND = new SRand(DateTime.UtcNow);
+
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
@@ -20,29 +30,28 @@ public class GTContactManager : MonoBehaviour
 
 	public static void RaiseContact(Vector3 point, Vector3 normal)
 	{
-		if (GTContactManager.gNextFree == -1)
+		if (gNextFree != -1)
 		{
-			return;
+			float time = GTShaderGlobals.Time;
+			GTContactPoint obj = _gContactPoints[gNextFree];
+			obj.contactPoint = point;
+			obj.radius = 0.04f;
+			obj.counterVelocity = normal;
+			obj.timestamp = time;
+			obj.lifetime = 2f;
+			obj.color = gRND.NextColor();
+			obj.free = 0u;
 		}
-		float time = GTShaderGlobals.Time;
-		GTContactPoint gtcontactPoint = GTContactManager._gContactPoints[GTContactManager.gNextFree];
-		gtcontactPoint.contactPoint = point;
-		gtcontactPoint.radius = 0.04f;
-		gtcontactPoint.counterVelocity = normal;
-		gtcontactPoint.timestamp = time;
-		gtcontactPoint.lifetime = 2f;
-		gtcontactPoint.color = GTContactManager.gRND.NextColor();
-		gtcontactPoint.free = 0U;
 	}
 
 	public static void ProcessContacts()
 	{
-		Matrix4x4[] shaderData = GTContactManager.ShaderData;
-		GTContactPoint[] gContactPoints = GTContactManager._gContactPoints;
-		int frame = GTShaderGlobals.Frame;
+		Matrix4x4[] shaderData = ShaderData;
+		GTContactPoint[] gContactPoints = _gContactPoints;
+		_ = GTShaderGlobals.Frame;
 		for (int i = 0; i < 32; i++)
 		{
-			GTContactManager.Transfer(ref gContactPoints[i].data, ref shaderData[i]);
+			Transfer(ref gContactPoints[i].data, ref shaderData[i]);
 		}
 	}
 
@@ -65,14 +74,4 @@ public class GTContactManager : MonoBehaviour
 		to.m32 = from.m32;
 		to.m33 = from.m33;
 	}
-
-	public const int MAX_CONTACTS = 32;
-
-	public static Matrix4x4[] ShaderData = new Matrix4x4[32];
-
-	private static GTContactPoint[] _gContactPoints = GTContactManager.InitContactPoints(32);
-
-	private static int gNextFree = 0;
-
-	private static SRand gRND = new SRand(DateTime.UtcNow);
 }

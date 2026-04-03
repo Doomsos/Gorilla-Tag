@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,136 +6,12 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityAttackSwipe : GRAbilityBase
 {
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	private enum State
 	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-		this.target = null;
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-	}
-
-	protected override void OnStart()
-	{
-		if (this.animData.Count > 0)
-		{
-			this.lastAnimIndex = AbilityHelperFunctions.RandomRangeUnique(0, this.animData.Count, this.lastAnimIndex);
-			this.duration = this.animData[this.lastAnimIndex].duration;
-			this.PlayAnim(this.animData[this.lastAnimIndex].animName, 0.1f, this.animData[this.lastAnimIndex].speed);
-			this.animNameString = this.animData[this.lastAnimIndex].animName;
-		}
-		else
-		{
-			this.duration = 0.5f;
-		}
-		this.soundAttack.soundSelectMode = AbilitySound.SoundSelectMode.Random;
-		this.soundAttack.Play(null);
-		this.agent.SetIsPathing(false, true);
-		this.agent.SetDisableNetworkSync(true);
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-		this.state = GRAbilityAttackSwipe.State.Tell;
-	}
-
-	protected override void OnStop()
-	{
-		this.agent.SetIsPathing(true, true);
-		this.agent.SetDisableNetworkSync(false);
-		if (this.damageTrigger != null)
-		{
-			this.damageTrigger.SetActive(false);
-		}
-	}
-
-	public override bool IsDone()
-	{
-		return this.state == GRAbilityAttackSwipe.State.Done;
-	}
-
-	protected override void OnUpdateShared(float dt)
-	{
-		float num = (float)(Time.timeAsDouble - this.startTime);
-		switch (this.state)
-		{
-		case GRAbilityAttackSwipe.State.Tell:
-			this.targetPos = this.root.position + this.root.transform.forward;
-			if (this.target != null)
-			{
-				this.targetPos = this.target.position;
-			}
-			GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
-			if (num > this.tellDuration)
-			{
-				this.state = GRAbilityAttackSwipe.State.Attack;
-				if (this.damageTrigger != null)
-				{
-					this.damageTrigger.SetActive(true);
-				}
-				this.initialPos = this.root.position;
-				this.initialVel = (this.targetPos - this.initialPos).normalized * this.attackMoveSpeed;
-				return;
-			}
-			break;
-		case GRAbilityAttackSwipe.State.Attack:
-		{
-			float d = num - this.tellDuration;
-			Vector3 vector = this.initialPos + this.initialVel * d;
-			NavMeshHit navMeshHit;
-			if (NavMesh.SamplePosition(vector, out navMeshHit, 0.5f, this.walkableArea))
-			{
-				vector = navMeshHit.position;
-				if (NavMesh.Raycast(this.initialPos, vector, out navMeshHit, this.walkableArea))
-				{
-					vector = navMeshHit.position;
-				}
-				this.root.position = vector;
-			}
-			if (num > this.tellDuration + this.attackDuration)
-			{
-				if (this.damageTrigger != null)
-				{
-					this.damageTrigger.SetActive(false);
-				}
-				this.state = GRAbilityAttackSwipe.State.FollowThrough;
-				return;
-			}
-			break;
-		}
-		case GRAbilityAttackSwipe.State.FollowThrough:
-			if (num >= this.duration)
-			{
-				this.state = GRAbilityAttackSwipe.State.Done;
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void SetTargetPlayer(NetPlayer targetPlayer)
-	{
-		this.target = null;
-		if (targetPlayer != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(targetPlayer.ActorNumber);
-			if (grplayer != null && grplayer.State == GRPlayer.GRPlayerState.Alive)
-			{
-				this.target = grplayer.transform;
-			}
-		}
-	}
-
-	public string GetAnimName()
-	{
-		return this.animNameString;
-	}
-
-	public override bool IsCoolDownOver()
-	{
-		return base.IsCoolDownOver(this.coolDown);
+		Tell,
+		Attack,
+		FollowThrough,
+		Done
 	}
 
 	public float duration;
@@ -152,7 +28,7 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 
 	public AbilitySound soundAttack;
 
-	private GRAbilityAttackSwipe.State state;
+	private State state;
 
 	public float maxTurnSpeed;
 
@@ -170,11 +46,130 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 
 	public Vector3 initialVel;
 
-	private enum State
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
-		Tell,
-		Attack,
-		FollowThrough,
-		Done
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+		target = null;
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+	}
+
+	protected override void OnStart()
+	{
+		if (animData.Count > 0)
+		{
+			lastAnimIndex = AbilityHelperFunctions.RandomRangeUnique(0, animData.Count, lastAnimIndex);
+			duration = animData[lastAnimIndex].duration;
+			PlayAnim(animData[lastAnimIndex].animName, 0.1f, animData[lastAnimIndex].speed);
+			animNameString = animData[lastAnimIndex].animName;
+		}
+		else
+		{
+			duration = 0.5f;
+		}
+		soundAttack.soundSelectMode = AbilitySound.SoundSelectMode.Random;
+		soundAttack.Play(null);
+		agent.SetIsPathing(isPathing: false, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: true);
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+		state = State.Tell;
+	}
+
+	protected override void OnStop()
+	{
+		agent.SetIsPathing(isPathing: true, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: false);
+		if (damageTrigger != null)
+		{
+			damageTrigger.SetActive(value: false);
+		}
+	}
+
+	public override bool IsDone()
+	{
+		return state == State.Done;
+	}
+
+	protected override void OnUpdateShared(float dt)
+	{
+		float num = (float)(Time.timeAsDouble - startTime);
+		switch (state)
+		{
+		case State.Tell:
+			targetPos = root.position + root.transform.forward;
+			if (target != null)
+			{
+				targetPos = target.position;
+			}
+			GameAgent.UpdateFacingTarget(root, agent.navAgent, target, maxTurnSpeed);
+			if (num > tellDuration)
+			{
+				state = State.Attack;
+				if (damageTrigger != null)
+				{
+					damageTrigger.SetActive(value: true);
+				}
+				initialPos = root.position;
+				initialVel = (targetPos - initialPos).normalized * attackMoveSpeed;
+			}
+			break;
+		case State.Attack:
+		{
+			float num2 = num - tellDuration;
+			Vector3 sourcePosition = initialPos + initialVel * num2;
+			if (NavMesh.SamplePosition(sourcePosition, out var hit, 0.5f, walkableArea))
+			{
+				sourcePosition = hit.position;
+				if (NavMesh.Raycast(initialPos, sourcePosition, out hit, walkableArea))
+				{
+					sourcePosition = hit.position;
+				}
+				root.position = sourcePosition;
+			}
+			if (num > tellDuration + attackDuration)
+			{
+				if (damageTrigger != null)
+				{
+					damageTrigger.SetActive(value: false);
+				}
+				state = State.FollowThrough;
+			}
+			break;
+		}
+		case State.FollowThrough:
+			if (num >= duration)
+			{
+				state = State.Done;
+			}
+			break;
+		}
+	}
+
+	public void SetTargetPlayer(NetPlayer targetPlayer)
+	{
+		target = null;
+		if (targetPlayer != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (gRPlayer != null && gRPlayer.State == GRPlayer.GRPlayerState.Alive)
+			{
+				target = gRPlayer.transform;
+			}
+		}
+	}
+
+	public string GetAnimName()
+	{
+		return animNameString;
+	}
+
+	public override bool IsCoolDownOver()
+	{
+		return IsCoolDownOver(coolDown);
 	}
 }

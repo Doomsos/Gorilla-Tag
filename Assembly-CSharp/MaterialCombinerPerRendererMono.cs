@@ -1,16 +1,17 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MaterialCombinerPerRendererMono : MonoBehaviour
 {
+	public List<MaterialCombinerPerRendererInfo> slotData = new List<MaterialCombinerPerRendererInfo>();
+
 	protected void Awake()
 	{
 	}
 
 	public void AddEntry(Renderer r, int slot, int sliceIndex, Color baseColor, Material oldMat)
 	{
-		this.slotData.Add(new MaterialCombinerPerRendererInfo
+		slotData.Add(new MaterialCombinerPerRendererInfo
 		{
 			renderer = r,
 			slotIndex = slot,
@@ -22,17 +23,15 @@ public class MaterialCombinerPerRendererMono : MonoBehaviour
 
 	public bool TryGetData(Renderer r, int slot, out MaterialCombinerPerRendererInfo data)
 	{
-		foreach (MaterialCombinerPerRendererInfo materialCombinerPerRendererInfo in this.slotData)
+		foreach (MaterialCombinerPerRendererInfo slotDatum in slotData)
 		{
-			if (materialCombinerPerRendererInfo.renderer == r && materialCombinerPerRendererInfo.slotIndex == slot)
+			if (slotDatum.renderer == r && slotDatum.slotIndex == slot)
 			{
-				data = materialCombinerPerRendererInfo;
+				data = slotDatum;
 				return true;
 			}
 		}
 		data = default(MaterialCombinerPerRendererInfo);
 		return false;
 	}
-
-	public List<MaterialCombinerPerRendererInfo> slotData = new List<MaterialCombinerPerRendererInfo>();
 }

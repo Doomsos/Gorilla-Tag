@@ -1,18 +1,23 @@
-﻿using System;
+using System;
 using Fusion;
 
 [NetworkBehaviourWeaved(22)]
 public class TagGameModeData : FusionGameModeData
 {
+	[WeaverGenerated]
+	[DefaultForProperty("tagData", 0, 22)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private TagData _tagData;
+
 	public override object Data
 	{
 		get
 		{
-			return this.tagData;
+			return tagData;
 		}
 		set
 		{
-			this.tagData = (TagData)value;
+			tagData = (TagData)value;
 		}
 	}
 
@@ -22,38 +27,33 @@ public class TagGameModeData : FusionGameModeData
 	{
 		get
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing TagGameModeData.tagData. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			return *(TagData*)(this.Ptr + 0);
+			return *(TagData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
 		set
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing TagGameModeData.tagData. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			*(TagData*)(this.Ptr + 0) = value;
+			*(TagData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
 		}
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
-		this.tagData = this._tagData;
+		base.CopyBackingFieldsToState(P_0);
+		tagData = _tagData;
 	}
 
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
 		base.CopyStateToBackingFields();
-		this._tagData = this.tagData;
+		_tagData = tagData;
 	}
-
-	[WeaverGenerated]
-	[DefaultForProperty("tagData", 0, 22)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private TagData _tagData;
 }

@@ -1,38 +1,9 @@
-﻿using System;
 using GorillaExtensions;
 using Unity.Cinemachine;
 using UnityEngine;
 
 public class GragerHoldable : MonoBehaviour
 {
-	private void Start()
-	{
-		this.LocalRotationAxis = this.LocalRotationAxis.normalized;
-		this.lastWorldPosition = base.transform.TransformPoint(this.LocalCenterOfMass);
-		this.lastClackParentLocalPosition = base.transform.parent.InverseTransformPoint(this.lastWorldPosition);
-		this.centerOfMassRadius = this.LocalCenterOfMass.magnitude;
-		this.RotationCorrection = Quaternion.Euler(this.RotationCorrectionEuler);
-	}
-
-	private void Update()
-	{
-		Vector3 target = base.transform.TransformPoint(this.LocalCenterOfMass);
-		Vector3 a = this.lastWorldPosition + this.velocity * Time.deltaTime * this.drag;
-		Vector3 vector = base.transform.parent.TransformDirection(this.LocalRotationAxis);
-		Vector3 vector2 = base.transform.position + (a - base.transform.position).ProjectOntoPlane(vector).normalized * this.centerOfMassRadius;
-		vector2 = Vector3.MoveTowards(vector2, target, this.localFriction * Time.deltaTime);
-		this.velocity = (vector2 - this.lastWorldPosition) / Time.deltaTime;
-		this.velocity += Vector3.down * this.gravity * Time.deltaTime;
-		this.lastWorldPosition = vector2;
-		base.transform.rotation = Quaternion.LookRotation(vector2 - base.transform.position, vector) * this.RotationCorrection;
-		Vector3 a2 = base.transform.parent.InverseTransformPoint(base.transform.TransformPoint(this.LocalCenterOfMass));
-		if ((a2 - this.lastClackParentLocalPosition).IsLongerThan(this.distancePerClack))
-		{
-			this.clackAudio.GTPlayOneShot(this.allClacks[Random.Range(0, this.allClacks.Length)], 1f);
-			this.lastClackParentLocalPosition = a2;
-		}
-	}
-
 	[SerializeField]
 	private Vector3 LocalCenterOfMass;
 
@@ -69,4 +40,32 @@ public class GragerHoldable : MonoBehaviour
 	private Vector3 lastClackParentLocalPosition;
 
 	private Quaternion RotationCorrection;
+
+	private void Start()
+	{
+		LocalRotationAxis = LocalRotationAxis.normalized;
+		lastWorldPosition = base.transform.TransformPoint(LocalCenterOfMass);
+		lastClackParentLocalPosition = base.transform.parent.InverseTransformPoint(lastWorldPosition);
+		centerOfMassRadius = LocalCenterOfMass.magnitude;
+		RotationCorrection = Quaternion.Euler(RotationCorrectionEuler);
+	}
+
+	private void Update()
+	{
+		Vector3 target = base.transform.TransformPoint(LocalCenterOfMass);
+		Vector3 vector = lastWorldPosition + velocity * Time.deltaTime * drag;
+		Vector3 vector2 = base.transform.parent.TransformDirection(LocalRotationAxis);
+		Vector3 current = base.transform.position + (vector - base.transform.position).ProjectOntoPlane(vector2).normalized * centerOfMassRadius;
+		current = Vector3.MoveTowards(current, target, localFriction * Time.deltaTime);
+		velocity = (current - lastWorldPosition) / Time.deltaTime;
+		velocity += Vector3.down * gravity * Time.deltaTime;
+		lastWorldPosition = current;
+		base.transform.rotation = Quaternion.LookRotation(current - base.transform.position, vector2) * RotationCorrection;
+		Vector3 vector3 = base.transform.parent.InverseTransformPoint(base.transform.TransformPoint(LocalCenterOfMass));
+		if ((vector3 - lastClackParentLocalPosition).IsLongerThan(distancePerClack))
+		{
+			clackAudio.GTPlayOneShot(allClacks[Random.Range(0, allClacks.Length)]);
+			lastClackParentLocalPosition = vector3;
+		}
+	}
 }

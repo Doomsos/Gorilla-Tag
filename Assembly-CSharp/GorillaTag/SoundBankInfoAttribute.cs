@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using Sirenix.OdinInspector;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[IncludeMyAttributes]
+public class SoundBankInfoAttribute : Attribute
 {
-	[IncludeMyAttributes]
-	public class SoundBankInfoAttribute : Attribute
-	{
-	}
 }

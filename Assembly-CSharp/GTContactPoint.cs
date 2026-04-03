@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -6,24 +6,24 @@ using UnityEngine;
 [StructLayout(LayoutKind.Explicit)]
 public class GTContactPoint
 {
-	[NonSerialized]
 	[FieldOffset(0)]
+	[NonSerialized]
 	public Matrix4x4 data;
 
-	[NonSerialized]
 	[FieldOffset(0)]
+	[NonSerialized]
 	public Vector4 data0;
 
-	[NonSerialized]
 	[FieldOffset(16)]
+	[NonSerialized]
 	public Vector4 data1;
 
-	[NonSerialized]
 	[FieldOffset(32)]
+	[NonSerialized]
 	public Vector4 data2;
 
-	[NonSerialized]
 	[FieldOffset(48)]
+	[NonSerialized]
 	public Vector4 data3;
 
 	[FieldOffset(0)]
@@ -48,5 +48,5 @@ public class GTContactPoint
 	public float lifetime = 1f;
 
 	[FieldOffset(56)]
-	public uint free = 1U;
+	public uint free = 1u;
 }

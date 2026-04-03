@@ -1,11 +1,34 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using GorillaLocomotion;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class GorillaIOBT : MonoBehaviour
 {
+	private OVRSkeleton upperBodySkeleton;
+
+	public AudioSource trackingChangedAudioSource;
+
+	public AudioClip trackingGainedClip;
+
+	public AudioClip trackingLostClip;
+
+	protected bool _skipUpdate;
+
+	protected readonly string trackingSpaceName = "TurnParent";
+
+	protected readonly string centerEyeAnchorName = "Main Camera";
+
+	protected readonly string leftHandAnchorName = "LeftHand Controller";
+
+	protected readonly string rightHandAnchorName = "RightHand Controller";
+
+	protected readonly string leftControllerAnchorName = "LeftControllerAnchor";
+
+	protected readonly string rightControllerAnchorName = "RightControllerAnchor";
+
+	protected Matrix4x4 _previousTrackingSpaceTransform;
+
 	public OVRInput.Controller leftActiveController { get; private set; }
 
 	public OVRInput.Controller rightActiveController { get; private set; }
@@ -14,7 +37,11 @@ public class GorillaIOBT : MonoBehaviour
 	{
 		get
 		{
-			return this.leftActiveController == OVRInput.Controller.LHand || this.rightActiveController == OVRInput.Controller.RHand;
+			if (leftActiveController != OVRInput.Controller.LHand)
+			{
+				return rightActiveController == OVRInput.Controller.RHand;
+			}
+			return true;
 		}
 	}
 
@@ -40,26 +67,26 @@ public class GorillaIOBT : MonoBehaviour
 
 	protected virtual void Awake()
 	{
-		this._skipUpdate = true;
-		this.EnsureGameObjectIntegrity();
-		this.upperBodySkeleton = base.GetComponent<OVRSkeleton>();
+		_skipUpdate = true;
+		EnsureGameObjectIntegrity();
+		upperBodySkeleton = GetComponent<OVRSkeleton>();
 	}
 
 	protected virtual void Start()
 	{
-		this.UpdateAnchors();
-		Application.onBeforeRender += this.OnBeforeRenderCallback;
+		UpdateAnchors();
+		Application.onBeforeRender += OnBeforeRenderCallback;
 	}
 
 	protected virtual void Update()
 	{
-		this._skipUpdate = false;
-		this.UpdateAnchors();
+		_skipUpdate = false;
+		UpdateAnchors();
 	}
 
 	protected virtual void OnDestroy()
 	{
-		Application.onBeforeRender -= this.OnBeforeRenderCallback;
+		Application.onBeforeRender -= OnBeforeRenderCallback;
 	}
 
 	protected virtual void UpdateAnchors()
@@ -68,112 +95,111 @@ public class GorillaIOBT : MonoBehaviour
 		{
 			return;
 		}
-		this.EnsureGameObjectIntegrity();
+		EnsureGameObjectIntegrity();
 		if (!Application.isPlaying)
 		{
 			return;
 		}
-		if (this._skipUpdate)
+		if (_skipUpdate)
 		{
-			this.centerEyeAnchor.FromOVRPose(OVRPose.identity, true);
+			centerEyeAnchor.FromOVRPose(OVRPose.identity, isLocal: true);
 			return;
 		}
-		bool monoscopic = OVRManager.instance.monoscopic;
+		_ = OVRManager.instance.monoscopic;
 		OVRNodeStateProperties.IsHmdPresent();
-		OVRManager.tracker.GetPose(0);
-		Quaternion.Euler(-OVRManager.instance.headPoseRelativeOffsetRotation.x, -OVRManager.instance.headPoseRelativeOffsetRotation.y, OVRManager.instance.headPoseRelativeOffsetRotation.z);
-		OVRInput.Controller leftActiveController = this.leftActiveController;
-		OVRInput.Controller rightActiveController = this.rightActiveController;
-		this.leftActiveController = OVRInput.GetActiveControllerForHand(OVRInput.Handedness.LeftHanded);
-		this.rightActiveController = OVRInput.GetActiveControllerForHand(OVRInput.Handedness.RightHanded);
-		if (this.leftActiveController == OVRInput.Controller.None)
+		OVRManager.tracker.GetPose();
+		Quaternion.Euler(0f - OVRManager.instance.headPoseRelativeOffsetRotation.x, 0f - OVRManager.instance.headPoseRelativeOffsetRotation.y, OVRManager.instance.headPoseRelativeOffsetRotation.z);
+		OVRInput.Controller controller = leftActiveController;
+		OVRInput.Controller controller2 = rightActiveController;
+		leftActiveController = OVRInput.GetActiveControllerForHand(OVRInput.Handedness.LeftHanded);
+		rightActiveController = OVRInput.GetActiveControllerForHand(OVRInput.Handedness.RightHanded);
+		if (leftActiveController == OVRInput.Controller.None)
 		{
 			if (OVRInput.GetControllerPositionValid(OVRInput.Controller.LHand))
 			{
-				this.leftActiveController = OVRInput.Controller.LHand;
+				leftActiveController = OVRInput.Controller.LHand;
 			}
 			else if (OVRInput.GetControllerPositionValid(OVRInput.Controller.LTouch))
 			{
-				this.leftActiveController = OVRInput.Controller.LTouch;
+				leftActiveController = OVRInput.Controller.LTouch;
 			}
 		}
-		if (this.rightActiveController == OVRInput.Controller.None)
+		if (rightActiveController == OVRInput.Controller.None)
 		{
 			if (OVRInput.GetControllerPositionValid(OVRInput.Controller.RHand))
 			{
-				this.rightActiveController = OVRInput.Controller.RHand;
+				rightActiveController = OVRInput.Controller.RHand;
 			}
 			else if (OVRInput.GetControllerPositionValid(OVRInput.Controller.RTouch))
 			{
-				this.rightActiveController = OVRInput.Controller.RTouch;
+				rightActiveController = OVRInput.Controller.RTouch;
 			}
 		}
-		if (leftActiveController == OVRInput.Controller.None && this.leftActiveController != OVRInput.Controller.None)
+		if (controller == OVRInput.Controller.None && leftActiveController != OVRInput.Controller.None)
 		{
-			this.trackingChangedAudioSource.PlayOneShot(this.trackingGainedClip);
+			trackingChangedAudioSource.PlayOneShot(trackingGainedClip);
 		}
-		else if (leftActiveController != OVRInput.Controller.None && this.leftActiveController == OVRInput.Controller.None)
+		else if (controller != OVRInput.Controller.None && leftActiveController == OVRInput.Controller.None)
 		{
-			this.trackingChangedAudioSource.PlayOneShot(this.trackingLostClip);
+			trackingChangedAudioSource.PlayOneShot(trackingLostClip);
 		}
-		if (rightActiveController == OVRInput.Controller.None && this.rightActiveController != OVRInput.Controller.None)
+		if (controller2 == OVRInput.Controller.None && rightActiveController != OVRInput.Controller.None)
 		{
-			this.trackingChangedAudioSource.PlayOneShot(this.trackingGainedClip);
+			trackingChangedAudioSource.PlayOneShot(trackingGainedClip);
 		}
-		else if (rightActiveController != OVRInput.Controller.None && this.rightActiveController == OVRInput.Controller.None)
+		else if (controller2 != OVRInput.Controller.None && rightActiveController == OVRInput.Controller.None)
 		{
-			this.trackingChangedAudioSource.PlayOneShot(this.trackingLostClip);
+			trackingChangedAudioSource.PlayOneShot(trackingLostClip);
 		}
-		if (this.leftActiveController == OVRInput.Controller.LHand)
+		if (leftActiveController == OVRInput.Controller.LHand)
 		{
-			this.leftHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(this.leftActiveController);
-			this.leftHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(this.leftActiveController);
-			this.leftHandAnchor.localRotation = this.leftHandAnchor.localRotation * Quaternion.Euler(0f, 90f, -90f);
+			leftHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(leftActiveController);
+			leftHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(leftActiveController);
+			leftHandAnchor.localRotation *= Quaternion.Euler(0f, 90f, -90f);
 		}
-		if (this.rightActiveController == OVRInput.Controller.RHand)
+		if (rightActiveController == OVRInput.Controller.RHand)
 		{
-			this.rightHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(this.rightActiveController);
-			this.rightHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(this.rightActiveController);
-			this.rightHandAnchor.localRotation = this.rightHandAnchor.localRotation * Quaternion.Euler(0f, -90f, 90f);
+			rightHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(rightActiveController);
+			rightHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(rightActiveController);
+			rightHandAnchor.localRotation *= Quaternion.Euler(0f, -90f, 90f);
 		}
-		OVRPose ovrpose = OVRPose.identity;
-		OVRPose ovrpose2 = OVRPose.identity;
+		OVRPose oVRPose = OVRPose.identity;
+		OVRPose oVRPose2 = OVRPose.identity;
 		if (OVRManager.loadedXRDevice == OVRManager.XRDevice.OpenVR)
 		{
-			ovrpose = OVRManager.GetOpenVRControllerOffset(XRNode.LeftHand);
-			ovrpose2 = OVRManager.GetOpenVRControllerOffset(XRNode.RightHand);
-			OVRManager.SetOpenVRLocalPose(this.trackingSpace.InverseTransformPoint(this.leftControllerAnchor.position), this.trackingSpace.InverseTransformPoint(this.rightControllerAnchor.position), Quaternion.Inverse(this.trackingSpace.rotation) * this.leftControllerAnchor.rotation, Quaternion.Inverse(this.trackingSpace.rotation) * this.rightControllerAnchor.rotation);
+			oVRPose = OVRManager.GetOpenVRControllerOffset(XRNode.LeftHand);
+			oVRPose2 = OVRManager.GetOpenVRControllerOffset(XRNode.RightHand);
+			OVRManager.SetOpenVRLocalPose(trackingSpace.InverseTransformPoint(leftControllerAnchor.position), trackingSpace.InverseTransformPoint(rightControllerAnchor.position), Quaternion.Inverse(trackingSpace.rotation) * leftControllerAnchor.rotation, Quaternion.Inverse(trackingSpace.rotation) * rightControllerAnchor.rotation);
 		}
-		this.rightControllerAnchor.localPosition = ovrpose2.position;
-		this.rightControllerAnchor.localRotation = ovrpose2.orientation;
-		this.leftControllerAnchor.localPosition = ovrpose.position;
-		this.leftControllerAnchor.localRotation = ovrpose.orientation;
-		GTPlayer.Instance.SetHandOffsets(true, new Vector3(0.03f, -0.16f, 0f), Quaternion.Euler(89f, 6f, 11f));
-		GTPlayer.Instance.SetHandOffsets(false, new Vector3(-0.01f, -0.16f, 0f), Quaternion.Euler(89f, 6f, 11f));
-		this.RaiseUpdatedAnchorsEvent();
-		this.CheckForTrackingSpaceChangesAndRaiseEvent();
+		rightControllerAnchor.localPosition = oVRPose2.position;
+		rightControllerAnchor.localRotation = oVRPose2.orientation;
+		leftControllerAnchor.localPosition = oVRPose.position;
+		leftControllerAnchor.localRotation = oVRPose.orientation;
+		GTPlayer.Instance.SetHandOffsets(isLeftHand: true, new Vector3(0.03f, -0.16f, 0f), Quaternion.Euler(89f, 6f, 11f));
+		GTPlayer.Instance.SetHandOffsets(isLeftHand: false, new Vector3(-0.01f, -0.16f, 0f), Quaternion.Euler(89f, 6f, 11f));
+		RaiseUpdatedAnchorsEvent();
+		CheckForTrackingSpaceChangesAndRaiseEvent();
 	}
 
 	protected virtual void OnBeforeRenderCallback()
 	{
 		if (OVRManager.loadedXRDevice == OVRManager.XRDevice.Oculus && OVRManager.instance.LateControllerUpdate)
 		{
-			this.UpdateAnchors();
+			UpdateAnchors();
 		}
 	}
 
 	protected virtual void CheckForTrackingSpaceChangesAndRaiseEvent()
 	{
-		if (this.trackingSpace == null)
+		if (!(trackingSpace == null))
 		{
-			return;
-		}
-		Matrix4x4 localToWorldMatrix = this.trackingSpace.localToWorldMatrix;
-		bool flag = this.TrackingSpaceChanged != null && !this._previousTrackingSpaceTransform.Equals(localToWorldMatrix);
-		this._previousTrackingSpaceTransform = localToWorldMatrix;
-		if (flag)
-		{
-			this.TrackingSpaceChanged(this.trackingSpace);
+			Matrix4x4 localToWorldMatrix = trackingSpace.localToWorldMatrix;
+			bool num = this.TrackingSpaceChanged != null && !_previousTrackingSpaceTransform.Equals(localToWorldMatrix);
+			_previousTrackingSpaceTransform = localToWorldMatrix;
+			if (num)
+			{
+				this.TrackingSpaceChanged(trackingSpace);
+			}
 		}
 	}
 
@@ -189,48 +215,46 @@ public class GorillaIOBT : MonoBehaviour
 	{
 		if (OVRManager.instance != null)
 		{
-			bool monoscopic = OVRManager.instance.monoscopic;
+			_ = OVRManager.instance.monoscopic;
 		}
-		if (this.trackingSpace == null)
+		if (trackingSpace == null)
 		{
-			this.trackingSpace = this.ConfigureAnchor(null, this.trackingSpaceName);
-			this._previousTrackingSpaceTransform = this.trackingSpace.localToWorldMatrix;
+			trackingSpace = ConfigureAnchor(null, trackingSpaceName);
+			_previousTrackingSpaceTransform = trackingSpace.localToWorldMatrix;
 		}
-		if (this.centerEyeAnchor == null)
+		if (centerEyeAnchor == null)
 		{
-			this.centerEyeAnchor = this.ConfigureAnchor(this.trackingSpace, this.centerEyeAnchorName);
+			centerEyeAnchor = ConfigureAnchor(trackingSpace, centerEyeAnchorName);
 		}
-		if (this.leftHandAnchor == null)
+		if (leftHandAnchor == null)
 		{
-			this.leftHandAnchor = this.ConfigureAnchor(this.trackingSpace, this.leftHandAnchorName);
+			leftHandAnchor = ConfigureAnchor(trackingSpace, leftHandAnchorName);
 		}
-		if (this.rightHandAnchor == null)
+		if (rightHandAnchor == null)
 		{
-			this.rightHandAnchor = this.ConfigureAnchor(this.trackingSpace, this.rightHandAnchorName);
+			rightHandAnchor = ConfigureAnchor(trackingSpace, rightHandAnchorName);
 		}
-		if (this.leftControllerAnchor == null)
+		if (leftControllerAnchor == null)
 		{
-			this.leftControllerAnchor = this.ConfigureAnchor(this.leftHandAnchor, this.leftControllerAnchorName);
+			leftControllerAnchor = ConfigureAnchor(leftHandAnchor, leftControllerAnchorName);
 		}
-		if (this.rightControllerAnchor == null)
+		if (rightControllerAnchor == null)
 		{
-			this.rightControllerAnchor = this.ConfigureAnchor(this.rightHandAnchor, this.rightControllerAnchorName);
+			rightControllerAnchor = ConfigureAnchor(rightHandAnchor, rightControllerAnchorName);
 		}
-		if (this.leftHandCurl == null)
+		if (leftHandCurl == null)
 		{
-			Transform leftHandAnchor = this.leftHandAnchor;
-			this.leftHandCurl = ((leftHandAnchor != null) ? leftHandAnchor.GetComponent<HandTrackingFingerCurl>() : null);
+			leftHandCurl = leftHandAnchor?.GetComponent<HandTrackingFingerCurl>();
 		}
-		if (this.rightHandCurl == null)
+		if (rightHandCurl == null)
 		{
-			Transform rightHandAnchor = this.rightHandAnchor;
-			this.rightHandCurl = ((rightHandAnchor != null) ? rightHandAnchor.GetComponent<HandTrackingFingerCurl>() : null);
+			rightHandCurl = rightHandAnchor?.GetComponent<HandTrackingFingerCurl>();
 		}
 	}
 
 	protected Transform ConfigureAnchor(Transform root, string name)
 	{
-		Transform transform = (root != null) ? root.Find(name) : null;
+		Transform transform = ((root != null) ? root.Find(name) : null);
 		if (transform == null)
 		{
 			transform = base.transform.Find(name);
@@ -249,81 +273,42 @@ public class GorillaIOBT : MonoBehaviour
 
 	public virtual Matrix4x4 ComputeTrackReferenceMatrix()
 	{
-		if (this.centerEyeAnchor == null)
+		if (centerEyeAnchor == null)
 		{
 			Debug.LogError("centerEyeAnchor is required");
 			return Matrix4x4.identity;
 		}
 		OVRPose identity = OVRPose.identity;
-		Vector3 position;
-		if (OVRNodeStateProperties.GetNodeStatePropertyVector3(XRNode.Head, NodeStatePropertyType.Position, OVRPlugin.Node.Head, OVRPlugin.Step.Render, out position))
+		if (OVRNodeStateProperties.GetNodeStatePropertyVector3(XRNode.Head, NodeStatePropertyType.Position, OVRPlugin.Node.Head, OVRPlugin.Step.Render, out var retVec))
 		{
-			identity.position = position;
+			identity.position = retVec;
 		}
-		Quaternion orientation;
-		if (OVRNodeStateProperties.GetNodeStatePropertyQuaternion(XRNode.Head, NodeStatePropertyType.Orientation, OVRPlugin.Node.Head, OVRPlugin.Step.Render, out orientation))
+		if (OVRNodeStateProperties.GetNodeStatePropertyQuaternion(XRNode.Head, NodeStatePropertyType.Orientation, OVRPlugin.Node.Head, OVRPlugin.Step.Render, out var retQuat))
 		{
-			identity.orientation = orientation;
+			identity.orientation = retQuat;
 		}
-		OVRPose ovrpose = identity.Inverse();
-		Matrix4x4 rhs = Matrix4x4.TRS(ovrpose.position, ovrpose.orientation, Vector3.one);
-		return this.centerEyeAnchor.localToWorldMatrix * rhs;
+		OVRPose oVRPose = identity.Inverse();
+		Matrix4x4 matrix4x = Matrix4x4.TRS(oVRPose.position, oVRPose.orientation, Vector3.one);
+		return centerEyeAnchor.localToWorldMatrix * matrix4x;
 	}
 
 	protected void CheckForAnchorsInParent()
 	{
 		Transform parent = base.transform.parent;
-		while (parent)
+		while ((bool)parent)
 		{
-			this.<CheckForAnchorsInParent>g__Check|71_0<OVRSpatialAnchor>(parent);
-			this.<CheckForAnchorsInParent>g__Check|71_0<OVRSceneAnchor>(parent);
+			Check<OVRSpatialAnchor>(parent);
+			Check<OVRSceneAnchor>(parent);
 			parent = parent.parent;
 		}
-	}
-
-	[CompilerGenerated]
-	private void <CheckForAnchorsInParent>g__Check|71_0<T>(Transform node) where T : MonoBehaviour
-	{
-		T component = node.GetComponent<T>();
-		if (component && component.enabled)
+		void Check<T>(Transform node) where T : MonoBehaviour
 		{
-			component.enabled = false;
-			Debug.LogError(string.Concat(new string[]
+			T component = node.GetComponent<T>();
+			if ((bool)component && component.enabled)
 			{
-				"The ",
-				typeof(T).Name,
-				" '",
-				component.name,
-				"' is a parent of the GorillaIOBT '",
-				base.name,
-				"', which is not allowed. An ",
-				typeof(T).Name,
-				" may not be the parent of an GorillaIOBT because the GorillaIOBT defines the tracking space for the anchor, and its transform is relative to the GorillaIOBT."
-			}));
+				component.enabled = false;
+				Debug.LogError("The " + typeof(T).Name + " '" + component.name + "' is a parent of the GorillaIOBT '" + base.name + "', which is not allowed. An " + typeof(T).Name + " may not be the parent of an GorillaIOBT because the GorillaIOBT defines the tracking space for the anchor, and its transform is relative to the GorillaIOBT.");
+			}
 		}
 	}
-
-	private OVRSkeleton upperBodySkeleton;
-
-	public AudioSource trackingChangedAudioSource;
-
-	public AudioClip trackingGainedClip;
-
-	public AudioClip trackingLostClip;
-
-	protected bool _skipUpdate;
-
-	protected readonly string trackingSpaceName = "TurnParent";
-
-	protected readonly string centerEyeAnchorName = "Main Camera";
-
-	protected readonly string leftHandAnchorName = "LeftHand Controller";
-
-	protected readonly string rightHandAnchorName = "RightHand Controller";
-
-	protected readonly string leftControllerAnchorName = "LeftControllerAnchor";
-
-	protected readonly string rightControllerAnchorName = "RightControllerAnchor";
-
-	protected Matrix4x4 _previousTrackingSpaceTransform;
 }

@@ -1,52 +1,53 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Serializable]
+internal class ExpectedUsersDecayTimer : TickSystemTimerAbstract
 {
-	[Serializable]
-	internal class ExpectedUsersDecayTimer : TickSystemTimerAbstract
+	public float decayTime = 15f;
+
+	private Dictionary<string, float> expectedUsers = new Dictionary<string, float>(20);
+
+	public override void OnTimedEvent()
 	{
-		public override void OnTimedEvent()
+		if (!NetworkSystem.Instance.InRoom || !NetworkSystem.Instance.IsMasterClient)
 		{
-			if (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.IsMasterClient)
+			return;
+		}
+		int num = 0;
+		if (PhotonNetwork.CurrentRoom.ExpectedUsers == null || PhotonNetwork.CurrentRoom.ExpectedUsers.Length == 0)
+		{
+			return;
+		}
+		string[] array = PhotonNetwork.CurrentRoom.ExpectedUsers;
+		foreach (string key in array)
+		{
+			if (expectedUsers.TryGetValue(key, out var value))
 			{
-				int num = 0;
-				if (PhotonNetwork.CurrentRoom.ExpectedUsers != null && PhotonNetwork.CurrentRoom.ExpectedUsers.Length != 0)
+				if (value + decayTime < Time.time)
 				{
-					foreach (string key in PhotonNetwork.CurrentRoom.ExpectedUsers)
-					{
-						float num2;
-						if (this.expectedUsers.TryGetValue(key, out num2))
-						{
-							if (num2 + this.decayTime < Time.time)
-							{
-								num++;
-							}
-						}
-						else
-						{
-							this.expectedUsers.Add(key, Time.time);
-						}
-					}
-					if (num >= PhotonNetwork.CurrentRoom.ExpectedUsers.Length && num != 0)
-					{
-						PhotonNetwork.CurrentRoom.ClearExpectedUsers();
-						this.expectedUsers.Clear();
-					}
+					num++;
 				}
 			}
+			else
+			{
+				expectedUsers.Add(key, Time.time);
+			}
 		}
-
-		public override void Stop()
+		if (num >= PhotonNetwork.CurrentRoom.ExpectedUsers.Length && num != 0)
 		{
-			base.Stop();
-			this.expectedUsers.Clear();
+			PhotonNetwork.CurrentRoom.ClearExpectedUsers();
+			expectedUsers.Clear();
 		}
+	}
 
-		public float decayTime = 15f;
-
-		private Dictionary<string, float> expectedUsers = new Dictionary<string, float>(20);
+	public override void Stop()
+	{
+		base.Stop();
+		expectedUsers.Clear();
 	}
 }

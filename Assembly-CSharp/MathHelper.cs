@@ -1,4 +1,3 @@
-﻿using System;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -45,6 +44,10 @@ public static class MathHelper
 
 	public static bool IsInBounds(this int3 a, int3 min, int3 max)
 	{
-		return min.x <= a.x && max.x >= a.x && min.y <= a.y && max.y >= a.y && min.z <= a.z && max.z >= a.z;
+		if (min.x <= a.x && max.x >= a.x && min.y <= a.y && max.y >= a.y && min.z <= a.z)
+		{
+			return max.z >= a.z;
+		}
+		return false;
 	}
 }

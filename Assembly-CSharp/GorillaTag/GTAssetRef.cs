@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Serializable]
+public class GTAssetRef<TObject> : AssetReferenceT<TObject> where TObject : UnityEngine.Object
 {
-	[Serializable]
-	public class GTAssetRef<TObject> : AssetReferenceT<TObject> where TObject : Object
+	public GTAssetRef(string guid)
+		: base(guid)
 	{
-		public GTAssetRef(string guid) : base(guid)
-		{
-		}
 	}
 }

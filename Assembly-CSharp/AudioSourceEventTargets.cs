@@ -1,64 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class AudioSourceEventTargets : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.audioSource = base.GetComponent<AudioSource>();
-		this.fadeVolume = this.audioSource.volume;
-	}
-
-	public void SetFadeSpeed(float arg)
-	{
-		this.fadeSpeed = Mathf.Max(arg, 0.01f);
-	}
-
-	public void StartFade(float arg)
-	{
-		this.fadeVolume = Mathf.Clamp01(arg);
-	}
-
-	public void Update()
-	{
-		if (this.audioSource.volume != this.fadeVolume)
-		{
-			this.audioSource.volume = Mathf.MoveTowards(this.audioSource.volume, this.fadeVolume, this.fadeSpeed * Time.deltaTime);
-		}
-		if (this.lastValueWhenPlayed != this.ExternalTriggerPlay)
-		{
-			if (!this.lastExternalTriggerPlayMatched)
-			{
-				this.audioSource.Play();
-				this.lastValueWhenPlayed = this.ExternalTriggerPlay;
-				this.lastExternalTriggerPlayMatched = true;
-			}
-			else
-			{
-				this.ExternalTriggerPlay = this.lastValueWhenPlayed;
-				this.lastExternalTriggerPlayMatched = false;
-			}
-		}
-		else
-		{
-			this.lastExternalTriggerPlayMatched = true;
-		}
-		if (this.lastValueWhenStopped == this.ExternalTriggerStop)
-		{
-			this.lastExternalTriggerStopMatched = true;
-			return;
-		}
-		if (!this.lastExternalTriggerStopMatched)
-		{
-			this.audioSource.Stop();
-			this.lastValueWhenStopped = this.ExternalTriggerStop;
-			this.lastExternalTriggerStopMatched = true;
-			return;
-		}
-		this.ExternalTriggerStop = this.lastValueWhenStopped;
-		this.lastExternalTriggerStopMatched = false;
-	}
-
 	private AudioSource audioSource;
 
 	private float fadeVolume;
@@ -78,4 +21,64 @@ public class AudioSourceEventTargets : MonoBehaviour
 	private bool lastExternalTriggerStopMatched = true;
 
 	private bool lastValueWhenStopped;
+
+	private void Awake()
+	{
+		audioSource = GetComponent<AudioSource>();
+		fadeVolume = audioSource.volume;
+	}
+
+	public void SetFadeSpeed(float arg)
+	{
+		fadeSpeed = Mathf.Max(arg, 0.01f);
+	}
+
+	public void StartFade(float arg)
+	{
+		fadeVolume = Mathf.Clamp01(arg);
+	}
+
+	public void Update()
+	{
+		if (audioSource.volume != fadeVolume)
+		{
+			audioSource.volume = Mathf.MoveTowards(audioSource.volume, fadeVolume, fadeSpeed * Time.deltaTime);
+		}
+		if (lastValueWhenPlayed != ExternalTriggerPlay)
+		{
+			if (!lastExternalTriggerPlayMatched)
+			{
+				audioSource.Play();
+				lastValueWhenPlayed = ExternalTriggerPlay;
+				lastExternalTriggerPlayMatched = true;
+			}
+			else
+			{
+				ExternalTriggerPlay = lastValueWhenPlayed;
+				lastExternalTriggerPlayMatched = false;
+			}
+		}
+		else
+		{
+			lastExternalTriggerPlayMatched = true;
+		}
+		if (lastValueWhenStopped != ExternalTriggerStop)
+		{
+			if (!lastExternalTriggerStopMatched)
+			{
+				audioSource.Stop();
+				lastValueWhenStopped = ExternalTriggerStop;
+				lastExternalTriggerStopMatched = true;
+			}
+			else
+			{
+				ExternalTriggerStop = lastValueWhenStopped;
+				lastExternalTriggerStopMatched = false;
+			}
+		}
+		else
+		{
+			lastExternalTriggerStopMatched = true;
+		}
+	}
 }

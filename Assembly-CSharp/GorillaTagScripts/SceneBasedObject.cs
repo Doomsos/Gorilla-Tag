@@ -1,15 +1,21 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTagScripts
-{
-	public class SceneBasedObject : MonoBehaviour
-	{
-		public bool IsLocalPlayerInScene()
-		{
-			return (ZoneManagement.instance.GetAllLoadedScenes().Count <= 1 || this.zone != GTZone.forest) && ZoneManagement.instance.IsSceneLoaded(this.zone);
-		}
+namespace GorillaTagScripts;
 
-		public GTZone zone;
+public class SceneBasedObject : MonoBehaviour
+{
+	public GTZone zone;
+
+	public bool IsLocalPlayerInScene()
+	{
+		if (ZoneManagement.instance.GetAllLoadedScenes().Count > 1 && zone == GTZone.forest)
+		{
+			return false;
+		}
+		if (ZoneManagement.instance.IsSceneLoaded(zone))
+		{
+			return true;
+		}
+		return false;
 	}
 }

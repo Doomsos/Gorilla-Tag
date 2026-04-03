@@ -1,5 +1,6 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using GorillaNetworking;
 using Newtonsoft.Json;
 using PlayFab;
@@ -7,23 +8,228 @@ using UnityEngine;
 
 public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 {
-	[RuntimeInitializeOnLoadMethod]
-	private static void RuntimeInit()
+	[Serializable]
+	public class TitleDataActivationData
 	{
-		TitleDataActivation.<RuntimeInit>d__2 <RuntimeInit>d__;
-		<RuntimeInit>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<RuntimeInit>d__.<>1__state = -1;
-		<RuntimeInit>d__.<>t__builder.Start<TitleDataActivation.<RuntimeInit>d__2>(ref <RuntimeInit>d__);
+		[SerializeField]
+		private TitleDataObjectActivationData[] data;
+
+		private bool validated;
+
+		public TitleDataObjectActivationData[] Data
+		{
+			get
+			{
+				return data;
+			}
+			set
+			{
+				data = value;
+			}
+		}
+	}
+
+	[Serializable]
+	public class TitleDataObjectActivationData
+	{
+		[SerializeField]
+		private string titleDataObjectID;
+
+		[SerializeField]
+		private AbsoluteDateTimeWindow[] absoluteDateTimeWindow;
+
+		[SerializeField]
+		private RelativeDateTimeWindow[] relativeDateTimeWindow;
+
+		private bool validated;
+
+		public string TitleDataObjectID
+		{
+			get
+			{
+				return titleDataObjectID;
+			}
+			set
+			{
+				titleDataObjectID = value;
+			}
+		}
+
+		public AbsoluteDateTimeWindow[] AbsoluteDateTimeWindow
+		{
+			get
+			{
+				return absoluteDateTimeWindow;
+			}
+			set
+			{
+				absoluteDateTimeWindow = value;
+			}
+		}
+
+		public RelativeDateTimeWindow[] RelativeDateTimeWindow
+		{
+			get
+			{
+				return relativeDateTimeWindow;
+			}
+			set
+			{
+				relativeDateTimeWindow = value;
+			}
+		}
+	}
+
+	[Serializable]
+	public class AbsoluteDateTimeWindow
+	{
+		protected DateTime dtStart;
+
+		protected DateTime dtEnd;
+
+		[SerializeField]
+		private string startDateTime;
+
+		[SerializeField]
+		private string endDateTime;
+
+		public string StartDateTime
+		{
+			get
+			{
+				return startDateTime;
+			}
+			set
+			{
+				if (DateTime.TryParse(value, out dtStart))
+				{
+					startDateTime = dtStart.ToString();
+				}
+			}
+		}
+
+		public string EndDateTime
+		{
+			get
+			{
+				return endDateTime;
+			}
+			set
+			{
+				if (DateTime.TryParse(value, out dtEnd))
+				{
+					endDateTime = dtEnd.ToString();
+				}
+			}
+		}
+
+		public void IsInWindow(DateTime d, out bool inRange, out float delay)
+		{
+			inRange = d >= dtStart && d <= dtEnd;
+			delay = (float)(d - dtStart).TotalSeconds;
+		}
+	}
+
+	[Serializable]
+	public class RelativeDateTimeWindow
+	{
+		protected DateTime dtStart;
+
+		protected DateTime dtEnd;
+
+		[SerializeField]
+		private RelativeDateTime startDateTime;
+
+		[SerializeField]
+		private RelativeDateTime endDateTime;
+
+		public RelativeDateTime StartDateTime
+		{
+			get
+			{
+				return startDateTime;
+			}
+			set
+			{
+				startDateTime = value;
+				dtStart = ReferenceDate.AddDays(startDateTime.DaysPast).AddHours(startDateTime.Hours).AddMinutes(startDateTime.Minutes)
+					.AddSeconds(startDateTime.Seconds);
+			}
+		}
+
+		public RelativeDateTime EndDateTime
+		{
+			get
+			{
+				return endDateTime;
+			}
+			set
+			{
+				endDateTime = value;
+				dtEnd = ReferenceDate.AddDays(endDateTime.DaysPast).AddHours(endDateTime.Hours).AddMinutes(endDateTime.Minutes)
+					.AddSeconds(endDateTime.Seconds);
+			}
+		}
+
+		public void IsInWindow(DateTime d, out bool inRange, out float delay)
+		{
+			inRange = d >= dtStart && d <= dtEnd;
+			delay = (float)(d - dtStart).TotalSeconds;
+		}
+	}
+
+	[Serializable]
+	public struct RelativeDateTime
+	{
+		public int DaysPast;
+
+		public int Hours;
+
+		public int Minutes;
+
+		public int Seconds;
+	}
+
+	public static DateTime ReferenceDate = DateTime.Parse("1/1/2001");
+
+	public static bool UpdatedReferenceDateFromTitleData = false;
+
+	[SerializeField]
+	private string titleDataKey;
+
+	[SerializeField]
+	private string titleDataObjectID;
+
+	private TitleDataObjectActivationData activationData;
+
+	private GameObject[] gameObjects;
+
+	private bool initialized;
+
+	private bool onOffState;
+
+	[RuntimeInitializeOnLoadMethod]
+	private static async void RuntimeInit()
+	{
+		ReferenceDate = DateTime.Parse("1/1/2001");
+		UpdatedReferenceDateFromTitleData = false;
+		while (PlayFabTitleDataCache.Instance == null)
+		{
+			await Task.Yield();
+		}
+		PlayFabTitleDataCache.Instance.GetTitleData("ActivationReferenceDate", onTDReferenceDate, onTDReferenceDateError);
 	}
 
 	private static void onTDReferenceDate(string s)
 	{
-		if (!DateTime.TryParse(s, out TitleDataActivation.ReferenceDate))
+		if (!DateTime.TryParse(s, out ReferenceDate))
 		{
 			Debug.LogError("TitleDataActivation :: onTDReferenceDate :: No Reference Date Set!!");
-			return;
 		}
-		TitleDataActivation.UpdatedReferenceDateFromTitleData = true;
+		else
+		{
+			UpdatedReferenceDateFromTitleData = true;
+		}
 	}
 
 	private static void onTDReferenceDateError(PlayFabError error)
@@ -31,21 +237,37 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 		Debug.LogError("TitleDataActivation :: onTDReferenceDateError :: No Reference Date Set!! :: " + error.ErrorMessage);
 	}
 
-	private void Initialize()
+	private async void Initialize()
 	{
-		TitleDataActivation.<Initialize>d__16 <Initialize>d__;
-		<Initialize>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Initialize>d__.<>4__this = this;
-		<Initialize>d__.<>1__state = -1;
-		<Initialize>d__.<>t__builder.Start<TitleDataActivation.<Initialize>d__16>(ref <Initialize>d__);
+		if (initialized)
+		{
+			return;
+		}
+		List<GameObject> list = new List<GameObject>();
+		for (int i = 0; i < base.transform.childCount; i++)
+		{
+			GameObject gameObject = base.transform.GetChild(i).gameObject;
+			gameObject.SetActive(value: false);
+			list.Add(gameObject);
+		}
+		gameObjects = list.ToArray();
+		initialized = true;
+		if (!titleDataKey.IsNullOrEmpty())
+		{
+			while (PlayFabTitleDataCache.Instance == null || !UpdatedReferenceDateFromTitleData)
+			{
+				await Task.Yield();
+			}
+			PlayFabTitleDataCache.Instance.GetTitleData(titleDataKey, onTD, onTDError);
+		}
 	}
 
 	private void onTD(string s)
 	{
-		TitleDataActivation.TitleDataActivationData titleDataActivationData = null;
+		TitleDataActivationData titleDataActivationData = null;
 		try
 		{
-			titleDataActivationData = JsonConvert.DeserializeObject<TitleDataActivation.TitleDataActivationData>(s);
+			titleDataActivationData = JsonConvert.DeserializeObject<TitleDataActivationData>(s);
 		}
 		catch (Exception ex)
 		{
@@ -54,22 +276,22 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 		}
 		for (int i = 0; i < titleDataActivationData.Data.Length; i++)
 		{
-			if (titleDataActivationData.Data[i].TitleDataObjectID == this.titleDataObjectID)
+			if (titleDataActivationData.Data[i].TitleDataObjectID == titleDataObjectID)
 			{
-				this.activationData = titleDataActivationData.Data[i];
-				return;
+				activationData = titleDataActivationData.Data[i];
+				break;
 			}
 		}
 	}
 
 	private void onTDError(PlayFabError error)
 	{
-		Debug.LogError(string.Format("TitleDataActivation :: onTDError :: {0} :: {1}", this.titleDataKey, error));
+		Debug.LogError($"TitleDataActivation :: onTDError :: {titleDataKey} :: {error}");
 	}
 
 	private void OnEnable()
 	{
-		this.Initialize();
+		Initialize();
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
@@ -80,44 +302,43 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
-		if (this.activationData == null)
+		if (activationData == null)
 		{
 			return;
 		}
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
-		if (serverTime.Year < 2000)
+		if (serverTime.Year >= 2000)
 		{
-			return;
-		}
-		bool flag = false;
-		float num = 0f;
-		int num2 = 0;
-		while (this.activationData.AbsoluteDateTimeWindow != null && num2 < this.activationData.AbsoluteDateTimeWindow.Length && !flag)
-		{
-			this.activationData.AbsoluteDateTimeWindow[num2].IsInWindow(serverTime, out flag, out num);
-			num2++;
-		}
-		int num3 = 0;
-		while (this.activationData.RelativeDateTimeWindow != null && num3 < this.activationData.RelativeDateTimeWindow.Length && !flag)
-		{
-			this.activationData.RelativeDateTimeWindow[num3].IsInWindow(serverTime, out flag, out num);
-			num3++;
-		}
-		if (flag != this.onOffState)
-		{
-			this.SetState(flag, num);
-			this.onOffState = flag;
+			bool inRange = false;
+			float delay = 0f;
+			int num = 0;
+			while (activationData.AbsoluteDateTimeWindow != null && num < activationData.AbsoluteDateTimeWindow.Length && !inRange)
+			{
+				activationData.AbsoluteDateTimeWindow[num].IsInWindow(serverTime, out inRange, out delay);
+				num++;
+			}
+			int num2 = 0;
+			while (activationData.RelativeDateTimeWindow != null && num2 < activationData.RelativeDateTimeWindow.Length && !inRange)
+			{
+				activationData.RelativeDateTimeWindow[num2].IsInWindow(serverTime, out inRange, out delay);
+				num2++;
+			}
+			if (inRange != onOffState)
+			{
+				SetState(inRange, delay);
+				onOffState = inRange;
+			}
 		}
 	}
 
 	private void SetState(bool onOff, float delayedActivation)
 	{
-		for (int i = 0; i < this.gameObjects.Length; i++)
+		for (int i = 0; i < gameObjects.Length; i++)
 		{
-			this.gameObjects[i].SetActive(onOff);
+			gameObjects[i].SetActive(onOff);
 			if (onOff && delayedActivation > 0f)
 			{
-				Animator[] componentsInChildren = this.gameObjects[i].GetComponentsInChildren<Animator>();
+				Animator[] componentsInChildren = gameObjects[i].GetComponentsInChildren<Animator>();
 				for (int j = 0; j < componentsInChildren.Length; j++)
 				{
 					int fullPathHash = componentsInChildren[j].GetCurrentAnimatorStateInfo(0).fullPathHash;
@@ -134,28 +355,28 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return 0f;
 		}
-		bool flag = false;
-		float b = 0f;
+		bool inRange = false;
+		float delay = 0f;
 		int num = 0;
-		while (this.activationData.AbsoluteDateTimeWindow != null && num < this.activationData.AbsoluteDateTimeWindow.Length && !flag)
+		while (activationData.AbsoluteDateTimeWindow != null && num < activationData.AbsoluteDateTimeWindow.Length && !inRange)
 		{
-			this.activationData.AbsoluteDateTimeWindow[num].IsInWindow(serverTime, out flag, out b);
+			activationData.AbsoluteDateTimeWindow[num].IsInWindow(serverTime, out inRange, out delay);
 			num++;
 		}
 		int num2 = 0;
-		while (this.activationData.RelativeDateTimeWindow != null && num2 < this.activationData.RelativeDateTimeWindow.Length && !flag)
+		while (activationData.RelativeDateTimeWindow != null && num2 < activationData.RelativeDateTimeWindow.Length && !inRange)
 		{
-			this.activationData.RelativeDateTimeWindow[num2].IsInWindow(serverTime, out flag, out b);
+			activationData.RelativeDateTimeWindow[num2].IsInWindow(serverTime, out inRange, out delay);
 			num2++;
 		}
-		return Mathf.Max(0f, b);
+		return Mathf.Max(0f, delay);
 	}
 
 	public void PlayAnimatorAtScheduledTime(Animator animator)
 	{
-		float delayedActivationTime = this.GetDelayedActivationTime();
+		float delayedActivationTime = GetDelayedActivationTime();
 		int fullPathHash = animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-		animator.PlayInFixedTime(fullPathHash, 0, this.GetDelayedActivationTime());
+		animator.PlayInFixedTime(fullPathHash, 0, GetDelayedActivationTime());
 		AudioSource[] componentsInChildren = animator.GetComponentsInChildren<AudioSource>();
 		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
@@ -164,203 +385,5 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 				componentsInChildren[i].time = delayedActivationTime;
 			}
 		}
-	}
-
-	public static DateTime ReferenceDate = DateTime.Parse("1/1/2001");
-
-	public static bool UpdatedReferenceDateFromTitleData = false;
-
-	[SerializeField]
-	private string titleDataKey;
-
-	[SerializeField]
-	private string titleDataObjectID;
-
-	private TitleDataActivation.TitleDataObjectActivationData activationData;
-
-	private GameObject[] gameObjects;
-
-	private bool initialized;
-
-	private bool onOffState;
-
-	[Serializable]
-	public class TitleDataActivationData
-	{
-		public TitleDataActivation.TitleDataObjectActivationData[] Data
-		{
-			get
-			{
-				return this.data;
-			}
-			set
-			{
-				this.data = value;
-			}
-		}
-
-		[SerializeField]
-		private TitleDataActivation.TitleDataObjectActivationData[] data;
-
-		private bool validated;
-	}
-
-	[Serializable]
-	public class TitleDataObjectActivationData
-	{
-		public string TitleDataObjectID
-		{
-			get
-			{
-				return this.titleDataObjectID;
-			}
-			set
-			{
-				this.titleDataObjectID = value;
-			}
-		}
-
-		public TitleDataActivation.AbsoluteDateTimeWindow[] AbsoluteDateTimeWindow
-		{
-			get
-			{
-				return this.absoluteDateTimeWindow;
-			}
-			set
-			{
-				this.absoluteDateTimeWindow = value;
-			}
-		}
-
-		public TitleDataActivation.RelativeDateTimeWindow[] RelativeDateTimeWindow
-		{
-			get
-			{
-				return this.relativeDateTimeWindow;
-			}
-			set
-			{
-				this.relativeDateTimeWindow = value;
-			}
-		}
-
-		[SerializeField]
-		private string titleDataObjectID;
-
-		[SerializeField]
-		private TitleDataActivation.AbsoluteDateTimeWindow[] absoluteDateTimeWindow;
-
-		[SerializeField]
-		private TitleDataActivation.RelativeDateTimeWindow[] relativeDateTimeWindow;
-
-		private bool validated;
-	}
-
-	[Serializable]
-	public class AbsoluteDateTimeWindow
-	{
-		public string StartDateTime
-		{
-			get
-			{
-				return this.startDateTime;
-			}
-			set
-			{
-				if (DateTime.TryParse(value, out this.dtStart))
-				{
-					this.startDateTime = this.dtStart.ToString();
-				}
-			}
-		}
-
-		public string EndDateTime
-		{
-			get
-			{
-				return this.endDateTime;
-			}
-			set
-			{
-				if (DateTime.TryParse(value, out this.dtEnd))
-				{
-					this.endDateTime = this.dtEnd.ToString();
-				}
-			}
-		}
-
-		public void IsInWindow(DateTime d, out bool inRange, out float delay)
-		{
-			inRange = (d >= this.dtStart && d <= this.dtEnd);
-			delay = (float)(d - this.dtStart).TotalSeconds;
-		}
-
-		protected DateTime dtStart;
-
-		protected DateTime dtEnd;
-
-		[SerializeField]
-		private string startDateTime;
-
-		[SerializeField]
-		private string endDateTime;
-	}
-
-	[Serializable]
-	public class RelativeDateTimeWindow
-	{
-		public TitleDataActivation.RelativeDateTime StartDateTime
-		{
-			get
-			{
-				return this.startDateTime;
-			}
-			set
-			{
-				this.startDateTime = value;
-				this.dtStart = TitleDataActivation.ReferenceDate.AddDays((double)this.startDateTime.DaysPast).AddHours((double)this.startDateTime.Hours).AddMinutes((double)this.startDateTime.Minutes).AddSeconds((double)this.startDateTime.Seconds);
-			}
-		}
-
-		public TitleDataActivation.RelativeDateTime EndDateTime
-		{
-			get
-			{
-				return this.endDateTime;
-			}
-			set
-			{
-				this.endDateTime = value;
-				this.dtEnd = TitleDataActivation.ReferenceDate.AddDays((double)this.endDateTime.DaysPast).AddHours((double)this.endDateTime.Hours).AddMinutes((double)this.endDateTime.Minutes).AddSeconds((double)this.endDateTime.Seconds);
-			}
-		}
-
-		public void IsInWindow(DateTime d, out bool inRange, out float delay)
-		{
-			inRange = (d >= this.dtStart && d <= this.dtEnd);
-			delay = (float)(d - this.dtStart).TotalSeconds;
-		}
-
-		protected DateTime dtStart;
-
-		protected DateTime dtEnd;
-
-		[SerializeField]
-		private TitleDataActivation.RelativeDateTime startDateTime;
-
-		[SerializeField]
-		private TitleDataActivation.RelativeDateTime endDateTime;
-	}
-
-	[Serializable]
-	public struct RelativeDateTime
-	{
-		public int DaysPast;
-
-		public int Hours;
-
-		public int Minutes;
-
-		public int Seconds;
 	}
 }

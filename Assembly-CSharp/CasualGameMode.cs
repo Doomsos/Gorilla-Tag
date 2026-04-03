@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using GorillaGameModes;
 using Photon.Pun;
@@ -45,8 +44,7 @@ public sealed class CasualGameMode : GorillaGameManager
 
 	public override string GameModeNameRoomLabel()
 	{
-		string result;
-		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_CASUAL_ROOM_LABEL", out result, "(CASUAL GAME)"))
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_CASUAL_ROOM_LABEL", out var result, "(CASUAL GAME)"))
 		{
 			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_CASUAL_ROOM_LABEL]");
 		}

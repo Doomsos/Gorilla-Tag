@@ -1,10 +1,14 @@
-﻿using System;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
 
 public class GorillaMouthTextureReplacement : MonoBehaviour, ISpawnable
 {
+	[SerializeField]
+	private Texture2D newMouthAtlas;
+
+	private VRRig myRig;
+
 	public bool IsSpawned { get; set; }
 
 	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
@@ -15,21 +19,16 @@ public class GorillaMouthTextureReplacement : MonoBehaviour, ISpawnable
 
 	public void OnSpawn(VRRig rig)
 	{
-		this.myRig = rig;
+		myRig = rig;
 	}
 
 	private void OnEnable()
 	{
-		this.myRig.GetComponent<GorillaMouthFlap>().SetMouthTextureReplacement(this.newMouthAtlas);
+		myRig.GetComponent<GorillaMouthFlap>().SetMouthTextureReplacement(newMouthAtlas);
 	}
 
 	private void OnDisable()
 	{
-		this.myRig.GetComponent<GorillaMouthFlap>().ClearMouthTextureReplacement();
+		myRig.GetComponent<GorillaMouthFlap>().ClearMouthTextureReplacement();
 	}
-
-	[SerializeField]
-	private Texture2D newMouthAtlas;
-
-	private VRRig myRig;
 }

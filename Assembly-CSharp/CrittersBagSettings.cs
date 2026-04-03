@@ -1,22 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CrittersBagSettings : CrittersActorSettings
 {
-	public override void UpdateActorSettings()
-	{
-		base.UpdateActorSettings();
-		CrittersBag crittersBag = (CrittersBag)this.parentActor;
-		crittersBag.attachableCollider = this.attachableCollider;
-		crittersBag.dropCube = this.dropCube;
-		crittersBag.anchorLocation = this.anchorLocation;
-		crittersBag.attachDisableColliders = this.attachDisableColliders;
-		crittersBag.attachSound = this.attachSound;
-		crittersBag.detachSound = this.detachSound;
-		crittersBag.blockAttachTypes = this.blockAttachTypes;
-	}
-
 	public Collider attachableCollider;
 
 	public BoxCollider dropCube;
@@ -30,4 +16,17 @@ public class CrittersBagSettings : CrittersActorSettings
 	public AudioClip detachSound;
 
 	public List<CrittersActor.CrittersActorType> blockAttachTypes;
+
+	public override void UpdateActorSettings()
+	{
+		base.UpdateActorSettings();
+		CrittersBag obj = (CrittersBag)parentActor;
+		obj.attachableCollider = attachableCollider;
+		obj.dropCube = dropCube;
+		obj.anchorLocation = anchorLocation;
+		obj.attachDisableColliders = attachDisableColliders;
+		obj.attachSound = attachSound;
+		obj.detachSound = detachSound;
+		obj.blockAttachTypes = blockAttachTypes;
+	}
 }

@@ -1,9 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameGrabbable : MonoBehaviour
 {
+	[Serializable]
+	public class SnapGrabPoints
+	{
+		public bool isLeftHand;
+
+		public Transform handTransform;
+	}
+
+	public GameEntity gameEntity;
+
+	public List<SnapGrabPoints> snapGrabPoints;
+
+	private static readonly Vector3 GRAB_UP = new Vector3(0f, 0f, 1f);
+
+	private static readonly Vector3 GRAB_PALM = new Vector3(1f, 0f, 0f);
+
 	private void Awake()
 	{
 	}
@@ -20,8 +36,8 @@ public class GameGrabbable : MonoBehaviour
 		{
 			for (int i = 0; i < this.snapGrabPoints.Count; i++)
 			{
-				GameGrabbable.SnapGrabPoints snapGrabPoints = this.snapGrabPoints[i];
-				if (snapGrabPoints.isLeftHand == flag2 && Vector3.Dot(snapGrabPoints.handTransform.rotation * GameGrabbable.GRAB_UP, handRot * GameGrabbable.GRAB_UP) >= 0f && Vector3.Dot(snapGrabPoints.handTransform.rotation * GameGrabbable.GRAB_PALM, handRot * GameGrabbable.GRAB_PALM) >= 0f && (double)(handPos - snapGrabPoints.handTransform.position).sqrMagnitude <= 0.0225)
+				SnapGrabPoints snapGrabPoints = this.snapGrabPoints[i];
+				if (snapGrabPoints.isLeftHand == flag2 && !(Vector3.Dot(snapGrabPoints.handTransform.rotation * GRAB_UP, handRot * GRAB_UP) < 0f) && !(Vector3.Dot(snapGrabPoints.handTransform.rotation * GRAB_PALM, handRot * GRAB_PALM) < 0f) && !((double)(handPos - snapGrabPoints.handTransform.position).sqrMagnitude > 0.0225))
 				{
 					grab.position = handPos + handRot * Quaternion.Inverse(snapGrabPoints.handTransform.localRotation) * -snapGrabPoints.handTransform.localPosition;
 					grab.rotation = handRot * Quaternion.Inverse(snapGrabPoints.handTransform.localRotation);
@@ -39,21 +55,5 @@ public class GameGrabbable : MonoBehaviour
 			grab.position = handPos + vector.normalized * num;
 		}
 		return true;
-	}
-
-	public GameEntity gameEntity;
-
-	public List<GameGrabbable.SnapGrabPoints> snapGrabPoints;
-
-	private static readonly Vector3 GRAB_UP = new Vector3(0f, 0f, 1f);
-
-	private static readonly Vector3 GRAB_PALM = new Vector3(1f, 0f, 0f);
-
-	[Serializable]
-	public class SnapGrabPoints
-	{
-		public bool isLeftHand;
-
-		public Transform handTransform;
 	}
 }

@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 
-namespace GorillaGameModes
+namespace GorillaGameModes;
+
+[Serializable]
+public struct GameModeNameOverrides
 {
-	[Serializable]
-	public struct GameModeNameOverrides
-	{
-		public GameModeType mode;
+	public GameModeType mode;
 
-		public string displayName;
-	}
+	public string displayName;
 }

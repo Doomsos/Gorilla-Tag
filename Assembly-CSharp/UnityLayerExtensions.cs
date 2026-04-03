@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public static class UnityLayerExtensions
@@ -26,9 +25,9 @@ public static class UnityLayerExtensions
 	public static void SetLayerRecursively(this GameObject obj, UnityLayer layer)
 	{
 		obj.layer = (int)layer;
-		foreach (object obj2 in obj.transform)
+		foreach (Transform item in obj.transform)
 		{
-			((Transform)obj2).gameObject.SetLayerRecursively(layer);
+			item.gameObject.SetLayerRecursively(layer);
 		}
 	}
 }

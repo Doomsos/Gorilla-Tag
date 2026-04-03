@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 {
-	public RankedMultiplayerStatisticString(string n, string val, RankedMultiplayerStatistic.SerializationType s = RankedMultiplayerStatistic.SerializationType.None) : base(n, s)
+	private string stringValue;
+
+	public RankedMultiplayerStatisticString(string n, string val, SerializationType s = SerializationType.None)
+		: base(n, s)
 	{
-		this.stringValue = val;
+		stringValue = val;
 	}
 
 	public static implicit operator string(RankedMultiplayerStatisticString stat)
@@ -21,53 +24,47 @@ public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 
 	public void Set(string val)
 	{
-		this.stringValue = val;
-		this.Save();
+		stringValue = val;
+		Save();
 	}
 
 	public string Get()
 	{
-		return this.stringValue;
+		return stringValue;
 	}
 
 	public override bool TrySetValue(string valAsString)
 	{
-		this.stringValue = valAsString;
+		stringValue = valAsString;
 		return true;
 	}
 
 	protected override void Save()
 	{
-		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
-		if (serializationType != RankedMultiplayerStatistic.SerializationType.Mothership && serializationType == RankedMultiplayerStatistic.SerializationType.PlayerPrefs)
+		SerializationType serializationType = base.serializationType;
+		if (serializationType != SerializationType.Mothership && serializationType == SerializationType.PlayerPrefs)
 		{
-			PlayerPrefs.SetString(this.name, this.stringValue);
+			PlayerPrefs.SetString(name, stringValue);
 			PlayerPrefs.Save();
 		}
 	}
 
 	public override void Load()
 	{
-		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
-		if (serializationType != RankedMultiplayerStatistic.SerializationType.Mothership)
+		switch (serializationType)
 		{
-			if (serializationType == RankedMultiplayerStatistic.SerializationType.PlayerPrefs)
-			{
-				base.IsValid = true;
-				this.stringValue = PlayerPrefs.GetString(this.name, this.stringValue);
-				return;
-			}
-		}
-		else
-		{
+		case SerializationType.PlayerPrefs:
+			base.IsValid = true;
+			stringValue = PlayerPrefs.GetString(name, stringValue);
+			break;
+		case SerializationType.Mothership:
 			base.IsValid = false;
+			break;
 		}
 	}
 
 	public override string ToString()
 	{
-		return this.stringValue;
+		return stringValue;
 	}
-
-	private string stringValue;
 }

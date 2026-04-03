@@ -1,14 +1,22 @@
-﻿using System;
 using UnityEngine;
 
 public class BuildTargetManager : MonoBehaviour
 {
-	public string GetPath()
+	public enum BuildTowards
 	{
-		return this.path;
+		Steam,
+		OculusPC,
+		Quest,
+		Viveport
 	}
 
-	public BuildTargetManager.BuildTowards newBuildTarget;
+	public enum NetworkBackend
+	{
+		Pun,
+		Fusion
+	}
+
+	public BuildTowards newBuildTarget;
 
 	public bool isBeta;
 
@@ -24,7 +32,7 @@ public class BuildTargetManager : MonoBehaviour
 
 	private string path = "Assets/csc.rsp";
 
-	public BuildTargetManager.BuildTowards currentBuildTargetDONOTCHANGE;
+	public BuildTowards currentBuildTargetDONOTCHANGE;
 
 	public GorillaTagger gorillaTagger;
 
@@ -32,19 +40,10 @@ public class BuildTargetManager : MonoBehaviour
 
 	public GameObject[] betaEnableObjects;
 
-	public BuildTargetManager.NetworkBackend networkBackend;
+	public NetworkBackend networkBackend;
 
-	public enum BuildTowards
+	public string GetPath()
 	{
-		Steam,
-		OculusPC,
-		Quest,
-		Viveport
-	}
-
-	public enum NetworkBackend
-	{
-		Pun,
-		Fusion
+		return path;
 	}
 }

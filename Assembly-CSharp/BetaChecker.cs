@@ -1,42 +1,41 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public class BetaChecker : MonoBehaviour
 {
+	public GameObject[] objectsToEnable;
+
+	public bool doNotEnable;
+
 	private void Start()
 	{
 		if (PlayerPrefs.GetString("CheckedBox2") == "true")
 		{
-			this.doNotEnable = true;
-			base.gameObject.SetActive(false);
+			doNotEnable = true;
+			base.gameObject.SetActive(value: false);
 		}
 	}
 
 	private void Update()
 	{
-		if (!this.doNotEnable)
+		if (doNotEnable)
 		{
-			if (CosmeticsController.instance.confirmedDidntPlayInBeta)
+			return;
+		}
+		if (CosmeticsController.instance.confirmedDidntPlayInBeta)
+		{
+			PlayerPrefs.SetString("CheckedBox2", "true");
+			PlayerPrefs.Save();
+			base.gameObject.SetActive(value: false);
+		}
+		else if (CosmeticsController.instance.playedInBeta)
+		{
+			GameObject[] array = objectsToEnable;
+			for (int i = 0; i < array.Length; i++)
 			{
-				PlayerPrefs.SetString("CheckedBox2", "true");
-				PlayerPrefs.Save();
-				base.gameObject.SetActive(false);
-				return;
+				array[i].SetActive(value: true);
 			}
-			if (CosmeticsController.instance.playedInBeta)
-			{
-				GameObject[] array = this.objectsToEnable;
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i].SetActive(true);
-				}
-				this.doNotEnable = true;
-			}
+			doNotEnable = true;
 		}
 	}
-
-	public GameObject[] objectsToEnable;
-
-	public bool doNotEnable;
 }

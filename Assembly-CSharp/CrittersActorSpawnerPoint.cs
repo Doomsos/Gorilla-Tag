@@ -1,80 +1,73 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 
 public class CrittersActorSpawnerPoint : CrittersActor
 {
+	private CrittersActor spawnedActor;
+
+	private int spawnedActorID = -1;
+
 	public event Action<CrittersActor> OnSpawnChanged;
 
 	public override void Initialize()
 	{
 		base.Initialize();
-		base.UpdateImpulses(false, false);
+		UpdateImpulses();
 	}
 
 	public override void OnDisable()
 	{
 		base.OnDisable();
-		this.spawnedActorID = -1;
-		this.spawnedActor = null;
+		spawnedActorID = -1;
+		spawnedActor = null;
 	}
 
 	public void SetSpawnedActor(CrittersActor actor)
 	{
-		if (this.spawnedActor == actor)
+		if (!(spawnedActor == actor))
 		{
-			return;
+			spawnedActor = actor;
+			if (spawnedActor != null)
+			{
+				spawnedActorID = spawnedActor.actorId;
+			}
+			else
+			{
+				spawnedActorID = -1;
+			}
+			this.OnSpawnChanged?.Invoke(spawnedActor);
+			updatedSinceLastFrame = true;
 		}
-		this.spawnedActor = actor;
-		if (this.spawnedActor != null)
-		{
-			this.spawnedActorID = this.spawnedActor.actorId;
-		}
-		else
-		{
-			this.spawnedActorID = -1;
-		}
-		Action<CrittersActor> onSpawnChanged = this.OnSpawnChanged;
-		if (onSpawnChanged != null)
-		{
-			onSpawnChanged(this.spawnedActor);
-		}
-		this.updatedSinceLastFrame = true;
 	}
 
 	private void UpdateSpawnedActor(int newSpawnedActorID)
 	{
-		if (this.spawnedActorID == newSpawnedActorID)
+		if (spawnedActorID == newSpawnedActorID)
 		{
 			return;
 		}
 		if (newSpawnedActorID == -1)
 		{
-			this.spawnedActorID = newSpawnedActorID;
-			this.spawnedActor = null;
+			spawnedActorID = newSpawnedActorID;
+			spawnedActor = null;
 		}
 		else
 		{
-			CrittersActor crittersActor;
-			if (!CrittersManager.instance.actorById.TryGetValue(newSpawnedActorID, out crittersActor))
+			if (!CrittersManager.instance.actorById.TryGetValue(newSpawnedActorID, out var value))
 			{
 				return;
 			}
-			this.spawnedActorID = newSpawnedActorID;
-			this.spawnedActor = crittersActor;
+			spawnedActorID = newSpawnedActorID;
+			spawnedActor = value;
 		}
-		Action<CrittersActor> onSpawnChanged = this.OnSpawnChanged;
-		if (onSpawnChanged == null)
-		{
-			return;
-		}
-		onSpawnChanged(this.spawnedActor);
+		this.OnSpawnChanged?.Invoke(spawnedActor);
 	}
 
 	public override void SendDataByCrittersActorType(PhotonStream stream)
 	{
 		base.SendDataByCrittersActorType(stream);
-		stream.SendNext(this.spawnedActorID);
+		stream.SendNext(spawnedActorID);
 	}
 
 	public override bool UpdateSpecificActor(PhotonStream stream)
@@ -83,48 +76,42 @@ public class CrittersActorSpawnerPoint : CrittersActor
 		{
 			return false;
 		}
-		int num;
-		if (!CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num))
+		if (!CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType))
 		{
 			return false;
 		}
-		if (num < -1 || num >= CrittersManager.instance.universalActorId)
+		if (dataAsType < -1 || dataAsType >= CrittersManager.instance.universalActorId)
 		{
 			return false;
 		}
-		this.UpdateSpawnedActor(num);
+		UpdateSpawnedActor(dataAsType);
 		return true;
 	}
 
 	public override int AddActorDataToList(ref List<object> objList)
 	{
 		base.AddActorDataToList(ref objList);
-		objList.Add(this.spawnedActorID);
-		return this.TotalActorDataLength();
+		objList.Add(spawnedActorID);
+		return TotalActorDataLength();
 	}
 
 	public override int TotalActorDataLength()
 	{
-		return base.BaseActorDataLength() + 1;
+		return BaseActorDataLength() + 1;
 	}
 
 	public override int UpdateFromRPC(object[] data, int startingIndex)
 	{
 		startingIndex += base.UpdateFromRPC(data, startingIndex);
-		int num;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex], out num))
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex], out var dataAsType))
 		{
-			return this.TotalActorDataLength();
+			return TotalActorDataLength();
 		}
-		if (num >= -1 && num < CrittersManager.instance.universalActorId)
+		if (dataAsType >= -1 && dataAsType < CrittersManager.instance.universalActorId)
 		{
-			return this.TotalActorDataLength();
+			return TotalActorDataLength();
 		}
-		this.UpdateSpawnedActor(num);
-		return this.TotalActorDataLength();
+		UpdateSpawnedActor(dataAsType);
+		return TotalActorDataLength();
 	}
-
-	private CrittersActor spawnedActor;
-
-	private int spawnedActorID = -1;
 }

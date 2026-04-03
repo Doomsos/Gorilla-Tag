@@ -1,18 +1,21 @@
-﻿using System;
 using UnityEngine;
 
 public abstract class CosmeticCritterCatcher : CosmeticCritterHoldable
 {
+	[SerializeField]
+	[Tooltip("If this catcher is capable of spawning immediately after catching, the linked spawner must be assigned here.")]
+	protected CosmeticCritterSpawner optionalLinkedSpawner;
+
 	public CosmeticCritterSpawner GetLinkedSpawner()
 	{
-		return this.optionalLinkedSpawner;
+		return optionalLinkedSpawner;
 	}
 
 	public abstract CosmeticCritterAction GetLocalCatchAction(CosmeticCritter critter);
 
 	public virtual bool ValidateRemoteCatchAction(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime)
 	{
-		return this.callLimiter.CheckCallServerTime(serverTime);
+		return callLimiter.CheckCallServerTime(serverTime);
 	}
 
 	public abstract void OnCatch(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime);
@@ -28,8 +31,4 @@ public abstract class CosmeticCritterCatcher : CosmeticCritterHoldable
 		base.OnDisable();
 		CosmeticCritterManager.Instance.UnregisterCatcher(this);
 	}
-
-	[SerializeField]
-	[Tooltip("If this catcher is capable of spawning immediately after catching, the linked spawner must be assigned here.")]
-	protected CosmeticCritterSpawner optionalLinkedSpawner;
 }

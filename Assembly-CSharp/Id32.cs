@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [Serializable]
 public struct Id32
 {
+	[SerializeField]
+	private int _id;
+
 	public Id32(string idString)
 	{
 		if (idString == null)
@@ -15,24 +18,24 @@ public struct Id32
 		{
 			throw new ArgumentNullException("idString");
 		}
-		this._id = XXHash32.Compute(idString, 0U);
+		_id = XXHash32.Compute(idString);
 	}
 
-	public unsafe static implicit operator int(Id32 i32)
+	public static implicit operator int(Id32 i32)
 	{
-		return *Unsafe.As<Id32, int>(ref i32);
+		return Unsafe.As<Id32, int>(ref i32);
 	}
 
 	public static implicit operator Id32(string s)
 	{
-		return Id32.ComputeID(s);
+		return ComputeID(s);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public unsafe static Id32 ComputeID(string s)
+	public static Id32 ComputeID(string s)
 	{
-		int num = Id32.ComputeHash(s);
-		return *Unsafe.As<int, Id32>(ref num);
+		int source = ComputeHash(s);
+		return Unsafe.As<int, Id32>(ref source);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,19 +50,16 @@ public struct Id32
 		{
 			return 0;
 		}
-		return XXHash32.Compute(s, 0U);
+		return XXHash32.Compute(s);
 	}
 
 	public override int GetHashCode()
 	{
-		return this._id;
+		return _id;
 	}
 
 	public override string ToString()
 	{
-		return string.Format("{{ {0} : {1} }}", "Id32", this._id);
+		return string.Format("{{ {0} : {1} }}", "Id32", _id);
 	}
-
-	[SerializeField]
-	private int _id;
 }

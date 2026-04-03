@@ -1,31 +1,37 @@
-﻿using System;
 using UnityEngine;
 
 public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimple
 {
+	private bool firstFrame = true;
+
+	private bool observable = true;
+
+	[SerializeField]
+	private ObservableBehaviorRule observableBehaviorRule;
+
 	private void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		this.UnityOnEnable();
+		UnityOnEnable();
 	}
 
 	private void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		if (this.observable)
+		if (observable)
 		{
-			this.observable = false;
-			this.OnLostObservable();
+			observable = false;
+			OnLostObservable();
 		}
-		this.UnityOnDisable();
+		UnityOnDisable();
 	}
 
 	private void OnDestroy()
 	{
-		if (this.observable)
+		if (observable)
 		{
-			this.observable = false;
-			this.OnLostObservable();
+			observable = false;
+			OnLostObservable();
 		}
 	}
 
@@ -33,32 +39,24 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	{
 		Transform transform = Camera.main.transform;
 		float num = Vector3.Distance(transform.position, base.transform.position);
-		float num2;
-		if (this.observableBehaviorRule != null && this.observableBehaviorRule.InverseObservable)
-		{
-			num2 = Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward);
-		}
-		else
-		{
-			num2 = Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward);
-		}
-		bool flag = this.observableBehaviorRule == null || (this.observableBehaviorRule.ObservableDistanceRange.x <= num && num <= this.observableBehaviorRule.ObservableDistanceRange.y && this.observableBehaviorRule.ObservableDotRange.x <= num2 && num2 <= this.observableBehaviorRule.ObservableDotRange.y);
-		if (this.firstFrame || this.observable != flag)
+		float num2 = ((!(observableBehaviorRule != null) || !observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
+		bool flag = observableBehaviorRule == null || (observableBehaviorRule.ObservableDistanceRange.x <= num && num <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num2 && num2 <= observableBehaviorRule.ObservableDotRange.y);
+		if (firstFrame || observable != flag)
 		{
 			if (flag)
 			{
-				this.OnBecameObservable();
+				OnBecameObservable();
 			}
 			else
 			{
-				this.OnLostObservable();
+				OnLostObservable();
 			}
 		}
-		this.observable = flag;
-		this.firstFrame = false;
+		observable = flag;
+		firstFrame = false;
 		if (flag)
 		{
-			this.ObservableSliceUpdate();
+			ObservableSliceUpdate();
 		}
 	}
 
@@ -75,11 +73,4 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	protected abstract void OnBecameObservable();
 
 	protected abstract void ObservableSliceUpdate();
-
-	private bool firstFrame = true;
-
-	private bool observable = true;
-
-	[SerializeField]
-	private ObservableBehaviorRule observableBehaviorRule;
 }

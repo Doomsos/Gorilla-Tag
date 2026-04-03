@@ -1,30 +1,22 @@
-﻿using System;
-
 public struct EnterPlayID
 {
+	private static int currentID = 1;
+
+	private int id;
+
+	public bool IsCurrent => id == currentID;
+
 	[OnEnterPlay_Run]
 	private static void NextID()
 	{
-		EnterPlayID.currentID++;
+		currentID++;
 	}
 
 	public static EnterPlayID GetCurrent()
 	{
 		return new EnterPlayID
 		{
-			id = EnterPlayID.currentID
+			id = currentID
 		};
 	}
-
-	public bool IsCurrent
-	{
-		get
-		{
-			return this.id == EnterPlayID.currentID;
-		}
-	}
-
-	private static int currentID = 1;
-
-	private int id;
 }

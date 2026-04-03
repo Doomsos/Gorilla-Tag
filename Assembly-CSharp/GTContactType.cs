@@ -1,10 +1,8 @@
-﻿using System;
-
 public enum GTContactType : uint
 {
-	None,
-	HandPrint,
-	Crater,
-	WaterSplash = 4U,
-	PaintSplat = 8U
+	None = 0u,
+	HandPrint = 1u,
+	Crater = 2u,
+	WaterSplash = 4u,
+	PaintSplat = 8u
 }

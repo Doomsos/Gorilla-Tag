@@ -1,25 +1,35 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ServerTimeSyncRule", menuName = "Scriptable Objects/ServerTimeSyncRule")]
 public class ServerTimeSyncRule : ScriptableObject
 {
+	private enum Unit
+	{
+		Hours,
+		Minutes,
+		Seconds
+	}
+
+	[SerializeField]
+	private Unit unit;
+
+	[SerializeField]
+	private int value;
+
 	public DateTime GetPrevious(DateTime dt)
 	{
 		DateTime result = DateTime.MinValue;
-		switch (this.unit)
+		switch (unit)
 		{
-		case ServerTimeSyncRule.Unit.Hours:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
-			result = result.AddHours((double)(-(double)(dt.Hour % this.value)));
+		case Unit.Hours:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0).AddHours(-(dt.Hour % value));
 			break;
-		case ServerTimeSyncRule.Unit.Minutes:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0);
-			result = result.AddMinutes((double)(-(double)(dt.Minute % this.value)));
+		case Unit.Minutes:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0).AddMinutes(-(dt.Minute % value));
 			break;
-		case ServerTimeSyncRule.Unit.Seconds:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-			result = result.AddSeconds((double)(-(double)(dt.Second % this.value)));
+		case Unit.Seconds:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second).AddSeconds(-(dt.Second % value));
 			break;
 		}
 		return result;
@@ -28,34 +38,18 @@ public class ServerTimeSyncRule : ScriptableObject
 	public DateTime GetNext(DateTime dt)
 	{
 		DateTime result = DateTime.MaxValue;
-		switch (this.unit)
+		switch (unit)
 		{
-		case ServerTimeSyncRule.Unit.Hours:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
-			result = result.AddHours((double)(this.value - dt.Hour % this.value));
+		case Unit.Hours:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0).AddHours(value - dt.Hour % value);
 			break;
-		case ServerTimeSyncRule.Unit.Minutes:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0);
-			result = result.AddMinutes((double)(this.value - dt.Minute % this.value));
+		case Unit.Minutes:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0).AddMinutes(value - dt.Minute % value);
 			break;
-		case ServerTimeSyncRule.Unit.Seconds:
-			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-			result = result.AddSeconds((double)(this.value - dt.Second % this.value));
+		case Unit.Seconds:
+			result = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second).AddSeconds(value - dt.Second % value);
 			break;
 		}
 		return result;
-	}
-
-	[SerializeField]
-	private ServerTimeSyncRule.Unit unit;
-
-	[SerializeField]
-	private int value;
-
-	private enum Unit
-	{
-		Hours,
-		Minutes,
-		Seconds
 	}
 }

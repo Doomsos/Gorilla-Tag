@@ -1,11 +1,8 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public enum RotationAxis
 {
-	public enum RotationAxis
-	{
-		X,
-		Y,
-		Z
-	}
+	X,
+	Y,
+	Z
 }

@@ -1,11 +1,16 @@
-﻿using System;
 using UnityEngine;
 
 public class GhostLabButton : GorillaPressableButton, IBuildValidation
 {
+	public GhostLab ghostLab;
+
+	public int buttonIndex;
+
+	public bool forSingleDoor;
+
 	public bool BuildValidationCheck()
 	{
-		if (this.ghostLab == null)
+		if (ghostLab == null)
 		{
 			Debug.LogError("ghostlab is missing", this);
 			return false;
@@ -16,12 +21,6 @@ public class GhostLabButton : GorillaPressableButton, IBuildValidation
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		this.ghostLab.DoorButtonPress(this.buttonIndex, this.forSingleDoor);
+		ghostLab.DoorButtonPress(buttonIndex, forSingleDoor);
 	}
-
-	public GhostLab ghostLab;
-
-	public int buttonIndex;
-
-	public bool forSingleDoor;
 }

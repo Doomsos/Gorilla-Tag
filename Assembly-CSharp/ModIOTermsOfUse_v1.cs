@@ -1,163 +1,10 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
 public class ModIOTermsOfUse_v1 : MonoBehaviour
 {
-	private void OnEnable()
-	{
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-		}
-	}
-
-	private void PostUpdate()
-	{
-		if (ControllerBehaviour.Instance.IsLeftStick)
-		{
-			this.TurnPage(-1);
-		}
-		if (ControllerBehaviour.Instance.IsRightStick)
-		{
-			this.TurnPage(1);
-		}
-		if (this.waitingForAcknowledge)
-		{
-			this.acceptButtonDown = ControllerBehaviour.Instance.ButtonDown;
-		}
-	}
-
-	private void Start()
-	{
-		ModIOTermsOfUse_v1.<Start>d__19 <Start>d__;
-		<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Start>d__.<>4__this = this;
-		<Start>d__.<>1__state = -1;
-		<Start>d__.<>t__builder.Start<ModIOTermsOfUse_v1.<Start>d__19>(ref <Start>d__);
-	}
-
-	private Task<bool> UpdateTextFromTerms()
-	{
-		ModIOTermsOfUse_v1.<UpdateTextFromTerms>d__20 <UpdateTextFromTerms>d__;
-		<UpdateTextFromTerms>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<UpdateTextFromTerms>d__.<>4__this = this;
-		<UpdateTextFromTerms>d__.<>1__state = -1;
-		<UpdateTextFromTerms>d__.<>t__builder.Start<ModIOTermsOfUse_v1.<UpdateTextFromTerms>d__20>(ref <UpdateTextFromTerms>d__);
-		return <UpdateTextFromTerms>d__.<>t__builder.Task;
-	}
-
-	public Task<bool> UpdateTextWithFullTerms()
-	{
-		ModIOTermsOfUse_v1.<UpdateTextWithFullTerms>d__21 <UpdateTextWithFullTerms>d__;
-		<UpdateTextWithFullTerms>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<UpdateTextWithFullTerms>d__.<>1__state = -1;
-		<UpdateTextWithFullTerms>d__.<>t__builder.Start<ModIOTermsOfUse_v1.<UpdateTextWithFullTerms>d__21>(ref <UpdateTextWithFullTerms>d__);
-		return <UpdateTextWithFullTerms>d__.<>t__builder.Task;
-	}
-
-	private string GetStringForListItemIdx_LowerAlpha(int idx)
-	{
-		switch (idx)
-		{
-		case 0:
-			return "  a. <indent=5%>";
-		case 1:
-			return "  b. <indent=5%>";
-		case 2:
-			return "  c. <indent=5%>";
-		case 3:
-			return "  d. <indent=5%>";
-		case 4:
-			return "  e. <indent=5%>";
-		case 5:
-			return "  f. <indent=5%>";
-		case 6:
-			return "  g. <indent=5%>";
-		case 7:
-			return "  h. <indent=5%>";
-		case 8:
-			return "  i. <indent=5%>";
-		case 9:
-			return "  j. <indent=5%>";
-		case 10:
-			return "  k. <indent=5%>";
-		case 11:
-			return "  l. <indent=5%>";
-		case 12:
-			return "  m. <indent=5%>";
-		case 13:
-			return "  n. <indent=5%>";
-		case 14:
-			return "  o. <indent=5%>";
-		case 15:
-			return "  p. <indent=5%>";
-		case 16:
-			return "  q. <indent=5%>";
-		case 17:
-			return "  r. <indent=5%>";
-		case 18:
-			return "  s. <indent=5%>";
-		case 19:
-			return "  t. <indent=5%>";
-		case 20:
-			return "  u. <indent=5%>";
-		case 21:
-			return "  v. <indent=5%>";
-		case 22:
-			return "  w. <indent=5%>";
-		case 23:
-			return "  x. <indent=5%>";
-		case 24:
-			return "  y. <indent=5%>";
-		case 25:
-			return "  z. <indent=5%>";
-		default:
-			return "";
-		}
-	}
-
-	private Task WaitForAcknowledgement()
-	{
-		ModIOTermsOfUse_v1.<WaitForAcknowledgement>d__23 <WaitForAcknowledgement>d__;
-		<WaitForAcknowledgement>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForAcknowledgement>d__.<>4__this = this;
-		<WaitForAcknowledgement>d__.<>1__state = -1;
-		<WaitForAcknowledgement>d__.<>t__builder.Start<ModIOTermsOfUse_v1.<WaitForAcknowledgement>d__23>(ref <WaitForAcknowledgement>d__);
-		return <WaitForAcknowledgement>d__.<>t__builder.Task;
-	}
-
-	public void TurnPage(int i)
-	{
-		this.tmpBody.pageToDisplay = Mathf.Clamp(this.tmpBody.pageToDisplay + i, 1, this.tmpBody.textInfo.pageCount);
-		this.tmpPage.text = string.Format("page {0} of {1}", this.tmpBody.pageToDisplay, this.tmpBody.textInfo.pageCount);
-		this.nextButton.SetActive(this.tmpBody.pageToDisplay < this.tmpBody.textInfo.pageCount);
-		this.prevButton.SetActive(this.tmpBody.pageToDisplay > 1);
-		this.ActivateAcceptButtonGroup();
-	}
-
-	private void ActivateAcceptButtonGroup()
-	{
-		bool active = this.tmpBody.pageToDisplay == this.tmpBody.textInfo.pageCount;
-		this.yesNoButtons.SetActive(active);
-		this.waitingForAcknowledge = active;
-	}
-
-	public void Acknowledge(bool didAccept)
-	{
-		this.accepted = didAccept;
-	}
-
 	[SerializeField]
 	private Transform uiParent;
 
@@ -199,4 +46,148 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 
 	[SerializeField]
 	private LineRenderer progressBar;
+
+	private void OnEnable()
+	{
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction += PostUpdate;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction -= PostUpdate;
+		}
+	}
+
+	private void PostUpdate()
+	{
+		if (ControllerBehaviour.Instance.IsLeftStick)
+		{
+			TurnPage(-1);
+		}
+		if (ControllerBehaviour.Instance.IsRightStick)
+		{
+			TurnPage(1);
+		}
+		if (waitingForAcknowledge)
+		{
+			acceptButtonDown = ControllerBehaviour.Instance.ButtonDown;
+		}
+	}
+
+	private async void Start()
+	{
+		while (!hasTermsOfUse)
+		{
+			await Task.Yield();
+		}
+		PrivateUIRoom.AddUI(uiParent);
+		if (!(await UpdateTextFromTerms()))
+		{
+			while (true)
+			{
+				await Task.Yield();
+			}
+		}
+		await WaitForAcknowledgement();
+		termsAcknowledgedCallback?.Invoke(accepted);
+		PrivateUIRoom.RemoveUI(uiParent);
+		UnityEngine.Object.Destroy(base.gameObject);
+	}
+
+	private async Task<bool> UpdateTextFromTerms()
+	{
+		tmpTitle.text = title;
+		tmpBody.text = "Loading...";
+		bool num = await UpdateTextWithFullTerms();
+		if (!num)
+		{
+			tmpBody.text = "Failed to retrieve full Terms of Use text from mod.io.\n\nPlease restart the game and try again.";
+			tmpBody.pageToDisplay = 1;
+			tmpPage.text = string.Empty;
+		}
+		return num;
+	}
+
+	public async Task<bool> UpdateTextWithFullTerms()
+	{
+		return true;
+	}
+
+	private string GetStringForListItemIdx_LowerAlpha(int idx)
+	{
+		return idx switch
+		{
+			0 => "  a. <indent=5%>", 
+			1 => "  b. <indent=5%>", 
+			2 => "  c. <indent=5%>", 
+			3 => "  d. <indent=5%>", 
+			4 => "  e. <indent=5%>", 
+			5 => "  f. <indent=5%>", 
+			6 => "  g. <indent=5%>", 
+			7 => "  h. <indent=5%>", 
+			8 => "  i. <indent=5%>", 
+			9 => "  j. <indent=5%>", 
+			10 => "  k. <indent=5%>", 
+			11 => "  l. <indent=5%>", 
+			12 => "  m. <indent=5%>", 
+			13 => "  n. <indent=5%>", 
+			14 => "  o. <indent=5%>", 
+			15 => "  p. <indent=5%>", 
+			16 => "  q. <indent=5%>", 
+			17 => "  r. <indent=5%>", 
+			18 => "  s. <indent=5%>", 
+			19 => "  t. <indent=5%>", 
+			20 => "  u. <indent=5%>", 
+			21 => "  v. <indent=5%>", 
+			22 => "  w. <indent=5%>", 
+			23 => "  x. <indent=5%>", 
+			24 => "  y. <indent=5%>", 
+			25 => "  z. <indent=5%>", 
+			_ => "", 
+		};
+	}
+
+	private async Task WaitForAcknowledgement()
+	{
+		accepted = false;
+		float progress = 0f;
+		progressBar.transform.localScale = new Vector3(0f, 1f, 1f);
+		while (progress < 1f)
+		{
+			progress = ((!acceptButtonDown) ? 0f : (progress + Time.deltaTime / holdTime));
+			progressBar.transform.localScale = new Vector3(Mathf.Clamp01(progress), 1f, 1f);
+			progressBar.textureScale = new Vector2(Mathf.Clamp01(progress), -1f);
+			await Task.Yield();
+		}
+		if (progress >= 1f)
+		{
+			Acknowledge(acceptButtonDown);
+		}
+	}
+
+	public void TurnPage(int i)
+	{
+		tmpBody.pageToDisplay = Mathf.Clamp(tmpBody.pageToDisplay + i, 1, tmpBody.textInfo.pageCount);
+		tmpPage.text = $"page {tmpBody.pageToDisplay} of {tmpBody.textInfo.pageCount}";
+		nextButton.SetActive(tmpBody.pageToDisplay < tmpBody.textInfo.pageCount);
+		prevButton.SetActive(tmpBody.pageToDisplay > 1);
+		ActivateAcceptButtonGroup();
+	}
+
+	private void ActivateAcceptButtonGroup()
+	{
+		bool active = tmpBody.pageToDisplay == tmpBody.textInfo.pageCount;
+		yesNoButtons.SetActive(active);
+		waitingForAcknowledge = active;
+	}
+
+	public void Acknowledge(bool didAccept)
+	{
+		accepted = didAccept;
+	}
 }

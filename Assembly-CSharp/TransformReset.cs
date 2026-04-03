@@ -1,72 +1,24 @@
-﻿using System;
 using UnityEngine;
 
 public class TransformReset : MonoBehaviour
 {
-	private void Awake()
+	private struct OriginalGameObjectTransform(Transform constructionTransform)
 	{
-		Transform[] componentsInChildren = base.GetComponentsInChildren<Transform>();
-		this.transformList = new TransformReset.OriginalGameObjectTransform[componentsInChildren.Length];
-		for (int i = 0; i < componentsInChildren.Length; i++)
-		{
-			this.transformList[i] = new TransformReset.OriginalGameObjectTransform(componentsInChildren[i]);
-		}
-		this.ResetTransforms();
-	}
+		private Transform _thisTransform = constructionTransform;
 
-	public void ReturnTransforms()
-	{
-		foreach (TransformReset.OriginalGameObjectTransform originalGameObjectTransform in this.tempTransformList)
-		{
-			originalGameObjectTransform.thisTransform.position = originalGameObjectTransform.thisPosition;
-			originalGameObjectTransform.thisTransform.rotation = originalGameObjectTransform.thisRotation;
-		}
-	}
+		private Vector3 _thisPosition = constructionTransform.position;
 
-	public void SetScale(float ratio)
-	{
-		foreach (TransformReset.OriginalGameObjectTransform originalGameObjectTransform in this.transformList)
-		{
-			originalGameObjectTransform.thisTransform.localScale *= ratio;
-		}
-	}
-
-	public void ResetTransforms()
-	{
-		this.tempTransformList = new TransformReset.OriginalGameObjectTransform[this.transformList.Length];
-		for (int i = 0; i < this.transformList.Length; i++)
-		{
-			this.tempTransformList[i] = new TransformReset.OriginalGameObjectTransform(this.transformList[i].thisTransform);
-		}
-		foreach (TransformReset.OriginalGameObjectTransform originalGameObjectTransform in this.transformList)
-		{
-			originalGameObjectTransform.thisTransform.position = originalGameObjectTransform.thisPosition;
-			originalGameObjectTransform.thisTransform.rotation = originalGameObjectTransform.thisRotation;
-		}
-	}
-
-	private TransformReset.OriginalGameObjectTransform[] transformList;
-
-	private TransformReset.OriginalGameObjectTransform[] tempTransformList;
-
-	private struct OriginalGameObjectTransform
-	{
-		public OriginalGameObjectTransform(Transform constructionTransform)
-		{
-			this._thisTransform = constructionTransform;
-			this._thisPosition = constructionTransform.position;
-			this._thisRotation = constructionTransform.rotation;
-		}
+		private Quaternion _thisRotation = constructionTransform.rotation;
 
 		public Transform thisTransform
 		{
 			get
 			{
-				return this._thisTransform;
+				return _thisTransform;
 			}
 			set
 			{
-				this._thisTransform = value;
+				_thisTransform = value;
 			}
 		}
 
@@ -74,11 +26,11 @@ public class TransformReset : MonoBehaviour
 		{
 			get
 			{
-				return this._thisPosition;
+				return _thisPosition;
 			}
 			set
 			{
-				this._thisPosition = value;
+				_thisPosition = value;
 			}
 		}
 
@@ -86,18 +38,63 @@ public class TransformReset : MonoBehaviour
 		{
 			get
 			{
-				return this._thisRotation;
+				return _thisRotation;
 			}
 			set
 			{
-				this._thisRotation = value;
+				_thisRotation = value;
 			}
 		}
+	}
 
-		private Transform _thisTransform;
+	private OriginalGameObjectTransform[] transformList;
 
-		private Vector3 _thisPosition;
+	private OriginalGameObjectTransform[] tempTransformList;
 
-		private Quaternion _thisRotation;
+	private void Awake()
+	{
+		Transform[] componentsInChildren = GetComponentsInChildren<Transform>();
+		transformList = new OriginalGameObjectTransform[componentsInChildren.Length];
+		for (int i = 0; i < componentsInChildren.Length; i++)
+		{
+			transformList[i] = new OriginalGameObjectTransform(componentsInChildren[i]);
+		}
+		ResetTransforms();
+	}
+
+	public void ReturnTransforms()
+	{
+		OriginalGameObjectTransform[] array = tempTransformList;
+		for (int i = 0; i < array.Length; i++)
+		{
+			OriginalGameObjectTransform originalGameObjectTransform = array[i];
+			originalGameObjectTransform.thisTransform.position = originalGameObjectTransform.thisPosition;
+			originalGameObjectTransform.thisTransform.rotation = originalGameObjectTransform.thisRotation;
+		}
+	}
+
+	public void SetScale(float ratio)
+	{
+		OriginalGameObjectTransform[] array = transformList;
+		foreach (OriginalGameObjectTransform originalGameObjectTransform in array)
+		{
+			originalGameObjectTransform.thisTransform.localScale *= ratio;
+		}
+	}
+
+	public void ResetTransforms()
+	{
+		tempTransformList = new OriginalGameObjectTransform[transformList.Length];
+		for (int i = 0; i < transformList.Length; i++)
+		{
+			tempTransformList[i] = new OriginalGameObjectTransform(transformList[i].thisTransform);
+		}
+		OriginalGameObjectTransform[] array = transformList;
+		for (int j = 0; j < array.Length; j++)
+		{
+			OriginalGameObjectTransform originalGameObjectTransform = array[j];
+			originalGameObjectTransform.thisTransform.position = originalGameObjectTransform.thisPosition;
+			originalGameObjectTransform.thisTransform.rotation = originalGameObjectTransform.thisRotation;
+		}
 	}
 }

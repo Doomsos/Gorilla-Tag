@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using GorillaTagScripts.GhostReactor;
@@ -8,182 +8,6 @@ using UnityEngine;
 [Serializable]
 public class GhostReactorShiftDepthDisplay
 {
-	public void Setup()
-	{
-		this.StopDelveDeeperFX();
-	}
-
-	public int GetRewardXP()
-	{
-		return this.reactor.GetDepthLevel() * 10 + 10;
-	}
-
-	public void RefreshDisplay()
-	{
-		int depthLevel = this.reactor.GetDepthLevel();
-		this.reactor.GetDepthLevelConfig(depthLevel);
-		this.reactor.GetDepthLevelConfig(depthLevel + 1);
-		switch (this.shiftManager.GetState())
-		{
-		case GhostReactorShiftManager.State.WaitingForShiftStart:
-		case GhostReactorShiftManager.State.WaitingForFirstShiftStart:
-		case GhostReactorShiftManager.State.ShiftActive:
-		{
-			foreach (TMP_Text tmp_Text in this.logoFrames)
-			{
-				tmp_Text.gameObject.SetActive(false);
-			}
-			this.cachedStringBuilder.Clear();
-			this.cachedStringBuilder.Append("<color=grey>Team Goals:</color>\n");
-			int num = 0;
-			if (this.shiftManager.coresRequiredToDelveDeeper > 0)
-			{
-				int num2 = Math.Min(this.shiftManager.shiftStats.GetShiftStat(GRShiftStatType.CoresCollected), this.shiftManager.coresRequiredToDelveDeeper);
-				StringBuilder stringBuilder = new StringBuilder();
-				stringBuilder.Append(string.Format("Deposit {0} Cores ", this.shiftManager.coresRequiredToDelveDeeper));
-				stringBuilder.Append(string.Format("({0}/{1})", num2, this.shiftManager.coresRequiredToDelveDeeper));
-				stringBuilder.Append("\n");
-				this.cachedStringBuilder.Append(stringBuilder);
-				num++;
-			}
-			if (this.shiftManager.sentientCoresRequiredToDelveDeeper > 0)
-			{
-				int num3 = Math.Min(this.shiftManager.shiftStats.GetShiftStat(GRShiftStatType.SentientCoresCollected), this.shiftManager.sentientCoresRequiredToDelveDeeper);
-				StringBuilder stringBuilder2 = new StringBuilder();
-				stringBuilder2.Append(string.Format("Collect {0} Seeds ", this.shiftManager.sentientCoresRequiredToDelveDeeper));
-				stringBuilder2.Append(string.Format("({0}/{1})", num3, this.shiftManager.sentientCoresRequiredToDelveDeeper));
-				stringBuilder2.Append("\n");
-				this.cachedStringBuilder.Append(stringBuilder2);
-				num++;
-			}
-			foreach (GREnemyCount grenemyCount in this.shiftManager.killsRequiredToDelveDeeper)
-			{
-				if (grenemyCount.Count > 0)
-				{
-					int num4 = this.shiftManager.shiftStats.EnemyKills.ContainsKey(grenemyCount.GetEnemyType()) ? Math.Min(this.shiftManager.shiftStats.EnemyKills[grenemyCount.GetEnemyType()], grenemyCount.Count) : 0;
-					StringBuilder stringBuilder3 = new StringBuilder();
-					string text = "Kill";
-					if (grenemyCount.EnemyType == GREnemyType.MoonBoss_Phase1 || grenemyCount.EnemyType == GREnemyType.MoonBoss_Phase2)
-					{
-						text = "Repel";
-					}
-					stringBuilder3.Append((grenemyCount.Count == 1) ? (text + " 1 " + grenemyCount.GetEnemyName() + " ") : string.Format("{0} {1} {2} ", text, grenemyCount.Count, grenemyCount.GetEnemyType().Pluralize()));
-					stringBuilder3.Append(string.Format("({0}/{1})", num4, grenemyCount.Count));
-					stringBuilder3.Append("\n");
-					this.cachedStringBuilder.Append(stringBuilder3);
-				}
-			}
-			if (this.shiftManager.maxPlayerDeaths >= 0)
-			{
-				StringBuilder stringBuilder4 = new StringBuilder();
-				stringBuilder4.Append(string.Format("Limit Incidents to {0} ", this.shiftManager.maxPlayerDeaths));
-				stringBuilder4.Append(string.Format("({0} so far)", this.shiftManager.shiftStats.GetShiftStat(GRShiftStatType.PlayerDeaths)));
-				stringBuilder4.Append("\n");
-				this.cachedStringBuilder.Append(stringBuilder4);
-				num++;
-			}
-			this.jumbotronRequirements.text = this.cachedStringBuilder.ToString();
-			int num5 = this.reactor.GetCurrLevelGenConfig().coresRequired * 5;
-			int rewardXP = this.GetRewardXP();
-			this.cachedStringBuilder.Clear();
-			this.cachedStringBuilder.Append("<color=grey>Rewards:</color>\n");
-			this.cachedStringBuilder.Append(string.Format("+⑭{0}\n", num5));
-			this.cachedStringBuilder.Append(string.Format("+{0} XP\n", rewardXP));
-			this.jumbotronRewards.text = this.cachedStringBuilder.ToString();
-			break;
-		}
-		case GhostReactorShiftManager.State.PreparingToDrill:
-			this.jumbotronRequirements.text = "";
-			this.jumbotronRewards.text = "";
-			break;
-		case GhostReactorShiftManager.State.Drilling:
-			this.jumbotronRequirements.text = "";
-			this.jumbotronRewards.text = "";
-			break;
-		}
-		if (this.jumbotronState != null)
-		{
-			int state = (int)this.shiftManager.GetState();
-			if (state >= 0 && state < GhostReactorShiftDepthDisplay.STATE_NAMES.Length)
-			{
-				this.jumbotronState.text = GhostReactorShiftDepthDisplay.STATE_NAMES[state];
-			}
-			else
-			{
-				this.jumbotronState.text = null;
-			}
-		}
-		this.RefreshObjectives();
-	}
-
-	public void RefreshObjectives()
-	{
-		GRShiftStat shiftStats = this.shiftManager.shiftStats;
-		bool flag = shiftStats.GetShiftStat(GRShiftStatType.CoresCollected) >= this.shiftManager.coresRequiredToDelveDeeper;
-		bool flag2 = shiftStats.GetShiftStat(GRShiftStatType.SentientCoresCollected) >= this.shiftManager.sentientCoresRequiredToDelveDeeper;
-		bool flag3 = this.shiftManager.maxPlayerDeaths < 0 || shiftStats.GetShiftStat(GRShiftStatType.PlayerDeaths) <= this.shiftManager.maxPlayerDeaths;
-		bool flag4 = true;
-		foreach (GREnemyCount grenemyCount in this.shiftManager.killsRequiredToDelveDeeper)
-		{
-			if (shiftStats.EnemyKills.GetValueOrDefault(grenemyCount.GetEnemyType()) < grenemyCount.Count)
-			{
-				flag4 = false;
-				break;
-			}
-		}
-		if (this.shiftManager.ShiftActive && flag && flag2 && flag3 && flag4)
-		{
-			this.shiftManager.authorizedToDelveDeeper = true;
-		}
-		if (this.shiftManager.IsSoaking())
-		{
-			this.shiftManager.authorizedToDelveDeeper = true;
-		}
-		if (this.shiftManager.authorizedToDelveDeeper && this.jumbotronRequirements != null)
-		{
-			this.jumbotronRequirements.text = "<color=green>AUTHORIZED TO\nDELVE DEEPER</color>";
-		}
-		bool authorizedToDelveDeeper = this.shiftManager.authorizedToDelveDeeper;
-		if (this.delveDeeperButton != null)
-		{
-			this.delveDeeperButton.SetActive(authorizedToDelveDeeper && !this.shiftManager.ShiftActive);
-		}
-	}
-
-	public void StartDelveDeeperFX()
-	{
-		this.delveDeeperAudio.Play();
-		this.delveDeeperNonspatializedAudio.Play();
-		for (int i = 0; i < this.delveDeeperAnims.Count; i++)
-		{
-			this.delveDeeperAnims[i].Play();
-		}
-		for (int j = 0; j < this.delveDeeperAnimators.Count; j++)
-		{
-			this.delveDeeperAnimators[j].enabled = true;
-		}
-		for (int k = 0; k < this.delveDeeperParticles.Count; k++)
-		{
-			this.delveDeeperParticles[k].emission.enabled = true;
-		}
-		GorillaTagger.Instance.StartVibration(false, 0.1f, (float)this.shiftManager.GetDrillingDuration());
-		GorillaTagger.Instance.StartVibration(true, 0.1f, (float)this.shiftManager.GetDrillingDuration());
-	}
-
-	public void StopDelveDeeperFX()
-	{
-		this.delveDeeperAudio.Stop();
-		this.delveDeeperNonspatializedAudio.Stop();
-		for (int i = 0; i < this.delveDeeperAnimators.Count; i++)
-		{
-			this.delveDeeperAnimators[i].enabled = false;
-		}
-		for (int j = 0; j < this.delveDeeperParticles.Count; j++)
-		{
-			this.delveDeeperParticles[j].emission.enabled = false;
-		}
-	}
-
 	public GhostReactorShiftManager shiftManager;
 
 	public GhostReactor reactor;
@@ -224,17 +48,185 @@ public class GhostReactorShiftDepthDisplay
 	[SerializeField]
 	private List<ParticleSystem> delveDeeperParticles;
 
-	private static readonly string[] STATE_NAMES = new string[]
-	{
-		"--",
-		"PREPARING ENTRY",
-		"PREPARING ENTRY",
-		"READY",
-		"ACTIVE",
-		"EVALUATING SHIFT",
-		"PREPARE TO DIVE",
-		"DIVING"
-	};
+	private static readonly string[] STATE_NAMES = new string[8] { "--", "PREPARING ENTRY", "PREPARING ENTRY", "READY", "ACTIVE", "EVALUATING SHIFT", "PREPARE TO DIVE", "DIVING" };
 
 	private StringBuilder cachedStringBuilder = new StringBuilder(256);
+
+	public void Setup()
+	{
+		StopDelveDeeperFX();
+	}
+
+	public int GetRewardXP()
+	{
+		return reactor.GetDepthLevel() * 10 + 10;
+	}
+
+	public void RefreshDisplay()
+	{
+		int depthLevel = reactor.GetDepthLevel();
+		reactor.GetDepthLevelConfig(depthLevel);
+		reactor.GetDepthLevelConfig(depthLevel + 1);
+		switch (shiftManager.GetState())
+		{
+		case GhostReactorShiftManager.State.WaitingForShiftStart:
+		case GhostReactorShiftManager.State.WaitingForFirstShiftStart:
+		case GhostReactorShiftManager.State.ShiftActive:
+		{
+			foreach (TMP_Text logoFrame in logoFrames)
+			{
+				logoFrame.gameObject.SetActive(value: false);
+			}
+			cachedStringBuilder.Clear();
+			cachedStringBuilder.Append("<color=grey>Team Goals:</color>\n");
+			int num = 0;
+			if (shiftManager.coresRequiredToDelveDeeper > 0)
+			{
+				int num2 = Math.Min(shiftManager.shiftStats.GetShiftStat(GRShiftStatType.CoresCollected), shiftManager.coresRequiredToDelveDeeper);
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append($"Deposit {shiftManager.coresRequiredToDelveDeeper} Cores ");
+				stringBuilder.Append($"({num2}/{shiftManager.coresRequiredToDelveDeeper})");
+				stringBuilder.Append("\n");
+				cachedStringBuilder.Append(stringBuilder);
+				num++;
+			}
+			if (shiftManager.sentientCoresRequiredToDelveDeeper > 0)
+			{
+				int num3 = Math.Min(shiftManager.shiftStats.GetShiftStat(GRShiftStatType.SentientCoresCollected), shiftManager.sentientCoresRequiredToDelveDeeper);
+				StringBuilder stringBuilder2 = new StringBuilder();
+				stringBuilder2.Append($"Collect {shiftManager.sentientCoresRequiredToDelveDeeper} Seeds ");
+				stringBuilder2.Append($"({num3}/{shiftManager.sentientCoresRequiredToDelveDeeper})");
+				stringBuilder2.Append("\n");
+				cachedStringBuilder.Append(stringBuilder2);
+				num++;
+			}
+			foreach (GREnemyCount item in shiftManager.killsRequiredToDelveDeeper)
+			{
+				if (item.Count > 0)
+				{
+					int num4 = (shiftManager.shiftStats.EnemyKills.ContainsKey(item.GetEnemyType()) ? Math.Min(shiftManager.shiftStats.EnemyKills[item.GetEnemyType()], item.Count) : 0);
+					StringBuilder stringBuilder3 = new StringBuilder();
+					string text = "Kill";
+					if (item.EnemyType == GREnemyType.MoonBoss_Phase1 || item.EnemyType == GREnemyType.MoonBoss_Phase2)
+					{
+						text = "Repel";
+					}
+					stringBuilder3.Append((item.Count == 1) ? (text + " 1 " + item.GetEnemyName() + " ") : $"{text} {item.Count} {item.GetEnemyType().Pluralize()} ");
+					stringBuilder3.Append($"({num4}/{item.Count})");
+					stringBuilder3.Append("\n");
+					cachedStringBuilder.Append(stringBuilder3);
+				}
+			}
+			if (shiftManager.maxPlayerDeaths >= 0)
+			{
+				StringBuilder stringBuilder4 = new StringBuilder();
+				stringBuilder4.Append($"Limit Incidents to {shiftManager.maxPlayerDeaths} ");
+				stringBuilder4.Append($"({shiftManager.shiftStats.GetShiftStat(GRShiftStatType.PlayerDeaths)} so far)");
+				stringBuilder4.Append("\n");
+				cachedStringBuilder.Append(stringBuilder4);
+				num++;
+			}
+			jumbotronRequirements.text = cachedStringBuilder.ToString();
+			int num5 = reactor.GetCurrLevelGenConfig().coresRequired * 5;
+			int rewardXP = GetRewardXP();
+			cachedStringBuilder.Clear();
+			cachedStringBuilder.Append("<color=grey>Rewards:</color>\n");
+			cachedStringBuilder.Append($"+⑭{num5}\n");
+			cachedStringBuilder.Append($"+{rewardXP} XP\n");
+			jumbotronRewards.text = cachedStringBuilder.ToString();
+			break;
+		}
+		case GhostReactorShiftManager.State.PreparingToDrill:
+			jumbotronRequirements.text = "";
+			jumbotronRewards.text = "";
+			break;
+		case GhostReactorShiftManager.State.Drilling:
+			jumbotronRequirements.text = "";
+			jumbotronRewards.text = "";
+			break;
+		}
+		if (jumbotronState != null)
+		{
+			int state = (int)shiftManager.GetState();
+			if (state >= 0 && state < STATE_NAMES.Length)
+			{
+				jumbotronState.text = STATE_NAMES[state];
+			}
+			else
+			{
+				jumbotronState.text = null;
+			}
+		}
+		RefreshObjectives();
+	}
+
+	public void RefreshObjectives()
+	{
+		GRShiftStat shiftStats = shiftManager.shiftStats;
+		bool flag = shiftStats.GetShiftStat(GRShiftStatType.CoresCollected) >= shiftManager.coresRequiredToDelveDeeper;
+		bool flag2 = shiftStats.GetShiftStat(GRShiftStatType.SentientCoresCollected) >= shiftManager.sentientCoresRequiredToDelveDeeper;
+		bool flag3 = shiftManager.maxPlayerDeaths < 0 || shiftStats.GetShiftStat(GRShiftStatType.PlayerDeaths) <= shiftManager.maxPlayerDeaths;
+		bool flag4 = true;
+		foreach (GREnemyCount item in shiftManager.killsRequiredToDelveDeeper)
+		{
+			if (shiftStats.EnemyKills.GetValueOrDefault(item.GetEnemyType()) < item.Count)
+			{
+				flag4 = false;
+				break;
+			}
+		}
+		if (shiftManager.ShiftActive && flag && flag2 && flag3 && flag4)
+		{
+			shiftManager.authorizedToDelveDeeper = true;
+		}
+		if (shiftManager.IsSoaking())
+		{
+			shiftManager.authorizedToDelveDeeper = true;
+		}
+		if (shiftManager.authorizedToDelveDeeper && jumbotronRequirements != null)
+		{
+			jumbotronRequirements.text = "<color=green>AUTHORIZED TO\nDELVE DEEPER</color>";
+		}
+		bool authorizedToDelveDeeper = shiftManager.authorizedToDelveDeeper;
+		if (delveDeeperButton != null)
+		{
+			delveDeeperButton.SetActive(authorizedToDelveDeeper && !shiftManager.ShiftActive);
+		}
+	}
+
+	public void StartDelveDeeperFX()
+	{
+		delveDeeperAudio.Play();
+		delveDeeperNonspatializedAudio.Play();
+		for (int i = 0; i < delveDeeperAnims.Count; i++)
+		{
+			delveDeeperAnims[i].Play();
+		}
+		for (int j = 0; j < delveDeeperAnimators.Count; j++)
+		{
+			delveDeeperAnimators[j].enabled = true;
+		}
+		for (int k = 0; k < delveDeeperParticles.Count; k++)
+		{
+			ParticleSystem.EmissionModule emission = delveDeeperParticles[k].emission;
+			emission.enabled = true;
+		}
+		GorillaTagger.Instance.StartVibration(forLeftController: false, 0.1f, shiftManager.GetDrillingDuration());
+		GorillaTagger.Instance.StartVibration(forLeftController: true, 0.1f, shiftManager.GetDrillingDuration());
+	}
+
+	public void StopDelveDeeperFX()
+	{
+		delveDeeperAudio.Stop();
+		delveDeeperNonspatializedAudio.Stop();
+		for (int i = 0; i < delveDeeperAnimators.Count; i++)
+		{
+			delveDeeperAnimators[i].enabled = false;
+		}
+		for (int j = 0; j < delveDeeperParticles.Count; j++)
+		{
+			ParticleSystem.EmissionModule emission = delveDeeperParticles[j].emission;
+			emission.enabled = false;
+		}
+	}
 }

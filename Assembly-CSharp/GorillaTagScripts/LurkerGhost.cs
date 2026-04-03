@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Fusion;
@@ -9,610 +9,608 @@ using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[NetworkBehaviourWeaved(6)]
+public class LurkerGhost : NetworkComponent
 {
-	[NetworkBehaviourWeaved(6)]
-	public class LurkerGhost : NetworkComponent
+	private enum ghostState
 	{
-		protected override void Awake()
-		{
-			base.Awake();
-			this.possibleTargets = new List<NetPlayer>();
-			this.targetPlayer = null;
-			this.targetTransform = null;
-			this.targetVRRig = null;
-		}
+		patrol,
+		seek,
+		charge,
+		possess
+	}
 
-		protected override void Start()
-		{
-			base.Start();
-			this.waypointRegions = this.waypointsContainer.GetComponentsInChildren<ZoneBasedObject>();
-			this.PickNextWaypoint();
-			this.ChangeState(LurkerGhost.ghostState.patrol);
-		}
+	[StructLayout(LayoutKind.Explicit, Size = 24)]
+	[NetworkStructWeaved(6)]
+	private struct LurkerGhostData : INetworkStruct
+	{
+		[FieldOffset(12)]
+		[FixedBufferProperty(typeof(Vector3), typeof(UnityValueSurrogate_0040ElementReaderWriterVector3), 0, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_00403 _TargetPos;
 
-		private void LateUpdate()
-		{
-			this.UpdateState();
-			this.UpdateGhostVisibility();
-		}
+		[field: FieldOffset(0)]
+		public ghostState CurrentState { get; set; }
 
-		private void PickNextWaypoint()
-		{
-			if (this.waypoints.Count == 0 || this.lastWaypointRegion == null || !this.lastWaypointRegion.IsLocalPlayerInZone())
-			{
-				ZoneBasedObject zoneBasedObject = ZoneBasedObject.SelectRandomEligible(this.waypointRegions, "");
-				if (zoneBasedObject == null)
-				{
-					zoneBasedObject = this.lastWaypointRegion;
-				}
-				if (zoneBasedObject == null)
-				{
-					return;
-				}
-				this.lastWaypointRegion = zoneBasedObject;
-				this.waypoints.Clear();
-				foreach (object obj in zoneBasedObject.transform)
-				{
-					Transform item = (Transform)obj;
-					this.waypoints.Add(item);
-				}
-			}
-			int index = Random.Range(0, this.waypoints.Count);
-			this.currentWaypoint = this.waypoints[index];
-			this.targetRotation = Quaternion.LookRotation(this.currentWaypoint.position - base.transform.position);
-			this.waypoints.RemoveAt(index);
-		}
+		[field: FieldOffset(4)]
+		public int CurrentIndex { get; set; }
 
-		private void Patrol()
-		{
-			Transform transform = this.currentWaypoint;
-			if (transform != null)
-			{
-				base.transform.position = Vector3.MoveTowards(base.transform.position, transform.position, this.patrolSpeed * Time.deltaTime);
-				base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, this.targetRotation, 360f * Time.deltaTime);
-			}
-		}
-
-		private void PlaySound(AudioClip clip, bool loop)
-		{
-			if (this.audioSource && this.audioSource.isPlaying)
-			{
-				this.audioSource.GTStop();
-			}
-			if (this.audioSource && clip != null)
-			{
-				this.audioSource.clip = clip;
-				this.audioSource.loop = loop;
-				this.audioSource.GTPlay();
-			}
-		}
-
-		private bool PickPlayer(float maxDistance)
-		{
-			if (base.IsMine)
-			{
-				this.possibleTargets.Clear();
-				for (int i = 0; i < VRRigCache.ActiveRigContainers.Count; i++)
-				{
-					if ((VRRigCache.ActiveRigContainers[i].transform.position - base.transform.position).magnitude < maxDistance && VRRigCache.ActiveRigContainers[i].Creator != this.targetPlayer)
-					{
-						this.possibleTargets.Add(VRRigCache.ActiveRigContainers[i].Creator);
-					}
-				}
-				this.targetPlayer = null;
-				this.targetTransform = null;
-				this.targetVRRig = null;
-				if (this.possibleTargets.Count > 0)
-				{
-					int index = Random.Range(0, this.possibleTargets.Count);
-					this.PickPlayer(this.possibleTargets[index]);
-				}
-			}
-			else
-			{
-				this.targetPlayer = null;
-				this.targetTransform = null;
-				this.targetVRRig = null;
-			}
-			return this.targetPlayer != null && this.targetTransform != null;
-		}
-
-		private void PickPlayer(NetPlayer player)
-		{
-			int num = VRRigCache.ActiveRigContainers.FindIndex((RigContainer x) => x.Creator != null && x.Creator == player);
-			if (num > -1 && num < VRRigCache.ActiveRigContainers.Count)
-			{
-				VRRig rig = VRRigCache.ActiveRigContainers[num].Rig;
-				this.targetPlayer = rig.creator;
-				this.targetTransform = rig.head.rigTarget;
-				this.targetVRRig = rig;
-			}
-		}
-
-		private void SeekPlayer()
-		{
-			if (this.targetTransform.IsNull())
-			{
-				this.ChangeState(LurkerGhost.ghostState.patrol);
-				return;
-			}
-			this.targetPosition = this.targetTransform.position + this.targetTransform.forward.x0z() * this.seekAheadDistance;
-			this.targetRotation = Quaternion.LookRotation(this.targetTransform.position - base.transform.position);
-			base.transform.position = Vector3.MoveTowards(base.transform.position, this.targetPosition, this.seekSpeed * Time.deltaTime);
-			base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, this.targetRotation, 720f * Time.deltaTime);
-		}
-
-		private void ChargeAtPlayer()
-		{
-			base.transform.position = Vector3.MoveTowards(base.transform.position, this.targetPosition, this.chargeSpeed * Time.deltaTime);
-			base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, this.targetRotation, 720f * Time.deltaTime);
-		}
-
-		private void UpdateGhostVisibility()
-		{
-			switch (this.currentState)
-			{
-			case LurkerGhost.ghostState.patrol:
-				this.meshRenderer.sharedMaterial = this.scryableMaterial;
-				this.bonesMeshRenderer.sharedMaterial = this.scryableMaterialBones;
-				return;
-			case LurkerGhost.ghostState.seek:
-			case LurkerGhost.ghostState.charge:
-				if (this.targetPlayer == NetworkSystem.Instance.LocalPlayer || this.passingPlayer == NetworkSystem.Instance.LocalPlayer)
-				{
-					this.meshRenderer.sharedMaterial = this.visibleMaterial;
-					this.bonesMeshRenderer.sharedMaterial = this.visibleMaterialBones;
-					return;
-				}
-				this.meshRenderer.sharedMaterial = this.scryableMaterial;
-				this.bonesMeshRenderer.sharedMaterial = this.scryableMaterialBones;
-				return;
-			case LurkerGhost.ghostState.possess:
-				if (this.targetPlayer == NetworkSystem.Instance.LocalPlayer || this.passingPlayer == NetworkSystem.Instance.LocalPlayer)
-				{
-					this.meshRenderer.sharedMaterial = this.visibleMaterial;
-					this.bonesMeshRenderer.sharedMaterial = this.visibleMaterialBones;
-					return;
-				}
-				this.meshRenderer.sharedMaterial = this.scryableMaterial;
-				this.bonesMeshRenderer.sharedMaterial = this.scryableMaterialBones;
-				return;
-			default:
-				return;
-			}
-		}
-
-		private void HauntObjects()
-		{
-			Collider[] array = new Collider[20];
-			int num = Physics.OverlapSphereNonAlloc(base.transform.position, this.sphereColliderRadius, array);
-			for (int i = 0; i < num; i++)
-			{
-				if (array[i].CompareTag("HauntedObject"))
-				{
-					UnityAction<GameObject> triggerHauntedObjects = this.TriggerHauntedObjects;
-					if (triggerHauntedObjects != null)
-					{
-						triggerHauntedObjects(array[i].gameObject);
-					}
-				}
-			}
-		}
-
-		private void ChangeState(LurkerGhost.ghostState newState)
-		{
-			this.currentState = newState;
-			VRRig vrrig = null;
-			switch (this.currentState)
-			{
-			case LurkerGhost.ghostState.patrol:
-				this.PlaySound(this.patrolAudio, true);
-				this.passingPlayer = null;
-				this.cooldownTimeRemaining = Random.Range(this.cooldownDuration, this.maxCooldownDuration);
-				this.currentRepeatHuntTimes = 0;
-				break;
-			case LurkerGhost.ghostState.charge:
-				this.PlaySound(this.huntAudio, false);
-				this.targetPosition = this.targetTransform.position;
-				this.targetRotation = Quaternion.LookRotation(this.targetTransform.position - base.transform.position);
-				break;
-			case LurkerGhost.ghostState.possess:
-				if (this.targetPlayer == NetworkSystem.Instance.LocalPlayer)
-				{
-					this.PlaySound(this.possessedAudio, true);
-					GorillaTagger.Instance.StartVibration(true, this.hapticStrength, this.hapticDuration);
-					GorillaTagger.Instance.StartVibration(false, this.hapticStrength, this.hapticDuration);
-				}
-				vrrig = GorillaGameManager.StaticFindRigForPlayer(this.targetPlayer);
-				break;
-			}
-			Shader.SetGlobalFloat(this._BlackAndWhite, (float)((newState == LurkerGhost.ghostState.possess && this.targetPlayer == NetworkSystem.Instance.LocalPlayer) ? 1 : 0));
-			if (vrrig != this.lastHauntedVRRig && this.lastHauntedVRRig != null)
-			{
-				this.lastHauntedVRRig.IsHaunted = false;
-			}
-			if (vrrig != null)
-			{
-				vrrig.IsHaunted = true;
-			}
-			this.lastHauntedVRRig = vrrig;
-			this.UpdateGhostVisibility();
-		}
-
-		private void OnDestroy()
-		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			Shader.SetGlobalFloat(this._BlackAndWhite, 0f);
-		}
-
-		private void UpdateState()
-		{
-			switch (this.currentState)
-			{
-			case LurkerGhost.ghostState.patrol:
-				this.Patrol();
-				if (base.IsMine)
-				{
-					if (this.currentWaypoint == null || Vector3.Distance(base.transform.position, this.currentWaypoint.position) < 0.2f)
-					{
-						this.PickNextWaypoint();
-					}
-					this.cooldownTimeRemaining -= Time.deltaTime;
-					if (this.cooldownTimeRemaining <= 0f)
-					{
-						this.cooldownTimeRemaining = 0f;
-						if (this.PickPlayer(this.maxHuntDistance))
-						{
-							this.ChangeState(LurkerGhost.ghostState.seek);
-							return;
-						}
-					}
-				}
-				break;
-			case LurkerGhost.ghostState.seek:
-				this.SeekPlayer();
-				if (base.IsMine && (this.targetPosition - base.transform.position).sqrMagnitude < this.seekCloseEnoughDistance * this.seekCloseEnoughDistance)
-				{
-					this.ChangeState(LurkerGhost.ghostState.charge);
-					return;
-				}
-				break;
-			case LurkerGhost.ghostState.charge:
-				this.ChargeAtPlayer();
-				if (base.IsMine && (this.targetPosition - base.transform.position).sqrMagnitude < 0.25f)
-				{
-					if ((this.targetTransform.position - this.targetPosition).magnitude < this.minCatchDistance)
-					{
-						this.ChangeState(LurkerGhost.ghostState.possess);
-						return;
-					}
-					this.huntedPassedTime = 0f;
-					this.ChangeState(LurkerGhost.ghostState.patrol);
-					return;
-				}
-				break;
-			case LurkerGhost.ghostState.possess:
-				if (this.targetTransform != null)
-				{
-					float num = this.SpookyMagicNumbers.x + MathF.Abs(MathF.Sin(Time.time * this.SpookyMagicNumbers.y));
-					float num2 = this.HauntedMagicNumbers.x * MathF.Sin(Time.time * this.HauntedMagicNumbers.y) + this.HauntedMagicNumbers.z * MathF.Sin(Time.time * this.HauntedMagicNumbers.w);
-					float y = 0.5f + 0.5f * MathF.Sin(Time.time * this.SpookyMagicNumbers.z);
-					Vector3 target = this.targetTransform.position + new Vector3(num * (float)Math.Sin((double)num2), y, num * (float)Math.Cos((double)num2));
-					base.transform.position = Vector3.MoveTowards(base.transform.position, target, this.chargeSpeed);
-					base.transform.rotation = Quaternion.LookRotation(base.transform.position - this.targetTransform.position);
-				}
-				if (base.IsMine)
-				{
-					this.huntedPassedTime += Time.deltaTime;
-					if (this.huntedPassedTime >= this.PossessionDuration)
-					{
-						this.huntedPassedTime = 0f;
-						if (this.hauntNeighbors && this.currentRepeatHuntTimes < this.maxRepeatHuntTimes && this.PickPlayer(this.maxRepeatHuntDistance))
-						{
-							this.currentRepeatHuntTimes++;
-							this.ChangeState(LurkerGhost.ghostState.seek);
-							return;
-						}
-						this.ChangeState(LurkerGhost.ghostState.patrol);
-					}
-				}
-				break;
-			default:
-				return;
-			}
-		}
+		[field: FieldOffset(8)]
+		public int TargetActor { get; set; }
 
 		[Networked]
-		[NetworkedWeaved(0, 6)]
-		private unsafe LurkerGhost.LurkerGhostData Data
+		[NetworkedWeaved(3, 3)]
+		public unsafe Vector3 TargetPos
 		{
-			get
+			readonly get
 			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing LurkerGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				return *(LurkerGhost.LurkerGhostData*)(this.Ptr + 0);
+				return *(Vector3*)Native.ReferenceToPointer(ref _TargetPos);
 			}
 			set
 			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing LurkerGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				*(LurkerGhost.LurkerGhostData*)(this.Ptr + 0) = value;
+				*(Vector3*)Native.ReferenceToPointer(ref _TargetPos) = value;
 			}
 		}
 
-		public override void WriteDataFusion()
+		public LurkerGhostData(ghostState state, int index, int actor, Vector3 pos)
 		{
-			this.Data = new LurkerGhost.LurkerGhostData(this.currentState, this.currentIndex, this.targetPlayer.ActorNumber, this.targetPosition);
+			CurrentState = state;
+			CurrentIndex = index;
+			TargetActor = actor;
+			TargetPos = pos;
 		}
+	}
 
-		public override void ReadDataFusion()
+	public float patrolSpeed = 3f;
+
+	public float seekSpeed = 6f;
+
+	public float chargeSpeed = 6f;
+
+	[Tooltip("Cooldown until the next time the ghost needs to hunt a new player")]
+	public float cooldownDuration = 10f;
+
+	[Tooltip("Max Cooldown (randomized)")]
+	public float maxCooldownDuration = 10f;
+
+	[Tooltip("How long the possession effects should last")]
+	public float PossessionDuration = 15f;
+
+	[Tooltip("Hunted objects within this radius will get triggered ")]
+	public float sphereColliderRadius = 2f;
+
+	[Tooltip("Maximum distance to the possible player to get hunted")]
+	public float maxHuntDistance = 20f;
+
+	[Tooltip("Minimum distance from the player to start the possession effects")]
+	public float minCatchDistance = 2f;
+
+	[Tooltip("Maximum distance to the possible player to get repeat hunted")]
+	public float maxRepeatHuntDistance = 5f;
+
+	[Tooltip("Maximum times the lurker can haunt a nearby player before going back on cooldown")]
+	public int maxRepeatHuntTimes = 3;
+
+	[Tooltip("Time in seconds before a haunted player can pass the lurker to another player by tagging")]
+	public float tagCoolDown = 2f;
+
+	[Tooltip("UP & DOWN, IN & OUT")]
+	public Vector3 SpookyMagicNumbers = new Vector3(1f, 1f, 1f);
+
+	[Tooltip("SPIN, SPIN, SPIN, SPIN")]
+	public Vector4 HauntedMagicNumbers = new Vector4(1f, 2f, 3f, 1f);
+
+	[Tooltip("Haptic vibration when haunted by the ghost")]
+	public float hapticStrength = 1f;
+
+	public float hapticDuration = 1.5f;
+
+	public GameObject waypointsContainer;
+
+	private ZoneBasedObject[] waypointRegions;
+
+	private ZoneBasedObject lastWaypointRegion;
+
+	private List<Transform> waypoints = new List<Transform>();
+
+	private Transform currentWaypoint;
+
+	public Material visibleMaterial;
+
+	public Material scryableMaterial;
+
+	public Material visibleMaterialBones;
+
+	public Material scryableMaterialBones;
+
+	public MeshRenderer meshRenderer;
+
+	public MeshRenderer bonesMeshRenderer;
+
+	[SerializeField]
+	private AudioSource audioSource;
+
+	public AudioClip patrolAudio;
+
+	public AudioClip huntAudio;
+
+	public AudioClip possessedAudio;
+
+	public ThrowableSetDressing scryingGlass;
+
+	public float scryingAngerAngle;
+
+	public float scryingAngerDelay;
+
+	public float seekAheadDistance;
+
+	public float seekCloseEnoughDistance;
+
+	private float scryingAngerAfterTimestamp;
+
+	private int currentRepeatHuntTimes;
+
+	public UnityAction<GameObject> TriggerHauntedObjects;
+
+	private int currentIndex;
+
+	private ghostState currentState;
+
+	private float cooldownTimeRemaining;
+
+	private List<NetPlayer> possibleTargets;
+
+	private NetPlayer targetPlayer;
+
+	private Transform targetTransform;
+
+	private float huntedPassedTime;
+
+	private Vector3 targetPosition;
+
+	private Quaternion targetRotation;
+
+	private VRRig targetVRRig;
+
+	private ShaderHashId _BlackAndWhite = "_BlackAndWhite";
+
+	private VRRig lastHauntedVRRig;
+
+	private float nextTagTime;
+
+	private NetPlayer passingPlayer;
+
+	[SerializeField]
+	private bool hauntNeighbors = true;
+
+	[WeaverGenerated]
+	[DefaultForProperty("Data", 0, 6)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private LurkerGhostData _Data;
+
+	[Networked]
+	[NetworkedWeaved(0, 6)]
+	private unsafe LurkerGhostData Data
+	{
+		get
 		{
-			this.ReadDataShared(this.Data.CurrentState, this.Data.CurrentIndex, this.Data.TargetActor, this.Data.TargetPos);
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing LurkerGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(LurkerGhostData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
-
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+		set
 		{
-			if (info.Sender != PhotonNetwork.MasterClient)
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing LurkerGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(LurkerGhostData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		possibleTargets = new List<NetPlayer>();
+		targetPlayer = null;
+		targetTransform = null;
+		targetVRRig = null;
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		waypointRegions = waypointsContainer.GetComponentsInChildren<ZoneBasedObject>();
+		PickNextWaypoint();
+		ChangeState(ghostState.patrol);
+	}
+
+	private void LateUpdate()
+	{
+		UpdateState();
+		UpdateGhostVisibility();
+	}
+
+	private void PickNextWaypoint()
+	{
+		if (waypoints.Count == 0 || lastWaypointRegion == null || !lastWaypointRegion.IsLocalPlayerInZone())
+		{
+			ZoneBasedObject zoneBasedObject = ZoneBasedObject.SelectRandomEligible(waypointRegions);
+			if (zoneBasedObject == null)
+			{
+				zoneBasedObject = lastWaypointRegion;
+			}
+			if (zoneBasedObject == null)
 			{
 				return;
 			}
-			stream.SendNext(this.currentState);
-			stream.SendNext(this.currentIndex);
-			if (this.targetPlayer != null)
+			lastWaypointRegion = zoneBasedObject;
+			waypoints.Clear();
+			foreach (Transform item in zoneBasedObject.transform)
 			{
-				stream.SendNext(this.targetPlayer.ActorNumber);
+				waypoints.Add(item);
+			}
+		}
+		int index = UnityEngine.Random.Range(0, waypoints.Count);
+		currentWaypoint = waypoints[index];
+		targetRotation = Quaternion.LookRotation(currentWaypoint.position - base.transform.position);
+		waypoints.RemoveAt(index);
+	}
+
+	private void Patrol()
+	{
+		Transform transform = currentWaypoint;
+		if (transform != null)
+		{
+			base.transform.position = Vector3.MoveTowards(base.transform.position, transform.position, patrolSpeed * Time.deltaTime);
+			base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, targetRotation, 360f * Time.deltaTime);
+		}
+	}
+
+	private void PlaySound(AudioClip clip, bool loop)
+	{
+		if ((bool)audioSource && audioSource.isPlaying)
+		{
+			audioSource.GTStop();
+		}
+		if ((bool)audioSource && clip != null)
+		{
+			audioSource.clip = clip;
+			audioSource.loop = loop;
+			audioSource.GTPlay();
+		}
+	}
+
+	private bool PickPlayer(float maxDistance)
+	{
+		if (base.IsMine)
+		{
+			possibleTargets.Clear();
+			for (int i = 0; i < VRRigCache.ActiveRigContainers.Count; i++)
+			{
+				if ((VRRigCache.ActiveRigContainers[i].transform.position - base.transform.position).magnitude < maxDistance && VRRigCache.ActiveRigContainers[i].Creator != targetPlayer)
+				{
+					possibleTargets.Add(VRRigCache.ActiveRigContainers[i].Creator);
+				}
+			}
+			targetPlayer = null;
+			targetTransform = null;
+			targetVRRig = null;
+			if (possibleTargets.Count > 0)
+			{
+				int index = UnityEngine.Random.Range(0, possibleTargets.Count);
+				PickPlayer(possibleTargets[index]);
+			}
+		}
+		else
+		{
+			targetPlayer = null;
+			targetTransform = null;
+			targetVRRig = null;
+		}
+		if (targetPlayer != null)
+		{
+			return targetTransform != null;
+		}
+		return false;
+	}
+
+	private void PickPlayer(NetPlayer player)
+	{
+		int num = VRRigCache.ActiveRigContainers.FindIndex((RigContainer x) => x.Creator != null && x.Creator == player);
+		if (num > -1 && num < VRRigCache.ActiveRigContainers.Count)
+		{
+			VRRig rig = VRRigCache.ActiveRigContainers[num].Rig;
+			targetPlayer = rig.creator;
+			targetTransform = rig.head.rigTarget;
+			targetVRRig = rig;
+		}
+	}
+
+	private void SeekPlayer()
+	{
+		if (targetTransform.IsNull())
+		{
+			ChangeState(ghostState.patrol);
+			return;
+		}
+		targetPosition = targetTransform.position + targetTransform.forward.x0z() * seekAheadDistance;
+		targetRotation = Quaternion.LookRotation(targetTransform.position - base.transform.position);
+		base.transform.position = Vector3.MoveTowards(base.transform.position, targetPosition, seekSpeed * Time.deltaTime);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, targetRotation, 720f * Time.deltaTime);
+	}
+
+	private void ChargeAtPlayer()
+	{
+		base.transform.position = Vector3.MoveTowards(base.transform.position, targetPosition, chargeSpeed * Time.deltaTime);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, targetRotation, 720f * Time.deltaTime);
+	}
+
+	private void UpdateGhostVisibility()
+	{
+		switch (currentState)
+		{
+		case ghostState.patrol:
+			meshRenderer.sharedMaterial = scryableMaterial;
+			bonesMeshRenderer.sharedMaterial = scryableMaterialBones;
+			break;
+		case ghostState.seek:
+		case ghostState.charge:
+			if (targetPlayer == NetworkSystem.Instance.LocalPlayer || passingPlayer == NetworkSystem.Instance.LocalPlayer)
+			{
+				meshRenderer.sharedMaterial = visibleMaterial;
+				bonesMeshRenderer.sharedMaterial = visibleMaterialBones;
+			}
+			else
+			{
+				meshRenderer.sharedMaterial = scryableMaterial;
+				bonesMeshRenderer.sharedMaterial = scryableMaterialBones;
+			}
+			break;
+		case ghostState.possess:
+			if (targetPlayer == NetworkSystem.Instance.LocalPlayer || passingPlayer == NetworkSystem.Instance.LocalPlayer)
+			{
+				meshRenderer.sharedMaterial = visibleMaterial;
+				bonesMeshRenderer.sharedMaterial = visibleMaterialBones;
+			}
+			else
+			{
+				meshRenderer.sharedMaterial = scryableMaterial;
+				bonesMeshRenderer.sharedMaterial = scryableMaterialBones;
+			}
+			break;
+		}
+	}
+
+	private void HauntObjects()
+	{
+		Collider[] array = new Collider[20];
+		int num = Physics.OverlapSphereNonAlloc(base.transform.position, sphereColliderRadius, array);
+		for (int i = 0; i < num; i++)
+		{
+			if (array[i].CompareTag("HauntedObject"))
+			{
+				TriggerHauntedObjects?.Invoke(array[i].gameObject);
+			}
+		}
+	}
+
+	private void ChangeState(ghostState newState)
+	{
+		currentState = newState;
+		VRRig vRRig = null;
+		switch (currentState)
+		{
+		case ghostState.patrol:
+			PlaySound(patrolAudio, loop: true);
+			passingPlayer = null;
+			cooldownTimeRemaining = UnityEngine.Random.Range(cooldownDuration, maxCooldownDuration);
+			currentRepeatHuntTimes = 0;
+			break;
+		case ghostState.charge:
+			PlaySound(huntAudio, loop: false);
+			targetPosition = targetTransform.position;
+			targetRotation = Quaternion.LookRotation(targetTransform.position - base.transform.position);
+			break;
+		case ghostState.possess:
+			if (targetPlayer == NetworkSystem.Instance.LocalPlayer)
+			{
+				PlaySound(possessedAudio, loop: true);
+				GorillaTagger.Instance.StartVibration(forLeftController: true, hapticStrength, hapticDuration);
+				GorillaTagger.Instance.StartVibration(forLeftController: false, hapticStrength, hapticDuration);
+			}
+			vRRig = GorillaGameManager.StaticFindRigForPlayer(targetPlayer);
+			break;
+		}
+		Shader.SetGlobalFloat(_BlackAndWhite, (newState == ghostState.possess && targetPlayer == NetworkSystem.Instance.LocalPlayer) ? 1 : 0);
+		if (vRRig != lastHauntedVRRig && lastHauntedVRRig != null)
+		{
+			lastHauntedVRRig.IsHaunted = false;
+		}
+		if (vRRig != null)
+		{
+			vRRig.IsHaunted = true;
+		}
+		lastHauntedVRRig = vRRig;
+		UpdateGhostVisibility();
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		Shader.SetGlobalFloat(_BlackAndWhite, 0f);
+	}
+
+	private void UpdateState()
+	{
+		switch (currentState)
+		{
+		case ghostState.patrol:
+			Patrol();
+			if (!base.IsMine)
+			{
+				break;
+			}
+			if (currentWaypoint == null || Vector3.Distance(base.transform.position, currentWaypoint.position) < 0.2f)
+			{
+				PickNextWaypoint();
+			}
+			cooldownTimeRemaining -= Time.deltaTime;
+			if (cooldownTimeRemaining <= 0f)
+			{
+				cooldownTimeRemaining = 0f;
+				if (PickPlayer(maxHuntDistance))
+				{
+					ChangeState(ghostState.seek);
+				}
+			}
+			break;
+		case ghostState.seek:
+			SeekPlayer();
+			if (base.IsMine && (targetPosition - base.transform.position).sqrMagnitude < seekCloseEnoughDistance * seekCloseEnoughDistance)
+			{
+				ChangeState(ghostState.charge);
+			}
+			break;
+		case ghostState.charge:
+			ChargeAtPlayer();
+			if (base.IsMine && (targetPosition - base.transform.position).sqrMagnitude < 0.25f)
+			{
+				if ((targetTransform.position - targetPosition).magnitude < minCatchDistance)
+				{
+					ChangeState(ghostState.possess);
+					break;
+				}
+				huntedPassedTime = 0f;
+				ChangeState(ghostState.patrol);
+			}
+			break;
+		case ghostState.possess:
+			if (targetTransform != null)
+			{
+				float num = SpookyMagicNumbers.x + MathF.Abs(MathF.Sin(Time.time * SpookyMagicNumbers.y));
+				float num2 = HauntedMagicNumbers.x * MathF.Sin(Time.time * HauntedMagicNumbers.y) + HauntedMagicNumbers.z * MathF.Sin(Time.time * HauntedMagicNumbers.w);
+				float y = 0.5f + 0.5f * MathF.Sin(Time.time * SpookyMagicNumbers.z);
+				Vector3 target = targetTransform.position + new Vector3(num * (float)Math.Sin(num2), y, num * (float)Math.Cos(num2));
+				base.transform.position = Vector3.MoveTowards(base.transform.position, target, chargeSpeed);
+				base.transform.rotation = Quaternion.LookRotation(base.transform.position - targetTransform.position);
+			}
+			if (!base.IsMine)
+			{
+				break;
+			}
+			huntedPassedTime += Time.deltaTime;
+			if (huntedPassedTime >= PossessionDuration)
+			{
+				huntedPassedTime = 0f;
+				if (hauntNeighbors && currentRepeatHuntTimes < maxRepeatHuntTimes && PickPlayer(maxRepeatHuntDistance))
+				{
+					currentRepeatHuntTimes++;
+					ChangeState(ghostState.seek);
+				}
+				else
+				{
+					ChangeState(ghostState.patrol);
+				}
+			}
+			break;
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		Data = new LurkerGhostData(currentState, currentIndex, targetPlayer.ActorNumber, targetPosition);
+	}
+
+	public override void ReadDataFusion()
+	{
+		ReadDataShared(Data.CurrentState, Data.CurrentIndex, Data.TargetActor, Data.TargetPos);
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
+		{
+			stream.SendNext(currentState);
+			stream.SendNext(currentIndex);
+			if (targetPlayer != null)
+			{
+				stream.SendNext(targetPlayer.ActorNumber);
 			}
 			else
 			{
 				stream.SendNext(-1);
 			}
-			stream.SendNext(this.targetPosition);
+			stream.SendNext(targetPosition);
 		}
+	}
 
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
 		{
-			if (info.Sender != PhotonNetwork.MasterClient)
-			{
-				return;
-			}
-			LurkerGhost.ghostState state = (LurkerGhost.ghostState)stream.ReceiveNext();
+			ghostState state = (ghostState)stream.ReceiveNext();
 			int index = (int)stream.ReceiveNext();
 			int targetActorNumber = (int)stream.ReceiveNext();
 			Vector3 targetPos = (Vector3)stream.ReceiveNext();
-			this.ReadDataShared(state, index, targetActorNumber, targetPos);
+			ReadDataShared(state, index, targetActorNumber, targetPos);
 		}
+	}
 
-		private void ReadDataShared(LurkerGhost.ghostState state, int index, int targetActorNumber, Vector3 targetPos)
+	private void ReadDataShared(ghostState state, int index, int targetActorNumber, Vector3 targetPos)
+	{
+		ghostState num = currentState;
+		currentState = state;
+		currentIndex = index;
+		NetPlayer netPlayer = targetPlayer;
+		targetPlayer = NetworkSystem.Instance.GetPlayer(targetActorNumber);
+		targetPosition = targetPos;
+		if (!targetPosition.IsValid(10000f))
 		{
-			LurkerGhost.ghostState ghostState = this.currentState;
-			this.currentState = state;
-			this.currentIndex = index;
-			NetPlayer netPlayer = this.targetPlayer;
-			this.targetPlayer = NetworkSystem.Instance.GetPlayer(targetActorNumber);
-			this.targetPosition = targetPos;
-			float num = 10000f;
-			if (!this.targetPosition.IsValid(num))
+			if (VRRigCache.Instance.TryGetVrrig(targetPlayer, out var playerRig))
 			{
-				RigContainer rigContainer;
-				if (VRRigCache.Instance.TryGetVrrig(this.targetPlayer, out rigContainer))
-				{
-					this.targetPosition = (this.targetPlayer.IsLocal ? rigContainer.Rig.transform.position : rigContainer.Rig.syncPos);
-				}
-				else
-				{
-					this.targetPosition = base.transform.position;
-				}
+				targetPosition = (targetPlayer.IsLocal ? playerRig.Rig.transform.position : playerRig.Rig.syncPos);
 			}
-			if (this.targetPlayer != netPlayer)
+			else
 			{
-				this.PickPlayer(this.targetPlayer);
-			}
-			if (ghostState != this.currentState || this.targetPlayer != netPlayer)
-			{
-				this.ChangeState(this.currentState);
+				targetPosition = base.transform.position;
 			}
 		}
-
-		public override void OnOwnerChange(Player newOwner, Player previousOwner)
+		if (targetPlayer != netPlayer)
 		{
-			base.OnOwnerChange(newOwner, previousOwner);
-			if (newOwner == PhotonNetwork.LocalPlayer)
-			{
-				this.ChangeState(this.currentState);
-			}
+			PickPlayer(targetPlayer);
 		}
-
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
+		if (num != currentState || targetPlayer != netPlayer)
 		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
+			ChangeState(currentState);
 		}
+	}
 
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
+	public override void OnOwnerChange(Player newOwner, Player previousOwner)
+	{
+		base.OnOwnerChange(newOwner, previousOwner);
+		if (newOwner == PhotonNetwork.LocalPlayer)
 		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
+			ChangeState(currentState);
 		}
+	}
 
-		public float patrolSpeed = 3f;
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
 
-		public float seekSpeed = 6f;
-
-		public float chargeSpeed = 6f;
-
-		[Tooltip("Cooldown until the next time the ghost needs to hunt a new player")]
-		public float cooldownDuration = 10f;
-
-		[Tooltip("Max Cooldown (randomized)")]
-		public float maxCooldownDuration = 10f;
-
-		[Tooltip("How long the possession effects should last")]
-		public float PossessionDuration = 15f;
-
-		[Tooltip("Hunted objects within this radius will get triggered ")]
-		public float sphereColliderRadius = 2f;
-
-		[Tooltip("Maximum distance to the possible player to get hunted")]
-		public float maxHuntDistance = 20f;
-
-		[Tooltip("Minimum distance from the player to start the possession effects")]
-		public float minCatchDistance = 2f;
-
-		[Tooltip("Maximum distance to the possible player to get repeat hunted")]
-		public float maxRepeatHuntDistance = 5f;
-
-		[Tooltip("Maximum times the lurker can haunt a nearby player before going back on cooldown")]
-		public int maxRepeatHuntTimes = 3;
-
-		[Tooltip("Time in seconds before a haunted player can pass the lurker to another player by tagging")]
-		public float tagCoolDown = 2f;
-
-		[Tooltip("UP & DOWN, IN & OUT")]
-		public Vector3 SpookyMagicNumbers = new Vector3(1f, 1f, 1f);
-
-		[Tooltip("SPIN, SPIN, SPIN, SPIN")]
-		public Vector4 HauntedMagicNumbers = new Vector4(1f, 2f, 3f, 1f);
-
-		[Tooltip("Haptic vibration when haunted by the ghost")]
-		public float hapticStrength = 1f;
-
-		public float hapticDuration = 1.5f;
-
-		public GameObject waypointsContainer;
-
-		private ZoneBasedObject[] waypointRegions;
-
-		private ZoneBasedObject lastWaypointRegion;
-
-		private List<Transform> waypoints = new List<Transform>();
-
-		private Transform currentWaypoint;
-
-		public Material visibleMaterial;
-
-		public Material scryableMaterial;
-
-		public Material visibleMaterialBones;
-
-		public Material scryableMaterialBones;
-
-		public MeshRenderer meshRenderer;
-
-		public MeshRenderer bonesMeshRenderer;
-
-		[SerializeField]
-		private AudioSource audioSource;
-
-		public AudioClip patrolAudio;
-
-		public AudioClip huntAudio;
-
-		public AudioClip possessedAudio;
-
-		public ThrowableSetDressing scryingGlass;
-
-		public float scryingAngerAngle;
-
-		public float scryingAngerDelay;
-
-		public float seekAheadDistance;
-
-		public float seekCloseEnoughDistance;
-
-		private float scryingAngerAfterTimestamp;
-
-		private int currentRepeatHuntTimes;
-
-		public UnityAction<GameObject> TriggerHauntedObjects;
-
-		private int currentIndex;
-
-		private LurkerGhost.ghostState currentState;
-
-		private float cooldownTimeRemaining;
-
-		private List<NetPlayer> possibleTargets;
-
-		private NetPlayer targetPlayer;
-
-		private Transform targetTransform;
-
-		private float huntedPassedTime;
-
-		private Vector3 targetPosition;
-
-		private Quaternion targetRotation;
-
-		private VRRig targetVRRig;
-
-		private ShaderHashId _BlackAndWhite = "_BlackAndWhite";
-
-		private VRRig lastHauntedVRRig;
-
-		private float nextTagTime;
-
-		private NetPlayer passingPlayer;
-
-		[SerializeField]
-		private bool hauntNeighbors = true;
-
-		[WeaverGenerated]
-		[DefaultForProperty("Data", 0, 6)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private LurkerGhost.LurkerGhostData _Data;
-
-		private enum ghostState
-		{
-			patrol,
-			seek,
-			charge,
-			possess
-		}
-
-		[NetworkStructWeaved(6)]
-		[StructLayout(LayoutKind.Explicit, Size = 24)]
-		private struct LurkerGhostData : INetworkStruct
-		{
-			public LurkerGhost.ghostState CurrentState { readonly get; set; }
-
-			public int CurrentIndex { readonly get; set; }
-
-			public int TargetActor { readonly get; set; }
-
-			[Networked]
-			[NetworkedWeaved(3, 3)]
-			public unsafe Vector3 TargetPos
-			{
-				readonly get
-				{
-					return *(Vector3*)Native.ReferenceToPointer<FixedStorage@3>(ref this._TargetPos);
-				}
-				set
-				{
-					*(Vector3*)Native.ReferenceToPointer<FixedStorage@3>(ref this._TargetPos) = value;
-				}
-			}
-
-			public LurkerGhostData(LurkerGhost.ghostState state, int index, int actor, Vector3 pos)
-			{
-				this.CurrentState = state;
-				this.CurrentIndex = index;
-				this.TargetActor = actor;
-				this.TargetPos = pos;
-			}
-
-			[FixedBufferProperty(typeof(Vector3), typeof(UnityValueSurrogate@ElementReaderWriterVector3), 0, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(12)]
-			private FixedStorage@3 _TargetPos;
-		}
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

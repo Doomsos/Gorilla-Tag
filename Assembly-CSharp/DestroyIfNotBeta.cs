@@ -1,16 +1,15 @@
-﻿using System;
 using UnityEngine;
 
 public class DestroyIfNotBeta : MonoBehaviour
 {
-	private void Awake()
-	{
-		bool shouldKeepIfBeta = this.m_shouldKeepIfBeta;
-		bool shouldKeepIfCreatorBuild = this.m_shouldKeepIfCreatorBuild;
-		Object.Destroy(base.gameObject);
-	}
-
 	public bool m_shouldKeepIfBeta = true;
 
 	public bool m_shouldKeepIfCreatorBuild;
+
+	private void Awake()
+	{
+		_ = m_shouldKeepIfBeta;
+		_ = m_shouldKeepIfCreatorBuild;
+		Object.Destroy(base.gameObject);
+	}
 }

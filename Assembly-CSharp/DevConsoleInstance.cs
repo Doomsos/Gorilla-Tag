@@ -1,14 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DevConsoleInstance : MonoBehaviour
 {
-	private void OnEnable()
-	{
-		base.gameObject.SetActive(false);
-	}
-
 	public GorillaDevButton[] buttons;
 
 	public GameObject[] disableWhileActive;
@@ -60,4 +54,9 @@ public class DevConsoleInstance : MonoBehaviour
 
 	[SerializeField]
 	private GameObject ConsoleLineExample;
+
+	private void OnEnable()
+	{
+		base.gameObject.SetActive(value: false);
+	}
 }

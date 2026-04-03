@@ -1,31 +1,17 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameObjectScheduling
+namespace GameObjectScheduling;
+
+public class GameObjectSchedulerEventDispatcher : MonoBehaviour
 {
-	public class GameObjectSchedulerEventDispatcher : MonoBehaviour
-	{
-		public UnityEvent OnScheduledActivation
-		{
-			get
-			{
-				return this.onScheduledActivation;
-			}
-		}
+	[SerializeField]
+	private UnityEvent onScheduledActivation;
 
-		public UnityEvent OnScheduledDeactivation
-		{
-			get
-			{
-				return this.onScheduledDeactivation;
-			}
-		}
+	[SerializeField]
+	private UnityEvent onScheduledDeactivation;
 
-		[SerializeField]
-		private UnityEvent onScheduledActivation;
+	public UnityEvent OnScheduledActivation => onScheduledActivation;
 
-		[SerializeField]
-		private UnityEvent onScheduledDeactivation;
-	}
+	public UnityEvent OnScheduledDeactivation => onScheduledDeactivation;
 }

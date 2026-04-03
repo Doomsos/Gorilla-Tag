@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using GameObjectScheduling;
 using TMPro;
 using UnityEngine;
@@ -8,634 +8,87 @@ using UnityEngine.Serialization;
 
 public class MonkeVoteMachine : MonoBehaviour
 {
-	private void Reset()
+	public enum VotingState
 	{
-		this.Configure();
+		None,
+		Voting,
+		Predicting,
+		Complete
 	}
 
-	private void Awake()
+	public class PollEntry
 	{
-		this._proximityTrigger.OnEnter += this.OnPlayerEnteredVoteProximity;
-	}
+		public int PollId;
 
-	private void Start()
-	{
-		MonkeVoteController.instance.OnPollsUpdated += this.HandleOnPollsUpdated;
-		MonkeVoteController.instance.OnVoteAccepted += this.HandleOnVoteAccepted;
-		MonkeVoteController.instance.OnVoteFailed += this.HandleOnVoteFailed;
-		MonkeVoteController.instance.OnCurrentPollEnded += this.HandleCurrentPollEnded;
-		this.Init();
-	}
+		public string Question;
 
-	private void OnDestroy()
-	{
-		this._proximityTrigger.OnEnter -= this.OnPlayerEnteredVoteProximity;
-		MonkeVoteController.instance.OnPollsUpdated -= this.HandleOnPollsUpdated;
-		MonkeVoteController.instance.OnVoteAccepted -= this.HandleOnVoteAccepted;
-		MonkeVoteController.instance.OnVoteFailed -= this.HandleOnVoteFailed;
-		MonkeVoteController.instance.OnCurrentPollEnded -= this.HandleCurrentPollEnded;
-	}
+		public string[] VoteOptions;
 
-	public void Init()
-	{
-		this._isTestingPoll = false;
-		this._previousPoll = (this._currentPoll = null);
-		this._waitingOnVote = false;
-		foreach (MonkeVoteOption monkeVoteOption in this._votingOptions)
+		public int[] VoteCount;
+
+		public int[] PredictionCount;
+
+		public DateTime StartTime;
+
+		public DateTime EndTime;
+
+		public bool IsValid
 		{
-			monkeVoteOption.ResetState();
-			monkeVoteOption.OnVote += this.OnVoteEntered;
-		}
-		this.UpdatePollDisplays();
-	}
-
-	private void OnPlayerEnteredVoteProximity()
-	{
-		MonkeVoteController.instance.RequestPolls();
-	}
-
-	private void HandleOnPollsUpdated()
-	{
-		this.UpdatePollDisplays();
-	}
-
-	private void UpdatePollDisplays()
-	{
-		if (MonkeVoteController.instance == null)
-		{
-			this.SetState(MonkeVoteMachine.VotingState.None, true);
-			this.ShowResults(null);
-			return;
-		}
-		MonkeVoteController.FetchPollsResponse lastPollData = MonkeVoteController.instance.GetLastPollData();
-		if (lastPollData != null)
-		{
-			this._previousPoll = new MonkeVoteMachine.PollEntry(lastPollData);
-			this.ShowResults(this._previousPoll);
-		}
-		else
-		{
-			this.ShowResults(null);
-		}
-		MonkeVoteController.FetchPollsResponse currentPollData = MonkeVoteController.instance.GetCurrentPollData();
-		if (currentPollData == null)
-		{
-			this.SetState(MonkeVoteMachine.VotingState.None, true);
-			return;
-		}
-		this._nextPollUpdate = MonkeVoteController.instance.GetCurrentPollCompletionTime();
-		this._currentPoll = new MonkeVoteMachine.PollEntry(currentPollData);
-		MonkeVoteMachine.PollEntry currentPoll = this._currentPoll;
-		if (currentPoll != null && currentPoll.IsValid)
-		{
-			ValueTuple<int, int> vote = this.GetVote(this._currentPoll.PollId);
-			int item = vote.Item1;
-			int item2 = vote.Item2;
-			MonkeVoteMachine.VotingState newState = (item < 0) ? MonkeVoteMachine.VotingState.Voting : ((item2 < 0) ? MonkeVoteMachine.VotingState.Predicting : MonkeVoteMachine.VotingState.Complete);
-			this.SetState(newState, true);
-			return;
-		}
-		this.SetState(MonkeVoteMachine.VotingState.None, true);
-	}
-
-	private void HandleOnVoteAccepted()
-	{
-		int lastVotePollId = MonkeVoteController.instance.GetLastVotePollId();
-		int lastVoteSelectedOption = MonkeVoteController.instance.GetLastVoteSelectedOption();
-		bool lastVoteWasPrediction = MonkeVoteController.instance.GetLastVoteWasPrediction();
-		this.OnVoteResponseReceived(lastVotePollId, lastVoteSelectedOption, lastVoteWasPrediction, true);
-	}
-
-	private void HandleOnVoteFailed()
-	{
-		this._waitingOnVote = false;
-		int lastVotePollId = MonkeVoteController.instance.GetLastVotePollId();
-		int lastVoteSelectedOption = MonkeVoteController.instance.GetLastVoteSelectedOption();
-		bool lastVoteWasPrediction = MonkeVoteController.instance.GetLastVoteWasPrediction();
-		this.OnVoteResponseReceived(lastVotePollId, lastVoteSelectedOption, lastVoteWasPrediction, false);
-	}
-
-	private void HandleCurrentPollEnded()
-	{
-		if (this._proximityTrigger.isPlayerNearby)
-		{
-			MonkeVoteController.instance.RequestPolls();
-		}
-	}
-
-	[Tooltip("Hide dynamic child meshes to avoid them getting combined into the parent mesh on awake")]
-	private void HideDynamicMeshes()
-	{
-		this.SetDynamicMeshesVisible(false);
-	}
-
-	[Tooltip("Show dynamic child meshes to allow easy visualization")]
-	private void ShowDynamicMeshes()
-	{
-		this.SetDynamicMeshesVisible(true);
-	}
-
-	private void SetDynamicMeshesVisible(bool enabled)
-	{
-		MonkeVoteOption[] votingOptions = this._votingOptions;
-		for (int i = 0; i < votingOptions.Length; i++)
-		{
-			votingOptions[i].SetDynamicMeshesVisible(enabled);
-		}
-		MonkeVoteResult[] results = this._results;
-		for (int i = 0; i < results.Length; i++)
-		{
-			results[i].SetDynamicMeshesVisible(enabled);
-		}
-	}
-
-	private void Configure()
-	{
-		this._audio = base.GetComponentInChildren<AudioSource>();
-		this._audio.spatialBlend = 1f;
-		this._votingOptions = base.GetComponentsInChildren<MonkeVoteOption>();
-		this._results = base.GetComponentsInChildren<MonkeVoteResult>();
-	}
-
-	public void CreateNextDummyPoll()
-	{
-		this._isTestingPoll = true;
-		if (this._currentPoll != null)
-		{
-			this._previousPoll = this._currentPoll;
-		}
-		else
-		{
-			this._previousPoll = null;
-		}
-		this.ShowResults(this._previousPoll);
-		int pollId = 0;
-		if (this._previousPoll != null)
-		{
-			pollId = this._previousPoll.PollId + 1;
-		}
-		string question = "Test Question Number: " + Random.Range(1, 101).ToString();
-		string text = "Answer " + Random.Range(1, 101).ToString();
-		string text2 = "Answer " + Random.Range(1, 101).ToString();
-		string[] voteOptions = new string[]
-		{
-			text,
-			text2
-		};
-		this._currentPoll = new MonkeVoteMachine.PollEntry(pollId, question, voteOptions);
-		MonkeVoteMachine.PollEntry currentPoll = this._currentPoll;
-		if (currentPoll != null && currentPoll.IsValid)
-		{
-			ValueTuple<int, int> vote = this.GetVote(this._currentPoll.PollId);
-			int item = vote.Item1;
-			int item2 = vote.Item2;
-			MonkeVoteMachine.VotingState newState = (item < 0) ? MonkeVoteMachine.VotingState.Voting : ((item2 < 0) ? MonkeVoteMachine.VotingState.Predicting : MonkeVoteMachine.VotingState.Complete);
-			this.SetState(newState, true);
-			return;
-		}
-		this.SetState(MonkeVoteMachine.VotingState.None, true);
-	}
-
-	private void VoteLeft()
-	{
-		this.OnVoteEntered(this._votingOptions[0], null);
-	}
-
-	private void VoteRight()
-	{
-		this.OnVoteEntered(this._votingOptions[1], null);
-	}
-
-	private void VoteWinner()
-	{
-		if (this._currentPoll != null)
-		{
-			if (this._currentPoll.VoteCount[0] > this._currentPoll.VoteCount[1])
+			get
 			{
-				this.OnVoteEntered(this._votingOptions[0], null);
-				return;
-			}
-			this.OnVoteEntered(this._votingOptions[1], null);
-		}
-	}
-
-	private void ClearLocalData()
-	{
-		this.ClearLocalVoteAndPredictionData();
-		this.UpdatePollDisplays();
-	}
-
-	private void SetState(MonkeVoteMachine.VotingState newState, bool instant = true)
-	{
-		this._state = newState;
-		MonkeVoteMachine.PollEntry currentPoll = this._currentPoll;
-		bool flag = currentPoll != null && currentPoll.IsValid;
-		if (this._state < MonkeVoteMachine.VotingState.None || this._state > MonkeVoteMachine.VotingState.Complete || (this._state != MonkeVoteMachine.VotingState.None && !flag))
-		{
-			this._state = MonkeVoteMachine.VotingState.None;
-		}
-		if (flag)
-		{
-			int item = this.GetVote(this._currentPoll.PollId).Item2;
-			if (this._state < MonkeVoteMachine.VotingState.Predicting)
-			{
-				this.SaveVote(this._currentPoll.PollId, -1, item);
-			}
-			int item2 = this.GetVote(this._currentPoll.PollId).Item1;
-			if (this._state < MonkeVoteMachine.VotingState.Complete)
-			{
-				this.SaveVote(this._currentPoll.PollId, item2, -1);
-			}
-		}
-		bool flag2 = true;
-		switch (this._state)
-		{
-		case MonkeVoteMachine.VotingState.None:
-			this._timerText.SetFixedText(this._pollsClosedText);
-			this._titleText.text = this._defaultTitle;
-			this._questionText.text = this._defaultQuestion;
-			flag2 = false;
-			break;
-		case MonkeVoteMachine.VotingState.Voting:
-			this._timerText.SetCountdownTime(this._nextPollUpdate);
-			this._titleText.text = this._voteTitle;
-			this._questionText.text = this._currentPoll.Question;
-			break;
-		case MonkeVoteMachine.VotingState.Predicting:
-			this._timerText.SetCountdownTime(this._nextPollUpdate);
-			this._titleText.text = this._predictTitle;
-			this._questionText.text = this._predictQuestion;
-			break;
-		case MonkeVoteMachine.VotingState.Complete:
-			this._timerText.SetCountdownTime(this._nextPollUpdate);
-			this._titleText.text = this._completeTitle;
-			this._questionText.text = this._currentPoll.Question;
-			break;
-		default:
-			throw new ArgumentOutOfRangeException();
-		}
-		int num;
-		int num2;
-		if (!flag)
-		{
-			num = -1;
-			num2 = -1;
-		}
-		else
-		{
-			ValueTuple<int, int> vote = this.GetVote(this._currentPoll.PollId);
-			num = vote.Item1;
-			num2 = vote.Item2;
-		}
-		if (flag2)
-		{
-			for (int i = 0; i < this._votingOptions.Length; i++)
-			{
-				this._votingOptions[i].Text = this._currentPoll.VoteOptions[i];
-				this._votingOptions[i].ShowIndicators(num == i, num2 == i, instant);
-			}
-			return;
-		}
-		foreach (MonkeVoteOption monkeVoteOption in this._votingOptions)
-		{
-			monkeVoteOption.Text = string.Empty;
-			monkeVoteOption.ShowIndicators(false, false, true);
-		}
-	}
-
-	private void ShowResults(MonkeVoteMachine.PollEntry entry)
-	{
-		if (entry != null && entry.IsValid)
-		{
-			ValueTuple<int, int> vote = this.GetVote(entry.PollId);
-			int item = vote.Item1;
-			int item2 = vote.Item2;
-			GTDev.Log<string>(string.Format("Showing {0} V:{1} P:{2}", entry.Question, item, item2), null);
-			List<int> list = this.ConvertToPercentages(entry.VoteCount);
-			int num = 0;
-			int num2 = -1;
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (list[i] > num)
+				string[] voteOptions = VoteOptions;
+				if (voteOptions != null)
 				{
-					num = list[i];
-					num2 = i;
+					return voteOptions.Length == 2;
+				}
+				return false;
+			}
+		}
+
+		public PollEntry(int pollId, string question, string[] voteOptions)
+		{
+			PollId = pollId;
+			Question = question;
+			VoteOptions = voteOptions;
+			VoteCount = new int[2];
+			VoteCount[0] = UnityEngine.Random.Range(0, 50000);
+			VoteCount[1] = UnityEngine.Random.Range(0, 50000);
+			PredictionCount = new int[2];
+			PredictionCount[0] = UnityEngine.Random.Range(0, 50000);
+			PredictionCount[1] = UnityEngine.Random.Range(0, 50000);
+			StartTime = DateTime.Now;
+			EndTime = DateTime.Now + TimeSpan.FromSeconds(20.0);
+		}
+
+		public PollEntry(MonkeVoteController.FetchPollsResponse poll)
+		{
+			PollId = poll.PollId;
+			Question = poll.Question;
+			VoteOptions = poll.VoteOptions.ToArray();
+			VoteCount = poll.VoteCount.ToArray();
+			PredictionCount = poll.PredictionCount.ToArray();
+			StartTime = poll.StartTime;
+			EndTime = poll.EndTime;
+		}
+
+		public int GetWinner()
+		{
+			if (VoteCount == null || VoteCount.Length == 0)
+			{
+				return -1;
+			}
+			int num = int.MinValue;
+			int result = -1;
+			for (int i = 0; i < VoteCount.Length; i++)
+			{
+				if (VoteCount[i] > num)
+				{
+					num = VoteCount[i];
+					result = i;
 				}
 			}
-			this._resultsTitleText.text = this._defaultResultsTitle;
-			this._resultsQuestionText.text = entry.Question;
-			for (int j = 0; j < entry.VoteOptions.Length; j++)
-			{
-				this._results[j].ShowResult(entry.VoteOptions[j], list[j], item == j, item2 == j, num2 == j);
-			}
-			int prePollStreak = this.GetPrePollStreak(entry.PollId);
-			int postPollStreak = this.GetPostPollStreak(entry);
-			this._resultsStreakText.text = ((postPollStreak >= prePollStreak) ? string.Format(this._streakBlurb, postPollStreak) : string.Format(this._streakLostBlurb, prePollStreak, postPollStreak));
-			return;
+			return result;
 		}
-		this._resultsTitleText.text = this._defaultResultsTitle;
-		this._resultsQuestionText.text = this._defaultQuestion;
-		this._resultsStreakText.text = string.Empty;
-		MonkeVoteResult[] results = this._results;
-		for (int k = 0; k < results.Length; k++)
-		{
-			results[k].HideResult();
-		}
-	}
-
-	private List<int> ConvertToPercentages(int[] votes)
-	{
-		List<int> list = new List<int>();
-		List<float> list2 = new List<float>();
-		if (votes == null || votes.Length == 0)
-		{
-			list.Add(-1);
-			list.Add(-1);
-			return list;
-		}
-		if (votes.Length == 1)
-		{
-			list.Add(100);
-			list.Add(0);
-			return list;
-		}
-		int num = MonkeVoteMachine.<ConvertToPercentages>g__Sum|64_0(votes);
-		if (num == 0)
-		{
-			list.Add(-1);
-			list.Add(-1);
-			return list;
-		}
-		int num2 = -1;
-		int num3 = 0;
-		for (int i = 0; i < votes.Length; i++)
-		{
-			if (votes[i] > num2)
-			{
-				num2 = votes[i];
-				num3 = i;
-			}
-			float num4 = (float)votes[i] / (float)num * 100f;
-			list.Add((int)num4);
-			list2.Add(num4 - (float)((int)num4));
-		}
-		int num5 = MonkeVoteMachine.<ConvertToPercentages>g__Sum|64_0(list);
-		int num6 = 100 - num5;
-		for (int j = 0; j < num6; j++)
-		{
-			int num7 = MonkeVoteMachine.<ConvertToPercentages>g__LargestFractionIndex|64_1(list2);
-			List<int> list3 = list;
-			int index = num7;
-			int num8 = list3[index];
-			list3[index] = num8 + 1;
-			list2[num7] = 0f;
-		}
-		if (list.Count == 2 && list[num3] == 50)
-		{
-			List<int> list4 = list;
-			int num8 = num3;
-			list4[num8]++;
-			list4 = list;
-			num8 = 1 - num3;
-			list4[num8]--;
-		}
-		return list;
-	}
-
-	private void OnVoteEntered(MonkeVoteOption option, Collider votingCollider)
-	{
-		if (this._waitingOnVote || (Time.realtimeSinceStartup < this._voteCooldownEnd && !this._isTestingPoll))
-		{
-			this.PlayVoteFailEffects();
-			return;
-		}
-		int num = Array.IndexOf<MonkeVoteOption>(this._votingOptions, option);
-		if (num < 0)
-		{
-			return;
-		}
-		switch (this._state)
-		{
-		case MonkeVoteMachine.VotingState.Voting:
-			this.Vote(this._currentPoll.PollId, num, false);
-			return;
-		case MonkeVoteMachine.VotingState.Predicting:
-			this.Vote(this._currentPoll.PollId, num, true);
-			return;
-		}
-		this.PlayVoteFailEffects();
-	}
-
-	private void Vote(int id, int option, bool isPrediction)
-	{
-		if (option < 0 || this._waitingOnVote)
-		{
-			return;
-		}
-		this._waitingOnVote = true;
-		if (this._isTestingPoll)
-		{
-			this.OnVoteResponseReceived(id, option, isPrediction, true);
-			return;
-		}
-		MonkeVoteController.instance.Vote(id, option, isPrediction);
-	}
-
-	private void OnVoteResponseReceived(int id, int option, bool isPrediction, bool success)
-	{
-		this._waitingOnVote = false;
-		if (success)
-		{
-			this.PlayVoteSuccessEffects();
-			this._voteCooldownEnd = Time.realtimeSinceStartup + this._voteCooldown;
-			ValueTuple<int, int> vote = this.GetVote(id);
-			int num = vote.Item1;
-			int num2 = vote.Item2;
-			if (!isPrediction)
-			{
-				int num3 = num2;
-				num = option;
-				num2 = num3;
-			}
-			else
-			{
-				num = num;
-				num2 = option;
-			}
-			this.SaveVote(id, num, num2);
-			MonkeVoteMachine.VotingState state = this._state;
-			if (state != MonkeVoteMachine.VotingState.Voting)
-			{
-				if (state == MonkeVoteMachine.VotingState.Predicting)
-				{
-					this.SetState(MonkeVoteMachine.VotingState.Complete, false);
-				}
-			}
-			else
-			{
-				this.SetState(MonkeVoteMachine.VotingState.Predicting, false);
-			}
-			if (isPrediction && id == this._currentPoll.PollId)
-			{
-				this.SavePrePollStreak(id, this.GetPostPollStreak(this._previousPoll));
-				return;
-			}
-		}
-		else
-		{
-			this.PlayVoteFailEffects();
-		}
-	}
-
-	private void PlayVoteSuccessEffects()
-	{
-		MonkeVoteMachine.<PlayVoteSuccessEffects>d__68 <PlayVoteSuccessEffects>d__;
-		<PlayVoteSuccessEffects>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<PlayVoteSuccessEffects>d__.<>4__this = this;
-		<PlayVoteSuccessEffects>d__.<>1__state = -1;
-		<PlayVoteSuccessEffects>d__.<>t__builder.Start<MonkeVoteMachine.<PlayVoteSuccessEffects>d__68>(ref <PlayVoteSuccessEffects>d__);
-	}
-
-	private void PlayVoteFailEffects()
-	{
-		this._audio.GTPlayOneShot(this._voteFailSound, this._audio.volume);
-	}
-
-	private void SaveVote(int id, int voteOption, int predictionOption)
-	{
-		int @int = PlayerPrefs.GetInt("Vote_Current_Id", -1);
-		if (@int == -1 || @int == id)
-		{
-			PlayerPrefs.SetInt("Vote_Current_Id", id);
-			PlayerPrefs.SetInt("Vote_Current_Option", voteOption);
-			PlayerPrefs.SetInt("Vote_Current_Prediction", predictionOption);
-		}
-		else
-		{
-			PlayerPrefs.SetInt("Vote_Previous_Id", @int);
-			PlayerPrefs.SetInt("Vote_Previous_Option", PlayerPrefs.GetInt("Vote_Current_Option"));
-			PlayerPrefs.SetInt("Vote_Previous_Prediction", PlayerPrefs.GetInt("Vote_Current_Prediction"));
-			PlayerPrefs.SetInt("Vote_Previous_Streak", PlayerPrefs.GetInt("Vote_Current_Streak"));
-			PlayerPrefs.SetInt("Vote_Current_Id", id);
-			PlayerPrefs.SetInt("Vote_Current_Option", voteOption);
-			PlayerPrefs.SetInt("Vote_Current_Prediction", predictionOption);
-			PlayerPrefs.SetInt("Vote_Current_Streak", 0);
-		}
-		PlayerPrefs.Save();
-	}
-
-	[return: TupleElementNames(new string[]
-	{
-		"voteOption",
-		"predictionOption"
-	})]
-	private ValueTuple<int, int> GetVote(int voteId)
-	{
-		if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == voteId)
-		{
-			int @int = PlayerPrefs.GetInt("Vote_Current_Option", -1);
-			int int2 = PlayerPrefs.GetInt("Vote_Current_Prediction", -1);
-			return new ValueTuple<int, int>(@int, int2);
-		}
-		if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == voteId)
-		{
-			int int3 = PlayerPrefs.GetInt("Vote_Previous_Option", -1);
-			int int4 = PlayerPrefs.GetInt("Vote_Previous_Prediction", -1);
-			return new ValueTuple<int, int>(int3, int4);
-		}
-		return new ValueTuple<int, int>(-1, -1);
-	}
-
-	private void SavePrePollStreak(int id, int streak)
-	{
-		if (id < 0)
-		{
-			return;
-		}
-		if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == id)
-		{
-			PlayerPrefs.SetInt("Vote_Current_Streak", streak);
-			return;
-		}
-		if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == id)
-		{
-			PlayerPrefs.SetInt("Vote_Previous_Streak", streak);
-		}
-	}
-
-	private int GetPrePollStreak(int id)
-	{
-		if (id < 0)
-		{
-			return 0;
-		}
-		if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == id)
-		{
-			return PlayerPrefs.GetInt("Vote_Current_Streak", 0);
-		}
-		if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == id)
-		{
-			return PlayerPrefs.GetInt("Vote_Previous_Streak", 0);
-		}
-		return 0;
-	}
-
-	private int GetPostPollStreak(MonkeVoteMachine.PollEntry entry)
-	{
-		if (entry == null || !entry.IsValid)
-		{
-			return 0;
-		}
-		int item = this.GetVote(entry.PollId).Item2;
-		if (item < 0)
-		{
-			return 0;
-		}
-		int prePollStreak = this.GetPrePollStreak(entry.PollId);
-		if (item != entry.GetWinner())
-		{
-			return 0;
-		}
-		return prePollStreak + 1;
-	}
-
-	private void ClearLocalVoteAndPredictionData()
-	{
-		PlayerPrefs.DeleteKey("Vote_Current_Id");
-		PlayerPrefs.DeleteKey("Vote_Current_Option");
-		PlayerPrefs.DeleteKey("Vote_Current_Prediction");
-		PlayerPrefs.DeleteKey("Vote_Current_Streak");
-		PlayerPrefs.DeleteKey("Vote_Previous_Id");
-		PlayerPrefs.DeleteKey("Vote_Previous_Option");
-		PlayerPrefs.DeleteKey("Vote_Previous_Prediction");
-		PlayerPrefs.DeleteKey("Vote_Previous_Streak");
-	}
-
-	[CompilerGenerated]
-	internal static int <ConvertToPercentages>g__Sum|64_0(IList<int> items)
-	{
-		int num = 0;
-		foreach (int num2 in items)
-		{
-			num += num2;
-		}
-		return num;
-	}
-
-	[CompilerGenerated]
-	internal static int <ConvertToPercentages>g__LargestFractionIndex|64_1(IList<float> fractions)
-	{
-		float num = float.NegativeInfinity;
-		int result = -1;
-		for (int i = 0; i < fractions.Count; i++)
-		{
-			if (fractions[i] > num)
-			{
-				num = fractions[i];
-				result = i;
-			}
-		}
-		return result;
 	}
 
 	private const string kVoteCurrentIdKey = "Vote_Current_Id";
@@ -737,96 +190,630 @@ public class MonkeVoteMachine : MonoBehaviour
 	[SerializeField]
 	private AudioClip[] _voteProcessingSound;
 
-	private MonkeVoteMachine.VotingState _state;
+	private VotingState _state;
 
 	private float _voteCooldownEnd;
 
 	private bool _waitingOnVote;
 
-	private MonkeVoteMachine.PollEntry _currentPoll;
+	private PollEntry _currentPoll;
 
-	private MonkeVoteMachine.PollEntry _previousPoll;
+	private PollEntry _previousPoll;
 
 	private DateTime _nextPollUpdate;
 
 	private bool _isTestingPoll;
 
-	public enum VotingState
+	private void Reset()
 	{
-		None,
-		Voting,
-		Predicting,
-		Complete
+		Configure();
 	}
 
-	public class PollEntry
+	private void Awake()
 	{
-		public PollEntry(int pollId, string question, string[] voteOptions)
-		{
-			this.PollId = pollId;
-			this.Question = question;
-			this.VoteOptions = voteOptions;
-			this.VoteCount = new int[2];
-			this.VoteCount[0] = Random.Range(0, 50000);
-			this.VoteCount[1] = Random.Range(0, 50000);
-			this.PredictionCount = new int[2];
-			this.PredictionCount[0] = Random.Range(0, 50000);
-			this.PredictionCount[1] = Random.Range(0, 50000);
-			this.StartTime = DateTime.Now;
-			this.EndTime = DateTime.Now + TimeSpan.FromSeconds(20.0);
-		}
+		_proximityTrigger.OnEnter += OnPlayerEnteredVoteProximity;
+	}
 
-		public PollEntry(MonkeVoteController.FetchPollsResponse poll)
-		{
-			this.PollId = poll.PollId;
-			this.Question = poll.Question;
-			this.VoteOptions = poll.VoteOptions.ToArray();
-			this.VoteCount = poll.VoteCount.ToArray();
-			this.PredictionCount = poll.PredictionCount.ToArray();
-			this.StartTime = poll.StartTime;
-			this.EndTime = poll.EndTime;
-		}
+	private void Start()
+	{
+		MonkeVoteController.instance.OnPollsUpdated += HandleOnPollsUpdated;
+		MonkeVoteController.instance.OnVoteAccepted += HandleOnVoteAccepted;
+		MonkeVoteController.instance.OnVoteFailed += HandleOnVoteFailed;
+		MonkeVoteController.instance.OnCurrentPollEnded += HandleCurrentPollEnded;
+		Init();
+	}
 
-		public int GetWinner()
+	private void OnDestroy()
+	{
+		_proximityTrigger.OnEnter -= OnPlayerEnteredVoteProximity;
+		MonkeVoteController.instance.OnPollsUpdated -= HandleOnPollsUpdated;
+		MonkeVoteController.instance.OnVoteAccepted -= HandleOnVoteAccepted;
+		MonkeVoteController.instance.OnVoteFailed -= HandleOnVoteFailed;
+		MonkeVoteController.instance.OnCurrentPollEnded -= HandleCurrentPollEnded;
+	}
+
+	public void Init()
+	{
+		_isTestingPoll = false;
+		_previousPoll = (_currentPoll = null);
+		_waitingOnVote = false;
+		MonkeVoteOption[] votingOptions = _votingOptions;
+		foreach (MonkeVoteOption obj in votingOptions)
 		{
-			if (this.VoteCount == null || this.VoteCount.Length == 0)
+			obj.ResetState();
+			obj.OnVote += OnVoteEntered;
+		}
+		UpdatePollDisplays();
+	}
+
+	private void OnPlayerEnteredVoteProximity()
+	{
+		MonkeVoteController.instance.RequestPolls();
+	}
+
+	private void HandleOnPollsUpdated()
+	{
+		UpdatePollDisplays();
+	}
+
+	private void UpdatePollDisplays()
+	{
+		if (MonkeVoteController.instance == null)
+		{
+			SetState(VotingState.None);
+			ShowResults(null);
+			return;
+		}
+		MonkeVoteController.FetchPollsResponse lastPollData = MonkeVoteController.instance.GetLastPollData();
+		if (lastPollData != null)
+		{
+			_previousPoll = new PollEntry(lastPollData);
+			ShowResults(_previousPoll);
+		}
+		else
+		{
+			ShowResults(null);
+		}
+		MonkeVoteController.FetchPollsResponse currentPollData = MonkeVoteController.instance.GetCurrentPollData();
+		if (currentPollData != null)
+		{
+			_nextPollUpdate = MonkeVoteController.instance.GetCurrentPollCompletionTime();
+			_currentPoll = new PollEntry(currentPollData);
+			PollEntry currentPoll = _currentPoll;
+			if (currentPoll != null && currentPoll.IsValid)
 			{
-				return -1;
+				(int voteOption, int predictionOption) vote = GetVote(_currentPoll.PollId);
+				int item = vote.voteOption;
+				int item2 = vote.predictionOption;
+				VotingState newState = ((item < 0) ? VotingState.Voting : ((item2 < 0) ? VotingState.Predicting : VotingState.Complete));
+				SetState(newState);
 			}
-			int num = int.MinValue;
-			int result = -1;
-			for (int i = 0; i < this.VoteCount.Length; i++)
+			else
 			{
-				if (this.VoteCount[i] > num)
+				SetState(VotingState.None);
+			}
+		}
+		else
+		{
+			SetState(VotingState.None);
+		}
+	}
+
+	private void HandleOnVoteAccepted()
+	{
+		int lastVotePollId = MonkeVoteController.instance.GetLastVotePollId();
+		int lastVoteSelectedOption = MonkeVoteController.instance.GetLastVoteSelectedOption();
+		bool lastVoteWasPrediction = MonkeVoteController.instance.GetLastVoteWasPrediction();
+		OnVoteResponseReceived(lastVotePollId, lastVoteSelectedOption, lastVoteWasPrediction, success: true);
+	}
+
+	private void HandleOnVoteFailed()
+	{
+		_waitingOnVote = false;
+		int lastVotePollId = MonkeVoteController.instance.GetLastVotePollId();
+		int lastVoteSelectedOption = MonkeVoteController.instance.GetLastVoteSelectedOption();
+		bool lastVoteWasPrediction = MonkeVoteController.instance.GetLastVoteWasPrediction();
+		OnVoteResponseReceived(lastVotePollId, lastVoteSelectedOption, lastVoteWasPrediction, success: false);
+	}
+
+	private void HandleCurrentPollEnded()
+	{
+		if (_proximityTrigger.isPlayerNearby)
+		{
+			MonkeVoteController.instance.RequestPolls();
+		}
+	}
+
+	[Tooltip("Hide dynamic child meshes to avoid them getting combined into the parent mesh on awake")]
+	private void HideDynamicMeshes()
+	{
+		SetDynamicMeshesVisible(enabled: false);
+	}
+
+	[Tooltip("Show dynamic child meshes to allow easy visualization")]
+	private void ShowDynamicMeshes()
+	{
+		SetDynamicMeshesVisible(enabled: true);
+	}
+
+	private void SetDynamicMeshesVisible(bool enabled)
+	{
+		MonkeVoteOption[] votingOptions = _votingOptions;
+		for (int i = 0; i < votingOptions.Length; i++)
+		{
+			votingOptions[i].SetDynamicMeshesVisible(enabled);
+		}
+		MonkeVoteResult[] results = _results;
+		for (int i = 0; i < results.Length; i++)
+		{
+			results[i].SetDynamicMeshesVisible(enabled);
+		}
+	}
+
+	private void Configure()
+	{
+		_audio = GetComponentInChildren<AudioSource>();
+		_audio.spatialBlend = 1f;
+		_votingOptions = GetComponentsInChildren<MonkeVoteOption>();
+		_results = GetComponentsInChildren<MonkeVoteResult>();
+	}
+
+	public void CreateNextDummyPoll()
+	{
+		_isTestingPoll = true;
+		if (_currentPoll != null)
+		{
+			_previousPoll = _currentPoll;
+		}
+		else
+		{
+			_previousPoll = null;
+		}
+		ShowResults(_previousPoll);
+		int pollId = 0;
+		if (_previousPoll != null)
+		{
+			pollId = _previousPoll.PollId + 1;
+		}
+		string question = "Test Question Number: " + UnityEngine.Random.Range(1, 101);
+		string text = "Answer " + UnityEngine.Random.Range(1, 101);
+		string text2 = "Answer " + UnityEngine.Random.Range(1, 101);
+		string[] voteOptions = new string[2] { text, text2 };
+		_currentPoll = new PollEntry(pollId, question, voteOptions);
+		PollEntry currentPoll = _currentPoll;
+		if (currentPoll != null && currentPoll.IsValid)
+		{
+			(int voteOption, int predictionOption) vote = GetVote(_currentPoll.PollId);
+			int item = vote.voteOption;
+			int item2 = vote.predictionOption;
+			VotingState newState = ((item < 0) ? VotingState.Voting : ((item2 < 0) ? VotingState.Predicting : VotingState.Complete));
+			SetState(newState);
+		}
+		else
+		{
+			SetState(VotingState.None);
+		}
+	}
+
+	private void VoteLeft()
+	{
+		OnVoteEntered(_votingOptions[0], null);
+	}
+
+	private void VoteRight()
+	{
+		OnVoteEntered(_votingOptions[1], null);
+	}
+
+	private void VoteWinner()
+	{
+		if (_currentPoll != null)
+		{
+			if (_currentPoll.VoteCount[0] > _currentPoll.VoteCount[1])
+			{
+				OnVoteEntered(_votingOptions[0], null);
+			}
+			else
+			{
+				OnVoteEntered(_votingOptions[1], null);
+			}
+		}
+	}
+
+	private void ClearLocalData()
+	{
+		ClearLocalVoteAndPredictionData();
+		UpdatePollDisplays();
+	}
+
+	private void SetState(VotingState newState, bool instant = true)
+	{
+		_state = newState;
+		bool flag = _currentPoll?.IsValid ?? false;
+		if (_state < VotingState.None || _state > VotingState.Complete || (_state != VotingState.None && !flag))
+		{
+			_state = VotingState.None;
+		}
+		if (flag)
+		{
+			int item = GetVote(_currentPoll.PollId).predictionOption;
+			if (_state < VotingState.Predicting)
+			{
+				SaveVote(_currentPoll.PollId, -1, item);
+			}
+			int item2 = GetVote(_currentPoll.PollId).voteOption;
+			if (_state < VotingState.Complete)
+			{
+				SaveVote(_currentPoll.PollId, item2, -1);
+			}
+		}
+		bool flag2 = true;
+		switch (_state)
+		{
+		case VotingState.None:
+			_timerText.SetFixedText(_pollsClosedText);
+			_titleText.text = _defaultTitle;
+			_questionText.text = _defaultQuestion;
+			flag2 = false;
+			break;
+		case VotingState.Voting:
+			_timerText.SetCountdownTime(_nextPollUpdate);
+			_titleText.text = _voteTitle;
+			_questionText.text = _currentPoll.Question;
+			break;
+		case VotingState.Predicting:
+			_timerText.SetCountdownTime(_nextPollUpdate);
+			_titleText.text = _predictTitle;
+			_questionText.text = _predictQuestion;
+			break;
+		case VotingState.Complete:
+			_timerText.SetCountdownTime(_nextPollUpdate);
+			_titleText.text = _completeTitle;
+			_questionText.text = _currentPoll.Question;
+			break;
+		default:
+			throw new ArgumentOutOfRangeException();
+		}
+		int num;
+		int num2;
+		if (flag)
+		{
+			(num, num2) = GetVote(_currentPoll.PollId);
+		}
+		else
+		{
+			num = -1;
+			num2 = -1;
+		}
+		if (flag2)
+		{
+			for (int i = 0; i < _votingOptions.Length; i++)
+			{
+				_votingOptions[i].Text = _currentPoll.VoteOptions[i];
+				_votingOptions[i].ShowIndicators(num == i, num2 == i, instant);
+			}
+			return;
+		}
+		MonkeVoteOption[] votingOptions = _votingOptions;
+		foreach (MonkeVoteOption obj in votingOptions)
+		{
+			obj.Text = string.Empty;
+			obj.ShowIndicators(showVote: false, showPrediction: false);
+		}
+	}
+
+	private void ShowResults(PollEntry entry)
+	{
+		if (entry != null && entry.IsValid)
+		{
+			var (num, num2) = GetVote(entry.PollId);
+			GTDev.Log($"Showing {entry.Question} V:{num} P:{num2}");
+			List<int> list = ConvertToPercentages(entry.VoteCount);
+			int num3 = 0;
+			int num4 = -1;
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (list[i] > num3)
 				{
-					num = this.VoteCount[i];
-					result = i;
+					num3 = list[i];
+					num4 = i;
+				}
+			}
+			_resultsTitleText.text = _defaultResultsTitle;
+			_resultsQuestionText.text = entry.Question;
+			for (int j = 0; j < entry.VoteOptions.Length; j++)
+			{
+				_results[j].ShowResult(entry.VoteOptions[j], list[j], num == j, num2 == j, num4 == j);
+			}
+			int prePollStreak = GetPrePollStreak(entry.PollId);
+			int postPollStreak = GetPostPollStreak(entry);
+			_resultsStreakText.text = ((postPollStreak >= prePollStreak) ? string.Format(_streakBlurb, postPollStreak) : string.Format(_streakLostBlurb, prePollStreak, postPollStreak));
+		}
+		else
+		{
+			_resultsTitleText.text = _defaultResultsTitle;
+			_resultsQuestionText.text = _defaultQuestion;
+			_resultsStreakText.text = string.Empty;
+			MonkeVoteResult[] results = _results;
+			for (int k = 0; k < results.Length; k++)
+			{
+				results[k].HideResult();
+			}
+		}
+	}
+
+	private List<int> ConvertToPercentages(int[] votes)
+	{
+		List<int> list = new List<int>();
+		List<float> list2 = new List<float>();
+		if (votes == null || votes.Length == 0)
+		{
+			list.Add(-1);
+			list.Add(-1);
+			return list;
+		}
+		if (votes.Length == 1)
+		{
+			list.Add(100);
+			list.Add(0);
+			return list;
+		}
+		int num = Sum(votes);
+		if (num == 0)
+		{
+			list.Add(-1);
+			list.Add(-1);
+			return list;
+		}
+		int num2 = -1;
+		int num3 = 0;
+		for (int i = 0; i < votes.Length; i++)
+		{
+			if (votes[i] > num2)
+			{
+				num2 = votes[i];
+				num3 = i;
+			}
+			float num4 = (float)votes[i] / (float)num * 100f;
+			list.Add((int)num4);
+			list2.Add(num4 - (float)(int)num4);
+		}
+		int num5 = Sum(list);
+		int num6 = 100 - num5;
+		for (int j = 0; j < num6; j++)
+		{
+			int index = LargestFractionIndex(list2);
+			list[index]++;
+			list2[index] = 0f;
+		}
+		if (list.Count == 2 && list[num3] == 50)
+		{
+			list[num3]++;
+			list[1 - num3]--;
+		}
+		return list;
+		static int LargestFractionIndex(IList<float> fractions)
+		{
+			float num7 = float.NegativeInfinity;
+			int result = -1;
+			for (int k = 0; k < fractions.Count; k++)
+			{
+				if (fractions[k] > num7)
+				{
+					num7 = fractions[k];
+					result = k;
 				}
 			}
 			return result;
 		}
-
-		public bool IsValid
+		static int Sum(IList<int> items)
 		{
-			get
+			int num7 = 0;
+			foreach (int item in items)
 			{
-				string[] voteOptions = this.VoteOptions;
-				return voteOptions != null && voteOptions.Length == 2;
+				num7 += item;
+			}
+			return num7;
+		}
+	}
+
+	private void OnVoteEntered(MonkeVoteOption option, Collider votingCollider)
+	{
+		if (_waitingOnVote || (Time.realtimeSinceStartup < _voteCooldownEnd && !_isTestingPoll))
+		{
+			PlayVoteFailEffects();
+			return;
+		}
+		int num = Array.IndexOf(_votingOptions, option);
+		if (num >= 0)
+		{
+			switch (_state)
+			{
+			case VotingState.Voting:
+				Vote(_currentPoll.PollId, num, isPrediction: false);
+				break;
+			case VotingState.Predicting:
+				Vote(_currentPoll.PollId, num, isPrediction: true);
+				break;
+			default:
+				PlayVoteFailEffects();
+				break;
 			}
 		}
+	}
 
-		public int PollId;
+	private void Vote(int id, int option, bool isPrediction)
+	{
+		if (option >= 0 && !_waitingOnVote)
+		{
+			_waitingOnVote = true;
+			if (_isTestingPoll)
+			{
+				OnVoteResponseReceived(id, option, isPrediction, success: true);
+			}
+			else
+			{
+				MonkeVoteController.instance.Vote(id, option, isPrediction);
+			}
+		}
+	}
 
-		public string Question;
+	private void OnVoteResponseReceived(int id, int option, bool isPrediction, bool success)
+	{
+		_waitingOnVote = false;
+		if (success)
+		{
+			PlayVoteSuccessEffects();
+			_voteCooldownEnd = Time.realtimeSinceStartup + _voteCooldown;
+			int num;
+			int num2;
+			(num, num2) = GetVote(id);
+			if (!isPrediction)
+			{
+				int num3 = num2;
+				num = option;
+				num2 = num3;
+			}
+			else
+			{
+				int num4 = num;
+				int num3 = option;
+				num = num4;
+				num2 = num3;
+			}
+			SaveVote(id, num, num2);
+			switch (_state)
+			{
+			case VotingState.Voting:
+				SetState(VotingState.Predicting, instant: false);
+				break;
+			case VotingState.Predicting:
+				SetState(VotingState.Complete, instant: false);
+				break;
+			}
+			if (isPrediction && id == _currentPoll.PollId)
+			{
+				SavePrePollStreak(id, GetPostPollStreak(_previousPoll));
+			}
+		}
+		else
+		{
+			PlayVoteFailEffects();
+		}
+	}
 
-		public string[] VoteOptions;
+	private async void PlayVoteSuccessEffects()
+	{
+		_audio.GTPlayOneShot(_voteSuccessDing, _audio.volume);
+		await Task.Delay(500);
+		_voteTubeAudio.GTPlayOneShot(_voteProcessingSound, _voteTubeAudio.volume);
+	}
 
-		public int[] VoteCount;
+	private void PlayVoteFailEffects()
+	{
+		_audio.GTPlayOneShot(_voteFailSound, _audio.volume);
+	}
 
-		public int[] PredictionCount;
+	private void SaveVote(int id, int voteOption, int predictionOption)
+	{
+		int num = PlayerPrefs.GetInt("Vote_Current_Id", -1);
+		if (num == -1 || num == id)
+		{
+			PlayerPrefs.SetInt("Vote_Current_Id", id);
+			PlayerPrefs.SetInt("Vote_Current_Option", voteOption);
+			PlayerPrefs.SetInt("Vote_Current_Prediction", predictionOption);
+		}
+		else
+		{
+			PlayerPrefs.SetInt("Vote_Previous_Id", num);
+			PlayerPrefs.SetInt("Vote_Previous_Option", PlayerPrefs.GetInt("Vote_Current_Option"));
+			PlayerPrefs.SetInt("Vote_Previous_Prediction", PlayerPrefs.GetInt("Vote_Current_Prediction"));
+			PlayerPrefs.SetInt("Vote_Previous_Streak", PlayerPrefs.GetInt("Vote_Current_Streak"));
+			PlayerPrefs.SetInt("Vote_Current_Id", id);
+			PlayerPrefs.SetInt("Vote_Current_Option", voteOption);
+			PlayerPrefs.SetInt("Vote_Current_Prediction", predictionOption);
+			PlayerPrefs.SetInt("Vote_Current_Streak", 0);
+		}
+		PlayerPrefs.Save();
+	}
 
-		public DateTime StartTime;
+	private (int voteOption, int predictionOption) GetVote(int voteId)
+	{
+		if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == voteId)
+		{
+			int item = PlayerPrefs.GetInt("Vote_Current_Option", -1);
+			int item2 = PlayerPrefs.GetInt("Vote_Current_Prediction", -1);
+			return (voteOption: item, predictionOption: item2);
+		}
+		if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == voteId)
+		{
+			int item3 = PlayerPrefs.GetInt("Vote_Previous_Option", -1);
+			int item4 = PlayerPrefs.GetInt("Vote_Previous_Prediction", -1);
+			return (voteOption: item3, predictionOption: item4);
+		}
+		return (voteOption: -1, predictionOption: -1);
+	}
 
-		public DateTime EndTime;
+	private void SavePrePollStreak(int id, int streak)
+	{
+		if (id >= 0)
+		{
+			if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == id)
+			{
+				PlayerPrefs.SetInt("Vote_Current_Streak", streak);
+			}
+			else if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == id)
+			{
+				PlayerPrefs.SetInt("Vote_Previous_Streak", streak);
+			}
+		}
+	}
+
+	private int GetPrePollStreak(int id)
+	{
+		if (id < 0)
+		{
+			return 0;
+		}
+		if (PlayerPrefs.GetInt("Vote_Current_Id", -1) == id)
+		{
+			return PlayerPrefs.GetInt("Vote_Current_Streak", 0);
+		}
+		if (PlayerPrefs.GetInt("Vote_Previous_Id", -1) == id)
+		{
+			return PlayerPrefs.GetInt("Vote_Previous_Streak", 0);
+		}
+		return 0;
+	}
+
+	private int GetPostPollStreak(PollEntry entry)
+	{
+		if (entry == null || !entry.IsValid)
+		{
+			return 0;
+		}
+		int item = GetVote(entry.PollId).predictionOption;
+		if (item < 0)
+		{
+			return 0;
+		}
+		int prePollStreak = GetPrePollStreak(entry.PollId);
+		if (item != entry.GetWinner())
+		{
+			return 0;
+		}
+		return prePollStreak + 1;
+	}
+
+	private void ClearLocalVoteAndPredictionData()
+	{
+		PlayerPrefs.DeleteKey("Vote_Current_Id");
+		PlayerPrefs.DeleteKey("Vote_Current_Option");
+		PlayerPrefs.DeleteKey("Vote_Current_Prediction");
+		PlayerPrefs.DeleteKey("Vote_Current_Streak");
+		PlayerPrefs.DeleteKey("Vote_Previous_Id");
+		PlayerPrefs.DeleteKey("Vote_Previous_Option");
+		PlayerPrefs.DeleteKey("Vote_Previous_Prediction");
+		PlayerPrefs.DeleteKey("Vote_Previous_Streak");
 	}
 }

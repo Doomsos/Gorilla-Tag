@@ -1,28 +1,27 @@
-﻿using System;
 using UnityEngine;
 
 public class DisableGameObjectDelayed : MonoBehaviour
 {
+	public float delayTime = 1f;
+
+	public float enabledTime;
+
 	private void OnEnable()
 	{
-		this.enabledTime = Time.time;
+		enabledTime = Time.time;
 	}
 
 	private void Update()
 	{
-		if (Time.time > this.enabledTime + this.delayTime)
+		if (Time.time > enabledTime + delayTime)
 		{
-			base.gameObject.SetActive(false);
+			base.gameObject.SetActive(value: false);
 		}
 	}
 
 	public void EnableAndResetTimer()
 	{
-		base.gameObject.SetActive(true);
-		this.OnEnable();
+		base.gameObject.SetActive(value: true);
+		OnEnable();
 	}
-
-	public float delayTime = 1f;
-
-	public float enabledTime;
 }

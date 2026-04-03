@@ -1,47 +1,9 @@
-﻿using System;
 using GorillaLocomotion.Gameplay;
 using Photon.Pun;
 using UnityEngine;
 
 public class SizeLayerChangerGrabable : MonoBehaviour, IGorillaGrabable
 {
-	public bool MomentaryGrabOnly()
-	{
-		return this.momentaryGrabOnly;
-	}
-
-	bool IGorillaGrabable.CanBeGrabbed(GorillaGrabber grabber)
-	{
-		return true;
-	}
-
-	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedObject, out Vector3 grabbedLocalPosiiton)
-	{
-		if (this.grabChangesSizeLayer)
-		{
-			RigContainer rigContainer;
-			VRRigCache.Instance.TryGetVrrig(PhotonNetwork.LocalPlayer, out rigContainer);
-			rigContainer.Rig.sizeManager.currentSizeLayerMaskValue = this.grabbedSizeLayerMask.Mask;
-		}
-		grabbedObject = base.transform;
-		grabbedLocalPosiiton = base.transform.InverseTransformPoint(g.transform.position);
-	}
-
-	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
-	{
-		if (this.releaseChangesSizeLayer)
-		{
-			RigContainer rigContainer;
-			VRRigCache.Instance.TryGetVrrig(PhotonNetwork.LocalPlayer, out rigContainer);
-			rigContainer.Rig.sizeManager.currentSizeLayerMaskValue = this.releasedSizeLayerMask.Mask;
-		}
-	}
-
-	string IGorillaGrabable.get_name()
-	{
-		return base.name;
-	}
-
 	[SerializeField]
 	private bool grabChangesSizeLayer = true;
 
@@ -56,4 +18,34 @@ public class SizeLayerChangerGrabable : MonoBehaviour, IGorillaGrabable
 
 	[SerializeField]
 	private bool momentaryGrabOnly = true;
+
+	public bool MomentaryGrabOnly()
+	{
+		return momentaryGrabOnly;
+	}
+
+	bool IGorillaGrabable.CanBeGrabbed(GorillaGrabber grabber)
+	{
+		return true;
+	}
+
+	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedObject, out Vector3 grabbedLocalPosiiton)
+	{
+		if (grabChangesSizeLayer)
+		{
+			VRRigCache.Instance.TryGetVrrig(PhotonNetwork.LocalPlayer, out var playerRig);
+			playerRig.Rig.sizeManager.currentSizeLayerMaskValue = grabbedSizeLayerMask.Mask;
+		}
+		grabbedObject = base.transform;
+		grabbedLocalPosiiton = base.transform.InverseTransformPoint(g.transform.position);
+	}
+
+	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
+	{
+		if (releaseChangesSizeLayer)
+		{
+			VRRigCache.Instance.TryGetVrrig(PhotonNetwork.LocalPlayer, out var playerRig);
+			playerRig.Rig.sizeManager.currentSizeLayerMaskValue = releasedSizeLayerMask.Mask;
+		}
+	}
 }

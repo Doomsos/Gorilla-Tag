@@ -1,178 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StopwatchFace : MonoBehaviour
 {
-	public bool watchActive
-	{
-		get
-		{
-			return this._watchActive;
-		}
-	}
-
-	public int millisElapsed
-	{
-		get
-		{
-			return this._millisElapsed;
-		}
-	}
-
-	public Vector3Int digitsMmSsMs
-	{
-		get
-		{
-			return StopwatchFace.ParseDigits(TimeSpan.FromMilliseconds((double)this._millisElapsed));
-		}
-	}
-
-	public void SetMillisElapsed(int millis, bool updateFace = true)
-	{
-		this._millisElapsed = millis;
-		if (!updateFace)
-		{
-			return;
-		}
-		this.UpdateText();
-		this.UpdateHand();
-	}
-
-	private void Awake()
-	{
-		this._lerpToZero = new LerpTask<int>();
-		this._lerpToZero.onLerp = new Action<int, int, float>(this.OnLerpToZero);
-		this._lerpToZero.onLerpEnd = new Action(this.OnLerpEnd);
-	}
-
-	private void OnLerpToZero(int a, int b, float t)
-	{
-		this._millisElapsed = Mathf.FloorToInt(Mathf.Lerp((float)a, (float)b, t * t));
-		this.UpdateText();
-		this.UpdateHand();
-	}
-
-	private void OnLerpEnd()
-	{
-		this.WatchReset(false);
-	}
-
-	private void OnEnable()
-	{
-		this.WatchReset(false);
-	}
-
-	private void OnDisable()
-	{
-		this.WatchReset(false);
-	}
-
-	private void Update()
-	{
-		if (this._lerpToZero.active)
-		{
-			this._lerpToZero.Update();
-			return;
-		}
-		if (this._watchActive)
-		{
-			this._millisElapsed += Mathf.FloorToInt(Time.deltaTime * 1000f);
-			this.UpdateText();
-			this.UpdateHand();
-		}
-	}
-
-	private static Vector3Int ParseDigits(TimeSpan time)
-	{
-		int num = (int)time.TotalMinutes % 100;
-		double num2 = 60.0 * (time.TotalMinutes - (double)num);
-		int num3 = (int)num2;
-		int num4 = (int)(100.0 * (num2 - (double)num3));
-		num = Math.Clamp(num, 0, 99);
-		num3 = Math.Clamp(num3, 0, 59);
-		num4 = Math.Clamp(num4, 0, 99);
-		return new Vector3Int(num, num3, num4);
-	}
-
-	private void UpdateText()
-	{
-		Vector3Int vector3Int = StopwatchFace.ParseDigits(TimeSpan.FromMilliseconds((double)this._millisElapsed));
-		string text = vector3Int.x.ToString("D2");
-		string text2 = vector3Int.y.ToString("D2");
-		string text3 = vector3Int.z.ToString("D2");
-		this._text.text = string.Concat(new string[]
-		{
-			text,
-			":",
-			text2,
-			":",
-			text3
-		});
-	}
-
-	private void UpdateHand()
-	{
-		float z = (float)(this._millisElapsed % 60000) / 60000f * 360f;
-		this._hand.localEulerAngles = new Vector3(0f, 0f, z);
-	}
-
-	public void WatchToggle()
-	{
-		if (!this._watchActive)
-		{
-			this.WatchStart();
-			return;
-		}
-		this.WatchStop();
-	}
-
-	public void WatchStart()
-	{
-		if (this._lerpToZero.active)
-		{
-			return;
-		}
-		this._watchActive = true;
-	}
-
-	public void WatchStop()
-	{
-		if (this._lerpToZero.active)
-		{
-			return;
-		}
-		this._watchActive = false;
-	}
-
-	public void WatchReset()
-	{
-		this.WatchReset(true);
-	}
-
-	public void WatchReset(bool doLerp)
-	{
-		if (!Application.isPlaying)
-		{
-			return;
-		}
-		if (doLerp)
-		{
-			if (!this._lerpToZero.active)
-			{
-				this._lerpToZero.Start(this._millisElapsed % 60000, 0, 0.36f);
-				return;
-			}
-		}
-		else
-		{
-			this._watchActive = false;
-			this._millisElapsed = 0;
-			this.UpdateText();
-			this.UpdateHand();
-		}
-	}
-
 	[SerializeField]
 	private Transform _hand;
 
@@ -193,8 +24,8 @@ public class StopwatchFace : MonoBehaviour
 	[SerializeField]
 	private AudioClip _audioTick;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private int _millisElapsed;
 
 	[NonSerialized]
@@ -202,4 +33,145 @@ public class StopwatchFace : MonoBehaviour
 
 	[NonSerialized]
 	private LerpTask<int> _lerpToZero;
+
+	public bool watchActive => _watchActive;
+
+	public int millisElapsed => _millisElapsed;
+
+	public Vector3Int digitsMmSsMs => ParseDigits(TimeSpan.FromMilliseconds(_millisElapsed));
+
+	public void SetMillisElapsed(int millis, bool updateFace = true)
+	{
+		_millisElapsed = millis;
+		if (updateFace)
+		{
+			UpdateText();
+			UpdateHand();
+		}
+	}
+
+	private void Awake()
+	{
+		_lerpToZero = new LerpTask<int>();
+		_lerpToZero.onLerp = OnLerpToZero;
+		_lerpToZero.onLerpEnd = OnLerpEnd;
+	}
+
+	private void OnLerpToZero(int a, int b, float t)
+	{
+		_millisElapsed = Mathf.FloorToInt(Mathf.Lerp(a, b, t * t));
+		UpdateText();
+		UpdateHand();
+	}
+
+	private void OnLerpEnd()
+	{
+		WatchReset(doLerp: false);
+	}
+
+	private void OnEnable()
+	{
+		WatchReset(doLerp: false);
+	}
+
+	private void OnDisable()
+	{
+		WatchReset(doLerp: false);
+	}
+
+	private void Update()
+	{
+		if (_lerpToZero.active)
+		{
+			_lerpToZero.Update();
+		}
+		else if (_watchActive)
+		{
+			_millisElapsed += Mathf.FloorToInt(Time.deltaTime * 1000f);
+			UpdateText();
+			UpdateHand();
+		}
+	}
+
+	private static Vector3Int ParseDigits(TimeSpan time)
+	{
+		int num = (int)time.TotalMinutes % 100;
+		double num2 = 60.0 * (time.TotalMinutes - (double)num);
+		int num3 = (int)num2;
+		int value = (int)(100.0 * (num2 - (double)num3));
+		num = Math.Clamp(num, 0, 99);
+		num3 = Math.Clamp(num3, 0, 59);
+		value = Math.Clamp(value, 0, 99);
+		return new Vector3Int(num, num3, value);
+	}
+
+	private void UpdateText()
+	{
+		Vector3Int vector3Int = ParseDigits(TimeSpan.FromMilliseconds(_millisElapsed));
+		string text = vector3Int.x.ToString("D2");
+		string text2 = vector3Int.y.ToString("D2");
+		string text3 = vector3Int.z.ToString("D2");
+		_text.text = text + ":" + text2 + ":" + text3;
+	}
+
+	private void UpdateHand()
+	{
+		float z = (float)(_millisElapsed % 60000) / 60000f * 360f;
+		_hand.localEulerAngles = new Vector3(0f, 0f, z);
+	}
+
+	public void WatchToggle()
+	{
+		if (!_watchActive)
+		{
+			WatchStart();
+		}
+		else
+		{
+			WatchStop();
+		}
+	}
+
+	public void WatchStart()
+	{
+		if (!_lerpToZero.active)
+		{
+			_watchActive = true;
+		}
+	}
+
+	public void WatchStop()
+	{
+		if (!_lerpToZero.active)
+		{
+			_watchActive = false;
+		}
+	}
+
+	public void WatchReset()
+	{
+		WatchReset(doLerp: true);
+	}
+
+	public void WatchReset(bool doLerp)
+	{
+		if (!Application.isPlaying)
+		{
+			return;
+		}
+		if (doLerp)
+		{
+			if (!_lerpToZero.active)
+			{
+				_lerpToZero.Start(_millisElapsed % 60000, 0, 0.36f);
+			}
+		}
+		else
+		{
+			_watchActive = false;
+			_millisElapsed = 0;
+			UpdateText();
+			UpdateHand();
+		}
+	}
 }

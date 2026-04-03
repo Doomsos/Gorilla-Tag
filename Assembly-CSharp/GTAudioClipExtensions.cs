@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public static class GTAudioClipExtensions
@@ -12,7 +11,8 @@ public static class GTAudioClipExtensions
 		float num = float.NegativeInfinity;
 		float[] array = new float[audioClip.samples];
 		audioClip.GetData(array, 0);
-		foreach (float f in array)
+		float[] array2 = array;
+		foreach (float f in array2)
 		{
 			num = Mathf.Max(num, Mathf.Abs(f));
 		}
@@ -28,7 +28,8 @@ public static class GTAudioClipExtensions
 		float num = 0f;
 		float[] array = new float[audioClip.samples];
 		audioClip.GetData(array, 0);
-		foreach (float num2 in array)
+		float[] array2 = array;
+		foreach (float num2 in array2)
 		{
 			num += num2 * num2;
 		}

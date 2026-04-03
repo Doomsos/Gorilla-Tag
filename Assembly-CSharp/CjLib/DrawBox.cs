@@ -1,29 +1,27 @@
-﻿using System;
 using UnityEngine;
 
-namespace CjLib
+namespace CjLib;
+
+[ExecuteInEditMode]
+public class DrawBox : DrawBase
 {
-	[ExecuteInEditMode]
-	public class DrawBox : DrawBase
+	public float Radius = 1f;
+
+	public int NumSegments = 64;
+
+	public float StartAngle;
+
+	public float ArcAngle = 60f;
+
+	private void OnValidate()
 	{
-		private void OnValidate()
-		{
-			this.Radius = Mathf.Max(0f, this.Radius);
-			this.NumSegments = Mathf.Max(0, this.NumSegments);
-		}
+		Radius = Mathf.Max(0f, Radius);
+		NumSegments = Mathf.Max(0, NumSegments);
+	}
 
-		protected override void Draw(Color color, DebugUtil.Style style, bool depthTest)
-		{
-			Quaternion rhs = QuaternionUtil.AxisAngle(Vector3.forward, this.StartAngle * MathUtil.Deg2Rad);
-			DebugUtil.DrawArc(base.transform.position, base.transform.rotation * rhs * Vector3.right, base.transform.rotation * Vector3.forward, this.ArcAngle * MathUtil.Deg2Rad, this.Radius, this.NumSegments, color, depthTest);
-		}
-
-		public float Radius = 1f;
-
-		public int NumSegments = 64;
-
-		public float StartAngle;
-
-		public float ArcAngle = 60f;
+	protected override void Draw(Color color, DebugUtil.Style style, bool depthTest)
+	{
+		Quaternion quaternion = QuaternionUtil.AxisAngle(Vector3.forward, StartAngle * MathUtil.Deg2Rad);
+		DebugUtil.DrawArc(base.transform.position, base.transform.rotation * quaternion * Vector3.right, base.transform.rotation * Vector3.forward, ArcAngle * MathUtil.Deg2Rad, Radius, NumSegments, color, depthTest);
 	}
 }

@@ -1,58 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class FreeHoverboardInstance : MonoBehaviour
 {
-	public Rigidbody Rigidbody { get; private set; }
-
-	public Color boardColor { get; private set; }
-
-	private void Awake()
-	{
-		this.Rigidbody = base.GetComponent<Rigidbody>();
-		Material[] sharedMaterials = this.boardMesh.sharedMaterials;
-		this.colorMaterial = new Material(sharedMaterials[1]);
-		sharedMaterials[1] = this.colorMaterial;
-		this.boardMesh.sharedMaterials = sharedMaterials;
-	}
-
-	public void SetColor(Color col)
-	{
-		this.colorMaterial.color = col;
-		this.boardColor = col;
-	}
-
-	private void Update()
-	{
-		RaycastHit raycastHit;
-		if (Physics.SphereCast(new Ray(base.transform.TransformPoint(this.sphereCastCenter), base.transform.TransformVector(Vector3.down)), this.sphereCastRadius, out raycastHit, 1f, this.hoverRaycastMask.value))
-		{
-			this.hasHoverPoint = true;
-			this.hoverPoint = raycastHit.point;
-			this.hoverNormal = raycastHit.normal;
-			return;
-		}
-		this.hasHoverPoint = false;
-	}
-
-	private void FixedUpdate()
-	{
-		if (this.hasHoverPoint)
-		{
-			float num = Vector3.Dot(base.transform.TransformPoint(this.sphereCastCenter) - this.hoverPoint, this.hoverNormal);
-			if (num < this.hoverHeight)
-			{
-				base.transform.position += this.hoverNormal * (this.hoverHeight - num);
-				this.Rigidbody.linearVelocity = Vector3.ProjectOnPlane(this.Rigidbody.linearVelocity, this.hoverNormal);
-				Vector3 point = Quaternion.Inverse(base.transform.rotation) * this.Rigidbody.angularVelocity;
-				point.x *= this.avelocityDragWhileHovering;
-				point.z *= this.avelocityDragWhileHovering;
-				this.Rigidbody.angularVelocity = base.transform.rotation * point;
-				base.transform.rotation = Quaternion.Lerp(base.transform.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(base.transform.forward, this.hoverNormal), this.hoverNormal), this.hoverRotationLerp);
-			}
-		}
-	}
-
 	public int ownerActorNumber;
 
 	public int boardIndex;
@@ -85,4 +34,55 @@ public class FreeHoverboardInstance : MonoBehaviour
 	private Vector3 hoverPoint;
 
 	private Vector3 hoverNormal;
+
+	public Rigidbody Rigidbody { get; private set; }
+
+	public Color boardColor { get; private set; }
+
+	private void Awake()
+	{
+		Rigidbody = GetComponent<Rigidbody>();
+		Material[] sharedMaterials = boardMesh.sharedMaterials;
+		colorMaterial = new Material(sharedMaterials[1]);
+		sharedMaterials[1] = colorMaterial;
+		boardMesh.sharedMaterials = sharedMaterials;
+	}
+
+	public void SetColor(Color col)
+	{
+		colorMaterial.color = col;
+		boardColor = col;
+	}
+
+	private void Update()
+	{
+		if (Physics.SphereCast(new Ray(base.transform.TransformPoint(sphereCastCenter), base.transform.TransformVector(Vector3.down)), sphereCastRadius, out var hitInfo, 1f, hoverRaycastMask.value))
+		{
+			hasHoverPoint = true;
+			hoverPoint = hitInfo.point;
+			hoverNormal = hitInfo.normal;
+		}
+		else
+		{
+			hasHoverPoint = false;
+		}
+	}
+
+	private void FixedUpdate()
+	{
+		if (hasHoverPoint)
+		{
+			float num = Vector3.Dot(base.transform.TransformPoint(sphereCastCenter) - hoverPoint, hoverNormal);
+			if (num < hoverHeight)
+			{
+				base.transform.position += hoverNormal * (hoverHeight - num);
+				Rigidbody.linearVelocity = Vector3.ProjectOnPlane(Rigidbody.linearVelocity, hoverNormal);
+				Vector3 vector = Quaternion.Inverse(base.transform.rotation) * Rigidbody.angularVelocity;
+				vector.x *= avelocityDragWhileHovering;
+				vector.z *= avelocityDragWhileHovering;
+				Rigidbody.angularVelocity = base.transform.rotation * vector;
+				base.transform.rotation = Quaternion.Lerp(base.transform.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(base.transform.forward, hoverNormal), hoverNormal), hoverRotationLerp);
+			}
+		}
+	}
 }

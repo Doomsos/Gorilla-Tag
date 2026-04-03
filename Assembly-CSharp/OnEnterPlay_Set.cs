@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 
 [AttributeUsage(AttributeTargets.Field)]
 public class OnEnterPlay_Set : OnEnterPlay_Attribute
 {
+	private object value;
+
 	public OnEnterPlay_Set(object value)
 	{
 		this.value = value;
@@ -14,16 +16,15 @@ public class OnEnterPlay_Set : OnEnterPlay_Attribute
 	{
 		if (!field.IsStatic)
 		{
-			Debug.LogError(string.Format("Can't Set non-static field {0}.{1}", field.DeclaringType, field.Name));
-			return;
+			Debug.LogError($"Can't Set non-static field {field.DeclaringType}.{field.Name}");
 		}
-		if (field.FieldType == typeof(ushort))
+		else if (field.FieldType == typeof(ushort))
 		{
-			field.SetValue(null, Convert.ToUInt16(this.value));
-			return;
+			field.SetValue(null, Convert.ToUInt16(value));
 		}
-		field.SetValue(null, this.value);
+		else
+		{
+			field.SetValue(null, value);
+		}
 	}
-
-	private object value;
 }

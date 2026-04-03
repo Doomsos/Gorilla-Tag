@@ -1,117 +1,85 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace PerformanceSystems
+namespace PerformanceSystems;
+
+public class TimeSliceLodBehaviour : ATimeSliceBehaviour, ILod
 {
-	public class TimeSliceLodBehaviour : ATimeSliceBehaviour, ILod
+	[Space]
+	[SerializeField]
+	protected int _currentLod = -1;
+
+	[SerializeField]
+	protected float[] _lodRanges;
+
+	[Space]
+	[SerializeField]
+	protected UnityEvent[] _onLodRangeEvents;
+
+	[Space]
+	[SerializeField]
+	protected UnityEvent _onCulledEvent;
+
+	protected Transform _transform;
+
+	public Vector3 Position => _transform.position;
+
+	public float[] LodRanges => _lodRanges;
+
+	public UnityEvent[] OnLodRangeEvents => _onLodRangeEvents;
+
+	public UnityEvent OnCulledEvent => _onCulledEvent;
+
+	public int CurrentLod => _currentLod;
+
+	protected void Start()
 	{
-		public Vector3 Position
+		_updateIfDisabled = true;
+		_transform = base.transform;
+	}
+
+	protected void SetLod(int newLod)
+	{
+		if (newLod != _currentLod)
 		{
-			get
+			_currentLod = newLod;
+			if (newLod < _onLodRangeEvents.Length)
 			{
-				return this._transform.position;
+				_onLodRangeEvents[newLod].Invoke();
+			}
+			else if (newLod == _onLodRangeEvents.Length)
+			{
+				_onCulledEvent.Invoke();
+			}
+			else
+			{
+				Debug.LogWarning($"No event for LOD [{newLod}]", this);
 			}
 		}
+	}
 
-		public float[] LodRanges
+	public void UpdateLod(Vector3 refPos)
+	{
+		Vector3 position = _transform.position;
+		float num = Vector3.Distance(refPos, position);
+		for (int i = 0; i < _lodRanges.Length; i++)
 		{
-			get
+			float num2 = _lodRanges[i];
+			if (num <= num2)
 			{
-				return this._lodRanges;
-			}
-		}
-
-		public UnityEvent[] OnLodRangeEvents
-		{
-			get
-			{
-				return this._onLodRangeEvents;
-			}
-		}
-
-		public UnityEvent OnCulledEvent
-		{
-			get
-			{
-				return this._onCulledEvent;
-			}
-		}
-
-		public int CurrentLod
-		{
-			get
-			{
-				return this._currentLod;
-			}
-		}
-
-		protected void Start()
-		{
-			this._updateIfDisabled = true;
-			this._transform = base.transform;
-		}
-
-		protected void SetLod(int newLod)
-		{
-			if (newLod == this._currentLod)
-			{
+				SetLod(i);
 				return;
 			}
-			this._currentLod = newLod;
-			if (newLod < this._onLodRangeEvents.Length)
-			{
-				this._onLodRangeEvents[newLod].Invoke();
-				return;
-			}
-			if (newLod == this._onLodRangeEvents.Length)
-			{
-				this._onCulledEvent.Invoke();
-				return;
-			}
-			Debug.LogWarning(string.Format("No event for LOD [{0}]", newLod), this);
 		}
+		SetLod(_lodRanges.Length);
+	}
 
-		public void UpdateLod(Vector3 refPos)
-		{
-			Vector3 position = this._transform.position;
-			float num = Vector3.Distance(refPos, position);
-			for (int i = 0; i < this._lodRanges.Length; i++)
-			{
-				float num2 = this._lodRanges[i];
-				if (num <= num2)
-				{
-					this.SetLod(i);
-					return;
-				}
-			}
-			this.SetLod(this._lodRanges.Length);
-		}
+	public override void SliceUpdate(float deltaTime)
+	{
+	}
 
-		public override void SliceUpdate(float deltaTime)
-		{
-		}
-
-		public override void SliceUpdateAlways(float deltaTime)
-		{
-			this.UpdateLod(this._timeSliceControllerAsset.ReferenceTransform.position);
-		}
-
-		[Space]
-		[SerializeField]
-		protected int _currentLod = -1;
-
-		[SerializeField]
-		protected float[] _lodRanges;
-
-		[Space]
-		[SerializeField]
-		protected UnityEvent[] _onLodRangeEvents;
-
-		[Space]
-		[SerializeField]
-		protected UnityEvent _onCulledEvent;
-
-		protected Transform _transform;
+	public override void SliceUpdateAlways(float deltaTime)
+	{
+		UpdateLod(_timeSliceControllerAsset.ReferenceTransform.position);
 	}
 }

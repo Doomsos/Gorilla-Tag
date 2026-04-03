@@ -1,70 +1,22 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 
 public class MonkeBallScoreboard : MonoBehaviour
 {
-	public void Setup(MonkeBallGame game)
+	[Serializable]
+	public class TeamDisplay
 	{
-		this.game = game;
-	}
+		public TextMeshPro nameLabel;
 
-	public void RefreshScore()
-	{
-		for (int i = 0; i < this.game.team.Count; i++)
-		{
-			this.teamDisplays[i].scoreLabel.text = this.game.team[i].score.ToString();
-		}
-	}
+		public TextMeshPro scoreLabel;
 
-	public void RefreshTeamPlayers(int teamId, int numPlayers)
-	{
-		this.teamDisplays[teamId].playersLabel.text = string.Format("PLAYERS: {0}", Mathf.Clamp(numPlayers, 0, 99));
-	}
-
-	public void PlayScoreFx()
-	{
-		this.PlayFX(this.scoreSound, this.scoreSoundVolume);
-	}
-
-	public void PlayPlayerJoinFx()
-	{
-		this.PlayFX(this.playerJoinSound, 0.5f);
-	}
-
-	public void PlayPlayerLeaveFx()
-	{
-		this.PlayFX(this.playerLeaveSound, 0.5f);
-	}
-
-	public void PlayGameStartFx()
-	{
-		this.PlayFX(this.gameStartSound, this.gameStartVolume);
-	}
-
-	public void PlayGameEndFx()
-	{
-		this.PlayFX(this.gameEndSound, this.gameEndVolume);
-	}
-
-	private void PlayFX(AudioClip clip, float volume)
-	{
-		if (this.audioSource != null)
-		{
-			this.audioSource.clip = clip;
-			this.audioSource.volume = volume;
-			this.audioSource.Play();
-		}
-	}
-
-	public void RefreshTime(string timeString)
-	{
-		this.timeRemainingLabel.text = timeString;
+		public TextMeshPro playersLabel;
 	}
 
 	private MonkeBallGame game;
 
-	public MonkeBallScoreboard.TeamDisplay[] teamDisplays;
+	public TeamDisplay[] teamDisplays;
 
 	public TextMeshPro timeRemainingLabel;
 
@@ -86,13 +38,61 @@ public class MonkeBallScoreboard : MonoBehaviour
 
 	public float gameEndVolume;
 
-	[Serializable]
-	public class TeamDisplay
+	public void Setup(MonkeBallGame game)
 	{
-		public TextMeshPro nameLabel;
+		this.game = game;
+	}
 
-		public TextMeshPro scoreLabel;
+	public void RefreshScore()
+	{
+		for (int i = 0; i < game.team.Count; i++)
+		{
+			teamDisplays[i].scoreLabel.text = game.team[i].score.ToString();
+		}
+	}
 
-		public TextMeshPro playersLabel;
+	public void RefreshTeamPlayers(int teamId, int numPlayers)
+	{
+		teamDisplays[teamId].playersLabel.text = $"PLAYERS: {Mathf.Clamp(numPlayers, 0, 99)}";
+	}
+
+	public void PlayScoreFx()
+	{
+		PlayFX(scoreSound, scoreSoundVolume);
+	}
+
+	public void PlayPlayerJoinFx()
+	{
+		PlayFX(playerJoinSound, 0.5f);
+	}
+
+	public void PlayPlayerLeaveFx()
+	{
+		PlayFX(playerLeaveSound, 0.5f);
+	}
+
+	public void PlayGameStartFx()
+	{
+		PlayFX(gameStartSound, gameStartVolume);
+	}
+
+	public void PlayGameEndFx()
+	{
+		PlayFX(gameEndSound, gameEndVolume);
+	}
+
+	private void PlayFX(AudioClip clip, float volume)
+	{
+		if (audioSource != null)
+		{
+			audioSource.clip = clip;
+			audioSource.volume = volume;
+			audioSource.Play();
+		}
+	}
+
+	public void RefreshTime(string timeString)
+	{
+		timeRemainingLabel.text = timeString;
 	}
 }

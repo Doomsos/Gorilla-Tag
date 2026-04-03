@@ -1,13 +1,10 @@
-﻿using System;
+namespace Constants;
 
-namespace Constants
+public static class EventCodes
 {
-	public static class EventCodes
-	{
-		public const byte PLAYER_TAGGED = 1;
+	public const byte PLAYER_TAGGED = 1;
 
-		public const byte PLAYER_INFECTED = 2;
+	public const byte PLAYER_INFECTED = 2;
 
-		public const byte PLAYER_TOUCHED = 3;
-	}
+	public const byte PLAYER_TOUCHED = 3;
 }

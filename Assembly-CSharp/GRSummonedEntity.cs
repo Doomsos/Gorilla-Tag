@@ -1,36 +1,41 @@
-﻿using System;
 using UnityEngine;
 
 public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 {
+	private GameEntityId summonerEntityId = GameEntityId.Invalid;
+
+	private GameEntity entity;
+
+	private IGRSummoningEntity summoner;
+
 	private void Awake()
 	{
-		this.entity = base.GetComponent<GameEntity>();
+		entity = GetComponent<GameEntity>();
 	}
 
 	public void OnEntityInit()
 	{
-		this.summonerEntityId = this.entity.createdByEntityId;
-		if (this.summonerEntityId.IsValid())
+		summonerEntityId = entity.createdByEntityId;
+		if (summonerEntityId.IsValid())
 		{
-			this.summoner = this.FindSummoner();
-			if (this.summoner != null)
+			summoner = FindSummoner();
+			if (summoner != null)
 			{
-				this.summoner.OnSummonedEntityInit(this.entity);
+				summoner.OnSummonedEntityInit(entity);
 			}
 		}
 	}
 
 	public GameEntityId GetSummonerID()
 	{
-		return this.summonerEntityId;
+		return summonerEntityId;
 	}
 
 	public void OnEntityDestroy()
 	{
-		if (this.summoner != null)
+		if (summoner != null)
 		{
-			this.summoner.OnSummonedEntityDestroy(this.entity);
+			summoner.OnSummonedEntityDestroy(entity);
 		}
 	}
 
@@ -40,9 +45,9 @@ public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 
 	private IGRSummoningEntity FindSummoner()
 	{
-		if (this.summonerEntityId.IsValid())
+		if (summonerEntityId.IsValid())
 		{
-			GameEntity gameEntity = GhostReactorManager.Get(this.entity).gameEntityManager.GetGameEntity(this.summonerEntityId);
+			GameEntity gameEntity = GhostReactorManager.Get(entity).gameEntityManager.GetGameEntity(summonerEntityId);
 			if (gameEntity != null)
 			{
 				return gameEntity.GetComponent<IGRSummoningEntity>();
@@ -50,10 +55,4 @@ public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 		}
 		return null;
 	}
-
-	private GameEntityId summonerEntityId = GameEntityId.Invalid;
-
-	private GameEntity entity;
-
-	private IGRSummoningEntity summoner;
 }

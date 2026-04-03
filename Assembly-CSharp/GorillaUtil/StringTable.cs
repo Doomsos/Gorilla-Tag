@@ -1,45 +1,44 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaUtil
+namespace GorillaUtil;
+
+[CreateAssetMenu(fileName = "StringTable", menuName = "Scriptable Objects/StringTable")]
+public class StringTable : ScriptableObject
 {
-	[CreateAssetMenu(fileName = "StringTable", menuName = "Scriptable Objects/StringTable")]
-	public class StringTable : ScriptableObject
+	[Serializable]
+	private struct StringPair
 	{
-		public bool ContainsKey(string key)
+		public string Key;
+
+		public string Value;
+	}
+
+	[SerializeField]
+	private StringPair[] entries;
+
+	private Dictionary<string, string> dict;
+
+	public bool ContainsKey(string key)
+	{
+		if (dict == null)
 		{
-			if (this.dict == null)
+			dict = new Dictionary<string, string>();
+			for (int i = 0; i < entries.Length; i++)
 			{
-				this.dict = new Dictionary<string, string>();
-				for (int i = 0; i < this.entries.Length; i++)
-				{
-					this.dict.Add(this.entries[i].Key, this.entries[i].Value);
-				}
+				dict.Add(entries[i].Key, entries[i].Value);
 			}
-			return this.dict.ContainsKey(key);
 		}
+		return dict.ContainsKey(key);
+	}
 
-		public string FetchValue(string key)
+	public string FetchValue(string key)
+	{
+		if (ContainsKey(key))
 		{
-			if (this.ContainsKey(key))
-			{
-				return this.dict[key];
-			}
-			return null;
+			return dict[key];
 		}
-
-		[SerializeField]
-		private StringTable.StringPair[] entries;
-
-		private Dictionary<string, string> dict;
-
-		[Serializable]
-		private struct StringPair
-		{
-			public string Key;
-
-			public string Value;
-		}
+		return null;
 	}
 }

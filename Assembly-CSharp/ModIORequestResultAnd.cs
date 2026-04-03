@@ -1,7 +1,9 @@
-﻿using System;
-
 public struct ModIORequestResultAnd<T>
 {
+	public ModIORequestResult result;
+
+	public T data;
+
 	public static ModIORequestResultAnd<T> CreateFailureResult(string inMessage)
 	{
 		return new ModIORequestResultAnd<T>
@@ -18,8 +20,4 @@ public struct ModIORequestResultAnd<T>
 			data = payload
 		};
 	}
-
-	public ModIORequestResult result;
-
-	public T data;
 }

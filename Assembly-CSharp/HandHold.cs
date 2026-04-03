@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using GorillaLocomotion.Gameplay;
@@ -9,143 +8,24 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class HandHold : MonoBehaviour, IGorillaGrabable
 {
-	public static event HandHold.HandHoldPositionEvent HandPositionRequestOverride;
-
-	public static event HandHold.HandHoldEvent HandPositionReleaseOverride;
-
-	public void OnDisable()
+	private enum HandSnapMethod
 	{
-		for (int i = 0; i < this.currentGrabbers.Count; i++)
-		{
-			if (this.currentGrabbers[i].IsNotNull())
-			{
-				this.currentGrabbers[i].Ungrab(this);
-			}
-		}
+		None,
+		SnapToCenterPoint,
+		SnapToNearestEdge,
+		SnapToXAxisPoint,
+		SnapToYAxisPoint,
+		SnapToZAxisPoint
 	}
 
-	private void Initialize()
-	{
-		if (this.initialized)
-		{
-			return;
-		}
-		this.myTappable = base.GetComponent<Tappable>();
-		this.myCollider = base.GetComponent<Collider>();
-		this.initialized = true;
-	}
+	public delegate void HandHoldPositionEvent(HandHold hh, bool lh, Vector3 pos);
 
-	public virtual bool CanBeGrabbed(GorillaGrabber grabber)
-	{
-		return true;
-	}
-
-	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedTransform, out Vector3 localGrabbedPosition)
-	{
-		this.Initialize();
-		grabbedTransform = base.transform;
-		Vector3 position = g.transform.position;
-		localGrabbedPosition = base.transform.InverseTransformPoint(position);
-		Vector3 arg;
-		g.Player.AddHandHold(base.transform, localGrabbedPosition, g, g.IsLeftHand, this.rotatePlayerWhenHeld, out arg);
-		this.currentGrabbers.AddIfNew(g);
-		if (this.handSnapMethod != HandHold.HandSnapMethod.None && HandHold.HandPositionRequestOverride != null)
-		{
-			HandHold.HandPositionRequestOverride(this, g.IsLeftHand, this.CalculateOffset(position));
-		}
-		UnityEvent<Vector3> onGrab = this.OnGrab;
-		if (onGrab != null)
-		{
-			onGrab.Invoke(arg);
-		}
-		UnityEvent<HandHold> onGrabHandHold = this.OnGrabHandHold;
-		if (onGrabHandHold != null)
-		{
-			onGrabHandHold.Invoke(this);
-		}
-		UnityEvent<bool> onGrabHanded = this.OnGrabHanded;
-		if (onGrabHanded != null)
-		{
-			onGrabHanded.Invoke(g.IsLeftHand);
-		}
-		if (this.myTappable != null)
-		{
-			this.myTappable.OnGrab();
-		}
-	}
-
-	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
-	{
-		this.Initialize();
-		g.Player.RemoveHandHold(g, g.IsLeftHand);
-		this.currentGrabbers.Remove(g);
-		if (this.handSnapMethod != HandHold.HandSnapMethod.None && HandHold.HandPositionReleaseOverride != null)
-		{
-			HandHold.HandPositionReleaseOverride(this, g.IsLeftHand);
-		}
-		UnityEvent onRelease = this.OnRelease;
-		if (onRelease != null)
-		{
-			onRelease.Invoke();
-		}
-		UnityEvent<HandHold> onReleaseHandHold = this.OnReleaseHandHold;
-		if (onReleaseHandHold != null)
-		{
-			onReleaseHandHold.Invoke(this);
-		}
-		if (this.myTappable != null)
-		{
-			this.myTappable.OnRelease();
-		}
-	}
-
-	private Vector3 CalculateOffset(Vector3 position)
-	{
-		switch (this.handSnapMethod)
-		{
-		case HandHold.HandSnapMethod.SnapToNearestEdge:
-			if (this.myCollider == null)
-			{
-				this.myCollider = base.GetComponent<Collider>();
-				if (this.myCollider is MeshCollider && !(this.myCollider as MeshCollider).convex)
-				{
-					this.handSnapMethod = HandHold.HandSnapMethod.None;
-					return Vector3.zero;
-				}
-			}
-			return base.transform.position - this.myCollider.ClosestPoint(position);
-		case HandHold.HandSnapMethod.SnapToXAxisPoint:
-			return base.transform.position - base.transform.TransformPoint(Vector3.right * base.transform.InverseTransformPoint(position).x);
-		case HandHold.HandSnapMethod.SnapToYAxisPoint:
-			return base.transform.position - base.transform.TransformPoint(Vector3.up * base.transform.InverseTransformPoint(position).y);
-		case HandHold.HandSnapMethod.SnapToZAxisPoint:
-			return base.transform.position - base.transform.TransformPoint(Vector3.forward * base.transform.InverseTransformPoint(position).z);
-		default:
-			return Vector3.zero;
-		}
-	}
-
-	public bool MomentaryGrabOnly()
-	{
-		return this.forceMomentary;
-	}
-
-	public void CopyProperties(HandHoldSettings handHoldSettings)
-	{
-		this.handSnapMethod = (HandHold.HandSnapMethod)handHoldSettings.handSnapMethod;
-		this.rotatePlayerWhenHeld = handHoldSettings.rotatePlayerWhenHeld;
-		this.forceMomentary = !handHoldSettings.allowPreGrab;
-	}
-
-	string IGorillaGrabable.get_name()
-	{
-		return base.name;
-	}
+	public delegate void HandHoldEvent(HandHold hh, bool lh);
 
 	private Dictionary<Transform, Transform> attached = new Dictionary<Transform, Transform>();
 
 	[SerializeField]
-	private HandHold.HandSnapMethod handSnapMethod;
+	private HandSnapMethod handSnapMethod;
 
 	[SerializeField]
 	private bool rotatePlayerWhenHeld;
@@ -177,17 +57,109 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 
 	private List<GorillaGrabber> currentGrabbers = new List<GorillaGrabber>();
 
-	private enum HandSnapMethod
+	public static event HandHoldPositionEvent HandPositionRequestOverride;
+
+	public static event HandHoldEvent HandPositionReleaseOverride;
+
+	public void OnDisable()
 	{
-		None,
-		SnapToCenterPoint,
-		SnapToNearestEdge,
-		SnapToXAxisPoint,
-		SnapToYAxisPoint,
-		SnapToZAxisPoint
+		for (int i = 0; i < currentGrabbers.Count; i++)
+		{
+			if (currentGrabbers[i].IsNotNull())
+			{
+				currentGrabbers[i].Ungrab(this);
+			}
+		}
 	}
 
-	public delegate void HandHoldPositionEvent(HandHold hh, bool lh, Vector3 pos);
+	private void Initialize()
+	{
+		if (!initialized)
+		{
+			myTappable = GetComponent<Tappable>();
+			myCollider = GetComponent<Collider>();
+			initialized = true;
+		}
+	}
 
-	public delegate void HandHoldEvent(HandHold hh, bool lh);
+	public virtual bool CanBeGrabbed(GorillaGrabber grabber)
+	{
+		return true;
+	}
+
+	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedTransform, out Vector3 localGrabbedPosition)
+	{
+		Initialize();
+		grabbedTransform = base.transform;
+		Vector3 position = g.transform.position;
+		localGrabbedPosition = base.transform.InverseTransformPoint(position);
+		g.Player.AddHandHold(base.transform, localGrabbedPosition, g, g.IsLeftHand, rotatePlayerWhenHeld, out var grabbedVelocity);
+		currentGrabbers.AddIfNew(g);
+		if (handSnapMethod != HandSnapMethod.None && HandHold.HandPositionRequestOverride != null)
+		{
+			HandHold.HandPositionRequestOverride(this, g.IsLeftHand, CalculateOffset(position));
+		}
+		OnGrab?.Invoke(grabbedVelocity);
+		OnGrabHandHold?.Invoke(this);
+		OnGrabHanded?.Invoke(g.IsLeftHand);
+		if (myTappable != null)
+		{
+			myTappable.OnGrab();
+		}
+	}
+
+	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
+	{
+		Initialize();
+		g.Player.RemoveHandHold(g, g.IsLeftHand);
+		currentGrabbers.Remove(g);
+		if (handSnapMethod != HandSnapMethod.None && HandHold.HandPositionReleaseOverride != null)
+		{
+			HandHold.HandPositionReleaseOverride(this, g.IsLeftHand);
+		}
+		OnRelease?.Invoke();
+		OnReleaseHandHold?.Invoke(this);
+		if (myTappable != null)
+		{
+			myTappable.OnRelease();
+		}
+	}
+
+	private Vector3 CalculateOffset(Vector3 position)
+	{
+		switch (handSnapMethod)
+		{
+		case HandSnapMethod.SnapToNearestEdge:
+			if (myCollider == null)
+			{
+				myCollider = GetComponent<Collider>();
+				if (myCollider is MeshCollider && !(myCollider as MeshCollider).convex)
+				{
+					handSnapMethod = HandSnapMethod.None;
+					return Vector3.zero;
+				}
+			}
+			return base.transform.position - myCollider.ClosestPoint(position);
+		case HandSnapMethod.SnapToXAxisPoint:
+			return base.transform.position - base.transform.TransformPoint(Vector3.right * base.transform.InverseTransformPoint(position).x);
+		case HandSnapMethod.SnapToYAxisPoint:
+			return base.transform.position - base.transform.TransformPoint(Vector3.up * base.transform.InverseTransformPoint(position).y);
+		case HandSnapMethod.SnapToZAxisPoint:
+			return base.transform.position - base.transform.TransformPoint(Vector3.forward * base.transform.InverseTransformPoint(position).z);
+		default:
+			return Vector3.zero;
+		}
+	}
+
+	public bool MomentaryGrabOnly()
+	{
+		return forceMomentary;
+	}
+
+	public void CopyProperties(HandHoldSettings handHoldSettings)
+	{
+		handSnapMethod = (HandSnapMethod)handHoldSettings.handSnapMethod;
+		rotatePlayerWhenHeld = handHoldSettings.rotatePlayerWhenHeld;
+		forceMomentary = !handHoldSettings.allowPreGrab;
+	}
 }

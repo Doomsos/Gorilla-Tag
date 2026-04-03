@@ -1,21 +1,20 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaVRConstraint : MonoBehaviourTick
 {
+	public bool isConstrained;
+
+	public float angle = 3600f;
+
 	public override void Tick()
 	{
 		if (NetworkSystem.Instance.WrongVersion)
 		{
-			this.isConstrained = true;
+			isConstrained = true;
 		}
-		if (this.isConstrained && Time.realtimeSinceStartup > this.angle)
+		if (isConstrained && Time.realtimeSinceStartup > angle)
 		{
 			GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 		}
 	}
-
-	public bool isConstrained;
-
-	public float angle = 3600f;
 }

@@ -1,59 +1,47 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
 using UnityEngine;
 
-[NetworkStructWeaved(337)]
 [StructLayout(LayoutKind.Explicit, Size = 1348)]
+[NetworkStructWeaved(337)]
 public struct FlockingData : INetworkStruct
 {
-	public int count { readonly get; set; }
+	[FieldOffset(4)]
+	[FixedBufferProperty(typeof(NetworkLinkedList<Vector3>), typeof(UnityLinkedListSurrogate_0040ElementReaderWriterVector3), 30, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_0040153 _Positions;
+
+	[FieldOffset(616)]
+	[FixedBufferProperty(typeof(NetworkLinkedList<Quaternion>), typeof(UnityLinkedListSurrogate_0040ReaderWriter_0040UnityEngine_Quaternion), 30, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_0040183 _Rotations;
+
+	[field: FieldOffset(0)]
+	public int count { get; set; }
 
 	[Networked]
 	[Capacity(30)]
-	[NetworkedWeavedLinkedList(30, 3, typeof(ElementReaderWriterVector3))]
+	[NetworkedWeavedLinkedList(30, 3, typeof(Fusion.ElementReaderWriterVector3))]
 	[NetworkedWeaved(1, 153)]
-	public NetworkLinkedList<Vector3> Positions
-	{
-		get
-		{
-			return new NetworkLinkedList<Vector3>(Native.ReferenceToPointer<FixedStorage@153>(ref this._Positions), 30, ElementReaderWriterVector3.GetInstance());
-		}
-	}
+	public unsafe NetworkLinkedList<Vector3> Positions => new NetworkLinkedList<Vector3>(Native.ReferenceToPointer(ref _Positions), 30, Fusion.ElementReaderWriterVector3.GetInstance());
 
 	[Networked]
 	[Capacity(30)]
-	[NetworkedWeavedLinkedList(30, 4, typeof(ReaderWriter@UnityEngine_Quaternion))]
+	[NetworkedWeavedLinkedList(30, 4, typeof(ReaderWriter_0040UnityEngine_Quaternion))]
 	[NetworkedWeaved(154, 183)]
-	public NetworkLinkedList<Quaternion> Rotations
-	{
-		get
-		{
-			return new NetworkLinkedList<Quaternion>(Native.ReferenceToPointer<FixedStorage@183>(ref this._Rotations), 30, ReaderWriter@UnityEngine_Quaternion.GetInstance());
-		}
-	}
+	public unsafe NetworkLinkedList<Quaternion> Rotations => new NetworkLinkedList<Quaternion>(Native.ReferenceToPointer(ref _Rotations), 30, ReaderWriter_0040UnityEngine_Quaternion.GetInstance());
 
 	public FlockingData(List<Flocking> items)
 	{
-		this.count = items.Count;
-		foreach (Flocking flocking in items)
+		count = items.Count;
+		foreach (Flocking item in items)
 		{
-			this.Positions.Add(flocking.pos);
-			this.Rotations.Add(flocking.rot);
+			Positions.Add(item.pos);
+			Rotations.Add(item.rot);
 		}
 	}
-
-	[FixedBufferProperty(typeof(NetworkLinkedList<Vector3>), typeof(UnityLinkedListSurrogate@ElementReaderWriterVector3), 30, order = -2147483647)]
-	[WeaverGenerated]
-	[SerializeField]
-	[FieldOffset(4)]
-	private FixedStorage@153 _Positions;
-
-	[FixedBufferProperty(typeof(NetworkLinkedList<Quaternion>), typeof(UnityLinkedListSurrogate@ReaderWriter@UnityEngine_Quaternion), 30, order = -2147483647)]
-	[WeaverGenerated]
-	[SerializeField]
-	[FieldOffset(616)]
-	private FixedStorage@183 _Rotations;
 }

@@ -1,12 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class PositionVolumeModifier : MonoBehaviour
 {
+	public TimeOfDayDependentAudio audioToMod;
+
 	public void OnTriggerStay(Collider other)
 	{
-		this.audioToMod.isModified = true;
+		audioToMod.isModified = true;
 	}
-
-	public TimeOfDayDependentAudio audioToMod;
 }

@@ -1,27 +1,26 @@
-﻿using System;
+using System;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public static class SceneView
 {
-	public static class SceneView
+	public static event Action duringSceneGui
 	{
-		public static event Action duringSceneGui
+		add
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
 		}
-
-		public static event Action duringSceneGuiTick
+		remove
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
+		}
+	}
+
+	public static event Action duringSceneGuiTick
+	{
+		add
+		{
+		}
+		remove
+		{
 		}
 	}
 }

@@ -1,31 +1,45 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BubbleGumEvents : MonoBehaviour
 {
+	public enum EdibleState
+	{
+		A = 1,
+		B = 2,
+		C = 4,
+		D = 8
+	}
+
+	[SerializeField]
+	private EdibleHoldable _edible;
+
+	[SerializeField]
+	private GumBubble _bubble;
+
+	private static Dictionary<GameObject, GumBubble> gTargetCache = new Dictionary<GameObject, GumBubble>(16);
+
 	private void OnEnable()
 	{
-		this._edible.onBiteWorld.AddListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
-		this._edible.onBiteView.AddListener(new UnityAction<VRRig, int>(this.OnBiteView));
+		_edible.onBiteWorld.AddListener(OnBiteWorld);
+		_edible.onBiteView.AddListener(OnBiteView);
 	}
 
 	private void OnDisable()
 	{
-		this._edible.onBiteWorld.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
-		this._edible.onBiteView.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteView));
+		_edible.onBiteWorld.RemoveListener(OnBiteWorld);
+		_edible.onBiteView.RemoveListener(OnBiteView);
 	}
 
 	public void OnBiteView(VRRig rig, int nextState)
 	{
-		this.OnBite(rig, nextState, true);
+		OnBite(rig, nextState, isViewRig: true);
 	}
 
 	public void OnBiteWorld(VRRig rig, int nextState)
 	{
-		this.OnBite(rig, nextState, false);
+		OnBite(rig, nextState, isViewRig: false);
 	}
 
 	public void OnBite(VRRig rig, int nextState, bool isViewRig)
@@ -40,47 +54,22 @@ public class BubbleGumEvents : MonoBehaviour
 		{
 			gameObject = rig.gameObject;
 		}
-		if (!BubbleGumEvents.gTargetCache.TryGetValue(gameObject, out this._bubble))
+		if (!gTargetCache.TryGetValue(gameObject, out _bubble))
 		{
-			this._bubble = gameObject.GetComponentsInChildren<GumBubble>(true).FirstOrDefault((GumBubble g) => g.transform.parent.name == "$gum");
+			_bubble = gameObject.GetComponentsInChildren<GumBubble>(includeInactive: true).FirstOrDefault((GumBubble g) => g.transform.parent.name == "$gum");
 			if (isViewRig)
 			{
-				this._bubble.audioSource = instance.offlineVRRig.tagSound;
-				this._bubble.targetScale = Vector3.one * 1.36f;
+				_bubble.audioSource = instance.offlineVRRig.tagSound;
+				_bubble.targetScale = Vector3.one * 1.36f;
 			}
 			else
 			{
-				this._bubble.audioSource = rig.tagSound;
-				this._bubble.targetScale = Vector3.one * 2f;
+				_bubble.audioSource = rig.tagSound;
+				_bubble.targetScale = Vector3.one * 2f;
 			}
-			BubbleGumEvents.gTargetCache.Add(gameObject, this._bubble);
+			gTargetCache.Add(gameObject, _bubble);
 		}
-		GumBubble bubble = this._bubble;
-		if (bubble != null)
-		{
-			bubble.transform.parent.gameObject.SetActive(true);
-		}
-		GumBubble bubble2 = this._bubble;
-		if (bubble2 == null)
-		{
-			return;
-		}
-		bubble2.InflateDelayed();
-	}
-
-	[SerializeField]
-	private EdibleHoldable _edible;
-
-	[SerializeField]
-	private GumBubble _bubble;
-
-	private static Dictionary<GameObject, GumBubble> gTargetCache = new Dictionary<GameObject, GumBubble>(16);
-
-	public enum EdibleState
-	{
-		A = 1,
-		B,
-		C = 4,
-		D = 8
+		_bubble?.transform.parent.gameObject.SetActive(value: true);
+		_bubble?.InflateDelayed();
 	}
 }

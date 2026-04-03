@@ -1,4 +1,3 @@
-﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Photon.Pun;
@@ -6,18 +5,39 @@ using UnityEngine;
 
 public abstract class ArcadeGame : MonoBehaviour
 {
+	[SerializeField]
+	public Vector2 Scale = new Vector2(1f, 1f);
+
+	private ArcadeButtons[] playerInputs = new ArcadeButtons[4];
+
+	public AudioClip[] audioClips;
+
+	private ArcadeMachine machine;
+
+	protected static int NetStateBufferSize = 512;
+
+	protected byte[] netStateBuffer = new byte[NetStateBufferSize];
+
+	protected byte[] netStateBufferAlt = new byte[NetStateBufferSize];
+
+	protected MemoryStream netStateMemStream;
+
+	protected MemoryStream netStateMemStreamAlt;
+
+	public bool memoryStreamsInitialized;
+
 	protected virtual void Awake()
 	{
-		this.InitializeMemoryStreams();
+		InitializeMemoryStreams();
 	}
 
 	public void InitializeMemoryStreams()
 	{
-		if (!this.memoryStreamsInitialized)
+		if (!memoryStreamsInitialized)
 		{
-			this.netStateMemStream = new MemoryStream(this.netStateBuffer, true);
-			this.netStateMemStreamAlt = new MemoryStream(this.netStateBufferAlt, true);
-			this.memoryStreamsInitialized = true;
+			netStateMemStream = new MemoryStream(netStateBuffer, writable: true);
+			netStateMemStreamAlt = new MemoryStream(netStateBufferAlt, writable: true);
+			memoryStreamsInitialized = true;
 		}
 	}
 
@@ -28,7 +48,7 @@ public abstract class ArcadeGame : MonoBehaviour
 
 	protected bool getButtonState(int player, ArcadeButtons button)
 	{
-		return this.playerInputs[player].HasFlag(button);
+		return playerInputs[player].HasFlag(button);
 	}
 
 	public void OnInputStateChange(int player, ArcadeButtons buttons)
@@ -37,20 +57,20 @@ public abstract class ArcadeGame : MonoBehaviour
 		{
 			ArcadeButtons arcadeButtons = (ArcadeButtons)i;
 			bool flag = buttons.HasFlag(arcadeButtons);
-			bool flag2 = this.playerInputs[player].HasFlag(arcadeButtons);
+			bool flag2 = playerInputs[player].HasFlag(arcadeButtons);
 			if (flag != flag2)
 			{
 				if (flag)
 				{
-					this.ButtonDown(player, arcadeButtons);
+					ButtonDown(player, arcadeButtons);
 				}
 				else
 				{
-					this.ButtonUp(player, arcadeButtons);
+					ButtonUp(player, arcadeButtons);
 				}
 			}
 		}
-		this.playerInputs[player] = buttons;
+		playerInputs[player] = buttons;
 	}
 
 	public abstract byte[] GetNetworkState();
@@ -83,24 +103,24 @@ public abstract class ArcadeGame : MonoBehaviour
 
 	protected void SwapNetStateBuffersAndStreams()
 	{
-		byte[] array = this.netStateBufferAlt;
-		byte[] array2 = this.netStateBuffer;
-		this.netStateBuffer = array;
-		this.netStateBufferAlt = array2;
-		MemoryStream memoryStream = this.netStateMemStreamAlt;
-		MemoryStream memoryStream2 = this.netStateMemStream;
-		this.netStateMemStream = memoryStream;
-		this.netStateMemStreamAlt = memoryStream2;
+		byte[] array = netStateBufferAlt;
+		byte[] array2 = netStateBuffer;
+		netStateBuffer = array;
+		netStateBufferAlt = array2;
+		MemoryStream memoryStream = netStateMemStreamAlt;
+		MemoryStream memoryStream2 = netStateMemStream;
+		netStateMemStream = memoryStream;
+		netStateMemStreamAlt = memoryStream2;
 	}
 
 	protected void PlaySound(int clipId, int prio = 3)
 	{
-		this.machine.PlaySound(clipId, prio);
+		machine.PlaySound(clipId, prio);
 	}
 
 	protected bool IsPlayerLocallyControlled(int player)
 	{
-		return this.machine.IsPlayerLocallyControlled(player);
+		return machine.IsPlayerLocallyControlled(player);
 	}
 
 	protected abstract void ButtonUp(int player, ArcadeButtons button);
@@ -116,25 +136,4 @@ public abstract class ArcadeGame : MonoBehaviour
 	public virtual void WritePlayerDataPUN(int player, PhotonStream stream, PhotonMessageInfo info)
 	{
 	}
-
-	[SerializeField]
-	public Vector2 Scale = new Vector2(1f, 1f);
-
-	private ArcadeButtons[] playerInputs = new ArcadeButtons[4];
-
-	public AudioClip[] audioClips;
-
-	private ArcadeMachine machine;
-
-	protected static int NetStateBufferSize = 512;
-
-	protected byte[] netStateBuffer = new byte[ArcadeGame.NetStateBufferSize];
-
-	protected byte[] netStateBufferAlt = new byte[ArcadeGame.NetStateBufferSize];
-
-	protected MemoryStream netStateMemStream;
-
-	protected MemoryStream netStateMemStreamAlt;
-
-	public bool memoryStreamsInitialized;
 }

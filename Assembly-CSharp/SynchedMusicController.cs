@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaNetworking;
 using GorillaTag;
@@ -7,494 +7,31 @@ using UnityEngine;
 
 public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 {
-	private void Start()
+	[Serializable]
+	public struct SyncedSongInfo
 	{
-		if (this.usingNewSyncedSongsCode)
-		{
-			this.New_Start();
-			return;
-		}
-		this.totalLoopTime = 0L;
-		AudioSource[] array = this.audioSourceArray;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].mute = (PlayerPrefs.GetInt(this.locationName + "Muted", 0) != 0);
-		}
-		this.audioSource.mute = (PlayerPrefs.GetInt(this.locationName + "Muted", 0) != 0);
-		this.muteButton.isOn = this.audioSource.mute;
-		this.muteButton.UpdateColor();
-		for (int j = 0; j < this.muteButtons.Length; j++)
-		{
-			this.muteButtons[j].isOn = this.audioSource.mute;
-			this.muteButtons[j].UpdateColor();
-		}
-		this.randomNumberGenerator = new Random(this.mySeed);
-		this.GenerateSongStartRandomTimes();
-		if (this.twoLayer)
-		{
-			array = this.audioSourceArray;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].clip.LoadAudioData();
-			}
-		}
+		[Tooltip("A layer for a song. For no layers, just add a single entry.")]
+		[RequiredListLength(1, null)]
+		public SyncedSongLayerInfo[] songLayers;
 	}
 
-	public void SliceUpdate()
+	[Serializable]
+	public struct SyncedSongLayerInfo
 	{
-		if (this.usingNewSyncedSongsCode)
-		{
-			this.New_Update();
-			return;
-		}
-		if (GorillaComputer.instance.startupMillis == 0L || this.totalLoopTime == 0L || this.songStartTimes.Length == 0)
-		{
-			return;
-		}
-		this.isPlayingCurrently = this.audioSource.isPlaying;
-		if (this.testPlay)
-		{
-			this.testPlay = false;
-			if (this.usingMultipleSources && this.usingMultipleSongs)
-			{
-				this.audioSource = this.audioSourceArray[Random.Range(0, this.audioSourceArray.Length)];
-				this.audioSource.clip = this.songsArray[Random.Range(0, this.songsArray.Length)];
-				this.audioSource.time = 0f;
-			}
-			if (this.twoLayer)
-			{
-				this.StartPlayingSongs(0L, 0L);
-			}
-			else if (this.audioSource.volume != 0f)
-			{
-				this.audioSource.GTPlay();
-			}
-		}
-		if (GorillaComputer.instance == null)
-		{
-			return;
-		}
-		this.currentTime = (GorillaComputer.instance.startupMillis + (long)(Time.realtimeSinceStartup * 1000f)) % this.totalLoopTime;
-		if (!this.audioSource.isPlaying)
-		{
-			if (this.lastPlayIndex >= 0 && this.songStartTimes[this.lastPlayIndex % this.songStartTimes.Length] < this.currentTime && this.currentTime < this.songStartTimes[(this.lastPlayIndex + 1) % this.songStartTimes.Length])
-			{
-				if (this.twoLayer)
-				{
-					if (this.songStartTimes[this.lastPlayIndex] + (long)(this.audioSource.clip.length * 1000f) > this.currentTime)
-					{
-						this.StartPlayingSongs(this.songStartTimes[this.lastPlayIndex], this.currentTime);
-						return;
-					}
-				}
-				else if (this.usingMultipleSongs && this.usingMultipleSources)
-				{
-					if (this.songStartTimes[this.lastPlayIndex] + (long)(this.songsArray[this.audioClipsForPlaying[this.lastPlayIndex]].length * 1000f) > this.currentTime)
-					{
-						this.StartPlayingSong(this.songStartTimes[this.lastPlayIndex], this.currentTime, this.songsArray[this.audioClipsForPlaying[this.lastPlayIndex]], this.audioSourceArray[this.audioSourcesForPlaying[this.lastPlayIndex]]);
-						return;
-					}
-				}
-				else if (this.songStartTimes[this.lastPlayIndex] + (long)(this.audioSource.clip.length * 1000f) > this.currentTime)
-				{
-					this.StartPlayingSong(this.songStartTimes[this.lastPlayIndex], this.currentTime);
-					return;
-				}
-			}
-			else
-			{
-				for (int i = 0; i < this.songStartTimes.Length; i++)
-				{
-					if (this.songStartTimes[i] > this.currentTime)
-					{
-						this.lastPlayIndex = (i - 1) % this.songStartTimes.Length;
-						return;
-					}
-				}
-			}
-		}
+		[Tooltip("The clip that will be played.")]
+		public AudioClip audioClip;
+
+		public AudioSourcePickMode audioSourcePickMode;
+
+		[Tooltip("The audio sources that should play the audio clip.")]
+		public AudioSource[] audioSources;
 	}
 
-	private void StartPlayingSong(long timeStarted, long currentTime)
+	public enum AudioSourcePickMode
 	{
-		if (this.audioSource.volume != 0f)
-		{
-			this.audioSource.GTPlay();
-		}
-		this.audioSource.time = (float)(currentTime - timeStarted) / 1000f;
-	}
-
-	private void StartPlayingSongs(long timeStarted, long currentTime)
-	{
-		foreach (AudioSource audioSource in this.audioSourceArray)
-		{
-			if (audioSource.volume != 0f)
-			{
-				audioSource.GTPlay();
-			}
-			audioSource.time = (float)(currentTime - timeStarted) / 1000f;
-		}
-	}
-
-	private void StartPlayingSong(long timeStarted, long currentTime, AudioClip clipToPlay, AudioSource sourceToPlay)
-	{
-		this.audioSource = sourceToPlay;
-		sourceToPlay.clip = clipToPlay;
-		if (sourceToPlay.isActiveAndEnabled && sourceToPlay.volume != 0f)
-		{
-			sourceToPlay.GTPlay();
-		}
-		sourceToPlay.time = (float)(currentTime - timeStarted) / 1000f;
-	}
-
-	private void GenerateSongStartRandomTimes()
-	{
-		this.songStartTimes = new long[500];
-		this.audioSourcesForPlaying = new int[500];
-		this.audioClipsForPlaying = new int[500];
-		this.songStartTimes[0] = this.minimumWait + (long)this.randomNumberGenerator.Next(this.randomInterval);
-		for (int i = 1; i < this.songStartTimes.Length; i++)
-		{
-			this.songStartTimes[i] = this.songStartTimes[i - 1] + this.minimumWait + (long)this.randomNumberGenerator.Next(this.randomInterval);
-		}
-		if (this.usingMultipleSources)
-		{
-			for (int j = 0; j < this.audioSourcesForPlaying.Length; j++)
-			{
-				this.audioSourcesForPlaying[j] = this.randomNumberGenerator.Next(this.audioSourceArray.Length);
-			}
-		}
-		if (this.usingMultipleSongs)
-		{
-			for (int k = 0; k < this.audioClipsForPlaying.Length; k++)
-			{
-				this.audioClipsForPlaying[k] = this.randomNumberGenerator.Next(this.songsArray.Length);
-			}
-		}
-		if (this.usingMultipleSongs)
-		{
-			this.totalLoopTime = this.songStartTimes[this.songStartTimes.Length - 1] + (long)(this.songsArray[this.audioClipsForPlaying[this.audioClipsForPlaying.Length - 1]].length * 1000f);
-			return;
-		}
-		if (this.audioSource.clip != null)
-		{
-			this.totalLoopTime = this.songStartTimes[this.songStartTimes.Length - 1] + (long)(this.audioSource.clip.length * 1000f);
-		}
-	}
-
-	public void MuteAudio(GorillaPressableButton pressedButton)
-	{
-		AudioSource[] array;
-		if (this.audioSource.mute)
-		{
-			PlayerPrefs.SetInt(this.locationName + "Muted", 0);
-			PlayerPrefs.Save();
-			this.audioSource.mute = false;
-			array = this.audioSourceArray;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].mute = false;
-			}
-			pressedButton.isOn = false;
-			pressedButton.UpdateColor();
-			for (int j = 0; j < this.muteButtons.Length; j++)
-			{
-				if (this.muteButtons[j] != null)
-				{
-					this.muteButtons[j].isOn = false;
-					this.muteButtons[j].UpdateColor();
-				}
-			}
-			return;
-		}
-		PlayerPrefs.SetInt(this.locationName + "Muted", 1);
-		PlayerPrefs.Save();
-		this.audioSource.mute = true;
-		array = this.audioSourceArray;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].mute = true;
-		}
-		pressedButton.isOn = true;
-		pressedButton.UpdateColor();
-		for (int k = 0; k < this.muteButtons.Length; k++)
-		{
-			if (this.muteButtons[k] != null)
-			{
-				this.muteButtons[k].isOn = true;
-				this.muteButtons[k].UpdateColor();
-			}
-		}
-	}
-
-	protected void New_Start()
-	{
-		string text = this.New_Validate();
-		if (text.Length > 0)
-		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				"Disabling SynchedMusicController on \"",
-				base.name,
-				"\" due to invalid setup: ",
-				text,
-				" Path: ",
-				base.transform.GetPathQ()
-			}), this);
-			base.enabled = false;
-		}
-		if (this.usingMultipleSources && this.audioSource == null)
-		{
-			this.audioSource = this.audioSourceArray[0];
-		}
-		this.totalLoopTime = 0L;
-		bool mute = PlayerPrefs.GetInt(this.locationName + "Muted", 0) != 0;
-		if (this.muteButton == null && this.muteButtons.Length >= 1 && this.muteButtons[0] != null)
-		{
-			this.muteButton = this.muteButtons[0];
-		}
-		if (this.audioSource != null)
-		{
-			this.audioSource.mute = mute;
-			this.muteButton.isOn = this.audioSource.mute;
-		}
-		foreach (AudioSource audioSource in this.audioSourceArray)
-		{
-			audioSource.mute = mute;
-			this.muteButton.isOn = (audioSource.mute || this.muteButton.isOn);
-		}
-		for (int j = 0; j < this.muteButtons.Length; j++)
-		{
-			if (!(this.muteButtons[j] == null))
-			{
-				this.muteButtons[j].isOn = this.muteButton.isOn;
-				this.muteButtons[j].UpdateColor();
-			}
-		}
-		this.muteButton.UpdateColor();
-		this.randomNumberGenerator = new Random(this.mySeed);
-		this.New_GeneratePlaylistArrays();
-		foreach (SynchedMusicController.SyncedSongInfo syncedSongInfo in this.syncedSongs)
-		{
-			if (syncedSongInfo.songLayers.Length > 1)
-			{
-				SynchedMusicController.SyncedSongLayerInfo[] songLayers = syncedSongInfo.songLayers;
-				for (int k = 0; k < songLayers.Length; k++)
-				{
-					songLayers[k].audioClip.LoadAudioData();
-				}
-			}
-		}
-	}
-
-	public void OnEnable()
-	{
-		this.lastPlayIndex = -1;
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnDisable()
-	{
-		this.StopAllAudioSources();
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	private void StopAllAudioSources()
-	{
-		for (int i = 0; i < this.audioSourceArray.Length; i++)
-		{
-			this.audioSourceArray[i].Stop();
-		}
-	}
-
-	private void New_Update()
-	{
-		if (!GorillaComputer.hasInstance)
-		{
-			return;
-		}
-		if (GorillaComputer.instance.startupMillis == 0L || this.totalLoopTime <= 0L || this.songStartTimes.Length == 0)
-		{
-			return;
-		}
-		long startupMillis = GorillaComputer.instance.startupMillis;
-		if (startupMillis <= 0L)
-		{
-			return;
-		}
-		long num = startupMillis + (long)(Time.realtimeSinceStartup * 1000f);
-		long num2 = (this.totalLoopTime > 0L) ? (num % this.totalLoopTime) : 0L;
-		bool flag = false;
-		if (this.lastPlayIndex < 0)
-		{
-			flag = true;
-			for (int i = 1; i < 256; i++)
-			{
-				if (this.songStartTimes[i] > num2)
-				{
-					this.lastPlayIndex = (i - 1) % 256;
-					break;
-				}
-			}
-			if (this.lastPlayIndex < 0)
-			{
-				this.lastPlayIndex = 255;
-			}
-		}
-		int num3 = (this.lastPlayIndex + 1) % 256;
-		if (this.songStartTimes[num3] < num2)
-		{
-			this.lastPlayIndex = num3;
-			flag = true;
-		}
-		if (!flag)
-		{
-			return;
-		}
-		long num4 = this.songStartTimes[this.lastPlayIndex];
-		SynchedMusicController.SyncedSongInfo syncedSongInfo = this.syncedSongs[this.audioClipsForPlaying[this.lastPlayIndex]];
-		float length = syncedSongInfo.songLayers[0].audioClip.length;
-		float num5 = (float)(num2 - num4) / 1000f;
-		if (num5 < 0f || length < num5)
-		{
-			return;
-		}
-		for (int j = 0; j < syncedSongInfo.songLayers.Length; j++)
-		{
-			SynchedMusicController.SyncedSongLayerInfo syncedSongLayerInfo = syncedSongInfo.songLayers[j];
-			if (syncedSongLayerInfo.audioSourcePickMode == SynchedMusicController.AudioSourcePickMode.All)
-			{
-				foreach (AudioSource audioSource in this.audioSourceArray)
-				{
-					audioSource.clip = syncedSongLayerInfo.audioClip;
-					if (audioSource.volume > 0f)
-					{
-						audioSource.GTPlay();
-					}
-					audioSource.time = num5;
-				}
-			}
-			else if (syncedSongLayerInfo.audioSourcePickMode == SynchedMusicController.AudioSourcePickMode.Shuffle)
-			{
-				AudioSource audioSource2 = this.audioSourceArray[this.audioSourcesForPlaying[this.lastPlayIndex]];
-				audioSource2.clip = syncedSongLayerInfo.audioClip;
-				if (audioSource2.volume > 0f)
-				{
-					audioSource2.GTPlay();
-				}
-				audioSource2.time = num5;
-			}
-			else if (syncedSongLayerInfo.audioSourcePickMode == SynchedMusicController.AudioSourcePickMode.Specific)
-			{
-				foreach (AudioSource audioSource3 in syncedSongLayerInfo.audioSources)
-				{
-					audioSource3.clip = syncedSongLayerInfo.audioClip;
-					if (audioSource3.volume > 0f)
-					{
-						audioSource3.GTPlay();
-					}
-					audioSource3.time = num5;
-				}
-			}
-		}
-	}
-
-	private string New_Validate()
-	{
-		if (this.syncedSongs == null)
-		{
-			return "syncedSongs array cannot be null.";
-		}
-		if (this.syncedSongs.Length == 0)
-		{
-			return "syncedSongs array cannot be empty.";
-		}
-		for (int i = 0; i < this.syncedSongs.Length; i++)
-		{
-			SynchedMusicController.SyncedSongInfo syncedSongInfo = this.syncedSongs[i];
-			if (syncedSongInfo.songLayers == null)
-			{
-				return string.Format("Song {0}'s songLayers array is null.", i);
-			}
-			if (syncedSongInfo.songLayers.Length == 0)
-			{
-				return string.Format("Song {0}'s songLayers array is empty.", i);
-			}
-			for (int j = 0; j < syncedSongInfo.songLayers.Length; j++)
-			{
-				SynchedMusicController.SyncedSongLayerInfo syncedSongLayerInfo = syncedSongInfo.songLayers[j];
-				if (syncedSongLayerInfo.audioClip == null)
-				{
-					return string.Format("Song {0}'s song layer {1} does not have an audio clip.", i, j);
-				}
-				if (syncedSongLayerInfo.audioSourcePickMode == SynchedMusicController.AudioSourcePickMode.Specific)
-				{
-					if (syncedSongLayerInfo.audioSources == null || syncedSongLayerInfo.audioSources.Length == 0)
-					{
-						return string.Format("Song {0}'s song layer {1} has audioSourcePickMode set to {2} ", i, j, syncedSongLayerInfo.audioSourcePickMode) + "but layer's audioSources array is empty or null.";
-					}
-				}
-				else if (this.audioSourceArray == null || this.audioSourceArray.Length == 0)
-				{
-					return string.Format("{0} is null or empty, while Song {1}'s song layer {2} has ", "audioSourceArray", i, j) + string.Format("audioSourcePickMode set to {0}, which uses the ", syncedSongLayerInfo.audioSourcePickMode) + "component's audioSourceArray.";
-				}
-			}
-		}
-		return string.Empty;
-	}
-
-	private void New_GeneratePlaylistArrays()
-	{
-		if (this.syncedSongs == null || this.syncedSongs.Length == 0)
-		{
-			return;
-		}
-		this.songStartTimes = new long[256];
-		this.songStartTimes[0] = this.minimumWait + (long)this.randomNumberGenerator.Next(this.randomInterval);
-		for (int i = 1; i < this.songStartTimes.Length; i++)
-		{
-			this.songStartTimes[i] = this.songStartTimes[i - 1] + this.minimumWait + (long)this.randomNumberGenerator.Next(this.randomInterval);
-		}
-		this.audioSourcesForPlaying = new int[256];
-		bool flag = false;
-		SynchedMusicController.SyncedSongInfo[] array = this.syncedSongs;
-		for (int j = 0; j < array.Length; j++)
-		{
-			SynchedMusicController.SyncedSongLayerInfo[] songLayers = array[j].songLayers;
-			for (int k = 0; k < songLayers.Length; k++)
-			{
-				if (songLayers[k].audioSourcePickMode == SynchedMusicController.AudioSourcePickMode.Shuffle)
-				{
-					flag = true;
-					break;
-				}
-			}
-		}
-		if (flag)
-		{
-			for (int l = 0; l < this.audioSourcesForPlaying.Length; l++)
-			{
-				this.audioSourcesForPlaying[l] = this.randomNumberGenerator.Next(this.audioSourceArray.Length);
-			}
-		}
-		this.audioClipsForPlaying = new int[256];
-		for (int m = 0; m < this.audioClipsForPlaying.Length; m++)
-		{
-			if (this.shufflePlaylist)
-			{
-				this.audioClipsForPlaying[m] = this.randomNumberGenerator.Next(this.syncedSongs.Length);
-			}
-			else
-			{
-				this.audioClipsForPlaying[m] = this.syncedSongs.Length - 1;
-			}
-		}
-		SynchedMusicController.SyncedSongInfo[] array2 = this.syncedSongs;
-		int[] array3 = this.audioClipsForPlaying;
-		long num = (long)array2[array3[array3.Length - 1]].songLayers[0].audioClip.length * 1000L;
-		long[] array4 = this.songStartTimes;
-		long num2 = array4[array4.Length - 1];
-		this.totalLoopTime = num + num2;
+		All,
+		Shuffle,
+		Specific
 	}
 
 	[SerializeField]
@@ -504,12 +41,12 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 	private bool shufflePlaylist = true;
 
 	[SerializeField]
-	private SynchedMusicController.SyncedSongInfo[] syncedSongs;
+	private SyncedSongInfo[] syncedSongs;
 
 	[Tooltip("This should be unique per sound post. Sound posts that share the same seed and the same song count will play songs a the same times.")]
 	public int mySeed;
 
-	private Random randomNumberGenerator = new Random();
+	private System.Random randomNumberGenerator = new System.Random();
 
 	[Tooltip("In milliseconds.")]
 	public long minimumWait = 900000L;
@@ -562,30 +99,485 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 
 	private const int kPlaylistLength = 256;
 
-	[Serializable]
-	public struct SyncedSongInfo
+	private void Start()
 	{
-		[Tooltip("A layer for a song. For no layers, just add a single entry.")]
-		[RequiredListLength(1, null)]
-		public SynchedMusicController.SyncedSongLayerInfo[] songLayers;
+		if (usingNewSyncedSongsCode)
+		{
+			New_Start();
+			return;
+		}
+		totalLoopTime = 0L;
+		AudioSource[] array = audioSourceArray;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].mute = PlayerPrefs.GetInt(locationName + "Muted", 0) != 0;
+		}
+		audioSource.mute = PlayerPrefs.GetInt(locationName + "Muted", 0) != 0;
+		muteButton.isOn = audioSource.mute;
+		muteButton.UpdateColor();
+		for (int j = 0; j < muteButtons.Length; j++)
+		{
+			muteButtons[j].isOn = audioSource.mute;
+			muteButtons[j].UpdateColor();
+		}
+		randomNumberGenerator = new System.Random(mySeed);
+		GenerateSongStartRandomTimes();
+		if (twoLayer)
+		{
+			array = audioSourceArray;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].clip.LoadAudioData();
+			}
+		}
 	}
 
-	[Serializable]
-	public struct SyncedSongLayerInfo
+	public void SliceUpdate()
 	{
-		[Tooltip("The clip that will be played.")]
-		public AudioClip audioClip;
-
-		public SynchedMusicController.AudioSourcePickMode audioSourcePickMode;
-
-		[Tooltip("The audio sources that should play the audio clip.")]
-		public AudioSource[] audioSources;
+		if (usingNewSyncedSongsCode)
+		{
+			New_Update();
+		}
+		else
+		{
+			if (GorillaComputer.instance.startupMillis == 0L || totalLoopTime == 0L || songStartTimes.Length == 0)
+			{
+				return;
+			}
+			isPlayingCurrently = audioSource.isPlaying;
+			if (testPlay)
+			{
+				testPlay = false;
+				if (usingMultipleSources && usingMultipleSongs)
+				{
+					audioSource = audioSourceArray[UnityEngine.Random.Range(0, audioSourceArray.Length)];
+					audioSource.clip = songsArray[UnityEngine.Random.Range(0, songsArray.Length)];
+					audioSource.time = 0f;
+				}
+				if (twoLayer)
+				{
+					StartPlayingSongs(0L, 0L);
+				}
+				else if (audioSource.volume != 0f)
+				{
+					audioSource.GTPlay();
+				}
+			}
+			if (GorillaComputer.instance == null)
+			{
+				return;
+			}
+			currentTime = (GorillaComputer.instance.startupMillis + (long)(Time.realtimeSinceStartup * 1000f)) % totalLoopTime;
+			if (audioSource.isPlaying)
+			{
+				return;
+			}
+			if (lastPlayIndex >= 0 && songStartTimes[lastPlayIndex % songStartTimes.Length] < currentTime && currentTime < songStartTimes[(lastPlayIndex + 1) % songStartTimes.Length])
+			{
+				if (twoLayer)
+				{
+					if (songStartTimes[lastPlayIndex] + (long)(audioSource.clip.length * 1000f) > currentTime)
+					{
+						StartPlayingSongs(songStartTimes[lastPlayIndex], currentTime);
+					}
+				}
+				else if (usingMultipleSongs && usingMultipleSources)
+				{
+					if (songStartTimes[lastPlayIndex] + (long)(songsArray[audioClipsForPlaying[lastPlayIndex]].length * 1000f) > currentTime)
+					{
+						StartPlayingSong(songStartTimes[lastPlayIndex], currentTime, songsArray[audioClipsForPlaying[lastPlayIndex]], audioSourceArray[audioSourcesForPlaying[lastPlayIndex]]);
+					}
+				}
+				else if (songStartTimes[lastPlayIndex] + (long)(audioSource.clip.length * 1000f) > currentTime)
+				{
+					StartPlayingSong(songStartTimes[lastPlayIndex], currentTime);
+				}
+				return;
+			}
+			for (int i = 0; i < songStartTimes.Length; i++)
+			{
+				if (songStartTimes[i] > currentTime)
+				{
+					lastPlayIndex = (i - 1) % songStartTimes.Length;
+					break;
+				}
+			}
+		}
 	}
 
-	public enum AudioSourcePickMode
+	private void StartPlayingSong(long timeStarted, long currentTime)
 	{
-		All,
-		Shuffle,
-		Specific
+		if (audioSource.volume != 0f)
+		{
+			audioSource.GTPlay();
+		}
+		audioSource.time = (float)(currentTime - timeStarted) / 1000f;
+	}
+
+	private void StartPlayingSongs(long timeStarted, long currentTime)
+	{
+		AudioSource[] array = audioSourceArray;
+		foreach (AudioSource audioSource in array)
+		{
+			if (audioSource.volume != 0f)
+			{
+				audioSource.GTPlay();
+			}
+			audioSource.time = (float)(currentTime - timeStarted) / 1000f;
+		}
+	}
+
+	private void StartPlayingSong(long timeStarted, long currentTime, AudioClip clipToPlay, AudioSource sourceToPlay)
+	{
+		audioSource = sourceToPlay;
+		sourceToPlay.clip = clipToPlay;
+		if (sourceToPlay.isActiveAndEnabled && sourceToPlay.volume != 0f)
+		{
+			sourceToPlay.GTPlay();
+		}
+		sourceToPlay.time = (float)(currentTime - timeStarted) / 1000f;
+	}
+
+	private void GenerateSongStartRandomTimes()
+	{
+		songStartTimes = new long[500];
+		audioSourcesForPlaying = new int[500];
+		audioClipsForPlaying = new int[500];
+		songStartTimes[0] = minimumWait + randomNumberGenerator.Next(randomInterval);
+		for (int i = 1; i < songStartTimes.Length; i++)
+		{
+			songStartTimes[i] = songStartTimes[i - 1] + minimumWait + randomNumberGenerator.Next(randomInterval);
+		}
+		if (usingMultipleSources)
+		{
+			for (int j = 0; j < audioSourcesForPlaying.Length; j++)
+			{
+				audioSourcesForPlaying[j] = randomNumberGenerator.Next(audioSourceArray.Length);
+			}
+		}
+		if (usingMultipleSongs)
+		{
+			for (int k = 0; k < audioClipsForPlaying.Length; k++)
+			{
+				audioClipsForPlaying[k] = randomNumberGenerator.Next(songsArray.Length);
+			}
+		}
+		if (usingMultipleSongs)
+		{
+			totalLoopTime = songStartTimes[songStartTimes.Length - 1] + (long)(songsArray[audioClipsForPlaying[audioClipsForPlaying.Length - 1]].length * 1000f);
+		}
+		else if (audioSource.clip != null)
+		{
+			totalLoopTime = songStartTimes[songStartTimes.Length - 1] + (long)(audioSource.clip.length * 1000f);
+		}
+	}
+
+	public void MuteAudio(GorillaPressableButton pressedButton)
+	{
+		AudioSource[] array;
+		if (audioSource.mute)
+		{
+			PlayerPrefs.SetInt(locationName + "Muted", 0);
+			PlayerPrefs.Save();
+			audioSource.mute = false;
+			array = audioSourceArray;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].mute = false;
+			}
+			pressedButton.isOn = false;
+			pressedButton.UpdateColor();
+			for (int j = 0; j < muteButtons.Length; j++)
+			{
+				if (muteButtons[j] != null)
+				{
+					muteButtons[j].isOn = false;
+					muteButtons[j].UpdateColor();
+				}
+			}
+			return;
+		}
+		PlayerPrefs.SetInt(locationName + "Muted", 1);
+		PlayerPrefs.Save();
+		audioSource.mute = true;
+		array = audioSourceArray;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].mute = true;
+		}
+		pressedButton.isOn = true;
+		pressedButton.UpdateColor();
+		for (int k = 0; k < muteButtons.Length; k++)
+		{
+			if (muteButtons[k] != null)
+			{
+				muteButtons[k].isOn = true;
+				muteButtons[k].UpdateColor();
+			}
+		}
+	}
+
+	protected void New_Start()
+	{
+		string text = New_Validate();
+		if (text.Length > 0)
+		{
+			Debug.LogError("Disabling SynchedMusicController on \"" + base.name + "\" due to invalid setup: " + text + " Path: " + base.transform.GetPathQ(), this);
+			base.enabled = false;
+		}
+		if (usingMultipleSources && this.audioSource == null)
+		{
+			this.audioSource = audioSourceArray[0];
+		}
+		totalLoopTime = 0L;
+		bool mute = PlayerPrefs.GetInt(locationName + "Muted", 0) != 0;
+		if (muteButton == null && muteButtons.Length >= 1 && muteButtons[0] != null)
+		{
+			muteButton = muteButtons[0];
+		}
+		if (this.audioSource != null)
+		{
+			this.audioSource.mute = mute;
+			muteButton.isOn = this.audioSource.mute;
+		}
+		AudioSource[] array = audioSourceArray;
+		foreach (AudioSource audioSource in array)
+		{
+			audioSource.mute = mute;
+			muteButton.isOn = audioSource.mute || muteButton.isOn;
+		}
+		for (int j = 0; j < muteButtons.Length; j++)
+		{
+			if (!(muteButtons[j] == null))
+			{
+				muteButtons[j].isOn = muteButton.isOn;
+				muteButtons[j].UpdateColor();
+			}
+		}
+		muteButton.UpdateColor();
+		randomNumberGenerator = new System.Random(mySeed);
+		New_GeneratePlaylistArrays();
+		SyncedSongInfo[] array2 = syncedSongs;
+		for (int i = 0; i < array2.Length; i++)
+		{
+			SyncedSongInfo syncedSongInfo = array2[i];
+			if (syncedSongInfo.songLayers.Length > 1)
+			{
+				SyncedSongLayerInfo[] songLayers = syncedSongInfo.songLayers;
+				for (int k = 0; k < songLayers.Length; k++)
+				{
+					songLayers[k].audioClip.LoadAudioData();
+				}
+			}
+		}
+	}
+
+	public void OnEnable()
+	{
+		lastPlayIndex = -1;
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		StopAllAudioSources();
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	private void StopAllAudioSources()
+	{
+		for (int i = 0; i < audioSourceArray.Length; i++)
+		{
+			audioSourceArray[i].Stop();
+		}
+	}
+
+	private void New_Update()
+	{
+		if (!GorillaComputer.hasInstance || GorillaComputer.instance.startupMillis == 0L || totalLoopTime <= 0 || songStartTimes.Length == 0)
+		{
+			return;
+		}
+		long startupMillis = GorillaComputer.instance.startupMillis;
+		if (startupMillis <= 0)
+		{
+			return;
+		}
+		long num = startupMillis + (long)(Time.realtimeSinceStartup * 1000f);
+		long num2 = ((totalLoopTime > 0) ? (num % totalLoopTime) : 0);
+		bool flag = false;
+		if (lastPlayIndex < 0)
+		{
+			flag = true;
+			for (int i = 1; i < 256; i++)
+			{
+				if (songStartTimes[i] > num2)
+				{
+					lastPlayIndex = (i - 1) % 256;
+					break;
+				}
+			}
+			if (lastPlayIndex < 0)
+			{
+				lastPlayIndex = 255;
+			}
+		}
+		int num3 = (lastPlayIndex + 1) % 256;
+		if (songStartTimes[num3] < num2)
+		{
+			lastPlayIndex = num3;
+			flag = true;
+		}
+		if (!flag)
+		{
+			return;
+		}
+		long num4 = songStartTimes[lastPlayIndex];
+		SyncedSongInfo syncedSongInfo = syncedSongs[audioClipsForPlaying[lastPlayIndex]];
+		float length = syncedSongInfo.songLayers[0].audioClip.length;
+		float num5 = (float)(num2 - num4) / 1000f;
+		if (num5 < 0f || length < num5)
+		{
+			return;
+		}
+		for (int j = 0; j < syncedSongInfo.songLayers.Length; j++)
+		{
+			SyncedSongLayerInfo syncedSongLayerInfo = syncedSongInfo.songLayers[j];
+			if (syncedSongLayerInfo.audioSourcePickMode == AudioSourcePickMode.All)
+			{
+				AudioSource[] array = audioSourceArray;
+				foreach (AudioSource audioSource in array)
+				{
+					audioSource.clip = syncedSongLayerInfo.audioClip;
+					if (audioSource.volume > 0f)
+					{
+						audioSource.GTPlay();
+					}
+					audioSource.time = num5;
+				}
+			}
+			else if (syncedSongLayerInfo.audioSourcePickMode == AudioSourcePickMode.Shuffle)
+			{
+				AudioSource audioSource2 = audioSourceArray[audioSourcesForPlaying[lastPlayIndex]];
+				audioSource2.clip = syncedSongLayerInfo.audioClip;
+				if (audioSource2.volume > 0f)
+				{
+					audioSource2.GTPlay();
+				}
+				audioSource2.time = num5;
+			}
+			else
+			{
+				if (syncedSongLayerInfo.audioSourcePickMode != AudioSourcePickMode.Specific)
+				{
+					continue;
+				}
+				AudioSource[] array = syncedSongLayerInfo.audioSources;
+				foreach (AudioSource audioSource3 in array)
+				{
+					audioSource3.clip = syncedSongLayerInfo.audioClip;
+					if (audioSource3.volume > 0f)
+					{
+						audioSource3.GTPlay();
+					}
+					audioSource3.time = num5;
+				}
+			}
+		}
+	}
+
+	private string New_Validate()
+	{
+		if (syncedSongs == null)
+		{
+			return "syncedSongs array cannot be null.";
+		}
+		if (syncedSongs.Length == 0)
+		{
+			return "syncedSongs array cannot be empty.";
+		}
+		for (int i = 0; i < syncedSongs.Length; i++)
+		{
+			SyncedSongInfo syncedSongInfo = syncedSongs[i];
+			if (syncedSongInfo.songLayers == null)
+			{
+				return $"Song {i}'s songLayers array is null.";
+			}
+			if (syncedSongInfo.songLayers.Length == 0)
+			{
+				return $"Song {i}'s songLayers array is empty.";
+			}
+			for (int j = 0; j < syncedSongInfo.songLayers.Length; j++)
+			{
+				SyncedSongLayerInfo syncedSongLayerInfo = syncedSongInfo.songLayers[j];
+				if (syncedSongLayerInfo.audioClip == null)
+				{
+					return $"Song {i}'s song layer {j} does not have an audio clip.";
+				}
+				if (syncedSongLayerInfo.audioSourcePickMode == AudioSourcePickMode.Specific)
+				{
+					if (syncedSongLayerInfo.audioSources == null || syncedSongLayerInfo.audioSources.Length == 0)
+					{
+						return $"Song {i}'s song layer {j} has audioSourcePickMode set to {syncedSongLayerInfo.audioSourcePickMode} " + "but layer's audioSources array is empty or null.";
+					}
+				}
+				else if (audioSourceArray == null || audioSourceArray.Length == 0)
+				{
+					return string.Format("{0} is null or empty, while Song {1}'s song layer {2} has ", "audioSourceArray", i, j) + $"audioSourcePickMode set to {syncedSongLayerInfo.audioSourcePickMode}, which uses the " + "component's audioSourceArray.";
+				}
+			}
+		}
+		return string.Empty;
+	}
+
+	private void New_GeneratePlaylistArrays()
+	{
+		if (syncedSongs == null || syncedSongs.Length == 0)
+		{
+			return;
+		}
+		songStartTimes = new long[256];
+		songStartTimes[0] = minimumWait + randomNumberGenerator.Next(randomInterval);
+		for (int i = 1; i < songStartTimes.Length; i++)
+		{
+			songStartTimes[i] = songStartTimes[i - 1] + minimumWait + randomNumberGenerator.Next(randomInterval);
+		}
+		audioSourcesForPlaying = new int[256];
+		bool flag = false;
+		SyncedSongInfo[] array = syncedSongs;
+		for (int j = 0; j < array.Length; j++)
+		{
+			SyncedSongLayerInfo[] songLayers = array[j].songLayers;
+			for (int k = 0; k < songLayers.Length; k++)
+			{
+				if (songLayers[k].audioSourcePickMode == AudioSourcePickMode.Shuffle)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		if (flag)
+		{
+			for (int l = 0; l < audioSourcesForPlaying.Length; l++)
+			{
+				audioSourcesForPlaying[l] = randomNumberGenerator.Next(audioSourceArray.Length);
+			}
+		}
+		audioClipsForPlaying = new int[256];
+		for (int m = 0; m < audioClipsForPlaying.Length; m++)
+		{
+			if (shufflePlaylist)
+			{
+				audioClipsForPlaying[m] = randomNumberGenerator.Next(syncedSongs.Length);
+			}
+			else
+			{
+				audioClipsForPlaying[m] = syncedSongs.Length - 1;
+			}
+		}
+		long num = (long)syncedSongs[audioClipsForPlaying[^1]].songLayers[0].audioClip.length * 1000;
+		long num2 = songStartTimes[^1];
+		totalLoopTime = num + num2;
 	}
 }

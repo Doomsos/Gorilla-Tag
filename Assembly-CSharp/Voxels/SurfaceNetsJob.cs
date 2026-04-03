@@ -1,257 +1,242 @@
-﻿using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace Voxels
+namespace Voxels;
+
+[BurstCompile]
+public struct SurfaceNetsJob : IJob
 {
-	[BurstCompile]
-	public struct SurfaceNetsJob : IJob
+	[ReadOnly]
+	public NativeArray<byte> sdf;
+
+	[ReadOnly]
+	public NativeArray<byte> material;
+
+	public int3 shape;
+
+	public int3 min;
+
+	public int3 max;
+
+	public byte isoLevel;
+
+	public SurfaceNetsBuffer buffer;
+
+	private static readonly int3[] cubeCorners = new int3[8]
 	{
-		public void Execute()
+		new int3(0, 0, 0),
+		new int3(1, 0, 0),
+		new int3(0, 1, 0),
+		new int3(1, 1, 0),
+		new int3(0, 0, 1),
+		new int3(1, 0, 1),
+		new int3(0, 1, 1),
+		new int3(1, 1, 1)
+	};
+
+	private static readonly float3[] cornerVecs = new float3[8]
+	{
+		new float3(0f, 0f, 0f),
+		new float3(1f, 0f, 0f),
+		new float3(0f, 1f, 0f),
+		new float3(1f, 1f, 0f),
+		new float3(0f, 0f, 1f),
+		new float3(1f, 0f, 1f),
+		new float3(0f, 1f, 1f),
+		new float3(1f, 1f, 1f)
+	};
+
+	private static readonly int2[] cubeEdges = new int2[12]
+	{
+		new int2(0, 1),
+		new int2(0, 2),
+		new int2(0, 4),
+		new int2(1, 3),
+		new int2(1, 5),
+		new int2(2, 3),
+		new int2(2, 6),
+		new int2(3, 7),
+		new int2(4, 5),
+		new int2(4, 6),
+		new int2(5, 7),
+		new int2(6, 7)
+	};
+
+	public void Execute()
+	{
+		buffer.Reset(shape.x * shape.y * shape.z);
+		int x = shape.x;
+		int num = shape.x * shape.y;
+		for (int i = min.z; i < max.z; i++)
 		{
-			this.buffer.Reset(this.shape.x * this.shape.y * this.shape.z);
-			int x = this.shape.x;
-			int num = this.shape.x * this.shape.y;
-			for (int i = this.min.z; i < this.max.z; i++)
+			for (int j = min.y; j < max.y; j++)
 			{
-				for (int j = this.min.y; j < this.max.y; j++)
+				int value = i * num + j * x + min.x;
+				int num2 = min.x;
+				while (num2 < max.x)
 				{
-					int num2 = i * num + j * x + this.min.x;
-					int k = this.min.x;
-					while (k < this.max.x)
+					if (EstimateSurfaceInCube(new int3(num2, j, i), value, 1, x, num, out var centroid))
 					{
-						float3 rhs;
-						if (this.EstimateSurfaceInCube(new int3(k, j, i), num2, 1, x, num, out rhs))
-						{
-							int length = this.buffer.Vertices.Length;
-							this.buffer.StrideToIndex[num2] = length;
-							int3 @int = new int3(k, j, i);
-							this.buffer.SurfacePoints.Add(@int);
-							this.buffer.SurfaceStrides.Add(num2);
-							float3 @float = new float3((float)k, (float)j, (float)i) + rhs;
-							this.buffer.Vertices.Add(@float);
-							this.buffer.Normals.Add(float3.zero);
-							byte b = this.material[num2];
-							this.buffer.Materials.Add(b);
-						}
-						k++;
-						num2++;
+						int length = buffer.Vertices.Length;
+						buffer.StrideToIndex[value] = length;
+						buffer.SurfacePoints.Add(new int3(num2, j, i));
+						buffer.SurfaceStrides.Add(in value);
+						buffer.Vertices.Add(new float3(num2, j, i) + centroid);
+						buffer.Normals.Add(in float3.zero);
+						buffer.Materials.Add(material[value]);
 					}
+					num2++;
+					value++;
 				}
 			}
-			this.MakeAllQuads(1, x, num);
-			this.AccumulateNormals();
 		}
+		MakeAllQuads(1, x, num);
+		AccumulateNormals();
+	}
 
-		private bool EstimateSurfaceInCube(int3 voxel, int cubeMin, int sx, int sy, int sz, out float3 centroid)
+	private bool EstimateSurfaceInCube(int3 voxel, int cubeMin, int sx, int sy, int sz, out float3 centroid)
+	{
+		int num = 0;
+		NativeArray<float> nativeArray = new NativeArray<float>(8, Allocator.Temp);
+		for (int i = 0; i < 8; i++)
 		{
-			int num = 0;
-			NativeArray<float> nativeArray = new NativeArray<float>(8, Allocator.Temp, NativeArrayOptions.ClearMemory);
-			for (int i = 0; i < 8; i++)
+			int3 int5 = cubeCorners[i];
+			float num2 = (nativeArray[i] = sdf[cubeMin + int5.x * sx + int5.y * sy + int5.z * sz].ToFloat());
+			if (num2 < 0f)
 			{
-				int3 @int = SurfaceNetsJob.cubeCorners[i];
-				float num2 = this.sdf[cubeMin + @int.x * sx + @int.y * sy + @int.z * sz].ToFloat();
-				nativeArray[i] = num2;
-				if (num2 < 0f)
-				{
-					num++;
-				}
+				num++;
 			}
-			if (num == 0 || num == 8)
-			{
-				centroid = default(float3);
-				nativeArray.Dispose();
-				return false;
-			}
-			float3 lhs = float3.zero;
-			int num3 = 0;
-			for (int j = 0; j < 12; j++)
-			{
-				int2 int2 = SurfaceNetsJob.cubeEdges[j];
-				float num4 = nativeArray[int2.x];
-				float num5 = nativeArray[int2.y];
-				if (num4 < 0f ^ num5 < 0f)
-				{
-					num3++;
-					lhs += SurfaceNetsJob.EdgeIntersection(int2.x, int2.y, num4, num5);
-				}
-			}
-			centroid = lhs / (float)num3;
+		}
+		if (num == 0 || num == 8)
+		{
+			centroid = default(float3);
 			nativeArray.Dispose();
-			return true;
+			return false;
 		}
-
-		private static float3 EdgeIntersection(int c1, int c2, float v1, float v2)
+		float3 zero = float3.zero;
+		int num4 = 0;
+		for (int j = 0; j < 12; j++)
 		{
-			float num = v1 / (v1 - v2);
-			return SurfaceNetsJob.cornerVecs[c1] * (1f - num) + SurfaceNetsJob.cornerVecs[c2] * num;
-		}
-
-		private void MakeAllQuads(int sx, int sy, int sz)
-		{
-			int3 @int = this.min;
-			int3 int2 = this.max;
-			for (int i = 0; i < this.buffer.SurfacePoints.Length; i++)
+			int2 int6 = cubeEdges[j];
+			float num5 = nativeArray[int6.x];
+			float num6 = nativeArray[int6.y];
+			if ((num5 < 0f) ^ (num6 < 0f))
 			{
-				int3 int3 = this.buffer.SurfacePoints[i];
-				int num = this.buffer.SurfaceStrides[i];
-				if (int3.y != @int.y && int3.z != @int.z && int3.x != int2.x - 1)
-				{
-					this.TryQuad(num, num + sx, sy, sz);
-				}
-				if (int3.x != @int.x && int3.z != @int.z && int3.y != int2.y - 1)
-				{
-					this.TryQuad(num, num + sy, sz, sx);
-				}
-				if (int3.x != @int.x && int3.y != @int.y && int3.z != int2.z - 1)
-				{
-					this.TryQuad(num, num + sz, sx, sy);
-				}
+				num4++;
+				zero += EdgeIntersection(int6.x, int6.y, num5, num6);
 			}
 		}
+		centroid = zero / num4;
+		nativeArray.Dispose();
+		return true;
+	}
 
-		private void TryQuad(int p1, int p2, int strideB, int strideC)
+	private static float3 EdgeIntersection(int c1, int c2, float v1, float v2)
+	{
+		float num = v1 / (v1 - v2);
+		return cornerVecs[c1] * (1f - num) + cornerVecs[c2] * num;
+	}
+
+	private void MakeAllQuads(int sx, int sy, int sz)
+	{
+		int3 int5 = min;
+		int3 int6 = max;
+		for (int i = 0; i < buffer.SurfacePoints.Length; i++)
 		{
-			float num = this.sdf[p1].ToFloat();
-			float num2 = this.sdf[p2].ToFloat();
-			bool flag = num < 0f && num2 >= 0f;
-			if (!flag && (num2 >= 0f || num < 0f))
+			int3 int7 = buffer.SurfacePoints[i];
+			int num = buffer.SurfaceStrides[i];
+			if (int7.y != int5.y && int7.z != int5.z && int7.x != int6.x - 1)
 			{
-				return;
+				TryQuad(num, num + sx, sy, sz);
 			}
-			int num3 = this.buffer.StrideToIndex[p1];
-			int num4 = this.buffer.StrideToIndex[p1 - strideB];
-			int num5 = this.buffer.StrideToIndex[p1 - strideC];
-			int num6 = this.buffer.StrideToIndex[p1 - strideB - strideC];
-			if ((num3 | num4 | num5 | num6) == 2147483647)
+			if (int7.x != int5.x && int7.z != int5.z && int7.y != int6.y - 1)
 			{
-				return;
+				TryQuad(num, num + sy, sz, sx);
 			}
-			float3 lhs = this.buffer.Vertices[num3];
-			float3 lhs2 = this.buffer.Vertices[num4];
-			float3 rhs = this.buffer.Vertices[num5];
-			float3 rhs2 = this.buffer.Vertices[num6];
-			if (math.lengthsq(lhs - rhs2) < math.lengthsq(lhs2 - rhs))
+			if (int7.x != int5.x && int7.y != int5.y && int7.z != int6.z - 1)
 			{
-				if (flag)
-				{
-					this.buffer.Triangles.Add(num3);
-					this.buffer.Triangles.Add(num6);
-					this.buffer.Triangles.Add(num4);
-					this.buffer.Triangles.Add(num3);
-					this.buffer.Triangles.Add(num5);
-					this.buffer.Triangles.Add(num6);
-					return;
-				}
-				this.buffer.Triangles.Add(num3);
-				this.buffer.Triangles.Add(num4);
-				this.buffer.Triangles.Add(num6);
-				this.buffer.Triangles.Add(num3);
-				this.buffer.Triangles.Add(num6);
-				this.buffer.Triangles.Add(num5);
-				return;
+				TryQuad(num, num + sz, sx, sy);
+			}
+		}
+	}
+
+	private void TryQuad(int p1, int p2, int strideB, int strideC)
+	{
+		float num = sdf[p1].ToFloat();
+		float num2 = sdf[p2].ToFloat();
+		bool flag = num < 0f && num2 >= 0f;
+		if (!flag && (!(num2 < 0f) || !(num >= 0f)))
+		{
+			return;
+		}
+		int value = buffer.StrideToIndex[p1];
+		int value2 = buffer.StrideToIndex[p1 - strideB];
+		int value3 = buffer.StrideToIndex[p1 - strideC];
+		int value4 = buffer.StrideToIndex[p1 - strideB - strideC];
+		if ((value | value2 | value3 | value4) == int.MaxValue)
+		{
+			return;
+		}
+		float3 obj = buffer.Vertices[value];
+		float3 float5 = buffer.Vertices[value2];
+		float3 float6 = buffer.Vertices[value3];
+		float3 float7 = buffer.Vertices[value4];
+		if (math.lengthsq(obj - float7) < math.lengthsq(float5 - float6))
+		{
+			if (flag)
+			{
+				buffer.Triangles.Add(in value);
+				buffer.Triangles.Add(in value4);
+				buffer.Triangles.Add(in value2);
+				buffer.Triangles.Add(in value);
+				buffer.Triangles.Add(in value3);
+				buffer.Triangles.Add(in value4);
 			}
 			else
 			{
-				if (flag)
-				{
-					this.buffer.Triangles.Add(num4);
-					this.buffer.Triangles.Add(num5);
-					this.buffer.Triangles.Add(num6);
-					this.buffer.Triangles.Add(num4);
-					this.buffer.Triangles.Add(num3);
-					this.buffer.Triangles.Add(num5);
-					return;
-				}
-				this.buffer.Triangles.Add(num4);
-				this.buffer.Triangles.Add(num6);
-				this.buffer.Triangles.Add(num5);
-				this.buffer.Triangles.Add(num4);
-				this.buffer.Triangles.Add(num5);
-				this.buffer.Triangles.Add(num3);
-				return;
+				buffer.Triangles.Add(in value);
+				buffer.Triangles.Add(in value2);
+				buffer.Triangles.Add(in value4);
+				buffer.Triangles.Add(in value);
+				buffer.Triangles.Add(in value4);
+				buffer.Triangles.Add(in value3);
 			}
 		}
-
-		private void AccumulateNormals()
+		else if (flag)
 		{
-			for (int i = 0; i < this.buffer.Triangles.Length; i += 3)
-			{
-				int num = this.buffer.Triangles[i];
-				int num2 = this.buffer.Triangles[i + 1];
-				int num3 = this.buffer.Triangles[i + 2];
-				float3 rhs = this.buffer.Vertices[num];
-				float3 lhs = this.buffer.Vertices[num2];
-				float3 lhs2 = this.buffer.Vertices[num3];
-				float3 rhs2 = math.cross(lhs - rhs, lhs2 - rhs);
-				ref NativeList<float3> ptr = ref this.buffer.Normals;
-				int index = num;
-				ptr[index] += rhs2;
-				ptr = ref this.buffer.Normals;
-				index = num2;
-				ptr[index] += rhs2;
-				ptr = ref this.buffer.Normals;
-				index = num3;
-				ptr[index] += rhs2;
-			}
+			buffer.Triangles.Add(in value2);
+			buffer.Triangles.Add(in value3);
+			buffer.Triangles.Add(in value4);
+			buffer.Triangles.Add(in value2);
+			buffer.Triangles.Add(in value);
+			buffer.Triangles.Add(in value3);
 		}
-
-		[ReadOnly]
-		public NativeArray<byte> sdf;
-
-		[ReadOnly]
-		public NativeArray<byte> material;
-
-		public int3 shape;
-
-		public int3 min;
-
-		public int3 max;
-
-		public byte isoLevel;
-
-		public SurfaceNetsBuffer buffer;
-
-		private static readonly int3[] cubeCorners = new int3[]
+		else
 		{
-			new int3(0, 0, 0),
-			new int3(1, 0, 0),
-			new int3(0, 1, 0),
-			new int3(1, 1, 0),
-			new int3(0, 0, 1),
-			new int3(1, 0, 1),
-			new int3(0, 1, 1),
-			new int3(1, 1, 1)
-		};
+			buffer.Triangles.Add(in value2);
+			buffer.Triangles.Add(in value4);
+			buffer.Triangles.Add(in value3);
+			buffer.Triangles.Add(in value2);
+			buffer.Triangles.Add(in value3);
+			buffer.Triangles.Add(in value);
+		}
+	}
 
-		private static readonly float3[] cornerVecs = new float3[]
+	private void AccumulateNormals()
+	{
+		for (int i = 0; i < buffer.Triangles.Length; i += 3)
 		{
-			new float3(0f, 0f, 0f),
-			new float3(1f, 0f, 0f),
-			new float3(0f, 1f, 0f),
-			new float3(1f, 1f, 0f),
-			new float3(0f, 0f, 1f),
-			new float3(1f, 0f, 1f),
-			new float3(0f, 1f, 1f),
-			new float3(1f, 1f, 1f)
-		};
-
-		private static readonly int2[] cubeEdges = new int2[]
-		{
-			new int2(0, 1),
-			new int2(0, 2),
-			new int2(0, 4),
-			new int2(1, 3),
-			new int2(1, 5),
-			new int2(2, 3),
-			new int2(2, 6),
-			new int2(3, 7),
-			new int2(4, 5),
-			new int2(4, 6),
-			new int2(5, 7),
-			new int2(6, 7)
-		};
+			int index = buffer.Triangles[i];
+			int index2 = buffer.Triangles[i + 1];
+			int index3 = buffer.Triangles[i + 2];
+			float3 float5 = buffer.Vertices[index];
+			float3 obj = buffer.Vertices[index2];
+			float3 float6 = math.cross(y: buffer.Vertices[index3] - float5, x: obj - float5);
+			buffer.Normals[index] += float6;
+			buffer.Normals[index2] += float6;
+			buffer.Normals[index3] += float6;
+		}
 	}
 }

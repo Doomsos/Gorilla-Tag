@@ -1,9 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct AnimStateHash
 {
+	[SerializeField]
+	private int _hash;
+
 	public static implicit operator AnimStateHash(string s)
 	{
 		return new AnimStateHash
@@ -16,7 +19,4 @@ public struct AnimStateHash
 	{
 		return ash._hash;
 	}
-
-	[SerializeField]
-	private int _hash;
 }

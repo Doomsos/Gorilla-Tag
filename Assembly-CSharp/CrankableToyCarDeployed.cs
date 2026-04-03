@@ -1,50 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class CrankableToyCarDeployed : MonoBehaviour
 {
-	public void Deploy(CrankableToyCarHoldable holdable, Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel, float lifetime, bool isRemote = false)
-	{
-		this.holdable = holdable;
-		holdable.OnCarDeployed();
-		base.transform.position = launchPos;
-		base.transform.rotation = launchRot;
-		base.transform.localScale = holdable.transform.lossyScale;
-		this.rb.linearVelocity = releaseVel;
-		this.startedAtTimestamp = Time.time;
-		this.expiresAtTimestamp = Time.time + lifetime;
-		this.isRemote = isRemote;
-	}
-
-	private void Update()
-	{
-		if (!this.isRemote && Time.time > this.expiresAtTimestamp)
-		{
-			if (this.holdable != null)
-			{
-				this.holdable.OnCarReturned();
-			}
-			return;
-		}
-		if (!this.wheelDriver.hasCollision)
-		{
-			this.expiresAtTimestamp -= Time.deltaTime;
-			if (!this.offGroundDrivingAudio.isPlaying)
-			{
-				this.offGroundDrivingAudio.GTPlay();
-				this.drivingAudio.Stop();
-			}
-		}
-		else if (!this.drivingAudio.isPlaying)
-		{
-			this.drivingAudio.GTPlay();
-			this.offGroundDrivingAudio.Stop();
-		}
-		float time = Mathf.InverseLerp(this.startedAtTimestamp, this.expiresAtTimestamp, Time.time);
-		float d = this.thrustCurve.Evaluate(time);
-		this.wheelDriver.SetThrust(this.maxThrust * d);
-	}
-
 	[SerializeField]
 	private Rigidbody rb;
 
@@ -70,4 +27,46 @@ public class CrankableToyCarDeployed : MonoBehaviour
 	private AudioSource offGroundDrivingAudio;
 
 	private bool isRemote;
+
+	public void Deploy(CrankableToyCarHoldable holdable, Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel, float lifetime, bool isRemote = false)
+	{
+		this.holdable = holdable;
+		holdable.OnCarDeployed();
+		base.transform.position = launchPos;
+		base.transform.rotation = launchRot;
+		base.transform.localScale = holdable.transform.lossyScale;
+		rb.linearVelocity = releaseVel;
+		startedAtTimestamp = Time.time;
+		expiresAtTimestamp = Time.time + lifetime;
+		this.isRemote = isRemote;
+	}
+
+	private void Update()
+	{
+		if (!isRemote && Time.time > expiresAtTimestamp)
+		{
+			if (holdable != null)
+			{
+				holdable.OnCarReturned();
+			}
+			return;
+		}
+		if (!wheelDriver.hasCollision)
+		{
+			expiresAtTimestamp -= Time.deltaTime;
+			if (!offGroundDrivingAudio.isPlaying)
+			{
+				offGroundDrivingAudio.GTPlay();
+				drivingAudio.Stop();
+			}
+		}
+		else if (!drivingAudio.isPlaying)
+		{
+			drivingAudio.GTPlay();
+			offGroundDrivingAudio.Stop();
+		}
+		float time = Mathf.InverseLerp(startedAtTimestamp, expiresAtTimestamp, Time.time);
+		float num = thrustCurve.Evaluate(time);
+		wheelDriver.SetThrust(maxThrust * num);
+	}
 }

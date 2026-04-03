@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,9 +12,9 @@ public interface IEyeScannable
 
 	IList<KeyValueStringPair> Entries { get; }
 
+	event Action OnDataChange;
+
 	void OnEnable();
 
 	void OnDisable();
-
-	event Action OnDataChange;
 }

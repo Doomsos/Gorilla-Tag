@@ -1,29 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class SpinParametricAnimation : MonoBehaviour
 {
-	protected void OnEnable()
-	{
-		this.axis = this.axis.normalized;
-	}
-
-	protected void LateUpdate()
-	{
-		Transform transform = base.transform;
-		this._animationProgress = (this._animationProgress + Time.deltaTime * this.revolutionsPerSecond) % 1f;
-		float num = this.timeCurve.Evaluate(this._animationProgress) * 360f;
-		float angle = num - this._oldAngle;
-		this._oldAngle = num;
-		if (this.WorldSpaceRotation)
-		{
-			transform.rotation = Quaternion.AngleAxis(angle, this.axis) * transform.rotation;
-			return;
-		}
-		transform.localRotation = Quaternion.AngleAxis(angle, this.axis) * transform.localRotation;
-	}
-
 	[Tooltip("Axis to rotate around.")]
 	public Vector3 axis = Vector3.up;
 
@@ -40,4 +19,26 @@ public class SpinParametricAnimation : MonoBehaviour
 	private float _animationProgress;
 
 	private float _oldAngle;
+
+	protected void OnEnable()
+	{
+		axis = axis.normalized;
+	}
+
+	protected void LateUpdate()
+	{
+		Transform transform = base.transform;
+		_animationProgress = (_animationProgress + Time.deltaTime * revolutionsPerSecond) % 1f;
+		float num = timeCurve.Evaluate(_animationProgress) * 360f;
+		float angle = num - _oldAngle;
+		_oldAngle = num;
+		if (WorldSpaceRotation)
+		{
+			transform.rotation = Quaternion.AngleAxis(angle, axis) * transform.rotation;
+		}
+		else
+		{
+			transform.localRotation = Quaternion.AngleAxis(angle, axis) * transform.localRotation;
+		}
+	}
 }

@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct StringEnum<TEnum> where TEnum : struct, Enum
 {
-	public TEnum Value
-	{
-		get
-		{
-			return this.m_EnumValue;
-		}
-	}
+	[SerializeField]
+	private TEnum m_EnumValue;
+
+	public TEnum Value => m_EnumValue;
 
 	public static implicit operator StringEnum<TEnum>(TEnum e)
 	{
@@ -37,25 +34,20 @@ public struct StringEnum<TEnum> where TEnum : struct, Enum
 
 	public override bool Equals(object obj)
 	{
-		if (obj is StringEnum<TEnum>)
+		if (obj is StringEnum<TEnum> stringEnum)
 		{
-			StringEnum<TEnum> stringEnum = (StringEnum<TEnum>)obj;
-			return this.m_EnumValue.Equals(stringEnum.m_EnumValue);
+			return m_EnumValue.Equals(stringEnum.m_EnumValue);
 		}
 		return false;
 	}
 
 	public override int GetHashCode()
 	{
-		return this.m_EnumValue.GetHashCode();
+		return m_EnumValue.GetHashCode();
 	}
 
 	public override string ToString()
 	{
-		TEnum value = this.Value;
-		return value.ToString();
+		return Value.ToString();
 	}
-
-	[SerializeField]
-	private TEnum m_EnumValue;
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
@@ -6,97 +6,39 @@ using UnityEngine;
 
 public class GorillaSkinToggle : MonoBehaviour, ISpawnable
 {
-	public bool applied
+	[Serializable]
+	private struct ColoringRule
 	{
-		get
+		public GorillaSkinMaterials colorMaterials;
+
+		public string shaderColorProperty;
+
+		private ShaderHashId shaderHashId;
+
+		public void Init()
 		{
-			return this._applied;
-		}
-	}
-
-	bool ISpawnable.IsSpawned { get; set; }
-
-	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
-
-	void ISpawnable.OnSpawn(VRRig rig)
-	{
-		this._rig = base.GetComponentInParent<VRRig>(true);
-		if (this.coloringRules.Length != 0)
-		{
-			this._activeSkin = GorillaSkin.CopyWithInstancedMaterials(this._skin);
-			for (int i = 0; i < this.coloringRules.Length; i++)
+			if (string.IsNullOrEmpty(shaderColorProperty))
 			{
-				this.coloringRules[i].Init();
+				shaderColorProperty = "_BaseColor";
 			}
-			return;
+			shaderHashId = new ShaderHashId(shaderColorProperty);
 		}
-		this._activeSkin = this._skin;
-	}
 
-	void ISpawnable.OnDespawn()
-	{
-	}
-
-	private void OnPlayerColorChanged(Color playerColor)
-	{
-		foreach (GorillaSkinToggle.ColoringRule coloringRule in this.coloringRules)
+		public void Apply(GorillaSkin skin, Color color)
 		{
-			coloringRule.Apply(this._activeSkin, playerColor);
+			if (colorMaterials.HasFlag(GorillaSkinMaterials.Body))
+			{
+				skin.bodyMaterial.SetColor(shaderHashId, color);
+			}
+			if (colorMaterials.HasFlag(GorillaSkinMaterials.Chest))
+			{
+				skin.chestMaterial.SetColor(shaderHashId, color);
+			}
+			if (colorMaterials.HasFlag(GorillaSkinMaterials.Scoreboard))
+			{
+				skin.scoreboardMaterial.SetColor(shaderHashId, color);
+			}
 		}
-	}
-
-	private void OnEnable()
-	{
-		if (this.coloringRules.Length != 0)
-		{
-			this._rig.OnColorChanged += this.OnPlayerColorChanged;
-			this.OnPlayerColorChanged(this._rig.playerColor);
-		}
-		this.Apply();
-	}
-
-	private void OnDisable()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this.Remove();
-		if (this.coloringRules.Length != 0)
-		{
-			this._rig.OnColorChanged -= this.OnPlayerColorChanged;
-		}
-	}
-
-	public void Apply()
-	{
-		GorillaSkin.ApplyToRig(this._rig, this._activeSkin, GorillaSkin.SkinType.cosmetic);
-		this._applied = true;
-	}
-
-	public void ApplyToMannequin(GameObject mannequin, bool swapMesh = false)
-	{
-		if (this._skin.IsNull())
-		{
-			Debug.LogError("No skin set on GorillaSkinToggle");
-			return;
-		}
-		if (mannequin.IsNull())
-		{
-			Debug.LogError("No mannequin set on GorillaSkinToggle");
-			return;
-		}
-		this._skin.ApplySkinToMannequin(mannequin, swapMesh);
-	}
-
-	public void Remove()
-	{
-		GorillaSkin.ApplyToRig(this._rig, null, GorillaSkin.SkinType.cosmetic);
-		float @float = PlayerPrefs.GetFloat("redValue", 0f);
-		float float2 = PlayerPrefs.GetFloat("greenValue", 0f);
-		float float3 = PlayerPrefs.GetFloat("blueValue", 0f);
-		GorillaTagger.Instance.UpdateColor(@float, float2, float3);
-		this._applied = false;
 	}
 
 	private VRRig _rig;
@@ -107,44 +49,99 @@ public class GorillaSkinToggle : MonoBehaviour, ISpawnable
 	private GorillaSkin _activeSkin;
 
 	[SerializeField]
-	private GorillaSkinToggle.ColoringRule[] coloringRules;
+	private ColoringRule[] coloringRules;
 
 	[Space]
 	[SerializeField]
 	private bool _applied;
 
-	[Serializable]
-	private struct ColoringRule
+	public bool applied => _applied;
+
+	bool ISpawnable.IsSpawned { get; set; }
+
+	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
+
+	void ISpawnable.OnSpawn(VRRig rig)
 	{
-		public void Init()
+		_rig = GetComponentInParent<VRRig>(includeInactive: true);
+		if (coloringRules.Length != 0)
 		{
-			if (string.IsNullOrEmpty(this.shaderColorProperty))
+			_activeSkin = GorillaSkin.CopyWithInstancedMaterials(_skin);
+			for (int i = 0; i < coloringRules.Length; i++)
 			{
-				this.shaderColorProperty = "_BaseColor";
-			}
-			this.shaderHashId = new ShaderHashId(this.shaderColorProperty);
-		}
-
-		public void Apply(GorillaSkin skin, Color color)
-		{
-			if (this.colorMaterials.HasFlag(GorillaSkinMaterials.Body))
-			{
-				skin.bodyMaterial.SetColor(this.shaderHashId, color);
-			}
-			if (this.colorMaterials.HasFlag(GorillaSkinMaterials.Chest))
-			{
-				skin.chestMaterial.SetColor(this.shaderHashId, color);
-			}
-			if (this.colorMaterials.HasFlag(GorillaSkinMaterials.Scoreboard))
-			{
-				skin.scoreboardMaterial.SetColor(this.shaderHashId, color);
+				coloringRules[i].Init();
 			}
 		}
+		else
+		{
+			_activeSkin = _skin;
+		}
+	}
 
-		public GorillaSkinMaterials colorMaterials;
+	void ISpawnable.OnDespawn()
+	{
+	}
 
-		public string shaderColorProperty;
+	private void OnPlayerColorChanged(Color playerColor)
+	{
+		ColoringRule[] array = coloringRules;
+		foreach (ColoringRule coloringRule in array)
+		{
+			coloringRule.Apply(_activeSkin, playerColor);
+		}
+	}
 
-		private ShaderHashId shaderHashId;
+	private void OnEnable()
+	{
+		if (coloringRules.Length != 0)
+		{
+			_rig.OnColorChanged += OnPlayerColorChanged;
+			OnPlayerColorChanged(_rig.playerColor);
+		}
+		Apply();
+	}
+
+	private void OnDisable()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			Remove();
+			if (coloringRules.Length != 0)
+			{
+				_rig.OnColorChanged -= OnPlayerColorChanged;
+			}
+		}
+	}
+
+	public void Apply()
+	{
+		GorillaSkin.ApplyToRig(_rig, _activeSkin, GorillaSkin.SkinType.cosmetic);
+		_applied = true;
+	}
+
+	public void ApplyToMannequin(GameObject mannequin, bool swapMesh = false)
+	{
+		if (_skin.IsNull())
+		{
+			Debug.LogError("No skin set on GorillaSkinToggle");
+		}
+		else if (mannequin.IsNull())
+		{
+			Debug.LogError("No mannequin set on GorillaSkinToggle");
+		}
+		else
+		{
+			_skin.ApplySkinToMannequin(mannequin, swapMesh);
+		}
+	}
+
+	public void Remove()
+	{
+		GorillaSkin.ApplyToRig(_rig, null, GorillaSkin.SkinType.cosmetic);
+		float red = PlayerPrefs.GetFloat("redValue", 0f);
+		float green = PlayerPrefs.GetFloat("greenValue", 0f);
+		float blue = PlayerPrefs.GetFloat("blueValue", 0f);
+		GorillaTagger.Instance.UpdateColor(red, green, blue);
+		_applied = false;
 	}
 }

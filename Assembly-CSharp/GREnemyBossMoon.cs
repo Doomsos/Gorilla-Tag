@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using GorillaLocomotion;
 using GorillaTagScripts.GhostReactor;
 using JetBrains.Annotations;
@@ -11,1312 +10,87 @@ using UnityEngine;
 
 public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameAgentComponent, IGameEntityDebugComponent, IGRSummoningEntity
 {
-	public bool BossHasRevealed { get; private set; }
-
-	public GRAbilityBase CurrAbility
-	{
-		get
-		{
-			return this.currAbility;
-		}
-	}
-
-	private void Awake()
-	{
-		this.trackedEntities = new List<int>(16);
-		this.trackedGameEntities = new List<GameEntity>(16);
-		this.rigidBody = base.GetComponent<Rigidbody>();
-		this.colliders = new List<Collider>(4);
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		this.agent.onBodyStateChanged += this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-		this.abilities = new GRAbilityBase[32];
-		this.adaptiveMusicController = Object.FindObjectOfType<GRAdaptiveMusicController>();
-	}
-
-	public void OnEntityInit()
-	{
-		this.currBehavior = GREnemyBossMoon.Behavior.None;
-		this.currAbility = null;
-		this.SetupAbility(GREnemyBossMoon.Behavior.HiddenIdle, this.abilityHiddenIdle, this.agent, this.anim, this.audioSource, null, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Reveal, this.abilityReveal, this.agent, this.anim, this.audioSource, null, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Idle, this.abilityIdle, this.agent, this.anim, this.audioSource, null, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Exposed, this.abilityExposed, this.agent, this.anim, this.audioSource, null, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.ExposedIdle, this.abilityExposedIdle, this.agent, this.anim, this.audioSource, null, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTongue, this.abilityAttackTongue01, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTongueSwipe, this.abilityAttackTongueSwipe01, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle00, this.abilityAttackTentacle00, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle01, this.abilityAttackTentacle01, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle02, this.abilityAttackTentacle02, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle03, this.abilityAttackTentacle03, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle04, this.abilityAttackTentacle04, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackTentacle05, this.abilityAttackTentacle05, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackQuickTentacle00, this.abilityAttackQuickTentacle00, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackQuickTentacle01, this.abilityAttackQuickTentacle01, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackQuickTentacle02, this.abilityAttackQuickTentacle02, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.AttackQuickTentacle03, this.abilityAttackQuickTentacle03, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.SummonStart, this.abilitySummonStart, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.SummonEnd, this.abilitySummonEnd, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Summon01, this.abilitySummon01, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Summon02, this.abilitySummon02, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Summon03, this.abilitySummon03, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Summon04, this.abilitySummon04, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.RetreatStart, this.abilityRetreatStart, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.RetreatEnd, this.abilityRetreatEnd, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.RetreatIdle, this.abilityRetreatIdle, this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Dying, this.abilityDie, this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.DyingIdle, this.abilityDieIdle, this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.Runaway, this.abilityRunaway, this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.SetupAbility(GREnemyBossMoon.Behavior.NextPhase, this.abilityIdle, this.agent, this.anim, this.audioSource, null, null, null);
-		this.senseNearby.Setup(this.headTransform, this.entity);
-		this.Setup(this.entity.createData);
-		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
-		{
-			GhostReactorLevelGenConfig currLevelGenConfig = this.entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig();
-			foreach (GRBonusEntry entry in currLevelGenConfig.enemyGlobalBonuses)
-			{
-				this.attributes.AddBonus(entry);
-			}
-			if (currLevelGenConfig.minEnemyKills.Count > 0)
-			{
-				GREnemyCount grenemyCount = currLevelGenConfig.minEnemyKills[0];
-				GREnemyType enemyType = grenemyCount.EnemyType;
-				if (enemyType != GREnemyType.MoonBoss_Phase1)
-				{
-					if (enemyType == GREnemyType.MoonBoss_Phase2)
-					{
-						this.phases[1].runawayAfterPhase = true;
-					}
-				}
-				else
-				{
-					this.phases[0].runawayAfterPhase = true;
-				}
-				GRBreakableItemSpawnConfig lootTableForType = this.GetLootTableForType(grenemyCount.EnemyType);
-				this.abilityDie.lootTable = lootTableForType;
-				this.abilityRunaway.lootTable = lootTableForType;
-			}
-		}
-		if (this.agent.navAgent != null)
-		{
-			this.agent.navAgent.autoTraverseOffMeshLink = false;
-		}
-		this.SetBehavior(GREnemyBossMoon.Behavior.HiddenIdle, true);
-		int maxHP = this.CalcMaxHP();
-		if (this.enemy != null)
-		{
-			this.enemy.SetMaxHP(maxHP);
-		}
-		this.SetHP(maxHP);
-	}
-
-	private GRBreakableItemSpawnConfig GetLootTableForType(GREnemyType enemyType)
-	{
-		for (int i = 0; i < this.lootPhases.Count; i++)
-		{
-			if (this.lootPhases[i].enemyType == enemyType)
-			{
-				return this.lootPhases[i].lootTable;
-			}
-		}
-		return null;
-	}
-
-	private void SetupAbility(GREnemyBossMoon.Behavior behavior, GRAbilityBase ability, GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
-	{
-		this.abilities[(int)behavior] = ability;
-		ability.Setup(agent, anim, audioSource, root, head, lineOfSight);
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnDestroy()
-	{
-		this.agent.onBodyStateChanged -= this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
-	}
-
-	public void Setup(long entityCreateData)
-	{
-		this.SetBehavior(GREnemyBossMoon.Behavior.HiddenIdle, true);
-		if (this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
-		{
-			this.SetBodyState(GREnemyBossMoon.BodyState.Shell, true);
-			return;
-		}
-		this.SetBodyState(GREnemyBossMoon.BodyState.Bones, true);
-	}
-
-	public void OnNetworkBehaviorStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 32)
-		{
-			return;
-		}
-		this.SetBehavior((GREnemyBossMoon.Behavior)newState, false);
-	}
-
-	public void OnNetworkBodyStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 3)
-		{
-			return;
-		}
-		this.SetBodyState((GREnemyBossMoon.BodyState)newState, false);
-	}
-
-	public void SetHP(int hp)
-	{
-		this.hp = hp;
-		if (this.enemy != null)
-		{
-			this.enemy.SetHP(hp);
-		}
-	}
-
-	public bool TrySetBehavior(GREnemyBossMoon.Behavior newBehavior)
-	{
-		if (newBehavior == GREnemyBossMoon.Behavior.Stagger)
-		{
-			return false;
-		}
-		this.SetBehavior(newBehavior, false);
-		return true;
-	}
-
-	public void SetBehavior(GREnemyBossMoon.Behavior newBehavior, bool force = false)
-	{
-		if (newBehavior < GREnemyBossMoon.Behavior.HiddenIdle || newBehavior >= (GREnemyBossMoon.Behavior)this.abilities.Length)
-		{
-			Debug.LogErrorFormat("New Behavior Index is invalid {0} {1} {2}", new object[]
-			{
-				(int)newBehavior,
-				newBehavior,
-				base.gameObject.name
-			});
-			return;
-		}
-		GRAbilityBase grabilityBase = this.abilities[(int)newBehavior];
-		if (this.currBehavior == newBehavior && !force)
-		{
-			return;
-		}
-		GREnemyBossMoon.Behavior behavior = this.currBehavior;
-		if (behavior != GREnemyBossMoon.Behavior.AttackTongue)
-		{
-			if (behavior == GREnemyBossMoon.Behavior.NextPhase)
-			{
-				this.IncrementBossPhase();
-			}
-		}
-		else
-		{
-			for (int i = 0; i < this.eyes.Count; i++)
-			{
-				this.eyes[i].ResetEye();
-			}
-			this.consecutiveCombos = 0;
-			this.attacksAfterSummon = 0;
-			this.currSummon = null;
-			this.KillAllSummoned(true, true);
-			if (this.triggerNextMusicTransition)
-			{
-				this.triggerNextMusicTransition = false;
-				if (this.adaptiveMusicController != null)
-				{
-					this.adaptiveMusicController.TransitionToNextTrack();
-				}
-			}
-		}
-		Debug.LogFormat("Boss SetBehavior {0} -> {1}", new object[]
-		{
-			this.currBehavior,
-			newBehavior
-		});
-		if (this.currAbility != null)
-		{
-			this.currAbility.Stop();
-		}
-		this.lastBehavior = this.currBehavior;
-		this.currBehavior = newBehavior;
-		this.currAbility = grabilityBase;
-		if (this.currAbility != null)
-		{
-			this.currAbility.Start();
-		}
-		behavior = this.currBehavior;
-		switch (behavior)
-		{
-		case GREnemyBossMoon.Behavior.Reveal:
-			if (this.firstTimeReveal)
-			{
-				if (this.adaptiveMusicController != null)
-				{
-					this.adaptiveMusicController.Restart();
-				}
-				this.internalPhaseIndex = 0;
-			}
-			this.firstTimeReveal = false;
-			this.BossHasRevealed = true;
-			break;
-		case GREnemyBossMoon.Behavior.Exposed:
-			this.ToggleShockColliders(false);
-			break;
-		case GREnemyBossMoon.Behavior.ExposedIdle:
-			break;
-		case GREnemyBossMoon.Behavior.Stagger:
-			this.lastStaggerTime = Time.time;
-			break;
-		case GREnemyBossMoon.Behavior.Dying:
-			this.KillAllSummoned();
-			this.TurnOffGrav();
-			for (int j = 0; j < this.eyes.Count; j++)
-			{
-				this.eyes[j].TrySetBehavior(GREnemyBossMoonEye.Behavior.Dying);
-			}
-			if (this.adaptiveMusicController != null)
-			{
-				this.adaptiveMusicController.TransitionToLastTrack();
-			}
-			this.ToggleShockColliders(false);
-			break;
-		default:
-			switch (behavior)
-			{
-			case GREnemyBossMoon.Behavior.AttackTongue:
-				this.ToggleShockColliders(true);
-				break;
-			case GREnemyBossMoon.Behavior.Summon01:
-			case GREnemyBossMoon.Behavior.Summon02:
-			case GREnemyBossMoon.Behavior.Summon03:
-			case GREnemyBossMoon.Behavior.Summon04:
-				this.currSummon = (GRAbilitySummon)this.currAbility;
-				break;
-			case GREnemyBossMoon.Behavior.RetreatStart:
-				this.TurnOnGrav();
-				break;
-			case GREnemyBossMoon.Behavior.RetreatEnd:
-				this.TurnOffGrav();
-				break;
-			case GREnemyBossMoon.Behavior.Runaway:
-				if (this.entity.manager.ghostReactorManager != null)
-				{
-					this.entity.manager.ghostReactorManager.InstantDeathForCurrentEnemies();
-				}
-				if (this.adaptiveMusicController != null)
-				{
-					this.adaptiveMusicController.TransitionToLastTrack();
-				}
-				break;
-			}
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestBehaviorChange((byte)this.currBehavior);
-		}
-	}
-
-	public void SetSquishVolumeState(bool squishEnabled)
-	{
-		for (int i = 0; i < this.squishVolumes.Count; i++)
-		{
-			this.squishVolumes[i].overrideDisabled = !squishEnabled;
-			this.squishVolumes[i].SliceUpdate();
-		}
-	}
-
-	private int CalcMaxHP()
-	{
-		float difficultyScalingForCurrentFloor = this.entity.manager.ghostReactorManager.reactor.difficultyScalingForCurrentFloor;
-		int result = (int)((float)this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax) * difficultyScalingForCurrentFloor);
-		for (int i = 0; i < this.phases.Count; i++)
-		{
-			this.phases[i].minHP = Mathf.RoundToInt((float)this.phases[i].minHP * difficultyScalingForCurrentFloor);
-		}
-		return result;
-	}
-
-	public int GetCurrPhaseIndex()
-	{
-		if (this.phases == null)
-		{
-			return -1;
-		}
-		for (int i = 0; i < this.phases.Count; i++)
-		{
-			if (this.hp > this.phases[i].minHP)
-			{
-				return i;
-			}
-		}
-		return this.phases.Count - 1;
-	}
-
-	public GREnemyBossMoon.PhaseDef GetCurrPhase()
-	{
-		int currPhaseIndex = this.GetCurrPhaseIndex();
-		if (currPhaseIndex < 0 || currPhaseIndex >= this.phases.Count)
-		{
-			return null;
-		}
-		return this.phases[currPhaseIndex];
-	}
-
-	public void RestoreFullHealth()
-	{
-		this.SetHP(this.CalcMaxHP());
-	}
-
-	public void HurtBossHP()
-	{
-		this.HurtBoss(100, this.entity.id, Vector3.zero);
-	}
-
-	public void KillAllEyes()
-	{
-		for (int i = 0; i < this.eyes.Count; i++)
-		{
-			this.eyes[i].InstantKill();
-		}
-	}
-
-	public void KillAllSummoned()
-	{
-		this.KillAllSummoned(true, true);
-	}
-
-	public void KillAllSummoned(bool ignoreMonkeye = false, bool killAllEnemies = true)
-	{
-		int num = 0;
-		for (int i = 0; i < this.trackedGameEntities.Count; i++)
-		{
-			if (!(this.trackedGameEntities[i] == null))
-			{
-				GREnemyChaser component = this.trackedGameEntities[i].GetComponent<GREnemyChaser>();
-				if (component != null)
-				{
-					component.InstantDeath();
-					num++;
-				}
-				else
-				{
-					GREnemyRanged component2 = this.trackedGameEntities[i].GetComponent<GREnemyRanged>();
-					if (component2 != null)
-					{
-						component2.InstantDeath();
-						num++;
-					}
-					else
-					{
-						GREnemyPest component3 = this.trackedGameEntities[i].GetComponent<GREnemyPest>();
-						if (component3 != null)
-						{
-							component3.InstantDeath();
-							num++;
-						}
-						else
-						{
-							GREnemySummoner component4 = this.trackedGameEntities[i].GetComponent<GREnemySummoner>();
-							if (component4 != null)
-							{
-								component4.InstantDeath();
-								num++;
-							}
-							else if (!ignoreMonkeye)
-							{
-								GREnemyMonkeye component5 = this.trackedGameEntities[i].GetComponent<GREnemyMonkeye>();
-								if (component5 != null)
-								{
-									component5.InstantDeath();
-									num++;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (killAllEnemies && this.entity.manager.ghostReactorManager != null)
-		{
-			this.entity.manager.ghostReactorManager.InstantDeathForCurrentEnemies();
-		}
-		Debug.Log(string.Format("Report killed all summon {0}", num));
-	}
-
-	public void GoBackPhase()
-	{
-		int currPhaseIndex = this.GetCurrPhaseIndex();
-		if (currPhaseIndex <= 0)
-		{
-			Debug.LogWarning("GREnemyBossMoon - GoBackPhase - At first phase");
-			return;
-		}
-		this.SetHP(this.phases[currPhaseIndex - 1].minHP);
-	}
-
-	public void GoToNextPhase()
-	{
-		int currPhaseIndex = this.GetCurrPhaseIndex();
-		if (currPhaseIndex < 0 || currPhaseIndex >= this.phases.Count)
-		{
-			return;
-		}
-		this.SetHP(this.phases[currPhaseIndex].minHP);
-	}
-
-	private bool IsSummon(GREnemyBossMoon.Behavior behavior)
-	{
-		for (int i = 0; i < this.phases.Count; i++)
-		{
-			if (this.phases[i] != null && this.phases[i].summons != null && this.phases[i].summons.Contains(behavior))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private bool IsAnySummonBehavior(GREnemyBossMoon.Behavior behavior)
-	{
-		return this.currBehavior == GREnemyBossMoon.Behavior.SummonStart || this.currBehavior == GREnemyBossMoon.Behavior.SummonEnd || this.currBehavior == GREnemyBossMoon.Behavior.Summon01 || this.currBehavior == GREnemyBossMoon.Behavior.Summon02 || this.currBehavior == GREnemyBossMoon.Behavior.Summon03 || this.currBehavior == GREnemyBossMoon.Behavior.Summon04;
-	}
-
-	public GREnemyBossMoon.Behavior ChooseSummonForPhase()
-	{
-		GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-		if (currPhase == null)
-		{
-			return GREnemyBossMoon.Behavior.None;
-		}
-		return this.ChooseRandomBehavior(currPhase.summons);
-	}
-
-	public GREnemyBossMoon.Behavior ChooseAttackForPhase()
-	{
-		GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-		if (currPhase == null)
-		{
-			return GREnemyBossMoon.Behavior.None;
-		}
-		return this.ChooseRandomBehavior(currPhase.attacks);
-	}
-
-	public GREnemyBossMoon.Behavior ChooseRandomBehavior(List<GREnemyBossMoon.Behavior> behaviors)
-	{
-		if (behaviors == null || behaviors.Count <= 0)
-		{
-			return GREnemyBossMoon.Behavior.None;
-		}
-		int index = Random.Range(0, behaviors.Count);
-		return behaviors[index];
-	}
-
-	public void SetBodyState(GREnemyBossMoon.BodyState newBodyState, bool force = false)
-	{
-		if (this.currBodyState == newBodyState && !force)
-		{
-			return;
-		}
-		this.currBodyState = newBodyState;
-		if (this.currBodyState == GREnemyBossMoon.BodyState.Destroyed)
-		{
-			GhostReactorManager.Get(this.entity).ReportEnemyDeath();
-		}
-		Debug.LogFormat("State Change {0} {1}", new object[]
-		{
-			this.entity.id.index,
-			this.currBodyState
-		});
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestStateChange((byte)newBodyState);
-		}
-	}
-
-	private void RefreshBody()
-	{
-		switch (this.currBodyState)
-		{
-		case GREnemyBossMoon.BodyState.Destroyed:
-			GREnemy.HideRenderers(this.bones, false);
-			GREnemy.HideRenderers(this.always, false);
-			return;
-		case GREnemyBossMoon.BodyState.Bones:
-			GREnemy.HideRenderers(this.bones, false);
-			GREnemy.HideRenderers(this.always, false);
-			return;
-		case GREnemyBossMoon.BodyState.Shell:
-			GREnemy.HideRenderers(this.bones, true);
-			GREnemy.HideRenderers(this.always, false);
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void Update()
-	{
-		this.OnUpdate(Time.deltaTime);
-	}
-
-	public void OnEntityThink(float dt)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		GREnemyBossMoon.tempRigs.Clear();
-		GREnemyBossMoon.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GREnemyBossMoon.tempRigs);
-		this.senseNearby.UpdateNearby(GREnemyBossMoon.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		this.agent.RequestTarget((vrrig == null) ? null : vrrig.OwningNetPlayer);
-		if (this.currAbility != null)
-		{
-			this.currAbility.Think(dt);
-		}
-		GREnemyBossMoon.Behavior behavior = this.currBehavior;
-		if (behavior != GREnemyBossMoon.Behavior.HiddenIdle)
-		{
-			if (behavior != GREnemyBossMoon.Behavior.Idle)
-			{
-				if (behavior != GREnemyBossMoon.Behavior.RetreatIdle)
-				{
-					return;
-				}
-				this.waitInRetreat += dt * 12f;
-				if (this.trackedEntities.Count <= 0 || this.waitInRetreat > 20f)
-				{
-					this.TrySetBehavior(GREnemyBossMoon.Behavior.RetreatEnd);
-				}
-			}
-			else if (this.currAbility.IsDone())
-			{
-				this.ChooseNewBehavior(false);
-				return;
-			}
-			return;
-		}
-		this.ChooseNewBehavior(true);
-	}
-
-	private GREnemyBossMoon.Behavior TryChooseAttackBehavior()
-	{
-		GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-		if (this.currBehavior == GREnemyBossMoon.Behavior.HiddenIdle)
-		{
-			if (currPhase != null && this.trackedEntities.Count <= currPhase.maxEnemiesForReveal && this.senseNearby.IsAnyoneNearby(this.abilityReveal.GetRange(), this.firstTimeReveal))
-			{
-				return GREnemyBossMoon.Behavior.Reveal;
-			}
-			return GREnemyBossMoon.Behavior.None;
-		}
-		else
-		{
-			if (GhostReactorManager.AggroDisabled)
-			{
-				return GREnemyBossMoon.Behavior.None;
-			}
-			if (currPhase == null)
-			{
-				return GREnemyBossMoon.Behavior.None;
-			}
-			if (currPhase.summons != null && currPhase.summons.Count > 0 && this.attacksAfterSummon <= 0 && this.trackedEntities.Count < currPhase.maxSimultaneousEnemies)
-			{
-				this.attacksAfterSummon = currPhase.attacksBetweenSummons;
-				if (currPhase.summons.Count > 0)
-				{
-					this.currSummon = (GRAbilitySummon)this.abilities[(int)currPhase.summons[0]];
-					if (this.currSummon != null)
-					{
-						for (int i = this.trackedEntities.Count; i < currPhase.maxSimultaneousEnemies; i++)
-						{
-							this.currSummon.ForceSpawn();
-						}
-					}
-				}
-			}
-			List<GREnemyBossMoon.Behavior> list = currPhase.attacks;
-			if (currPhase.comboAttacks != null && currPhase.comboAttacks.Count > 0 && ((currPhase.allowConsecutiveCombos && this.consecutiveCombos < 3) || this.consecutiveCombos <= 0) && Random.value < currPhase.comboAttackChance)
-			{
-				list = currPhase.comboAttacks;
-				this.consecutiveCombos++;
-			}
-			else
-			{
-				this.consecutiveCombos = 0;
-			}
-			if (list != null && list.Count > 0)
-			{
-				GREnemyBossMoon.tempPotentialAttacks.Clear();
-				for (int j = 0; j < list.Count; j++)
-				{
-					GREnemyBossMoon.tempPotentialAttacks.Add(list[j]);
-				}
-				for (int k = GREnemyBossMoon.tempPotentialAttacks.Count - 1; k >= 0; k--)
-				{
-					GRAbilityBase grabilityBase = this.abilities[(int)GREnemyBossMoon.tempPotentialAttacks[k]];
-					if (grabilityBase == null || !this.senseNearby.IsAnyoneNearby(grabilityBase.GetRange(), false) || !grabilityBase.IsCoolDownOver())
-					{
-						GREnemyBossMoon.tempPotentialAttacks.RemoveAt(k);
-					}
-				}
-				if (GREnemyBossMoon.tempPotentialAttacks.Count > 0)
-				{
-					this.attacksAfterSummon--;
-					int index = Random.Range(0, GREnemyBossMoon.tempPotentialAttacks.Count);
-					return GREnemyBossMoon.tempPotentialAttacks[index];
-				}
-			}
-			return GREnemyBossMoon.Behavior.None;
-		}
-	}
-
-	private bool AreAllEyesClosed()
-	{
-		for (int i = 0; i < this.eyes.Count; i++)
-		{
-			if (this.eyes[i].hp > 0)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public void GotoDyingIdle()
-	{
-		this.SetBehavior(GREnemyBossMoon.Behavior.DyingIdle, true);
-	}
-
-	private void ChooseNewBehavior(bool forceAttack = false)
-	{
-		if (this.hp <= 0)
-		{
-			this.TrySetBehavior(GREnemyBossMoon.Behavior.Dying);
-			return;
-		}
-		if (this.AreAllEyesClosed())
-		{
-			if (this.eyesPushVolume != null)
-			{
-				this.eyesPushVolume.Trigger();
-			}
-			this.TrySetBehavior(GREnemyBossMoon.Behavior.Exposed);
-			return;
-		}
-		if (forceAttack || !this.restAfterAttack)
-		{
-			this.restAfterAttack = false;
-			GREnemyBossMoon.Behavior behavior = this.TryChooseAttackBehavior();
-			if (behavior != GREnemyBossMoon.Behavior.None)
-			{
-				if (this.TrySetBehavior(behavior) && this.currBehavior != GREnemyBossMoon.Behavior.AttackTongue)
-				{
-					GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-					this.restAfterAttack = currPhase.restAfterAttack;
-				}
-				if (this.currSummon != null)
-				{
-					GREnemyBossMoon.PhaseDef currPhase2 = this.GetCurrPhase();
-					if (this.trackedEntities.Count < currPhase2.maxSimultaneousEnemies && Random.value < currPhase2.randomSummonChance)
-					{
-						this.currSummon.ForceSpawn();
-					}
-				}
-				return;
-			}
-		}
-		if (this.currBehavior == GREnemyBossMoon.Behavior.None)
-		{
-			this.restAfterAttack = false;
-			this.TrySetBehavior(GREnemyBossMoon.Behavior.Idle);
-		}
-	}
-
-	private void OnUpdate(float dt)
-	{
-		if (this.entity.IsAuthority())
-		{
-			this.OnUpdateAuthority(dt);
-			return;
-		}
-		this.OnUpdateRemote(dt);
-	}
-
-	private void OnUpdateAuthority(float dt)
-	{
-		if (this.currBehavior == GREnemyBossMoon.Behavior.Runaway)
-		{
-			this.currAbility.UpdateAuthority(dt);
-			return;
-		}
-		if (this.currBehavior == GREnemyBossMoon.Behavior.ExposedIdle)
-		{
-			GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-			if (this.hp <= 0)
-			{
-				this.SetBehavior(GREnemyBossMoon.Behavior.Dying, false);
-			}
-			else if (this.hp <= currPhase.minHP)
-			{
-				this.SetBehavior(GREnemyBossMoon.Behavior.AttackTongue, false);
-			}
-		}
-		if (this.currAbility != null)
-		{
-			this.currAbility.UpdateAuthority(dt);
-			GREnemyBossMoon.PhaseDef currPhase2 = this.GetCurrPhase();
-			if (this.currAbility.IsDone())
-			{
-				if (this.currBehavior == GREnemyBossMoon.Behavior.NextPhase)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.AttackTongue, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.Exposed)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.ExposedIdle, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.SummonStart)
-				{
-					GREnemyBossMoon.Behavior newBehavior = this.ChooseSummonForPhase();
-					this.SetBehavior(newBehavior, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.SummonEnd && currPhase2.retreatAfterSummon)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.RetreatStart, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.RetreatStart)
-				{
-					this.waitInRetreat = 0f;
-					this.SetBehavior(GREnemyBossMoon.Behavior.RetreatIdle, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.RetreatIdle)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.RetreatEnd, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.ExposedIdle)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.AttackTongue, false);
-					return;
-				}
-				if (this.currBehavior == GREnemyBossMoon.Behavior.AttackTongue)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.HiddenIdle, false);
-					return;
-				}
-				if (!this.IsSummon(this.currBehavior))
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.None, false);
-					this.ChooseNewBehavior(false);
-					return;
-				}
-				if (currPhase2 == null || this.trackedEntities.Count >= currPhase2.maxSimultaneousEnemies)
-				{
-					this.SetBehavior(GREnemyBossMoon.Behavior.SummonEnd, false);
-					return;
-				}
-				this.SetBehavior(GREnemyBossMoon.Behavior.None, false);
-				GREnemyBossMoon.Behavior newBehavior2 = this.ChooseSummonForPhase();
-				this.SetBehavior(newBehavior2, false);
-				return;
-			}
-			else if (this.AreAllEyesClosed() && this.currBehavior != GREnemyBossMoon.Behavior.Exposed && this.currBehavior != GREnemyBossMoon.Behavior.ExposedIdle && this.lastBehavior != GREnemyBossMoon.Behavior.Exposed && this.lastBehavior != GREnemyBossMoon.Behavior.ExposedIdle)
-			{
-				this.TrySetBehavior(GREnemyBossMoon.Behavior.Exposed);
-			}
-		}
-	}
-
-	private void OnUpdateRemote(float dt)
-	{
-		if (this.currAbility != null)
-		{
-			this.currAbility.UpdateRemote(dt);
-		}
-	}
-
-	private void CatchUpPhase(int phase)
-	{
-		this.BossHasRevealed = true;
-		this.internalPhaseIndex = phase;
-		this.AdjustByPhaseIndex(phase);
-		if (this.adaptiveMusicController != null)
-		{
-			this.adaptiveMusicController.RestartAt(phase);
-		}
-	}
-
-	private void IncrementBossPhase()
-	{
-		this.internalPhaseIndex++;
-		this.triggerNextMusicTransition = true;
-		this.AdjustByPhaseIndex(this.internalPhaseIndex);
-		Debug.Log(string.Format("Incrementing phase to phase {0}!", this.internalPhaseIndex));
-	}
-
-	private void SyncPhase(int phase)
-	{
-		this.internalPhaseIndex = phase;
-		if (this.adaptiveMusicController != null)
-		{
-			this.adaptiveMusicController.GoToTrack(this.internalPhaseIndex, false);
-		}
-		this.AdjustByPhaseIndex(this.internalPhaseIndex);
-		Debug.Log(string.Format("Syncing phase to phase {0}!", this.internalPhaseIndex));
-	}
-
-	private void AdjustByPhaseIndex(int phase)
-	{
-		switch (this.internalPhaseIndex)
-		{
-		case 1:
-			this.abilityIdle.SpeedUp(3f);
-			this.AdjustAttackAnimSpeed(1.2f);
-			return;
-		case 2:
-			this.abilityIdle.SpeedUp(4f);
-			this.AdjustAttackAnimSpeed(1.4f);
-			return;
-		case 3:
-			this.abilityIdle.SpeedUp(4f);
-			this.AdjustAttackAnimSpeed(1.6f);
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void AdjustAttackAnimSpeed(float speed)
-	{
-		this.abilityAttackTentacle00.attackAnimData.speed = speed;
-		this.abilityAttackTentacle01.attackAnimData.speed = speed;
-		this.abilityAttackTentacle02.attackAnimData.speed = speed;
-		this.abilityAttackTentacle03.attackAnimData.speed = speed;
-		this.abilityAttackTentacle04.attackAnimData.speed = speed;
-		this.abilityAttackTentacle05.attackAnimData.speed = speed;
-	}
-
-	public void OnHitByClub(GRTool tool, GameHitData hit)
-	{
-		this.HurtBoss(hit.hitAmount, hit.hitEntityId, tool.transform.position);
-	}
-
-	private void HurtBoss(int hitAmount, GameEntityId hitByEntityId, Vector3 toolPosition)
-	{
-		if (this.currBehavior == GREnemyBossMoon.Behavior.Dying || this.currBehavior == GREnemyBossMoon.Behavior.DyingIdle || this.currBehavior == GREnemyBossMoon.Behavior.Runaway || this.IsAnySummonBehavior(this.currBehavior))
-		{
-			return;
-		}
-		if (this.currBodyState == GREnemyBossMoon.BodyState.Bones)
-		{
-			int num = this.hp;
-			GREnemyBossMoon.PhaseDef currPhase = this.GetCurrPhase();
-			this.SetHP(this.hp - hitAmount);
-			if (this.damagedSounds.Count > 0)
-			{
-				this.damagedSoundIndex = AbilityHelperFunctions.RandomRangeUnique(0, this.damagedSounds.Count, this.damagedSoundIndex);
-				this.audioSource.PlayOneShot(this.damagedSounds[this.damagedSoundIndex], this.damagedSoundVolume);
-			}
-			if (this.fxDamaged != null)
-			{
-				this.fxDamaged.SetActive(false);
-				this.fxDamaged.SetActive(true);
-			}
-			if (this.hp <= 0)
-			{
-				if (hitByEntityId != GameEntityId.Invalid)
-				{
-					this.abilityDie.SetInstigatingPlayerIndex(this.entity.GetLastHeldByPlayerForEntityID(hitByEntityId));
-				}
-				this.SetBodyState(GREnemyBossMoon.BodyState.Destroyed, false);
-				this.SetBehavior(GREnemyBossMoon.Behavior.Dying, false);
-				return;
-			}
-			if (num > currPhase.minHP && this.hp <= currPhase.minHP)
-			{
-				if (currPhase.runawayAfterPhase)
-				{
-					Debug.Log("Force runaway!");
-					if (hitByEntityId != GameEntityId.Invalid)
-					{
-						this.abilityRunaway.SetInstigatingPlayerIndex(this.entity.GetLastHeldByPlayerForEntityID(hitByEntityId));
-					}
-					this.SetBehavior(GREnemyBossMoon.Behavior.Runaway, false);
-				}
-				else
-				{
-					Debug.Log("Force next phase transition!");
-					this.SetBehavior(GREnemyBossMoon.Behavior.NextPhase, false);
-				}
-			}
-			this.lastSeenTargetPosition = toolPosition;
-			this.lastSeenTargetTime = Time.timeAsDouble;
-			Vector3 vector = this.lastSeenTargetPosition - base.transform.position;
-			vector.y = 0f;
-			this.searchPosition = this.lastSeenTargetPosition + vector.normalized * 1.5f;
-		}
-	}
-
-	public void OnHitByFlash(GRTool grTool, GameHitData hit)
-	{
-	}
-
-	public void OnHitByShield(GRTool tool, GameHitData hit)
+	[Serializable]
+	public class PhaseDef
 	{
-		this.OnHitByClub(tool, hit);
-	}
-
-	public void ReportDeathStat()
-	{
-		if (this.currAbility != null)
-		{
-			GRAbilityDie grabilityDie = this.currAbility as GRAbilityDie;
-			if (grabilityDie != null)
-			{
-				grabilityDie.ReportDeathStat();
-			}
-		}
-	}
-
-	private bool IsAttackBehavior(GREnemyBossMoon.Behavior behavior)
-	{
-		return behavior == GREnemyBossMoon.Behavior.AttackTentacle00 || behavior == GREnemyBossMoon.Behavior.AttackTentacle01 || behavior == GREnemyBossMoon.Behavior.AttackTentacle02 || behavior == GREnemyBossMoon.Behavior.AttackTentacle03 || behavior == GREnemyBossMoon.Behavior.AttackTentacle04 || behavior == GREnemyBossMoon.Behavior.AttackTentacle05 || behavior == GREnemyBossMoon.Behavior.AttackQuickTentacle00 || behavior == GREnemyBossMoon.Behavior.AttackQuickTentacle01 || behavior == GREnemyBossMoon.Behavior.AttackQuickTentacle02 || behavior == GREnemyBossMoon.Behavior.AttackQuickTentacle03 || behavior == GREnemyBossMoon.Behavior.AttackTongue || behavior == GREnemyBossMoon.Behavior.AttackTongueSwipe;
-	}
-
-	[CanBeNull]
-	private GRAbilityBase GetAssociatedAbilityForBehavior(GREnemyBossMoon.Behavior behavior)
-	{
-		switch (behavior)
-		{
-		case GREnemyBossMoon.Behavior.AttackTentacle00:
-			return this.abilityAttackTentacle00;
-		case GREnemyBossMoon.Behavior.AttackTentacle01:
-			return this.abilityAttackTentacle01;
-		case GREnemyBossMoon.Behavior.AttackTentacle02:
-			return this.abilityAttackTentacle02;
-		case GREnemyBossMoon.Behavior.AttackTentacle03:
-			return this.abilityAttackTentacle03;
-		case GREnemyBossMoon.Behavior.AttackTentacle04:
-			return this.abilityAttackTentacle04;
-		case GREnemyBossMoon.Behavior.AttackTentacle05:
-			return this.abilityAttackTentacle05;
-		case GREnemyBossMoon.Behavior.AttackQuickTentacle00:
-			return this.abilityAttackQuickTentacle00;
-		case GREnemyBossMoon.Behavior.AttackQuickTentacle01:
-			return this.abilityAttackQuickTentacle01;
-		case GREnemyBossMoon.Behavior.AttackQuickTentacle02:
-			return this.abilityAttackQuickTentacle02;
-		case GREnemyBossMoon.Behavior.AttackQuickTentacle03:
-			return this.abilityAttackQuickTentacle03;
-		case GREnemyBossMoon.Behavior.AttackTongue:
-			return this.abilityAttackTongue01;
-		case GREnemyBossMoon.Behavior.AttackTongueSwipe:
-			return this.abilityAttackTongueSwipe01;
-		}
-		return null;
-	}
-
-	private void OnTriggerEnter(Collider collider)
-	{
-		if (this.currBodyState == GREnemyBossMoon.BodyState.Destroyed)
-		{
-			return;
-		}
-		if (!this.IsAttackBehavior(this.currBehavior))
-		{
-			return;
-		}
-		if (collider.isTrigger)
-		{
-			return;
-		}
-		GRShieldCollider component = collider.GetComponent<GRShieldCollider>();
-		if (component != null)
-		{
-			GameHittable component2 = base.GetComponent<GameHittable>();
-			component.BlockHittable(this.headTransform.position, base.transform.forward, component2);
-			return;
-		}
-		Rigidbody attachedRigidbody = collider.attachedRigidbody;
-		if (attachedRigidbody != null)
-		{
-			GRPlayer component3 = attachedRigidbody.GetComponent<GRPlayer>();
-			if (component3 == null)
-			{
-				GorillaTagger component4 = attachedRigidbody.GetComponent<GorillaTagger>();
-				if (component4 != null && component4.offlineVRRig != null)
-				{
-					component3 = component4.offlineVRRig.GetComponent<GRPlayer>();
-				}
-			}
-			if (component3 != null && component3.gamePlayer.IsLocal() && Time.time > this.lastHitPlayerTime + this.minTimeBetweenHits)
-			{
-				this.HitPlayer(component3, false);
-			}
-			GRBreakable component5 = attachedRigidbody.GetComponent<GRBreakable>();
-			GameHittable component6 = attachedRigidbody.GetComponent<GameHittable>();
-			if (component5 != null && component6 != null)
-			{
-				GameHitData hitData = new GameHitData
-				{
-					hitTypeId = 0,
-					hitEntityId = component6.gameEntity.id,
-					hitByEntityId = this.entity.id,
-					hitEntityPosition = component5.transform.position,
-					hitImpulse = Vector3.zero,
-					hitPosition = component5.transform.position,
-					hittablePoint = component6.FindHittablePoint(collider)
-				};
-				component6.RequestHit(hitData);
-			}
-		}
-	}
-
-	private void TurnOnGrav()
-	{
-		if (this.currentGravActivator != null)
-		{
-			return;
-		}
-		this.currentGravActivator = this.gravActivators[Random.Range(0, this.gravActivators.Length)];
-		this.currentGravActivator.SetActive(true);
-	}
-
-	private void TurnOffGrav()
-	{
-		if (this.currentGravActivator == null)
-		{
-			return;
-		}
-		this.currentGravActivator.SetActive(false);
-		this.currentGravActivator = null;
-	}
-
-	[ContextMenu("Debug Hit Player")]
-	private void DebugHitPlayer()
-	{
-		this.HitPlayer(VRRig.LocalRig.GetComponent<GRPlayer>(), true);
-	}
-
-	public void HitPlayer(GRPlayer player, bool useImpulse = false)
-	{
-		if (this.currBodyState == GREnemyBossMoon.BodyState.Destroyed || this.tryHitPlayerCoroutine != null)
-		{
-			base.StopCoroutine(this.tryHitPlayerCoroutine);
-		}
-		this.tryHitPlayerCoroutine = base.StartCoroutine(this.TryHitPlayer(player, useImpulse));
-	}
+		public int minHP;
 
-	private IEnumerator TryHitPlayer(GRPlayer player, bool useImpulse = false)
-	{
-		yield return new WaitForUpdate();
-		if (player != null && player.gamePlayer.IsLocal() && Time.time > this.lastHitPlayerTime + this.minTimeBetweenHits)
-		{
-			this.lastHitPlayerTime = Time.time;
-			ICustomKnockbackAbility customKnockbackAbility = this.GetAssociatedAbilityForBehavior(this.currBehavior) as ICustomKnockbackAbility;
-			Vector3 vector2;
-			if (customKnockbackAbility != null)
-			{
-				Vector3? vector = customKnockbackAbility.CalculateImpulse(player.transform);
-				if (vector != null)
-				{
-					Vector3 valueOrDefault = vector.GetValueOrDefault();
-					vector2 = valueOrDefault;
-					goto IL_F4;
-				}
-			}
-			vector2 = (player.transform.position - this.knockbackTransform.position).normalized * this.knockbackImpulse;
-			IL_F4:
-			GhostReactorManager.Get(this.entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Chaser, this.entity.id, player, base.transform.position, vector2);
-			this.cameraShaker.Shake();
-			float magnitude = vector2.magnitude;
-			GorillaTagger.Instance.StartVibration(true, magnitude, 0.333f);
-			GorillaTagger.Instance.StartVibration(false, magnitude, 0.333f);
-			if (useImpulse)
-			{
-				GTPlayer.Instance.ApplyKnockback(vector2 / magnitude, magnitude, true);
-			}
-		}
-		yield break;
-	}
+		public List<Behavior> attacks;
 
-	public void ShockPlayer()
-	{
-		if (this.currBodyState == GREnemyBossMoon.BodyState.Destroyed || this.tryShockPlayerCoroutine != null)
-		{
-			return;
-		}
-		this.tryShockPlayerCoroutine = base.StartCoroutine(this.TryShockPlayer());
-	}
+		public List<Behavior> comboAttacks;
 
-	private IEnumerator TryShockPlayer()
-	{
-		this.bodyRenderer.sharedMaterials = this.shockedBodyMaterials;
-		yield return new WaitForSecondsRealtime(1f);
-		this.bodyRenderer.sharedMaterials = this.defaultBodyMaterials;
-		this.tryShockPlayerCoroutine = null;
-		yield break;
-	}
+		public bool restAfterAttack = true;
 
-	private void ToggleShockColliders(bool toggle)
-	{
-		for (int i = 0; i < this.shockColliders.Count; i++)
-		{
-			this.shockColliders[i].enabled = toggle;
-		}
-	}
+		public float comboAttackChance = 0.25f;
 
-	public void GroundSlamWeak(Transform slamCenter)
-	{
-		this._GroundSlam(slamCenter, 0.1f, 6f, 5f);
-	}
+		public bool allowConsecutiveCombos;
 
-	public void GroundSlam(Transform slamCenter)
-	{
-		this._GroundSlam(slamCenter, 1f, 11f, 8f);
-	}
+		public List<Behavior> summons;
 
-	public void _GroundSlam(Transform slamCenter, float duration, float distance, float hitVelocity)
-	{
-		GREnemyBossMoon.<_GroundSlam>d__173 <_GroundSlam>d__;
-		<_GroundSlam>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<_GroundSlam>d__.<>4__this = this;
-		<_GroundSlam>d__.slamCenter = slamCenter;
-		<_GroundSlam>d__.duration = duration;
-		<_GroundSlam>d__.distance = distance;
-		<_GroundSlam>d__.hitVelocity = hitVelocity;
-		<_GroundSlam>d__.<>1__state = -1;
-		<_GroundSlam>d__.<>t__builder.Start<GREnemyBossMoon.<_GroundSlam>d__173>(ref <_GroundSlam>d__);
-	}
+		public int maxSimultaneousEnemies = 6;
 
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Concat(new string[]
-		{
-			"<color=\"white\">State:</color> <color=\"yellow\">",
-			this.currBehavior.ToString(),
-			"</color>\n",
-			string.Format("<color=\"white\">Phase:</color> <color=\"yellow\">{0}</color>\n", this.GetCurrPhaseIndex()),
-			string.Format("<color=\"white\">HP:</color> <color=\"yellow\">{0}</color>", this.hp)
-		}));
-	}
+		public int maxEnemiesForReveal = 4;
 
-	public void OnGameEntitySerialize(BinaryWriter writer)
-	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		int value3 = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
-		writer.Write(value);
-		writer.Write(value2);
-		writer.Write(this.hp);
-		writer.Write(value3);
-		writer.Write(this.internalPhaseIndex);
-	}
+		public int attacksBetweenSummons = 4;
 
-	public void OnGameEntityDeserialize(BinaryReader reader)
-	{
-		GREnemyBossMoon.Behavior newBehavior = (GREnemyBossMoon.Behavior)reader.ReadByte();
-		GREnemyBossMoon.BodyState newBodyState = (GREnemyBossMoon.BodyState)reader.ReadByte();
-		int num = reader.ReadInt32();
-		int playerID = reader.ReadInt32();
-		int num2 = reader.ReadInt32();
-		this.SetHP(num);
-		this.SetBehavior(newBehavior, true);
-		this.SetBodyState(newBodyState, true);
-		this.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
-		if (num2 != -1)
-		{
-			if (this.internalPhaseIndex == -1)
-			{
-				Debug.Log(string.Format("Catching up to boss phase {0}.", num2));
-				this.CatchUpPhase(num2);
-				return;
-			}
-			if (num2 != this.internalPhaseIndex)
-			{
-				Debug.Log(string.Format("Syncing up to boss phase {0}.", this.internalPhaseIndex));
-				this.SyncPhase(num2);
-			}
-		}
-	}
+		public bool retreatAfterSummon = true;
 
-	public bool IsHitValid(GameHitData hit)
-	{
-		return true;
-	}
+		public float randomSummonChance = 0.1f;
 
-	public void OnHit(GameHitData hit)
-	{
-		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
-		GRTool gameComponent = this.entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
-		if (gameComponent != null)
-		{
-			switch (hitTypeId)
-			{
-			case GameHitType.Club:
-				this.OnHitByClub(gameComponent, hit);
-				return;
-			case GameHitType.Flash:
-				this.OnHitByFlash(gameComponent, hit);
-				return;
-			case GameHitType.Shield:
-				this.OnHitByShield(gameComponent, hit);
-				break;
-			default:
-				return;
-			}
-		}
+		public bool runawayAfterPhase;
 	}
 
-	private void AddTrackedEntity(GameEntity entityToTrack)
+	[Serializable]
+	public class LootPhase
 	{
-		int netId = entityToTrack.GetNetId();
-		this.trackedEntities.AddIfNew(netId);
-		if (!this.trackedGameEntities.Contains(entityToTrack))
-		{
-			this.trackedGameEntities.Add(entityToTrack);
-		}
-	}
+		public GREnemyType enemyType;
 
-	private void RemoveTrackedEntity(GameEntity entityToRemove)
-	{
-		int netId = entityToRemove.GetNetId();
-		if (this.trackedEntities.Contains(netId))
-		{
-			this.trackedEntities.Remove(netId);
-		}
-		if (this.trackedGameEntities.Contains(entityToRemove))
-		{
-			this.trackedGameEntities.Remove(entityToRemove);
-		}
+		public GRBreakableItemSpawnConfig lootTable;
 	}
 
-	public void OnSummonedEntityInit(GameEntity entity)
+	public enum Behavior
 	{
-		this.AddTrackedEntity(entity);
+		HiddenIdle,
+		Idle,
+		Reveal,
+		Exposed,
+		ExposedIdle,
+		Stagger,
+		Dying,
+		AttackTentacle00,
+		AttackTentacle01,
+		AttackTentacle02,
+		AttackTentacle03,
+		AttackTentacle04,
+		AttackTentacle05,
+		AttackQuickTentacle00,
+		AttackQuickTentacle01,
+		AttackQuickTentacle02,
+		AttackQuickTentacle03,
+		AttackTongue,
+		SummonStart,
+		SummonEnd,
+		Summon01,
+		Summon02,
+		Summon03,
+		Summon04,
+		RetreatStart,
+		RetreatEnd,
+		RetreatIdle,
+		DyingIdle,
+		Runaway,
+		AttackTongueSwipe,
+		NextPhase,
+		None,
+		Count
 	}
 
-	public void OnSummonedEntityDestroy(GameEntity entity)
+	public enum BodyState
 	{
-		this.RemoveTrackedEntity(entity);
+		Destroyed,
+		Bones,
+		Shell,
+		Count
 	}
 
 	public GameEntity entity;
@@ -1330,11 +104,11 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	[SerializeField]
 	private GRAttributes attributes;
 
-	public List<GREnemyBossMoon.PhaseDef> phases;
+	public List<PhaseDef> phases;
 
 	private int internalPhaseIndex = -1;
 
-	public List<GREnemyBossMoon.LootPhase> lootPhases;
+	public List<LootPhase> lootPhases;
 
 	public GRSenseNearby senseNearby;
 
@@ -1454,10 +228,10 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	public int hp;
 
 	[ReadOnly]
-	public GREnemyBossMoon.Behavior currBehavior;
+	public Behavior currBehavior;
 
 	[ReadOnly]
-	public GREnemyBossMoon.BodyState currBodyState;
+	public BodyState currBodyState;
 
 	[ReadOnly]
 	public NetPlayer targetPlayer;
@@ -1471,7 +245,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	[ReadOnly]
 	public Vector3 searchPosition;
 
-	private GREnemyBossMoon.Behavior lastBehavior;
+	private Behavior lastBehavior;
 
 	private bool restAfterAttack;
 
@@ -1521,92 +295,1259 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 
 	private static List<VRRig> tempRigs = new List<VRRig>(16);
 
-	private static List<GREnemyBossMoon.Behavior> tempPotentialAttacks = new List<GREnemyBossMoon.Behavior>(16);
+	private static List<Behavior> tempPotentialAttacks = new List<Behavior>(16);
 
 	private Coroutine tryHitPlayerCoroutine;
 
 	private Coroutine tryShockPlayerCoroutine;
 
-	[Serializable]
-	public class PhaseDef
+	public bool BossHasRevealed { get; private set; }
+
+	public GRAbilityBase CurrAbility => currAbility;
+
+	private void Awake()
 	{
-		public int minHP;
-
-		public List<GREnemyBossMoon.Behavior> attacks;
-
-		public List<GREnemyBossMoon.Behavior> comboAttacks;
-
-		public bool restAfterAttack = true;
-
-		public float comboAttackChance = 0.25f;
-
-		public bool allowConsecutiveCombos;
-
-		public List<GREnemyBossMoon.Behavior> summons;
-
-		public int maxSimultaneousEnemies = 6;
-
-		public int maxEnemiesForReveal = 4;
-
-		public int attacksBetweenSummons = 4;
-
-		public bool retreatAfterSummon = true;
-
-		public float randomSummonChance = 0.1f;
-
-		public bool runawayAfterPhase;
+		trackedEntities = new List<int>(16);
+		trackedGameEntities = new List<GameEntity>(16);
+		rigidBody = GetComponent<Rigidbody>();
+		colliders = new List<Collider>(4);
+		GetComponentsInChildren(colliders);
+		agent.onBodyStateChanged += OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged += OnNetworkBehaviorStateChange;
+		abilities = new GRAbilityBase[32];
+		adaptiveMusicController = UnityEngine.Object.FindObjectOfType<GRAdaptiveMusicController>();
 	}
 
-	[Serializable]
-	public class LootPhase
+	public void OnEntityInit()
 	{
-		public GREnemyType enemyType;
-
-		public GRBreakableItemSpawnConfig lootTable;
+		currBehavior = Behavior.None;
+		currAbility = null;
+		SetupAbility(Behavior.HiddenIdle, abilityHiddenIdle, agent, anim, audioSource, null, null, null);
+		SetupAbility(Behavior.Reveal, abilityReveal, agent, anim, audioSource, null, null, null);
+		SetupAbility(Behavior.Idle, abilityIdle, agent, anim, audioSource, null, null, null);
+		SetupAbility(Behavior.Exposed, abilityExposed, agent, anim, audioSource, null, null, null);
+		SetupAbility(Behavior.ExposedIdle, abilityExposedIdle, agent, anim, audioSource, null, null, null);
+		SetupAbility(Behavior.AttackTongue, abilityAttackTongue01, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTongueSwipe, abilityAttackTongueSwipe01, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle00, abilityAttackTentacle00, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle01, abilityAttackTentacle01, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle02, abilityAttackTentacle02, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle03, abilityAttackTentacle03, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle04, abilityAttackTentacle04, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackTentacle05, abilityAttackTentacle05, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackQuickTentacle00, abilityAttackQuickTentacle00, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackQuickTentacle01, abilityAttackQuickTentacle01, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackQuickTentacle02, abilityAttackQuickTentacle02, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.AttackQuickTentacle03, abilityAttackQuickTentacle03, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.SummonStart, abilitySummonStart, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.SummonEnd, abilitySummonEnd, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.Summon01, abilitySummon01, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.Summon02, abilitySummon02, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.Summon03, abilitySummon03, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.Summon04, abilitySummon04, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.RetreatStart, abilityRetreatStart, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.RetreatEnd, abilityRetreatEnd, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.RetreatIdle, abilityRetreatIdle, agent, anim, audioSource, base.transform, headTransform, null);
+		SetupAbility(Behavior.Dying, abilityDie, agent, anim, audioSource, base.transform, null, null);
+		SetupAbility(Behavior.DyingIdle, abilityDieIdle, agent, anim, audioSource, base.transform, null, null);
+		SetupAbility(Behavior.Runaway, abilityRunaway, agent, anim, audioSource, base.transform, null, null);
+		SetupAbility(Behavior.NextPhase, abilityIdle, agent, anim, audioSource, null, null, null);
+		senseNearby.Setup(headTransform, entity);
+		Setup(entity.createData);
+		if ((bool)entity && (bool)entity.manager && (bool)entity.manager.ghostReactorManager && (bool)entity.manager.ghostReactorManager.reactor)
+		{
+			GhostReactorLevelGenConfig currLevelGenConfig = entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig();
+			foreach (GRBonusEntry enemyGlobalBonuse in currLevelGenConfig.enemyGlobalBonuses)
+			{
+				attributes.AddBonus(enemyGlobalBonuse);
+			}
+			if (currLevelGenConfig.minEnemyKills.Count > 0)
+			{
+				GREnemyCount gREnemyCount = currLevelGenConfig.minEnemyKills[0];
+				switch (gREnemyCount.EnemyType)
+				{
+				case GREnemyType.MoonBoss_Phase1:
+					phases[0].runawayAfterPhase = true;
+					break;
+				case GREnemyType.MoonBoss_Phase2:
+					phases[1].runawayAfterPhase = true;
+					break;
+				}
+				GRBreakableItemSpawnConfig lootTableForType = GetLootTableForType(gREnemyCount.EnemyType);
+				abilityDie.lootTable = lootTableForType;
+				abilityRunaway.lootTable = lootTableForType;
+			}
+		}
+		if (agent.navAgent != null)
+		{
+			agent.navAgent.autoTraverseOffMeshLink = false;
+		}
+		SetBehavior(Behavior.HiddenIdle, force: true);
+		int num = CalcMaxHP();
+		if (enemy != null)
+		{
+			enemy.SetMaxHP(num);
+		}
+		SetHP(num);
 	}
 
-	public enum Behavior
+	private GRBreakableItemSpawnConfig GetLootTableForType(GREnemyType enemyType)
 	{
-		HiddenIdle,
-		Idle,
-		Reveal,
-		Exposed,
-		ExposedIdle,
-		Stagger,
-		Dying,
-		AttackTentacle00,
-		AttackTentacle01,
-		AttackTentacle02,
-		AttackTentacle03,
-		AttackTentacle04,
-		AttackTentacle05,
-		AttackQuickTentacle00,
-		AttackQuickTentacle01,
-		AttackQuickTentacle02,
-		AttackQuickTentacle03,
-		AttackTongue,
-		SummonStart,
-		SummonEnd,
-		Summon01,
-		Summon02,
-		Summon03,
-		Summon04,
-		RetreatStart,
-		RetreatEnd,
-		RetreatIdle,
-		DyingIdle,
-		Runaway,
-		AttackTongueSwipe,
-		NextPhase,
-		None,
-		Count
+		for (int i = 0; i < lootPhases.Count; i++)
+		{
+			if (lootPhases[i].enemyType == enemyType)
+			{
+				return lootPhases[i].lootTable;
+			}
+		}
+		return null;
 	}
 
-	public enum BodyState
+	private void SetupAbility(Behavior behavior, GRAbilityBase ability, GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
-		Destroyed,
-		Bones,
-		Shell,
-		Count
+		abilities[(int)behavior] = ability;
+		ability.Setup(agent, anim, audioSource, root, head, lineOfSight);
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnDestroy()
+	{
+		agent.onBodyStateChanged -= OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged -= OnNetworkBehaviorStateChange;
+	}
+
+	public void Setup(long entityCreateData)
+	{
+		SetBehavior(Behavior.HiddenIdle, force: true);
+		if (attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
+		{
+			SetBodyState(BodyState.Shell, force: true);
+		}
+		else
+		{
+			SetBodyState(BodyState.Bones, force: true);
+		}
+	}
+
+	public void OnNetworkBehaviorStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 32)
+		{
+			SetBehavior((Behavior)newState);
+		}
+	}
+
+	public void OnNetworkBodyStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 3)
+		{
+			SetBodyState((BodyState)newState);
+		}
+	}
+
+	public void SetHP(int hp)
+	{
+		this.hp = hp;
+		if (enemy != null)
+		{
+			enemy.SetHP(hp);
+		}
+	}
+
+	public bool TrySetBehavior(Behavior newBehavior)
+	{
+		if (newBehavior == Behavior.Stagger)
+		{
+			return false;
+		}
+		SetBehavior(newBehavior);
+		return true;
+	}
+
+	public void SetBehavior(Behavior newBehavior, bool force = false)
+	{
+		if (newBehavior < Behavior.HiddenIdle || (int)newBehavior >= abilities.Length)
+		{
+			Debug.LogErrorFormat("New Behavior Index is invalid {0} {1} {2}", (int)newBehavior, newBehavior, base.gameObject.name);
+			return;
+		}
+		GRAbilityBase gRAbilityBase = abilities[(int)newBehavior];
+		if (currBehavior == newBehavior && !force)
+		{
+			return;
+		}
+		switch (currBehavior)
+		{
+		case Behavior.AttackTongue:
+		{
+			for (int i = 0; i < eyes.Count; i++)
+			{
+				eyes[i].ResetEye();
+			}
+			consecutiveCombos = 0;
+			attacksAfterSummon = 0;
+			currSummon = null;
+			KillAllSummoned(ignoreMonkeye: true);
+			if (triggerNextMusicTransition)
+			{
+				triggerNextMusicTransition = false;
+				if (adaptiveMusicController != null)
+				{
+					adaptiveMusicController.TransitionToNextTrack();
+				}
+			}
+			break;
+		}
+		case Behavior.NextPhase:
+			IncrementBossPhase();
+			break;
+		}
+		Debug.LogFormat("Boss SetBehavior {0} -> {1}", currBehavior, newBehavior);
+		if (currAbility != null)
+		{
+			currAbility.Stop();
+		}
+		lastBehavior = currBehavior;
+		currBehavior = newBehavior;
+		currAbility = gRAbilityBase;
+		if (currAbility != null)
+		{
+			currAbility.Start();
+		}
+		switch (currBehavior)
+		{
+		case Behavior.Reveal:
+			if (firstTimeReveal)
+			{
+				if (adaptiveMusicController != null)
+				{
+					adaptiveMusicController.Restart();
+				}
+				internalPhaseIndex = 0;
+			}
+			firstTimeReveal = false;
+			BossHasRevealed = true;
+			break;
+		case Behavior.Exposed:
+			ToggleShockColliders(toggle: false);
+			break;
+		case Behavior.Stagger:
+			lastStaggerTime = Time.time;
+			break;
+		case Behavior.AttackTongue:
+			ToggleShockColliders(toggle: true);
+			break;
+		case Behavior.Summon01:
+		case Behavior.Summon02:
+		case Behavior.Summon03:
+		case Behavior.Summon04:
+			currSummon = (GRAbilitySummon)currAbility;
+			break;
+		case Behavior.Dying:
+		{
+			KillAllSummoned();
+			TurnOffGrav();
+			for (int j = 0; j < eyes.Count; j++)
+			{
+				eyes[j].TrySetBehavior(GREnemyBossMoonEye.Behavior.Dying);
+			}
+			if (adaptiveMusicController != null)
+			{
+				adaptiveMusicController.TransitionToLastTrack();
+			}
+			ToggleShockColliders(toggle: false);
+			break;
+		}
+		case Behavior.RetreatStart:
+			TurnOnGrav();
+			break;
+		case Behavior.RetreatEnd:
+			TurnOffGrav();
+			break;
+		case Behavior.Runaway:
+			if (entity.manager.ghostReactorManager != null)
+			{
+				entity.manager.ghostReactorManager.InstantDeathForCurrentEnemies();
+			}
+			if (adaptiveMusicController != null)
+			{
+				adaptiveMusicController.TransitionToLastTrack();
+			}
+			break;
+		}
+		RefreshBody();
+		if (entity.IsAuthority())
+		{
+			agent.RequestBehaviorChange((byte)currBehavior);
+		}
+	}
+
+	public void SetSquishVolumeState(bool squishEnabled)
+	{
+		for (int i = 0; i < squishVolumes.Count; i++)
+		{
+			squishVolumes[i].overrideDisabled = !squishEnabled;
+			squishVolumes[i].SliceUpdate();
+		}
+	}
+
+	private int CalcMaxHP()
+	{
+		float difficultyScalingForCurrentFloor = entity.manager.ghostReactorManager.reactor.difficultyScalingForCurrentFloor;
+		int result = (int)((float)attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax) * difficultyScalingForCurrentFloor);
+		for (int i = 0; i < phases.Count; i++)
+		{
+			phases[i].minHP = Mathf.RoundToInt((float)phases[i].minHP * difficultyScalingForCurrentFloor);
+		}
+		return result;
+	}
+
+	public int GetCurrPhaseIndex()
+	{
+		if (phases == null)
+		{
+			return -1;
+		}
+		for (int i = 0; i < phases.Count; i++)
+		{
+			if (hp > phases[i].minHP)
+			{
+				return i;
+			}
+		}
+		return phases.Count - 1;
+	}
+
+	public PhaseDef GetCurrPhase()
+	{
+		int currPhaseIndex = GetCurrPhaseIndex();
+		if (currPhaseIndex < 0 || currPhaseIndex >= phases.Count)
+		{
+			return null;
+		}
+		return phases[currPhaseIndex];
+	}
+
+	public void RestoreFullHealth()
+	{
+		SetHP(CalcMaxHP());
+	}
+
+	public void HurtBossHP()
+	{
+		HurtBoss(100, entity.id, Vector3.zero);
+	}
+
+	public void KillAllEyes()
+	{
+		for (int i = 0; i < eyes.Count; i++)
+		{
+			eyes[i].InstantKill();
+		}
+	}
+
+	public void KillAllSummoned()
+	{
+		KillAllSummoned(ignoreMonkeye: true);
+	}
+
+	public void KillAllSummoned(bool ignoreMonkeye = false, bool killAllEnemies = true)
+	{
+		int num = 0;
+		for (int i = 0; i < trackedGameEntities.Count; i++)
+		{
+			if (trackedGameEntities[i] == null)
+			{
+				continue;
+			}
+			GREnemyChaser component = trackedGameEntities[i].GetComponent<GREnemyChaser>();
+			if (component != null)
+			{
+				component.InstantDeath();
+				num++;
+				continue;
+			}
+			GREnemyRanged component2 = trackedGameEntities[i].GetComponent<GREnemyRanged>();
+			if (component2 != null)
+			{
+				component2.InstantDeath();
+				num++;
+				continue;
+			}
+			GREnemyPest component3 = trackedGameEntities[i].GetComponent<GREnemyPest>();
+			if (component3 != null)
+			{
+				component3.InstantDeath();
+				num++;
+				continue;
+			}
+			GREnemySummoner component4 = trackedGameEntities[i].GetComponent<GREnemySummoner>();
+			if (component4 != null)
+			{
+				component4.InstantDeath();
+				num++;
+			}
+			else if (!ignoreMonkeye)
+			{
+				GREnemyMonkeye component5 = trackedGameEntities[i].GetComponent<GREnemyMonkeye>();
+				if (component5 != null)
+				{
+					component5.InstantDeath();
+					num++;
+				}
+			}
+		}
+		if (killAllEnemies && entity.manager.ghostReactorManager != null)
+		{
+			entity.manager.ghostReactorManager.InstantDeathForCurrentEnemies();
+		}
+		Debug.Log($"Report killed all summon {num}");
+	}
+
+	public void GoBackPhase()
+	{
+		int currPhaseIndex = GetCurrPhaseIndex();
+		if (currPhaseIndex <= 0)
+		{
+			Debug.LogWarning("GREnemyBossMoon - GoBackPhase - At first phase");
+		}
+		else
+		{
+			SetHP(phases[currPhaseIndex - 1].minHP);
+		}
+	}
+
+	public void GoToNextPhase()
+	{
+		int currPhaseIndex = GetCurrPhaseIndex();
+		if (currPhaseIndex >= 0 && currPhaseIndex < phases.Count)
+		{
+			SetHP(phases[currPhaseIndex].minHP);
+		}
+	}
+
+	private bool IsSummon(Behavior behavior)
+	{
+		for (int i = 0; i < phases.Count; i++)
+		{
+			if (phases[i] != null && phases[i].summons != null && phases[i].summons.Contains(behavior))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private bool IsAnySummonBehavior(Behavior behavior)
+	{
+		if (currBehavior != Behavior.SummonStart && currBehavior != Behavior.SummonEnd && currBehavior != Behavior.Summon01 && currBehavior != Behavior.Summon02 && currBehavior != Behavior.Summon03)
+		{
+			return currBehavior == Behavior.Summon04;
+		}
+		return true;
+	}
+
+	public Behavior ChooseSummonForPhase()
+	{
+		PhaseDef currPhase = GetCurrPhase();
+		if (currPhase == null)
+		{
+			return Behavior.None;
+		}
+		return ChooseRandomBehavior(currPhase.summons);
+	}
+
+	public Behavior ChooseAttackForPhase()
+	{
+		PhaseDef currPhase = GetCurrPhase();
+		if (currPhase == null)
+		{
+			return Behavior.None;
+		}
+		return ChooseRandomBehavior(currPhase.attacks);
+	}
+
+	public Behavior ChooseRandomBehavior(List<Behavior> behaviors)
+	{
+		if (behaviors == null || behaviors.Count <= 0)
+		{
+			return Behavior.None;
+		}
+		int index = UnityEngine.Random.Range(0, behaviors.Count);
+		return behaviors[index];
+	}
+
+	public void SetBodyState(BodyState newBodyState, bool force = false)
+	{
+		if (currBodyState != newBodyState || force)
+		{
+			currBodyState = newBodyState;
+			if (currBodyState == BodyState.Destroyed)
+			{
+				GhostReactorManager.Get(entity).ReportEnemyDeath();
+			}
+			Debug.LogFormat("State Change {0} {1}", entity.id.index, currBodyState);
+			RefreshBody();
+			if (entity.IsAuthority())
+			{
+				agent.RequestStateChange((byte)newBodyState);
+			}
+		}
+	}
+
+	private void RefreshBody()
+	{
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			GREnemy.HideRenderers(bones, hide: false);
+			GREnemy.HideRenderers(always, hide: false);
+			break;
+		case BodyState.Bones:
+			GREnemy.HideRenderers(bones, hide: false);
+			GREnemy.HideRenderers(always, hide: false);
+			break;
+		case BodyState.Shell:
+			GREnemy.HideRenderers(bones, hide: true);
+			GREnemy.HideRenderers(always, hide: false);
+			break;
+		}
+	}
+
+	private void Update()
+	{
+		OnUpdate(Time.deltaTime);
+	}
+
+	public void OnEntityThink(float dt)
+	{
+		if (!entity.IsAuthority())
+		{
+			return;
+		}
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+		float outDistanceSq;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		agent.RequestTarget((vRRig == null) ? null : vRRig.OwningNetPlayer);
+		if (currAbility != null)
+		{
+			currAbility.Think(dt);
+		}
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			if (currAbility.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		case Behavior.HiddenIdle:
+			ChooseNewBehavior(forceAttack: true);
+			break;
+		case Behavior.RetreatIdle:
+			waitInRetreat += dt * 12f;
+			if (trackedEntities.Count <= 0 || waitInRetreat > 20f)
+			{
+				TrySetBehavior(Behavior.RetreatEnd);
+			}
+			break;
+		}
+	}
+
+	private Behavior TryChooseAttackBehavior()
+	{
+		PhaseDef currPhase = GetCurrPhase();
+		if (currBehavior == Behavior.HiddenIdle)
+		{
+			if (currPhase != null && trackedEntities.Count <= currPhase.maxEnemiesForReveal && senseNearby.IsAnyoneNearby(abilityReveal.GetRange(), firstTimeReveal))
+			{
+				return Behavior.Reveal;
+			}
+			return Behavior.None;
+		}
+		if (GhostReactorManager.AggroDisabled)
+		{
+			return Behavior.None;
+		}
+		if (currPhase == null)
+		{
+			return Behavior.None;
+		}
+		if (currPhase.summons != null && currPhase.summons.Count > 0 && attacksAfterSummon <= 0 && trackedEntities.Count < currPhase.maxSimultaneousEnemies)
+		{
+			attacksAfterSummon = currPhase.attacksBetweenSummons;
+			if (currPhase.summons.Count > 0)
+			{
+				currSummon = (GRAbilitySummon)abilities[(int)currPhase.summons[0]];
+				if (currSummon != null)
+				{
+					for (int i = trackedEntities.Count; i < currPhase.maxSimultaneousEnemies; i++)
+					{
+						currSummon.ForceSpawn();
+					}
+				}
+			}
+		}
+		List<Behavior> list = currPhase.attacks;
+		if (currPhase.comboAttacks != null && currPhase.comboAttacks.Count > 0 && ((currPhase.allowConsecutiveCombos && consecutiveCombos < 3) || consecutiveCombos <= 0) && UnityEngine.Random.value < currPhase.comboAttackChance)
+		{
+			list = currPhase.comboAttacks;
+			consecutiveCombos++;
+		}
+		else
+		{
+			consecutiveCombos = 0;
+		}
+		if (list != null && list.Count > 0)
+		{
+			tempPotentialAttacks.Clear();
+			for (int j = 0; j < list.Count; j++)
+			{
+				tempPotentialAttacks.Add(list[j]);
+			}
+			for (int num = tempPotentialAttacks.Count - 1; num >= 0; num--)
+			{
+				GRAbilityBase gRAbilityBase = abilities[(int)tempPotentialAttacks[num]];
+				if (gRAbilityBase == null || !senseNearby.IsAnyoneNearby(gRAbilityBase.GetRange()) || !gRAbilityBase.IsCoolDownOver())
+				{
+					tempPotentialAttacks.RemoveAt(num);
+				}
+			}
+			if (tempPotentialAttacks.Count > 0)
+			{
+				attacksAfterSummon--;
+				int index = UnityEngine.Random.Range(0, tempPotentialAttacks.Count);
+				return tempPotentialAttacks[index];
+			}
+		}
+		return Behavior.None;
+	}
+
+	private bool AreAllEyesClosed()
+	{
+		for (int i = 0; i < eyes.Count; i++)
+		{
+			if (eyes[i].hp > 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void GotoDyingIdle()
+	{
+		SetBehavior(Behavior.DyingIdle, force: true);
+	}
+
+	private void ChooseNewBehavior(bool forceAttack = false)
+	{
+		if (hp <= 0)
+		{
+			TrySetBehavior(Behavior.Dying);
+			return;
+		}
+		if (AreAllEyesClosed())
+		{
+			if (eyesPushVolume != null)
+			{
+				eyesPushVolume.Trigger();
+			}
+			TrySetBehavior(Behavior.Exposed);
+			return;
+		}
+		if (forceAttack || !restAfterAttack)
+		{
+			restAfterAttack = false;
+			Behavior behavior = TryChooseAttackBehavior();
+			if (behavior != Behavior.None)
+			{
+				if (TrySetBehavior(behavior) && currBehavior != Behavior.AttackTongue)
+				{
+					PhaseDef currPhase = GetCurrPhase();
+					restAfterAttack = currPhase.restAfterAttack;
+				}
+				if (currSummon != null)
+				{
+					PhaseDef currPhase2 = GetCurrPhase();
+					if (trackedEntities.Count < currPhase2.maxSimultaneousEnemies && UnityEngine.Random.value < currPhase2.randomSummonChance)
+					{
+						currSummon.ForceSpawn();
+					}
+				}
+				return;
+			}
+		}
+		if (currBehavior == Behavior.None)
+		{
+			restAfterAttack = false;
+			TrySetBehavior(Behavior.Idle);
+		}
+	}
+
+	private void OnUpdate(float dt)
+	{
+		if (entity.IsAuthority())
+		{
+			OnUpdateAuthority(dt);
+		}
+		else
+		{
+			OnUpdateRemote(dt);
+		}
+	}
+
+	private void OnUpdateAuthority(float dt)
+	{
+		if (currBehavior == Behavior.Runaway)
+		{
+			currAbility.UpdateAuthority(dt);
+			return;
+		}
+		if (currBehavior == Behavior.ExposedIdle)
+		{
+			PhaseDef currPhase = GetCurrPhase();
+			if (hp <= 0)
+			{
+				SetBehavior(Behavior.Dying);
+			}
+			else if (hp <= currPhase.minHP)
+			{
+				SetBehavior(Behavior.AttackTongue);
+			}
+		}
+		if (currAbility == null)
+		{
+			return;
+		}
+		currAbility.UpdateAuthority(dt);
+		PhaseDef currPhase2 = GetCurrPhase();
+		if (currAbility.IsDone())
+		{
+			if (currBehavior == Behavior.NextPhase)
+			{
+				SetBehavior(Behavior.AttackTongue);
+			}
+			else if (currBehavior == Behavior.Exposed)
+			{
+				SetBehavior(Behavior.ExposedIdle);
+			}
+			else if (currBehavior == Behavior.SummonStart)
+			{
+				Behavior newBehavior = ChooseSummonForPhase();
+				SetBehavior(newBehavior);
+			}
+			else if (currBehavior == Behavior.SummonEnd && currPhase2.retreatAfterSummon)
+			{
+				SetBehavior(Behavior.RetreatStart);
+			}
+			else if (currBehavior == Behavior.RetreatStart)
+			{
+				waitInRetreat = 0f;
+				SetBehavior(Behavior.RetreatIdle);
+			}
+			else if (currBehavior == Behavior.RetreatIdle)
+			{
+				SetBehavior(Behavior.RetreatEnd);
+			}
+			else if (currBehavior == Behavior.ExposedIdle)
+			{
+				SetBehavior(Behavior.AttackTongue);
+			}
+			else if (currBehavior == Behavior.AttackTongue)
+			{
+				SetBehavior(Behavior.HiddenIdle);
+			}
+			else if (IsSummon(currBehavior))
+			{
+				if (currPhase2 == null || trackedEntities.Count >= currPhase2.maxSimultaneousEnemies)
+				{
+					SetBehavior(Behavior.SummonEnd);
+					return;
+				}
+				SetBehavior(Behavior.None);
+				Behavior newBehavior2 = ChooseSummonForPhase();
+				SetBehavior(newBehavior2);
+			}
+			else
+			{
+				SetBehavior(Behavior.None);
+				ChooseNewBehavior();
+			}
+		}
+		else if (AreAllEyesClosed() && currBehavior != Behavior.Exposed && currBehavior != Behavior.ExposedIdle && lastBehavior != Behavior.Exposed && lastBehavior != Behavior.ExposedIdle)
+		{
+			TrySetBehavior(Behavior.Exposed);
+		}
+	}
+
+	private void OnUpdateRemote(float dt)
+	{
+		if (currAbility != null)
+		{
+			currAbility.UpdateRemote(dt);
+		}
+	}
+
+	private void CatchUpPhase(int phase)
+	{
+		BossHasRevealed = true;
+		internalPhaseIndex = phase;
+		AdjustByPhaseIndex(phase);
+		if (adaptiveMusicController != null)
+		{
+			adaptiveMusicController.RestartAt(phase);
+		}
+	}
+
+	private void IncrementBossPhase()
+	{
+		internalPhaseIndex++;
+		triggerNextMusicTransition = true;
+		AdjustByPhaseIndex(internalPhaseIndex);
+		Debug.Log($"Incrementing phase to phase {internalPhaseIndex}!");
+	}
+
+	private void SyncPhase(int phase)
+	{
+		internalPhaseIndex = phase;
+		if (adaptiveMusicController != null)
+		{
+			adaptiveMusicController.GoToTrack(internalPhaseIndex);
+		}
+		AdjustByPhaseIndex(internalPhaseIndex);
+		Debug.Log($"Syncing phase to phase {internalPhaseIndex}!");
+	}
+
+	private void AdjustByPhaseIndex(int phase)
+	{
+		switch (internalPhaseIndex)
+		{
+		case 1:
+			abilityIdle.SpeedUp(3f);
+			AdjustAttackAnimSpeed(1.2f);
+			break;
+		case 2:
+			abilityIdle.SpeedUp(4f);
+			AdjustAttackAnimSpeed(1.4f);
+			break;
+		case 3:
+			abilityIdle.SpeedUp(4f);
+			AdjustAttackAnimSpeed(1.6f);
+			break;
+		}
+	}
+
+	private void AdjustAttackAnimSpeed(float speed)
+	{
+		abilityAttackTentacle00.attackAnimData.speed = speed;
+		abilityAttackTentacle01.attackAnimData.speed = speed;
+		abilityAttackTentacle02.attackAnimData.speed = speed;
+		abilityAttackTentacle03.attackAnimData.speed = speed;
+		abilityAttackTentacle04.attackAnimData.speed = speed;
+		abilityAttackTentacle05.attackAnimData.speed = speed;
+	}
+
+	public void OnHitByClub(GRTool tool, GameHitData hit)
+	{
+		HurtBoss(hit.hitAmount, hit.hitEntityId, tool.transform.position);
+	}
+
+	private void HurtBoss(int hitAmount, GameEntityId hitByEntityId, Vector3 toolPosition)
+	{
+		if (currBehavior == Behavior.Dying || currBehavior == Behavior.DyingIdle || currBehavior == Behavior.Runaway || IsAnySummonBehavior(currBehavior) || currBodyState != BodyState.Bones)
+		{
+			return;
+		}
+		int num = hp;
+		PhaseDef currPhase = GetCurrPhase();
+		SetHP(hp - hitAmount);
+		if (damagedSounds.Count > 0)
+		{
+			damagedSoundIndex = AbilityHelperFunctions.RandomRangeUnique(0, damagedSounds.Count, damagedSoundIndex);
+			audioSource.PlayOneShot(damagedSounds[damagedSoundIndex], damagedSoundVolume);
+		}
+		if (fxDamaged != null)
+		{
+			fxDamaged.SetActive(value: false);
+			fxDamaged.SetActive(value: true);
+		}
+		if (hp <= 0)
+		{
+			if (hitByEntityId != GameEntityId.Invalid)
+			{
+				abilityDie.SetInstigatingPlayerIndex(entity.GetLastHeldByPlayerForEntityID(hitByEntityId));
+			}
+			SetBodyState(BodyState.Destroyed);
+			SetBehavior(Behavior.Dying);
+			return;
+		}
+		if (num > currPhase.minHP && hp <= currPhase.minHP)
+		{
+			if (currPhase.runawayAfterPhase)
+			{
+				Debug.Log("Force runaway!");
+				if (hitByEntityId != GameEntityId.Invalid)
+				{
+					abilityRunaway.SetInstigatingPlayerIndex(entity.GetLastHeldByPlayerForEntityID(hitByEntityId));
+				}
+				SetBehavior(Behavior.Runaway);
+			}
+			else
+			{
+				Debug.Log("Force next phase transition!");
+				SetBehavior(Behavior.NextPhase);
+			}
+		}
+		lastSeenTargetPosition = toolPosition;
+		lastSeenTargetTime = Time.timeAsDouble;
+		Vector3 vector = lastSeenTargetPosition - base.transform.position;
+		vector.y = 0f;
+		searchPosition = lastSeenTargetPosition + vector.normalized * 1.5f;
+	}
+
+	public void OnHitByFlash(GRTool grTool, GameHitData hit)
+	{
+	}
+
+	public void OnHitByShield(GRTool tool, GameHitData hit)
+	{
+		OnHitByClub(tool, hit);
+	}
+
+	public void ReportDeathStat()
+	{
+		if (currAbility != null && currAbility is GRAbilityDie gRAbilityDie)
+		{
+			gRAbilityDie.ReportDeathStat();
+		}
+	}
+
+	private bool IsAttackBehavior(Behavior behavior)
+	{
+		if (behavior != Behavior.AttackTentacle00 && behavior != Behavior.AttackTentacle01 && behavior != Behavior.AttackTentacle02 && behavior != Behavior.AttackTentacle03 && behavior != Behavior.AttackTentacle04 && behavior != Behavior.AttackTentacle05 && behavior != Behavior.AttackQuickTentacle00 && behavior != Behavior.AttackQuickTentacle01 && behavior != Behavior.AttackQuickTentacle02 && behavior != Behavior.AttackQuickTentacle03 && behavior != Behavior.AttackTongue)
+		{
+			return behavior == Behavior.AttackTongueSwipe;
+		}
+		return true;
+	}
+
+	[CanBeNull]
+	private GRAbilityBase GetAssociatedAbilityForBehavior(Behavior behavior)
+	{
+		return behavior switch
+		{
+			Behavior.AttackTentacle00 => abilityAttackTentacle00, 
+			Behavior.AttackTentacle01 => abilityAttackTentacle01, 
+			Behavior.AttackTentacle02 => abilityAttackTentacle02, 
+			Behavior.AttackTentacle03 => abilityAttackTentacle03, 
+			Behavior.AttackTentacle04 => abilityAttackTentacle04, 
+			Behavior.AttackTentacle05 => abilityAttackTentacle05, 
+			Behavior.AttackQuickTentacle00 => abilityAttackQuickTentacle00, 
+			Behavior.AttackQuickTentacle01 => abilityAttackQuickTentacle01, 
+			Behavior.AttackQuickTentacle02 => abilityAttackQuickTentacle02, 
+			Behavior.AttackQuickTentacle03 => abilityAttackQuickTentacle03, 
+			Behavior.AttackTongue => abilityAttackTongue01, 
+			Behavior.AttackTongueSwipe => abilityAttackTongueSwipe01, 
+			_ => null, 
+		};
+	}
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		if (currBodyState == BodyState.Destroyed || !IsAttackBehavior(currBehavior) || collider.isTrigger)
+		{
+			return;
+		}
+		GRShieldCollider component = collider.GetComponent<GRShieldCollider>();
+		if (component != null)
+		{
+			GameHittable component2 = GetComponent<GameHittable>();
+			component.BlockHittable(headTransform.position, base.transform.forward, component2);
+			return;
+		}
+		Rigidbody attachedRigidbody = collider.attachedRigidbody;
+		if (!(attachedRigidbody != null))
+		{
+			return;
+		}
+		GRPlayer component3 = attachedRigidbody.GetComponent<GRPlayer>();
+		if (component3 == null)
+		{
+			GorillaTagger component4 = attachedRigidbody.GetComponent<GorillaTagger>();
+			if (component4 != null && component4.offlineVRRig != null)
+			{
+				component3 = component4.offlineVRRig.GetComponent<GRPlayer>();
+			}
+		}
+		if (component3 != null && component3.gamePlayer.IsLocal() && Time.time > lastHitPlayerTime + minTimeBetweenHits)
+		{
+			HitPlayer(component3);
+		}
+		GRBreakable component5 = attachedRigidbody.GetComponent<GRBreakable>();
+		GameHittable component6 = attachedRigidbody.GetComponent<GameHittable>();
+		if (component5 != null && component6 != null)
+		{
+			GameHitData hitData = new GameHitData
+			{
+				hitTypeId = 0,
+				hitEntityId = component6.gameEntity.id,
+				hitByEntityId = entity.id,
+				hitEntityPosition = component5.transform.position,
+				hitImpulse = Vector3.zero,
+				hitPosition = component5.transform.position,
+				hittablePoint = component6.FindHittablePoint(collider)
+			};
+			component6.RequestHit(hitData);
+		}
+	}
+
+	private void TurnOnGrav()
+	{
+		if (!(currentGravActivator != null))
+		{
+			currentGravActivator = gravActivators[UnityEngine.Random.Range(0, gravActivators.Length)];
+			currentGravActivator.SetActive(value: true);
+		}
+	}
+
+	private void TurnOffGrav()
+	{
+		if (!(currentGravActivator == null))
+		{
+			currentGravActivator.SetActive(value: false);
+			currentGravActivator = null;
+		}
+	}
+
+	[ContextMenu("Debug Hit Player")]
+	private void DebugHitPlayer()
+	{
+		HitPlayer(VRRig.LocalRig.GetComponent<GRPlayer>(), useImpulse: true);
+	}
+
+	public void HitPlayer(GRPlayer player, bool useImpulse = false)
+	{
+		if (currBodyState == BodyState.Destroyed || tryHitPlayerCoroutine != null)
+		{
+			StopCoroutine(tryHitPlayerCoroutine);
+		}
+		tryHitPlayerCoroutine = StartCoroutine(TryHitPlayer(player, useImpulse));
+	}
+
+	private IEnumerator TryHitPlayer(GRPlayer player, bool useImpulse = false)
+	{
+		yield return new WaitForUpdate();
+		if (!(player != null) || !player.gamePlayer.IsLocal() || !(Time.time > lastHitPlayerTime + minTimeBetweenHits))
+		{
+			yield break;
+		}
+		lastHitPlayerTime = Time.time;
+		Vector3 vector2;
+		if (GetAssociatedAbilityForBehavior(currBehavior) is ICustomKnockbackAbility customKnockbackAbility)
+		{
+			Vector3? vector = customKnockbackAbility.CalculateImpulse(player.transform);
+			if (vector.HasValue)
+			{
+				Vector3 valueOrDefault = vector.GetValueOrDefault();
+				vector2 = valueOrDefault;
+				goto IL_00f4;
+			}
+		}
+		vector2 = (player.transform.position - knockbackTransform.position).normalized * knockbackImpulse;
+		goto IL_00f4;
+		IL_00f4:
+		GhostReactorManager.Get(entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Chaser, entity.id, player, base.transform.position, vector2);
+		cameraShaker.Shake();
+		float magnitude = vector2.magnitude;
+		GorillaTagger.Instance.StartVibration(forLeftController: true, magnitude, 0.333f);
+		GorillaTagger.Instance.StartVibration(forLeftController: false, magnitude, 0.333f);
+		if (useImpulse)
+		{
+			GTPlayer.Instance.ApplyKnockback(vector2 / magnitude, magnitude, forceOffTheGround: true);
+		}
+	}
+
+	public void ShockPlayer()
+	{
+		if (currBodyState != BodyState.Destroyed && tryShockPlayerCoroutine == null)
+		{
+			tryShockPlayerCoroutine = StartCoroutine(TryShockPlayer());
+		}
+	}
+
+	private IEnumerator TryShockPlayer()
+	{
+		bodyRenderer.sharedMaterials = shockedBodyMaterials;
+		yield return new WaitForSecondsRealtime(1f);
+		bodyRenderer.sharedMaterials = defaultBodyMaterials;
+		tryShockPlayerCoroutine = null;
+	}
+
+	private void ToggleShockColliders(bool toggle)
+	{
+		for (int i = 0; i < shockColliders.Count; i++)
+		{
+			shockColliders[i].enabled = toggle;
+		}
+	}
+
+	public void GroundSlamWeak(Transform slamCenter)
+	{
+		_GroundSlam(slamCenter, 0.1f, 6f, 5f);
+	}
+
+	public void GroundSlam(Transform slamCenter)
+	{
+		_GroundSlam(slamCenter, 1f, 11f, 8f);
+	}
+
+	public async void _GroundSlam(Transform slamCenter, float duration, float distance, float hitVelocity)
+	{
+		Vector3 slamPosition = slamCenter.position;
+		float timeHit = Time.time;
+		bool playerHit = false;
+		GTPlayer player = GTPlayer.Instance;
+		float upwardsAngleBoost = 55f;
+		if ((player.HeadCenterPosition - slamCenter.position).magnitude < distance * 1.25f)
+		{
+			cameraShaker.Shake();
+			GorillaTagger.Instance.StartVibration(forLeftController: true, GorillaTagger.Instance.tapHapticStrength * 3f, 0.5f);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, GorillaTagger.Instance.tapHapticStrength * 3f, 0.5f);
+		}
+		while (!playerHit && Time.time < timeHit + duration)
+		{
+			if ((!player.IsGroundedHand && !player.IsGroundedButt) || !((player.HeadCenterPosition - slamPosition).magnitude < distance))
+			{
+				await Awaitable.WaitForSecondsAsync(0.1f);
+			}
+			else
+			{
+				playerHit = true;
+			}
+		}
+		if (playerHit)
+		{
+			Vector3 vector = player.HeadCenterPosition - slamPosition;
+			float num = Vector3.Angle(base.transform.forward, Vector3.up);
+			vector = Vector3.RotateTowards(vector.normalized, Vector3.up, Mathf.Clamp(num - upwardsAngleBoost, 0f, upwardsAngleBoost) * (MathF.PI / 180f), 0f);
+			GorillaTagger.Instance.StartVibration(forLeftController: true, GorillaTagger.Instance.tapHapticStrength * 5f, 0.75f);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, GorillaTagger.Instance.tapHapticStrength * 5f, 0.75f);
+			player.ApplyKnockback(vector, hitVelocity, forceOffTheGround: true);
+			GhostReactorManager.Get(entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Chaser, entity.id, GRPlayer.GetLocal(), base.transform.position, vector.normalized * hitVelocity);
+		}
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add("<color=\"white\">State:</color> <color=\"yellow\">" + currBehavior.ToString() + "</color>\n" + $"<color=\"white\">Phase:</color> <color=\"yellow\">{GetCurrPhaseIndex()}</color>\n" + $"<color=\"white\">HP:</color> <color=\"yellow\">{hp}</color>");
+	}
+
+	public void OnGameEntitySerialize(BinaryWriter writer)
+	{
+		byte value = (byte)currBehavior;
+		byte value2 = (byte)currBodyState;
+		int value3 = ((targetPlayer == null) ? (-1) : targetPlayer.ActorNumber);
+		writer.Write(value);
+		writer.Write(value2);
+		writer.Write(hp);
+		writer.Write(value3);
+		writer.Write(internalPhaseIndex);
+	}
+
+	public void OnGameEntityDeserialize(BinaryReader reader)
+	{
+		Behavior newBehavior = (Behavior)reader.ReadByte();
+		BodyState newBodyState = (BodyState)reader.ReadByte();
+		int hP = reader.ReadInt32();
+		int playerID = reader.ReadInt32();
+		int num = reader.ReadInt32();
+		SetHP(hP);
+		SetBehavior(newBehavior, force: true);
+		SetBodyState(newBodyState, force: true);
+		targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
+		if (num != -1)
+		{
+			if (internalPhaseIndex == -1)
+			{
+				Debug.Log($"Catching up to boss phase {num}.");
+				CatchUpPhase(num);
+			}
+			else if (num != internalPhaseIndex)
+			{
+				Debug.Log($"Syncing up to boss phase {internalPhaseIndex}.");
+				SyncPhase(num);
+			}
+		}
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		return true;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
+		GRTool gameComponent = entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
+		if (gameComponent != null)
+		{
+			switch (hitTypeId)
+			{
+			case GameHitType.Club:
+				OnHitByClub(gameComponent, hit);
+				break;
+			case GameHitType.Flash:
+				OnHitByFlash(gameComponent, hit);
+				break;
+			case GameHitType.Shield:
+				OnHitByShield(gameComponent, hit);
+				break;
+			}
+		}
+	}
+
+	private void AddTrackedEntity(GameEntity entityToTrack)
+	{
+		int netId = entityToTrack.GetNetId();
+		trackedEntities.AddIfNew(netId);
+		if (!trackedGameEntities.Contains(entityToTrack))
+		{
+			trackedGameEntities.Add(entityToTrack);
+		}
+	}
+
+	private void RemoveTrackedEntity(GameEntity entityToRemove)
+	{
+		int netId = entityToRemove.GetNetId();
+		if (trackedEntities.Contains(netId))
+		{
+			trackedEntities.Remove(netId);
+		}
+		if (trackedGameEntities.Contains(entityToRemove))
+		{
+			trackedGameEntities.Remove(entityToRemove);
+		}
+	}
+
+	public void OnSummonedEntityInit(GameEntity entity)
+	{
+		AddTrackedEntity(entity);
+	}
+
+	public void OnSummonedEntityDestroy(GameEntity entity)
+	{
+		RemoveTrackedEntity(entity);
 	}
 }

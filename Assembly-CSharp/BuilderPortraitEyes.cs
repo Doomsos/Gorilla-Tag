@@ -1,30 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class BuilderPortraitEyes : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		this.scale = base.transform.lossyScale.x;
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		this.eyes.transform.position = this.eyeCenter.transform.position;
-	}
-
-	public void SliceUpdate()
-	{
-		if (GorillaTagger.Instance == null)
-		{
-			return;
-		}
-		Vector3 b = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(GorillaTagger.Instance.headCollider.transform.position - this.eyeCenter.position, this.eyeCenter.forward), this.moveRadius * this.scale);
-		this.eyes.transform.position = this.eyeCenter.position + b;
-	}
-
 	[SerializeField]
 	private Transform eyeCenter;
 
@@ -35,4 +12,25 @@ public class BuilderPortraitEyes : MonoBehaviour, IGorillaSliceableSimple
 	private float moveRadius = 0.5f;
 
 	private float scale = 1f;
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+		scale = base.transform.lossyScale.x;
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+		eyes.transform.position = eyeCenter.transform.position;
+	}
+
+	public void SliceUpdate()
+	{
+		if (!(GorillaTagger.Instance == null))
+		{
+			Vector3 vector = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(GorillaTagger.Instance.headCollider.transform.position - eyeCenter.position, eyeCenter.forward), moveRadius * scale);
+			eyes.transform.position = eyeCenter.position + vector;
+		}
+	}
 }

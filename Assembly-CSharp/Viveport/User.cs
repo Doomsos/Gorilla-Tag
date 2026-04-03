@@ -1,81 +1,80 @@
-﻿using System;
+using System;
 using System.Text;
 using AOT;
 using Viveport.Internal;
 
-namespace Viveport
+namespace Viveport;
+
+public class User
 {
-	public class User
+	private static Viveport.Internal.StatusCallback isReadyIl2cppCallback;
+
+	private const int MaxIdLength = 256;
+
+	private const int MaxNameLength = 256;
+
+	private const int MaxUrlLength = 512;
+
+	[MonoPInvokeCallback(typeof(Viveport.Internal.StatusCallback))]
+	private static void IsReadyIl2cppCallback(int errorCode)
 	{
-		[MonoPInvokeCallback(typeof(StatusCallback))]
-		private static void IsReadyIl2cppCallback(int errorCode)
+		isReadyIl2cppCallback(errorCode);
+	}
+
+	public static int IsReady(StatusCallback callback)
+	{
+		if (callback == null)
 		{
-			User.isReadyIl2cppCallback(errorCode);
+			throw new InvalidOperationException("callback == null");
 		}
-
-		public static int IsReady(StatusCallback callback)
+		isReadyIl2cppCallback = callback.Invoke;
+		Api.InternalStatusCallbacks.Add(IsReadyIl2cppCallback);
+		if (IntPtr.Size == 8)
 		{
-			if (callback == null)
-			{
-				throw new InvalidOperationException("callback == null");
-			}
-			User.isReadyIl2cppCallback = new StatusCallback(callback.Invoke);
-			Api.InternalStatusCallbacks.Add(new StatusCallback(User.IsReadyIl2cppCallback));
-			if (IntPtr.Size == 8)
-			{
-				return User.IsReady_64(new StatusCallback(User.IsReadyIl2cppCallback));
-			}
-			return User.IsReady(new StatusCallback(User.IsReadyIl2cppCallback));
+			return Viveport.Internal.User.IsReady_64(IsReadyIl2cppCallback);
 		}
+		return Viveport.Internal.User.IsReady(IsReadyIl2cppCallback);
+	}
 
-		public static string GetUserId()
+	public static string GetUserId()
+	{
+		StringBuilder stringBuilder = new StringBuilder(256);
+		if (IntPtr.Size == 8)
 		{
-			StringBuilder stringBuilder = new StringBuilder(256);
-			if (IntPtr.Size == 8)
-			{
-				User.GetUserID_64(stringBuilder, 256);
-			}
-			else
-			{
-				User.GetUserID(stringBuilder, 256);
-			}
-			return stringBuilder.ToString();
+			Viveport.Internal.User.GetUserID_64(stringBuilder, 256);
 		}
-
-		public static string GetUserName()
+		else
 		{
-			StringBuilder stringBuilder = new StringBuilder(256);
-			if (IntPtr.Size == 8)
-			{
-				User.GetUserName_64(stringBuilder, 256);
-			}
-			else
-			{
-				User.GetUserName(stringBuilder, 256);
-			}
-			return stringBuilder.ToString();
+			Viveport.Internal.User.GetUserID(stringBuilder, 256);
 		}
+		return stringBuilder.ToString();
+	}
 
-		public static string GetUserAvatarUrl()
+	public static string GetUserName()
+	{
+		StringBuilder stringBuilder = new StringBuilder(256);
+		if (IntPtr.Size == 8)
 		{
-			StringBuilder stringBuilder = new StringBuilder(512);
-			if (IntPtr.Size == 8)
-			{
-				User.GetUserAvatarUrl_64(stringBuilder, 512);
-			}
-			else
-			{
-				User.GetUserAvatarUrl(stringBuilder, 512);
-			}
-			return stringBuilder.ToString();
+			Viveport.Internal.User.GetUserName_64(stringBuilder, 256);
 		}
+		else
+		{
+			Viveport.Internal.User.GetUserName(stringBuilder, 256);
+		}
+		return stringBuilder.ToString();
+	}
 
-		private static StatusCallback isReadyIl2cppCallback;
-
-		private const int MaxIdLength = 256;
-
-		private const int MaxNameLength = 256;
-
-		private const int MaxUrlLength = 512;
+	public static string GetUserAvatarUrl()
+	{
+		StringBuilder stringBuilder = new StringBuilder(512);
+		if (IntPtr.Size == 8)
+		{
+			Viveport.Internal.User.GetUserAvatarUrl_64(stringBuilder, 512);
+		}
+		else
+		{
+			Viveport.Internal.User.GetUserAvatarUrl(stringBuilder, 512);
+		}
+		return stringBuilder.ToString();
 	}
 }

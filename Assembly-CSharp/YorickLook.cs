@@ -1,66 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class YorickLook : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.overlapRigs = new VRRig[20];
-	}
-
-	private void LateUpdate()
-	{
-		if (NetworkSystem.Instance.InRoom)
-		{
-			if (this.rigs.Length != NetworkSystem.Instance.RoomPlayerCount)
-			{
-				this.rigs = VRRigCache.Instance.GetAllRigs();
-			}
-		}
-		else if (this.rigs.Length != 1)
-		{
-			this.rigs = new VRRig[1];
-			this.rigs[0] = VRRig.LocalRig;
-		}
-		float num = -1f;
-		float num2 = Mathf.Cos(this.lookAtAngleDegrees / 180f * 3.1415927f);
-		int num3 = 0;
-		for (int i = 0; i < this.rigs.Length; i++)
-		{
-			Vector3 rhs = this.rigs[i].tagSound.transform.position - base.transform.position;
-			if (rhs.magnitude <= this.lookRadius)
-			{
-				float num4 = Vector3.Dot(-base.transform.up, rhs.normalized);
-				if (num4 > num2)
-				{
-					this.overlapRigs[num3++] = this.rigs[i];
-				}
-			}
-		}
-		this.lookTarget = null;
-		for (int j = 0; j < num3; j++)
-		{
-			Vector3 rhs = (this.overlapRigs[j].tagSound.transform.position - base.transform.position).normalized;
-			float num4 = Vector3.Dot(base.transform.forward, rhs);
-			if (num4 > num)
-			{
-				num = num4;
-				this.lookTarget = this.overlapRigs[j].tagSound.transform;
-			}
-		}
-		Vector3 target = -base.transform.up;
-		Vector3 target2 = -base.transform.up;
-		if (this.lookTarget != null)
-		{
-			target = (this.lookTarget.position - this.leftEye.position).normalized;
-			target2 = (this.lookTarget.position - this.rightEye.position).normalized;
-		}
-		Vector3 forward = Vector3.RotateTowards(this.leftEye.rotation * Vector3.forward, target, this.rotSpeed * 3.1415927f, 0f);
-		Vector3 forward2 = Vector3.RotateTowards(this.rightEye.rotation * Vector3.forward, target2, this.rotSpeed * 3.1415927f, 0f);
-		this.leftEye.rotation = Quaternion.LookRotation(forward);
-		this.rightEye.rotation = Quaternion.LookRotation(forward2);
-	}
-
 	public Transform leftEye;
 
 	public Transform rightEye;
@@ -76,4 +18,62 @@ public class YorickLook : MonoBehaviour
 	public float rotSpeed = 1f;
 
 	public float lookAtAngleDegrees = 60f;
+
+	private void Awake()
+	{
+		overlapRigs = new VRRig[20];
+	}
+
+	private void LateUpdate()
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			if (rigs.Length != NetworkSystem.Instance.RoomPlayerCount)
+			{
+				rigs = VRRigCache.Instance.GetAllRigs();
+			}
+		}
+		else if (rigs.Length != 1)
+		{
+			rigs = new VRRig[1];
+			rigs[0] = VRRig.LocalRig;
+		}
+		float num = -1f;
+		float num2 = Mathf.Cos(lookAtAngleDegrees / 180f * MathF.PI);
+		int num3 = 0;
+		for (int i = 0; i < rigs.Length; i++)
+		{
+			Vector3 vector = rigs[i].tagSound.transform.position - base.transform.position;
+			if (!(vector.magnitude > lookRadius))
+			{
+				float num4 = Vector3.Dot(-base.transform.up, vector.normalized);
+				if (num4 > num2)
+				{
+					overlapRigs[num3++] = rigs[i];
+				}
+			}
+		}
+		lookTarget = null;
+		for (int j = 0; j < num3; j++)
+		{
+			Vector3 vector = (overlapRigs[j].tagSound.transform.position - base.transform.position).normalized;
+			float num4 = Vector3.Dot(base.transform.forward, vector);
+			if (num4 > num)
+			{
+				num = num4;
+				lookTarget = overlapRigs[j].tagSound.transform;
+			}
+		}
+		Vector3 target = -base.transform.up;
+		Vector3 target2 = -base.transform.up;
+		if (lookTarget != null)
+		{
+			target = (lookTarget.position - leftEye.position).normalized;
+			target2 = (lookTarget.position - rightEye.position).normalized;
+		}
+		Vector3 forward = Vector3.RotateTowards(leftEye.rotation * Vector3.forward, target, rotSpeed * MathF.PI, 0f);
+		Vector3 forward2 = Vector3.RotateTowards(rightEye.rotation * Vector3.forward, target2, rotSpeed * MathF.PI, 0f);
+		leftEye.rotation = Quaternion.LookRotation(forward);
+		rightEye.rotation = Quaternion.LookRotation(forward2);
+	}
 }

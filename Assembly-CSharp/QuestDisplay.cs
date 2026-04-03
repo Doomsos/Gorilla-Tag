@@ -1,47 +1,9 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 
 public class QuestDisplay : MonoBehaviour
 {
-	public bool IsChanged
-	{
-		get
-		{
-			return this.quest.lastChange > this._lastUpdate;
-		}
-	}
-
-	public void UpdateDisplay()
-	{
-		this.text.text = this.quest.GetTextDescription();
-		if (this.quest.isQuestComplete)
-		{
-			this.progressDisplay.SetVisible(false);
-		}
-		else if (this.quest.requiredOccurenceCount > 1)
-		{
-			this.progressDisplay.SetProgress(this.quest.occurenceCount, this.quest.requiredOccurenceCount);
-			this.progressDisplay.SetVisible(true);
-		}
-		else
-		{
-			this.progressDisplay.SetVisible(false);
-		}
-		this.UpdateCompletionIndicator();
-		this._lastUpdate = Time.frameCount;
-	}
-
-	private void UpdateCompletionIndicator()
-	{
-		bool isQuestComplete = this.quest.isQuestComplete;
-		bool flag = !isQuestComplete && this.quest.requiredOccurenceCount == 1;
-		this.dailyIncompleteIndicator.SetActive(this.quest.isDailyQuest && flag);
-		this.dailyCompleteIndicator.SetActive(this.quest.isDailyQuest && isQuestComplete);
-		this.weeklyIncompleteIndicator.SetActive(!this.quest.isDailyQuest && flag);
-		this.weeklyCompleteIndicator.SetActive(!this.quest.isDailyQuest && isQuestComplete);
-	}
-
 	[SerializeField]
 	private ProgressDisplay progressDisplay;
 
@@ -67,4 +29,36 @@ public class QuestDisplay : MonoBehaviour
 	public RotatingQuest quest;
 
 	private int _lastUpdate = -1;
+
+	public bool IsChanged => quest.lastChange > _lastUpdate;
+
+	public void UpdateDisplay()
+	{
+		text.text = quest.GetTextDescription();
+		if (quest.isQuestComplete)
+		{
+			progressDisplay.SetVisible(visible: false);
+		}
+		else if (quest.requiredOccurenceCount > 1)
+		{
+			progressDisplay.SetProgress(quest.occurenceCount, quest.requiredOccurenceCount);
+			progressDisplay.SetVisible(visible: true);
+		}
+		else
+		{
+			progressDisplay.SetVisible(visible: false);
+		}
+		UpdateCompletionIndicator();
+		_lastUpdate = Time.frameCount;
+	}
+
+	private void UpdateCompletionIndicator()
+	{
+		bool isQuestComplete = quest.isQuestComplete;
+		bool flag = !isQuestComplete && quest.requiredOccurenceCount == 1;
+		dailyIncompleteIndicator.SetActive(quest.isDailyQuest && flag);
+		dailyCompleteIndicator.SetActive(quest.isDailyQuest && isQuestComplete);
+		weeklyIncompleteIndicator.SetActive(!quest.isDailyQuest && flag);
+		weeklyCompleteIndicator.SetActive(!quest.isDailyQuest && isQuestComplete);
+	}
 }

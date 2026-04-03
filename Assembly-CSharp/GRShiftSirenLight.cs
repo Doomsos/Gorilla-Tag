@@ -1,35 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GRShiftSirenLight : MonoBehaviourTick
 {
-	public override void Tick()
-	{
-		if (this.shiftManager == null)
-		{
-			this.shiftManager = GhostReactor.instance.shiftManager;
-			return;
-		}
-		if (this.redLight.activeSelf != this.shiftManager.ShiftActive)
-		{
-			this.redLight.SetActive(this.shiftManager.ShiftActive);
-		}
-		if (this.greenLight.activeSelf == this.shiftManager.ShiftActive)
-		{
-			this.greenLight.SetActive(!this.shiftManager.ShiftActive);
-		}
-		if (this.readyRoomLight != null)
-		{
-			this.readyRoomLight.intensity = (this.shiftManager.ShiftActive ? this.dimLight : this.brightLight);
-		}
-		if (this.shiftManager.ShiftActive)
-		{
-			this.redLightParent.localEulerAngles = new Vector3(0f, Time.time * this.rotationRate, 0f);
-			return;
-		}
-		this.greenLightParent.localEulerAngles = new Vector3(0f, Time.time * this.rotationRate, 0f);
-	}
-
 	public float rotationRate = 1.25f;
 
 	public Transform greenLightParent;
@@ -47,4 +19,33 @@ public class GRShiftSirenLight : MonoBehaviourTick
 	public float brightLight;
 
 	public Light readyRoomLight;
+
+	public override void Tick()
+	{
+		if (shiftManager == null)
+		{
+			shiftManager = GhostReactor.instance.shiftManager;
+			return;
+		}
+		if (redLight.activeSelf != shiftManager.ShiftActive)
+		{
+			redLight.SetActive(shiftManager.ShiftActive);
+		}
+		if (greenLight.activeSelf == shiftManager.ShiftActive)
+		{
+			greenLight.SetActive(!shiftManager.ShiftActive);
+		}
+		if (readyRoomLight != null)
+		{
+			readyRoomLight.intensity = (shiftManager.ShiftActive ? dimLight : brightLight);
+		}
+		if (shiftManager.ShiftActive)
+		{
+			redLightParent.localEulerAngles = new Vector3(0f, Time.time * rotationRate, 0f);
+		}
+		else
+		{
+			greenLightParent.localEulerAngles = new Vector3(0f, Time.time * rotationRate, 0f);
+		}
+	}
 }

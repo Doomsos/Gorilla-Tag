@@ -1,139 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class SetAnimatorBoolCosmetic : MonoBehaviour
 {
-	private void OnAnimatorValueChanged()
-	{
-	}
-
-	public void SetAnimatorBool(bool value)
-	{
-		if (this.bool1Hash == 0)
-		{
-			this.bool1Hash = Animator.StringToHash(this.boolParameterName);
-		}
-		this.animator.SetBool(this.bool1Hash, value);
-	}
-
-	public void SetAnimatorBool2(bool value)
-	{
-		if (this.bool2Hash == 0)
-		{
-			this.bool2Hash = Animator.StringToHash(this.bool2ParameterName);
-		}
-		this.animator.SetBool(this.bool2Hash, value);
-	}
-
-	public void SetAnimatorBool3(bool value)
-	{
-		if (this.bool3Hash == 0)
-		{
-			this.bool3Hash = Animator.StringToHash(this.bool3ParameterName);
-		}
-		this.animator.SetBool(this.bool3Hash, value);
-	}
-
-	public void SetAnimatorBool4(bool value)
-	{
-		if (this.bool4Hash == 0)
-		{
-			this.bool4Hash = Animator.StringToHash(this.bool4ParameterName);
-		}
-		this.animator.SetBool(this.bool4Hash, value);
-	}
-
-	public void SetAnimatorBool5(bool value)
-	{
-		if (this.bool5Hash == 0)
-		{
-			this.bool5Hash = Animator.StringToHash(this.bool5ParameterName);
-		}
-		this.animator.SetBool(this.bool5Hash, value);
-	}
-
-	public void SetAnimatorInteger1(int value)
-	{
-		if (this.int1Hash == 0)
-		{
-			this.int1Hash = Animator.StringToHash(this.int1ParameterName);
-		}
-		this.animator.SetInteger(this.int1Hash, value);
-	}
-
-	public void SetAnimatorInteger2(int value)
-	{
-		if (this.int2Hash == 0)
-		{
-			this.int2Hash = Animator.StringToHash(this.int2ParameterName);
-		}
-		this.animator.SetInteger(this.int2Hash, value);
-	}
-
-	public void SetAnimatorInteger3(int value)
-	{
-		if (this.int3Hash == 0)
-		{
-			this.int3Hash = Animator.StringToHash(this.int3ParameterName);
-		}
-		this.animator.SetInteger(this.int3Hash, value);
-	}
-
-	public void SetAnimatorInteger4(int value)
-	{
-		if (this.int4Hash == 0)
-		{
-			this.int4Hash = Animator.StringToHash(this.int4ParameterName);
-		}
-		this.animator.SetInteger(this.int4Hash, value);
-	}
-
-	public void SetAnimatorFloat1(float value)
-	{
-		if (this.float1Hash == 0)
-		{
-			this.float1Hash = Animator.StringToHash(this.float1ParameterName);
-		}
-		this.animator.SetFloat(this.float1Hash, value);
-	}
-
-	public void SetAnimatorFloat2(float value)
-	{
-		if (this.float2Hash == 0)
-		{
-			this.float2Hash = Animator.StringToHash(this.float2ParameterName);
-		}
-		this.animator.SetFloat(this.float2Hash, value);
-	}
-
-	public void SetAnimatorFloat3(float value)
-	{
-		if (this.float3Hash == 0)
-		{
-			this.float3Hash = Animator.StringToHash(this.float3ParameterName);
-		}
-		this.animator.SetFloat(this.float3Hash, value);
-	}
-
-	public void SetAnimatorFloat4(float value)
-	{
-		if (this.float4Hash == 0)
-		{
-			this.float4Hash = Animator.StringToHash(this.float4ParameterName);
-		}
-		this.animator.SetFloat(this.float4Hash, value);
-	}
-
-	public void SetAnimatorTrigger(string triggerName)
-	{
-		this.animator.SetTrigger(triggerName);
-	}
-
-	private void Reset()
-	{
-		this.animator = base.GetComponent<Animator>();
-	}
-
 	[SerializeField]
 	private Animator animator;
 
@@ -207,4 +75,135 @@ public class SetAnimatorBoolCosmetic : MonoBehaviour
 	private int float4Hash;
 
 	private const int MAX_FLOATS = 4;
+
+	private void OnAnimatorValueChanged()
+	{
+	}
+
+	public void SetAnimatorBool(bool value)
+	{
+		if (bool1Hash == 0)
+		{
+			bool1Hash = Animator.StringToHash(boolParameterName);
+		}
+		animator.SetBool(bool1Hash, value);
+	}
+
+	public void SetAnimatorBool2(bool value)
+	{
+		if (bool2Hash == 0)
+		{
+			bool2Hash = Animator.StringToHash(bool2ParameterName);
+		}
+		animator.SetBool(bool2Hash, value);
+	}
+
+	public void SetAnimatorBool3(bool value)
+	{
+		if (bool3Hash == 0)
+		{
+			bool3Hash = Animator.StringToHash(bool3ParameterName);
+		}
+		animator.SetBool(bool3Hash, value);
+	}
+
+	public void SetAnimatorBool4(bool value)
+	{
+		if (bool4Hash == 0)
+		{
+			bool4Hash = Animator.StringToHash(bool4ParameterName);
+		}
+		animator.SetBool(bool4Hash, value);
+	}
+
+	public void SetAnimatorBool5(bool value)
+	{
+		if (bool5Hash == 0)
+		{
+			bool5Hash = Animator.StringToHash(bool5ParameterName);
+		}
+		animator.SetBool(bool5Hash, value);
+	}
+
+	public void SetAnimatorInteger1(int value)
+	{
+		if (int1Hash == 0)
+		{
+			int1Hash = Animator.StringToHash(int1ParameterName);
+		}
+		animator.SetInteger(int1Hash, value);
+	}
+
+	public void SetAnimatorInteger2(int value)
+	{
+		if (int2Hash == 0)
+		{
+			int2Hash = Animator.StringToHash(int2ParameterName);
+		}
+		animator.SetInteger(int2Hash, value);
+	}
+
+	public void SetAnimatorInteger3(int value)
+	{
+		if (int3Hash == 0)
+		{
+			int3Hash = Animator.StringToHash(int3ParameterName);
+		}
+		animator.SetInteger(int3Hash, value);
+	}
+
+	public void SetAnimatorInteger4(int value)
+	{
+		if (int4Hash == 0)
+		{
+			int4Hash = Animator.StringToHash(int4ParameterName);
+		}
+		animator.SetInteger(int4Hash, value);
+	}
+
+	public void SetAnimatorFloat1(float value)
+	{
+		if (float1Hash == 0)
+		{
+			float1Hash = Animator.StringToHash(float1ParameterName);
+		}
+		animator.SetFloat(float1Hash, value);
+	}
+
+	public void SetAnimatorFloat2(float value)
+	{
+		if (float2Hash == 0)
+		{
+			float2Hash = Animator.StringToHash(float2ParameterName);
+		}
+		animator.SetFloat(float2Hash, value);
+	}
+
+	public void SetAnimatorFloat3(float value)
+	{
+		if (float3Hash == 0)
+		{
+			float3Hash = Animator.StringToHash(float3ParameterName);
+		}
+		animator.SetFloat(float3Hash, value);
+	}
+
+	public void SetAnimatorFloat4(float value)
+	{
+		if (float4Hash == 0)
+		{
+			float4Hash = Animator.StringToHash(float4ParameterName);
+		}
+		animator.SetFloat(float4Hash, value);
+	}
+
+	public void SetAnimatorTrigger(string triggerName)
+	{
+		animator.SetTrigger(triggerName);
+	}
+
+	private void Reset()
+	{
+		animator = GetComponent<Animator>();
+	}
 }

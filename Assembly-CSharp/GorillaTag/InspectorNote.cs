@@ -1,13 +1,11 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class InspectorNote : MonoBehaviour
 {
-	public class InspectorNote : MonoBehaviour
+	protected void Awake()
 	{
-		protected void Awake()
-		{
-			Object.Destroy(this);
-		}
+		Object.Destroy(this);
 	}
 }

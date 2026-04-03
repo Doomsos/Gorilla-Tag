@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaTag.Rendering;
@@ -8,27 +7,33 @@ using UnityEngine;
 
 public class CMSZoneShaderSettingsTrigger : MonoBehaviour
 {
+	public GameObject shaderSettingsObject;
+
+	public bool activateCustomMapDefaults;
+
+	public bool activateOnEnable;
+
 	public void OnEnable()
 	{
-		if (this.activateOnEnable)
+		if (activateOnEnable)
 		{
-			this.ActivateShaderSettings();
+			ActivateShaderSettings();
 		}
 	}
 
 	public void CopySettings(ZoneShaderTriggerSettings triggerSettings)
 	{
 		base.gameObject.layer = UnityLayer.GorillaBoundary.ToLayerIndex();
-		this.activateOnEnable = triggerSettings.activateOnEnable;
+		activateOnEnable = triggerSettings.activateOnEnable;
 		if (triggerSettings.activationType == ZoneShaderTriggerSettings.ActivationType.ActivateCustomMapDefaults)
 		{
-			this.activateCustomMapDefaults = true;
+			activateCustomMapDefaults = true;
 			return;
 		}
 		GameObject zoneShaderSettingsObject = triggerSettings.zoneShaderSettingsObject;
 		if (zoneShaderSettingsObject.IsNotNull())
 		{
-			this.shaderSettingsObject = zoneShaderSettingsObject;
+			shaderSettingsObject = zoneShaderSettingsObject;
 		}
 	}
 
@@ -36,30 +41,23 @@ public class CMSZoneShaderSettingsTrigger : MonoBehaviour
 	{
 		if (other == GTPlayer.Instance.bodyCollider)
 		{
-			this.ActivateShaderSettings();
+			ActivateShaderSettings();
 		}
 	}
 
 	private void ActivateShaderSettings()
 	{
-		if (this.activateCustomMapDefaults)
+		if (activateCustomMapDefaults)
 		{
 			CustomMapManager.ActivateDefaultZoneShaderSettings();
-			return;
 		}
-		if (this.shaderSettingsObject.IsNotNull())
+		else if (shaderSettingsObject.IsNotNull())
 		{
-			ZoneShaderSettings component = this.shaderSettingsObject.GetComponent<ZoneShaderSettings>();
+			ZoneShaderSettings component = shaderSettingsObject.GetComponent<ZoneShaderSettings>();
 			if (component.IsNotNull())
 			{
-				component.BecomeActiveInstance(false);
+				component.BecomeActiveInstance();
 			}
 		}
 	}
-
-	public GameObject shaderSettingsObject;
-
-	public bool activateCustomMapDefaults;
-
-	public bool activateOnEnable;
 }

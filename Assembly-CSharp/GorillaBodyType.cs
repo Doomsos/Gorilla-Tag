@@ -1,5 +1,3 @@
-﻿using System;
-
 public enum GorillaBodyType
 {
 	Invisible = -1,

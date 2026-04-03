@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaNetworking;
 using GorillaTagScripts.GhostReactor.SoakTasks;
@@ -7,159 +6,11 @@ using UnityEngine;
 
 public class GhostReactorSoak
 {
-	public void Setup(GRPlayer grPlayer)
+	public enum State
 	{
-		this.grPlayer = grPlayer;
-		GhostReactorSoak.instance = this;
-		if (this.IsSoaking())
-		{
-			Debug.LogFormat("Soak Setup {0} InRoom {1} Auth {2}", new object[]
-			{
-				this.state,
-				this.grManager != null && this.grManager.IsAuthority(),
-				PhotonNetwork.InRoom
-			});
-		}
-		this._soakTasks.Add(new SoakTaskGrabThrow(grPlayer));
-		this._soakTasks.Add(new SoakTaskDepositCollectibles(grPlayer));
-		this._soakTasks.Add(new SoakTaskBreakable(grPlayer));
-		this._soakTasks.Add(new SoakTaskHitEnemy(grPlayer));
-	}
-
-	public bool IsSoaking()
-	{
-		return false;
-	}
-
-	public void OnUpdate()
-	{
-		if (!this.IsSoaking())
-		{
-			return;
-		}
-		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.grPlayer.gamePlayer.rig.zoneEntity.currentZone);
-		if (managerForZone == null)
-		{
-			return;
-		}
-		this.grManager = managerForZone.ghostReactorManager;
-		if (this.grManager == null)
-		{
-			return;
-		}
-		double timeAsDouble = Time.timeAsDouble;
-		switch (this.state)
-		{
-		case GhostReactorSoak.State.Disconnected:
-			if (!PhotonNetwork.InRoom && timeAsDouble > this.reconnectTime)
-			{
-				this.SetState(GhostReactorSoak.State.Connecting);
-				return;
-			}
-			break;
-		case GhostReactorSoak.State.Connecting:
-			if (this.grManager.IsZoneActive())
-			{
-				this.SetState(GhostReactorSoak.State.Active);
-				return;
-			}
-			if (timeAsDouble > this.stateStartTime + 15.0)
-			{
-				this.SetState(GhostReactorSoak.State.Disconnected);
-				return;
-			}
-			break;
-		case GhostReactorSoak.State.Active:
-			this.UpdateActive();
-			if (timeAsDouble > this.disconnectTime)
-			{
-				this.SetState(GhostReactorSoak.State.Disconnected);
-				return;
-			}
-			if (!PhotonNetwork.InRoom)
-			{
-				this.SetState(GhostReactorSoak.State.Disconnected);
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	private int GetActorNumber()
-	{
-		if (this.grPlayer.gamePlayer.rig.OwningNetPlayer == null)
-		{
-			return -1;
-		}
-		return this.grPlayer.gamePlayer.rig.OwningNetPlayer.ActorNumber;
-	}
-
-	public void SetState(GhostReactorSoak.State newState)
-	{
-		this.state = newState;
-		this.stateStartTime = Time.timeAsDouble;
-		Debug.LogFormat("Soak Set State {0} Player {1} InRoom {2} Auth {3}", new object[]
-		{
-			this.state,
-			this.GetActorNumber(),
-			this.grManager != null && this.grManager.IsAuthority(),
-			PhotonNetwork.InRoom
-		});
-		switch (this.state)
-		{
-		case GhostReactorSoak.State.Disconnected:
-			this.LeaveRoom();
-			this.reconnectTime = this.stateStartTime + (double)Random.Range(3f, 6f);
-			return;
-		case GhostReactorSoak.State.Connecting:
-			this.JoinRoom();
-			return;
-		case GhostReactorSoak.State.Active:
-			this.disconnectTime = this.stateStartTime + (double)Random.Range(5f, 60f);
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void JoinRoom()
-	{
-		Debug.LogFormat("Soak Join Room {0}", new object[]
-		{
-			"AKJSOAK"
-		});
-		PhotonNetworkController.Instance.AttemptToJoinSpecificRoom("AKJSOAK", JoinType.Solo);
-	}
-
-	public void LeaveRoom()
-	{
-		Debug.LogFormat("Soak Leave Room", Array.Empty<object>());
-		NetworkSystem.Instance.ReturnToSinglePlayer();
-	}
-
-	private void UpdateActive()
-	{
-		if (this._activeTask != null)
-		{
-			bool flag = false;
-			if (!this._activeTask.Update())
-			{
-				Debug.LogError(string.Format("Failed to execute soak task of type {0}", this._activeTask.GetType()));
-				flag = true;
-			}
-			if (flag || this._activeTask.Complete)
-			{
-				this._activeTask.Reset();
-				this._activeTask = null;
-				return;
-			}
-		}
-		else if (Random.value <= 0.005f)
-		{
-			int index = Random.Range(0, this._soakTasks.Count);
-			this._activeTask = this._soakTasks[index];
-		}
+		Disconnected,
+		Connecting,
+		Active
 	}
 
 	public static GhostReactorSoak instance;
@@ -178,7 +29,7 @@ public class GhostReactorSoak
 
 	public GhostReactorManager grManager;
 
-	public GhostReactorSoak.State state;
+	public State state;
 
 	public double stateStartTime;
 
@@ -192,10 +43,135 @@ public class GhostReactorSoak
 
 	private readonly List<IGhostReactorSoakTask> _soakTasks = new List<IGhostReactorSoakTask>();
 
-	public enum State
+	public void Setup(GRPlayer grPlayer)
 	{
-		Disconnected,
-		Connecting,
-		Active
+		this.grPlayer = grPlayer;
+		instance = this;
+		if (IsSoaking())
+		{
+			Debug.LogFormat("Soak Setup {0} InRoom {1} Auth {2}", state, grManager != null && grManager.IsAuthority(), PhotonNetwork.InRoom);
+		}
+		_soakTasks.Add(new SoakTaskGrabThrow(grPlayer));
+		_soakTasks.Add(new SoakTaskDepositCollectibles(grPlayer));
+		_soakTasks.Add(new SoakTaskBreakable(grPlayer));
+		_soakTasks.Add(new SoakTaskHitEnemy(grPlayer));
+	}
+
+	public bool IsSoaking()
+	{
+		return false;
+	}
+
+	public void OnUpdate()
+	{
+		if (!IsSoaking())
+		{
+			return;
+		}
+		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(grPlayer.gamePlayer.rig.zoneEntity.currentZone);
+		if (managerForZone == null)
+		{
+			return;
+		}
+		grManager = managerForZone.ghostReactorManager;
+		if (grManager == null)
+		{
+			return;
+		}
+		double timeAsDouble = Time.timeAsDouble;
+		switch (state)
+		{
+		case State.Disconnected:
+			if (!PhotonNetwork.InRoom && timeAsDouble > reconnectTime)
+			{
+				SetState(State.Connecting);
+			}
+			break;
+		case State.Connecting:
+			if (grManager.IsZoneActive())
+			{
+				SetState(State.Active);
+			}
+			else if (timeAsDouble > stateStartTime + 15.0)
+			{
+				SetState(State.Disconnected);
+			}
+			break;
+		case State.Active:
+			UpdateActive();
+			if (timeAsDouble > disconnectTime)
+			{
+				SetState(State.Disconnected);
+			}
+			else if (!PhotonNetwork.InRoom)
+			{
+				SetState(State.Disconnected);
+			}
+			break;
+		}
+	}
+
+	private int GetActorNumber()
+	{
+		if (grPlayer.gamePlayer.rig.OwningNetPlayer == null)
+		{
+			return -1;
+		}
+		return grPlayer.gamePlayer.rig.OwningNetPlayer.ActorNumber;
+	}
+
+	public void SetState(State newState)
+	{
+		state = newState;
+		stateStartTime = Time.timeAsDouble;
+		Debug.LogFormat("Soak Set State {0} Player {1} InRoom {2} Auth {3}", state, GetActorNumber(), grManager != null && grManager.IsAuthority(), PhotonNetwork.InRoom);
+		switch (state)
+		{
+		case State.Disconnected:
+			LeaveRoom();
+			reconnectTime = stateStartTime + (double)Random.Range(3f, 6f);
+			break;
+		case State.Connecting:
+			JoinRoom();
+			break;
+		case State.Active:
+			disconnectTime = stateStartTime + (double)Random.Range(5f, 60f);
+			break;
+		}
+	}
+
+	public void JoinRoom()
+	{
+		Debug.LogFormat("Soak Join Room {0}", "AKJSOAK");
+		PhotonNetworkController.Instance.AttemptToJoinSpecificRoom("AKJSOAK", JoinType.Solo);
+	}
+
+	public void LeaveRoom()
+	{
+		Debug.LogFormat("Soak Leave Room");
+		NetworkSystem.Instance.ReturnToSinglePlayer();
+	}
+
+	private void UpdateActive()
+	{
+		if (_activeTask != null)
+		{
+			bool flag = false;
+			if (!_activeTask.Update())
+			{
+				Debug.LogError($"Failed to execute soak task of type {_activeTask.GetType()}");
+				flag = true;
+			}
+			if (flag || _activeTask.Complete)
+			{
+				_activeTask.Reset();
+				_activeTask = null;
+			}
+		}
+		else if (Random.value <= 0.005f)
+		{
+			int index = Random.Range(0, _soakTasks.Count);
+			_activeTask = _soakTasks[index];
+		}
 	}
 }

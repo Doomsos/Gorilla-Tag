@@ -1,109 +1,12 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GRBreakable : MonoBehaviour, IGameHittable
 {
-	public bool BrokenLocal
+	public enum BreakableState
 	{
-		get
-		{
-			return this.brokenLocal;
-		}
-	}
-
-	private void OnEnable()
-	{
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
-	}
-
-	private void OnDisable()
-	{
-		if (this.gameEntity != null)
-		{
-			this.gameEntity.OnStateChanged -= this.OnEntityStateChanged;
-		}
-	}
-
-	private void OnEntityStateChanged(long prevState, long nextState)
-	{
-		GRBreakable.BreakableState breakableState = (GRBreakable.BreakableState)nextState;
-		if (breakableState == GRBreakable.BreakableState.Broken)
-		{
-			this.BreakLocal();
-			return;
-		}
-		if (breakableState == GRBreakable.BreakableState.Unbroken)
-		{
-			this.RestoreLocal();
-		}
-	}
-
-	public void BreakLocal()
-	{
-		if (!this.brokenLocal)
-		{
-			this.brokenLocal = true;
-			if (this.breakableCollider != null)
-			{
-				this.breakableCollider.enabled = false;
-			}
-			for (int i = 0; i < this.disableWhenBroken.Count; i++)
-			{
-				this.disableWhenBroken[i].gameObject.SetActive(false);
-			}
-			for (int j = 0; j < this.enableWhenBroken.Count; j++)
-			{
-				this.enableWhenBroken[j].gameObject.SetActive(true);
-			}
-			if (this.audioSource != null)
-			{
-				this.audioSource.PlayOneShot(this.breakSound, this.breakSoundVolume);
-			}
-			GameEntity gameEntity;
-			if (this.gameEntity.IsAuthority() && this.holdsRandomItem && this.itemSpawnProbability.TryForRandomItem(this.gameEntity, out gameEntity, 0))
-			{
-				this.gameEntity.manager.RequestCreateItem(gameEntity.gameObject.name.GetStaticHash(), this.itemSpawnLocation.position, this.itemSpawnLocation.rotation, 0L);
-			}
-		}
-	}
-
-	public void RestoreLocal()
-	{
-		if (this.brokenLocal)
-		{
-			this.brokenLocal = false;
-			if (this.breakableCollider != null)
-			{
-				this.breakableCollider.enabled = true;
-			}
-			for (int i = 0; i < this.disableWhenBroken.Count; i++)
-			{
-				this.disableWhenBroken[i].gameObject.SetActive(true);
-			}
-			for (int j = 0; j < this.enableWhenBroken.Count; j++)
-			{
-				this.enableWhenBroken[j].gameObject.SetActive(false);
-			}
-		}
-	}
-
-	public bool IsHitValid(GameHitData hit)
-	{
-		return !this.brokenLocal && hit.hitTypeId == 0;
-	}
-
-	public void OnHit(GameHitData hit)
-	{
-		if (hit.hitTypeId == 0 && (int)this.gameEntity.GetState() != 1)
-		{
-			this.gameEntity.RequestState(this.gameEntity.id, 1L);
-			GameEntity gameEntity = this.gameEntity.manager.GetGameEntity(hit.hitByEntityId);
-			if (gameEntity != null && gameEntity.IsHeldByLocalPlayer())
-			{
-				PlayerGameEvents.MiscEvent("GRSmashBreakable", 1);
-			}
-		}
+		Unbroken,
+		Broken
 	}
 
 	public GameEntity gameEntity;
@@ -128,9 +31,101 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 
 	private bool brokenLocal;
 
-	public enum BreakableState
+	public bool BrokenLocal => brokenLocal;
+
+	private void OnEnable()
 	{
-		Unbroken,
-		Broken
+		gameEntity.OnStateChanged += OnEntityStateChanged;
+	}
+
+	private void OnDisable()
+	{
+		if (gameEntity != null)
+		{
+			gameEntity.OnStateChanged -= OnEntityStateChanged;
+		}
+	}
+
+	private void OnEntityStateChanged(long prevState, long nextState)
+	{
+		switch ((BreakableState)nextState)
+		{
+		case BreakableState.Broken:
+			BreakLocal();
+			break;
+		case BreakableState.Unbroken:
+			RestoreLocal();
+			break;
+		}
+	}
+
+	public void BreakLocal()
+	{
+		if (!brokenLocal)
+		{
+			brokenLocal = true;
+			if (breakableCollider != null)
+			{
+				breakableCollider.enabled = false;
+			}
+			for (int i = 0; i < disableWhenBroken.Count; i++)
+			{
+				disableWhenBroken[i].gameObject.SetActive(value: false);
+			}
+			for (int j = 0; j < enableWhenBroken.Count; j++)
+			{
+				enableWhenBroken[j].gameObject.SetActive(value: true);
+			}
+			if (audioSource != null)
+			{
+				audioSource.PlayOneShot(breakSound, breakSoundVolume);
+			}
+			if (gameEntity.IsAuthority() && holdsRandomItem && itemSpawnProbability.TryForRandomItem(gameEntity, out var entity))
+			{
+				gameEntity.manager.RequestCreateItem(entity.gameObject.name.GetStaticHash(), itemSpawnLocation.position, itemSpawnLocation.rotation, 0L);
+			}
+		}
+	}
+
+	public void RestoreLocal()
+	{
+		if (brokenLocal)
+		{
+			brokenLocal = false;
+			if (breakableCollider != null)
+			{
+				breakableCollider.enabled = true;
+			}
+			for (int i = 0; i < disableWhenBroken.Count; i++)
+			{
+				disableWhenBroken[i].gameObject.SetActive(value: true);
+			}
+			for (int j = 0; j < enableWhenBroken.Count; j++)
+			{
+				enableWhenBroken[j].gameObject.SetActive(value: false);
+			}
+		}
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		if (!brokenLocal)
+		{
+			return hit.hitTypeId == 0;
+		}
+		return false;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		if (hit.hitTypeId == 0 && (int)this.gameEntity.GetState() != 1)
+		{
+			this.gameEntity.RequestState(this.gameEntity.id, 1L);
+			GameEntity gameEntity = this.gameEntity.manager.GetGameEntity(hit.hitByEntityId);
+			if (gameEntity != null && gameEntity.IsHeldByLocalPlayer())
+			{
+				PlayerGameEvents.MiscEvent("GRSmashBreakable");
+			}
+		}
 	}
 }

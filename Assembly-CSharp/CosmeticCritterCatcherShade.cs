@@ -1,168 +1,8 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 
 public class CosmeticCritterCatcherShade : CosmeticCritterCatcher
 {
-	public Vector3 LastTargetPosition { get; private set; }
-
-	public float GetActionTimeFrac()
-	{
-		return this.targetHoldTime / this.maxHoldTime;
-	}
-
-	protected override CallLimiter CreateCallLimiter()
-	{
-		return new CallLimiter(10, 0.25f, 0.5f);
-	}
-
-	public override CosmeticCritterAction GetLocalCatchAction(CosmeticCritter critter)
-	{
-		if (this.heartbeatCooldown > 0.5f || (this.currentTarget != null && this.currentTarget != critter))
-		{
-			return CosmeticCritterAction.None;
-		}
-		if (critter is CosmeticCritterShadeFleeing && this.shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.LOCKED, 0f))
-		{
-			if (this.targetHoldTime >= this.minSecondsLockedToCatch && (critter.transform.position - this.catchOrigin.position).sqrMagnitude <= this.catchRadius * this.catchRadius)
-			{
-				return CosmeticCritterAction.RPC | CosmeticCritterAction.Despawn;
-			}
-			return CosmeticCritterAction.RPC | CosmeticCritterAction.ShadeHeartbeat;
-		}
-		else
-		{
-			if (!(critter is CosmeticCritterShadeHidden) || !this.shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.TRACKING, 0f))
-			{
-				return CosmeticCritterAction.None;
-			}
-			if (this.targetHoldTime >= this.secondsToReveal)
-			{
-				return CosmeticCritterAction.RPC | CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked;
-			}
-			return CosmeticCritterAction.RPC | CosmeticCritterAction.ShadeHeartbeat;
-		}
-	}
-
-	public override bool ValidateRemoteCatchAction(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime)
-	{
-		if (!base.ValidateRemoteCatchAction(critter, catchAction, serverTime))
-		{
-			return false;
-		}
-		if (critter is CosmeticCritterShadeFleeing)
-		{
-			if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None && (critter.transform.position - this.catchOrigin.position).sqrMagnitude <= this.catchRadius * this.catchRadius + 1f && this.targetHoldTime >= this.minSecondsLockedToCatch * 0.8f)
-			{
-				return true;
-			}
-			if ((catchAction & CosmeticCritterAction.ShadeHeartbeat) != CosmeticCritterAction.None && this.shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.LOCKED, 2f))
-			{
-				return true;
-			}
-		}
-		else if (critter is CosmeticCritterShadeHidden)
-		{
-			if ((catchAction & (CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked)) != CosmeticCritterAction.None && this.targetHoldTime >= this.secondsToReveal * 0.8f)
-			{
-				return true;
-			}
-			if ((catchAction & CosmeticCritterAction.ShadeHeartbeat) != CosmeticCritterAction.None && this.shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.TRACKING, 2f))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public override void OnCatch(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime)
-	{
-		this.currentTarget = critter;
-		float num = PhotonNetwork.InRoom ? ((float)(PhotonNetwork.Time - serverTime)) : 0f;
-		this.heartbeatCooldown = 1f + num;
-		this.targetHoldTime += num;
-		if (!(critter is CosmeticCritterShadeFleeing))
-		{
-			if (critter is CosmeticCritterShadeHidden)
-			{
-				this.maxHoldTime = this.secondsToReveal;
-				if ((catchAction & (CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked)) != CosmeticCritterAction.None)
-				{
-					(this.optionalLinkedSpawner as CosmeticCritterSpawnerShadeFleeing).SetSpawnPosition(critter.transform.position);
-					this.currentTarget = null;
-					this.targetHoldTime = 0f;
-				}
-			}
-			return;
-		}
-		this.maxHoldTime = this.minSecondsLockedToCatch;
-		if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
-		{
-			this.shadeRevealer.ShadeCaught();
-			this.currentTarget = null;
-			this.targetHoldTime = 0f;
-			return;
-		}
-		CosmeticCritterAction cosmeticCritterAction = catchAction & CosmeticCritterAction.ShadeHeartbeat;
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		this.shadeRevealer = (this.transferrableObject as ShadeRevealer);
-		this.maxHoldTime = Mathf.Max(this.secondsToReveal, this.minSecondsLockedToCatch);
-	}
-
-	protected void LateUpdate()
-	{
-		if (this.heartbeatCooldown > 0f)
-		{
-			this.heartbeatCooldown -= Time.deltaTime;
-			if (this.heartbeatCooldown < 0f)
-			{
-				this.heartbeatCooldown = 0f;
-				this.currentTarget = null;
-				return;
-			}
-			this.targetHoldTime = Mathf.Min(this.targetHoldTime + Time.deltaTime, this.maxHoldTime);
-			if (this.currentTarget is CosmeticCritterShadeFleeing)
-			{
-				if (!base.IsLocal || this.heartbeatCooldown > 0.4f)
-				{
-					this.shadeRevealer.SetBestBeamState(ShadeRevealer.State.LOCKED);
-				}
-				Vector3 normalized = (this.catchOrigin.position - this.currentTarget.transform.position).normalized;
-				(this.currentTarget as CosmeticCritterShadeFleeing).pullVector += this.vacuumSpeed * Time.deltaTime * normalized;
-				return;
-			}
-			if (this.currentTarget is CosmeticCritterShadeHidden && (!base.IsLocal || this.heartbeatCooldown > 0.4f))
-			{
-				this.shadeRevealer.SetBestBeamState(ShadeRevealer.State.TRACKING);
-				return;
-			}
-		}
-		else if (this.targetHoldTime > 0f)
-		{
-			this.targetHoldTime = Mathf.Max(this.targetHoldTime - Time.deltaTime, 0f);
-		}
-	}
-
-	protected override void OnEnable()
-	{
-		base.OnEnable();
-		this.currentTarget = null;
-		this.targetHoldTime = 0f;
-		this.heartbeatCooldown = 1f;
-	}
-
-	protected override void OnDisable()
-	{
-		base.OnDisable();
-		this.currentTarget = null;
-		this.targetHoldTime = 0f;
-		this.heartbeatCooldown = 1f;
-	}
-
 	[SerializeField]
 	private float secondsToReveal = 1f;
 
@@ -189,4 +29,159 @@ public class CosmeticCritterCatcherShade : CosmeticCritterCatcher
 	private const float HEARTBEAT_DELAY = 1f;
 
 	private float heartbeatCooldown;
+
+	public Vector3 LastTargetPosition { get; private set; }
+
+	public float GetActionTimeFrac()
+	{
+		return targetHoldTime / maxHoldTime;
+	}
+
+	protected override CallLimiter CreateCallLimiter()
+	{
+		return new CallLimiter(10, 0.25f);
+	}
+
+	public override CosmeticCritterAction GetLocalCatchAction(CosmeticCritter critter)
+	{
+		if (heartbeatCooldown > 0.5f || (currentTarget != null && currentTarget != critter))
+		{
+			return CosmeticCritterAction.None;
+		}
+		if (critter is CosmeticCritterShadeFleeing && shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.LOCKED, 0f))
+		{
+			if (targetHoldTime >= minSecondsLockedToCatch && (critter.transform.position - catchOrigin.position).sqrMagnitude <= catchRadius * catchRadius)
+			{
+				return CosmeticCritterAction.RPC | CosmeticCritterAction.Despawn;
+			}
+			return CosmeticCritterAction.RPC | CosmeticCritterAction.ShadeHeartbeat;
+		}
+		if (critter is CosmeticCritterShadeHidden && shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.TRACKING, 0f))
+		{
+			if (targetHoldTime >= secondsToReveal)
+			{
+				return CosmeticCritterAction.RPC | CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked;
+			}
+			return CosmeticCritterAction.RPC | CosmeticCritterAction.ShadeHeartbeat;
+		}
+		return CosmeticCritterAction.None;
+	}
+
+	public override bool ValidateRemoteCatchAction(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime)
+	{
+		if (!base.ValidateRemoteCatchAction(critter, catchAction, serverTime))
+		{
+			return false;
+		}
+		if (critter is CosmeticCritterShadeFleeing)
+		{
+			if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None && (critter.transform.position - catchOrigin.position).sqrMagnitude <= catchRadius * catchRadius + 1f && targetHoldTime >= minSecondsLockedToCatch * 0.8f)
+			{
+				return true;
+			}
+			if ((catchAction & CosmeticCritterAction.ShadeHeartbeat) != CosmeticCritterAction.None && shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.LOCKED, 2f))
+			{
+				return true;
+			}
+		}
+		else if (critter is CosmeticCritterShadeHidden)
+		{
+			if ((catchAction & (CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked)) != CosmeticCritterAction.None && targetHoldTime >= secondsToReveal * 0.8f)
+			{
+				return true;
+			}
+			if ((catchAction & CosmeticCritterAction.ShadeHeartbeat) != CosmeticCritterAction.None && shadeRevealer.CritterWithinBeamThreshold(critter, ShadeRevealer.State.TRACKING, 2f))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public override void OnCatch(CosmeticCritter critter, CosmeticCritterAction catchAction, double serverTime)
+	{
+		currentTarget = critter;
+		float num = (PhotonNetwork.InRoom ? ((float)(PhotonNetwork.Time - serverTime)) : 0f);
+		heartbeatCooldown = 1f + num;
+		targetHoldTime += num;
+		if (critter is CosmeticCritterShadeFleeing)
+		{
+			maxHoldTime = minSecondsLockedToCatch;
+			if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
+			{
+				shadeRevealer.ShadeCaught();
+				currentTarget = null;
+				targetHoldTime = 0f;
+			}
+			else
+			{
+				_ = catchAction & CosmeticCritterAction.ShadeHeartbeat;
+			}
+		}
+		else if (critter is CosmeticCritterShadeHidden)
+		{
+			maxHoldTime = secondsToReveal;
+			if ((catchAction & (CosmeticCritterAction.Despawn | CosmeticCritterAction.SpawnLinked)) != CosmeticCritterAction.None)
+			{
+				(optionalLinkedSpawner as CosmeticCritterSpawnerShadeFleeing).SetSpawnPosition(critter.transform.position);
+				currentTarget = null;
+				targetHoldTime = 0f;
+			}
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		shadeRevealer = transferrableObject as ShadeRevealer;
+		maxHoldTime = Mathf.Max(secondsToReveal, minSecondsLockedToCatch);
+	}
+
+	protected void LateUpdate()
+	{
+		if (heartbeatCooldown > 0f)
+		{
+			heartbeatCooldown -= Time.deltaTime;
+			if (heartbeatCooldown < 0f)
+			{
+				heartbeatCooldown = 0f;
+				currentTarget = null;
+				return;
+			}
+			targetHoldTime = Mathf.Min(targetHoldTime + Time.deltaTime, maxHoldTime);
+			if (currentTarget is CosmeticCritterShadeFleeing)
+			{
+				if (!base.IsLocal || heartbeatCooldown > 0.4f)
+				{
+					shadeRevealer.SetBestBeamState(ShadeRevealer.State.LOCKED);
+				}
+				Vector3 normalized = (catchOrigin.position - currentTarget.transform.position).normalized;
+				(currentTarget as CosmeticCritterShadeFleeing).pullVector += vacuumSpeed * Time.deltaTime * normalized;
+			}
+			else if (currentTarget is CosmeticCritterShadeHidden && (!base.IsLocal || heartbeatCooldown > 0.4f))
+			{
+				shadeRevealer.SetBestBeamState(ShadeRevealer.State.TRACKING);
+			}
+		}
+		else if (targetHoldTime > 0f)
+		{
+			targetHoldTime = Mathf.Max(targetHoldTime - Time.deltaTime, 0f);
+		}
+	}
+
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		currentTarget = null;
+		targetHoldTime = 0f;
+		heartbeatCooldown = 1f;
+	}
+
+	protected override void OnDisable()
+	{
+		base.OnDisable();
+		currentTarget = null;
+		targetHoldTime = 0f;
+		heartbeatCooldown = 1f;
+	}
 }

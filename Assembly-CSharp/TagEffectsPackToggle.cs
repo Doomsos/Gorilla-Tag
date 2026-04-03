@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using TagEffects;
@@ -6,13 +5,18 @@ using UnityEngine;
 
 public class TagEffectsPackToggle : MonoBehaviour, ISpawnable
 {
+	private VRRig _rig;
+
+	[SerializeField]
+	private TagEffectPack tagEffectPack;
+
 	bool ISpawnable.IsSpawned { get; set; }
 
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
-		this._rig = rig;
+		_rig = rig;
 	}
 
 	void ISpawnable.OnDespawn()
@@ -21,30 +25,24 @@ public class TagEffectsPackToggle : MonoBehaviour, ISpawnable
 
 	private void OnEnable()
 	{
-		this.Apply();
+		Apply();
 	}
 
 	private void OnDisable()
 	{
-		if (ApplicationQuittingState.IsQuitting)
+		if (!ApplicationQuittingState.IsQuitting)
 		{
-			return;
+			Remove();
 		}
-		this.Remove();
 	}
 
 	public void Apply()
 	{
-		this._rig.CosmeticEffectPack = this.tagEffectPack;
+		_rig.CosmeticEffectPack = tagEffectPack;
 	}
 
 	public void Remove()
 	{
-		this._rig.CosmeticEffectPack = null;
+		_rig.CosmeticEffectPack = null;
 	}
-
-	private VRRig _rig;
-
-	[SerializeField]
-	private TagEffectPack tagEffectPack;
 }

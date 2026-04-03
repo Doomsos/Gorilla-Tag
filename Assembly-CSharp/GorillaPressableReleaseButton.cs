@@ -1,91 +1,62 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class GorillaPressableReleaseButton : GorillaPressableButton
 {
+	public UnityEvent onReleaseButton;
+
+	private Collider touchingCollider;
+
 	private new void OnTriggerEnter(Collider other)
 	{
-		if (!base.enabled)
-		{
-			return;
-		}
-		if (this.touchTime + this.debounceTime >= Time.time)
-		{
-			return;
-		}
-		if (this.touchingCollider)
+		if (!base.enabled || !(touchTime + debounceTime < Time.time) || (bool)touchingCollider)
 		{
 			return;
 		}
 		GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		this.touchTime = Time.time;
-		this.touchingCollider = other;
-		UnityEvent onPressButton = this.onPressButton;
-		if (onPressButton != null)
-		{
-			onPressButton.Invoke();
-		}
-		this.ButtonActivation();
-		this.ButtonActivationWithHand(component.isLeftHand);
-		GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(this.pressButtonSoundIndex, component.isLeftHand, 0.05f);
-		GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
-		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
-		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
+			touchTime = Time.time;
+			touchingCollider = other;
+			onPressButton?.Invoke();
+			ButtonActivation();
+			ButtonActivationWithHand(component.isLeftHand);
+			GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(pressButtonSoundIndex, component.isLeftHand, 0.05f);
+			GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 			{
-				67,
-				component.isLeftHand,
-				0.05f
-			});
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, 67, component.isLeftHand, 0.05f);
+			}
 		}
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
-		if (!base.enabled)
+		if (!base.enabled || other != touchingCollider)
 		{
 			return;
 		}
-		if (other != this.touchingCollider)
-		{
-			return;
-		}
-		this.touchingCollider = null;
+		touchingCollider = null;
 		GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		UnityEvent unityEvent = this.onReleaseButton;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke();
-		}
-		this.ButtonDeactivation();
-		this.ButtonDeactivationWithHand(component.isLeftHand);
-		GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(this.pressButtonSoundIndex, component.isLeftHand, 0.05f);
-		GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
-		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
-		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
+			onReleaseButton?.Invoke();
+			ButtonDeactivation();
+			ButtonDeactivationWithHand(component.isLeftHand);
+			GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(pressButtonSoundIndex, component.isLeftHand, 0.05f);
+			GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 			{
-				67,
-				component.isLeftHand,
-				0.05f
-			});
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, 67, component.isLeftHand, 0.05f);
+			}
 		}
 	}
 
 	public override void ResetState()
 	{
 		base.ResetState();
-		this.touchingCollider = null;
+		touchingCollider = null;
 	}
 
 	public virtual void ButtonDeactivation()
@@ -95,8 +66,4 @@ public class GorillaPressableReleaseButton : GorillaPressableButton
 	public virtual void ButtonDeactivationWithHand(bool isLeftHand)
 	{
 	}
-
-	public UnityEvent onReleaseButton;
-
-	private Collider touchingCollider;
 }

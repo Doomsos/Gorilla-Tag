@@ -1,27 +1,51 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 [Serializable]
 public class GRSenseLineOfSight
 {
-	public bool HasLineOfSight(Vector3 headPos, Vector3 targetPos)
+	public enum RaycastMode
 	{
-		return GRSenseLineOfSight.HasLineOfSight(headPos, targetPos, this.sightDist, this.visibilityMask.value, this.rayCastMode);
+		Geometry,
+		Navmesh,
+		GeometryAndNavMesh,
+		GeometryOrNavMesh
 	}
 
-	public static bool HasLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask, GRSenseLineOfSight.RaycastMode rayCastMode = GRSenseLineOfSight.RaycastMode.Geometry)
+	public float sightDist;
+
+	public LayerMask visibilityMask;
+
+	public RaycastMode rayCastMode;
+
+	public static RaycastHit[] visibilityHits = new RaycastHit[16];
+
+	public bool HasLineOfSight(Vector3 headPos, Vector3 targetPos)
+	{
+		return HasLineOfSight(headPos, targetPos, sightDist, visibilityMask.value, rayCastMode);
+	}
+
+	public static bool HasLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask, RaycastMode rayCastMode = RaycastMode.Geometry)
 	{
 		switch (rayCastMode)
 		{
-		case GRSenseLineOfSight.RaycastMode.Geometry:
-			return GRSenseLineOfSight.HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask);
-		case GRSenseLineOfSight.RaycastMode.Navmesh:
-			return GRSenseLineOfSight.HasNavmeshLineOfSight(headPos, targetPos, sightDist);
-		case GRSenseLineOfSight.RaycastMode.GeometryAndNavMesh:
-			return GRSenseLineOfSight.HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask) && GRSenseLineOfSight.HasNavmeshLineOfSight(headPos, targetPos, sightDist);
-		case GRSenseLineOfSight.RaycastMode.GeometryOrNavMesh:
-			return GRSenseLineOfSight.HasNavmeshLineOfSight(headPos, targetPos, sightDist) || GRSenseLineOfSight.HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask);
+		case RaycastMode.Geometry:
+			return HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask);
+		case RaycastMode.Navmesh:
+			return HasNavmeshLineOfSight(headPos, targetPos, sightDist);
+		case RaycastMode.GeometryAndNavMesh:
+			if (HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask))
+			{
+				return HasNavmeshLineOfSight(headPos, targetPos, sightDist);
+			}
+			return false;
+		case RaycastMode.GeometryOrNavMesh:
+			if (!HasNavmeshLineOfSight(headPos, targetPos, sightDist))
+			{
+				return HasGeoLineOfSight(headPos, targetPos, sightDist, layerMask);
+			}
+			return true;
 		default:
 			return false;
 		}
@@ -30,29 +54,24 @@ public class GRSenseLineOfSight
 	public static bool HasGeoLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask)
 	{
 		float num = Vector3.Distance(targetPos, headPos);
-		return num <= sightDist && Physics.RaycastNonAlloc(new Ray(headPos, targetPos - headPos), GRSenseLineOfSight.visibilityHits, Mathf.Min(num, sightDist), layerMask, QueryTriggerInteraction.Ignore) < 1;
+		if (num > sightDist)
+		{
+			return false;
+		}
+		return Physics.RaycastNonAlloc(new Ray(headPos, targetPos - headPos), visibilityHits, Mathf.Min(num, sightDist), layerMask, QueryTriggerInteraction.Ignore) < 1;
 	}
 
 	public static bool HasNavmeshLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist)
 	{
-		NavMeshHit navMeshHit;
-		NavMeshHit navMeshHit2;
-		return (targetPos - headPos).sqrMagnitude <= sightDist * sightDist && NavMesh.SamplePosition(headPos, out navMeshHit, 1f, -1) && !NavMesh.Raycast(navMeshHit.position, targetPos, out navMeshHit2, -1);
-	}
-
-	public float sightDist;
-
-	public LayerMask visibilityMask;
-
-	public GRSenseLineOfSight.RaycastMode rayCastMode;
-
-	public static RaycastHit[] visibilityHits = new RaycastHit[16];
-
-	public enum RaycastMode
-	{
-		Geometry,
-		Navmesh,
-		GeometryAndNavMesh,
-		GeometryOrNavMesh
+		if ((targetPos - headPos).sqrMagnitude > sightDist * sightDist)
+		{
+			return false;
+		}
+		NavMeshHit hit2;
+		if (NavMesh.SamplePosition(headPos, out var hit, 1f, -1))
+		{
+			return !NavMesh.Raycast(hit.position, targetPos, out hit2, -1);
+		}
+		return false;
 	}
 }

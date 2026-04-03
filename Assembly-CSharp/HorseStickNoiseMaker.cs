@@ -1,48 +1,8 @@
-﻿using System;
 using GorillaExtensions;
 using UnityEngine;
 
 public class HorseStickNoiseMaker : MonoBehaviour
 {
-	protected void OnEnable()
-	{
-		if (!this.gorillaPlayerXform && !base.transform.TryFindByPath(this.gorillaPlayerXform_path, out this.gorillaPlayerXform, false))
-		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				"HorseStickNoiseMaker: DEACTIVATING! Could not find gorillaPlayerXform using path: \"",
-				this.gorillaPlayerXform_path,
-				"\"\nThis component's transform path: \"",
-				base.transform.GetPath(),
-				"\""
-			}));
-			base.gameObject.SetActive(false);
-			return;
-		}
-		this.oldPos = this.gorillaPlayerXform.position;
-		this.distElapsed = 0f;
-		this.timeSincePlay = 0f;
-	}
-
-	protected void LateUpdate()
-	{
-		Vector3 position = this.gorillaPlayerXform.position;
-		Vector3 vector = position - this.oldPos;
-		this.distElapsed += vector.magnitude;
-		this.timeSincePlay += Time.deltaTime;
-		this.oldPos = position;
-		if (this.distElapsed >= this.metersPerClip && this.timeSincePlay >= this.minSecBetweenClips)
-		{
-			this.soundBankPlayer.Play();
-			this.distElapsed = 0f;
-			this.timeSincePlay = 0f;
-			if (this.particleFX != null)
-			{
-				this.particleFX.Play();
-			}
-		}
-	}
-
 	[Tooltip("Meters the object should traverse between playing a provided audio clip.")]
 	public float metersPerClip = 4f;
 
@@ -65,4 +25,37 @@ public class HorseStickNoiseMaker : MonoBehaviour
 	private float timeSincePlay;
 
 	private float distElapsed;
+
+	protected void OnEnable()
+	{
+		if (!gorillaPlayerXform && !base.transform.TryFindByPath(gorillaPlayerXform_path, out gorillaPlayerXform))
+		{
+			Debug.LogError("HorseStickNoiseMaker: DEACTIVATING! Could not find gorillaPlayerXform using path: \"" + gorillaPlayerXform_path + "\"\nThis component's transform path: \"" + base.transform.GetPath() + "\"");
+			base.gameObject.SetActive(value: false);
+		}
+		else
+		{
+			oldPos = gorillaPlayerXform.position;
+			distElapsed = 0f;
+			timeSincePlay = 0f;
+		}
+	}
+
+	protected void LateUpdate()
+	{
+		Vector3 position = gorillaPlayerXform.position;
+		distElapsed += (position - oldPos).magnitude;
+		timeSincePlay += Time.deltaTime;
+		oldPos = position;
+		if (distElapsed >= metersPerClip && timeSincePlay >= minSecBetweenClips)
+		{
+			soundBankPlayer.Play();
+			distElapsed = 0f;
+			timeSincePlay = 0f;
+			if (particleFX != null)
+			{
+				particleFX.Play();
+			}
+		}
+	}
 }

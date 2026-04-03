@@ -1,26 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaPlaySpace : MonoBehaviour
 {
-	public static GorillaPlaySpace Instance
-	{
-		get
-		{
-			return GorillaPlaySpace._instance;
-		}
-	}
-
-	private void Awake()
-	{
-		if (GorillaPlaySpace._instance != null && GorillaPlaySpace._instance != this)
-		{
-			Object.Destroy(base.gameObject);
-			return;
-		}
-		GorillaPlaySpace._instance = this;
-	}
-
 	[OnEnterPlay_SetNull]
 	private static GorillaPlaySpace _instance;
 
@@ -93,4 +74,18 @@ public class GorillaPlaySpace : MonoBehaviour
 	public float taggedHapticDuration = 0.35f;
 
 	public float taggedHapticStrength = 1f;
+
+	public static GorillaPlaySpace Instance => _instance;
+
+	private void Awake()
+	{
+		if (_instance != null && _instance != this)
+		{
+			Object.Destroy(base.gameObject);
+		}
+		else
+		{
+			_instance = this;
+		}
+	}
 }

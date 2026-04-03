@@ -1,15 +1,12 @@
-﻿using System;
+namespace Voxels;
 
-namespace Voxels
+public enum ChunkState
 {
-	public enum ChunkState
-	{
-		UNINITIALIZED,
-		Created,
-		VoxelDataGenerated,
-		MeshDataGenerated,
-		MeshCreated,
-		CollisionBaked,
-		MeshAssigned
-	}
+	UNINITIALIZED,
+	Created,
+	VoxelDataGenerated,
+	MeshDataGenerated,
+	MeshCreated,
+	CollisionBaked,
+	MeshAssigned
 }

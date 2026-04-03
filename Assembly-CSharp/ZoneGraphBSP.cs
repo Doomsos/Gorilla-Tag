@@ -1,35 +1,41 @@
-﻿using System;
 using UnityEngine;
 
 public class ZoneGraphBSP : MonoBehaviour
 {
+	[SerializeField]
+	private SerializableBSPTree bspTree;
+
 	public static ZoneGraphBSP Instance { get; private set; }
 
 	private void Awake()
 	{
-		if (ZoneGraphBSP.Instance == null)
+		if (Instance == null)
 		{
-			ZoneGraphBSP.Instance = this;
-			return;
+			Instance = this;
 		}
-		Object.Destroy(this);
+		else
+		{
+			Object.Destroy(this);
+		}
 	}
 
 	public void Preprocess()
 	{
-		BoxCollider[] componentsInChildren = base.GetComponentsInChildren<BoxCollider>(true);
-		if (componentsInChildren != null)
+		BoxCollider[] componentsInChildren = GetComponentsInChildren<BoxCollider>(includeInactive: true);
+		if (componentsInChildren == null)
 		{
-			foreach (BoxCollider boxCollider in componentsInChildren)
+			return;
+		}
+		BoxCollider[] array = componentsInChildren;
+		foreach (BoxCollider boxCollider in array)
+		{
+			if (boxCollider.transform.GetComponent<ZoneDef>() != null)
 			{
-				if (boxCollider.transform.GetComponent<ZoneDef>() != null)
-				{
-					Object.Destroy(boxCollider);
-				}
-				else
-				{
-					Object.Destroy(boxCollider.gameObject);
-				}
+				Object.Destroy(boxCollider);
+			}
+			else
+			{
+				Object.Destroy(boxCollider.gameObject);
 			}
 		}
 	}
@@ -37,40 +43,38 @@ public class ZoneGraphBSP : MonoBehaviour
 	public void CompileBSP()
 	{
 		ZoneDef[] componentsInChildren = base.gameObject.GetComponentsInChildren<ZoneDef>();
-		this.bspTree = BSPTreeBuilder.BuildTree(componentsInChildren);
-		if (this.bspTree != null && this.bspTree.nodes != null)
+		bspTree = BSPTreeBuilder.BuildTree(componentsInChildren);
+		if (bspTree != null && bspTree.nodes != null)
 		{
-			Debug.Log(string.Format("BSP Tree compiled with {0} zones, {1} nodes", componentsInChildren.Length, this.bspTree.nodes.Length));
-			return;
+			Debug.Log($"BSP Tree compiled with {componentsInChildren.Length} zones, {bspTree.nodes.Length} nodes");
 		}
-		Debug.Log("BSP Tree compilation failed - no zones found");
+		else
+		{
+			Debug.Log("BSP Tree compilation failed - no zones found");
+		}
 	}
 
 	public ZoneDef FindZoneAtPoint(Vector3 worldPoint)
 	{
-		SerializableBSPTree serializableBSPTree = this.bspTree;
-		if (serializableBSPTree == null)
-		{
-			return null;
-		}
-		return serializableBSPTree.FindZone(worldPoint);
+		return bspTree?.FindZone(worldPoint);
 	}
 
 	public bool IsPointInAnyZone(Vector3 worldPoint)
 	{
-		return this.FindZoneAtPoint(worldPoint) != null;
+		return FindZoneAtPoint(worldPoint) != null;
 	}
 
 	public bool HasCompiledTree()
 	{
-		return this.bspTree != null && this.bspTree.nodes != null && this.bspTree.nodes.Length != 0;
+		if (bspTree != null && bspTree.nodes != null)
+		{
+			return bspTree.nodes.Length != 0;
+		}
+		return false;
 	}
 
 	public SerializableBSPTree GetBSPTree()
 	{
-		return this.bspTree;
+		return bspTree;
 	}
-
-	[SerializeField]
-	private SerializableBSPTree bspTree;
 }

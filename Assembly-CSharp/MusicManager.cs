@@ -1,62 +1,68 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MusicManager : MonoBehaviour
 {
+	[OnEnterPlay_SetNull]
+	public static volatile MusicManager Instance;
+
+	private HashSet<MusicSource> activeSources = new HashSet<MusicSource>();
+
 	private void Awake()
 	{
-		if (MusicManager.Instance == null)
+		if (Instance == null)
 		{
-			MusicManager.Instance = this;
-			return;
+			Instance = this;
 		}
-		Object.Destroy(this);
+		else
+		{
+			Object.Destroy(this);
+		}
 	}
 
 	public void RegisterMusicSource(MusicSource musicSource)
 	{
-		if (!this.activeSources.Contains(musicSource))
+		if (!activeSources.Contains(musicSource))
 		{
-			this.activeSources.Add(musicSource);
+			activeSources.Add(musicSource);
 		}
 	}
 
 	public void UnregisterMusicSource(MusicSource musicSource)
 	{
-		if (this.activeSources.Contains(musicSource))
+		if (activeSources.Contains(musicSource))
 		{
-			this.activeSources.Remove(musicSource);
+			activeSources.Remove(musicSource);
 			musicSource.UnsetVolumeOverride();
 		}
 	}
 
 	public void FadeOutMusic(float duration = 3f)
 	{
-		base.StopAllCoroutines();
+		StopAllCoroutines();
 		if (duration > 0f)
 		{
-			base.StartCoroutine(this.FadeOutVolumeCoroutine(duration));
+			StartCoroutine(FadeOutVolumeCoroutine(duration));
 			return;
 		}
-		foreach (MusicSource musicSource in this.activeSources)
+		foreach (MusicSource activeSource in activeSources)
 		{
-			musicSource.SetVolumeOverride(0f);
+			activeSource.SetVolumeOverride(0f);
 		}
 	}
 
 	public void FadeInMusic(float duration = 3f)
 	{
-		base.StopAllCoroutines();
+		StopAllCoroutines();
 		if (duration > 0f)
 		{
-			base.StartCoroutine(this.FadeInVolumeCoroutine(duration));
+			StartCoroutine(FadeInVolumeCoroutine(duration));
 			return;
 		}
-		foreach (MusicSource musicSource in this.activeSources)
+		foreach (MusicSource activeSource in activeSources)
 		{
-			musicSource.UnsetVolumeOverride();
+			activeSource.UnsetVolumeOverride();
 		}
 	}
 
@@ -67,28 +73,22 @@ public class MusicManager : MonoBehaviour
 		{
 			complete = true;
 			float deltaTime = Time.deltaTime;
-			foreach (MusicSource musicSource in this.activeSources)
+			foreach (MusicSource activeSource in activeSources)
 			{
-				float num = musicSource.DefaultVolume / duration;
-				float volumeOverride = Mathf.MoveTowards(musicSource.AudioSource.volume, musicSource.DefaultVolume, num * deltaTime);
-				musicSource.SetVolumeOverride(volumeOverride);
-				if (musicSource.AudioSource.volume != musicSource.DefaultVolume)
+				float num = activeSource.DefaultVolume / duration;
+				float volumeOverride = Mathf.MoveTowards(activeSource.AudioSource.volume, activeSource.DefaultVolume, num * deltaTime);
+				activeSource.SetVolumeOverride(volumeOverride);
+				if (activeSource.AudioSource.volume != activeSource.DefaultVolume)
 				{
 					complete = false;
 				}
 			}
 			yield return null;
 		}
-		using (HashSet<MusicSource>.Enumerator enumerator = this.activeSources.GetEnumerator())
+		foreach (MusicSource activeSource2 in activeSources)
 		{
-			while (enumerator.MoveNext())
-			{
-				MusicSource musicSource2 = enumerator.Current;
-				musicSource2.UnsetVolumeOverride();
-			}
-			yield break;
+			activeSource2.UnsetVolumeOverride();
 		}
-		yield break;
 	}
 
 	private IEnumerator FadeOutVolumeCoroutine(float duration)
@@ -98,46 +98,39 @@ public class MusicManager : MonoBehaviour
 		{
 			complete = true;
 			float deltaTime = Time.deltaTime;
-			foreach (MusicSource musicSource in this.activeSources)
+			foreach (MusicSource activeSource in activeSources)
 			{
-				float num = musicSource.DefaultVolume / duration;
-				float volumeOverride = Mathf.MoveTowards(musicSource.AudioSource.volume, 0f, num * deltaTime);
-				musicSource.SetVolumeOverride(volumeOverride);
-				if (musicSource.AudioSource.volume != 0f)
+				float volumeOverride = Mathf.MoveTowards(maxDelta: activeSource.DefaultVolume / duration * deltaTime, current: activeSource.AudioSource.volume, target: 0f);
+				activeSource.SetVolumeOverride(volumeOverride);
+				if (activeSource.AudioSource.volume != 0f)
 				{
 					complete = false;
 				}
 			}
 			yield return null;
 		}
-		yield break;
 	}
 
 	public static void StopAllMusic()
 	{
-		MusicManager.StopAllMusic(null);
+		StopAllMusic(null);
 	}
 
 	public static void StopAllMusic(AudioClip clip)
 	{
-		if (MusicManager.Instance == null)
+		if (Instance == null)
 		{
 			return;
 		}
-		MusicManager.Instance.StopAllCoroutines();
-		foreach (MusicSource musicSource in MusicManager.Instance.activeSources)
+		Instance.StopAllCoroutines();
+		foreach (MusicSource activeSource in Instance.activeSources)
 		{
-			musicSource.UnsetVolumeOverride();
-			musicSource.AudioSource.Stop();
+			activeSource.UnsetVolumeOverride();
+			activeSource.AudioSource.Stop();
 			if (clip != null)
 			{
-				musicSource.AudioSource.PlayOneShot(clip);
+				activeSource.AudioSource.PlayOneShot(clip);
 			}
 		}
 	}
-
-	[OnEnterPlay_SetNull]
-	public static volatile MusicManager Instance;
-
-	private HashSet<MusicSource> activeSources = new HashSet<MusicSource>();
 }

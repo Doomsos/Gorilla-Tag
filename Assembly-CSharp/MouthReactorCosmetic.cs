@@ -1,87 +1,9 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 {
-	private void ResetReactorTransform()
-	{
-		if (this.reactorTransform == null)
-		{
-			this.reactorTransform = base.transform;
-		}
-	}
-
-	private void ResetRadius()
-	{
-		this.reactorRadius = 0.1666667f;
-	}
-
-	private bool IsRadiusChanged
-	{
-		get
-		{
-			return this.reactorRadius != 0.1666667f;
-		}
-	}
-
-	private void ResetOffset()
-	{
-		this.mouthOffset = MouthReactorCosmetic.DEFAULT_OFFSET;
-	}
-
-	private bool IsOffsetChanged
-	{
-		get
-		{
-			return this.mouthOffset != MouthReactorCosmetic.DEFAULT_OFFSET;
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (this.myRig == null)
-		{
-			this.myRig = base.GetComponentInParent<VRRig>();
-		}
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private void OnDisable()
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		Vector3 b = this.myRig.head.rigTarget.TransformPoint(this.mouthOffset);
-		float sqrMagnitude = (this.reactorTransform.TransformPoint(this.reactorOffset) - b).sqrMagnitude;
-		if (sqrMagnitude < this.reactorRadius * this.reactorRadius)
-		{
-			if ((!this.mustExitBeforeRefire || !this.wasInside) && Time.time - this.lastInsideTime >= this.eventRefireDelay)
-			{
-				UnityEvent unityEvent = this.onInsideMouth;
-				if (unityEvent != null)
-				{
-					unityEvent.Invoke();
-				}
-				this.lastInsideTime = Time.time;
-			}
-			this.wasInside = true;
-		}
-		else
-		{
-			this.wasInside = false;
-		}
-		if (this.continuousProperties.Count > 0)
-		{
-			this.continuousProperties.ApplyAll(Mathf.Min(0f, Mathf.Sqrt(sqrMagnitude) - this.reactorRadius));
-		}
-	}
-
 	private static readonly Vector3 DEFAULT_OFFSET = new Vector3(0f, 0.0208f, 0.171f);
 
 	private const float DEFAULT_RADIUS = 0.1666667f;
@@ -106,11 +28,72 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 
 	public UnityEvent onInsideMouth;
 
-	public Vector3 mouthOffset = MouthReactorCosmetic.DEFAULT_OFFSET;
+	public Vector3 mouthOffset = DEFAULT_OFFSET;
 
 	private VRRig myRig;
 
 	private float lastInsideTime;
 
 	private bool wasInside;
+
+	private bool IsRadiusChanged => reactorRadius != 0.1666667f;
+
+	private bool IsOffsetChanged => mouthOffset != DEFAULT_OFFSET;
+
+	public bool TickRunning { get; set; }
+
+	private void ResetReactorTransform()
+	{
+		if (reactorTransform == null)
+		{
+			reactorTransform = base.transform;
+		}
+	}
+
+	private void ResetRadius()
+	{
+		reactorRadius = 0.1666667f;
+	}
+
+	private void ResetOffset()
+	{
+		mouthOffset = DEFAULT_OFFSET;
+	}
+
+	private void OnEnable()
+	{
+		if ((object)myRig == null)
+		{
+			myRig = GetComponentInParent<VRRig>();
+		}
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void Tick()
+	{
+		Vector3 vector = myRig.head.rigTarget.TransformPoint(mouthOffset);
+		float sqrMagnitude = (reactorTransform.TransformPoint(reactorOffset) - vector).sqrMagnitude;
+		if (sqrMagnitude < reactorRadius * reactorRadius)
+		{
+			if ((!mustExitBeforeRefire || !wasInside) && Time.time - lastInsideTime >= eventRefireDelay)
+			{
+				onInsideMouth?.Invoke();
+				lastInsideTime = Time.time;
+			}
+			wasInside = true;
+		}
+		else
+		{
+			wasInside = false;
+		}
+		if (continuousProperties.Count > 0)
+		{
+			continuousProperties.ApplyAll(Mathf.Min(0f, Mathf.Sqrt(sqrMagnitude) - reactorRadius));
+		}
+	}
 }

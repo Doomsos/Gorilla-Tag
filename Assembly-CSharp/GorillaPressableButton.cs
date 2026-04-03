@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTagScripts;
 using Photon.Pun;
@@ -10,287 +10,6 @@ using UnityEngine.UI;
 
 public class GorillaPressableButton : MonoBehaviour, IClickable
 {
-	public event Action<GorillaPressableButton, bool> onPressed;
-
-	public virtual void Start()
-	{
-	}
-
-	protected virtual void OnEnable()
-	{
-		LocalisationManager.RegisterOnLanguageChanged(new Action(this.RefreshText));
-		if (this.isSubscriberOnlyButton)
-		{
-			SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Combine(SubscriptionManager.OnLocalSubscriptionData, new Action(this.CheckSubscription));
-			this.CheckSubscription();
-		}
-		this.RefreshText();
-	}
-
-	protected virtual void OnDisable()
-	{
-		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.RefreshText));
-		if (this.isSubscriberOnlyButton)
-		{
-			SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Remove(SubscriptionManager.OnLocalSubscriptionData, new Action(this.CheckSubscription));
-		}
-	}
-
-	private void CheckSubscription()
-	{
-		bool flag = SubscriptionManager.IsLocalSubscribed();
-		if (!this._subscriptionChecked || flag != this._localPlayerSubscribed)
-		{
-			this.UpdateSubscriptionState(flag);
-		}
-	}
-
-	private void UpdateSubscriptionState(bool subscribed)
-	{
-		this._localPlayerSubscribed = subscribed;
-		this.UpdateColor();
-		this._subscriptionChecked = true;
-	}
-
-	protected virtual void RefreshText()
-	{
-		if (this._offLocalizedText == null || this._offLocalizedText.IsEmpty || this._onLocalizedText == null || this._onLocalizedText.IsEmpty)
-		{
-			return;
-		}
-		if (!this._useOnOffText)
-		{
-			return;
-		}
-		string localizedString;
-		if (!this.isOn)
-		{
-			localizedString = this.offText;
-			localizedString = this._offLocalizedText.GetLocalizedString();
-			if (string.IsNullOrEmpty(localizedString))
-			{
-				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for OFF localized text", this);
-				localizedString = this.offText;
-			}
-		}
-		else
-		{
-			localizedString = this.onText;
-			localizedString = this._onLocalizedText.GetLocalizedString();
-			if (string.IsNullOrEmpty(localizedString))
-			{
-				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for ON localized text", this);
-				localizedString = this.onText;
-			}
-		}
-		if (this._myTxtSet || this.myText.IsNotNull())
-		{
-			this.myText.text = localizedString;
-		}
-		if (this._myTmpTxtSet || this.myTmpText.IsNotNull())
-		{
-			this.myTmpText.text = localizedString;
-		}
-		if (this._myTmpTxt2Set || this.myTmpText2.IsNotNull())
-		{
-			this.myTmpText2.text = localizedString;
-		}
-	}
-
-	protected virtual void SetOffText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
-	{
-		if (!this._useOnOffText)
-		{
-			return;
-		}
-		string localizedString = this.offText;
-		if (this._offLocalizedText != null && !this._offLocalizedText.IsEmpty)
-		{
-			localizedString = this._offLocalizedText.GetLocalizedString();
-			if (string.IsNullOrEmpty(localizedString))
-			{
-				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for OFF localized text", this);
-				localizedString = this.offText;
-			}
-		}
-		this._myTxtSet = setMyText;
-		this._myTmpTxtSet = setMyTmpText;
-		this._myTmpTxt2Set = setMyTmpText2;
-		if (setMyText)
-		{
-			this.myText.text = localizedString;
-		}
-		if (setMyTmpText)
-		{
-			this.myTmpText.text = localizedString;
-		}
-		if (setMyTmpText2)
-		{
-			this.myTmpText2.text = localizedString;
-		}
-	}
-
-	protected virtual void SetOnText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
-	{
-		if (!this._useOnOffText)
-		{
-			return;
-		}
-		string localizedString = this.onText;
-		if (this._onLocalizedText != null && !this._onLocalizedText.IsEmpty)
-		{
-			localizedString = this._onLocalizedText.GetLocalizedString();
-			if (string.IsNullOrEmpty(localizedString))
-			{
-				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for ON localized text", this);
-				localizedString = this.onText;
-			}
-		}
-		this._myTxtSet = setMyText;
-		this._myTmpTxtSet = setMyTmpText;
-		this._myTmpTxt2Set = setMyTmpText2;
-		if (setMyText)
-		{
-			this.myText.text = localizedString;
-		}
-		if (setMyTmpText)
-		{
-			this.myTmpText.text = localizedString;
-		}
-		if (setMyTmpText2)
-		{
-			this.myTmpText2.text = localizedString;
-		}
-	}
-
-	protected void OnTriggerEnter(Collider collider)
-	{
-		if (!base.enabled)
-		{
-			return;
-		}
-		if (this.touchTime + this.debounceTime >= Time.time)
-		{
-			return;
-		}
-		GorillaTriggerColliderHandIndicator component = collider.gameObject.GetComponent<GorillaTriggerColliderHandIndicator>();
-		if (!component)
-		{
-			return;
-		}
-		this.PressButton(component.isLeftHand);
-	}
-
-	private void PressButton(bool isLeftHand)
-	{
-		if (this.isSubscriberOnlyButton && !this._localPlayerSubscribed)
-		{
-			return;
-		}
-		this.touchTime = Time.time;
-		UnityEvent unityEvent = this.onPressButton;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke();
-		}
-		Action<GorillaPressableButton, bool> action = this.onPressed;
-		if (action != null)
-		{
-			action(this, isLeftHand);
-		}
-		this.ButtonActivation();
-		this.ButtonActivationWithHand(isLeftHand);
-		GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(this.pressButtonSoundIndex, isLeftHand, 0.05f);
-		GorillaTagger.Instance.StartVibration(isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
-		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
-		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
-			{
-				67,
-				isLeftHand,
-				0.05f
-			});
-		}
-	}
-
-	public void Click(bool leftHand = false)
-	{
-		this.PressButton(leftHand);
-	}
-
-	public virtual void UpdateColor()
-	{
-		this.UpdateColorWithState(this.isOn);
-	}
-
-	protected void UpdateColorWithState(bool state)
-	{
-		if (this.isSubscriberOnlyButton && !this._localPlayerSubscribed)
-		{
-			this.SetUnsubscribedMaterial();
-			this.SetOffText(this.myText.IsNotNull(), this.myTmpText.IsNotNull(), this.myTmpText2.IsNotNull());
-			return;
-		}
-		if (state)
-		{
-			this.SetPressedMaterial();
-			this.SetOnText(this.myText.IsNotNull(), this.myTmpText.IsNotNull(), this.myTmpText2.IsNotNull());
-			return;
-		}
-		this.SetUnpressedMaterial();
-		this.SetOffText(this.myText.IsNotNull(), this.myTmpText.IsNotNull(), this.myTmpText2.IsNotNull());
-	}
-
-	public void SetRendererMaterial(Material mat)
-	{
-		this.buttonRenderer.material = mat;
-	}
-
-	public void SetPressedMaterial()
-	{
-		this.SetRendererMaterial(this.pressedMaterial);
-	}
-
-	public void SetUnpressedMaterial()
-	{
-		this.SetRendererMaterial(this.unpressedMaterial);
-	}
-
-	public void SetUnsubscribedMaterial()
-	{
-		this.SetRendererMaterial(this.nonSubscriberMaterial ? this.nonSubscriberMaterial : this.unpressedMaterial);
-	}
-
-	public virtual void ButtonActivation()
-	{
-	}
-
-	public virtual void ButtonActivationWithHand(bool isLeftHand)
-	{
-	}
-
-	public virtual void ResetState()
-	{
-		this.isOn = false;
-		this.UpdateColor();
-	}
-
-	public void SetText(string newText)
-	{
-		if (this.myTmpText != null)
-		{
-			this.myTmpText.text = newText;
-		}
-		if (this.myTmpText2 != null)
-		{
-			this.myTmpText2.text = newText;
-		}
-		if (this.myText != null)
-		{
-			this.myText.text = newText;
-		}
-	}
-
 	public Material pressedMaterial;
 
 	public Material unpressedMaterial;
@@ -350,4 +69,262 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 	protected bool _myTmpTxtSet;
 
 	protected bool _myTmpTxt2Set;
+
+	public event Action<GorillaPressableButton, bool> onPressed;
+
+	public virtual void Start()
+	{
+	}
+
+	protected virtual void OnEnable()
+	{
+		LocalisationManager.RegisterOnLanguageChanged(RefreshText);
+		if (isSubscriberOnlyButton)
+		{
+			SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Combine(SubscriptionManager.OnLocalSubscriptionData, new Action(CheckSubscription));
+			CheckSubscription();
+		}
+		RefreshText();
+	}
+
+	protected virtual void OnDisable()
+	{
+		LocalisationManager.UnregisterOnLanguageChanged(RefreshText);
+		if (isSubscriberOnlyButton)
+		{
+			SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Remove(SubscriptionManager.OnLocalSubscriptionData, new Action(CheckSubscription));
+		}
+	}
+
+	private void CheckSubscription()
+	{
+		bool flag = SubscriptionManager.IsLocalSubscribed();
+		if (!_subscriptionChecked || flag != _localPlayerSubscribed)
+		{
+			UpdateSubscriptionState(flag);
+		}
+	}
+
+	private void UpdateSubscriptionState(bool subscribed)
+	{
+		_localPlayerSubscribed = subscribed;
+		UpdateColor();
+		_subscriptionChecked = true;
+	}
+
+	protected virtual void RefreshText()
+	{
+		if (_offLocalizedText == null || _offLocalizedText.IsEmpty || _onLocalizedText == null || _onLocalizedText.IsEmpty || !_useOnOffText)
+		{
+			return;
+		}
+		string text = "";
+		if (!isOn)
+		{
+			text = offText;
+			text = _offLocalizedText.GetLocalizedString();
+			if (string.IsNullOrEmpty(text))
+			{
+				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for OFF localized text", this);
+				text = offText;
+			}
+		}
+		else
+		{
+			text = onText;
+			text = _onLocalizedText.GetLocalizedString();
+			if (string.IsNullOrEmpty(text))
+			{
+				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for ON localized text", this);
+				text = onText;
+			}
+		}
+		if (_myTxtSet || myText.IsNotNull())
+		{
+			myText.text = text;
+		}
+		if (_myTmpTxtSet || myTmpText.IsNotNull())
+		{
+			myTmpText.text = text;
+		}
+		if (_myTmpTxt2Set || myTmpText2.IsNotNull())
+		{
+			myTmpText2.text = text;
+		}
+	}
+
+	protected virtual void SetOffText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
+	{
+		if (!_useOnOffText)
+		{
+			return;
+		}
+		string localizedString = offText;
+		if (_offLocalizedText != null && !_offLocalizedText.IsEmpty)
+		{
+			localizedString = _offLocalizedText.GetLocalizedString();
+			if (string.IsNullOrEmpty(localizedString))
+			{
+				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for OFF localized text", this);
+				localizedString = offText;
+			}
+		}
+		_myTxtSet = setMyText;
+		_myTmpTxtSet = setMyTmpText;
+		_myTmpTxt2Set = setMyTmpText2;
+		if (setMyText)
+		{
+			myText.text = localizedString;
+		}
+		if (setMyTmpText)
+		{
+			myTmpText.text = localizedString;
+		}
+		if (setMyTmpText2)
+		{
+			myTmpText2.text = localizedString;
+		}
+	}
+
+	protected virtual void SetOnText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
+	{
+		if (!_useOnOffText)
+		{
+			return;
+		}
+		string localizedString = onText;
+		if (_onLocalizedText != null && !_onLocalizedText.IsEmpty)
+		{
+			localizedString = _onLocalizedText.GetLocalizedString();
+			if (string.IsNullOrEmpty(localizedString))
+			{
+				Debug.LogError("[LOCALIZATION::GORILLA_PRESSABLE_BUTTON] Null or empty string returned for ON localized text", this);
+				localizedString = onText;
+			}
+		}
+		_myTxtSet = setMyText;
+		_myTmpTxtSet = setMyTmpText;
+		_myTmpTxt2Set = setMyTmpText2;
+		if (setMyText)
+		{
+			myText.text = localizedString;
+		}
+		if (setMyTmpText)
+		{
+			myTmpText.text = localizedString;
+		}
+		if (setMyTmpText2)
+		{
+			myTmpText2.text = localizedString;
+		}
+	}
+
+	protected void OnTriggerEnter(Collider collider)
+	{
+		if (base.enabled && touchTime + debounceTime < Time.time)
+		{
+			GorillaTriggerColliderHandIndicator component = collider.gameObject.GetComponent<GorillaTriggerColliderHandIndicator>();
+			if ((bool)component)
+			{
+				PressButton(component.isLeftHand);
+			}
+		}
+	}
+
+	private void PressButton(bool isLeftHand)
+	{
+		if (!isSubscriberOnlyButton || _localPlayerSubscribed)
+		{
+			touchTime = Time.time;
+			onPressButton?.Invoke();
+			this.onPressed?.Invoke(this, isLeftHand);
+			ButtonActivation();
+			ButtonActivationWithHand(isLeftHand);
+			GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(pressButtonSoundIndex, isLeftHand, 0.05f);
+			GorillaTagger.Instance.StartVibration(isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
+			{
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, 67, isLeftHand, 0.05f);
+			}
+		}
+	}
+
+	public void Click(bool leftHand = false)
+	{
+		PressButton(leftHand);
+	}
+
+	public virtual void UpdateColor()
+	{
+		UpdateColorWithState(isOn);
+	}
+
+	protected void UpdateColorWithState(bool state)
+	{
+		if (isSubscriberOnlyButton && !_localPlayerSubscribed)
+		{
+			SetUnsubscribedMaterial();
+			SetOffText(myText.IsNotNull(), myTmpText.IsNotNull(), myTmpText2.IsNotNull());
+		}
+		else if (state)
+		{
+			SetPressedMaterial();
+			SetOnText(myText.IsNotNull(), myTmpText.IsNotNull(), myTmpText2.IsNotNull());
+		}
+		else
+		{
+			SetUnpressedMaterial();
+			SetOffText(myText.IsNotNull(), myTmpText.IsNotNull(), myTmpText2.IsNotNull());
+		}
+	}
+
+	public void SetRendererMaterial(Material mat)
+	{
+		buttonRenderer.material = mat;
+	}
+
+	public void SetPressedMaterial()
+	{
+		SetRendererMaterial(pressedMaterial);
+	}
+
+	public void SetUnpressedMaterial()
+	{
+		SetRendererMaterial(unpressedMaterial);
+	}
+
+	public void SetUnsubscribedMaterial()
+	{
+		SetRendererMaterial(nonSubscriberMaterial ? nonSubscriberMaterial : unpressedMaterial);
+	}
+
+	public virtual void ButtonActivation()
+	{
+	}
+
+	public virtual void ButtonActivationWithHand(bool isLeftHand)
+	{
+	}
+
+	public virtual void ResetState()
+	{
+		isOn = false;
+		UpdateColor();
+	}
+
+	public void SetText(string newText)
+	{
+		if (myTmpText != null)
+		{
+			myTmpText.text = newText;
+		}
+		if (myTmpText2 != null)
+		{
+			myTmpText2.text = newText;
+		}
+		if (myText != null)
+		{
+			myText.text = newText;
+		}
+	}
 }

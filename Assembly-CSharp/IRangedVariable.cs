@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public interface IRangedVariable<T> : IVariable<T>, IVariable

@@ -1,33 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EqualizerAnim : MonoBehaviour
 {
-	private void Start()
-	{
-		this.inputColorHash = Shader.PropertyToID(this.inputColorProperty);
-	}
-
-	private void Update()
-	{
-		if (EqualizerAnim.thisFrame == Time.frameCount)
-		{
-			if (EqualizerAnim.materialsUpdatedThisFrame.Contains(this.material))
-			{
-				return;
-			}
-		}
-		else
-		{
-			EqualizerAnim.thisFrame = Time.frameCount;
-			EqualizerAnim.materialsUpdatedThisFrame.Clear();
-		}
-		float time = Time.time % this.loopDuration;
-		this.material.SetColor(this.inputColorHash, new Color(this.redCurve.Evaluate(time), this.greenCurve.Evaluate(time), this.blueCurve.Evaluate(time)));
-		EqualizerAnim.materialsUpdatedThisFrame.Add(this.material);
-	}
-
 	[SerializeField]
 	private AnimationCurve redCurve;
 
@@ -51,4 +26,28 @@ public class EqualizerAnim : MonoBehaviour
 	private static int thisFrame;
 
 	private static HashSet<Material> materialsUpdatedThisFrame = new HashSet<Material>();
+
+	private void Start()
+	{
+		inputColorHash = Shader.PropertyToID(inputColorProperty);
+	}
+
+	private void Update()
+	{
+		if (thisFrame == Time.frameCount)
+		{
+			if (materialsUpdatedThisFrame.Contains(material))
+			{
+				return;
+			}
+		}
+		else
+		{
+			thisFrame = Time.frameCount;
+			materialsUpdatedThisFrame.Clear();
+		}
+		float time = Time.time % loopDuration;
+		material.SetColor(inputColorHash, new Color(redCurve.Evaluate(time), greenCurve.Evaluate(time), blueCurve.Evaluate(time)));
+		materialsUpdatedThisFrame.Add(material);
+	}
 }

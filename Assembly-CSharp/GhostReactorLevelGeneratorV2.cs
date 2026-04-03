@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
@@ -7,12 +7,6 @@ public class GhostReactorLevelGeneratorV2
 	[Serializable]
 	public struct TreeLevelConfig
 	{
-		public bool ValidateDatetime([CanBeNull] string timestamp)
-		{
-			DateTime dateTime;
-			return string.IsNullOrEmpty(timestamp) || DateTime.TryParse(timestamp, out dateTime);
-		}
-
 		[CanBeNull]
 		public string EnableAfterDatetime;
 
@@ -38,5 +32,15 @@ public class GhostReactorLevelGeneratorV2
 		public List<GhostReactorLevelSection> blockers;
 
 		public List<GhostReactorLevelSectionConnector> connectors;
+
+		public bool ValidateDatetime([CanBeNull] string timestamp)
+		{
+			DateTime result;
+			if (!string.IsNullOrEmpty(timestamp))
+			{
+				return DateTime.TryParse(timestamp, out result);
+			}
+			return true;
+		}
 	}
 }

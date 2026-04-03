@@ -1,9 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class Ref<T> where T : class
 {
+	[SerializeField]
+	private UnityEngine.Object _target;
+
 	public T AsT
 	{
 		get
@@ -12,44 +15,45 @@ public class Ref<T> where T : class
 		}
 		set
 		{
-			this._target = (value as Object);
+			_target = value as UnityEngine.Object;
 		}
 	}
 
 	public static implicit operator bool(Ref<T> r)
 	{
-		Object @object = (r != null) ? r._target : null;
-		return @object != null && @object != null;
+		UnityEngine.Object obj = r?._target;
+		if ((object)obj == null)
+		{
+			return false;
+		}
+		return obj != null;
 	}
 
 	public static implicit operator T(Ref<T> r)
 	{
-		Object @object = (r != null) ? r._target : null;
-		if (@object == null)
+		UnityEngine.Object obj = r?._target;
+		if ((object)obj == null)
 		{
-			return default(T);
+			return null;
 		}
-		if (@object == null)
+		if (obj == null)
 		{
-			return default(T);
+			return null;
 		}
-		return @object as T;
+		return obj as T;
 	}
 
-	public static implicit operator Object(Ref<T> r)
+	public static implicit operator UnityEngine.Object(Ref<T> r)
 	{
-		Object @object = (r != null) ? r._target : null;
-		if (@object == null)
+		UnityEngine.Object obj = r?._target;
+		if ((object)obj == null)
 		{
 			return null;
 		}
-		if (@object == null)
+		if (obj == null)
 		{
 			return null;
 		}
-		return @object;
+		return obj;
 	}
-
-	[SerializeField]
-	private Object _target;
 }

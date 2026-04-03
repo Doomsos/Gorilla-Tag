@@ -1,892 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GorillaExtensions;
 using GorillaNetworking;
 using GorillaTagScripts.VirtualStumpCustomMaps.UI;
+using Modio;
+using Modio.Errors;
 using Modio.Mods;
 using Modio.Users;
-using PlayFab;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class CustomMapsListScreen : CustomMapsTerminalScreen
 {
-	public bool OfficialMapsOnly
+	public enum ListScreenState
 	{
-		get
-		{
-			return this.officialMapsOnly;
-		}
-	}
-
-	public int CurrentModPage
-	{
-		get
-		{
-			return this.currentModPage;
-		}
-	}
-
-	public int ModsPerPage
-	{
-		get
-		{
-			return this.modsPerPage;
-		}
-	}
-
-	public SortModsBy SortType
-	{
-		get
-		{
-			return this.sortType;
-		}
-		set
-		{
-			if (this.sortType != value)
-			{
-				this.currentAvailableModsRequestPage = 0;
-			}
-			this.sortType = value;
-			switch (this.sortType)
-			{
-			case SortModsBy.Name:
-				this.isAscendingOrder = true;
-				return;
-			case SortModsBy.Price:
-				break;
-			case SortModsBy.Rating:
-				this.isAscendingOrder = false;
-				return;
-			case SortModsBy.Popular:
-				this.isAscendingOrder = false;
-				return;
-			case SortModsBy.Downloads:
-				this.isAscendingOrder = false;
-				return;
-			case SortModsBy.Subscribers:
-				this.isAscendingOrder = false;
-				return;
-			case SortModsBy.DateSubmitted:
-				this.isAscendingOrder = false;
-				break;
-			default:
-				return;
-			}
-		}
-	}
-
-	private void Awake()
-	{
-		this.subscribedBttnPosition = this.subscribedMapsButton.transform.position;
-		this.searchBttnPosition = this.searchButton.transform.position;
-	}
-
-	public override void Initialize()
-	{
-	}
-
-	public override void Show()
-	{
-		base.Show();
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedIn.AddListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOLoggedOut.AddListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModIOUserChanged.AddListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModIOCacheRefreshing.RemoveListener(new UnityAction(this.OnModCacheRefreshing));
-		ModIOManager.OnModIOCacheRefreshing.AddListener(new UnityAction(this.OnModCacheRefreshing));
-		ModIOManager.OnModIOCacheRefreshed.RemoveListener(new UnityAction(this.OnModCacheRefreshed));
-		ModIOManager.OnModIOCacheRefreshed.AddListener(new UnityAction(this.OnModCacheRefreshed));
-		if (this.featuredMods.IsNullOrEmpty<Mod>())
-		{
-			this.RetrieveFeaturedMods();
-		}
-		if (this.availableMods.IsNullOrEmpty<Mod>())
-		{
-			this.RetrieveAvailableMods();
-		}
-		this.RetrieveInstalledMods(false);
-		this.RetrieveFavoriteMods(false);
-		this.RetrieveSubscribedMods();
-		this.RefreshScreenState();
-	}
-
-	public override void Hide()
-	{
-		base.Hide();
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
-		ModIOManager.OnModIOCacheRefreshing.RemoveListener(new UnityAction(this.OnModCacheRefreshing));
-		ModIOManager.OnModIOCacheRefreshed.RemoveListener(new UnityAction(this.OnModCacheRefreshed));
-	}
-
-	private void OnModIOLoggedIn()
-	{
-		if (CustomMapsTerminal.IsDriver)
-		{
-			this.subscribedMapsButton.gameObject.SetActive(true);
-		}
-		this.subscribedMods = null;
-		this.filteredSubscribedMods.Clear();
-		this.totalSubscribedMods = 0;
-		this.RetrieveSubscribedMods();
-	}
-
-	private void OnModIOLoggedOut()
-	{
-		this.subscribedMapsButton.gameObject.SetActive(false);
-		this.subscribedMods = null;
-		this.filteredSubscribedMods.Clear();
-		this.totalSubscribedMods = 0;
-	}
-
-	private void OnModIOUserChanged(User user)
-	{
-	}
-
-	private void OnModCacheRefreshing()
-	{
-		this.RefreshScreenState();
-	}
-
-	private void OnModCacheRefreshed()
-	{
-		this.RetrieveFavoriteMods(false);
-		this.RetrieveInstalledMods(false);
-		if (ModIOManager.IsLoggedIn())
-		{
-			this.RetrieveSubscribedMods();
-		}
-	}
-
-	public override void PressButton(CustomMapKeyboardBinding buttonPressed)
-	{
-		if (Time.time < this.showTime + this.activationTime)
-		{
-			return;
-		}
-		GTDev.Log<string>("[CustomMapsListScreen::PressButton] Is Driver: " + CustomMapsTerminal.IsDriver.ToString() + ", Button Pressed: " + buttonPressed.ToString(), null);
-		if (!CustomMapsTerminal.IsDriver)
-		{
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.goback)
-		{
-			return;
-		}
-		if (this.loadingText.gameObject.activeSelf)
-		{
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.option3)
-		{
-			ModIOManager.RefreshUserProfile(delegate(bool result)
-			{
-				if (result)
-				{
-					this.Refresh();
-				}
-			}, false);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.option4)
-		{
-			CustomMapsTerminal.ShowSearchScreen();
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.up)
-		{
-			this.currentModPage--;
-			this.RefreshScreenState();
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.down)
-		{
-			this.currentModPage++;
-			this.RefreshScreenState();
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.all)
-		{
-			bool flag = this.officialMapsOnly;
-			this.officialMapsOnly = false;
-			this.displayFeaturedMods = (this.sortType == SortModsBy.Popular);
-			if (flag)
-			{
-				this.RefreshModSearch();
-			}
-			this.SwapListDisplay(CustomMapsListScreen.ListScreenState.AvailableMods, flag);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.mustplay)
-		{
-			bool flag2 = !this.officialMapsOnly;
-			this.officialMapsOnly = true;
-			this.displayFeaturedMods = false;
-			if (flag2)
-			{
-				this.RefreshModSearch();
-			}
-			this.SwapListDisplay(CustomMapsListScreen.ListScreenState.AvailableMods, flag2);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.sub)
-		{
-			this.SwapListDisplay(CustomMapsListScreen.ListScreenState.SubscribedMods, false);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.fav)
-		{
-			this.SwapListDisplay(CustomMapsListScreen.ListScreenState.FavoriteMods, false);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.inst)
-		{
-			this.SwapListDisplay(CustomMapsListScreen.ListScreenState.InstalledMods, false);
-			return;
-		}
-		if (buttonPressed == CustomMapKeyboardBinding.sort)
-		{
-			this.SetSortType();
-			this.RefreshModSearch();
-			return;
-		}
-		if (CustomMapKeyboardBinding.one <= buttonPressed && buttonPressed <= CustomMapKeyboardBinding.nine && !this.customMapsGalleryView.IsNull())
-		{
-			this.customMapsGalleryView.ShowDetailsForEntry(buttonPressed - CustomMapKeyboardBinding.one);
-		}
-	}
-
-	private void SetSortType()
-	{
-		this.currentAvailableModsRequestPage = 0;
-		this.sortTypeIndex++;
-		if (this.sortTypeIndex >= 6)
-		{
-			this.sortTypeIndex = 0;
-		}
-		switch (this.sortTypeIndex)
-		{
-		case 0:
-			this.SortType = SortModsBy.Popular;
-			this.useMapName = true;
-			this.displayFeaturedMods = !this.officialMapsOnly;
-			return;
-		case 1:
-			this.SortType = SortModsBy.DateSubmitted;
-			this.useMapName = true;
-			this.displayFeaturedMods = false;
-			return;
-		case 2:
-			this.SortType = SortModsBy.Rating;
-			this.useMapName = false;
-			this.displayFeaturedMods = false;
-			return;
-		case 3:
-			this.SortType = SortModsBy.Downloads;
-			this.useMapName = true;
-			this.displayFeaturedMods = false;
-			return;
-		case 4:
-			this.SortType = SortModsBy.Subscribers;
-			this.useMapName = true;
-			this.displayFeaturedMods = false;
-			return;
-		case 5:
-			this.SortType = SortModsBy.Name;
-			this.useMapName = true;
-			this.displayFeaturedMods = false;
-			return;
-		default:
-			this.sortTypeIndex = 0;
-			this.SortType = SortModsBy.Popular;
-			this.useMapName = true;
-			this.displayFeaturedMods = !this.officialMapsOnly;
-			return;
-		}
-	}
-
-	public void SwapListDisplay(CustomMapsListScreen.ListScreenState newState, bool force = false)
-	{
-		if (this.currentState == newState && !force)
-		{
-			return;
-		}
-		if (newState == CustomMapsListScreen.ListScreenState.SubscribedMods && !ModIOManager.IsLoggedIn())
-		{
-			return;
-		}
-		this.currentState = newState;
-		this.currentModPage = 0;
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			this.allMapsButton.SetButtonActive(!this.officialMapsOnly);
-			this.officialMapsButton.SetButtonActive(this.officialMapsOnly);
-			this.favoriteMapsButton.SetButtonActive(false);
-			this.installedMapsButton.SetButtonActive(false);
-			this.subscribedMapsButton.SetButtonActive(false);
-			this.searchButton.SetButtonActive(false);
-			break;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			this.allMapsButton.SetButtonActive(false);
-			this.officialMapsButton.SetButtonActive(false);
-			this.favoriteMapsButton.SetButtonActive(false);
-			this.subscribedMapsButton.SetButtonActive(false);
-			this.searchButton.SetButtonActive(false);
-			this.installedMapsButton.SetButtonActive(true);
-			break;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			this.allMapsButton.SetButtonActive(false);
-			this.officialMapsButton.SetButtonActive(false);
-			this.installedMapsButton.SetButtonActive(false);
-			this.subscribedMapsButton.SetButtonActive(false);
-			this.searchButton.SetButtonActive(false);
-			this.favoriteMapsButton.SetButtonActive(true);
-			break;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			this.allMapsButton.SetButtonActive(false);
-			this.officialMapsButton.SetButtonActive(false);
-			this.installedMapsButton.SetButtonActive(false);
-			this.favoriteMapsButton.SetButtonActive(false);
-			this.searchButton.SetButtonActive(false);
-			this.subscribedMapsButton.SetButtonActive(true);
-			break;
-		}
-		this.RefreshScreenState();
-	}
-
-	public void RefreshModSearch()
-	{
-		if (this.loadingAvailableMods || this.loadingFavoriteMods || this.loadingInstalledMods || this.loadingSubscribedMods)
-		{
-			return;
-		}
-		this.currentModPage = 0;
-		this.availableMods.Clear();
-		this.filteredAvailableMods.Clear();
-		this.currentAvailableModsRequestPage = 0;
-		this.errorLoadingAvailableMods = false;
-		this.totalAvailableMods = 0;
-		this.RetrieveAvailableMods();
-	}
-
-	public void Refresh()
-	{
-		if (this.loadingAvailableMods || this.loadingFavoriteMods || this.loadingFeaturedMods || this.loadingInstalledMods || this.loadingSubscribedMods)
-		{
-			return;
-		}
-		this.currentModPage = 0;
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			this.featuredMods.Clear();
-			this.availableMods.Clear();
-			this.filteredAvailableMods.Clear();
-			this.currentAvailableModsRequestPage = 0;
-			this.errorLoadingAvailableMods = false;
-			this.totalAvailableMods = 0;
-			this.RetrieveFeaturedMods();
-			this.RetrieveAvailableMods();
-			return;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			this.RetrieveInstalledMods(true);
-			return;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			this.RetrieveFavoriteMods(true);
-			return;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			this.RetrieveSubscribedMods();
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void RetrieveFeaturedMods()
-	{
-		if (this.loadingFeaturedMods || this.featuredMods.Count > 0)
-		{
-			return;
-		}
-		this.loadingFeaturedMods = true;
-		PlayFabTitleDataCache.Instance.GetTitleData(this.featuredModsPlayFabKey, new Action<string>(this.OnGetFeaturedModsTitleData), delegate(PlayFabError error)
-		{
-			this.loadingFeaturedMods = false;
-			this.RefreshScreenState();
-		}, false);
-	}
-
-	private void OnGetFeaturedModsTitleData(string data)
-	{
-		CustomMapsListScreen.<OnGetFeaturedModsTitleData>d__102 <OnGetFeaturedModsTitleData>d__;
-		<OnGetFeaturedModsTitleData>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<OnGetFeaturedModsTitleData>d__.<>4__this = this;
-		<OnGetFeaturedModsTitleData>d__.data = data;
-		<OnGetFeaturedModsTitleData>d__.<>1__state = -1;
-		<OnGetFeaturedModsTitleData>d__.<>t__builder.Start<CustomMapsListScreen.<OnGetFeaturedModsTitleData>d__102>(ref <OnGetFeaturedModsTitleData>d__);
-	}
-
-	private void RetrieveAvailableMods()
-	{
-		CustomMapsListScreen.<RetrieveAvailableMods>d__103 <RetrieveAvailableMods>d__;
-		<RetrieveAvailableMods>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<RetrieveAvailableMods>d__.<>4__this = this;
-		<RetrieveAvailableMods>d__.<>1__state = -1;
-		<RetrieveAvailableMods>d__.<>t__builder.Start<CustomMapsListScreen.<RetrieveAvailableMods>d__103>(ref <RetrieveAvailableMods>d__);
-	}
-
-	private void FilterAvailableMods()
-	{
-		this.filteredAvailableMods.Clear();
-		if (this.availableMods.IsNullOrEmpty<Mod>())
-		{
-			return;
-		}
-		this.totalAvailableMods = Mathf.Max(0, this.totalAvailableMods - 1);
-		foreach (Mod mod in this.availableMods)
-		{
-			ModId right;
-			ModIOManager.TryGetNewMapsModId(out right);
-			if (!(mod.Id == right) && (!this.displayFeaturedMods || this.featuredModIds.IsNullOrEmpty<long>() || !this.featuredModIds.Contains(mod.Id)))
-			{
-				this.filteredAvailableMods.Add(mod);
-			}
-		}
-		if (this.displayFeaturedMods && !this.featuredMods.IsNullOrEmpty<Mod>())
-		{
-			this.filteredAvailableMods.InsertRange(0, this.featuredMods);
-		}
-	}
-
-	private Task RetrieveSubscribedMods()
-	{
-		CustomMapsListScreen.<RetrieveSubscribedMods>d__105 <RetrieveSubscribedMods>d__;
-		<RetrieveSubscribedMods>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<RetrieveSubscribedMods>d__.<>4__this = this;
-		<RetrieveSubscribedMods>d__.<>1__state = -1;
-		<RetrieveSubscribedMods>d__.<>t__builder.Start<CustomMapsListScreen.<RetrieveSubscribedMods>d__105>(ref <RetrieveSubscribedMods>d__);
-		return <RetrieveSubscribedMods>d__.<>t__builder.Task;
-	}
-
-	private void FilterSubscribedMods()
-	{
-		this.filteredSubscribedMods.Clear();
-		if (this.subscribedMods.IsNullOrEmpty<Mod>())
-		{
-			return;
-		}
-		foreach (Mod mod in this.subscribedMods)
-		{
-			ModId right;
-			ModIOManager.TryGetNewMapsModId(out right);
-			if (!(mod.Id == right))
-			{
-				this.filteredSubscribedMods.Add(mod);
-			}
-		}
-	}
-
-	private Task RetrieveInstalledMods(bool forceRefresh = false)
-	{
-		CustomMapsListScreen.<RetrieveInstalledMods>d__107 <RetrieveInstalledMods>d__;
-		<RetrieveInstalledMods>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<RetrieveInstalledMods>d__.<>4__this = this;
-		<RetrieveInstalledMods>d__.forceRefresh = forceRefresh;
-		<RetrieveInstalledMods>d__.<>1__state = -1;
-		<RetrieveInstalledMods>d__.<>t__builder.Start<CustomMapsListScreen.<RetrieveInstalledMods>d__107>(ref <RetrieveInstalledMods>d__);
-		return <RetrieveInstalledMods>d__.<>t__builder.Task;
-	}
-
-	private void FilterInstalledMods()
-	{
-		this.filteredInstalledMods.Clear();
-		if (this.installedMods.IsNullOrEmpty<Mod>())
-		{
-			return;
-		}
-		foreach (Mod mod in this.installedMods)
-		{
-			ModId right;
-			if (!ModIOManager.TryGetNewMapsModId(out right) || !(mod.Id == right))
-			{
-				this.filteredInstalledMods.Add(mod);
-			}
-		}
-	}
-
-	private Task RetrieveFavoriteMods(bool forceRefresh = false)
-	{
-		CustomMapsListScreen.<RetrieveFavoriteMods>d__109 <RetrieveFavoriteMods>d__;
-		<RetrieveFavoriteMods>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<RetrieveFavoriteMods>d__.<>4__this = this;
-		<RetrieveFavoriteMods>d__.forceRefresh = forceRefresh;
-		<RetrieveFavoriteMods>d__.<>1__state = -1;
-		<RetrieveFavoriteMods>d__.<>t__builder.Start<CustomMapsListScreen.<RetrieveFavoriteMods>d__109>(ref <RetrieveFavoriteMods>d__);
-		return <RetrieveFavoriteMods>d__.<>t__builder.Task;
-	}
-
-	private void FilterFavoriteMods()
-	{
-		this.filteredFavoriteMods.Clear();
-		if (this.favoriteMods.IsNullOrEmpty<Mod>())
-		{
-			return;
-		}
-		foreach (Mod mod in this.favoriteMods)
-		{
-			ModId right;
-			if (!ModIOManager.TryGetNewMapsModId(out right) || !(mod.Id == right))
-			{
-				this.filteredFavoriteMods.Add(mod);
-			}
-		}
-	}
-
-	public void GetDisplayedModList(out long[] modList)
-	{
-		if (this.displayedModProfiles.IsNullOrEmpty<Mod>())
-		{
-			modList = Array.Empty<long>();
-			return;
-		}
-		modList = new long[this.displayedModProfiles.Count];
-		for (int i = 0; i < this.displayedModProfiles.Count; i++)
-		{
-			modList[i] = this.displayedModProfiles[i].Id;
-		}
-	}
-
-	private void RefreshScreenState()
-	{
-		this.displayedModProfiles.Clear();
-		this.errorText.gameObject.SetActive(false);
-		this.sortTypeText.gameObject.SetActive(false);
-		this.modPageText.gameObject.SetActive(false);
-		this.titleText.text = this.GetTitleForCurrentState();
-		this.loadingText.gameObject.SetActive(true);
-		if (CustomMapsTerminal.IsDriver && ModIOManager.IsLoggedIn())
-		{
-			this.subscribedMapsButton.gameObject.SetActive(true);
-			this.subscribedMapsButton.transform.position = this.subscribedBttnPosition;
-			this.searchButton.transform.position = this.searchBttnPosition;
-		}
-		else
-		{
-			this.subscribedMapsButton.gameObject.SetActive(false);
-			this.subscribedMapsButton.transform.position = this.searchBttnPosition;
-			this.searchButton.transform.position = this.subscribedBttnPosition;
-		}
-		if (this.currentState == CustomMapsListScreen.ListScreenState.AvailableMods)
-		{
-			this.RefreshScreenForAvailableMods();
-			return;
-		}
-		this.sortByButton.SetActive(false);
-		this.RefreshScreenForCurrentState();
-	}
-
-	private void RefreshScreenForAvailableMods()
-	{
-		string text = (this.sortType == SortModsBy.DateSubmitted) ? "NEWEST" : this.sortType.ToString().ToUpper();
-		this.sortByButton.SetActive(true);
-		this.sortTypeText.gameObject.SetActive(true);
-		this.sortTypeText.text = text;
-		this.customMapsGalleryView.ResetGallery();
-		if (this.loadingAvailableMods)
-		{
-			return;
-		}
-		if (this.errorLoadingAvailableMods)
-		{
-			this.errorText.text = this.failedToRetrieveModsString;
-			this.loadingText.gameObject.SetActive(false);
-			this.errorText.gameObject.SetActive(true);
-			return;
-		}
-		this.UpdatePageCount(this.totalAvailableMods);
-		int num = 0;
-		int num2 = this.modsPerPage - 1;
-		if (!this.IsOnFirstPage())
-		{
-			num = this.currentModPage * this.modsPerPage;
-			num2 = num + this.modsPerPage - 1;
-			this.pageUpButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.pageUpButton.gameObject.SetActive(false);
-		}
-		if (!this.IsOnLastPage())
-		{
-			this.pageDownButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.pageDownButton.gameObject.SetActive(false);
-		}
-		if (this.filteredAvailableMods.Count <= num2 && this.totalAvailableMods > this.availableMods.Count)
-		{
-			this.displayedModProfiles.Clear();
-			this.RetrieveAvailableMods();
-			return;
-		}
-		int num3 = num;
-		while (num3 <= num2 && this.filteredAvailableMods.Count > num3)
-		{
-			this.displayedModProfiles.Add(this.filteredAvailableMods[num3]);
-			num3++;
-		}
-		string text2;
-		if (!this.customMapsGalleryView.DisplayGallery(this.displayedModProfiles, this.useMapName, out text2))
-		{
-			this.errorText.text = text2;
-			this.loadingText.gameObject.SetActive(false);
-			this.errorText.gameObject.SetActive(true);
-			return;
-		}
-		if (this.displayFeaturedMods && !this.featuredModIds.IsNullOrEmpty<long>())
-		{
-			for (int i = 0; i < this.displayedModProfiles.Count; i++)
-			{
-				if (this.featuredModIds.Contains(this.displayedModProfiles[i].Id))
-				{
-					this.customMapsGalleryView.HighlightTileAtIndex(num + i);
-				}
-			}
-		}
-		this.loadingText.gameObject.SetActive(false);
-	}
-
-	private void RefreshScreenForCurrentState()
-	{
-		this.customMapsGalleryView.ResetGallery();
-		if (this.GetLoadingStatusForCurrentState())
-		{
-			return;
-		}
-		if (this.HasModLoadingErrorForCurrentState())
-		{
-			this.modPageText.gameObject.SetActive(false);
-			if (CustomMapsTerminal.IsDriver)
-			{
-				this.currentModPage = -1;
-			}
-			this.errorText.text = this.failedToRetrieveModsString;
-			this.loadingText.gameObject.SetActive(false);
-			this.errorText.gameObject.SetActive(true);
-			return;
-		}
-		this.UpdatePageCount(this.GetTotalModsForCurrentState());
-		if (!this.IsOnFirstPage())
-		{
-			this.pageUpButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.pageUpButton.gameObject.SetActive(false);
-		}
-		if (!this.IsOnLastPage())
-		{
-			this.pageDownButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.pageDownButton.gameObject.SetActive(false);
-		}
-		List<Mod> modListForCurrentState = this.GetModListForCurrentState();
-		if (modListForCurrentState != null)
-		{
-			if (this.currentState == CustomMapsListScreen.ListScreenState.CustomModList)
-			{
-				this.displayedModProfiles.AddRange(modListForCurrentState);
-			}
-			else
-			{
-				int num = this.currentModPage * this.modsPerPage;
-				int num2 = num;
-				while (num2 < num + this.modsPerPage && modListForCurrentState.Count > num2)
-				{
-					this.displayedModProfiles.Add(modListForCurrentState[num2]);
-					num2++;
-				}
-			}
-		}
-		string text;
-		if (!this.customMapsGalleryView.DisplayGallery(this.displayedModProfiles, true, out text))
-		{
-			this.errorText.text = text;
-			this.loadingText.gameObject.SetActive(false);
-			this.errorText.gameObject.SetActive(true);
-			return;
-		}
-		this.loadingText.gameObject.SetActive(false);
-	}
-
-	private bool GetLoadingStatusForCurrentState()
-	{
-		if (ModIOManager.IsRefreshing())
-		{
-			return true;
-		}
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			return this.loadingAvailableMods;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			return this.loadingInstalledMods;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			return this.loadingFavoriteMods;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			return this.loadingSubscribedMods;
-		default:
-			return false;
-		}
-	}
-
-	private bool HasModLoadingErrorForCurrentState()
-	{
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			return this.errorLoadingAvailableMods;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			return this.errorLoadingInstalledMods;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			return this.errorLoadingFavoriteMods;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			return this.errorLoadingSubscribedMods;
-		default:
-			return false;
-		}
-	}
-
-	private List<Mod> GetModListForCurrentState()
-	{
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			return this.filteredAvailableMods;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			return this.filteredInstalledMods;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			return this.filteredFavoriteMods;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			return this.filteredSubscribedMods;
-		default:
-			return null;
-		}
-	}
-
-	private int GetTotalModsForCurrentState()
-	{
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			return this.totalAvailableMods;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			return this.totalInstalledMods;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			return this.totalFavoriteMods;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			return this.totalSubscribedMods;
-		default:
-			return 0;
-		}
-	}
-
-	private string GetTitleForCurrentState()
-	{
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			if (this.officialMapsOnly)
-			{
-				return this.officialModsTitle;
-			}
-			return this.browseModsTitle;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			return this.installedModsTitle;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			return this.favoriteModsTitle;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			return this.subscribedModsTitle;
-		default:
-			return "";
-		}
-	}
-
-	private void UpdatePageCount(int totalMods)
-	{
-		this.totalModCount = totalMods;
-		this.modPageText.gameObject.SetActive(false);
-		if (this.totalModCount != 0)
-		{
-			int numPages = this.GetNumPages();
-			if (numPages > 1)
-			{
-				this.modPageText.text = string.Format("{0} / {1}", this.currentModPage + 1, numPages);
-				this.modPageText.gameObject.SetActive(true);
-			}
-			return;
-		}
-		switch (this.currentState)
-		{
-		case CustomMapsListScreen.ListScreenState.AvailableMods:
-			this.errorText.text = this.noModsAvailableString;
-			return;
-		case CustomMapsListScreen.ListScreenState.InstalledMods:
-			this.errorText.text = this.noInstalledModsString;
-			return;
-		case CustomMapsListScreen.ListScreenState.FavoriteMods:
-			this.errorText.text = this.noFavoriteModsString;
-			return;
-		case CustomMapsListScreen.ListScreenState.SubscribedMods:
-			this.errorText.text = this.noSubscribedModsString;
-			return;
-		case CustomMapsListScreen.ListScreenState.CustomModList:
-			this.errorText.text = this.noModsFoundGenericString;
-			return;
-		default:
-			return;
-		}
-	}
-
-	public int GetNumPages()
-	{
-		int num = this.totalModCount % this.modsPerPage;
-		int num2 = this.totalModCount / this.modsPerPage;
-		if (num > 0)
-		{
-			num2++;
-		}
-		return num2;
-	}
-
-	private bool IsOnFirstPage()
-	{
-		return this.currentModPage == 0;
-	}
-
-	private bool IsOnLastPage()
-	{
-		long num = (long)this.GetNumPages();
-		return (long)(this.currentModPage + 1) == num;
-	}
-
-	public void RefreshDriverNickname(string driverNickname)
-	{
-		if (this.currentState == CustomMapsListScreen.ListScreenState.CustomModList)
-		{
-			this.titleText.text = driverNickname;
-		}
+		AvailableMods,
+		InstalledMods,
+		FavoriteMods,
+		SubscribedMods,
+		CustomModList
 	}
 
 	[SerializeField]
@@ -1072,14 +205,956 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 
 	private bool restartSubscribedModsRetrieval;
 
-	public CustomMapsListScreen.ListScreenState currentState;
+	public ListScreenState currentState;
 
-	public enum ListScreenState
+	public bool OfficialMapsOnly => officialMapsOnly;
+
+	public int CurrentModPage => currentModPage;
+
+	public int ModsPerPage => modsPerPage;
+
+	public SortModsBy SortType
 	{
-		AvailableMods,
-		InstalledMods,
-		FavoriteMods,
-		SubscribedMods,
-		CustomModList
+		get
+		{
+			return sortType;
+		}
+		set
+		{
+			if (sortType != value)
+			{
+				currentAvailableModsRequestPage = 0;
+			}
+			sortType = value;
+			switch (sortType)
+			{
+			case SortModsBy.Popular:
+				isAscendingOrder = false;
+				break;
+			case SortModsBy.Name:
+				isAscendingOrder = true;
+				break;
+			case SortModsBy.Rating:
+				isAscendingOrder = false;
+				break;
+			case SortModsBy.Downloads:
+				isAscendingOrder = false;
+				break;
+			case SortModsBy.Subscribers:
+				isAscendingOrder = false;
+				break;
+			case SortModsBy.DateSubmitted:
+				isAscendingOrder = false;
+				break;
+			case SortModsBy.Price:
+				break;
+			}
+		}
+	}
+
+	private void Awake()
+	{
+		subscribedBttnPosition = subscribedMapsButton.transform.position;
+		searchBttnPosition = searchButton.transform.position;
+	}
+
+	public override void Initialize()
+	{
+	}
+
+	public override void Show()
+	{
+		base.Show();
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOLoggedOut.AddListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+		ModIOManager.OnModIOUserChanged.AddListener(OnModIOUserChanged);
+		ModIOManager.OnModIOCacheRefreshing.RemoveListener(OnModCacheRefreshing);
+		ModIOManager.OnModIOCacheRefreshing.AddListener(OnModCacheRefreshing);
+		ModIOManager.OnModIOCacheRefreshed.RemoveListener(OnModCacheRefreshed);
+		ModIOManager.OnModIOCacheRefreshed.AddListener(OnModCacheRefreshed);
+		if (featuredMods.IsNullOrEmpty())
+		{
+			RetrieveFeaturedMods();
+		}
+		if (availableMods.IsNullOrEmpty())
+		{
+			RetrieveAvailableMods();
+		}
+		RetrieveInstalledMods();
+		RetrieveFavoriteMods();
+		RetrieveSubscribedMods();
+		RefreshScreenState();
+	}
+
+	public override void Hide()
+	{
+		base.Hide();
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+		ModIOManager.OnModIOCacheRefreshing.RemoveListener(OnModCacheRefreshing);
+		ModIOManager.OnModIOCacheRefreshed.RemoveListener(OnModCacheRefreshed);
+	}
+
+	private void OnModIOLoggedIn()
+	{
+		if (CustomMapsTerminal.IsDriver)
+		{
+			subscribedMapsButton.gameObject.SetActive(value: true);
+		}
+		subscribedMods = null;
+		filteredSubscribedMods.Clear();
+		totalSubscribedMods = 0;
+		RetrieveSubscribedMods();
+	}
+
+	private void OnModIOLoggedOut()
+	{
+		subscribedMapsButton.gameObject.SetActive(value: false);
+		subscribedMods = null;
+		filteredSubscribedMods.Clear();
+		totalSubscribedMods = 0;
+	}
+
+	private void OnModIOUserChanged(User user)
+	{
+	}
+
+	private void OnModCacheRefreshing()
+	{
+		RefreshScreenState();
+	}
+
+	private void OnModCacheRefreshed()
+	{
+		RetrieveFavoriteMods();
+		RetrieveInstalledMods();
+		if (ModIOManager.IsLoggedIn())
+		{
+			RetrieveSubscribedMods();
+		}
+	}
+
+	public override void PressButton(CustomMapKeyboardBinding buttonPressed)
+	{
+		if (Time.time < showTime + activationTime)
+		{
+			return;
+		}
+		GTDev.Log("[CustomMapsListScreen::PressButton] Is Driver: " + CustomMapsTerminal.IsDriver + ", Button Pressed: " + buttonPressed);
+		if (!CustomMapsTerminal.IsDriver || buttonPressed == CustomMapKeyboardBinding.goback || loadingText.gameObject.activeSelf)
+		{
+			return;
+		}
+		switch (buttonPressed)
+		{
+		case CustomMapKeyboardBinding.option3:
+			ModIOManager.RefreshUserProfile(delegate(bool result)
+			{
+				if (result)
+				{
+					Refresh();
+				}
+			});
+			break;
+		case CustomMapKeyboardBinding.option4:
+			CustomMapsTerminal.ShowSearchScreen();
+			break;
+		case CustomMapKeyboardBinding.up:
+			currentModPage--;
+			RefreshScreenState();
+			break;
+		case CustomMapKeyboardBinding.down:
+			currentModPage++;
+			RefreshScreenState();
+			break;
+		case CustomMapKeyboardBinding.all:
+		{
+			bool flag = officialMapsOnly;
+			officialMapsOnly = false;
+			displayFeaturedMods = sortType == SortModsBy.Popular;
+			if (flag)
+			{
+				RefreshModSearch();
+			}
+			SwapListDisplay(ListScreenState.AvailableMods, flag);
+			break;
+		}
+		case CustomMapKeyboardBinding.mustplay:
+		{
+			bool flag2 = !officialMapsOnly;
+			officialMapsOnly = true;
+			displayFeaturedMods = false;
+			if (flag2)
+			{
+				RefreshModSearch();
+			}
+			SwapListDisplay(ListScreenState.AvailableMods, flag2);
+			break;
+		}
+		case CustomMapKeyboardBinding.sub:
+			SwapListDisplay(ListScreenState.SubscribedMods);
+			break;
+		case CustomMapKeyboardBinding.fav:
+			SwapListDisplay(ListScreenState.FavoriteMods);
+			break;
+		case CustomMapKeyboardBinding.inst:
+			SwapListDisplay(ListScreenState.InstalledMods);
+			break;
+		case CustomMapKeyboardBinding.sort:
+			SetSortType();
+			RefreshModSearch();
+			break;
+		default:
+			if (CustomMapKeyboardBinding.one <= buttonPressed && buttonPressed <= CustomMapKeyboardBinding.nine && !customMapsGalleryView.IsNull())
+			{
+				customMapsGalleryView.ShowDetailsForEntry((int)(buttonPressed - 1));
+			}
+			break;
+		}
+	}
+
+	private void SetSortType()
+	{
+		currentAvailableModsRequestPage = 0;
+		sortTypeIndex++;
+		if (sortTypeIndex >= 6)
+		{
+			sortTypeIndex = 0;
+		}
+		switch (sortTypeIndex)
+		{
+		case 0:
+			SortType = SortModsBy.Popular;
+			useMapName = true;
+			displayFeaturedMods = !officialMapsOnly;
+			break;
+		case 1:
+			SortType = SortModsBy.DateSubmitted;
+			useMapName = true;
+			displayFeaturedMods = false;
+			break;
+		case 2:
+			SortType = SortModsBy.Rating;
+			useMapName = false;
+			displayFeaturedMods = false;
+			break;
+		case 3:
+			SortType = SortModsBy.Downloads;
+			useMapName = true;
+			displayFeaturedMods = false;
+			break;
+		case 4:
+			SortType = SortModsBy.Subscribers;
+			useMapName = true;
+			displayFeaturedMods = false;
+			break;
+		case 5:
+			SortType = SortModsBy.Name;
+			useMapName = true;
+			displayFeaturedMods = false;
+			break;
+		default:
+			sortTypeIndex = 0;
+			SortType = SortModsBy.Popular;
+			useMapName = true;
+			displayFeaturedMods = !officialMapsOnly;
+			break;
+		}
+	}
+
+	public void SwapListDisplay(ListScreenState newState, bool force = false)
+	{
+		if ((currentState != newState || force) && (newState != ListScreenState.SubscribedMods || ModIOManager.IsLoggedIn()))
+		{
+			currentState = newState;
+			currentModPage = 0;
+			switch (currentState)
+			{
+			case ListScreenState.AvailableMods:
+				allMapsButton.SetButtonActive(!officialMapsOnly);
+				officialMapsButton.SetButtonActive(officialMapsOnly);
+				favoriteMapsButton.SetButtonActive(active: false);
+				installedMapsButton.SetButtonActive(active: false);
+				subscribedMapsButton.SetButtonActive(active: false);
+				searchButton.SetButtonActive(active: false);
+				break;
+			case ListScreenState.InstalledMods:
+				allMapsButton.SetButtonActive(active: false);
+				officialMapsButton.SetButtonActive(active: false);
+				favoriteMapsButton.SetButtonActive(active: false);
+				subscribedMapsButton.SetButtonActive(active: false);
+				searchButton.SetButtonActive(active: false);
+				installedMapsButton.SetButtonActive(active: true);
+				break;
+			case ListScreenState.FavoriteMods:
+				allMapsButton.SetButtonActive(active: false);
+				officialMapsButton.SetButtonActive(active: false);
+				installedMapsButton.SetButtonActive(active: false);
+				subscribedMapsButton.SetButtonActive(active: false);
+				searchButton.SetButtonActive(active: false);
+				favoriteMapsButton.SetButtonActive(active: true);
+				break;
+			case ListScreenState.SubscribedMods:
+				allMapsButton.SetButtonActive(active: false);
+				officialMapsButton.SetButtonActive(active: false);
+				installedMapsButton.SetButtonActive(active: false);
+				favoriteMapsButton.SetButtonActive(active: false);
+				searchButton.SetButtonActive(active: false);
+				subscribedMapsButton.SetButtonActive(active: true);
+				break;
+			}
+			RefreshScreenState();
+		}
+	}
+
+	public void RefreshModSearch()
+	{
+		if (!loadingAvailableMods && !loadingFavoriteMods && !loadingInstalledMods && !loadingSubscribedMods)
+		{
+			currentModPage = 0;
+			availableMods.Clear();
+			filteredAvailableMods.Clear();
+			currentAvailableModsRequestPage = 0;
+			errorLoadingAvailableMods = false;
+			totalAvailableMods = 0;
+			RetrieveAvailableMods();
+		}
+	}
+
+	public void Refresh()
+	{
+		if (!loadingAvailableMods && !loadingFavoriteMods && !loadingFeaturedMods && !loadingInstalledMods && !loadingSubscribedMods)
+		{
+			currentModPage = 0;
+			switch (currentState)
+			{
+			case ListScreenState.AvailableMods:
+				featuredMods.Clear();
+				availableMods.Clear();
+				filteredAvailableMods.Clear();
+				currentAvailableModsRequestPage = 0;
+				errorLoadingAvailableMods = false;
+				totalAvailableMods = 0;
+				RetrieveFeaturedMods();
+				RetrieveAvailableMods();
+				break;
+			case ListScreenState.InstalledMods:
+				RetrieveInstalledMods(forceRefresh: true);
+				break;
+			case ListScreenState.FavoriteMods:
+				RetrieveFavoriteMods(forceRefresh: true);
+				break;
+			case ListScreenState.SubscribedMods:
+				RetrieveSubscribedMods();
+				break;
+			}
+		}
+	}
+
+	private void RetrieveFeaturedMods()
+	{
+		if (!loadingFeaturedMods && featuredMods.Count <= 0)
+		{
+			loadingFeaturedMods = true;
+			PlayFabTitleDataCache.Instance.GetTitleData(featuredModsPlayFabKey, OnGetFeaturedModsTitleData, delegate
+			{
+				loadingFeaturedMods = false;
+				RefreshScreenState();
+			});
+		}
+	}
+
+	private async void OnGetFeaturedModsTitleData(string data)
+	{
+		if (data.IsNullOrEmpty())
+		{
+			RefreshScreenState();
+			return;
+		}
+		featuredModIds.Clear();
+		featuredMods.Clear();
+		if (data[0] == '"' && data[data.Length - 1] == '"')
+		{
+			data = data.Substring(1, data.Length - 2);
+		}
+		string[] array = data.Split(',');
+		string[] array2 = array;
+		foreach (string s in array2)
+		{
+			if (!s.IsNullOrEmpty())
+			{
+				long featuredModId;
+				try
+				{
+					featuredModId = long.Parse(s);
+				}
+				catch (Exception)
+				{
+					continue;
+				}
+				(Error, Mod) tuple = await ModIOManager.GetMod(new ModId(featuredModId));
+				if (!tuple.Item1)
+				{
+					featuredModIds.Add(featuredModId);
+					featuredMods.Add(tuple.Item2);
+				}
+			}
+		}
+		totalFeaturedMods = featuredMods.Count;
+		GTDev.Log($"CustomMapsListScreen::OnGetFeaturedModsTitleData totalFeaturedMods {totalFeaturedMods}");
+		FilterAvailableMods();
+		loadingFeaturedMods = false;
+		if (currentState == ListScreenState.AvailableMods)
+		{
+			RefreshScreenState();
+		}
+	}
+
+	private async void RetrieveAvailableMods()
+	{
+		if (!loadingAvailableMods)
+		{
+			loadingAvailableMods = true;
+			ModSearchFilter modSearchFilter = new ModSearchFilter(currentAvailableModsRequestPage++, numModsPerRequest);
+			modSearchFilter.SortBy = sortType;
+			if (officialMapsOnly)
+			{
+				modSearchFilter.AddTag(officialMapsTag);
+			}
+			modSearchFilter.IsSortAscending = isAscendingOrder;
+			var (error, modioPage) = await ModIOManager.GetMods(modSearchFilter.GetModsFilter());
+			if ((bool)error)
+			{
+				errorLoadingAvailableMods = true;
+				loadingAvailableMods = false;
+				GTDev.LogError("[CustomMapsListScreen::OnAvailableModsRetrieved] Failed to retrieve mods. Error: " + error.GetMessage());
+			}
+			else
+			{
+				totalAvailableMods = (int)modioPage.TotalSearchResults;
+				availableMods.AddRange(modioPage.Data);
+				FilterAvailableMods();
+			}
+			loadingAvailableMods = false;
+			if (currentState == ListScreenState.AvailableMods)
+			{
+				RefreshScreenState();
+			}
+		}
+	}
+
+	private void FilterAvailableMods()
+	{
+		filteredAvailableMods.Clear();
+		if (availableMods.IsNullOrEmpty())
+		{
+			return;
+		}
+		totalAvailableMods = Mathf.Max(0, totalAvailableMods - 1);
+		foreach (Mod availableMod in availableMods)
+		{
+			ModIOManager.TryGetNewMapsModId(out var newMapsModId);
+			if (!(availableMod.Id == newMapsModId) && (!displayFeaturedMods || featuredModIds.IsNullOrEmpty() || !featuredModIds.Contains(availableMod.Id)))
+			{
+				filteredAvailableMods.Add(availableMod);
+			}
+		}
+		if (displayFeaturedMods && !featuredMods.IsNullOrEmpty())
+		{
+			filteredAvailableMods.InsertRange(0, featuredMods);
+		}
+	}
+
+	private async Task RetrieveSubscribedMods()
+	{
+		if (!ModIOManager.IsLoggedIn())
+		{
+			return;
+		}
+		if (loadingSubscribedMods)
+		{
+			restartSubscribedModsRetrieval = true;
+			return;
+		}
+		subscribedMods = null;
+		filteredSubscribedMods.Clear();
+		totalSubscribedMods = 0;
+		errorLoadingSubscribedMods = false;
+		loadingSubscribedMods = true;
+		Error error;
+		(error, subscribedMods) = await ModIOManager.GetSubscribedMods();
+		if (restartSubscribedModsRetrieval)
+		{
+			restartSubscribedModsRetrieval = false;
+			RetrieveSubscribedMods();
+			return;
+		}
+		if ((bool)error)
+		{
+			errorLoadingSubscribedMods = true;
+			loadingSubscribedMods = false;
+			Debug.LogError("[CustomMapsListScreen::RetrieveSubscribedMods] Failed to get subscribed mods. Error: " + error.GetMessage());
+			return;
+		}
+		FilterSubscribedMods();
+		totalSubscribedMods = filteredSubscribedMods.Count;
+		loadingSubscribedMods = false;
+		if (currentState == ListScreenState.SubscribedMods)
+		{
+			RefreshScreenState();
+		}
+	}
+
+	private void FilterSubscribedMods()
+	{
+		filteredSubscribedMods.Clear();
+		if (subscribedMods.IsNullOrEmpty())
+		{
+			return;
+		}
+		Mod[] array = subscribedMods;
+		foreach (Mod mod in array)
+		{
+			ModIOManager.TryGetNewMapsModId(out var newMapsModId);
+			if (!(mod.Id == newMapsModId))
+			{
+				filteredSubscribedMods.Add(mod);
+			}
+		}
+	}
+
+	private async Task RetrieveInstalledMods(bool forceRefresh = false)
+	{
+		if (loadingInstalledMods)
+		{
+			restartInstalledModsRetrieval = true;
+			restartInstalledModsRetrievalForceRefresh = forceRefresh;
+			return;
+		}
+		installedMods = null;
+		filteredInstalledMods.Clear();
+		totalInstalledMods = 0;
+		errorLoadingInstalledMods = false;
+		loadingInstalledMods = true;
+		Error error;
+		(error, installedMods) = await ModIOManager.GetInstalledMods(forceRefresh);
+		if (restartInstalledModsRetrieval)
+		{
+			restartInstalledModsRetrieval = false;
+			RetrieveInstalledMods(restartInstalledModsRetrievalForceRefresh);
+			restartInstalledModsRetrievalForceRefresh = false;
+			return;
+		}
+		if ((bool)error)
+		{
+			errorLoadingInstalledMods = true;
+			loadingInstalledMods = false;
+			GTDev.LogError("[CustomMapsListScreen::RetrieveInstalledMods] Failed to get Installed Mods. Error: " + error.GetMessage());
+			return;
+		}
+		FilterInstalledMods();
+		totalInstalledMods = filteredInstalledMods.Count;
+		loadingInstalledMods = false;
+		if (currentState == ListScreenState.InstalledMods)
+		{
+			RefreshScreenState();
+		}
+	}
+
+	private void FilterInstalledMods()
+	{
+		filteredInstalledMods.Clear();
+		if (installedMods.IsNullOrEmpty())
+		{
+			return;
+		}
+		Mod[] array = installedMods;
+		foreach (Mod mod in array)
+		{
+			if (!ModIOManager.TryGetNewMapsModId(out var newMapsModId) || !(mod.Id == newMapsModId))
+			{
+				filteredInstalledMods.Add(mod);
+			}
+		}
+	}
+
+	private async Task RetrieveFavoriteMods(bool forceRefresh = false)
+	{
+		if (loadingFavoriteMods)
+		{
+			restartFavoriteModsRetrieval = true;
+			restartFavoriteModsRetrievalForceRefresh = forceRefresh;
+			return;
+		}
+		favoriteMods.Clear();
+		filteredFavoriteMods.Clear();
+		totalFavoriteMods = 0;
+		errorLoadingFavoriteMods = false;
+		loadingFavoriteMods = true;
+		Error error;
+		(error, favoriteMods) = await ModIOManager.GetFavoriteMods(forceRefresh);
+		if (restartFavoriteModsRetrieval)
+		{
+			restartFavoriteModsRetrieval = false;
+			RetrieveFavoriteMods(restartFavoriteModsRetrievalForceRefresh);
+			restartFavoriteModsRetrievalForceRefresh = false;
+			return;
+		}
+		if ((bool)error)
+		{
+			if (error.Code != ErrorCode.FILE_NOT_FOUND)
+			{
+				errorLoadingFavoriteMods = true;
+			}
+			loadingFavoriteMods = false;
+			GTDev.LogError("[CustomMapsListScreen::RetrieveFavoriteMods] Failed to get Favorite mods. Error: " + error.GetMessage());
+			return;
+		}
+		FilterFavoriteMods();
+		totalFavoriteMods = filteredFavoriteMods.Count;
+		loadingFavoriteMods = false;
+		if (currentState == ListScreenState.FavoriteMods)
+		{
+			RefreshScreenState();
+		}
+	}
+
+	private void FilterFavoriteMods()
+	{
+		filteredFavoriteMods.Clear();
+		if (favoriteMods.IsNullOrEmpty())
+		{
+			return;
+		}
+		foreach (Mod favoriteMod in favoriteMods)
+		{
+			if (!ModIOManager.TryGetNewMapsModId(out var newMapsModId) || !(favoriteMod.Id == newMapsModId))
+			{
+				filteredFavoriteMods.Add(favoriteMod);
+			}
+		}
+	}
+
+	public void GetDisplayedModList(out long[] modList)
+	{
+		if (displayedModProfiles.IsNullOrEmpty())
+		{
+			modList = Array.Empty<long>();
+			return;
+		}
+		modList = new long[displayedModProfiles.Count];
+		for (int i = 0; i < displayedModProfiles.Count; i++)
+		{
+			modList[i] = displayedModProfiles[i].Id;
+		}
+	}
+
+	private void RefreshScreenState()
+	{
+		displayedModProfiles.Clear();
+		errorText.gameObject.SetActive(value: false);
+		sortTypeText.gameObject.SetActive(value: false);
+		modPageText.gameObject.SetActive(value: false);
+		titleText.text = GetTitleForCurrentState();
+		loadingText.gameObject.SetActive(value: true);
+		if (CustomMapsTerminal.IsDriver && ModIOManager.IsLoggedIn())
+		{
+			subscribedMapsButton.gameObject.SetActive(value: true);
+			subscribedMapsButton.transform.position = subscribedBttnPosition;
+			searchButton.transform.position = searchBttnPosition;
+		}
+		else
+		{
+			subscribedMapsButton.gameObject.SetActive(value: false);
+			subscribedMapsButton.transform.position = searchBttnPosition;
+			searchButton.transform.position = subscribedBttnPosition;
+		}
+		if (currentState == ListScreenState.AvailableMods)
+		{
+			RefreshScreenForAvailableMods();
+			return;
+		}
+		sortByButton.SetActive(value: false);
+		RefreshScreenForCurrentState();
+	}
+
+	private void RefreshScreenForAvailableMods()
+	{
+		string text = ((sortType == SortModsBy.DateSubmitted) ? "NEWEST" : sortType.ToString().ToUpper());
+		sortByButton.SetActive(value: true);
+		sortTypeText.gameObject.SetActive(value: true);
+		sortTypeText.text = text;
+		customMapsGalleryView.ResetGallery();
+		if (loadingAvailableMods)
+		{
+			return;
+		}
+		if (errorLoadingAvailableMods)
+		{
+			errorText.text = failedToRetrieveModsString;
+			loadingText.gameObject.SetActive(value: false);
+			errorText.gameObject.SetActive(value: true);
+			return;
+		}
+		UpdatePageCount(totalAvailableMods);
+		int num = 0;
+		int num2 = modsPerPage - 1;
+		if (!IsOnFirstPage())
+		{
+			num = currentModPage * modsPerPage;
+			num2 = num + modsPerPage - 1;
+			pageUpButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			pageUpButton.gameObject.SetActive(value: false);
+		}
+		if (!IsOnLastPage())
+		{
+			pageDownButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			pageDownButton.gameObject.SetActive(value: false);
+		}
+		if (filteredAvailableMods.Count <= num2 && totalAvailableMods > availableMods.Count)
+		{
+			displayedModProfiles.Clear();
+			RetrieveAvailableMods();
+			return;
+		}
+		for (int i = num; i <= num2 && filteredAvailableMods.Count > i; i++)
+		{
+			displayedModProfiles.Add(filteredAvailableMods[i]);
+		}
+		if (!customMapsGalleryView.DisplayGallery(displayedModProfiles, useMapName, out var error))
+		{
+			errorText.text = error;
+			loadingText.gameObject.SetActive(value: false);
+			errorText.gameObject.SetActive(value: true);
+			return;
+		}
+		if (displayFeaturedMods && !featuredModIds.IsNullOrEmpty())
+		{
+			for (int j = 0; j < displayedModProfiles.Count; j++)
+			{
+				if (featuredModIds.Contains(displayedModProfiles[j].Id))
+				{
+					customMapsGalleryView.HighlightTileAtIndex(num + j);
+				}
+			}
+		}
+		loadingText.gameObject.SetActive(value: false);
+	}
+
+	private void RefreshScreenForCurrentState()
+	{
+		customMapsGalleryView.ResetGallery();
+		if (GetLoadingStatusForCurrentState())
+		{
+			return;
+		}
+		if (HasModLoadingErrorForCurrentState())
+		{
+			modPageText.gameObject.SetActive(value: false);
+			if (CustomMapsTerminal.IsDriver)
+			{
+				currentModPage = -1;
+			}
+			errorText.text = failedToRetrieveModsString;
+			loadingText.gameObject.SetActive(value: false);
+			errorText.gameObject.SetActive(value: true);
+			return;
+		}
+		UpdatePageCount(GetTotalModsForCurrentState());
+		if (!IsOnFirstPage())
+		{
+			pageUpButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			pageUpButton.gameObject.SetActive(value: false);
+		}
+		if (!IsOnLastPage())
+		{
+			pageDownButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			pageDownButton.gameObject.SetActive(value: false);
+		}
+		List<Mod> modListForCurrentState = GetModListForCurrentState();
+		if (modListForCurrentState != null)
+		{
+			if (currentState == ListScreenState.CustomModList)
+			{
+				displayedModProfiles.AddRange(modListForCurrentState);
+			}
+			else
+			{
+				int num = currentModPage * modsPerPage;
+				for (int i = num; i < num + modsPerPage && modListForCurrentState.Count > i; i++)
+				{
+					displayedModProfiles.Add(modListForCurrentState[i]);
+				}
+			}
+		}
+		if (!customMapsGalleryView.DisplayGallery(displayedModProfiles, useMapName: true, out var error))
+		{
+			errorText.text = error;
+			loadingText.gameObject.SetActive(value: false);
+			errorText.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			loadingText.gameObject.SetActive(value: false);
+		}
+	}
+
+	private bool GetLoadingStatusForCurrentState()
+	{
+		if (ModIOManager.IsRefreshing())
+		{
+			return true;
+		}
+		return currentState switch
+		{
+			ListScreenState.AvailableMods => loadingAvailableMods, 
+			ListScreenState.InstalledMods => loadingInstalledMods, 
+			ListScreenState.FavoriteMods => loadingFavoriteMods, 
+			ListScreenState.SubscribedMods => loadingSubscribedMods, 
+			_ => false, 
+		};
+	}
+
+	private bool HasModLoadingErrorForCurrentState()
+	{
+		return currentState switch
+		{
+			ListScreenState.AvailableMods => errorLoadingAvailableMods, 
+			ListScreenState.InstalledMods => errorLoadingInstalledMods, 
+			ListScreenState.FavoriteMods => errorLoadingFavoriteMods, 
+			ListScreenState.SubscribedMods => errorLoadingSubscribedMods, 
+			_ => false, 
+		};
+	}
+
+	private List<Mod> GetModListForCurrentState()
+	{
+		return currentState switch
+		{
+			ListScreenState.AvailableMods => filteredAvailableMods, 
+			ListScreenState.InstalledMods => filteredInstalledMods, 
+			ListScreenState.FavoriteMods => filteredFavoriteMods, 
+			ListScreenState.SubscribedMods => filteredSubscribedMods, 
+			_ => null, 
+		};
+	}
+
+	private int GetTotalModsForCurrentState()
+	{
+		return currentState switch
+		{
+			ListScreenState.AvailableMods => totalAvailableMods, 
+			ListScreenState.InstalledMods => totalInstalledMods, 
+			ListScreenState.FavoriteMods => totalFavoriteMods, 
+			ListScreenState.SubscribedMods => totalSubscribedMods, 
+			_ => 0, 
+		};
+	}
+
+	private string GetTitleForCurrentState()
+	{
+		switch (currentState)
+		{
+		case ListScreenState.AvailableMods:
+			if (officialMapsOnly)
+			{
+				return officialModsTitle;
+			}
+			return browseModsTitle;
+		case ListScreenState.InstalledMods:
+			return installedModsTitle;
+		case ListScreenState.FavoriteMods:
+			return favoriteModsTitle;
+		case ListScreenState.SubscribedMods:
+			return subscribedModsTitle;
+		default:
+			return "";
+		}
+	}
+
+	private void UpdatePageCount(int totalMods)
+	{
+		totalModCount = totalMods;
+		modPageText.gameObject.SetActive(value: false);
+		if (totalModCount == 0)
+		{
+			switch (currentState)
+			{
+			case ListScreenState.AvailableMods:
+				errorText.text = noModsAvailableString;
+				break;
+			case ListScreenState.InstalledMods:
+				errorText.text = noInstalledModsString;
+				break;
+			case ListScreenState.FavoriteMods:
+				errorText.text = noFavoriteModsString;
+				break;
+			case ListScreenState.SubscribedMods:
+				errorText.text = noSubscribedModsString;
+				break;
+			case ListScreenState.CustomModList:
+				errorText.text = noModsFoundGenericString;
+				break;
+			}
+		}
+		else
+		{
+			int numPages = GetNumPages();
+			if (numPages > 1)
+			{
+				modPageText.text = $"{currentModPage + 1} / {numPages}";
+				modPageText.gameObject.SetActive(value: true);
+			}
+		}
+	}
+
+	public int GetNumPages()
+	{
+		int num = totalModCount % modsPerPage;
+		int num2 = totalModCount / modsPerPage;
+		if (num > 0)
+		{
+			num2++;
+		}
+		return num2;
+	}
+
+	private bool IsOnFirstPage()
+	{
+		return currentModPage == 0;
+	}
+
+	private bool IsOnLastPage()
+	{
+		long num = GetNumPages();
+		if (currentModPage + 1 == num)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public void RefreshDriverNickname(string driverNickname)
+	{
+		if (currentState == ListScreenState.CustomModList)
+		{
+			titleText.text = driverNickname;
+		}
 	}
 }

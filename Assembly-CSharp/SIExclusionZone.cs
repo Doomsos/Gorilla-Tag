@@ -1,30 +1,35 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SIExclusionZone : MonoBehaviour
 {
+	public SIExclusionType exclusionType = SIExclusionType.AffectsOthers;
+
+	private List<SIGadget> gadgetsInZone = new List<SIGadget>();
+
+	private List<SIPlayer> playersInZone = new List<SIPlayer>();
+
 	private void OnDisable()
 	{
-		foreach (SIGadget sigadget in this.gadgetsInZone)
+		foreach (SIGadget item in gadgetsInZone)
 		{
-			if (sigadget != null)
+			if (item != null)
 			{
-				sigadget.LeaveExclusionZone(this);
+				item.LeaveExclusionZone(this);
 			}
 		}
-		this.gadgetsInZone.Clear();
-		if ((this.exclusionType & SIExclusionType.AffectsOthers) != (SIExclusionType)0)
+		gadgetsInZone.Clear();
+		if ((exclusionType & SIExclusionType.AffectsOthers) != 0)
 		{
-			foreach (SIPlayer siplayer in this.playersInZone)
+			foreach (SIPlayer item2 in playersInZone)
 			{
-				if (siplayer != null)
+				if (item2 != null)
 				{
-					siplayer.exclusionZoneCount--;
+					item2.exclusionZoneCount--;
 				}
 			}
 		}
-		this.playersInZone.Clear();
+		playersInZone.Clear();
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -32,17 +37,17 @@ public class SIExclusionZone : MonoBehaviour
 		SIGadget componentInParent = other.GetComponentInParent<SIGadget>();
 		if (componentInParent != null)
 		{
-			if (!this.gadgetsInZone.Contains(componentInParent))
+			if (!gadgetsInZone.Contains(componentInParent))
 			{
-				this.gadgetsInZone.Add(componentInParent);
+				gadgetsInZone.Add(componentInParent);
 			}
 			componentInParent.ApplyExclusionZone(this);
 		}
 		SIPlayer componentInParent2 = other.GetComponentInParent<SIPlayer>();
-		if (componentInParent2 != null && !this.playersInZone.Contains(componentInParent2))
+		if (componentInParent2 != null && !playersInZone.Contains(componentInParent2))
 		{
-			this.playersInZone.Add(componentInParent2);
-			if ((this.exclusionType & SIExclusionType.AffectsOthers) != (SIExclusionType)0)
+			playersInZone.Add(componentInParent2);
+			if ((exclusionType & SIExclusionType.AffectsOthers) != 0)
 			{
 				componentInParent2.exclusionZoneCount++;
 			}
@@ -52,16 +57,16 @@ public class SIExclusionZone : MonoBehaviour
 	private void OnTriggerExit(Collider other)
 	{
 		SIGadget componentInParent = other.GetComponentInParent<SIGadget>();
-		if (componentInParent != null && this.gadgetsInZone.Contains(componentInParent))
+		if (componentInParent != null && gadgetsInZone.Contains(componentInParent))
 		{
 			componentInParent.LeaveExclusionZone(this);
-			this.gadgetsInZone.Remove(componentInParent);
+			gadgetsInZone.Remove(componentInParent);
 		}
 		SIPlayer componentInParent2 = other.GetComponentInParent<SIPlayer>();
-		if (componentInParent2 != null && this.playersInZone.Contains(componentInParent2))
+		if (componentInParent2 != null && playersInZone.Contains(componentInParent2))
 		{
-			this.playersInZone.Remove(componentInParent2);
-			if ((this.exclusionType & SIExclusionType.AffectsOthers) != (SIExclusionType)0)
+			playersInZone.Remove(componentInParent2);
+			if ((exclusionType & SIExclusionType.AffectsOthers) != 0)
 			{
 				componentInParent2.exclusionZoneCount--;
 			}
@@ -70,12 +75,6 @@ public class SIExclusionZone : MonoBehaviour
 
 	public void ClearGadget(SIGadget gadget)
 	{
-		this.gadgetsInZone.Remove(gadget);
+		gadgetsInZone.Remove(gadget);
 	}
-
-	public SIExclusionType exclusionType = SIExclusionType.AffectsOthers;
-
-	private List<SIGadget> gadgetsInZone = new List<SIGadget>();
-
-	private List<SIPlayer> playersInZone = new List<SIPlayer>();
 }

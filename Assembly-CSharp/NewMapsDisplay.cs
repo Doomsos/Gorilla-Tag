@@ -1,160 +1,21 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Modio;
+using Modio.Errors;
 using Modio.Images;
 using Modio.Mods;
+using Modio.Unity;
 using TMPro;
 using UnityEngine;
 
 public class NewMapsDisplay : MonoBehaviour
 {
-	public void OnEnable()
+	private struct NewMapData
 	{
-		this.mapImage.gameObject.SetActive(false);
-		this.mapInfoTMP.text = "";
-		this.mapInfoTMP.gameObject.SetActive(false);
-		UGCPermissionManager.SubscribeToUGCEnabled(new Action(this.OnUGCEnabled));
-		UGCPermissionManager.SubscribeToUGCDisabled(new Action(this.OnUGCDisabled));
-		if (!UGCPermissionManager.IsUGCDisabled)
-		{
-			if (!ModIOManager.IsInitialized() || !ModIOManager.TryGetNewMapsModId(out this.newMapsModId))
-			{
-				this.initCoroutine = base.StartCoroutine(this.DelayedInitialize());
-			}
-			else
-			{
-				if (this.newMapsModId == ModId.Null)
-				{
-					return;
-				}
-				this.Initialize();
-			}
-		}
-		this.loadingText.gameObject.SetActive(true);
-	}
+		public Texture2D image;
 
-	public void OnDisable()
-	{
-		if (this.initCoroutine != null)
-		{
-			base.StopCoroutine(this.initCoroutine);
-			this.initCoroutine = null;
-		}
-		this.newMapsModProfile = null;
-		this.newMapDatas.Clear();
-		this.slideshowActive = false;
-		this.slideshowIndex = 0;
-		this.lastSlideshowUpdate = 0f;
-		this.mapImage.gameObject.SetActive(false);
-		this.mapInfoTMP.text = "";
-		this.mapInfoTMP.gameObject.SetActive(false);
-		this.loadingText.text = this.loadingString;
-		this.loadingText.gameObject.SetActive(false);
-		UGCPermissionManager.UnsubscribeFromUGCEnabled(new Action(this.OnUGCEnabled));
-		UGCPermissionManager.UnsubscribeFromUGCDisabled(new Action(this.OnUGCDisabled));
-	}
-
-	private void OnUGCEnabled()
-	{
-		if (this.newMapDatas.IsNullOrEmpty<NewMapsDisplay.NewMapData>())
-		{
-			if (!ModIOManager.IsInitialized() || !ModIOManager.TryGetNewMapsModId(out this.newMapsModId))
-			{
-				this.initCoroutine = base.StartCoroutine(this.DelayedInitialize());
-				return;
-			}
-			if (this.newMapsModId == ModId.Null)
-			{
-				return;
-			}
-			this.Initialize();
-		}
-	}
-
-	private void OnUGCDisabled()
-	{
-		this.mapImage.gameObject.SetActive(false);
-		this.mapInfoTMP.text = "";
-		this.mapInfoTMP.gameObject.SetActive(false);
-		this.loadingText.text = this.ugcDisabledString;
-		this.loadingText.gameObject.SetActive(true);
-	}
-
-	private IEnumerator DelayedInitialize()
-	{
-		while (!ModIOManager.TryGetNewMapsModId(out this.newMapsModId))
-		{
-			yield return new WaitForSecondsRealtime(1f);
-		}
-		this.initCoroutine = null;
-		if (this.newMapsModId == ModId.Null)
-		{
-			yield break;
-		}
-		this.Initialize();
-		yield break;
-	}
-
-	private Task<Error> Initialize()
-	{
-		NewMapsDisplay.<Initialize>d__28 <Initialize>d__;
-		<Initialize>d__.<>t__builder = AsyncTaskMethodBuilder<Error>.Create();
-		<Initialize>d__.<>4__this = this;
-		<Initialize>d__.<>1__state = -1;
-		<Initialize>d__.<>t__builder.Start<NewMapsDisplay.<Initialize>d__28>(ref <Initialize>d__);
-		return <Initialize>d__.<>t__builder.Task;
-	}
-
-	private void StartSlideshow()
-	{
-		if (this.newMapDatas.IsNullOrEmpty<NewMapsDisplay.NewMapData>())
-		{
-			return;
-		}
-		this.slideshowIndex = 0;
-		this.slideshowActive = true;
-		this.UpdateSlideshow();
-	}
-
-	public void Update()
-	{
-		if (!this.slideshowActive || Time.time - this.lastSlideshowUpdate < this.slideshowUpdateInterval)
-		{
-			return;
-		}
-		this.UpdateSlideshow();
-	}
-
-	private void UpdateSlideshow()
-	{
-		this.loadingText.gameObject.SetActive(false);
-		this.lastSlideshowUpdate = Time.time;
-		Texture2D image = this.newMapDatas[this.slideshowIndex].image;
-		if (image != null)
-		{
-			Sprite sprite;
-			if (!this.cachedTextures.TryGetValue(image, out sprite))
-			{
-				sprite = Sprite.Create(image, new Rect(0f, 0f, (float)image.width, (float)image.height), new Vector2(0.5f, 0.5f));
-				this.cachedTextures.Add(image, sprite);
-			}
-			this.mapImage.sprite = sprite;
-			this.mapImage.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.mapImage.gameObject.SetActive(false);
-		}
-		this.mapInfoTMP.text = this.newMapDatas[this.slideshowIndex].info;
-		this.mapInfoTMP.gameObject.SetActive(true);
-		this.slideshowIndex++;
-		if (this.slideshowIndex >= this.newMapDatas.Count)
-		{
-			this.slideshowIndex = 0;
-		}
+		public string info;
 	}
 
 	[SerializeField]
@@ -191,7 +52,7 @@ public class NewMapsDisplay : MonoBehaviour
 
 	private Mod newMapsModProfile;
 
-	private List<NewMapsDisplay.NewMapData> newMapDatas = new List<NewMapsDisplay.NewMapData>();
+	private List<NewMapData> newMapDatas = new List<NewMapData>();
 
 	private bool slideshowActive;
 
@@ -213,10 +74,203 @@ public class NewMapsDisplay : MonoBehaviour
 
 	private Dictionary<Texture2D, Sprite> cachedTextures = new Dictionary<Texture2D, Sprite>();
 
-	private struct NewMapData
+	public void OnEnable()
 	{
-		public Texture2D image;
+		mapImage.gameObject.SetActive(value: false);
+		mapInfoTMP.text = "";
+		mapInfoTMP.gameObject.SetActive(value: false);
+		UGCPermissionManager.SubscribeToUGCEnabled(OnUGCEnabled);
+		UGCPermissionManager.SubscribeToUGCDisabled(OnUGCDisabled);
+		if (!UGCPermissionManager.IsUGCDisabled)
+		{
+			if (!ModIOManager.IsInitialized() || !ModIOManager.TryGetNewMapsModId(out newMapsModId))
+			{
+				initCoroutine = StartCoroutine(DelayedInitialize());
+			}
+			else
+			{
+				if (newMapsModId == ModId.Null)
+				{
+					return;
+				}
+				Initialize();
+			}
+		}
+		loadingText.gameObject.SetActive(value: true);
+	}
 
-		public string info;
+	public void OnDisable()
+	{
+		if (initCoroutine != null)
+		{
+			StopCoroutine(initCoroutine);
+			initCoroutine = null;
+		}
+		newMapsModProfile = null;
+		newMapDatas.Clear();
+		slideshowActive = false;
+		slideshowIndex = 0;
+		lastSlideshowUpdate = 0f;
+		mapImage.gameObject.SetActive(value: false);
+		mapInfoTMP.text = "";
+		mapInfoTMP.gameObject.SetActive(value: false);
+		loadingText.text = loadingString;
+		loadingText.gameObject.SetActive(value: false);
+		UGCPermissionManager.UnsubscribeFromUGCEnabled(OnUGCEnabled);
+		UGCPermissionManager.UnsubscribeFromUGCDisabled(OnUGCDisabled);
+	}
+
+	private void OnUGCEnabled()
+	{
+		if (newMapDatas.IsNullOrEmpty())
+		{
+			if (!ModIOManager.IsInitialized() || !ModIOManager.TryGetNewMapsModId(out newMapsModId))
+			{
+				initCoroutine = StartCoroutine(DelayedInitialize());
+			}
+			else if (!(newMapsModId == ModId.Null))
+			{
+				Initialize();
+			}
+		}
+	}
+
+	private void OnUGCDisabled()
+	{
+		mapImage.gameObject.SetActive(value: false);
+		mapInfoTMP.text = "";
+		mapInfoTMP.gameObject.SetActive(value: false);
+		loadingText.text = ugcDisabledString;
+		loadingText.gameObject.SetActive(value: true);
+	}
+
+	private IEnumerator DelayedInitialize()
+	{
+		while (!ModIOManager.TryGetNewMapsModId(out newMapsModId))
+		{
+			yield return new WaitForSecondsRealtime(1f);
+		}
+		initCoroutine = null;
+		if (!(newMapsModId == ModId.Null))
+		{
+			Initialize();
+		}
+	}
+
+	private async Task<Error> Initialize()
+	{
+		if (!requestingNewMapsModProfile && !downloadingImages)
+		{
+			requestingNewMapsModProfile = true;
+			loadingText.text = loadingString;
+			Error error = await ModIOManager.Initialize();
+			if ((bool)error)
+			{
+				return error;
+			}
+			if (!base.isActiveAndEnabled)
+			{
+				return Error.None;
+			}
+			(error, newMapsModProfile) = await ModIOManager.GetMod(newMapsModId);
+			if ((bool)error)
+			{
+				GTDev.LogWarning("[NewMapsDisplay::OnGetNewMapsModProfile] Failed to get NewMaps ModProfile " + $"from mod.io: {error}");
+				return error;
+			}
+			newMapDatas.Clear();
+			string[] array = newMapsModProfile.MetadataBlob.Split(';');
+			string text = "";
+			string[] array2 = array;
+			foreach (string text2 in array2)
+			{
+				if (text2.StartsWith("mapInfo:"))
+				{
+					text = text2.Substring(8);
+					break;
+				}
+			}
+			string[] mapInfoList = (text.IsNullOrEmpty() ? null : text.Split(','));
+			lazyImage = new LazyImage<Texture2D>(ImageCacheTexture2D.Instance, delegate(Texture2D loadedImage)
+			{
+				downloadingImage = false;
+				lastDownloadedImage = loadedImage;
+			});
+			downloadingImages = true;
+			int i;
+			for (int i2 = 0; i2 < newMapsModProfile.Gallery.Length; i2 = i)
+			{
+				downloadingImage = true;
+				lazyImage.SetImage(newMapsModProfile.Gallery[i2], Mod.GalleryResolution.X320_Y180);
+				while (downloadingImage)
+				{
+					await Task.Yield();
+				}
+				string info = ((mapInfoList != null && mapInfoList.Length > i2) ? mapInfoList[i2] : "");
+				NewMapData item = new NewMapData
+				{
+					image = lastDownloadedImage,
+					info = info
+				};
+				newMapDatas.Add(item);
+				lastDownloadedImage = null;
+				i = i2 + 1;
+			}
+			downloadingImages = false;
+			if (!base.isActiveAndEnabled)
+			{
+				return Error.None;
+			}
+			StartSlideshow();
+			requestingNewMapsModProfile = false;
+			return Error.None;
+		}
+		return new Error(ErrorCode.UNKNOWN, "Initialization already in progress.");
+	}
+
+	private void StartSlideshow()
+	{
+		if (!newMapDatas.IsNullOrEmpty())
+		{
+			slideshowIndex = 0;
+			slideshowActive = true;
+			UpdateSlideshow();
+		}
+	}
+
+	public void Update()
+	{
+		if (slideshowActive && !(Time.time - lastSlideshowUpdate < slideshowUpdateInterval))
+		{
+			UpdateSlideshow();
+		}
+	}
+
+	private void UpdateSlideshow()
+	{
+		loadingText.gameObject.SetActive(value: false);
+		lastSlideshowUpdate = Time.time;
+		Texture2D image = newMapDatas[slideshowIndex].image;
+		if (image != null)
+		{
+			if (!cachedTextures.TryGetValue(image, out var value))
+			{
+				value = Sprite.Create(image, new Rect(0f, 0f, image.width, image.height), new Vector2(0.5f, 0.5f));
+				cachedTextures.Add(image, value);
+			}
+			mapImage.sprite = value;
+			mapImage.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			mapImage.gameObject.SetActive(value: false);
+		}
+		mapInfoTMP.text = newMapDatas[slideshowIndex].info;
+		mapInfoTMP.gameObject.SetActive(value: true);
+		slideshowIndex++;
+		if (slideshowIndex >= newMapDatas.Count)
+		{
+			slideshowIndex = 0;
+		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Unity.Mathematics;
@@ -7,12 +7,12 @@ public static class CosmeticIDUtils
 {
 	public static int PlayFabIdToIndexInCategory(string playFabIdString)
 	{
-		return CosmeticIDUtils._PlayFabIdToInt(playFabIdString, 2);
+		return _PlayFabIdToInt(playFabIdString, 2);
 	}
 
 	public static int PlayFabIdToInt(string playFabIdString)
 	{
-		return CosmeticIDUtils._PlayFabIdToInt(playFabIdString, 1);
+		return _PlayFabIdToInt(playFabIdString, 1);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,23 +30,26 @@ public static class CosmeticIDUtils
 		{
 			throw new ArgumentException("_PlayFabIdToInt: playFabId \"" + playFabIdString + "\" cannot be greater than 8 chars.");
 		}
-		if (playFabIdString[0] != 'L' || playFabIdString[playFabIdString.Length - 1] != '.')
+		if (playFabIdString[0] == 'L')
 		{
-			throw new ArgumentException("PlayFabIdToIndexInCategory: playFabId must start with 'L' and end with '.', instead got " + playFabIdString + ".");
-		}
-		int num = playFabIdString.Length - 2;
-		int num2 = 0;
-		for (int i = start; i <= num; i++)
-		{
-			char c = playFabIdString[i];
-			if (c < 'A' || c > 'Z')
+			if (playFabIdString[playFabIdString.Length - 1] == '.')
 			{
-				throw new ArgumentException("String must contain only uppercase letters A-Z.");
+				int num = playFabIdString.Length - 2;
+				int num2 = 0;
+				for (int i = start; i <= num; i++)
+				{
+					char c = playFabIdString[i];
+					if (c < 'A' || c > 'Z')
+					{
+						throw new ArgumentException("String must contain only uppercase letters A-Z.");
+					}
+					int num3 = playFabIdString[i] - 65;
+					num2 += num3 * (int)math.pow(26f, num - i);
+				}
+				return num2;
 			}
-			int num3 = (int)(playFabIdString[i] - 'A');
-			num2 += num3 * (int)math.pow(26f, (float)(num - i));
 		}
-		return num2;
+		throw new ArgumentException("PlayFabIdToIndexInCategory: playFabId must start with 'L' and end with '.', instead got " + playFabIdString + ".");
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,10 +66,10 @@ public static class CosmeticIDUtils
 		}
 		else
 		{
-			for (int i = id; i > 0; i /= 26)
+			for (int num = id; num > 0; num /= 26)
 			{
-				int num = i % 26;
-				char value = (char)(65 + num);
+				int num2 = num % 26;
+				char value = (char)(65 + num2);
 				stringBuilder.Insert(0, value);
 			}
 		}

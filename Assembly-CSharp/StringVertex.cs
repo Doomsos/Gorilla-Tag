@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 internal struct StringVertex

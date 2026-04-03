@@ -1,42 +1,47 @@
-﻿using System;
+using System;
 using System.Globalization;
 using UnityEngine;
 
 [Serializable]
 public struct GTDateTimeSerializable : ISerializationCallbackReceiver
 {
+	[HideInInspector]
+	[SerializeField]
+	private string _dateTimeString;
+
+	private DateTime _dateTime;
+
 	public DateTime dateTime
 	{
 		get
 		{
-			return this._dateTime;
+			return _dateTime;
 		}
 		set
 		{
-			this._dateTime = value;
-			this._dateTimeString = GTDateTimeSerializable.FormatDateTime(this._dateTime);
+			_dateTime = value;
+			_dateTimeString = FormatDateTime(_dateTime);
 		}
 	}
 
 	void ISerializationCallbackReceiver.OnBeforeSerialize()
 	{
-		this._dateTimeString = GTDateTimeSerializable.FormatDateTime(this._dateTime);
+		_dateTimeString = FormatDateTime(_dateTime);
 	}
 
 	void ISerializationCallbackReceiver.OnAfterDeserialize()
 	{
-		DateTime dateTime;
-		if (GTDateTimeSerializable.TryParseDateTime(this._dateTimeString, out dateTime))
+		if (TryParseDateTime(_dateTimeString, out var result))
 		{
-			this._dateTime = dateTime;
+			_dateTime = result;
 		}
 	}
 
 	public GTDateTimeSerializable(int dummyValue)
 	{
 		DateTime now = DateTime.Now;
-		this._dateTime = new DateTime(now.Year, now.Month, now.Day, 11, 0, 0);
-		this._dateTimeString = GTDateTimeSerializable.FormatDateTime(this._dateTime);
+		_dateTime = new DateTime(now.Year, now.Month, now.Day, 11, 0, 0);
+		_dateTimeString = FormatDateTime(_dateTime);
 	}
 
 	private static string FormatDateTime(DateTime dateTime)
@@ -46,12 +51,7 @@ public struct GTDateTimeSerializable : ISerializationCallbackReceiver
 
 	private static bool TryParseDateTime(string value, out DateTime result)
 	{
-		if (DateTime.TryParseExact(value, new string[]
-		{
-			"yyyy-MM-dd HH:mm",
-			"yyyy-MM-dd",
-			"yyyy-MM"
-		}, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+		if (DateTime.TryParseExact(value, new string[3] { "yyyy-MM-dd HH:mm", "yyyy-MM-dd", "yyyy-MM" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
 		{
 			DateTime dateTime = result;
 			if (dateTime.Hour == 0 && dateTime.Minute == 0)
@@ -62,10 +62,4 @@ public struct GTDateTimeSerializable : ISerializationCallbackReceiver
 		}
 		return false;
 	}
-
-	[HideInInspector]
-	[SerializeField]
-	private string _dateTimeString;
-
-	private DateTime _dateTime;
 }

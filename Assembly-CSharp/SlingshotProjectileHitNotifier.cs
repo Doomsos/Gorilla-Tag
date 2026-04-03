@@ -1,72 +1,55 @@
-﻿using System;
 using GorillaTag.GuidedRefs;
 using Unity.Cinemachine;
 using UnityEngine;
 
 public class SlingshotProjectileHitNotifier : BaseGuidedRefTargetMono
 {
-	public event SlingshotProjectileHitNotifier.ProjectileHitEvent OnProjectileHit;
+	public delegate void ProjectileHitEvent(SlingshotProjectile projectile, Collision collision);
 
-	public event SlingshotProjectileHitNotifier.PaperPlaneProjectileHitEvent OnPaperPlaneHit;
+	public delegate void PaperPlaneProjectileHitEvent(PaperPlaneProjectile projectile, Collider collider);
 
-	public event SlingshotProjectileHitNotifier.ProjectileHitEvent OnProjectileCollisionStay;
+	public delegate void ProjectileTriggerEvent(SlingshotProjectile projectile, Collider collider);
 
-	public event SlingshotProjectileHitNotifier.ProjectileTriggerEvent OnProjectileTriggerEnter;
+	[TagField]
+	[SerializeField]
+	private string projectileType;
 
-	public event SlingshotProjectileHitNotifier.ProjectileTriggerEvent OnProjectileTriggerExit;
+	public event ProjectileHitEvent OnProjectileHit;
+
+	public event PaperPlaneProjectileHitEvent OnPaperPlaneHit;
+
+	public event ProjectileHitEvent OnProjectileCollisionStay;
+
+	public event ProjectileTriggerEvent OnProjectileTriggerEnter;
+
+	public event ProjectileTriggerEvent OnProjectileTriggerExit;
 
 	public void InvokeHit(SlingshotProjectile projectile, Collision collision)
 	{
-		if (this.projectileType != "" && projectile.tag != this.projectileType)
+		if (!(projectileType != "") || !(projectile.tag != projectileType))
 		{
-			return;
+			this.OnProjectileHit?.Invoke(projectile, collision);
 		}
-		SlingshotProjectileHitNotifier.ProjectileHitEvent onProjectileHit = this.OnProjectileHit;
-		if (onProjectileHit == null)
-		{
-			return;
-		}
-		onProjectileHit(projectile, collision);
 	}
 
 	public void InvokeHit(PaperPlaneProjectile projectile, Collider collider)
 	{
-		SlingshotProjectileHitNotifier.PaperPlaneProjectileHitEvent onPaperPlaneHit = this.OnPaperPlaneHit;
-		if (onPaperPlaneHit == null)
-		{
-			return;
-		}
-		onPaperPlaneHit(projectile, collider);
+		this.OnPaperPlaneHit?.Invoke(projectile, collider);
 	}
 
 	public void InvokeCollisionStay(SlingshotProjectile projectile, Collision collision)
 	{
-		SlingshotProjectileHitNotifier.ProjectileHitEvent onProjectileCollisionStay = this.OnProjectileCollisionStay;
-		if (onProjectileCollisionStay == null)
-		{
-			return;
-		}
-		onProjectileCollisionStay(projectile, collision);
+		this.OnProjectileCollisionStay?.Invoke(projectile, collision);
 	}
 
 	public void InvokeTriggerEnter(SlingshotProjectile projectile, Collider collider)
 	{
-		SlingshotProjectileHitNotifier.ProjectileTriggerEvent onProjectileTriggerEnter = this.OnProjectileTriggerEnter;
-		if (onProjectileTriggerEnter == null)
-		{
-			return;
-		}
-		onProjectileTriggerEnter(projectile, collider);
+		this.OnProjectileTriggerEnter?.Invoke(projectile, collider);
 	}
 
 	public void InvokeTriggerExit(SlingshotProjectile projectile, Collider collider)
 	{
-		SlingshotProjectileHitNotifier.ProjectileTriggerEvent onProjectileTriggerExit = this.OnProjectileTriggerExit;
-		if (onProjectileTriggerExit == null)
-		{
-			return;
-		}
-		onProjectileTriggerExit(projectile, collider);
+		this.OnProjectileTriggerExit?.Invoke(projectile, collider);
 	}
 
 	private new void OnDestroy()
@@ -76,14 +59,4 @@ public class SlingshotProjectileHitNotifier : BaseGuidedRefTargetMono
 		this.OnProjectileTriggerEnter = null;
 		this.OnProjectileTriggerExit = null;
 	}
-
-	[TagField]
-	[SerializeField]
-	private string projectileType;
-
-	public delegate void ProjectileHitEvent(SlingshotProjectile projectile, Collision collision);
-
-	public delegate void PaperPlaneProjectileHitEvent(PaperPlaneProjectile projectile, Collider collider);
-
-	public delegate void ProjectileTriggerEvent(SlingshotProjectile projectile, Collider collider);
 }

@@ -1,12 +1,9 @@
-﻿using System;
+namespace BuildSafe;
 
-namespace BuildSafe
+public enum SceneBakeMode
 {
-	public enum SceneBakeMode
-	{
-		Always,
-		OnBuildPlayer,
-		OnEditorPlayMode,
-		Disabled
-	}
+	Always,
+	OnBuildPlayer,
+	OnEditorPlayMode,
+	Disabled
 }

@@ -1,9 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 public class StringFormatter
 {
+	private static StringBuilder builder = new StringBuilder();
+
+	private string[] spans;
+
+	private int[] indices;
+
 	public StringFormatter(string[] spans, int[] indices)
 	{
 		this.spans = spans;
@@ -12,161 +18,153 @@ public class StringFormatter
 
 	public string Format(string term1)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			StringFormatter.builder.Append(term1);
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(term1);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(Func<string> term1)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			StringFormatter.builder.Append(term1());
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(term1());
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(string term1, string term2)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			StringFormatter.builder.Append((this.indices[i - 1] == 0) ? term1 : term2);
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append((indices[i - 1] == 0) ? term1 : term2);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(string term1, string term2, string term3)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			int num = this.indices[i - 1];
-			if (num != 0)
+			switch (indices[i - 1])
 			{
-				if (num != 1)
-				{
-					StringFormatter.builder.Append(term3);
-				}
-				else
-				{
-					StringFormatter.builder.Append(term2);
-				}
+			case 0:
+				builder.Append(term1);
+				break;
+			case 1:
+				builder.Append(term2);
+				break;
+			default:
+				builder.Append(term3);
+				break;
 			}
-			else
-			{
-				StringFormatter.builder.Append(term1);
-			}
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(Func<string> term1, Func<string> term2)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			if (this.indices[i - 1] == 0)
+			if (indices[i - 1] == 0)
 			{
-				StringFormatter.builder.Append(term1());
+				builder.Append(term1());
 			}
 			else
 			{
-				StringFormatter.builder.Append(term2());
+				builder.Append(term2());
 			}
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(Func<string> term1, Func<string> term2, Func<string> term3)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			int num = this.indices[i - 1];
-			if (num != 0)
+			switch (indices[i - 1])
 			{
-				if (num != 1)
-				{
-					StringFormatter.builder.Append(term3());
-				}
-				else
-				{
-					StringFormatter.builder.Append(term2());
-				}
+			case 0:
+				builder.Append(term1());
+				break;
+			case 1:
+				builder.Append(term2());
+				break;
+			default:
+				builder.Append(term3());
+				break;
 			}
-			else
-			{
-				StringFormatter.builder.Append(term1());
-			}
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(Func<string> term1, Func<string> term2, Func<string> term3, Func<string> term4)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			switch (this.indices[i - 1])
+			switch (indices[i - 1])
 			{
 			case 0:
-				StringFormatter.builder.Append(term1());
+				builder.Append(term1());
 				break;
 			case 1:
-				StringFormatter.builder.Append(term2());
+				builder.Append(term2());
 				break;
 			case 2:
-				StringFormatter.builder.Append(term3());
+				builder.Append(term3());
 				break;
 			default:
-				StringFormatter.builder.Append(term4());
+				builder.Append(term4());
 				break;
 			}
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(params string[] terms)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			StringFormatter.builder.Append(terms[this.indices[i - 1]]);
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(terms[indices[i - 1]]);
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public string Format(params Func<string>[] terms)
 	{
-		StringFormatter.builder.Clear();
-		StringFormatter.builder.Append(this.spans[0]);
-		for (int i = 1; i < this.spans.Length; i++)
+		builder.Clear();
+		builder.Append(spans[0]);
+		for (int i = 1; i < spans.Length; i++)
 		{
-			StringFormatter.builder.Append(terms[this.indices[i - 1]]());
-			StringFormatter.builder.Append(this.spans[i]);
+			builder.Append(terms[indices[i - 1]]());
+			builder.Append(spans[i]);
 		}
-		return StringFormatter.builder.ToString();
+		return builder.ToString();
 	}
 
 	public static StringFormatter Parse(string input)
@@ -174,7 +172,7 @@ public class StringFormatter
 		int num = 0;
 		List<string> list = new List<string>();
 		List<int> list2 = new List<int>();
-		for (;;)
+		while (true)
 		{
 			int num2 = input.IndexOf('%', num);
 			if (num2 == -1)
@@ -182,16 +180,10 @@ public class StringFormatter
 				break;
 			}
 			list.Add(input.Substring(num, num2 - num));
-			list2.Add((int)(input[num2 + 1] - '0'));
+			list2.Add(input[num2 + 1] - 48);
 			num = num2 + 2;
 		}
 		list.Add(input.Substring(num));
 		return new StringFormatter(list.ToArray(), list2.ToArray());
 	}
-
-	private static StringBuilder builder = new StringBuilder();
-
-	private string[] spans;
-
-	private int[] indices;
 }

@@ -1,44 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class OnSqueezeTrigger : MonoBehaviour
 {
-	private void Start()
-	{
-		this.myRig = base.GetComponentInParent<VRRig>();
-	}
-
-	private void Update()
-	{
-		bool flag;
-		if (this.myHoldable.InLeftHand())
-		{
-			flag = ((this.indexFinger ? this.myRig.leftIndex.calcT : this.myRig.leftMiddle.calcT) > 0.5f);
-		}
-		else
-		{
-			flag = (this.myHoldable.InRightHand() && (this.indexFinger ? this.myRig.rightIndex.calcT : this.myRig.rightMiddle.calcT) > 0.5f);
-		}
-		if (flag != this.triggerWasDown)
-		{
-			if (flag)
-			{
-				this.onPress.Invoke();
-				this.updateWhilePressed.Invoke();
-			}
-			else
-			{
-				this.onRelease.Invoke();
-			}
-		}
-		else if (flag)
-		{
-			this.updateWhilePressed.Invoke();
-		}
-		this.triggerWasDown = flag;
-	}
-
 	[SerializeField]
 	private TransferrableObject myHoldable;
 
@@ -56,4 +20,31 @@ public class OnSqueezeTrigger : MonoBehaviour
 	private bool indexFinger = true;
 
 	private bool triggerWasDown;
+
+	private void Start()
+	{
+		myRig = GetComponentInParent<VRRig>();
+	}
+
+	private void Update()
+	{
+		bool flag = (myHoldable.InLeftHand() ? ((indexFinger ? myRig.leftIndex.calcT : myRig.leftMiddle.calcT) > 0.5f) : (myHoldable.InRightHand() && (indexFinger ? myRig.rightIndex.calcT : myRig.rightMiddle.calcT) > 0.5f));
+		if (flag != triggerWasDown)
+		{
+			if (flag)
+			{
+				onPress.Invoke();
+				updateWhilePressed.Invoke();
+			}
+			else
+			{
+				onRelease.Invoke();
+			}
+		}
+		else if (flag)
+		{
+			updateWhilePressed.Invoke();
+		}
+		triggerWasDown = flag;
+	}
 }

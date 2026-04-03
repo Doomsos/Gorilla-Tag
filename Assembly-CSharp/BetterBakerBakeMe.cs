@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTag.Rendering.Shaders;
 using UnityEngine;

@@ -1,8 +1,20 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public static class AprilFools
 {
+	private const int changeIntervalSeconds = 300;
+
+	private const int lerpIntervalSeconds = 120;
+
+	private const float minRange = 0.5f;
+
+	private const float maxRange = 2f;
+
+	private const float excludeRangeStart = 0.75f;
+
+	private const float excludeRangeEnd = 1.25f;
+
 	public static int mod(int x, int m)
 	{
 		return (x % m + m) % m;
@@ -10,26 +22,13 @@ public static class AprilFools
 
 	public static float GenerateTarget(string username, string roomName, string areaName, int startTime)
 	{
-		float num = (float)AprilFools.mod(string.Format("{0}-{1}-{2}-{3}", new object[]
-		{
-			username,
-			roomName,
-			areaName,
-			startTime
-		}).GetHashCode(), 10000) / 10000f;
+		float num = (float)mod($"{username}-{roomName}-{areaName}-{startTime}".GetHashCode(), 10000) / 10000f;
 		float num2 = 1.5f;
 		float num3 = 0.5f / 2f;
 		num = num * num2 + 0.5f;
 		if (num > 0.75f && num < 1.25f)
 		{
-			if (num < 1f)
-			{
-				num = 0.75f - num3;
-			}
-			else
-			{
-				num = 1.25f + num3;
-			}
+			num = ((!(num < 1f)) ? (1.25f + num3) : (0.75f - num3));
 		}
 		return num;
 	}
@@ -51,7 +50,7 @@ public static class AprilFools
 		float num3 = Mathf.Clamp01(t + num);
 		float a2 = 3f * num2 * num2 - 2f * num2 * num2 * num2;
 		float b2 = 3f * num3 * num3 - 2f * num3 * num3 * num3;
-		return AprilFools.Slerp(a, b, Mathf.Lerp(a2, b2, (t - num2) / (num3 - num2)));
+		return Slerp(a, b, Mathf.Lerp(a2, b2, (t - num2) / (num3 - num2)));
 	}
 
 	public static float GenerateSmoothTarget(string username, string roomName, string areaName)
@@ -60,14 +59,14 @@ public static class AprilFools
 		int num2 = (int)num / 300;
 		int num3 = num2 * 300;
 		int startTime = (num2 + 1) * 300;
-		float a = AprilFools.GenerateTarget(username, roomName, areaName, num3);
-		float b = AprilFools.GenerateTarget(username, roomName, areaName, startTime);
+		float a = GenerateTarget(username, roomName, areaName, num3);
+		float b = GenerateTarget(username, roomName, areaName, startTime);
 		float num4 = (num - (float)num3) / 120f;
 		if (num4 > 1f)
 		{
 			num4 = 1f;
 		}
-		float num5 = AprilFools.SmoothSlerp(a, b, num4);
+		float num5 = SmoothSlerp(a, b, num4);
 		if (float.IsInfinity(num5))
 		{
 			return 0.5f;
@@ -86,16 +85,4 @@ public static class AprilFools
 		}
 		return num5;
 	}
-
-	private const int changeIntervalSeconds = 300;
-
-	private const int lerpIntervalSeconds = 120;
-
-	private const float minRange = 0.5f;
-
-	private const float maxRange = 2f;
-
-	private const float excludeRangeStart = 0.75f;
-
-	private const float excludeRangeEnd = 1.25f;
 }

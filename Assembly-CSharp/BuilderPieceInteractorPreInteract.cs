@@ -1,8 +1,9 @@
-﻿using System;
 using UnityEngine;
 
 public class BuilderPieceInteractorPreInteract : MonoBehaviour
 {
+	public BuilderPieceInteractor interactor;
+
 	private void Awake()
 	{
 	}
@@ -10,6 +11,4 @@ public class BuilderPieceInteractorPreInteract : MonoBehaviour
 	private void LateUpdate()
 	{
 	}
-
-	public BuilderPieceInteractor interactor;
 }

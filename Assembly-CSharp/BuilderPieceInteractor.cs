@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTagScripts;
 using Photon.Pun;
@@ -9,1004 +9,22 @@ using UnityEngine.XR;
 
 public class BuilderPieceInteractor : MonoBehaviour
 {
-	private void Awake()
+	public enum HandType
 	{
-		if (BuilderPieceInteractor.instance == null)
-		{
-			BuilderPieceInteractor.instance = this;
-			BuilderPieceInteractor.hasInstance = true;
-		}
-		else if (BuilderPieceInteractor.instance != this)
-		{
-			Object.Destroy(base.gameObject);
-		}
-		this.velocityEstimator = new List<GorillaVelocityEstimator>(2)
-		{
-			this.velocityEstimatorLeft,
-			this.velocityEstimatorRight
-		};
-		this.laserSight = new List<BuilderLaserSight>(2)
-		{
-			this.laserSightLeft,
-			this.laserSightRight
-		};
-		this.handState = new List<BuilderPieceInteractor.HandState>(2);
-		this.heldPiece = new List<BuilderPiece>(2);
-		this.potentialHeldPiece = new List<BuilderPiece>(2);
-		this.potentialGrabbedOffsetDist = new List<float>(2);
-		this.heldInitialRot = new List<Quaternion>(2);
-		this.heldCurrentRot = new List<Quaternion>(2);
-		this.heldInitialPos = new List<Vector3>(2);
-		this.heldCurrentPos = new List<Vector3>(2);
-		this.heldChainLength = new int[2];
-		this.heldChainLength[0] = 0;
-		this.heldChainLength[1] = 0;
-		this.heldChainCost = new List<int[]>(2);
-		for (int i = 0; i < 2; i++)
-		{
-			this.heldChainCost.Add(new int[3]);
-		}
-		BuilderPieceInteractor.allPotentialPlacements = new List<BuilderPotentialPlacement>[2];
-		this.delayedPotentialPlacement = new List<BuilderPotentialPlacement>(2);
-		this.delayedPlacementTime = new List<float>(2);
-		this.prevPotentialPlacement = new List<BuilderPotentialPlacement>(2);
-		this.glowBumps = new List<List<BuilderBumpGlow>>(2);
-		for (int j = 0; j < 2; j++)
-		{
-			this.handState.Add(BuilderPieceInteractor.HandState.Empty);
-			this.heldPiece.Add(null);
-			this.potentialHeldPiece.Add(null);
-			this.potentialGrabbedOffsetDist.Add(0f);
-			this.heldInitialRot.Add(Quaternion.identity);
-			this.heldCurrentRot.Add(Quaternion.identity);
-			this.heldInitialPos.Add(Vector3.zero);
-			this.heldCurrentPos.Add(Vector3.zero);
-			this.delayedPotentialPlacement.Add(default(BuilderPotentialPlacement));
-			this.delayedPlacementTime.Add(-1f);
-			this.prevPotentialPlacement.Add(default(BuilderPotentialPlacement));
-			BuilderPieceInteractor.allPotentialPlacements[j] = new List<BuilderPotentialPlacement>(128);
-			this.glowBumps.Add(new List<BuilderBumpGlow>(1024));
-		}
-		this.checkPiecesInSphere = new NativeArray<OverlapSphereCommand>(2, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		this.checkPiecesInSphereResults = new NativeArray<ColliderHit>(2048, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		this.grabSphereCast = new NativeArray<SpherecastCommand>(2, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		this.grabSphereCastResults = new NativeArray<RaycastHit>(128, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		BuilderPieceInteractor.handGridPlaneData = new NativeList<BuilderGridPlaneData>[2];
-		BuilderPieceInteractor.handPieceData = new NativeList<BuilderPieceData>[2];
-		BuilderPieceInteractor.localAttachableGridPlaneData = new NativeList<BuilderGridPlaneData>[2];
-		BuilderPieceInteractor.localAttachablePieceData = new NativeList<BuilderPieceData>[2];
-		for (int k = 0; k < 2; k++)
-		{
-			BuilderPieceInteractor.handGridPlaneData[k] = new NativeList<BuilderGridPlaneData>(512, Allocator.Persistent);
-			BuilderPieceInteractor.handPieceData[k] = new NativeList<BuilderPieceData>(512, Allocator.Persistent);
-			BuilderPieceInteractor.localAttachableGridPlaneData[k] = new NativeList<BuilderGridPlaneData>(10240, Allocator.Persistent);
-			BuilderPieceInteractor.localAttachablePieceData[k] = new NativeList<BuilderPieceData>(2560, Allocator.Persistent);
-		}
+		Invalid = -1,
+		Left,
+		Right
 	}
 
-	public bool GetIsHolding(XRNode node)
+	public enum HandState
 	{
-		if (this.heldPiece == null)
-		{
-			return false;
-		}
-		if (node == XRNode.LeftHand)
-		{
-			return this.heldPiece[0] != null;
-		}
-		return this.heldPiece[1] != null;
-	}
-
-	public void PreInteract()
-	{
-	}
-
-	public void StartFindNearbyPieces()
-	{
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		BuilderTable builderTable;
-		if (!BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out builderTable))
-		{
-			return;
-		}
-		if (!builderTable.isTableMutable)
-		{
-			return;
-		}
-		QueryParameters queryParameters = new QueryParameters
-		{
-			layerMask = builderTable.allPiecesMask
-		};
-		this.checkPiecesInSphere[0] = new OverlapSphereCommand(offlineVRRig.leftHand.overrideTarget.position, (this.handState[0] == BuilderPieceInteractor.HandState.Empty) ? 0.0375f : 1f, queryParameters);
-		this.checkPiecesInSphere[1] = new OverlapSphereCommand(offlineVRRig.rightHand.overrideTarget.position, (this.handState[1] == BuilderPieceInteractor.HandState.Empty) ? 0.0375f : 1f, queryParameters);
-		this.checkNearbyPiecesHandle = OverlapSphereCommand.ScheduleBatch(this.checkPiecesInSphere, this.checkPiecesInSphereResults, 1, 1024, default(JobHandle));
-		for (int i = 0; i < 64; i++)
-		{
-			this.grabSphereCastResults[i] = this.emptyRaycastHit;
-		}
-		this.grabSphereCast[0] = new SpherecastCommand(offlineVRRig.leftHand.overrideTarget.position, 0.0375f, offlineVRRig.leftHand.overrideTarget.rotation * Vector3.right, queryParameters, 0.15f);
-		this.grabSphereCast[1] = new SpherecastCommand(offlineVRRig.rightHand.overrideTarget.position, 0.0375f, offlineVRRig.rightHand.overrideTarget.rotation * -Vector3.right, queryParameters, 0.15f);
-		this.findPiecesToGrab = SpherecastCommand.ScheduleBatch(this.grabSphereCast, this.grabSphereCastResults, 1, 64, default(JobHandle));
-		JobHandle.ScheduleBatchedJobs();
-	}
-
-	private void CalcLocalGridPlanes()
-	{
-		this.checkNearbyPiecesHandle.Complete();
-		for (int i = 0; i < 2; i++)
-		{
-			if (this.handState[i] == BuilderPieceInteractor.HandState.Grabbed)
-			{
-				BuilderPieceInteractor.localAttachableGridPlaneData[i].Clear();
-				BuilderPieceInteractor.localAttachablePieceData[i].Clear();
-				BuilderPieceInteractor.tempPieceSet.Clear();
-				if (this.currentTable.IsInBuilderZone())
-				{
-					for (int j = 0; j < 1024; j++)
-					{
-						int index = i * 1024 + j;
-						if (this.checkPiecesInSphereResults[index].instanceID == 0)
-						{
-							break;
-						}
-						BuilderPiece pieceInHand = this.heldPiece[i];
-						BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(this.checkPiecesInSphereResults[index].collider);
-						if (builderPieceFromCollider != null && !BuilderPieceInteractor.tempPieceSet.Contains(builderPieceFromCollider))
-						{
-							BuilderPieceInteractor.tempPieceSet.Add(builderPieceFromCollider);
-							if (this.currentTable.CanPiecesPotentiallySnap(pieceInHand, builderPieceFromCollider))
-							{
-								int length = BuilderPieceInteractor.localAttachablePieceData[i].Length;
-								NativeList<BuilderPieceData>[] array = BuilderPieceInteractor.localAttachablePieceData;
-								int num = i;
-								BuilderPieceData builderPieceData = new BuilderPieceData(builderPieceFromCollider);
-								array[num].Add(builderPieceData);
-								for (int k = 0; k < builderPieceFromCollider.gridPlanes.Count; k++)
-								{
-									NativeList<BuilderGridPlaneData>[] array2 = BuilderPieceInteractor.localAttachableGridPlaneData;
-									int num2 = i;
-									BuilderGridPlaneData builderGridPlaneData = new BuilderGridPlaneData(builderPieceFromCollider.gridPlanes[k], length);
-									array2[num2].Add(builderGridPlaneData);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void OnDestroy()
-	{
-		if (BuilderPieceInteractor.instance == this)
-		{
-			BuilderPieceInteractor.hasInstance = false;
-			BuilderPieceInteractor.instance = null;
-		}
-		if (this.checkPiecesInSphere.IsCreated)
-		{
-			this.checkPiecesInSphere.Dispose();
-		}
-		if (this.checkPiecesInSphereResults.IsCreated)
-		{
-			this.checkPiecesInSphereResults.Dispose();
-		}
-		if (this.grabSphereCast.IsCreated)
-		{
-			this.grabSphereCast.Dispose();
-		}
-		if (this.grabSphereCastResults.IsCreated)
-		{
-			this.grabSphereCastResults.Dispose();
-		}
-		for (int i = 0; i < 2; i++)
-		{
-			if (BuilderPieceInteractor.handGridPlaneData[i].IsCreated)
-			{
-				BuilderPieceInteractor.handGridPlaneData[i].Dispose();
-			}
-			if (BuilderPieceInteractor.handPieceData[i].IsCreated)
-			{
-				BuilderPieceInteractor.handPieceData[i].Dispose();
-			}
-			if (BuilderPieceInteractor.localAttachableGridPlaneData[i].IsCreated)
-			{
-				BuilderPieceInteractor.localAttachableGridPlaneData[i].Dispose();
-			}
-			if (BuilderPieceInteractor.localAttachablePieceData[i].IsCreated)
-			{
-				BuilderPieceInteractor.localAttachablePieceData[i].Dispose();
-			}
-		}
-	}
-
-	public bool BlockSnowballCreation()
-	{
-		BuilderTable builderTable;
-		return !(GorillaTagger.Instance == null) && BuilderTable.TryGetBuilderTableForZone(GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone, out builderTable) && (builderTable.IsInBuilderZone() && builderTable.isTableMutable && GorillaTagger.Instance.offlineVRRig.scaleFactor >= 0.99f);
-	}
-
-	public void OnLateUpdate()
-	{
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		BuilderTable builderTable;
-		if (!BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out builderTable))
-		{
-			return;
-		}
-		if (!builderTable.isTableMutable)
-		{
-			return;
-		}
-		this.currentTable = builderTable;
-		this.CalcLocalGridPlanes();
-		BodyDockPositions myBodyDockPositions = offlineVRRig.myBodyDockPositions;
-		this.findPiecesToGrab.Complete();
-		this.UpdateHandState(BuilderPieceInteractor.HandType.Left, offlineVRRig.leftHand.overrideTarget, Vector3.right, myBodyDockPositions.leftHandTransform, this.equipmentInteractor.isLeftGrabbing, this.equipmentInteractor.wasLeftGrabPressed, this.equipmentInteractor.leftHandHeldEquipment, this.equipmentInteractor.disableLeftGrab);
-		this.UpdateHandState(BuilderPieceInteractor.HandType.Right, offlineVRRig.rightHand.overrideTarget, -Vector3.right, myBodyDockPositions.rightHandTransform, this.equipmentInteractor.isRightGrabbing, this.equipmentInteractor.wasRightGrabPressed, this.equipmentInteractor.rightHandHeldEquipment, this.equipmentInteractor.disableRightGrab);
-		this.UpdatePieceDisables();
-		if (offlineVRRig != null)
-		{
-			bool flag = offlineVRRig.scaleFactor < 1f;
-			if (flag && !this.isRigSmall)
-			{
-				if (offlineVRRig.builderArmShelfLeft != null)
-				{
-					offlineVRRig.builderArmShelfLeft.DropAttachedPieces();
-					if (offlineVRRig.builderArmShelfLeft.piece != null)
-					{
-						foreach (Collider collider in offlineVRRig.builderArmShelfLeft.piece.colliders)
-						{
-							collider.enabled = false;
-						}
-					}
-				}
-				if (!(offlineVRRig.builderArmShelfRight != null))
-				{
-					goto IL_2C0;
-				}
-				offlineVRRig.builderArmShelfRight.DropAttachedPieces();
-				if (!(offlineVRRig.builderArmShelfRight.piece != null))
-				{
-					goto IL_2C0;
-				}
-				using (List<Collider>.Enumerator enumerator = offlineVRRig.builderArmShelfRight.piece.colliders.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						Collider collider2 = enumerator.Current;
-						collider2.enabled = false;
-					}
-					goto IL_2C0;
-				}
-			}
-			if (!flag && this.isRigSmall)
-			{
-				if (offlineVRRig.builderArmShelfLeft != null && offlineVRRig.builderArmShelfLeft.piece != null)
-				{
-					foreach (Collider collider3 in offlineVRRig.builderArmShelfLeft.piece.colliders)
-					{
-						collider3.enabled = true;
-					}
-				}
-				if (offlineVRRig.builderArmShelfRight != null && offlineVRRig.builderArmShelfRight.piece != null)
-				{
-					foreach (Collider collider4 in offlineVRRig.builderArmShelfRight.piece.colliders)
-					{
-						collider4.enabled = true;
-					}
-				}
-			}
-			IL_2C0:
-			this.isRigSmall = flag;
-		}
-	}
-
-	private void SetHandState(int handIndex, BuilderPieceInteractor.HandState newState)
-	{
-		if (this.handState[handIndex] == BuilderPieceInteractor.HandState.Empty && this.potentialHeldPiece[handIndex] != null)
-		{
-			this.potentialHeldPiece[handIndex].PotentialGrab(false);
-			this.potentialHeldPiece[handIndex] = null;
-		}
-		this.handState[handIndex] = newState;
-		switch (this.handState[handIndex])
-		{
-		case BuilderPieceInteractor.HandState.Empty:
-			this.heldChainLength[handIndex] = 0;
-			for (int i = 0; i < this.heldChainCost[handIndex].Length; i++)
-			{
-				this.heldChainCost[handIndex][i] = 0;
-			}
-			break;
-		case BuilderPieceInteractor.HandState.Grabbed:
-			this.heldChainLength[handIndex] = this.heldPiece[handIndex].GetChildCount() + 1;
-			this.heldPiece[handIndex].GetChainCost(this.heldChainCost[handIndex]);
-			return;
-		case BuilderPieceInteractor.HandState.PotentialGrabbed:
-			this.heldChainLength[handIndex] = 0;
-			for (int j = 0; j < this.heldChainCost[handIndex].Length; j++)
-			{
-				this.heldChainCost[handIndex][j] = 0;
-			}
-			return;
-		case BuilderPieceInteractor.HandState.WaitForGrabbed:
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnCountChangedForRoot(BuilderPiece piece)
-	{
-		if (piece == null)
-		{
-			return;
-		}
-		if (this.heldPiece[0] != null && this.heldPiece[0].Equals(piece))
-		{
-			this.heldChainLength[0] = this.heldPiece[0].GetChainCostAndCount(this.heldChainCost[0]);
-			return;
-		}
-		if (this.heldPiece[1] != null && this.heldPiece[1].Equals(piece))
-		{
-			this.heldChainLength[1] = this.heldPiece[1].GetChainCostAndCount(this.heldChainCost[1]);
-		}
-	}
-
-	private void UpdateHandState(BuilderPieceInteractor.HandType handType, Transform handTransform, Vector3 palmForwardLocal, Transform handAttachPoint, bool isGrabbing, bool wasGrabPressed, IHoldableObject heldEquipment, bool grabDisabled)
-	{
-		int index = (int)((handType + 1) % (BuilderPieceInteractor.HandType)2);
-		bool flag = GorillaTagger.Instance.offlineVRRig.scaleFactor < 1f;
-		bool flag2 = isGrabbing && !wasGrabPressed;
-		bool flag3 = this.heldPiece[(int)handType] != null && (!isGrabbing || flag);
-		bool flag4 = heldEquipment != null;
-		bool flag5 = this.heldPiece[(int)handType] != null;
-		bool flag6 = !flag4 && !flag5 && !grabDisabled && !flag && this.currentTable.IsInBuilderZone();
-		BuilderPiece builderPiece = null;
-		Vector3 position = handTransform.position;
-		handTransform.rotation * palmForwardLocal;
-		Vector3 zero = Vector3.zero;
-		switch (this.handState[(int)handType])
-		{
-		case BuilderPieceInteractor.HandState.Empty:
-			if (!flag)
-			{
-				float num = float.MaxValue;
-				for (int i = 0; i < 1024; i++)
-				{
-					int index2 = (int)(handType * (BuilderPieceInteractor.HandType)1024 + i);
-					ColliderHit colliderHit = this.checkPiecesInSphereResults[index2];
-					if (colliderHit.instanceID == 0)
-					{
-						break;
-					}
-					BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(colliderHit.collider);
-					if (builderPieceFromCollider != null && !builderPieceFromCollider.isBuiltIntoTable)
-					{
-						float num2 = Vector3.SqrMagnitude(colliderHit.collider.transform.position - handTransform.position);
-						if ((builderPiece == null || num2 < num) && builderPieceFromCollider.CanPlayerGrabPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPieceFromCollider.transform.position))
-						{
-							builderPiece = builderPieceFromCollider;
-							num = num2;
-						}
-					}
-				}
-				if (builderPiece == null)
-				{
-					for (int j = 0; j < 64; j++)
-					{
-						int index3 = (int)(handType * (BuilderPieceInteractor.HandType)64 + j);
-						RaycastHit raycastHit = this.grabSphereCastResults[index3];
-						if (raycastHit.colliderInstanceID == 0)
-						{
-							break;
-						}
-						BuilderPiece builderPieceFromCollider2 = BuilderPiece.GetBuilderPieceFromCollider(raycastHit.collider);
-						if (builderPieceFromCollider2 != null && !builderPieceFromCollider2.isBuiltIntoTable && (builderPiece == null || raycastHit.distance < num) && builderPieceFromCollider2.CanPlayerGrabPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPieceFromCollider2.transform.position))
-						{
-							builderPiece = builderPieceFromCollider2;
-							num = raycastHit.distance;
-						}
-					}
-				}
-			}
-			if (this.potentialHeldPiece[(int)handType] != builderPiece)
-			{
-				if (this.potentialHeldPiece[(int)handType] != null)
-				{
-					this.potentialHeldPiece[(int)handType].PotentialGrab(false);
-				}
-				this.potentialHeldPiece[(int)handType] = builderPiece;
-				if (this.potentialHeldPiece[(int)handType] != null)
-				{
-					this.potentialHeldPiece[(int)handType].PotentialGrab(true);
-				}
-			}
-			if (flag6 && flag2 && builderPiece != null)
-			{
-				Vector3 vector;
-				Quaternion quaternion;
-				this.CalcPieceLocalPosAndRot(builderPiece.transform.position, builderPiece.transform.rotation, handAttachPoint, out vector, out quaternion);
-				if (BuilderPiece.IsDroppedState(builderPiece.state) || this.heldPiece[index] == builderPiece)
-				{
-					builderPiece.PlayGrabbedFx();
-					this.currentTable.RequestGrabPiece(builderPiece, handType == BuilderPieceInteractor.HandType.Left, vector, quaternion);
-					return;
-				}
-				builderPiece.PlayGrabbedFx();
-				this.SetHandState((int)handType, BuilderPieceInteractor.HandState.PotentialGrabbed);
-				this.potentialGrabbedOffsetDist[(int)handType] = 0f;
-				this.heldPiece[(int)handType] = builderPiece;
-				this.heldInitialRot[(int)handType] = quaternion;
-				this.heldCurrentRot[(int)handType] = quaternion;
-				this.heldInitialPos[(int)handType] = vector;
-				this.heldCurrentPos[(int)handType] = vector;
-				return;
-			}
-			break;
-		case BuilderPieceInteractor.HandState.Grabbed:
-		{
-			if (flag3)
-			{
-				Vector3 vector2 = this.velocityEstimator[(int)handType].linearVelocity;
-				if (flag)
-				{
-					Vector3 point = this.currentTable.roomCenter.position - this.velocityEstimator[(int)handType].handPos;
-					point.Normalize();
-					Vector3 a = Quaternion.Euler(0f, 180f, 0f) * point;
-					vector2 = BuilderTable.DROP_ZONE_REPEL * a;
-				}
-				else if (this.prevPotentialPlacement[(int)handType].attachPiece == this.heldPiece[(int)handType] && this.prevPotentialPlacement[(int)handType].parentPiece != null)
-				{
-					Vector3 a2 = this.prevPotentialPlacement[(int)handType].parentPiece.gridPlanes[this.prevPotentialPlacement[(int)handType].parentAttachIndex].transform.TransformDirection(this.prevPotentialPlacement[(int)handType].attachPlaneNormal);
-					vector2 += a2 * 1f;
-				}
-				this.currentTable.TryDropPiece(handType == BuilderPieceInteractor.HandType.Left, this.heldPiece[(int)handType], vector2, this.velocityEstimator[(int)handType].angularVelocity);
-				return;
-			}
-			BuilderPiece builderPiece2 = this.heldPiece[(int)handType];
-			if (builderPiece2 != null)
-			{
-				builderPiece2.transform.localRotation = this.heldInitialRot[(int)handType];
-				builderPiece2.transform.localPosition = this.heldInitialPos[(int)handType];
-				Quaternion quaternion2 = this.heldCurrentRot[(int)handType];
-				Vector3 vector3 = this.heldCurrentPos[(int)handType];
-				NativeList<BuilderGridPlaneData>[] array = BuilderPieceInteractor.localAttachableGridPlaneData;
-				BuilderPieceInteractor.handPieceData[(int)handType].Clear();
-				BuilderPieceInteractor.handGridPlaneData[(int)handType].Clear();
-				BuilderTableJobs.BuildTestPieceListForJob(builderPiece2, BuilderPieceInteractor.handPieceData[(int)handType], BuilderPieceInteractor.handGridPlaneData[(int)handType]);
-				BuilderPieceInteractor.allPotentialPlacements[(int)handType].Clear();
-				BuilderPotentialPlacement builderPotentialPlacement;
-				bool flag7 = this.currentTable.TryPlacePieceOnTableNoDropJobs(BuilderPieceInteractor.handGridPlaneData[(int)handType], BuilderPieceInteractor.handPieceData[(int)handType], BuilderPieceInteractor.localAttachableGridPlaneData[(int)handType], BuilderPieceInteractor.localAttachablePieceData[(int)handType], out builderPotentialPlacement, BuilderPieceInteractor.allPotentialPlacements[(int)handType]);
-				if (flag7)
-				{
-					BuilderPiece.State state = builderPotentialPlacement.attachPiece.state;
-					BuilderPiece.State state2 = (builderPotentialPlacement.parentPiece == null) ? BuilderPiece.State.None : builderPotentialPlacement.parentPiece.state;
-					bool flag8 = state == BuilderPiece.State.Grabbed || state == BuilderPiece.State.GrabbedLocal;
-					bool flag9 = state2 == BuilderPiece.State.Grabbed || state2 == BuilderPiece.State.GrabbedLocal;
-					bool flag10 = flag8 && flag9;
-					int index4 = (int)((handType + 1) % (BuilderPieceInteractor.HandType)2);
-					BuilderPieceInteractor.HandState handState = this.handState[index4];
-					if (flag10 && builderPotentialPlacement.attachPiece.gridPlanes[builderPotentialPlacement.attachIndex].male)
-					{
-						flag7 = false;
-					}
-					else if (flag10 && handState == BuilderPieceInteractor.HandState.WaitingForSnap)
-					{
-						flag7 = false;
-					}
-				}
-				if (flag7)
-				{
-					for (int k = 0; k < BuilderPieceInteractor.allPotentialPlacements[(int)handType].Count; k++)
-					{
-						BuilderPotentialPlacement builderPotentialPlacement2 = BuilderPieceInteractor.allPotentialPlacements[(int)handType][k];
-						BuilderAttachGridPlane builderAttachGridPlane = builderPotentialPlacement2.attachPiece.gridPlanes[builderPotentialPlacement2.attachIndex];
-						BuilderAttachGridPlane builderAttachGridPlane2 = (builderPotentialPlacement2.parentPiece == null) ? null : builderPotentialPlacement2.parentPiece.gridPlanes[builderPotentialPlacement2.parentAttachIndex];
-						bool flag11 = builderAttachGridPlane.IsConnected(builderPotentialPlacement2.attachBounds);
-						if (!flag11)
-						{
-							flag11 = builderAttachGridPlane2.IsConnected(builderPotentialPlacement2.parentAttachBounds);
-						}
-						if (flag11)
-						{
-							flag7 = false;
-							break;
-						}
-					}
-				}
-				if (flag7)
-				{
-					Vector3 position2 = builderPotentialPlacement.localPosition;
-					Quaternion rhs = builderPotentialPlacement.localRotation;
-					Vector3 vector4 = builderPotentialPlacement.attachPlaneNormal;
-					if (builderPotentialPlacement.parentPiece != null)
-					{
-						BuilderAttachGridPlane builderAttachGridPlane3 = builderPotentialPlacement.parentPiece.gridPlanes[builderPotentialPlacement.parentAttachIndex];
-						position2 = builderAttachGridPlane3.transform.TransformPoint(builderPotentialPlacement.localPosition);
-						rhs = builderAttachGridPlane3.transform.rotation * builderPotentialPlacement.localRotation;
-						vector4 = builderAttachGridPlane3.transform.TransformDirection(builderPotentialPlacement.attachPlaneNormal);
-					}
-					Vector3 a3 = handAttachPoint.transform.InverseTransformPoint(position2);
-					Quaternion a4 = Quaternion.Inverse(handAttachPoint.transform.rotation) * rhs;
-					float attachDistance = builderPotentialPlacement.attachDistance;
-					float num3 = Mathf.InverseLerp(this.currentTable.pushAndEaseParams.snapDelayOffsetDist, this.currentTable.pushAndEaseParams.maxOffsetY, attachDistance);
-					num3 = Mathf.Clamp(num3, 0f, 1f);
-					bool flag12 = builderPotentialPlacement.attachPiece == builderPiece2;
-					bool flag13 = builderPotentialPlacement.attachPiece == builderPiece2;
-					if (flag12)
-					{
-						Quaternion b = this.heldInitialRot[(int)handType];
-						Quaternion b2 = Quaternion.Slerp(a4, b, num3);
-						quaternion2 = Quaternion.Slerp(quaternion2, b2, 0.1f);
-					}
-					if (flag13)
-					{
-						Vector3 vector5 = this.heldInitialPos[(int)handType];
-						Vector3 vector6 = handAttachPoint.transform.InverseTransformDirection(vector4);
-						Vector3 vector7 = a3 + vector6 * this.currentTable.pushAndEaseParams.snapDelayOffsetDist - vector5;
-						float num4 = Vector3.Dot(vector7, vector6);
-						num4 = Mathf.Min(0f, num4);
-						Vector3 b3 = vector6 * num4;
-						Vector3 a5 = vector7 - b3;
-						Vector3 b4 = vector5 + Vector3.Lerp(a5, Vector3.zero, num3);
-						vector3 = Vector3.Lerp(vector3, b4, 0.5f);
-					}
-					this.heldCurrentRot[(int)handType] = quaternion2;
-					this.heldCurrentPos[(int)handType] = vector3;
-					builderPiece2.transform.localRotation = quaternion2;
-					builderPiece2.transform.localPosition = vector3;
-					bool flag14 = Vector3.Dot(this.velocityEstimator[(int)handType].linearVelocity, vector4) > 0f;
-					float snapAttachDistance = this.currentTable.pushAndEaseParams.snapAttachDistance;
-					if (builderPotentialPlacement.attachDistance < snapAttachDistance && !flag14 && BuilderPiece.CanPlayerAttachPieceToPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPiece2, builderPotentialPlacement.parentPiece))
-					{
-						GorillaTagger.Instance.StartVibration(handType == BuilderPieceInteractor.HandType.Left, GorillaTagger.Instance.tapHapticStrength, this.currentTable.pushAndEaseParams.snapDelayTime * 2f);
-						if (((builderPotentialPlacement.parentPiece == null) ? BuilderPiece.State.None : builderPotentialPlacement.parentPiece.state) == BuilderPiece.State.GrabbedLocal)
-						{
-							GorillaTagger.Instance.StartVibration(handType > BuilderPieceInteractor.HandType.Left, GorillaTagger.Instance.tapHapticStrength, this.currentTable.pushAndEaseParams.snapDelayTime * 2f);
-						}
-						this.delayedPotentialPlacement[(int)handType] = builderPotentialPlacement;
-						this.delayedPlacementTime[(int)handType] = 0f;
-						this.SetHandState((int)handType, BuilderPieceInteractor.HandState.WaitingForSnap);
-					}
-					else
-					{
-						float num5 = this.currentTable.gridSize * 0.5f * (this.currentTable.gridSize * 0.5f);
-						if (this.prevPotentialPlacement[(int)handType].attachPiece != builderPotentialPlacement.attachPiece || this.prevPotentialPlacement[(int)handType].parentPiece != builderPotentialPlacement.parentPiece || this.prevPotentialPlacement[(int)handType].attachIndex != builderPotentialPlacement.attachIndex || this.prevPotentialPlacement[(int)handType].parentAttachIndex != builderPotentialPlacement.parentAttachIndex || Vector3.SqrMagnitude(this.prevPotentialPlacement[(int)handType].localPosition - builderPotentialPlacement.localPosition) > num5)
-						{
-							GorillaTagger.Instance.StartVibration(handType == BuilderPieceInteractor.HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, this.currentTable.pushAndEaseParams.snapDelayTime);
-							try
-							{
-								this.ClearGlowBumps((int)handType);
-								this.AddGlowBumps((int)handType, BuilderPieceInteractor.allPotentialPlacements[(int)handType]);
-							}
-							catch (Exception ex)
-							{
-								Debug.LogErrorFormat("Error adding glow bumps {0}", new object[]
-								{
-									ex.ToString()
-								});
-							}
-						}
-					}
-					this.UpdateGlowBumps((int)handType, 1f - num3);
-					this.prevPotentialPlacement[(int)handType] = builderPotentialPlacement;
-					return;
-				}
-				this.ClearGlowBumps((int)handType);
-				Quaternion b5 = this.heldInitialRot[(int)handType];
-				quaternion2 = Quaternion.Slerp(quaternion2, b5, 0.1f);
-				Vector3 b6 = this.heldInitialPos[(int)handType];
-				vector3 = Vector3.Lerp(vector3, b6, 0.1f);
-				this.heldCurrentRot[(int)handType] = quaternion2;
-				this.heldCurrentPos[(int)handType] = vector3;
-				builderPiece2.transform.localRotation = quaternion2;
-				builderPiece2.transform.localPosition = vector3;
-				this.prevPotentialPlacement[(int)handType] = default(BuilderPotentialPlacement);
-				return;
-			}
-			break;
-		}
-		case BuilderPieceInteractor.HandState.PotentialGrabbed:
-		{
-			if (flag3)
-			{
-				BuilderPiece builderPiece3 = this.heldPiece[(int)handType];
-				this.ClearUnSnapOffset((int)handType, builderPiece3);
-				this.RemovePieceFromHand(builderPiece3, (int)handType);
-				this.heldPiece[(int)handType] = null;
-				this.SetHandState((int)handType, BuilderPieceInteractor.HandState.Empty);
-				return;
-			}
-			BuilderPiece builderPiece4 = this.heldPiece[(int)handType];
-			Vector3 b7;
-			Quaternion quaternion3;
-			this.CalcPieceLocalPosAndRot(builderPiece4.transform.position, builderPiece4.transform.rotation, handAttachPoint, out b7, out quaternion3);
-			if (BuilderPiece.IsDroppedState(builderPiece4.state))
-			{
-				this.currentTable.RequestGrabPiece(builderPiece4, handType == BuilderPieceInteractor.HandType.Left, this.heldInitialPos[(int)handType], this.heldInitialRot[(int)handType]);
-				return;
-			}
-			Vector3 vector8 = this.heldInitialPos[(int)handType] - b7;
-			this.UpdatePullApartOffset((int)handType, builderPiece4, handAttachPoint.TransformVector(vector8));
-			float num6 = this.currentTable.pushAndEaseParams.unSnapDelayDist * this.currentTable.pushAndEaseParams.unSnapDelayDist;
-			if (vector8.sqrMagnitude > num6)
-			{
-				GorillaTagger.Instance.StartVibration(handType == BuilderPieceInteractor.HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, this.currentTable.pushAndEaseParams.unSnapDelayTime * 2f);
-				if (((builderPiece4 == null) ? BuilderPiece.State.None : builderPiece4.state) == BuilderPiece.State.GrabbedLocal)
-				{
-					GorillaTagger.Instance.StartVibration(handType > BuilderPieceInteractor.HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, this.currentTable.pushAndEaseParams.unSnapDelayTime * 2f);
-				}
-				this.SetHandState((int)handType, BuilderPieceInteractor.HandState.WaitingForUnSnap);
-				this.delayedPlacementTime[(int)handType] = 0f;
-				return;
-			}
-			break;
-		}
-		case BuilderPieceInteractor.HandState.WaitForGrabbed:
-			break;
-		case BuilderPieceInteractor.HandState.WaitingForSnap:
-		{
-			BuilderPiece builderPiece5 = this.heldPiece[(int)handType];
-			if (builderPiece5 != null)
-			{
-				builderPiece5.transform.localRotation = this.heldInitialRot[(int)handType];
-				builderPiece5.transform.localPosition = this.heldInitialPos[(int)handType];
-				Quaternion quaternion4 = this.heldCurrentRot[(int)handType];
-				Vector3 vector9 = this.heldCurrentPos[(int)handType];
-				if (this.delayedPlacementTime[(int)handType] >= 0f)
-				{
-					BuilderPotentialPlacement builderPotentialPlacement3 = this.delayedPotentialPlacement[(int)handType];
-					if (this.delayedPlacementTime[(int)handType] > this.currentTable.pushAndEaseParams.snapDelayTime)
-					{
-						BuilderAttachGridPlane builderAttachGridPlane4 = builderPotentialPlacement3.attachPiece.gridPlanes[builderPotentialPlacement3.attachIndex];
-						BuilderAttachGridPlane builderAttachGridPlane5 = (builderPotentialPlacement3.parentPiece == null) ? null : builderPotentialPlacement3.parentPiece.gridPlanes[builderPotentialPlacement3.parentAttachIndex];
-						bool flag15 = builderAttachGridPlane4.IsConnected(builderPotentialPlacement3.attachBounds);
-						if (!flag15)
-						{
-							flag15 = builderAttachGridPlane5.IsConnected(builderPotentialPlacement3.parentAttachBounds);
-						}
-						if (flag15)
-						{
-							Debug.LogError("Snap Overlapping Why are we doing this!!??");
-						}
-						if (!BuilderPiece.CanPlayerAttachPieceToPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPiece5, builderPotentialPlacement3.parentPiece))
-						{
-							this.SetHandState((int)handType, BuilderPieceInteractor.HandState.Grabbed);
-						}
-						this.currentTable.RequestPlacePiece(builderPiece5, builderPotentialPlacement3.attachPiece, builderPotentialPlacement3.bumpOffsetX, builderPotentialPlacement3.bumpOffsetZ, builderPotentialPlacement3.twist, builderPotentialPlacement3.parentPiece, builderPotentialPlacement3.attachIndex, builderPotentialPlacement3.parentAttachIndex);
-						return;
-					}
-					this.delayedPlacementTime[(int)handType] = this.delayedPlacementTime[(int)handType] + Time.deltaTime;
-					Transform parent = builderPiece5.transform.parent;
-					Vector3 position3 = builderPotentialPlacement3.localPosition;
-					Quaternion rhs2 = builderPotentialPlacement3.localRotation;
-					Vector3 direction = builderPotentialPlacement3.attachPlaneNormal;
-					if (builderPotentialPlacement3.parentPiece != null)
-					{
-						BuilderAttachGridPlane builderAttachGridPlane6 = builderPotentialPlacement3.parentPiece.gridPlanes[builderPotentialPlacement3.parentAttachIndex];
-						position3 = builderAttachGridPlane6.transform.TransformPoint(builderPotentialPlacement3.localPosition);
-						rhs2 = builderAttachGridPlane6.transform.rotation * builderPotentialPlacement3.localRotation;
-						direction = builderAttachGridPlane6.transform.TransformDirection(builderPotentialPlacement3.attachPlaneNormal);
-					}
-					Vector3 a6 = parent.transform.InverseTransformPoint(position3);
-					Quaternion quaternion5 = Quaternion.Inverse(parent.transform.rotation) * rhs2;
-					bool flag16 = builderPotentialPlacement3.attachPiece == builderPiece5;
-					bool flag17 = builderPotentialPlacement3.attachPiece == builderPiece5;
-					if (flag16)
-					{
-						quaternion4 = quaternion5;
-					}
-					if (flag17)
-					{
-						Vector3 a7 = parent.transform.InverseTransformDirection(direction);
-						vector9 = a6 + a7 * this.currentTable.pushAndEaseParams.snapDelayOffsetDist;
-					}
-					this.heldCurrentRot[(int)handType] = quaternion4;
-					this.heldCurrentPos[(int)handType] = vector9;
-					builderPiece5.transform.localRotation = quaternion4;
-					builderPiece5.transform.localPosition = vector9;
-				}
-			}
-			break;
-		}
-		case BuilderPieceInteractor.HandState.WaitingForUnSnap:
-		{
-			BuilderPiece builderPiece6 = this.heldPiece[(int)handType];
-			if (BuilderPiece.IsDroppedState(builderPiece6.state))
-			{
-				this.currentTable.RequestGrabPiece(builderPiece6, handType == BuilderPieceInteractor.HandType.Left, this.heldInitialPos[(int)handType], this.heldInitialRot[(int)handType]);
-				return;
-			}
-			if (this.delayedPlacementTime[(int)handType] <= this.currentTable.pushAndEaseParams.unSnapDelayTime)
-			{
-				Vector3 b8;
-				Quaternion quaternion6;
-				this.CalcPieceLocalPosAndRot(builderPiece6.transform.position, builderPiece6.transform.rotation, handAttachPoint, out b8, out quaternion6);
-				Vector3 vector10 = this.heldInitialPos[(int)handType] - b8;
-				this.UpdatePullApartOffset((int)handType, builderPiece6, handAttachPoint.TransformVector(vector10));
-				this.delayedPlacementTime[(int)handType] = this.delayedPlacementTime[(int)handType] + Time.deltaTime;
-				return;
-			}
-			if (builderPiece6.GetChildCount() > this.maxHoldablePieceStackCount)
-			{
-				builderPiece6.PlayTooHeavyFx();
-				this.ClearUnSnapOffset((int)handType, builderPiece6);
-				this.RemovePieceFromHand(builderPiece6, (int)handType);
-				return;
-			}
-			this.currentTable.RequestGrabPiece(builderPiece6, handType == BuilderPieceInteractor.HandType.Left, this.heldInitialPos[(int)handType], this.heldInitialRot[(int)handType]);
-			return;
-		}
-		default:
-			return;
-		}
-	}
-
-	private void ClearGlowBumps(int handIndex)
-	{
-		BuilderTable builderTable;
-		if (!BuilderTable.TryGetBuilderTableForZone(GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone, out builderTable))
-		{
-			return;
-		}
-		BuilderPool builderPool = builderTable.builderPool;
-		List<BuilderBumpGlow> list = this.glowBumps[handIndex];
-		if (builderPool != null)
-		{
-			for (int i = 0; i < list.Count; i++)
-			{
-				builderPool.DestroyBumpGlow(list[i]);
-			}
-		}
-		else
-		{
-			Debug.LogError("BuilderPieceInteractor could not find Builderpool");
-		}
-		list.Clear();
-	}
-
-	private void AddGlowBumps(int handIndex, List<BuilderPotentialPlacement> allPotentialPlacements)
-	{
-		this.ClearGlowBumps(handIndex);
-		if (allPotentialPlacements == null)
-		{
-			Debug.LogError("How is allPotentialPlacements null");
-			return;
-		}
-		BuilderPool builderPool = this.currentTable.builderPool;
-		if (builderPool == null)
-		{
-			Debug.LogError("How is the pool null?");
-			return;
-		}
-		float gridSize = this.currentTable.gridSize;
-		for (int i = 0; i < allPotentialPlacements.Count; i++)
-		{
-			BuilderPotentialPlacement builderPotentialPlacement = allPotentialPlacements[i];
-			if (builderPotentialPlacement.parentPiece != null && builderPotentialPlacement.attachPiece != null && builderPotentialPlacement.attachPiece.gridPlanes != null && builderPotentialPlacement.parentPiece.gridPlanes != null)
-			{
-				BuilderAttachGridPlane builderAttachGridPlane = builderPotentialPlacement.parentPiece.gridPlanes[builderPotentialPlacement.parentAttachIndex];
-				if (builderAttachGridPlane != null)
-				{
-					Vector2Int min = builderPotentialPlacement.parentAttachBounds.min;
-					Vector2Int max = builderPotentialPlacement.parentAttachBounds.max;
-					for (int j = min.x; j <= max.x; j++)
-					{
-						for (int k = min.y; k <= max.y; k++)
-						{
-							Vector3 gridPosition = builderAttachGridPlane.GetGridPosition(j, k, gridSize);
-							BuilderBumpGlow builderBumpGlow = builderPool.CreateGlowBump();
-							if (builderBumpGlow != null)
-							{
-								builderBumpGlow.transform.SetPositionAndRotation(gridPosition, builderAttachGridPlane.transform.rotation);
-								builderBumpGlow.transform.SetParent(builderAttachGridPlane.transform, true);
-								builderBumpGlow.transform.localScale = Vector3.one;
-								builderBumpGlow.gameObject.SetActive(true);
-								this.glowBumps[handIndex].Add(builderBumpGlow);
-							}
-						}
-					}
-				}
-				BuilderAttachGridPlane builderAttachGridPlane2 = builderPotentialPlacement.attachPiece.gridPlanes[builderPotentialPlacement.attachIndex];
-				if (builderAttachGridPlane2 != null)
-				{
-					Vector2Int min2 = builderPotentialPlacement.attachBounds.min;
-					Vector2Int max2 = builderPotentialPlacement.attachBounds.max;
-					for (int l = min2.x; l <= max2.x; l++)
-					{
-						for (int m = min2.y; m <= max2.y; m++)
-						{
-							Vector3 gridPosition2 = builderAttachGridPlane2.GetGridPosition(l, m, gridSize);
-							BuilderBumpGlow builderBumpGlow2 = builderPool.CreateGlowBump();
-							if (builderBumpGlow2 != null)
-							{
-								Quaternion rhs = Quaternion.Euler(180f, 0f, 0f);
-								builderBumpGlow2.transform.SetPositionAndRotation(gridPosition2, builderAttachGridPlane2.transform.rotation * rhs);
-								builderBumpGlow2.transform.SetParent(builderAttachGridPlane2.transform, true);
-								builderBumpGlow2.transform.localScale = Vector3.one;
-								builderBumpGlow2.gameObject.SetActive(true);
-								this.glowBumps[handIndex].Add(builderBumpGlow2);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void UpdateGlowBumps(int handIndex, float intensity)
-	{
-		List<BuilderBumpGlow> list = this.glowBumps[handIndex];
-		for (int i = 0; i < list.Count; i++)
-		{
-			list[i].SetIntensity(intensity);
-		}
-	}
-
-	private void UpdatePullApartOffset(int handIndex, BuilderPiece potentialGrabPiece, Vector3 pullApartDiff)
-	{
-		BuilderPiece parentPiece = potentialGrabPiece.parentPiece;
-		BuilderAttachGridPlane builderAttachGridPlane = null;
-		if (parentPiece != null)
-		{
-			builderAttachGridPlane = parentPiece.gridPlanes[potentialGrabPiece.parentAttachIndex];
-		}
-		Vector3 vector = Vector3.up;
-		if (builderAttachGridPlane != null)
-		{
-			vector = builderAttachGridPlane.transform.TransformDirection(vector);
-			if (!builderAttachGridPlane.male)
-			{
-				vector *= -1f;
-			}
-		}
-		float num = Vector3.Dot(pullApartDiff, vector);
-		num = Mathf.Max(num, 0f);
-		float num2 = 0.0025f;
-		float num3 = num / num2;
-		num3 = 1f - 1f / (1f + num3);
-		num = num3 * num2;
-		Vector3 vector2 = vector * this.potentialGrabbedOffsetDist[handIndex];
-		this.potentialGrabbedOffsetDist[handIndex] = num;
-		Vector3 vector3 = vector * this.potentialGrabbedOffsetDist[handIndex];
-		if (builderAttachGridPlane != null)
-		{
-			vector2 = builderAttachGridPlane.transform.InverseTransformVector(vector2);
-			vector3 = builderAttachGridPlane.transform.InverseTransformVector(vector3);
-		}
-		Vector3 a = potentialGrabPiece.transform.localPosition - vector2;
-		potentialGrabPiece.transform.localPosition = a + vector3;
-	}
-
-	private void ClearUnSnapOffset(int handIndex, BuilderPiece potentialGrabPiece)
-	{
-		this.UpdatePullApartOffset(handIndex, potentialGrabPiece, Vector3.zero);
-	}
-
-	public void AddPieceToHeld(BuilderPiece piece, bool isLeft, Vector3 localPosition, Quaternion localRotation)
-	{
-		int num = isLeft ? 0 : 1;
-		this.AddPieceToHand(piece, num, localPosition, localRotation);
-		int num2 = (num + 1) % 2;
-		if (this.heldPiece[num2] == piece)
-		{
-			this.RemovePieceFromHand(piece, num2);
-		}
-	}
-
-	public void RemovePieceFromHeld(BuilderPiece piece)
-	{
-		for (int i = 0; i < 2; i++)
-		{
-			if (this.heldPiece[i] == piece)
-			{
-				this.RemovePieceFromHand(piece, i);
-			}
-		}
-	}
-
-	private void AddPieceToHand(BuilderPiece piece, int handIndex, Vector3 localPosition, Quaternion localRotation)
-	{
-		this.heldPiece[handIndex] = piece;
-		this.delayedPlacementTime[handIndex] = -1f;
-		this.SetHandState(handIndex, BuilderPieceInteractor.HandState.Grabbed);
-		this.heldInitialRot[handIndex] = localRotation;
-		this.heldCurrentRot[handIndex] = localRotation;
-		this.heldInitialPos[handIndex] = localPosition;
-		this.heldCurrentPos[handIndex] = localPosition;
-	}
-
-	private void RemovePieceFromHand(BuilderPiece piece, int handIndex)
-	{
-		this.heldPiece[handIndex] = null;
-		this.delayedPlacementTime[handIndex] = -1f;
-		this.SetHandState(handIndex, BuilderPieceInteractor.HandState.Empty);
-		this.ClearGlowBumps(handIndex);
-	}
-
-	public void RemovePiecesFromHands()
-	{
-		for (int i = 0; i < 2; i++)
-		{
-			this.heldPiece[i] = null;
-			this.delayedPlacementTime[i] = -1f;
-			this.SetHandState(i, BuilderPieceInteractor.HandState.Empty);
-			this.ClearGlowBumps(i);
-		}
-	}
-
-	private void CalcPieceLocalPosAndRot(Vector3 worldPosition, Quaternion worldRotation, Transform attachPoint, out Vector3 localPosition, out Quaternion localRotation)
-	{
-		Quaternion rotation = attachPoint.transform.rotation;
-		Vector3 position = attachPoint.transform.position;
-		localRotation = Quaternion.Inverse(rotation) * worldRotation;
-		localPosition = Quaternion.Inverse(rotation) * (worldPosition - position);
-	}
-
-	public void DisableCollisionsWithHands()
-	{
-		this.DisableCollisionsWithHand(true);
-		this.DisableCollisionsWithHand(false);
-	}
-
-	private void DisableCollisionsWithHand(bool leftHand)
-	{
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		BuilderTable builderTable;
-		if (!BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out builderTable))
-		{
-			return;
-		}
-		Transform transform = leftHand ? offlineVRRig.leftHand.overrideTarget : offlineVRRig.rightHand.overrideTarget;
-		List<GameObject> list = leftHand ? this.collisionDisabledPiecesLeft : this.collisionDisabledPiecesRight;
-		int num = Physics.OverlapSphereNonAlloc(transform.position, 0.15f, BuilderPieceInteractor.tempDisableColliders, builderTable.allPiecesMask);
-		for (int i = 0; i < num; i++)
-		{
-			GameObject gameObject = BuilderPieceInteractor.tempDisableColliders[i].gameObject;
-			BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(BuilderPieceInteractor.tempDisableColliders[i]);
-			if (builderPieceFromCollider != null && builderPieceFromCollider.state == BuilderPiece.State.AttachedAndPlaced && !list.Contains(gameObject))
-			{
-				gameObject.layer = BuilderTable.heldLayer;
-				list.Add(gameObject);
-			}
-		}
-	}
-
-	public void UpdatePieceDisables()
-	{
-		this.UpdatePieceDisablesForHand(true);
-		this.UpdatePieceDisablesForHand(false);
-	}
-
-	public void UpdatePieceDisablesForHand(bool leftHand)
-	{
-		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-		Transform transform = leftHand ? offlineVRRig.leftHand.overrideTarget : offlineVRRig.rightHand.overrideTarget;
-		List<GameObject> list = leftHand ? this.collisionDisabledPiecesLeft : this.collisionDisabledPiecesRight;
-		List<GameObject> list2 = (!leftHand) ? this.collisionDisabledPiecesLeft : this.collisionDisabledPiecesRight;
-		Vector3 position = transform.position;
-		float num = 0.040000003f;
-		for (int i = 0; i < list.Count; i++)
-		{
-			GameObject gameObject = list[i];
-			if (gameObject == null)
-			{
-				list.RemoveAt(i);
-				i--;
-			}
-			else if ((gameObject.transform.position - position).sqrMagnitude > num)
-			{
-				BuilderPiece builderPieceFromTransform = BuilderPiece.GetBuilderPieceFromTransform(gameObject.transform);
-				if (builderPieceFromTransform.state == BuilderPiece.State.AttachedAndPlaced && !list2.Contains(gameObject))
-				{
-					builderPieceFromTransform.SetColliderLayers<Collider>(builderPieceFromTransform.colliders, BuilderTable.placedLayer);
-				}
-				list.RemoveAt(i);
-				i--;
-			}
-		}
+		Invalid = -1,
+		Empty,
+		Grabbed,
+		PotentialGrabbed,
+		WaitForGrabbed,
+		WaitingForSnap,
+		WaitingForUnSnap
 	}
 
 	[OnEnterPlay_SetNull]
@@ -1031,7 +49,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 
 	public List<GorillaVelocityEstimator> velocityEstimator;
 
-	public List<BuilderPieceInteractor.HandState> handState;
+	public List<HandState> handState;
 
 	public List<BuilderPiece> heldPiece;
 
@@ -1115,21 +133,979 @@ public class BuilderPieceInteractor : MonoBehaviour
 
 	private static Collider[] tempDisableColliders = new Collider[128];
 
-	public enum HandType
+	private void Awake()
 	{
-		Invalid = -1,
-		Left,
-		Right
+		if (instance == null)
+		{
+			instance = this;
+			hasInstance = true;
+		}
+		else if (instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+		velocityEstimator = new List<GorillaVelocityEstimator>(2) { velocityEstimatorLeft, velocityEstimatorRight };
+		laserSight = new List<BuilderLaserSight>(2) { laserSightLeft, laserSightRight };
+		handState = new List<HandState>(2);
+		heldPiece = new List<BuilderPiece>(2);
+		potentialHeldPiece = new List<BuilderPiece>(2);
+		potentialGrabbedOffsetDist = new List<float>(2);
+		heldInitialRot = new List<Quaternion>(2);
+		heldCurrentRot = new List<Quaternion>(2);
+		heldInitialPos = new List<Vector3>(2);
+		heldCurrentPos = new List<Vector3>(2);
+		heldChainLength = new int[2];
+		heldChainLength[0] = 0;
+		heldChainLength[1] = 0;
+		heldChainCost = new List<int[]>(2);
+		for (int i = 0; i < 2; i++)
+		{
+			heldChainCost.Add(new int[3]);
+		}
+		allPotentialPlacements = new List<BuilderPotentialPlacement>[2];
+		delayedPotentialPlacement = new List<BuilderPotentialPlacement>(2);
+		delayedPlacementTime = new List<float>(2);
+		prevPotentialPlacement = new List<BuilderPotentialPlacement>(2);
+		glowBumps = new List<List<BuilderBumpGlow>>(2);
+		for (int j = 0; j < 2; j++)
+		{
+			handState.Add(HandState.Empty);
+			heldPiece.Add(null);
+			potentialHeldPiece.Add(null);
+			potentialGrabbedOffsetDist.Add(0f);
+			heldInitialRot.Add(Quaternion.identity);
+			heldCurrentRot.Add(Quaternion.identity);
+			heldInitialPos.Add(Vector3.zero);
+			heldCurrentPos.Add(Vector3.zero);
+			delayedPotentialPlacement.Add(default(BuilderPotentialPlacement));
+			delayedPlacementTime.Add(-1f);
+			prevPotentialPlacement.Add(default(BuilderPotentialPlacement));
+			allPotentialPlacements[j] = new List<BuilderPotentialPlacement>(128);
+			glowBumps.Add(new List<BuilderBumpGlow>(1024));
+		}
+		checkPiecesInSphere = new NativeArray<OverlapSphereCommand>(2, Allocator.Persistent);
+		checkPiecesInSphereResults = new NativeArray<ColliderHit>(2048, Allocator.Persistent);
+		grabSphereCast = new NativeArray<SpherecastCommand>(2, Allocator.Persistent);
+		grabSphereCastResults = new NativeArray<RaycastHit>(128, Allocator.Persistent);
+		handGridPlaneData = new NativeList<BuilderGridPlaneData>[2];
+		handPieceData = new NativeList<BuilderPieceData>[2];
+		localAttachableGridPlaneData = new NativeList<BuilderGridPlaneData>[2];
+		localAttachablePieceData = new NativeList<BuilderPieceData>[2];
+		for (int k = 0; k < 2; k++)
+		{
+			handGridPlaneData[k] = new NativeList<BuilderGridPlaneData>(512, Allocator.Persistent);
+			handPieceData[k] = new NativeList<BuilderPieceData>(512, Allocator.Persistent);
+			localAttachableGridPlaneData[k] = new NativeList<BuilderGridPlaneData>(10240, Allocator.Persistent);
+			localAttachablePieceData[k] = new NativeList<BuilderPieceData>(2560, Allocator.Persistent);
+		}
 	}
 
-	public enum HandState
+	public bool GetIsHolding(XRNode node)
 	{
-		Invalid = -1,
-		Empty,
-		Grabbed,
-		PotentialGrabbed,
-		WaitForGrabbed,
-		WaitingForSnap,
-		WaitingForUnSnap
+		if (heldPiece == null)
+		{
+			return false;
+		}
+		if (node == XRNode.LeftHand)
+		{
+			return heldPiece[0] != null;
+		}
+		return heldPiece[1] != null;
+	}
+
+	public void PreInteract()
+	{
+	}
+
+	public void StartFindNearbyPieces()
+	{
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		if (BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out var table) && table.isTableMutable)
+		{
+			QueryParameters queryParameters = new QueryParameters
+			{
+				layerMask = table.allPiecesMask
+			};
+			checkPiecesInSphere[0] = new OverlapSphereCommand(offlineVRRig.leftHand.overrideTarget.position, (handState[0] == HandState.Empty) ? 0.0375f : 1f, queryParameters);
+			checkPiecesInSphere[1] = new OverlapSphereCommand(offlineVRRig.rightHand.overrideTarget.position, (handState[1] == HandState.Empty) ? 0.0375f : 1f, queryParameters);
+			checkNearbyPiecesHandle = OverlapSphereCommand.ScheduleBatch(checkPiecesInSphere, checkPiecesInSphereResults, 1, 1024);
+			for (int i = 0; i < 64; i++)
+			{
+				grabSphereCastResults[i] = emptyRaycastHit;
+			}
+			grabSphereCast[0] = new SpherecastCommand(offlineVRRig.leftHand.overrideTarget.position, 0.0375f, offlineVRRig.leftHand.overrideTarget.rotation * Vector3.right, queryParameters, 0.15f);
+			grabSphereCast[1] = new SpherecastCommand(offlineVRRig.rightHand.overrideTarget.position, 0.0375f, offlineVRRig.rightHand.overrideTarget.rotation * -Vector3.right, queryParameters, 0.15f);
+			findPiecesToGrab = SpherecastCommand.ScheduleBatch(grabSphereCast, grabSphereCastResults, 1, 64);
+			JobHandle.ScheduleBatchedJobs();
+		}
+	}
+
+	private void CalcLocalGridPlanes()
+	{
+		checkNearbyPiecesHandle.Complete();
+		for (int i = 0; i < 2; i++)
+		{
+			if (handState[i] != HandState.Grabbed)
+			{
+				continue;
+			}
+			localAttachableGridPlaneData[i].Clear();
+			localAttachablePieceData[i].Clear();
+			tempPieceSet.Clear();
+			if (!currentTable.IsInBuilderZone())
+			{
+				continue;
+			}
+			for (int j = 0; j < 1024; j++)
+			{
+				int index = i * 1024 + j;
+				if (checkPiecesInSphereResults[index].instanceID == 0)
+				{
+					break;
+				}
+				BuilderPiece pieceInHand = heldPiece[i];
+				BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(checkPiecesInSphereResults[index].collider);
+				if (!(builderPieceFromCollider != null) || tempPieceSet.Contains(builderPieceFromCollider))
+				{
+					continue;
+				}
+				tempPieceSet.Add(builderPieceFromCollider);
+				if (currentTable.CanPiecesPotentiallySnap(pieceInHand, builderPieceFromCollider))
+				{
+					int length = localAttachablePieceData[i].Length;
+					localAttachablePieceData[i].Add(new BuilderPieceData(builderPieceFromCollider));
+					for (int k = 0; k < builderPieceFromCollider.gridPlanes.Count; k++)
+					{
+						localAttachableGridPlaneData[i].Add(new BuilderGridPlaneData(builderPieceFromCollider.gridPlanes[k], length));
+					}
+				}
+			}
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (instance == this)
+		{
+			hasInstance = false;
+			instance = null;
+		}
+		if (checkPiecesInSphere.IsCreated)
+		{
+			checkPiecesInSphere.Dispose();
+		}
+		if (checkPiecesInSphereResults.IsCreated)
+		{
+			checkPiecesInSphereResults.Dispose();
+		}
+		if (grabSphereCast.IsCreated)
+		{
+			grabSphereCast.Dispose();
+		}
+		if (grabSphereCastResults.IsCreated)
+		{
+			grabSphereCastResults.Dispose();
+		}
+		for (int i = 0; i < 2; i++)
+		{
+			if (handGridPlaneData[i].IsCreated)
+			{
+				handGridPlaneData[i].Dispose();
+			}
+			if (handPieceData[i].IsCreated)
+			{
+				handPieceData[i].Dispose();
+			}
+			if (localAttachableGridPlaneData[i].IsCreated)
+			{
+				localAttachableGridPlaneData[i].Dispose();
+			}
+			if (localAttachablePieceData[i].IsCreated)
+			{
+				localAttachablePieceData[i].Dispose();
+			}
+		}
+	}
+
+	public bool BlockSnowballCreation()
+	{
+		if (GorillaTagger.Instance == null)
+		{
+			return false;
+		}
+		if (!BuilderTable.TryGetBuilderTableForZone(GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone, out var table))
+		{
+			return false;
+		}
+		if (table.IsInBuilderZone() && table.isTableMutable && GorillaTagger.Instance.offlineVRRig.scaleFactor >= 0.99f)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public void OnLateUpdate()
+	{
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		if (!BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out var table) || !table.isTableMutable)
+		{
+			return;
+		}
+		currentTable = table;
+		CalcLocalGridPlanes();
+		BodyDockPositions myBodyDockPositions = offlineVRRig.myBodyDockPositions;
+		findPiecesToGrab.Complete();
+		UpdateHandState(HandType.Left, offlineVRRig.leftHand.overrideTarget, Vector3.right, myBodyDockPositions.leftHandTransform, equipmentInteractor.isLeftGrabbing, equipmentInteractor.wasLeftGrabPressed, equipmentInteractor.leftHandHeldEquipment, equipmentInteractor.disableLeftGrab);
+		UpdateHandState(HandType.Right, offlineVRRig.rightHand.overrideTarget, -Vector3.right, myBodyDockPositions.rightHandTransform, equipmentInteractor.isRightGrabbing, equipmentInteractor.wasRightGrabPressed, equipmentInteractor.rightHandHeldEquipment, equipmentInteractor.disableRightGrab);
+		UpdatePieceDisables();
+		if (!(offlineVRRig != null))
+		{
+			return;
+		}
+		bool flag = offlineVRRig.scaleFactor < 1f;
+		if (flag && !isRigSmall)
+		{
+			if (offlineVRRig.builderArmShelfLeft != null)
+			{
+				offlineVRRig.builderArmShelfLeft.DropAttachedPieces();
+				if (offlineVRRig.builderArmShelfLeft.piece != null)
+				{
+					foreach (Collider collider in offlineVRRig.builderArmShelfLeft.piece.colliders)
+					{
+						collider.enabled = false;
+					}
+				}
+			}
+			if (offlineVRRig.builderArmShelfRight != null)
+			{
+				offlineVRRig.builderArmShelfRight.DropAttachedPieces();
+				if (offlineVRRig.builderArmShelfRight.piece != null)
+				{
+					foreach (Collider collider2 in offlineVRRig.builderArmShelfRight.piece.colliders)
+					{
+						collider2.enabled = false;
+					}
+				}
+			}
+		}
+		else if (!flag && isRigSmall)
+		{
+			if (offlineVRRig.builderArmShelfLeft != null && offlineVRRig.builderArmShelfLeft.piece != null)
+			{
+				foreach (Collider collider3 in offlineVRRig.builderArmShelfLeft.piece.colliders)
+				{
+					collider3.enabled = true;
+				}
+			}
+			if (offlineVRRig.builderArmShelfRight != null && offlineVRRig.builderArmShelfRight.piece != null)
+			{
+				foreach (Collider collider4 in offlineVRRig.builderArmShelfRight.piece.colliders)
+				{
+					collider4.enabled = true;
+				}
+			}
+		}
+		isRigSmall = flag;
+	}
+
+	private void SetHandState(int handIndex, HandState newState)
+	{
+		if (handState[handIndex] == HandState.Empty && potentialHeldPiece[handIndex] != null)
+		{
+			potentialHeldPiece[handIndex].PotentialGrab(enable: false);
+			potentialHeldPiece[handIndex] = null;
+		}
+		handState[handIndex] = newState;
+		switch (handState[handIndex])
+		{
+		case HandState.Grabbed:
+			heldChainLength[handIndex] = heldPiece[handIndex].GetChildCount() + 1;
+			heldPiece[handIndex].GetChainCost(heldChainCost[handIndex]);
+			break;
+		case HandState.PotentialGrabbed:
+		{
+			heldChainLength[handIndex] = 0;
+			for (int j = 0; j < heldChainCost[handIndex].Length; j++)
+			{
+				heldChainCost[handIndex][j] = 0;
+			}
+			break;
+		}
+		case HandState.Empty:
+		{
+			heldChainLength[handIndex] = 0;
+			for (int i = 0; i < heldChainCost[handIndex].Length; i++)
+			{
+				heldChainCost[handIndex][i] = 0;
+			}
+			break;
+		}
+		case HandState.WaitForGrabbed:
+			break;
+		}
+	}
+
+	public void OnCountChangedForRoot(BuilderPiece piece)
+	{
+		if (!(piece == null))
+		{
+			if (heldPiece[0] != null && heldPiece[0].Equals(piece))
+			{
+				heldChainLength[0] = heldPiece[0].GetChainCostAndCount(heldChainCost[0]);
+			}
+			else if (heldPiece[1] != null && heldPiece[1].Equals(piece))
+			{
+				heldChainLength[1] = heldPiece[1].GetChainCostAndCount(heldChainCost[1]);
+			}
+		}
+	}
+
+	private void UpdateHandState(HandType handType, Transform handTransform, Vector3 palmForwardLocal, Transform handAttachPoint, bool isGrabbing, bool wasGrabPressed, IHoldableObject heldEquipment, bool grabDisabled)
+	{
+		int index = (int)(handType + 1) % 2;
+		bool flag = GorillaTagger.Instance.offlineVRRig.scaleFactor < 1f;
+		bool flag2 = isGrabbing && !wasGrabPressed;
+		bool flag3 = heldPiece[(int)handType] != null && (!isGrabbing || flag);
+		bool num = heldEquipment != null;
+		bool flag4 = heldPiece[(int)handType] != null;
+		bool flag5 = !num && !flag4 && !grabDisabled && !flag && currentTable.IsInBuilderZone();
+		BuilderPiece builderPiece = null;
+		_ = handTransform.position;
+		_ = handTransform.rotation * palmForwardLocal;
+		_ = Vector3.zero;
+		switch (this.handState[(int)handType])
+		{
+		case HandState.Empty:
+			if (!flag)
+			{
+				float num7 = float.MaxValue;
+				for (int j = 0; j < 1024; j++)
+				{
+					int index3 = (int)handType * 1024 + j;
+					ColliderHit colliderHit = checkPiecesInSphereResults[index3];
+					if (colliderHit.instanceID == 0)
+					{
+						break;
+					}
+					BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(colliderHit.collider);
+					if (builderPieceFromCollider != null && !builderPieceFromCollider.isBuiltIntoTable)
+					{
+						float num8 = Vector3.SqrMagnitude(colliderHit.collider.transform.position - handTransform.position);
+						if ((builderPiece == null || num8 < num7) && builderPieceFromCollider.CanPlayerGrabPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPieceFromCollider.transform.position))
+						{
+							builderPiece = builderPieceFromCollider;
+							num7 = num8;
+						}
+					}
+				}
+				if (builderPiece == null)
+				{
+					for (int k = 0; k < 64; k++)
+					{
+						int index4 = (int)handType * 64 + k;
+						RaycastHit raycastHit = grabSphereCastResults[index4];
+						if (raycastHit.colliderInstanceID == 0)
+						{
+							break;
+						}
+						BuilderPiece builderPieceFromCollider2 = BuilderPiece.GetBuilderPieceFromCollider(raycastHit.collider);
+						if (builderPieceFromCollider2 != null && !builderPieceFromCollider2.isBuiltIntoTable && (builderPiece == null || raycastHit.distance < num7) && builderPieceFromCollider2.CanPlayerGrabPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPieceFromCollider2.transform.position))
+						{
+							builderPiece = builderPieceFromCollider2;
+							num7 = raycastHit.distance;
+						}
+					}
+				}
+			}
+			if (potentialHeldPiece[(int)handType] != builderPiece)
+			{
+				if (potentialHeldPiece[(int)handType] != null)
+				{
+					potentialHeldPiece[(int)handType].PotentialGrab(enable: false);
+				}
+				potentialHeldPiece[(int)handType] = builderPiece;
+				if (potentialHeldPiece[(int)handType] != null)
+				{
+					potentialHeldPiece[(int)handType].PotentialGrab(enable: true);
+				}
+			}
+			if (flag5 && flag2 && builderPiece != null)
+			{
+				CalcPieceLocalPosAndRot(builderPiece.transform.position, builderPiece.transform.rotation, handAttachPoint, out var localPosition3, out var localRotation3);
+				if (BuilderPiece.IsDroppedState(builderPiece.state) || heldPiece[index] == builderPiece)
+				{
+					builderPiece.PlayGrabbedFx();
+					currentTable.RequestGrabPiece(builderPiece, handType == HandType.Left, localPosition3, localRotation3);
+					break;
+				}
+				builderPiece.PlayGrabbedFx();
+				SetHandState((int)handType, HandState.PotentialGrabbed);
+				potentialGrabbedOffsetDist[(int)handType] = 0f;
+				heldPiece[(int)handType] = builderPiece;
+				heldInitialRot[(int)handType] = localRotation3;
+				heldCurrentRot[(int)handType] = localRotation3;
+				heldInitialPos[(int)handType] = localPosition3;
+				heldCurrentPos[(int)handType] = localPosition3;
+			}
+			break;
+		case HandState.Grabbed:
+		{
+			if (flag3)
+			{
+				Vector3 velocity = velocityEstimator[(int)handType].linearVelocity;
+				if (flag)
+				{
+					Vector3 vector6 = currentTable.roomCenter.position - velocityEstimator[(int)handType].handPos;
+					vector6.Normalize();
+					Vector3 vector7 = Quaternion.Euler(0f, 180f, 0f) * vector6;
+					velocity = BuilderTable.DROP_ZONE_REPEL * vector7;
+				}
+				else if (prevPotentialPlacement[(int)handType].attachPiece == heldPiece[(int)handType] && prevPotentialPlacement[(int)handType].parentPiece != null)
+				{
+					Vector3 vector8 = prevPotentialPlacement[(int)handType].parentPiece.gridPlanes[prevPotentialPlacement[(int)handType].parentAttachIndex].transform.TransformDirection(prevPotentialPlacement[(int)handType].attachPlaneNormal);
+					velocity += vector8 * 1f;
+				}
+				currentTable.TryDropPiece(handType == HandType.Left, heldPiece[(int)handType], velocity, velocityEstimator[(int)handType].angularVelocity);
+				break;
+			}
+			BuilderPiece builderPiece6 = heldPiece[(int)handType];
+			if (!(builderPiece6 != null))
+			{
+				break;
+			}
+			builderPiece6.transform.localRotation = heldInitialRot[(int)handType];
+			builderPiece6.transform.localPosition = heldInitialPos[(int)handType];
+			Quaternion quaternion4 = heldCurrentRot[(int)handType];
+			Vector3 vector9 = heldCurrentPos[(int)handType];
+			_ = ref localAttachableGridPlaneData[(int)handType];
+			handPieceData[(int)handType].Clear();
+			handGridPlaneData[(int)handType].Clear();
+			BuilderTableJobs.BuildTestPieceListForJob(builderPiece6, handPieceData[(int)handType], handGridPlaneData[(int)handType]);
+			allPotentialPlacements[(int)handType].Clear();
+			BuilderPotentialPlacement potentialPlacement;
+			bool flag8 = currentTable.TryPlacePieceOnTableNoDropJobs(handGridPlaneData[(int)handType], handPieceData[(int)handType], localAttachableGridPlaneData[(int)handType], localAttachablePieceData[(int)handType], out potentialPlacement, allPotentialPlacements[(int)handType]);
+			if (flag8)
+			{
+				BuilderPiece.State state = potentialPlacement.attachPiece.state;
+				BuilderPiece.State state2 = ((potentialPlacement.parentPiece == null) ? BuilderPiece.State.None : potentialPlacement.parentPiece.state);
+				bool num4 = state == BuilderPiece.State.Grabbed || state == BuilderPiece.State.GrabbedLocal;
+				bool flag9 = state2 == BuilderPiece.State.Grabbed || state2 == BuilderPiece.State.GrabbedLocal;
+				bool flag10 = num4 && flag9;
+				int index2 = (int)(handType + 1) % 2;
+				HandState handState = this.handState[index2];
+				if (flag10 && potentialPlacement.attachPiece.gridPlanes[potentialPlacement.attachIndex].male)
+				{
+					flag8 = false;
+				}
+				else if (flag10 && handState == HandState.WaitingForSnap)
+				{
+					flag8 = false;
+				}
+			}
+			if (flag8)
+			{
+				for (int i = 0; i < allPotentialPlacements[(int)handType].Count; i++)
+				{
+					BuilderPotentialPlacement builderPotentialPlacement2 = allPotentialPlacements[(int)handType][i];
+					BuilderAttachGridPlane builderAttachGridPlane4 = builderPotentialPlacement2.attachPiece.gridPlanes[builderPotentialPlacement2.attachIndex];
+					BuilderAttachGridPlane builderAttachGridPlane5 = ((builderPotentialPlacement2.parentPiece == null) ? null : builderPotentialPlacement2.parentPiece.gridPlanes[builderPotentialPlacement2.parentAttachIndex]);
+					bool flag11 = builderAttachGridPlane4.IsConnected(builderPotentialPlacement2.attachBounds);
+					if (!flag11)
+					{
+						flag11 = builderAttachGridPlane5.IsConnected(builderPotentialPlacement2.parentAttachBounds);
+					}
+					if (flag11)
+					{
+						flag8 = false;
+						break;
+					}
+				}
+			}
+			if (flag8)
+			{
+				Vector3 position2 = potentialPlacement.localPosition;
+				Quaternion quaternion5 = potentialPlacement.localRotation;
+				Vector3 vector10 = potentialPlacement.attachPlaneNormal;
+				if (potentialPlacement.parentPiece != null)
+				{
+					BuilderAttachGridPlane builderAttachGridPlane6 = potentialPlacement.parentPiece.gridPlanes[potentialPlacement.parentAttachIndex];
+					position2 = builderAttachGridPlane6.transform.TransformPoint(potentialPlacement.localPosition);
+					quaternion5 = builderAttachGridPlane6.transform.rotation * potentialPlacement.localRotation;
+					vector10 = builderAttachGridPlane6.transform.TransformDirection(potentialPlacement.attachPlaneNormal);
+				}
+				Vector3 vector11 = handAttachPoint.transform.InverseTransformPoint(position2);
+				Quaternion a = Quaternion.Inverse(handAttachPoint.transform.rotation) * quaternion5;
+				float attachDistance = potentialPlacement.attachDistance;
+				float value = Mathf.InverseLerp(currentTable.pushAndEaseParams.snapDelayOffsetDist, currentTable.pushAndEaseParams.maxOffsetY, attachDistance);
+				value = Mathf.Clamp(value, 0f, 1f);
+				bool num5 = potentialPlacement.attachPiece == builderPiece6;
+				bool flag12 = potentialPlacement.attachPiece == builderPiece6;
+				if (num5)
+				{
+					Quaternion b = heldInitialRot[(int)handType];
+					Quaternion b2 = Quaternion.Slerp(a, b, value);
+					quaternion4 = Quaternion.Slerp(quaternion4, b2, 0.1f);
+				}
+				if (flag12)
+				{
+					Vector3 vector12 = heldInitialPos[(int)handType];
+					Vector3 vector13 = handAttachPoint.transform.InverseTransformDirection(vector10);
+					Vector3 vector14 = vector11 + vector13 * currentTable.pushAndEaseParams.snapDelayOffsetDist - vector12;
+					float b3 = Vector3.Dot(vector14, vector13);
+					b3 = Mathf.Min(0f, b3);
+					Vector3 vector15 = vector13 * b3;
+					Vector3 a2 = vector14 - vector15;
+					Vector3 b4 = vector12 + Vector3.Lerp(a2, Vector3.zero, value);
+					vector9 = Vector3.Lerp(vector9, b4, 0.5f);
+				}
+				heldCurrentRot[(int)handType] = quaternion4;
+				heldCurrentPos[(int)handType] = vector9;
+				builderPiece6.transform.localRotation = quaternion4;
+				builderPiece6.transform.localPosition = vector9;
+				bool flag13 = Vector3.Dot(velocityEstimator[(int)handType].linearVelocity, vector10) > 0f;
+				float snapAttachDistance = currentTable.pushAndEaseParams.snapAttachDistance;
+				if (potentialPlacement.attachDistance < snapAttachDistance && !flag13 && BuilderPiece.CanPlayerAttachPieceToPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPiece6, potentialPlacement.parentPiece))
+				{
+					GorillaTagger.Instance.StartVibration(handType == HandType.Left, GorillaTagger.Instance.tapHapticStrength, currentTable.pushAndEaseParams.snapDelayTime * 2f);
+					if (((potentialPlacement.parentPiece == null) ? BuilderPiece.State.None : potentialPlacement.parentPiece.state) == BuilderPiece.State.GrabbedLocal)
+					{
+						GorillaTagger.Instance.StartVibration(handType != HandType.Left, GorillaTagger.Instance.tapHapticStrength, currentTable.pushAndEaseParams.snapDelayTime * 2f);
+					}
+					delayedPotentialPlacement[(int)handType] = potentialPlacement;
+					delayedPlacementTime[(int)handType] = 0f;
+					SetHandState((int)handType, HandState.WaitingForSnap);
+				}
+				else
+				{
+					float num6 = currentTable.gridSize * 0.5f * (currentTable.gridSize * 0.5f);
+					if (prevPotentialPlacement[(int)handType].attachPiece != potentialPlacement.attachPiece || prevPotentialPlacement[(int)handType].parentPiece != potentialPlacement.parentPiece || prevPotentialPlacement[(int)handType].attachIndex != potentialPlacement.attachIndex || prevPotentialPlacement[(int)handType].parentAttachIndex != potentialPlacement.parentAttachIndex || Vector3.SqrMagnitude(prevPotentialPlacement[(int)handType].localPosition - potentialPlacement.localPosition) > num6)
+					{
+						GorillaTagger.Instance.StartVibration(handType == HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, currentTable.pushAndEaseParams.snapDelayTime);
+						try
+						{
+							ClearGlowBumps((int)handType);
+							AddGlowBumps((int)handType, allPotentialPlacements[(int)handType]);
+						}
+						catch (Exception ex)
+						{
+							Debug.LogErrorFormat("Error adding glow bumps {0}", ex.ToString());
+						}
+					}
+				}
+				UpdateGlowBumps((int)handType, 1f - value);
+				prevPotentialPlacement[(int)handType] = potentialPlacement;
+			}
+			else
+			{
+				ClearGlowBumps((int)handType);
+				Quaternion b5 = heldInitialRot[(int)handType];
+				quaternion4 = Quaternion.Slerp(quaternion4, b5, 0.1f);
+				Vector3 b6 = heldInitialPos[(int)handType];
+				vector9 = Vector3.Lerp(vector9, b6, 0.1f);
+				heldCurrentRot[(int)handType] = quaternion4;
+				heldCurrentPos[(int)handType] = vector9;
+				builderPiece6.transform.localRotation = quaternion4;
+				builderPiece6.transform.localPosition = vector9;
+				prevPotentialPlacement[(int)handType] = default(BuilderPotentialPlacement);
+			}
+			break;
+		}
+		case HandState.PotentialGrabbed:
+		{
+			if (flag3)
+			{
+				BuilderPiece builderPiece4 = heldPiece[(int)handType];
+				ClearUnSnapOffset((int)handType, builderPiece4);
+				RemovePieceFromHand(builderPiece4, (int)handType);
+				heldPiece[(int)handType] = null;
+				SetHandState((int)handType, HandState.Empty);
+				break;
+			}
+			BuilderPiece builderPiece5 = heldPiece[(int)handType];
+			CalcPieceLocalPosAndRot(builderPiece5.transform.position, builderPiece5.transform.rotation, handAttachPoint, out var localPosition2, out var _);
+			if (BuilderPiece.IsDroppedState(builderPiece5.state))
+			{
+				currentTable.RequestGrabPiece(builderPiece5, handType == HandType.Left, heldInitialPos[(int)handType], heldInitialRot[(int)handType]);
+				break;
+			}
+			Vector3 vector5 = heldInitialPos[(int)handType] - localPosition2;
+			UpdatePullApartOffset((int)handType, builderPiece5, handAttachPoint.TransformVector(vector5));
+			float num3 = currentTable.pushAndEaseParams.unSnapDelayDist * currentTable.pushAndEaseParams.unSnapDelayDist;
+			if (vector5.sqrMagnitude > num3)
+			{
+				GorillaTagger.Instance.StartVibration(handType == HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, currentTable.pushAndEaseParams.unSnapDelayTime * 2f);
+				if (((builderPiece5 == null) ? BuilderPiece.State.None : builderPiece5.state) == BuilderPiece.State.GrabbedLocal)
+				{
+					GorillaTagger.Instance.StartVibration(handType != HandType.Left, GorillaTagger.Instance.tapHapticStrength * 0.15f, currentTable.pushAndEaseParams.unSnapDelayTime * 2f);
+				}
+				SetHandState((int)handType, HandState.WaitingForUnSnap);
+				delayedPlacementTime[(int)handType] = 0f;
+			}
+			break;
+		}
+		case HandState.WaitingForUnSnap:
+		{
+			BuilderPiece builderPiece3 = heldPiece[(int)handType];
+			if (BuilderPiece.IsDroppedState(builderPiece3.state))
+			{
+				currentTable.RequestGrabPiece(builderPiece3, handType == HandType.Left, heldInitialPos[(int)handType], heldInitialRot[(int)handType]);
+			}
+			else if (delayedPlacementTime[(int)handType] > currentTable.pushAndEaseParams.unSnapDelayTime)
+			{
+				if (builderPiece3.GetChildCount() > maxHoldablePieceStackCount)
+				{
+					builderPiece3.PlayTooHeavyFx();
+					ClearUnSnapOffset((int)handType, builderPiece3);
+					RemovePieceFromHand(builderPiece3, (int)handType);
+				}
+				else
+				{
+					currentTable.RequestGrabPiece(builderPiece3, handType == HandType.Left, heldInitialPos[(int)handType], heldInitialRot[(int)handType]);
+				}
+			}
+			else
+			{
+				CalcPieceLocalPosAndRot(builderPiece3.transform.position, builderPiece3.transform.rotation, handAttachPoint, out var localPosition, out var _);
+				Vector3 vector4 = heldInitialPos[(int)handType] - localPosition;
+				UpdatePullApartOffset((int)handType, builderPiece3, handAttachPoint.TransformVector(vector4));
+				delayedPlacementTime[(int)handType] = delayedPlacementTime[(int)handType] + Time.deltaTime;
+			}
+			break;
+		}
+		case HandState.WaitingForSnap:
+		{
+			BuilderPiece builderPiece2 = heldPiece[(int)handType];
+			if (!(builderPiece2 != null))
+			{
+				break;
+			}
+			builderPiece2.transform.localRotation = heldInitialRot[(int)handType];
+			builderPiece2.transform.localPosition = heldInitialPos[(int)handType];
+			Quaternion quaternion = heldCurrentRot[(int)handType];
+			Vector3 vector = heldCurrentPos[(int)handType];
+			if (!(delayedPlacementTime[(int)handType] >= 0f))
+			{
+				break;
+			}
+			BuilderPotentialPlacement builderPotentialPlacement = delayedPotentialPlacement[(int)handType];
+			if (delayedPlacementTime[(int)handType] > currentTable.pushAndEaseParams.snapDelayTime)
+			{
+				BuilderAttachGridPlane builderAttachGridPlane = builderPotentialPlacement.attachPiece.gridPlanes[builderPotentialPlacement.attachIndex];
+				BuilderAttachGridPlane builderAttachGridPlane2 = ((builderPotentialPlacement.parentPiece == null) ? null : builderPotentialPlacement.parentPiece.gridPlanes[builderPotentialPlacement.parentAttachIndex]);
+				bool flag6 = builderAttachGridPlane.IsConnected(builderPotentialPlacement.attachBounds);
+				if (!flag6)
+				{
+					flag6 = builderAttachGridPlane2.IsConnected(builderPotentialPlacement.parentAttachBounds);
+				}
+				if (flag6)
+				{
+					Debug.LogError("Snap Overlapping Why are we doing this!!??");
+				}
+				if (!BuilderPiece.CanPlayerAttachPieceToPiece(PhotonNetwork.LocalPlayer.ActorNumber, builderPiece2, builderPotentialPlacement.parentPiece))
+				{
+					SetHandState((int)handType, HandState.Grabbed);
+				}
+				currentTable.RequestPlacePiece(builderPiece2, builderPotentialPlacement.attachPiece, builderPotentialPlacement.bumpOffsetX, builderPotentialPlacement.bumpOffsetZ, builderPotentialPlacement.twist, builderPotentialPlacement.parentPiece, builderPotentialPlacement.attachIndex, builderPotentialPlacement.parentAttachIndex);
+				break;
+			}
+			delayedPlacementTime[(int)handType] = delayedPlacementTime[(int)handType] + Time.deltaTime;
+			Transform parent = builderPiece2.transform.parent;
+			Vector3 position = builderPotentialPlacement.localPosition;
+			Quaternion quaternion2 = builderPotentialPlacement.localRotation;
+			Vector3 direction = builderPotentialPlacement.attachPlaneNormal;
+			if (builderPotentialPlacement.parentPiece != null)
+			{
+				BuilderAttachGridPlane builderAttachGridPlane3 = builderPotentialPlacement.parentPiece.gridPlanes[builderPotentialPlacement.parentAttachIndex];
+				position = builderAttachGridPlane3.transform.TransformPoint(builderPotentialPlacement.localPosition);
+				quaternion2 = builderAttachGridPlane3.transform.rotation * builderPotentialPlacement.localRotation;
+				direction = builderAttachGridPlane3.transform.TransformDirection(builderPotentialPlacement.attachPlaneNormal);
+			}
+			Vector3 vector2 = parent.transform.InverseTransformPoint(position);
+			Quaternion quaternion3 = Quaternion.Inverse(parent.transform.rotation) * quaternion2;
+			bool num2 = builderPotentialPlacement.attachPiece == builderPiece2;
+			bool flag7 = builderPotentialPlacement.attachPiece == builderPiece2;
+			if (num2)
+			{
+				quaternion = quaternion3;
+			}
+			if (flag7)
+			{
+				Vector3 vector3 = parent.transform.InverseTransformDirection(direction);
+				vector = vector2 + vector3 * currentTable.pushAndEaseParams.snapDelayOffsetDist;
+			}
+			heldCurrentRot[(int)handType] = quaternion;
+			heldCurrentPos[(int)handType] = vector;
+			builderPiece2.transform.localRotation = quaternion;
+			builderPiece2.transform.localPosition = vector;
+			break;
+		}
+		case HandState.WaitForGrabbed:
+			break;
+		}
+	}
+
+	private void ClearGlowBumps(int handIndex)
+	{
+		if (!BuilderTable.TryGetBuilderTableForZone(GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone, out var table))
+		{
+			return;
+		}
+		BuilderPool builderPool = table.builderPool;
+		List<BuilderBumpGlow> list = glowBumps[handIndex];
+		if (builderPool != null)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				builderPool.DestroyBumpGlow(list[i]);
+			}
+		}
+		else
+		{
+			Debug.LogError("BuilderPieceInteractor could not find Builderpool");
+		}
+		list.Clear();
+	}
+
+	private void AddGlowBumps(int handIndex, List<BuilderPotentialPlacement> allPotentialPlacements)
+	{
+		ClearGlowBumps(handIndex);
+		if (allPotentialPlacements == null)
+		{
+			Debug.LogError("How is allPotentialPlacements null");
+			return;
+		}
+		BuilderPool builderPool = currentTable.builderPool;
+		if (builderPool == null)
+		{
+			Debug.LogError("How is the pool null?");
+			return;
+		}
+		float gridSize = currentTable.gridSize;
+		for (int i = 0; i < allPotentialPlacements.Count; i++)
+		{
+			BuilderPotentialPlacement builderPotentialPlacement = allPotentialPlacements[i];
+			if (!(builderPotentialPlacement.parentPiece != null) || !(builderPotentialPlacement.attachPiece != null) || builderPotentialPlacement.attachPiece.gridPlanes == null || builderPotentialPlacement.parentPiece.gridPlanes == null)
+			{
+				continue;
+			}
+			BuilderAttachGridPlane builderAttachGridPlane = builderPotentialPlacement.parentPiece.gridPlanes[builderPotentialPlacement.parentAttachIndex];
+			if (builderAttachGridPlane != null)
+			{
+				Vector2Int min = builderPotentialPlacement.parentAttachBounds.min;
+				Vector2Int max = builderPotentialPlacement.parentAttachBounds.max;
+				for (int j = min.x; j <= max.x; j++)
+				{
+					for (int k = min.y; k <= max.y; k++)
+					{
+						Vector3 gridPosition = builderAttachGridPlane.GetGridPosition(j, k, gridSize);
+						BuilderBumpGlow builderBumpGlow = builderPool.CreateGlowBump();
+						if (builderBumpGlow != null)
+						{
+							builderBumpGlow.transform.SetPositionAndRotation(gridPosition, builderAttachGridPlane.transform.rotation);
+							builderBumpGlow.transform.SetParent(builderAttachGridPlane.transform, worldPositionStays: true);
+							builderBumpGlow.transform.localScale = Vector3.one;
+							builderBumpGlow.gameObject.SetActive(value: true);
+							glowBumps[handIndex].Add(builderBumpGlow);
+						}
+					}
+				}
+			}
+			BuilderAttachGridPlane builderAttachGridPlane2 = builderPotentialPlacement.attachPiece.gridPlanes[builderPotentialPlacement.attachIndex];
+			if (!(builderAttachGridPlane2 != null))
+			{
+				continue;
+			}
+			Vector2Int min2 = builderPotentialPlacement.attachBounds.min;
+			Vector2Int max2 = builderPotentialPlacement.attachBounds.max;
+			for (int l = min2.x; l <= max2.x; l++)
+			{
+				for (int m = min2.y; m <= max2.y; m++)
+				{
+					Vector3 gridPosition2 = builderAttachGridPlane2.GetGridPosition(l, m, gridSize);
+					BuilderBumpGlow builderBumpGlow2 = builderPool.CreateGlowBump();
+					if (builderBumpGlow2 != null)
+					{
+						Quaternion quaternion = Quaternion.Euler(180f, 0f, 0f);
+						builderBumpGlow2.transform.SetPositionAndRotation(gridPosition2, builderAttachGridPlane2.transform.rotation * quaternion);
+						builderBumpGlow2.transform.SetParent(builderAttachGridPlane2.transform, worldPositionStays: true);
+						builderBumpGlow2.transform.localScale = Vector3.one;
+						builderBumpGlow2.gameObject.SetActive(value: true);
+						glowBumps[handIndex].Add(builderBumpGlow2);
+					}
+				}
+			}
+		}
+	}
+
+	private void UpdateGlowBumps(int handIndex, float intensity)
+	{
+		List<BuilderBumpGlow> list = glowBumps[handIndex];
+		for (int i = 0; i < list.Count; i++)
+		{
+			list[i].SetIntensity(intensity);
+		}
+	}
+
+	private void UpdatePullApartOffset(int handIndex, BuilderPiece potentialGrabPiece, Vector3 pullApartDiff)
+	{
+		BuilderPiece parentPiece = potentialGrabPiece.parentPiece;
+		BuilderAttachGridPlane builderAttachGridPlane = null;
+		if (parentPiece != null)
+		{
+			builderAttachGridPlane = parentPiece.gridPlanes[potentialGrabPiece.parentAttachIndex];
+		}
+		Vector3 vector = Vector3.up;
+		if (builderAttachGridPlane != null)
+		{
+			vector = builderAttachGridPlane.transform.TransformDirection(vector);
+			if (!builderAttachGridPlane.male)
+			{
+				vector *= -1f;
+			}
+		}
+		float a = Vector3.Dot(pullApartDiff, vector);
+		a = Mathf.Max(a, 0f);
+		float num = 0.0025f;
+		float num2 = a / num;
+		num2 = 1f - 1f / (1f + num2);
+		a = num2 * num;
+		Vector3 vector2 = vector * potentialGrabbedOffsetDist[handIndex];
+		potentialGrabbedOffsetDist[handIndex] = a;
+		Vector3 vector3 = vector * potentialGrabbedOffsetDist[handIndex];
+		if (builderAttachGridPlane != null)
+		{
+			vector2 = builderAttachGridPlane.transform.InverseTransformVector(vector2);
+			vector3 = builderAttachGridPlane.transform.InverseTransformVector(vector3);
+		}
+		Vector3 vector4 = potentialGrabPiece.transform.localPosition - vector2;
+		potentialGrabPiece.transform.localPosition = vector4 + vector3;
+	}
+
+	private void ClearUnSnapOffset(int handIndex, BuilderPiece potentialGrabPiece)
+	{
+		UpdatePullApartOffset(handIndex, potentialGrabPiece, Vector3.zero);
+	}
+
+	public void AddPieceToHeld(BuilderPiece piece, bool isLeft, Vector3 localPosition, Quaternion localRotation)
+	{
+		int num = ((!isLeft) ? 1 : 0);
+		AddPieceToHand(piece, num, localPosition, localRotation);
+		int num2 = (num + 1) % 2;
+		if (heldPiece[num2] == piece)
+		{
+			RemovePieceFromHand(piece, num2);
+		}
+	}
+
+	public void RemovePieceFromHeld(BuilderPiece piece)
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			if (heldPiece[i] == piece)
+			{
+				RemovePieceFromHand(piece, i);
+			}
+		}
+	}
+
+	private void AddPieceToHand(BuilderPiece piece, int handIndex, Vector3 localPosition, Quaternion localRotation)
+	{
+		heldPiece[handIndex] = piece;
+		delayedPlacementTime[handIndex] = -1f;
+		SetHandState(handIndex, HandState.Grabbed);
+		heldInitialRot[handIndex] = localRotation;
+		heldCurrentRot[handIndex] = localRotation;
+		heldInitialPos[handIndex] = localPosition;
+		heldCurrentPos[handIndex] = localPosition;
+	}
+
+	private void RemovePieceFromHand(BuilderPiece piece, int handIndex)
+	{
+		heldPiece[handIndex] = null;
+		delayedPlacementTime[handIndex] = -1f;
+		SetHandState(handIndex, HandState.Empty);
+		ClearGlowBumps(handIndex);
+	}
+
+	public void RemovePiecesFromHands()
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			heldPiece[i] = null;
+			delayedPlacementTime[i] = -1f;
+			SetHandState(i, HandState.Empty);
+			ClearGlowBumps(i);
+		}
+	}
+
+	private void CalcPieceLocalPosAndRot(Vector3 worldPosition, Quaternion worldRotation, Transform attachPoint, out Vector3 localPosition, out Quaternion localRotation)
+	{
+		Quaternion rotation = attachPoint.transform.rotation;
+		Vector3 position = attachPoint.transform.position;
+		localRotation = Quaternion.Inverse(rotation) * worldRotation;
+		localPosition = Quaternion.Inverse(rotation) * (worldPosition - position);
+	}
+
+	public void DisableCollisionsWithHands()
+	{
+		DisableCollisionsWithHand(leftHand: true);
+		DisableCollisionsWithHand(leftHand: false);
+	}
+
+	private void DisableCollisionsWithHand(bool leftHand)
+	{
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		if (!BuilderTable.TryGetBuilderTableForZone(offlineVRRig.zoneEntity.currentZone, out var table))
+		{
+			return;
+		}
+		Transform obj = (leftHand ? offlineVRRig.leftHand.overrideTarget : offlineVRRig.rightHand.overrideTarget);
+		List<GameObject> list = (leftHand ? collisionDisabledPiecesLeft : collisionDisabledPiecesRight);
+		int num = Physics.OverlapSphereNonAlloc(obj.position, 0.15f, tempDisableColliders, table.allPiecesMask);
+		for (int i = 0; i < num; i++)
+		{
+			GameObject gameObject = tempDisableColliders[i].gameObject;
+			BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(tempDisableColliders[i]);
+			if (builderPieceFromCollider != null && builderPieceFromCollider.state == BuilderPiece.State.AttachedAndPlaced && !list.Contains(gameObject))
+			{
+				gameObject.layer = BuilderTable.heldLayer;
+				list.Add(gameObject);
+			}
+		}
+	}
+
+	public void UpdatePieceDisables()
+	{
+		UpdatePieceDisablesForHand(leftHand: true);
+		UpdatePieceDisablesForHand(leftHand: false);
+	}
+
+	public void UpdatePieceDisablesForHand(bool leftHand)
+	{
+		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
+		Transform obj = (leftHand ? offlineVRRig.leftHand.overrideTarget : offlineVRRig.rightHand.overrideTarget);
+		List<GameObject> list = (leftHand ? collisionDisabledPiecesLeft : collisionDisabledPiecesRight);
+		List<GameObject> list2 = ((!leftHand) ? collisionDisabledPiecesLeft : collisionDisabledPiecesRight);
+		Vector3 position = obj.position;
+		float num = 0.040000003f;
+		for (int i = 0; i < list.Count; i++)
+		{
+			GameObject gameObject = list[i];
+			if (gameObject == null)
+			{
+				list.RemoveAt(i);
+				i--;
+			}
+			else if ((gameObject.transform.position - position).sqrMagnitude > num)
+			{
+				BuilderPiece builderPieceFromTransform = BuilderPiece.GetBuilderPieceFromTransform(gameObject.transform);
+				if (builderPieceFromTransform.state == BuilderPiece.State.AttachedAndPlaced && !list2.Contains(gameObject))
+				{
+					builderPieceFromTransform.SetColliderLayers(builderPieceFromTransform.colliders, BuilderTable.placedLayer);
+				}
+				list.RemoveAt(i);
+				i--;
+			}
+		}
 	}
 }

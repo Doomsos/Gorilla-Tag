@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using Fusion;
 using Fusion.Photon.Realtime;
 using Fusion.Sockets;
@@ -9,70 +8,73 @@ using UnityEngine;
 
 public class FusionRegionCrawler : MonoBehaviour, INetworkRunnerCallbacks, IPublicFacingInterface
 {
-	public int PlayerCountGlobal
-	{
-		get
-		{
-			return this.globalPlayerCount;
-		}
-	}
+	public delegate void PlayerCountUpdated(int playerCount);
+
+	public PlayerCountUpdated OnPlayerCountUpdated;
+
+	private NetworkRunner regionRunner;
+
+	private List<SessionInfo> sessionInfoCache;
+
+	private bool waitingForSessionListUpdate;
+
+	private int globalPlayerCount;
+
+	private float UpdateFrequency = 10f;
+
+	private bool refreshPlayerCountAutomatically = true;
+
+	private int tempSessionPlayerCount;
+
+	public int PlayerCountGlobal => globalPlayerCount;
 
 	public void Start()
 	{
-		this.regionRunner = base.gameObject.AddComponent<NetworkRunner>();
-		this.regionRunner.AddCallbacks(new INetworkRunnerCallbacks[]
-		{
-			this
-		});
-		base.StartCoroutine(this.OccasionalUpdate());
+		regionRunner = base.gameObject.AddComponent<NetworkRunner>();
+		regionRunner.AddCallbacks(this);
+		StartCoroutine(OccasionalUpdate());
 	}
 
 	public IEnumerator OccasionalUpdate()
 	{
-		while (this.refreshPlayerCountAutomatically)
+		while (refreshPlayerCountAutomatically)
 		{
-			yield return this.UpdatePlayerCount();
-			yield return new WaitForSeconds(this.UpdateFrequency);
+			yield return UpdatePlayerCount();
+			yield return new WaitForSeconds(UpdateFrequency);
 		}
-		yield break;
 	}
 
 	public IEnumerator UpdatePlayerCount()
 	{
 		int tempGlobalPlayerCount = 0;
 		StartGameArgs startGameArgs = default(StartGameArgs);
-		foreach (string fixedRegion in NetworkSystem.Instance.regionNames)
+		string[] regionNames = NetworkSystem.Instance.regionNames;
+		foreach (string fixedRegion in regionNames)
 		{
 			startGameArgs.CustomPhotonAppSettings = new FusionAppSettings();
 			startGameArgs.CustomPhotonAppSettings.FixedRegion = fixedRegion;
-			this.waitingForSessionListUpdate = true;
-			this.regionRunner.JoinSessionLobby(SessionLobby.ClientServer, startGameArgs.CustomPhotonAppSettings.FixedRegion, null, null, new bool?(false), default(CancellationToken), true);
-			while (this.waitingForSessionListUpdate)
+			waitingForSessionListUpdate = true;
+			regionRunner.JoinSessionLobby(SessionLobby.ClientServer, startGameArgs.CustomPhotonAppSettings.FixedRegion, null, null, false);
+			while (waitingForSessionListUpdate)
 			{
 				yield return new WaitForEndOfFrame();
 			}
-			foreach (SessionInfo sessionInfo in this.sessionInfoCache)
+			foreach (SessionInfo item in sessionInfoCache)
 			{
-				tempGlobalPlayerCount += sessionInfo.PlayerCount;
+				tempGlobalPlayerCount += item.PlayerCount;
 			}
-			tempGlobalPlayerCount += this.tempSessionPlayerCount;
+			tempGlobalPlayerCount += tempSessionPlayerCount;
 		}
-		string[] array = null;
-		this.globalPlayerCount = tempGlobalPlayerCount;
-		FusionRegionCrawler.PlayerCountUpdated onPlayerCountUpdated = this.OnPlayerCountUpdated;
-		if (onPlayerCountUpdated != null)
-		{
-			onPlayerCountUpdated(this.globalPlayerCount);
-		}
-		yield break;
+		globalPlayerCount = tempGlobalPlayerCount;
+		OnPlayerCountUpdated?.Invoke(globalPlayerCount);
 	}
 
 	public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
 	{
-		if (this.waitingForSessionListUpdate)
+		if (waitingForSessionListUpdate)
 		{
-			this.sessionInfoCache = sessionList;
-			this.waitingForSessionListUpdate = false;
+			sessionInfoCache = sessionList;
+			waitingForSessionListUpdate = false;
 		}
 	}
 
@@ -151,22 +153,4 @@ public class FusionRegionCrawler : MonoBehaviour, INetworkRunnerCallbacks, IPubl
 	public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
 	{
 	}
-
-	public FusionRegionCrawler.PlayerCountUpdated OnPlayerCountUpdated;
-
-	private NetworkRunner regionRunner;
-
-	private List<SessionInfo> sessionInfoCache;
-
-	private bool waitingForSessionListUpdate;
-
-	private int globalPlayerCount;
-
-	private float UpdateFrequency = 10f;
-
-	private bool refreshPlayerCountAutomatically = true;
-
-	private int tempSessionPlayerCount;
-
-	public delegate void PlayerCountUpdated(int playerCount);
 }

@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface SIGadgetProjectileType
 {
 	void LocalProjectileHit(SIPlayer player = null);

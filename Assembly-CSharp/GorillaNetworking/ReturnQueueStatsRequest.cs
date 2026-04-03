@@ -1,9 +1,6 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class ReturnQueueStatsRequest
 {
-	public class ReturnQueueStatsRequest
-	{
-		public string queueName;
-	}
+	public string queueName;
 }

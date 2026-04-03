@@ -1,23 +1,22 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTag;
 using UnityEngine;
 
 public class FlattenerCrumb : MonoBehaviour
 {
+	[DebugReadout]
+	private List<ObjectHierarchyFlattener> flattenerList = new List<ObjectHierarchyFlattener>();
+
 	private void OnDisable()
 	{
-		for (int i = this.flattenerList.Count - 1; i >= 0; i--)
+		for (int num = flattenerList.Count - 1; num >= 0; num--)
 		{
-			this.flattenerList[i].CrumbDisabled();
+			flattenerList[num].CrumbDisabled();
 		}
 	}
 
 	public void AddFlattenerReference(ObjectHierarchyFlattener flattener)
 	{
-		this.flattenerList.AddIfNew(flattener);
+		flattenerList.AddIfNew(flattener);
 	}
-
-	[DebugReadout]
-	private List<ObjectHierarchyFlattener> flattenerList = new List<ObjectHierarchyFlattener>();
 }

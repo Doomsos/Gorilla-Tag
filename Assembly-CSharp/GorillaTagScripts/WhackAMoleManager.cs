@@ -1,52 +1,50 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class WhackAMoleManager : MonoBehaviour, IGorillaSliceableSimple
 {
-	public class WhackAMoleManager : MonoBehaviour, IGorillaSliceableSimple
+	public static WhackAMoleManager instance;
+
+	public HashSet<WhackAMole> allGames = new HashSet<WhackAMole>();
+
+	private void Awake()
 	{
-		private void Awake()
+		instance = this;
+		allGames.Clear();
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void SliceUpdate()
+	{
+		foreach (WhackAMole allGame in allGames)
 		{
-			WhackAMoleManager.instance = this;
-			this.allGames.Clear();
+			allGame.InvokeUpdate();
 		}
+	}
 
-		public void OnEnable()
-		{
-			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		}
+	private void OnDestroy()
+	{
+		instance = null;
+	}
 
-		public void OnDisable()
-		{
-			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		}
+	public void Register(WhackAMole whackAMole)
+	{
+		allGames.Add(whackAMole);
+	}
 
-		public void SliceUpdate()
-		{
-			foreach (WhackAMole whackAMole in this.allGames)
-			{
-				whackAMole.InvokeUpdate();
-			}
-		}
-
-		private void OnDestroy()
-		{
-			WhackAMoleManager.instance = null;
-		}
-
-		public void Register(WhackAMole whackAMole)
-		{
-			this.allGames.Add(whackAMole);
-		}
-
-		public void Unregister(WhackAMole whackAMole)
-		{
-			this.allGames.Remove(whackAMole);
-		}
-
-		public static WhackAMoleManager instance;
-
-		public HashSet<WhackAMole> allGames = new HashSet<WhackAMole>();
+	public void Unregister(WhackAMole whackAMole)
+	{
+		allGames.Remove(whackAMole);
 	}
 }

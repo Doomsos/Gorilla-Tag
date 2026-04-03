@@ -1,12 +1,15 @@
-﻿using System;
 using Photon.Pun;
 
 internal class GorillaTagCompetitiveRPCs : RPCNetworkBase
 {
+	private GameModeSerializer serializer;
+
+	private GorillaTagCompetitiveManager tagCompManager;
+
 	public override void SetClassTarget(IWrappedSerializable target, GorillaWrappedSerializer netHandler)
 	{
-		this.tagCompManager = (GorillaTagCompetitiveManager)target;
-		this.serializer = (GameModeSerializer)netHandler;
+		tagCompManager = (GorillaTagCompetitiveManager)target;
+		serializer = (GameModeSerializer)netHandler;
 	}
 
 	[PunRPC]
@@ -48,33 +51,21 @@ internal class GorillaTagCompetitiveRPCs : RPCNetworkBase
 		}
 		for (int k = 0; k < num; k++)
 		{
-			if (NetworkSystem.Instance.GetNetPlayerByID(playerId[k]) == null)
-			{
-				return;
-			}
-			if (numTags[k] < 0 || numTags[k] >= 15)
-			{
-				return;
-			}
-			if (pointsOnDefense[k] < 0f)
+			if (NetworkSystem.Instance.GetNetPlayerByID(playerId[k]) == null || numTags[k] < 0 || numTags[k] >= 15 || pointsOnDefense[k] < 0f)
 			{
 				return;
 			}
 			float num2 = joinTime[k];
-			if (float.IsNaN(num2) || float.IsInfinity(num2) || num2 < 0f || num2 > this.tagCompManager.GetRoundDuration() + 15f)
+			if (float.IsNaN(num2) || float.IsInfinity(num2) || num2 < 0f || num2 > tagCompManager.GetRoundDuration() + 15f)
 			{
 				return;
 			}
 			float num3 = taggedTime[k];
-			if (float.IsNaN(num3) || float.IsInfinity(num3) || num3 < 0f || num3 > this.tagCompManager.GetRoundDuration() + 15f)
+			if (float.IsNaN(num3) || float.IsInfinity(num3) || num3 < 0f || num3 > tagCompManager.GetRoundDuration() + 15f)
 			{
 				return;
 			}
 		}
-		this.tagCompManager.GetScoring().ReceivedScoresForLateJoiner(playerId, numTags, pointsOnDefense, joinTime, infected, taggedTime);
+		tagCompManager.GetScoring().ReceivedScoresForLateJoiner(playerId, numTags, pointsOnDefense, joinTime, infected, taggedTime);
 	}
-
-	private GameModeSerializer serializer;
-
-	private GorillaTagCompetitiveManager tagCompManager;
 }

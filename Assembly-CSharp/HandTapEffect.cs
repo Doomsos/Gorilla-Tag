@@ -1,57 +1,13 @@
-﻿using System;
+using System;
 using GorillaTag;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class HandTapEffect : MonoBehaviour
 {
-	private void Awake()
-	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>();
-		this.leftHandEffect.handContext = componentInParent.LeftHandEffect;
-		this.rightHandEffect.handContext = componentInParent.RightHandEffect;
-	}
-
-	private void OnEnable()
-	{
-		this.leftHandEffect.OnEnable();
-		this.rightHandEffect.OnEnable();
-	}
-
-	private void OnDisable()
-	{
-		this.leftHandEffect.OnDisable();
-		this.rightHandEffect.OnDisable();
-	}
-
-	public HandTapEffect.HandTapEffectLeftRight leftHandEffect;
-
-	public HandTapEffect.HandTapEffectLeftRight rightHandEffect;
-
 	[Serializable]
 	public class HandTapEffectDownUp
 	{
-		public bool HasOverrides
-		{
-			get
-			{
-				return this.overrides.overrideSurfacePrefab || this.overrides.overrideGamemodePrefab || this.overrides.overrideSound;
-			}
-		}
-
-		internal void OnTap(HandEffectContext handContext)
-		{
-			UnityEvent unityEvent = this.onTapUnityEvents;
-			if (unityEvent != null)
-			{
-				unityEvent.Invoke();
-			}
-			for (int i = 0; i < this.onTapBehaviours.Length; i++)
-			{
-				this.onTapBehaviours[i].OnTap(handContext);
-			}
-		}
-
 		public HandTapBehaviour[] onTapBehaviours;
 
 		public UnityEvent onTapUnityEvents;
@@ -60,61 +16,105 @@ public class HandTapEffect : MonoBehaviour
 		public HashWrapper onTapPrefabToSpawn;
 
 		public HandTapOverrides overrides;
+
+		public bool HasOverrides
+		{
+			get
+			{
+				if (!overrides.overrideSurfacePrefab && !overrides.overrideGamemodePrefab)
+				{
+					return overrides.overrideSound;
+				}
+				return true;
+			}
+		}
+
+		internal void OnTap(HandEffectContext handContext)
+		{
+			onTapUnityEvents?.Invoke();
+			for (int i = 0; i < onTapBehaviours.Length; i++)
+			{
+				onTapBehaviours[i].OnTap(handContext);
+			}
+		}
 	}
 
 	[Serializable]
 	public class HandTapEffectLeftRight
 	{
+		public bool separateUpTapCooldown;
+
+		public HandTapEffectDownUp downTapEffect;
+
+		public HandTapEffectDownUp upTapEffect;
+
+		internal HandEffectContext handContext;
+
 		public void OnEnable()
 		{
-			if (this.separateUpTapCooldown)
+			if (separateUpTapCooldown)
 			{
-				this.handContext.SeparateUpTapCooldown = true;
+				handContext.SeparateUpTapCooldown = true;
 			}
-			if (this.downTapEffect.onTapPrefabToSpawn != -1)
+			if ((int)downTapEffect.onTapPrefabToSpawn != -1)
 			{
-				this.handContext.AddFXPrefab(this.downTapEffect.onTapPrefabToSpawn);
+				handContext.AddFXPrefab(downTapEffect.onTapPrefabToSpawn);
 			}
-			if (this.downTapEffect.HasOverrides)
+			if (downTapEffect.HasOverrides)
 			{
-				this.handContext.DownTapOverrides = this.downTapEffect.overrides;
+				handContext.DownTapOverrides = downTapEffect.overrides;
 			}
-			if (this.upTapEffect.HasOverrides)
+			if (upTapEffect.HasOverrides)
 			{
-				this.handContext.UpTapOverrides = this.upTapEffect.overrides;
+				handContext.UpTapOverrides = upTapEffect.overrides;
 			}
-			this.handContext.handTapDown += this.downTapEffect.OnTap;
-			this.handContext.handTapUp += this.upTapEffect.OnTap;
+			handContext.handTapDown += downTapEffect.OnTap;
+			handContext.handTapUp += upTapEffect.OnTap;
 		}
 
 		public void OnDisable()
 		{
-			if (this.separateUpTapCooldown)
+			if (separateUpTapCooldown)
 			{
-				this.handContext.SeparateUpTapCooldown = false;
+				handContext.SeparateUpTapCooldown = false;
 			}
-			if (this.downTapEffect.onTapPrefabToSpawn != -1)
+			if ((int)downTapEffect.onTapPrefabToSpawn != -1)
 			{
-				this.handContext.RemoveFXPrefab(this.downTapEffect.onTapPrefabToSpawn);
+				handContext.RemoveFXPrefab(downTapEffect.onTapPrefabToSpawn);
 			}
-			if (this.downTapEffect.HasOverrides && this.handContext.DownTapOverrides == this.downTapEffect.overrides)
+			if (downTapEffect.HasOverrides && handContext.DownTapOverrides == downTapEffect.overrides)
 			{
-				this.handContext.DownTapOverrides = null;
+				handContext.DownTapOverrides = null;
 			}
-			if (this.upTapEffect.HasOverrides && this.handContext.UpTapOverrides == this.upTapEffect.overrides)
+			if (upTapEffect.HasOverrides && handContext.UpTapOverrides == upTapEffect.overrides)
 			{
-				this.handContext.UpTapOverrides = null;
+				handContext.UpTapOverrides = null;
 			}
-			this.handContext.handTapDown -= this.downTapEffect.OnTap;
-			this.handContext.handTapUp -= this.upTapEffect.OnTap;
+			handContext.handTapDown -= downTapEffect.OnTap;
+			handContext.handTapUp -= upTapEffect.OnTap;
 		}
+	}
 
-		public bool separateUpTapCooldown;
+	public HandTapEffectLeftRight leftHandEffect;
 
-		public HandTapEffect.HandTapEffectDownUp downTapEffect;
+	public HandTapEffectLeftRight rightHandEffect;
 
-		public HandTapEffect.HandTapEffectDownUp upTapEffect;
+	private void Awake()
+	{
+		VRRig componentInParent = GetComponentInParent<VRRig>();
+		leftHandEffect.handContext = componentInParent.LeftHandEffect;
+		rightHandEffect.handContext = componentInParent.RightHandEffect;
+	}
 
-		internal HandEffectContext handContext;
+	private void OnEnable()
+	{
+		leftHandEffect.OnEnable();
+		rightHandEffect.OnEnable();
+	}
+
+	private void OnDisable()
+	{
+		leftHandEffect.OnDisable();
+		rightHandEffect.OnDisable();
 	}
 }

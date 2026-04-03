@@ -1,28 +1,35 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 {
+	public static CosmeticAnchorManager instance;
+
+	public static bool hasInstance = false;
+
+	public static List<CosmeticAnchors> allAnchors = new List<CosmeticAnchors>();
+
 	protected void Awake()
 	{
-		if (CosmeticAnchorManager.hasInstance && CosmeticAnchorManager.instance != this)
+		if (hasInstance && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		CosmeticAnchorManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	public static void CreateManager()
 	{
-		CosmeticAnchorManager.SetInstance(new GameObject("CosmeticAnchorManager").AddComponent<CosmeticAnchorManager>());
+		SetInstance(new GameObject("CosmeticAnchorManager").AddComponent<CosmeticAnchorManager>());
 	}
 
 	private static void SetInstance(CosmeticAnchorManager manager)
 	{
-		CosmeticAnchorManager.instance = manager;
-		CosmeticAnchorManager.hasInstance = true;
+		instance = manager;
+		hasInstance = true;
 		if (Application.isPlaying)
 		{
 			Object.DontDestroyOnLoad(manager);
@@ -31,25 +38,25 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 
 	public static void RegisterCosmeticAnchor(CosmeticAnchors cA)
 	{
-		if (!CosmeticAnchorManager.hasInstance)
+		if (!hasInstance)
 		{
-			CosmeticAnchorManager.CreateManager();
+			CreateManager();
 		}
-		if ((cA.AffectedByHunt() || cA.AffectedByBuilder()) && !CosmeticAnchorManager.allAnchors.Contains(cA))
+		if ((cA.AffectedByHunt() || cA.AffectedByBuilder()) && !allAnchors.Contains(cA))
 		{
-			CosmeticAnchorManager.allAnchors.Add(cA);
+			allAnchors.Add(cA);
 		}
 	}
 
 	public static void UnregisterCosmeticAnchor(CosmeticAnchors cA)
 	{
-		if (!CosmeticAnchorManager.hasInstance)
+		if (!hasInstance)
 		{
-			CosmeticAnchorManager.CreateManager();
+			CreateManager();
 		}
-		if ((cA.AffectedByHunt() || cA.AffectedByBuilder()) && CosmeticAnchorManager.allAnchors.Contains(cA))
+		if ((cA.AffectedByHunt() || cA.AffectedByBuilder()) && allAnchors.Contains(cA))
 		{
-			CosmeticAnchorManager.allAnchors.Remove(cA);
+			allAnchors.Remove(cA);
 		}
 	}
 
@@ -65,15 +72,9 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 
 	public void SliceUpdate()
 	{
-		for (int i = 0; i < CosmeticAnchorManager.allAnchors.Count; i++)
+		for (int i = 0; i < allAnchors.Count; i++)
 		{
-			CosmeticAnchorManager.allAnchors[i].TryUpdate();
+			allAnchors[i].TryUpdate();
 		}
 	}
-
-	public static CosmeticAnchorManager instance;
-
-	public static bool hasInstance = false;
-
-	public static List<CosmeticAnchors> allAnchors = new List<CosmeticAnchors>();
 }

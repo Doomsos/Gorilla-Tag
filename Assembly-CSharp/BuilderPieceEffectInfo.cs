@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BuilderPieceEffectInfo", menuName = "Gorilla Tag/Builder/EffectInfo", order = 0)]

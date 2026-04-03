@@ -1,47 +1,10 @@
-﻿using System;
+using System;
 using GorillaGameModes;
 using UnityEngine;
 
 [Serializable]
 public class SITechTreeNode
 {
-	public EAssetReleaseTier EdReleaseTier
-	{
-		get
-		{
-			return this.m_edReleaseTier;
-		}
-		set
-		{
-			this.m_edReleaseTier = value;
-		}
-	}
-
-	public bool IsValid
-	{
-		get
-		{
-			EAssetReleaseTier edReleaseTier = this.m_edReleaseTier;
-			return edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC && (this.excludedGameModes & (ESuperGameModes)GameMode.CurrentGameModeFlag) == (ESuperGameModes)0;
-		}
-	}
-
-	public bool IsAllowed
-	{
-		get
-		{
-			return (this.excludedGameModes & (ESuperGameModes)GameMode.CurrentGameModeFlag) == (ESuperGameModes)0;
-		}
-	}
-
-	public bool IsDispensableGadget
-	{
-		get
-		{
-			return this.IsValid && this.unlockedGadgetPrefab && this.IsAllowed;
-		}
-	}
-
 	[SerializeField]
 	private EAssetReleaseTier m_edReleaseTier = (EAssetReleaseTier)(-1);
 
@@ -60,4 +23,43 @@ public class SITechTreeNode
 	public SIResource.ResourceCost[] nodeCost;
 
 	public bool costOverride;
+
+	public EAssetReleaseTier EdReleaseTier
+	{
+		get
+		{
+			return m_edReleaseTier;
+		}
+		set
+		{
+			m_edReleaseTier = value;
+		}
+	}
+
+	public bool IsValid
+	{
+		get
+		{
+			EAssetReleaseTier edReleaseTier = m_edReleaseTier;
+			if (edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC)
+			{
+				return ((uint)excludedGameModes & (uint)GameMode.CurrentGameModeFlag) == 0;
+			}
+			return false;
+		}
+	}
+
+	public bool IsAllowed => ((uint)excludedGameModes & (uint)GameMode.CurrentGameModeFlag) == 0;
+
+	public bool IsDispensableGadget
+	{
+		get
+		{
+			if (IsValid && (bool)unlockedGadgetPrefab)
+			{
+				return IsAllowed;
+			}
+			return false;
+		}
+	}
 }

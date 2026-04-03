@@ -1,82 +1,10 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
 
 public class SuperInfectionSnapPoint : MonoBehaviour
 {
-	public void Initialize()
-	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
-		if (componentInParent == null)
-		{
-			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Expected a VRRig to be in parent hierarchy. Path=\"" + base.transform.GetPathQ() + "\"");
-		}
-		Transform[] boneXforms;
-		string str;
-		if (!GTHardCodedBones.TryGetBoneXforms(componentInParent, out boneXforms, out str))
-		{
-			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Could not get bone transforms: " + str);
-		}
-		if (this.overrideParentTransform != null)
-		{
-			this.parentTransform = this.overrideParentTransform;
-		}
-		else if (!GTHardCodedBones.TryGetBoneXform(boneXforms, this.parentBone.Bone, out this.parentTransform))
-		{
-			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  " + string.Format("Could not find bone Transform `{0}`.", this.parentBone));
-		}
-		Vector3 localPosition = base.transform.localPosition;
-		Vector3 localEulerAngles = base.transform.localEulerAngles;
-		if (this.parentTransform != null)
-		{
-			base.transform.SetParent(this.parentTransform, false);
-		}
-		base.transform.localPosition = localPosition;
-		base.transform.localEulerAngles = localEulerAngles;
-	}
-
-	public void Clear()
-	{
-		this.Unsnapped();
-	}
-
-	public void Snapped(GameEntity entity)
-	{
-		this.snappedEntity = entity;
-		GameSnappable gameSnappable;
-		if (this.snappedEntity.TryGetComponent<GameSnappable>(out gameSnappable))
-		{
-			gameSnappable.snappedToJoint = this;
-			return;
-		}
-		Debug.LogError(string.Format("Snapped: entity {0} has no GameSnappable!?", this.snappedEntity));
-	}
-
-	public void Unsnapped()
-	{
-		GameSnappable gameSnappable;
-		if (this.snappedEntity && this.snappedEntity.TryGetComponent<GameSnappable>(out gameSnappable))
-		{
-			gameSnappable.snappedToJoint = null;
-		}
-		else
-		{
-			Debug.LogError(string.Format("Unsnapped: entity {0} has no GameSnappable!?", this.snappedEntity));
-		}
-		this.snappedEntity = null;
-	}
-
-	public bool HasSnapped()
-	{
-		return this.snappedEntity != null;
-	}
-
-	public GameEntity GetSnappedEntity()
-	{
-		return this.snappedEntity;
-	}
-
 	private const string preLog = "[SuperInfectionSnapPoint]  ";
 
 	private const string preErr = "[SuperInfectionSnapPoint]  ERROR!!!  ";
@@ -96,4 +24,74 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 	public float snapPointRadius;
 
 	private GameEntity snappedEntity;
+
+	public void Initialize()
+	{
+		VRRig componentInParent = GetComponentInParent<VRRig>(includeInactive: true);
+		if (componentInParent == null)
+		{
+			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Expected a VRRig to be in parent hierarchy. Path=\"" + base.transform.GetPathQ() + "\"");
+		}
+		if (!GTHardCodedBones.TryGetBoneXforms(componentInParent, out var outBoneXforms, out var outErrorMsg))
+		{
+			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Could not get bone transforms: " + outErrorMsg);
+		}
+		if (overrideParentTransform != null)
+		{
+			parentTransform = overrideParentTransform;
+		}
+		else if (!GTHardCodedBones.TryGetBoneXform(outBoneXforms, parentBone.Bone, out parentTransform))
+		{
+			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  " + $"Could not find bone Transform `{parentBone}`.");
+		}
+		Vector3 localPosition = base.transform.localPosition;
+		Vector3 localEulerAngles = base.transform.localEulerAngles;
+		if (parentTransform != null)
+		{
+			base.transform.SetParent(parentTransform, worldPositionStays: false);
+		}
+		base.transform.localPosition = localPosition;
+		base.transform.localEulerAngles = localEulerAngles;
+	}
+
+	public void Clear()
+	{
+		Unsnapped();
+	}
+
+	public void Snapped(GameEntity entity)
+	{
+		snappedEntity = entity;
+		if (snappedEntity.TryGetComponent<GameSnappable>(out var component))
+		{
+			component.snappedToJoint = this;
+		}
+		else
+		{
+			Debug.LogError($"Snapped: entity {snappedEntity} has no GameSnappable!?");
+		}
+	}
+
+	public void Unsnapped()
+	{
+		if ((bool)snappedEntity && snappedEntity.TryGetComponent<GameSnappable>(out var component))
+		{
+			component.snappedToJoint = null;
+		}
+		else
+		{
+			Debug.LogError($"Unsnapped: entity {snappedEntity} has no GameSnappable!?");
+		}
+		snappedEntity = null;
+	}
+
+	public bool HasSnapped()
+	{
+		return snappedEntity != null;
+	}
+
+	public GameEntity GetSnappedEntity()
+	{
+		return snappedEntity;
+	}
 }

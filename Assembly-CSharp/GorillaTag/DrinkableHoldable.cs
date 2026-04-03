@@ -1,155 +1,150 @@
-﻿using System;
+using System;
 using emotitron.Compression;
 using GorillaExtensions;
 using GorillaNetworking;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class DrinkableHoldable : TransferrableObject
 {
-	public class DrinkableHoldable : TransferrableObject
+	[AssignInCorePrefab]
+	public ContainerLiquid containerLiquid;
+
+	[AssignInCorePrefab]
+	[SoundBankInfo]
+	public SoundBankPlayer sipSoundBankPlayer;
+
+	[AssignInCorePrefab]
+	public float sipRate = 0.1f;
+
+	[AssignInCorePrefab]
+	public float sipSoundCooldown = 0.5f;
+
+	[AssignInCorePrefab]
+	public Vector3 headToMouthOffset = new Vector3(0f, 0.0208f, 0.171f);
+
+	[AssignInCorePrefab]
+	public float sipRadius = 0.15f;
+
+	private float lastTimeSipSoundPlayed;
+
+	private bool wasSipping;
+
+	private bool coolingDown;
+
+	private bool wasCoolingDown;
+
+	private byte[] myByteArray;
+
+	internal override void OnEnable()
 	{
-		internal override void OnEnable()
-		{
-			base.OnEnable();
-			base.enabled = (this.containerLiquid != null);
-			this.itemState = (TransferrableObject.ItemStates)DrinkableHoldable.PackValues(this.sipSoundCooldown, this.containerLiquid.fillAmount, this.coolingDown);
-			this.myByteArray = new byte[32];
-		}
+		base.OnEnable();
+		base.enabled = containerLiquid != null;
+		itemState = (ItemStates)PackValues(sipSoundCooldown, containerLiquid.fillAmount, coolingDown);
+		myByteArray = new byte[32];
+	}
 
-		protected override void LateUpdateLocal()
+	protected override void LateUpdateLocal()
+	{
+		if (!containerLiquid.isActiveAndEnabled || !GorillaParent.hasInstance || !GorillaComputer.hasInstance)
 		{
-			if (!this.containerLiquid.isActiveAndEnabled || !GorillaParent.hasInstance || !GorillaComputer.hasInstance)
-			{
-				base.LateUpdateLocal();
-				return;
-			}
-			float num = (float)((GorillaComputer.instance.startupMillis + (long)Time.realtimeSinceStartup * 1000L) % 259200000L) / 1000f;
-			if (Mathf.Abs(num - this.lastTimeSipSoundPlayed) > 129600f)
-			{
-				this.lastTimeSipSoundPlayed = num;
-			}
-			float num2 = this.sipRadius * this.sipRadius;
-			bool flag = (GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.TransformPoint(this.headToMouthOffset) - this.containerLiquid.cupTopWorldPos).sqrMagnitude < num2;
-			if (!flag)
-			{
-				foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
-				{
-					VRRig rig = rigContainer.Rig;
-					if (!rig.isOfflineVRRig)
-					{
-						if (flag || rig.head == null)
-						{
-							break;
-						}
-						if (rig.head.rigTarget.IsNull())
-						{
-							break;
-						}
-						flag = ((rig.head.rigTarget.transform.TransformPoint(this.headToMouthOffset) - this.containerLiquid.cupTopWorldPos).sqrMagnitude < num2);
-					}
-				}
-			}
-			if (flag)
-			{
-				this.containerLiquid.fillAmount = Mathf.Clamp01(this.containerLiquid.fillAmount - this.sipRate * Time.deltaTime);
-				if (num > this.lastTimeSipSoundPlayed + this.sipSoundCooldown)
-				{
-					if (!this.wasSipping)
-					{
-						this.lastTimeSipSoundPlayed = num;
-						this.coolingDown = true;
-					}
-				}
-				else
-				{
-					this.coolingDown = false;
-				}
-			}
-			this.wasSipping = flag;
-			this.itemState = (TransferrableObject.ItemStates)DrinkableHoldable.PackValues(this.lastTimeSipSoundPlayed, this.containerLiquid.fillAmount, this.coolingDown);
 			base.LateUpdateLocal();
+			return;
 		}
-
-		protected override void LateUpdateReplicated()
+		float num = (float)((GorillaComputer.instance.startupMillis + (long)Time.realtimeSinceStartup * 1000) % 259200000) / 1000f;
+		if (Mathf.Abs(num - lastTimeSipSoundPlayed) > 129600f)
 		{
-			base.LateUpdateReplicated();
-			int itemState = (int)this.itemState;
-			this.UnpackValuesNonstatic(itemState, out this.lastTimeSipSoundPlayed, out this.containerLiquid.fillAmount, out this.coolingDown);
+			lastTimeSipSoundPlayed = num;
 		}
-
-		protected override void LateUpdateShared()
+		float num2 = sipRadius * sipRadius;
+		bool flag = (GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.TransformPoint(headToMouthOffset) - containerLiquid.cupTopWorldPos).sqrMagnitude < num2;
+		if (!flag)
 		{
-			base.LateUpdateShared();
-			if (this.coolingDown && !this.wasCoolingDown)
+			foreach (RigContainer activeRigContainer in VRRigCache.ActiveRigContainers)
 			{
-				this.sipSoundBankPlayer.Play();
-			}
-			this.wasCoolingDown = this.coolingDown;
-		}
-
-		private static int PackValues(float cooldownStartTime, float fillAmount, bool coolingDown)
-		{
-			byte[] array = new byte[32];
-			int num = 0;
-			array.WriteBool(coolingDown, ref num);
-			array.Write((ulong)((double)cooldownStartTime * 100.0), ref num, 25);
-			array.Write((ulong)((double)fillAmount * 63.0), ref num, 6);
-			return BitConverter.ToInt32(array, 0);
-		}
-
-		private void UnpackValuesNonstatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
-		{
-			DrinkableHoldable.GetBytes(packed, ref this.myByteArray);
-			int num = 0;
-			coolingDown = this.myByteArray.ReadBool(ref num);
-			cooldownStartTime = (float)(this.myByteArray.Read(ref num, 25) / 100.0);
-			fillAmount = this.myByteArray.Read(ref num, 6) / 63f;
-		}
-
-		public static void GetBytes(int value, ref byte[] bytes)
-		{
-			for (int i = 0; i < bytes.Length; i++)
-			{
-				bytes[i] = (byte)(value >> 8 * i & 255);
+				VRRig rig = activeRigContainer.Rig;
+				if (!rig.isOfflineVRRig)
+				{
+					if (flag || rig.head == null || rig.head.rigTarget.IsNull())
+					{
+						break;
+					}
+					flag = (rig.head.rigTarget.transform.TransformPoint(headToMouthOffset) - containerLiquid.cupTopWorldPos).sqrMagnitude < num2;
+				}
 			}
 		}
-
-		private static void UnpackValuesStatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
+		if (flag)
 		{
-			byte[] bytes = BitConverter.GetBytes(packed);
-			int num = 0;
-			coolingDown = bytes.ReadBool(ref num);
-			cooldownStartTime = (float)(bytes.Read(ref num, 25) / 100.0);
-			fillAmount = bytes.Read(ref num, 6) / 63f;
+			containerLiquid.fillAmount = Mathf.Clamp01(containerLiquid.fillAmount - sipRate * Time.deltaTime);
+			if (num > lastTimeSipSoundPlayed + sipSoundCooldown)
+			{
+				if (!wasSipping)
+				{
+					lastTimeSipSoundPlayed = num;
+					coolingDown = true;
+				}
+			}
+			else
+			{
+				coolingDown = false;
+			}
 		}
+		wasSipping = flag;
+		itemState = (ItemStates)PackValues(lastTimeSipSoundPlayed, containerLiquid.fillAmount, coolingDown);
+		base.LateUpdateLocal();
+	}
 
-		[AssignInCorePrefab]
-		public ContainerLiquid containerLiquid;
+	protected override void LateUpdateReplicated()
+	{
+		base.LateUpdateReplicated();
+		int packed = (int)itemState;
+		UnpackValuesNonstatic(in packed, out lastTimeSipSoundPlayed, out containerLiquid.fillAmount, out coolingDown);
+	}
 
-		[AssignInCorePrefab]
-		[SoundBankInfo]
-		public SoundBankPlayer sipSoundBankPlayer;
+	protected override void LateUpdateShared()
+	{
+		base.LateUpdateShared();
+		if (coolingDown && !wasCoolingDown)
+		{
+			sipSoundBankPlayer.Play();
+		}
+		wasCoolingDown = coolingDown;
+	}
 
-		[AssignInCorePrefab]
-		public float sipRate = 0.1f;
+	private static int PackValues(float cooldownStartTime, float fillAmount, bool coolingDown)
+	{
+		byte[] array = new byte[32];
+		int bitposition = 0;
+		array.WriteBool(coolingDown, ref bitposition);
+		array.Write((ulong)((double)cooldownStartTime * 100.0), ref bitposition, 25);
+		array.Write((ulong)((double)fillAmount * 63.0), ref bitposition, 6);
+		return BitConverter.ToInt32(array, 0);
+	}
 
-		[AssignInCorePrefab]
-		public float sipSoundCooldown = 0.5f;
+	private void UnpackValuesNonstatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
+	{
+		GetBytes(packed, ref myByteArray);
+		int bitposition = 0;
+		coolingDown = myByteArray.ReadBool(ref bitposition);
+		cooldownStartTime = (float)((double)myByteArray.Read(ref bitposition, 25) / 100.0);
+		fillAmount = (float)myByteArray.Read(ref bitposition, 6) / 63f;
+	}
 
-		[AssignInCorePrefab]
-		public Vector3 headToMouthOffset = new Vector3(0f, 0.0208f, 0.171f);
+	public static void GetBytes(int value, ref byte[] bytes)
+	{
+		for (int i = 0; i < bytes.Length; i++)
+		{
+			bytes[i] = (byte)((value >> 8 * i) & 0xFF);
+		}
+	}
 
-		[AssignInCorePrefab]
-		public float sipRadius = 0.15f;
-
-		private float lastTimeSipSoundPlayed;
-
-		private bool wasSipping;
-
-		private bool coolingDown;
-
-		private bool wasCoolingDown;
-
-		private byte[] myByteArray;
+	private static void UnpackValuesStatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
+	{
+		byte[] bytes = BitConverter.GetBytes(packed);
+		int bitposition = 0;
+		coolingDown = bytes.ReadBool(ref bitposition);
+		cooldownStartTime = (float)((double)bytes.Read(ref bitposition, 25) / 100.0);
+		fillAmount = (float)bytes.Read(ref bitposition, 6) / 63f;
 	}
 }

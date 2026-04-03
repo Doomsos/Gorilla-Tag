@@ -1,14 +1,17 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTag;
 using UnityEngine;
 
 public class SuperInfectionSnapPointManager : MonoBehaviour
 {
+	public List<SuperInfectionSnapPoint> SnapPoints;
+
+	private Dictionary<SnapJointType, SuperInfectionSnapPoint> snapPointDict = new Dictionary<SnapJointType, SuperInfectionSnapPoint>();
+
 	public void Awake()
 	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
-		ISpawnable[] componentsInChildren = base.GetComponentsInChildren<ISpawnable>(true);
+		VRRig componentInParent = GetComponentInParent<VRRig>(includeInactive: true);
+		ISpawnable[] componentsInChildren = GetComponentsInChildren<ISpawnable>(includeInactive: true);
 		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
 			componentsInChildren[i].OnSpawn(componentInParent);
@@ -17,20 +20,20 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 
 	public void Start()
 	{
-		foreach (SuperInfectionSnapPoint superInfectionSnapPoint in this.SnapPoints)
+		foreach (SuperInfectionSnapPoint snapPoint in SnapPoints)
 		{
-			superInfectionSnapPoint.Initialize();
-			this.snapPointDict[superInfectionSnapPoint.jointType] = superInfectionSnapPoint;
+			snapPoint.Initialize();
+			snapPointDict[snapPoint.jointType] = snapPoint;
 		}
 	}
 
 	public void Clear()
 	{
-		foreach (SuperInfectionSnapPoint superInfectionSnapPoint in this.SnapPoints)
+		foreach (SuperInfectionSnapPoint snapPoint in SnapPoints)
 		{
-			superInfectionSnapPoint.Clear();
+			snapPoint.Clear();
 		}
-		this.snapPointDict.Clear();
+		snapPointDict.Clear();
 	}
 
 	public SuperInfectionSnapPoint FindSnapPoint(SnapJointType jointType)
@@ -39,9 +42,9 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		{
 			return null;
 		}
-		if (this.snapPointDict.ContainsKey(jointType))
+		if (snapPointDict.ContainsKey(jointType))
 		{
-			return this.snapPointDict[jointType];
+			return snapPointDict[jointType];
 		}
 		return null;
 	}
@@ -57,19 +60,15 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 
 	public void DropAllSnappedAuthority()
 	{
-		for (int i = 0; i < this.SnapPoints.Count; i++)
+		for (int i = 0; i < SnapPoints.Count; i++)
 		{
-			GameEntity snappedEntity = this.SnapPoints[i].GetSnappedEntity();
+			GameEntity snappedEntity = SnapPoints[i].GetSnappedEntity();
 			if (!(snappedEntity == null))
 			{
 				Vector3 position = snappedEntity.transform.position;
-				snappedEntity.manager.RequestGrabEntity(snappedEntity.id, false, Vector3.zero, Quaternion.identity);
-				snappedEntity.manager.RequestThrowEntity(snappedEntity.id, false, position, Vector3.zero, Vector3.zero);
+				snappedEntity.manager.RequestGrabEntity(snappedEntity.id, isLeftHand: false, Vector3.zero, Quaternion.identity);
+				snappedEntity.manager.RequestThrowEntity(snappedEntity.id, isLeftHand: false, position, Vector3.zero, Vector3.zero);
 			}
 		}
 	}
-
-	public List<SuperInfectionSnapPoint> SnapPoints;
-
-	private Dictionary<SnapJointType, SuperInfectionSnapPoint> snapPointDict = new Dictionary<SnapJointType, SuperInfectionSnapPoint>();
 }

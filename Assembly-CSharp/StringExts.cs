@@ -1,25 +1,17 @@
-﻿using System;
-
 public static class StringExts
 {
+	private static char[] _escapeChars;
+
 	public static string EscapeCsv(this string field)
 	{
-		if (StringExts._escapeChars == null)
+		if (_escapeChars == null)
 		{
-			StringExts._escapeChars = new char[]
-			{
-				',',
-				'"',
-				'\n',
-				'\r'
-			};
+			_escapeChars = new char[4] { ',', '"', '\n', '\r' };
 		}
-		if (field.IndexOfAny(StringExts._escapeChars) != -1)
+		if (field.IndexOfAny(_escapeChars) != -1)
 		{
 			return field.Replace("\"", "\"\"");
 		}
 		return field;
 	}
-
-	private static char[] _escapeChars;
 }

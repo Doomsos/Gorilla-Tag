@@ -1,110 +1,9 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 
 [DefaultExecutionOrder(2001)]
 public class ObjectHierarchyFlattener : MonoBehaviour, IGorillaSimpleBackgroundWorker
 {
-	private void ResetTransform()
-	{
-		if (!this.initialized || (this.originalParentGO != null && this.originalParentGO.activeInHierarchy))
-		{
-			return;
-		}
-		base.transform.SetParent(this.originalParentTransform);
-		this.isAttachedToOverride = false;
-		base.transform.localPosition = this.originalLocalPosition;
-		base.transform.localRotation = this.originalLocalRotation;
-		base.transform.localScale = this.originalScale;
-		this.initialized = false;
-	}
-
-	public void CrumbDisabled()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		if (this.trackTransformOfParent)
-		{
-			ObjectHierarchyFlattenerManager.UnregisterOHF(this);
-		}
-		if (this != null)
-		{
-			base.Invoke("ResetTransform", 0f);
-		}
-	}
-
-	public void InvokeLateUpdate()
-	{
-		if (this.maintainRelativeScale)
-		{
-			base.transform.localScale = Vector3.Scale(this.originalParentTransform.lossyScale, this.originalScale);
-		}
-		base.transform.rotation = this.originalParentTransform.rotation * this.originalLocalRotation;
-		base.transform.position = this.originalParentTransform.position + base.transform.rotation * this.calcOffset * (this.originalParentTransform.lossyScale.x / this.originalParentScale) * this.originalParentScale;
-	}
-
-	private void OnEnable()
-	{
-		this.abandonWork = false;
-		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-	}
-
-	private void OnDisable()
-	{
-		this.abandonWork = true;
-		ObjectHierarchyFlattenerManager.UnregisterOHF(this);
-		if (base.enabled)
-		{
-			base.Invoke("ResetTransformIfStillDisabled", 0f);
-		}
-	}
-
-	private void OnDestroy()
-	{
-		base.CancelInvoke();
-	}
-
-	private void ResetTransformIfStillDisabled()
-	{
-		if (!base.isActiveAndEnabled)
-		{
-			this.ResetTransform();
-		}
-	}
-
-	public void SimpleWork()
-	{
-		if (this.initialized || this.abandonWork)
-		{
-			return;
-		}
-		if (this.trackTransformOfParent)
-		{
-			ObjectHierarchyFlattenerManager.RegisterOHF(this);
-		}
-		if (!this.isAttachedToOverride)
-		{
-			this.originalParentTransform = base.transform.parent;
-			this.originalParentGO = this.originalParentTransform.gameObject;
-			this.originalLocalPosition = base.transform.localPosition;
-			this.originalLocalRotation = base.transform.localRotation;
-			this.originalParentScale = base.transform.parent.lossyScale.x;
-			this.originalScale = base.transform.localScale;
-			this.calcOffset = Vector3.Scale(this.originalLocalPosition, this.originalScale);
-			FlattenerCrumb flattenerCrumb = this.originalParentGO.GetComponent<FlattenerCrumb>();
-			if (flattenerCrumb == null)
-			{
-				flattenerCrumb = this.originalParentGO.AddComponent<FlattenerCrumb>();
-			}
-			flattenerCrumb.AddFlattenerReference(this);
-		}
-		base.transform.SetParent((this.overrideParentTransform != null) ? this.overrideParentTransform : null);
-		this.isAttachedToOverride = true;
-		this.initialized = true;
-	}
-
 	public const int k_monoDefaultExecutionOrder = 2001;
 
 	[DebugReadout]
@@ -135,4 +34,102 @@ public class ObjectHierarchyFlattener : MonoBehaviour, IGorillaSimpleBackgroundW
 	private bool initialized;
 
 	private bool abandonWork = true;
+
+	private void ResetTransform()
+	{
+		if (initialized && (!(originalParentGO != null) || !originalParentGO.activeInHierarchy))
+		{
+			base.transform.SetParent(originalParentTransform);
+			isAttachedToOverride = false;
+			base.transform.localPosition = originalLocalPosition;
+			base.transform.localRotation = originalLocalRotation;
+			base.transform.localScale = originalScale;
+			initialized = false;
+		}
+	}
+
+	public void CrumbDisabled()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			if (trackTransformOfParent)
+			{
+				ObjectHierarchyFlattenerManager.UnregisterOHF(this);
+			}
+			if (this != null)
+			{
+				Invoke("ResetTransform", 0f);
+			}
+		}
+	}
+
+	public void InvokeLateUpdate()
+	{
+		if (maintainRelativeScale)
+		{
+			base.transform.localScale = Vector3.Scale(originalParentTransform.lossyScale, originalScale);
+		}
+		base.transform.rotation = originalParentTransform.rotation * originalLocalRotation;
+		base.transform.position = originalParentTransform.position + base.transform.rotation * calcOffset * (originalParentTransform.lossyScale.x / originalParentScale) * originalParentScale;
+	}
+
+	private void OnEnable()
+	{
+		abandonWork = false;
+		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+	}
+
+	private void OnDisable()
+	{
+		abandonWork = true;
+		ObjectHierarchyFlattenerManager.UnregisterOHF(this);
+		if (base.enabled)
+		{
+			Invoke("ResetTransformIfStillDisabled", 0f);
+		}
+	}
+
+	private void OnDestroy()
+	{
+		CancelInvoke();
+	}
+
+	private void ResetTransformIfStillDisabled()
+	{
+		if (!base.isActiveAndEnabled)
+		{
+			ResetTransform();
+		}
+	}
+
+	public void SimpleWork()
+	{
+		if (initialized || abandonWork)
+		{
+			return;
+		}
+		if (trackTransformOfParent)
+		{
+			ObjectHierarchyFlattenerManager.RegisterOHF(this);
+		}
+		if (!isAttachedToOverride)
+		{
+			originalParentTransform = base.transform.parent;
+			originalParentGO = originalParentTransform.gameObject;
+			originalLocalPosition = base.transform.localPosition;
+			originalLocalRotation = base.transform.localRotation;
+			originalParentScale = base.transform.parent.lossyScale.x;
+			originalScale = base.transform.localScale;
+			calcOffset = Vector3.Scale(originalLocalPosition, originalScale);
+			FlattenerCrumb flattenerCrumb = originalParentGO.GetComponent<FlattenerCrumb>();
+			if (flattenerCrumb == null)
+			{
+				flattenerCrumb = originalParentGO.AddComponent<FlattenerCrumb>();
+			}
+			flattenerCrumb.AddFlattenerReference(this);
+		}
+		base.transform.SetParent((overrideParentTransform != null) ? overrideParentTransform : null);
+		isAttachedToOverride = true;
+		initialized = true;
+	}
 }

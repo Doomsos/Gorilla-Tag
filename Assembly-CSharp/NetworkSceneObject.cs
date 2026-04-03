@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using Photon.Pun;
 using UnityEngine;
@@ -6,19 +5,15 @@ using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 public class NetworkSceneObject : SimulationBehaviour
 {
-	public bool IsMine
-	{
-		get
-		{
-			return this.photonView.IsMine;
-		}
-	}
+	public PhotonView photonView;
+
+	public bool IsMine => photonView.IsMine;
 
 	protected virtual void Start()
 	{
-		if (this.photonView == null)
+		if (photonView == null)
 		{
-			this.photonView = base.GetComponent<PhotonView>();
+			photonView = GetComponent<PhotonView>();
 		}
 	}
 
@@ -49,6 +44,4 @@ public class NetworkSceneObject : SimulationBehaviour
 			runner.RemoveGlobal(this);
 		}
 	}
-
-	public PhotonView photonView;
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using Cysharp.Text;
 using GorillaExtensions;
@@ -10,77 +9,105 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class HeadModel : MonoBehaviour, IDelayedExecListener
 {
+	protected struct _CosmeticPartLoadInfo
+	{
+		public string playFabId;
+
+		public GTAssetRef<GameObject> prefabAssetRef;
+
+		public CosmeticAttachInfo attachInfo;
+
+		public AsyncOperationHandle<GameObject> loadOp;
+
+		public Transform xform;
+	}
+
+	[DebugReadout]
+	protected readonly List<_CosmeticPartLoadInfo> _currentPartLoadInfos = new List<_CosmeticPartLoadInfo>(1);
+
+	[DebugReadout]
+	private readonly Dictionary<AsyncOperationHandle, int> _loadOp_to_partInfoIndex = new Dictionary<AsyncOperationHandle, int>(1);
+
+	private Renderer _mannequinRenderer;
+
+	public GameObject[] cosmetics;
+
 	protected void Awake()
 	{
-		this.RefreshRenderer();
+		RefreshRenderer();
 	}
 
 	protected void RefreshRenderer()
 	{
-		this._mannequinRenderer = base.GetComponentInChildren<Renderer>(true);
+		_mannequinRenderer = GetComponentInChildren<Renderer>(includeInactive: true);
 	}
 
 	public void SetCosmeticActive(string playFabId, bool forRightSide = false)
 	{
-		this._ClearCurrent();
-		this._AddPreviewCosmetic(playFabId, forRightSide);
+		_ClearCurrent();
+		_AddPreviewCosmetic(playFabId, forRightSide);
 	}
 
 	public void SetCosmeticActiveArray(string[] playFabIds, bool[] forRightSideArray)
 	{
-		this._ClearCurrent();
+		_ClearCurrent();
 		for (int i = 0; i < playFabIds.Length; i++)
 		{
-			this._AddPreviewCosmetic(playFabIds[i], forRightSideArray[i]);
+			_AddPreviewCosmetic(playFabIds[i], forRightSideArray[i]);
 		}
 	}
 
 	private void _AddPreviewCosmetic(string playFabId, bool forRightSide)
 	{
-		CosmeticInfoV2 cosmeticInfoV;
-		if (!CosmeticsController.instance.TryGetCosmeticInfoV2(playFabId, out cosmeticInfoV))
+		if (!CosmeticsController.instance.TryGetCosmeticInfoV2(playFabId, out var cosmeticInfo))
 		{
-			if (!(playFabId == "null") && !(playFabId == "NOTHING") && !(playFabId == "Slingshot"))
+			switch (playFabId)
 			{
-				Debug.LogError(ZString.Concat<string, string, string>("HeadModel._AddPreviewCosmetic: Cosmetic id \"", playFabId, "\" not found in `CosmeticsController`."), this);
+			case "NOTHING":
+				return;
+			case "Slingshot":
+				return;
 			}
+			Debug.LogError(ZString.Concat("HeadModel._AddPreviewCosmetic: Cosmetic id \"", playFabId, "\" not found in `CosmeticsController`."), this);
 			return;
 		}
-		if (cosmeticInfoV.hideWardrobeMannequin)
+		if (cosmeticInfo.hideWardrobeMannequin)
 		{
-			if (this._mannequinRenderer.IsNull())
+			if (_mannequinRenderer.IsNull())
 			{
-				this.RefreshRenderer();
+				RefreshRenderer();
 			}
-			if (this._mannequinRenderer.IsNotNull())
+			if (_mannequinRenderer.IsNotNull())
 			{
-				this._mannequinRenderer.enabled = false;
+				_mannequinRenderer.enabled = false;
 			}
 		}
-		foreach (CosmeticPart cosmeticPart in cosmeticInfoV.wardrobeParts)
+		CosmeticPart[] wardrobeParts = cosmeticInfo.wardrobeParts;
+		for (int i = 0; i < wardrobeParts.Length; i++)
 		{
+			CosmeticPart cosmeticPart = wardrobeParts[i];
 			if (!cosmeticPart.prefabAssetRef.RuntimeKeyIsValid())
 			{
-				GTDev.LogError<string>("Cosmetic " + cosmeticInfoV.displayName + " has missing object reference in wardrobe parts, skipping load", null);
+				GTDev.LogError("Cosmetic " + cosmeticInfo.displayName + " has missing object reference in wardrobe parts, skipping load");
+				continue;
 			}
-			else
+			CosmeticAttachInfo[] attachAnchors = cosmeticPart.attachAnchors;
+			for (int j = 0; j < attachAnchors.Length; j++)
 			{
-				foreach (CosmeticAttachInfo cosmeticAttachInfo in cosmeticPart.attachAnchors)
+				CosmeticAttachInfo attachInfo = attachAnchors[j];
+				if ((!forRightSide || !(attachInfo.selectSide == ECosmeticSelectSide.Left)) && (forRightSide || !(attachInfo.selectSide == ECosmeticSelectSide.Right)))
 				{
-					if ((!forRightSide || !(cosmeticAttachInfo.selectSide == ECosmeticSelectSide.Left)) && (forRightSide || !(cosmeticAttachInfo.selectSide == ECosmeticSelectSide.Right)))
+					_CosmeticPartLoadInfo item = new _CosmeticPartLoadInfo
 					{
-						HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = new HeadModel._CosmeticPartLoadInfo
-						{
-							playFabId = playFabId,
-							prefabAssetRef = cosmeticPart.prefabAssetRef,
-							attachInfo = cosmeticAttachInfo,
-							loadOp = cosmeticPart.prefabAssetRef.InstantiateAsync(base.transform, false),
-							xform = null
-						};
-						cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadOpOnCompleted;
-						this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = this._currentPartLoadInfos.Count;
-						this._currentPartLoadInfos.Add(cosmeticPartLoadInfo);
-					}
+						playFabId = playFabId,
+						prefabAssetRef = cosmeticPart.prefabAssetRef,
+						attachInfo = attachInfo,
+						loadOp = cosmeticPart.prefabAssetRef.InstantiateAsync(base.transform),
+						xform = null
+					};
+					item.loadOp.Completed += _HandleLoadOpOnCompleted;
+					_loadOp_to_partInfoIndex[item.loadOp] = _currentPartLoadInfos.Count;
+					_currentPartLoadInfos.Add(item);
 				}
 			}
 		}
@@ -88,58 +115,55 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 
 	private void _HandleLoadOpOnCompleted(AsyncOperationHandle<GameObject> loadOp)
 	{
-		int num;
-		if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, out num))
+		if (!_loadOp_to_partInfoIndex.TryGetValue(loadOp, out var value))
 		{
-			if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
+			if (loadOp.Status == AsyncOperationStatus.Succeeded && (bool)loadOp.Result)
 			{
 				Object.Destroy(loadOp.Result);
 			}
 			return;
 		}
-		HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[num];
+		_CosmeticPartLoadInfo cosmeticPartLoadInfo = _currentPartLoadInfos[value];
 		if (loadOp.Status == AsyncOperationStatus.Failed)
 		{
 			Debug.Log("HeadModel: Failed to load a part for cosmetic \"" + cosmeticPartLoadInfo.playFabId + "\"! Waiting for 10 seconds before trying again.", this);
-			GTDelayedExec.Add(this, 10f, num);
+			GTDelayedExec.Add(this, 10f, value);
 			return;
 		}
 		cosmeticPartLoadInfo.xform = loadOp.Result.transform;
 		cosmeticPartLoadInfo.xform.localPosition = cosmeticPartLoadInfo.attachInfo.offset.pos;
 		cosmeticPartLoadInfo.xform.localRotation = cosmeticPartLoadInfo.attachInfo.offset.rot;
 		cosmeticPartLoadInfo.xform.localScale = cosmeticPartLoadInfo.attachInfo.offset.scale;
-		cosmeticPartLoadInfo.xform.gameObject.SetActive(true);
+		cosmeticPartLoadInfo.xform.gameObject.SetActive(value: true);
 	}
 
 	void IDelayedExecListener.OnDelayedAction(int partLoadInfosIndex)
 	{
-		if (partLoadInfosIndex < 0 || partLoadInfosIndex >= this._currentPartLoadInfos.Count)
+		if (partLoadInfosIndex >= 0 && partLoadInfosIndex < _currentPartLoadInfos.Count)
 		{
-			return;
+			_CosmeticPartLoadInfo cosmeticPartLoadInfo = _currentPartLoadInfos[partLoadInfosIndex];
+			if (cosmeticPartLoadInfo.loadOp.Status == AsyncOperationStatus.Failed)
+			{
+				cosmeticPartLoadInfo.loadOp.Completed += _HandleLoadOpOnCompleted;
+				cosmeticPartLoadInfo.loadOp = cosmeticPartLoadInfo.prefabAssetRef.InstantiateAsync(base.transform);
+				_loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = partLoadInfosIndex;
+			}
 		}
-		HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[partLoadInfosIndex];
-		if (cosmeticPartLoadInfo.loadOp.Status != AsyncOperationStatus.Failed)
-		{
-			return;
-		}
-		cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadOpOnCompleted;
-		cosmeticPartLoadInfo.loadOp = cosmeticPartLoadInfo.prefabAssetRef.InstantiateAsync(base.transform, false);
-		this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = partLoadInfosIndex;
 	}
 
 	protected void _ClearCurrent()
 	{
-		for (int i = 0; i < this._currentPartLoadInfos.Count; i++)
+		for (int i = 0; i < _currentPartLoadInfos.Count; i++)
 		{
-			Object.Destroy(this._currentPartLoadInfos[i].loadOp.Result);
+			Object.Destroy(_currentPartLoadInfos[i].loadOp.Result);
 		}
-		this._EnsureCapacityAndClear<AsyncOperationHandle, int>(this._loadOp_to_partInfoIndex);
-		this._EnsureCapacityAndClear<HeadModel._CosmeticPartLoadInfo>(this._currentPartLoadInfos);
-		if (this._mannequinRenderer.IsNull())
+		_EnsureCapacityAndClear(_loadOp_to_partInfoIndex);
+		_EnsureCapacityAndClear(_currentPartLoadInfos);
+		if (_mannequinRenderer.IsNull())
 		{
-			this.RefreshRenderer();
+			RefreshRenderer();
 		}
-		this._mannequinRenderer.enabled = true;
+		_mannequinRenderer.enabled = true;
 	}
 
 	private void _EnsureCapacityAndClear<T>(List<T> list)
@@ -155,28 +179,5 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 	{
 		dict.EnsureCapacity(dict.Count);
 		dict.Clear();
-	}
-
-	[DebugReadout]
-	protected readonly List<HeadModel._CosmeticPartLoadInfo> _currentPartLoadInfos = new List<HeadModel._CosmeticPartLoadInfo>(1);
-
-	[DebugReadout]
-	private readonly Dictionary<AsyncOperationHandle, int> _loadOp_to_partInfoIndex = new Dictionary<AsyncOperationHandle, int>(1);
-
-	private Renderer _mannequinRenderer;
-
-	public GameObject[] cosmetics;
-
-	protected struct _CosmeticPartLoadInfo
-	{
-		public string playFabId;
-
-		public GTAssetRef<GameObject> prefabAssetRef;
-
-		public CosmeticAttachInfo attachInfo;
-
-		public AsyncOperationHandle<GameObject> loadOp;
-
-		public Transform xform;
 	}
 }

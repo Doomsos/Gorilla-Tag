@@ -1,64 +1,59 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using UnityEngine;
 
-namespace NetSynchrony
+namespace NetSynchrony;
+
+public class RandomDispatcherManager : MonoBehaviour
 {
-	public class RandomDispatcherManager : MonoBehaviour
+	[SerializeField]
+	private RandomDispatcher[] randomDispatchers;
+
+	private static RandomDispatcherManager __instance;
+
+	private double serverTime;
+
+	private void OnDisable()
 	{
-		private void OnDisable()
-		{
-			if (ApplicationQuittingState.IsQuitting)
-			{
-				return;
-			}
-			if (GorillaComputer.instance != null)
-			{
-				GorillaComputer instance = GorillaComputer.instance;
-				instance.OnServerTimeUpdated = (Action)Delegate.Remove(instance.OnServerTimeUpdated, new Action(this.OnTimeChanged));
-			}
-		}
-
-		private void OnTimeChanged()
-		{
-			this.AdjustedServerTime();
-			for (int i = 0; i < this.randomDispatchers.Length; i++)
-			{
-				this.randomDispatchers[i].Sync(this.serverTime);
-			}
-		}
-
-		private void AdjustedServerTime()
-		{
-			DateTime dateTime = new DateTime(2020, 1, 1);
-			long num = GorillaComputer.instance.GetServerTime().Ticks - dateTime.Ticks;
-			this.serverTime = (double)((float)num / 10000000f);
-		}
-
-		private void Start()
+		if (!ApplicationQuittingState.IsQuitting && GorillaComputer.instance != null)
 		{
 			GorillaComputer instance = GorillaComputer.instance;
-			instance.OnServerTimeUpdated = (Action)Delegate.Combine(instance.OnServerTimeUpdated, new Action(this.OnTimeChanged));
-			for (int i = 0; i < this.randomDispatchers.Length; i++)
-			{
-				this.randomDispatchers[i].Init(this.serverTime);
-			}
+			instance.OnServerTimeUpdated = (Action)Delegate.Remove(instance.OnServerTimeUpdated, new Action(OnTimeChanged));
 		}
+	}
 
-		private void Update()
+	private void OnTimeChanged()
+	{
+		AdjustedServerTime();
+		for (int i = 0; i < randomDispatchers.Length; i++)
 		{
-			for (int i = 0; i < this.randomDispatchers.Length; i++)
-			{
-				this.randomDispatchers[i].Tick(this.serverTime);
-			}
-			this.serverTime += (double)Time.deltaTime;
+			randomDispatchers[i].Sync(serverTime);
 		}
+	}
 
-		[SerializeField]
-		private RandomDispatcher[] randomDispatchers;
+	private void AdjustedServerTime()
+	{
+		DateTime dateTime = new DateTime(2020, 1, 1);
+		long num = GorillaComputer.instance.GetServerTime().Ticks - dateTime.Ticks;
+		serverTime = (float)num / 10000000f;
+	}
 
-		private static RandomDispatcherManager __instance;
+	private void Start()
+	{
+		GorillaComputer instance = GorillaComputer.instance;
+		instance.OnServerTimeUpdated = (Action)Delegate.Combine(instance.OnServerTimeUpdated, new Action(OnTimeChanged));
+		for (int i = 0; i < randomDispatchers.Length; i++)
+		{
+			randomDispatchers[i].Init(serverTime);
+		}
+	}
 
-		private double serverTime;
+	private void Update()
+	{
+		for (int i = 0; i < randomDispatchers.Length; i++)
+		{
+			randomDispatchers[i].Tick(serverTime);
+		}
+		serverTime += Time.deltaTime;
 	}
 }

@@ -1,57 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class ZoneConditionalComponentEnabling : MonoBehaviour
 {
-	private void Start()
-	{
-		this.OnZoneChanged();
-		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
-	}
-
-	private void OnDestroy()
-	{
-		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.OnZoneChanged));
-	}
-
-	private void OnZoneChanged()
-	{
-		bool flag = ZoneManagement.IsInZone(this.zone);
-		bool enabled = this.invisibleWhileLoaded ? (!flag) : flag;
-		if (this.components != null)
-		{
-			for (int i = 0; i < this.components.Length; i++)
-			{
-				if (this.components[i] != null)
-				{
-					this.components[i].enabled = enabled;
-				}
-			}
-		}
-		if (this.m_renderers != null)
-		{
-			for (int j = 0; j < this.m_renderers.Length; j++)
-			{
-				if (this.m_renderers[j] != null)
-				{
-					this.m_renderers[j].enabled = enabled;
-				}
-			}
-		}
-		if (this.m_colliders != null)
-		{
-			for (int k = 0; k < this.m_colliders.Length; k++)
-			{
-				if (this.m_colliders[k] != null)
-				{
-					this.m_colliders[k].enabled = enabled;
-				}
-			}
-		}
-	}
-
 	[SerializeField]
 	private GTZone zone;
 
@@ -66,4 +17,54 @@ public class ZoneConditionalComponentEnabling : MonoBehaviour
 
 	[SerializeField]
 	private Collider[] m_colliders;
+
+	private void Start()
+	{
+		OnZoneChanged();
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(OnZoneChanged));
+	}
+
+	private void OnDestroy()
+	{
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(OnZoneChanged));
+	}
+
+	private void OnZoneChanged()
+	{
+		bool flag = ZoneManagement.IsInZone(zone);
+		bool flag2 = (invisibleWhileLoaded ? (!flag) : flag);
+		if (components != null)
+		{
+			for (int i = 0; i < components.Length; i++)
+			{
+				if (components[i] != null)
+				{
+					components[i].enabled = flag2;
+				}
+			}
+		}
+		if (m_renderers != null)
+		{
+			for (int j = 0; j < m_renderers.Length; j++)
+			{
+				if (m_renderers[j] != null)
+				{
+					m_renderers[j].enabled = flag2;
+				}
+			}
+		}
+		if (m_colliders == null)
+		{
+			return;
+		}
+		for (int k = 0; k < m_colliders.Length; k++)
+		{
+			if (m_colliders[k] != null)
+			{
+				m_colliders[k].enabled = flag2;
+			}
+		}
+	}
 }

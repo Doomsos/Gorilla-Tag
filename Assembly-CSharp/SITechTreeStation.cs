@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using GorillaTag;
 using Photon.Pun;
 using TMPro;
@@ -12,722 +11,33 @@ using UnityEngine.UI;
 [DefaultExecutionOrder(100)]
 public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 {
-	public SIScreenRegion ScreenRegion
+	public enum NodePopupState
 	{
-		get
-		{
-			return this.screenRegion;
-		}
+		Description,
+		NotEnoughResources,
+		Success,
+		PurchaseInitiation,
+		Loading
 	}
 
-	public SITechTreeNode CurrentNode
+	public enum TechTreeStationTerminalState
 	{
-		get
-		{
-			return this.techTreeSO.GetTreeNode(this.parentTerminal.ActivePage, this.currentNodeId);
-		}
-	}
-
-	public SITechTreePage CurrentPage
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.techTreeSO.GetTreePage((SITechTreePageId)this.parentTerminal.ActivePage);
-		}
-	}
-
-	public SIPlayer ActivePlayer
-	{
-		get
-		{
-			return this.parentTerminal.activePlayer;
-		}
-	}
-
-	public string ActivePlayerName
-	{
-		get
-		{
-			NetPlayer creator = this.ActivePlayer.gamePlayer.rig.Creator;
-			if (creator == null)
-			{
-				return null;
-			}
-			return creator.SanitizedNickName;
-		}
-	}
-
-	public bool IsAuthority
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager.gameEntityManager.IsAuthority();
-		}
-	}
-
-	public GameEntityManager GameEntityManager
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager.gameEntityManager;
-		}
-	}
-
-	public SuperInfectionManager SIManager
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager;
-		}
-	}
-
-	private void CollectButtonColliders()
-	{
-		SITechTreeStation.<>c__DisplayClass75_0 CS$<>8__locals1;
-		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|75_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
-		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|75_2(new GameObject[]
-		{
-			this.techTreeHelpScreen,
-			this.nodePopupScreen
-		}, ref CS$<>8__locals1);
-		this._nonPopupButtonColliders = (from b in CS$<>8__locals1.buttons
-		select b.GetComponent<Collider>()).ToList<Collider>();
-	}
-
-	private void SetNonPopupButtonsEnabled(bool enable)
-	{
-		foreach (Collider collider in this._nonPopupButtonColliders)
-		{
-			collider.enabled = enable;
-		}
-	}
-
-	private void OnEnable()
-	{
-		SIProgression instance = SIProgression.Instance;
-		instance.OnTreeReady = (Action)Delegate.Combine(instance.OnTreeReady, new Action(this.OnProgressionUpdate));
-		SIProgression instance2 = SIProgression.Instance;
-		instance2.OnInventoryReady = (Action)Delegate.Combine(instance2.OnInventoryReady, new Action(this.OnProgressionUpdate));
-		SIProgression instance3 = SIProgression.Instance;
-		instance3.OnNodeUnlocked = (Action<SIUpgradeType>)Delegate.Combine(instance3.OnNodeUnlocked, new Action<SIUpgradeType>(this.OnProgressionUpdateNode));
-		this._RefreshButtonsUsableState();
-	}
-
-	private void OnDisable()
-	{
-		SIProgression instance = SIProgression.Instance;
-		instance.OnTreeReady = (Action)Delegate.Remove(instance.OnTreeReady, new Action(this.OnProgressionUpdate));
-		SIProgression instance2 = SIProgression.Instance;
-		instance2.OnInventoryReady = (Action)Delegate.Remove(instance2.OnInventoryReady, new Action(this.OnProgressionUpdate));
-		SIProgression instance3 = SIProgression.Instance;
-		instance3.OnNodeUnlocked = (Action<SIUpgradeType>)Delegate.Remove(instance3.OnNodeUnlocked, new Action<SIUpgradeType>(this.OnProgressionUpdateNode));
-	}
-
-	public void Initialize()
-	{
-		if (this.initialized)
-		{
-			return;
-		}
-		this.initialized = true;
-		if (this.parentTerminal == null)
-		{
-			this.parentTerminal = base.GetComponentInParent<SICombinedTerminal>();
-		}
-		this.screenData = new Dictionary<SITechTreeStation.TechTreeStationTerminalState, GameObject>();
-		this.screenData.Add(SITechTreeStation.TechTreeStationTerminalState.WaitingForScan, this.waitingForScanScreen);
-		this.screenData.Add(SITechTreeStation.TechTreeStationTerminalState.TechTreePagesList, this.pagesListScreen);
-		this.screenData.Add(SITechTreeStation.TechTreeStationTerminalState.TechTreePage, this.pageScreen);
-		this.screenData.Add(SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup, this.nodePopupScreen);
-		this.screenData.Add(SITechTreeStation.TechTreeStationTerminalState.HelpScreen, this.techTreeHelpScreen);
-		this.techTreeSO.EnsureInitialized();
-		this.pageButtons = new List<SIGadgetListEntry>();
-		this.techTreePages = new List<SITechTreeUIPage>();
-		this.spriteByType.Add(SIResource.ResourceType.TechPoint, this.techPointSprite);
-		this.spriteByType.Add(SIResource.ResourceType.StrangeWood, this.strangeWoodSprite);
-		this.spriteByType.Add(SIResource.ResourceType.WeirdGear, this.weirdGearSprite);
-		this.spriteByType.Add(SIResource.ResourceType.VibratingSpring, this.vibratingSpringSprite);
-		this.spriteByType.Add(SIResource.ResourceType.BouncySand, this.bouncySandSprite);
-		this.spriteByType.Add(SIResource.ResourceType.FloppyMetal, this.floppyMetalSprite);
-		int count = this.techTreeSO.TreePages.Count;
-		for (int i = 0; i < count; i++)
-		{
-			SITechTreePage sitechTreePage = this.techTreeSO.TreePages[i];
-			if (sitechTreePage.IsValid)
-			{
-				this.techTreeIconById.Add(sitechTreePage.pageId, sitechTreePage.icon);
-				SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
-				StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
-				sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.PageSelect, i, -0.07f, count);
-				this.pageButtons.Add(sigadgetListEntry);
-				SITechTreeUIPage sitechTreeUIPage = Object.Instantiate<SITechTreeUIPage>(this.pagePrefab, this.pageParent);
-				StaticLodManager.TryAddLateInstantiatedMembers(sitechTreeUIPage.gameObject);
-				sitechTreeUIPage.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText);
-				this.techTreePages.Add(sitechTreeUIPage);
-			}
-		}
-		this.Reset();
-	}
-
-	private void _RefreshButtonsUsableState()
-	{
-		foreach (SIGadgetListEntry sigadgetListEntry in this.pageButtons)
-		{
-			SITechTreePageId id = (SITechTreePageId)sigadgetListEntry.Id;
-			SITechTreePage sitechTreePage;
-			if (this.techTreeSO.TryGetTreePage(id, out sitechTreePage))
-			{
-				sigadgetListEntry.ButtonContainer.SetUsable(sitechTreePage.IsAllowed);
-			}
-		}
-	}
-
-	public void Reset()
-	{
-		this.currentState = SITechTreeStation.TechTreeStationTerminalState.WaitingForScan;
-		this.nodePopupState = SITechTreeStation.NodePopupState.Description;
-		this.SetScreenVisibility(this.currentState, this.currentState);
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy)
-		{
-			this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.WaitingForScan, SITechTreeStation.TechTreeStationTerminalState.WaitingForScan);
-		}
-		stream.SendNext(this.currentNodeId);
-		stream.SendNext(this.helpScreenIndex);
-		stream.SendNext((int)this.nodePopupState);
-		stream.SendNext((int)this.currentState);
-		stream.SendNext((int)this.lastState);
-	}
-
-	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.currentNodeId = (int)stream.ReceiveNext();
-		if (this.CurrentNode == null)
-		{
-			this.currentNodeId = (int)this.CurrentPage.AllNodes[0].Value.upgradeType;
-		}
-		this.helpScreenIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, this.helpPopupScreens.Length - 1);
-		this.nodePopupState = (SITechTreeStation.NodePopupState)stream.ReceiveNext();
-		if (!Enum.IsDefined(typeof(SITechTreeStation.NodePopupState), this.nodePopupState))
-		{
-			this.nodePopupState = SITechTreeStation.NodePopupState.Description;
-		}
-		SITechTreeStation.TechTreeStationTerminalState techTreeStationTerminalState = (SITechTreeStation.TechTreeStationTerminalState)stream.ReceiveNext();
-		SITechTreeStation.TechTreeStationTerminalState techTreeStationTerminalState2 = (SITechTreeStation.TechTreeStationTerminalState)stream.ReceiveNext();
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SITechTreeStation.TechTreeStationTerminalState), techTreeStationTerminalState) || !Enum.IsDefined(typeof(SITechTreeStation.TechTreeStationTerminalState), techTreeStationTerminalState2))
-		{
-			this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.WaitingForScan, SITechTreeStation.TechTreeStationTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(techTreeStationTerminalState, techTreeStationTerminalState2);
-	}
-
-	public void ZoneDataSerializeWrite(BinaryWriter writer)
-	{
-		writer.Write(this.currentNodeId);
-		writer.Write(this.helpScreenIndex);
-		writer.Write((int)this.nodePopupState);
-		writer.Write((int)this.currentState);
-		writer.Write((int)this.lastState);
-	}
-
-	public void ZoneDataSerializeRead(BinaryReader reader)
-	{
-		this.currentNodeId = reader.ReadInt32();
-		if (this.CurrentNode == null || !Enum.IsDefined(typeof(SIUpgradeType), this.CurrentNode.upgradeType))
-		{
-			GTDev.LogError<string>(string.Format("SITechTreeStation.ZoneDataSerializeRead: Invalid currentNodeId {0} for page {1}. Falling back to first node.", this.currentNodeId, this.parentTerminal.ActivePage), null);
-			this.currentNodeId = (int)this.CurrentPage.AllNodes[0].Value.upgradeType;
-		}
-		this.helpScreenIndex = Mathf.Clamp(reader.ReadInt32(), 0, this.helpPopupScreens.Length - 1);
-		this.nodePopupState = (SITechTreeStation.NodePopupState)reader.ReadInt32();
-		if (!Enum.IsDefined(typeof(SITechTreeStation.NodePopupState), this.nodePopupState))
-		{
-			this.nodePopupState = SITechTreeStation.NodePopupState.Description;
-		}
-		SITechTreeStation.TechTreeStationTerminalState techTreeStationTerminalState = (SITechTreeStation.TechTreeStationTerminalState)reader.ReadInt32();
-		SITechTreeStation.TechTreeStationTerminalState techTreeStationTerminalState2 = (SITechTreeStation.TechTreeStationTerminalState)reader.ReadInt32();
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SITechTreeStation.TechTreeStationTerminalState), techTreeStationTerminalState) || !Enum.IsDefined(typeof(SITechTreeStation.TechTreeStationTerminalState), techTreeStationTerminalState2))
-		{
-			this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.WaitingForScan, SITechTreeStation.TechTreeStationTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(techTreeStationTerminalState, techTreeStationTerminalState2);
-	}
-
-	public void UpdateState(SITechTreeStation.TechTreeStationTerminalState newState, SITechTreeStation.TechTreeStationTerminalState newLastState)
-	{
-		if (!this.IsPopupState(newLastState))
-		{
-			this.currentState = newLastState;
-		}
-		this.UpdateState(newState);
-	}
-
-	public void UpdateState(SITechTreeStation.TechTreeStationTerminalState newState)
-	{
-		if (!this.IsPopupState(this.currentState))
-		{
-			this.lastState = this.currentState;
-		}
-		this.currentState = newState;
-		this.SetScreenVisibility(this.currentState, this.lastState);
-		switch (this.currentState)
-		{
-		case SITechTreeStation.TechTreeStationTerminalState.WaitingForScan:
-			break;
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreePagesList:
-			this.playerNameText.text = this.ActivePlayerName;
-			this.screenDescriptionText.text = "TECH TREE PAGES";
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreePage:
-		{
-			this.playerNameText.text = this.ActivePlayerName;
-			this.UpdateNodeData(this.ActivePlayer);
-			TMP_Text tmp_Text = this.screenDescriptionText;
-			SITechTreePage treePage = this.techTreeSO.GetTreePage((SITechTreePageId)this.parentTerminal.ActivePage);
-			tmp_Text.text = ((treePage != null) ? treePage.nickName : null);
-			foreach (SIGadgetListEntry sigadgetListEntry in this.pageButtons)
-			{
-				sigadgetListEntry.selectionIndicator.SetActive(sigadgetListEntry.Id == this.parentTerminal.ActivePage);
-			}
-			foreach (SITechTreeUIPage sitechTreeUIPage in this.techTreePages)
-			{
-				sitechTreeUIPage.gameObject.SetActive(sitechTreeUIPage.id == (SITechTreePageId)this.parentTerminal.ActivePage);
-			}
-			Sprite sprite;
-			this.techTreeIconById.TryGetValue((SITechTreePageId)this.parentTerminal.ActivePage, out sprite);
-			this.techTreeIcon.sprite = sprite;
-			return;
-		}
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup:
-			switch (this.nodePopupState)
-			{
-			case SITechTreeStation.NodePopupState.Description:
-				this.nodeNameText.text = this.CurrentNode.nickName;
-				this.nodeDescriptionText.text = this.CurrentNode.description;
-				if (this.ActivePlayer.NodeResearched(this.CurrentNode.upgradeType))
-				{
-					this.nodeResearched.SetActive(true);
-					this.nodeLocked.SetActive(false);
-					this.nodeAvailable.SetActive(false);
-					this.nodeResearchButton.SetActive(false);
-					this.canAffordNode.SetActive(false);
-					this.cantAffordNode.SetActive(false);
-				}
-				else if (this.ActivePlayer.NodeParentsUnlocked(this.CurrentNode.upgradeType))
-				{
-					this.nodeResearched.SetActive(false);
-					this.nodeLocked.SetActive(false);
-					this.nodeAvailable.SetActive(true);
-					this.nodeResearchButton.SetActive(true);
-					bool flag = this.ActivePlayer.PlayerCanAffordNode(this.CurrentNode);
-					this.canAffordNode.SetActive(flag);
-					this.cantAffordNode.SetActive(!flag);
-				}
-				else
-				{
-					this.nodeResearched.SetActive(false);
-					this.nodeAvailable.SetActive(false);
-					this.nodeLocked.SetActive(true);
-					this.nodeResearchButton.SetActive(false);
-					this.canAffordNode.SetActive(false);
-					this.cantAffordNode.SetActive(false);
-				}
-				this.nodeResourceTypeText.text = this.FormattedCurrentResourceTypesForNode(this.CurrentNode);
-				this.nodeResourceCostText.text = this.FormattedResearchCost(this.CurrentNode);
-				this.playerCurrentResourceAmountsText.text = this.FormattedCurrentResourceAmountsForNode(this.CurrentNode);
-				break;
-			case SITechTreeStation.NodePopupState.NotEnoughResources:
-				this.nodeNameResearchMessageText.text = "NOT ENOUGH RESOURCES TO UNLOCK NODE! GATHER MORE AND TRY AGAIN!";
-				break;
-			case SITechTreeStation.NodePopupState.Success:
-				this.nodeNameResearchMessageText.text = "SUCCESSFULLY UNLOCKED TECH NODE!";
-				break;
-			case SITechTreeStation.NodePopupState.Loading:
-				if (this.ActivePlayer.NodeResearched(this.CurrentNode.upgradeType))
-				{
-					this.nodePopupState = SITechTreeStation.NodePopupState.Success;
-					this.nodeNameResearchMessageText.text = "SUCCESSFULLY UNLOCKED TECH NODE!";
-				}
-				else
-				{
-					this.nodeNameResearchMessageText.text = "ATTEMPTING TO UNLOCK NODE\n\nLOADING . . .";
-				}
-				break;
-			}
-			this.UpdateNodePopupPage();
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.HelpScreen:
-			this.UpdateHelpButtonPage(this.helpScreenIndex);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void SetScreenVisibility(SITechTreeStation.TechTreeStationTerminalState currentState, SITechTreeStation.TechTreeStationTerminalState lastState)
-	{
-		bool flag = this.IsPopupState(currentState);
-		this.background.color = ((currentState == SITechTreeStation.TechTreeStationTerminalState.WaitingForScan) ? Color.white : ((this.ActivePlayer != null && this.ActivePlayer.gamePlayer.IsLocal()) ? this.active : this.notActive));
-		foreach (SITechTreeStation.TechTreeStationTerminalState techTreeStationTerminalState in this.screenData.Keys)
-		{
-			if (techTreeStationTerminalState == SITechTreeStation.TechTreeStationTerminalState.TechTreePagesList)
-			{
-				this.screenData[techTreeStationTerminalState].SetActive(currentState > SITechTreeStation.TechTreeStationTerminalState.WaitingForScan);
-			}
-			else
-			{
-				bool flag2 = techTreeStationTerminalState == currentState || (flag && techTreeStationTerminalState == lastState);
-				if (this.screenData[techTreeStationTerminalState].activeSelf != flag2)
-				{
-					this.screenData[techTreeStationTerminalState].SetActive(flag2);
-				}
-			}
-		}
-		if (this.popupScreen.activeSelf != flag)
-		{
-			this.popupScreen.SetActive(flag);
-		}
-		bool flag3 = currentState > SITechTreeStation.TechTreeStationTerminalState.WaitingForScan;
-		this.screenDescriptionText.gameObject.SetActive(flag3);
-		this.playerNameText.gameObject.SetActive(flag3);
-		this.SetNonPopupButtonsEnabled(!flag);
-	}
-
-	public bool IsPopupState(SITechTreeStation.TechTreeStationTerminalState state)
-	{
-		return state == SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup || state == SITechTreeStation.TechTreeStationTerminalState.HelpScreen;
-	}
-
-	public void PlayerHandScanned(int actorNr)
-	{
-		if (!this.IsAuthority)
-		{
-			this.parentTerminal.PlayerHandScanned(actorNr);
-			return;
-		}
-		this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreePage);
-	}
-
-	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
-	{
-		if (!isPopupButton)
-		{
-			this._nonPopupButtonColliders.Add(button.GetComponent<Collider>());
-		}
-	}
-
-	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
-	{
-		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (this.ActivePlayer == null || this.ActivePlayer != SIPlayer.LocalPlayer))
-		{
-			this.parentTerminal.PlayWrongPlayerBuzz(this.uiCenter);
-		}
-		else
-		{
-			this.soundBankPlayer.Play();
-		}
-		if (actorNr == SIPlayer.LocalPlayer.ActorNr && this.ActivePlayer == SIPlayer.LocalPlayer && this.currentState == SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup && this.nodePopupState == SITechTreeStation.NodePopupState.Description && buttonType == SITouchscreenButton.SITouchscreenButtonType.Research && !SIPlayer.LocalPlayer.NodeResearched(this.CurrentNode.upgradeType) && SIPlayer.LocalPlayer.NodeParentsUnlocked(this.CurrentNode.upgradeType))
-		{
-			SIProgression.Instance.TryUnlock(this.CurrentNode.upgradeType);
-		}
-		if (!this.IsAuthority)
-		{
-			this.parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.TechTree);
-			return;
-		}
-		if (this.ActivePlayer == null || actorNr != this.ActivePlayer.ActorNr)
-		{
-			return;
-		}
-		this.soundBankPlayer.Play();
-		if (buttonType == SITouchscreenButton.SITouchscreenButtonType.PageSelect)
-		{
-			this.parentTerminal.SetActivePage(data);
-			this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreePage);
-			return;
-		}
-		switch (this.currentState)
-		{
-		case SITechTreeStation.TechTreeStationTerminalState.WaitingForScan:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.HelpScreen);
-			}
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreePagesList:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.HelpScreen);
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
-			{
-				this.parentTerminal.SetActivePage(data);
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreePage);
-			}
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreePage:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
-			{
-				this.currentNodeId = data;
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreePagesList);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.HelpScreen);
-				return;
-			}
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup:
-			if (this.nodePopupState == SITechTreeStation.NodePopupState.Description)
-			{
-				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-				{
-					this.UpdateState(this.lastState);
-				}
-				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Research)
-				{
-					if (this.ActivePlayer.PlayerCanAffordNode(this.CurrentNode))
-					{
-						this.nodePopupState = SITechTreeStation.NodePopupState.Loading;
-					}
-					else
-					{
-						this.nodePopupState = SITechTreeStation.NodePopupState.NotEnoughResources;
-					}
-					this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup);
-					return;
-				}
-			}
-			else if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.nodePopupState = SITechTreeStation.NodePopupState.Description;
-				this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreeNodePopup);
-			}
-			return;
-		case SITechTreeStation.TechTreeStationTerminalState.HelpScreen:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-			{
-				this.helpScreenIndex = 0;
-				this.UpdateState(this.lastState);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Next)
-			{
-				this.helpScreenIndex = Mathf.Clamp(this.helpScreenIndex + 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.helpScreenIndex);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.helpScreenIndex = Mathf.Clamp(this.helpScreenIndex - 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.helpScreenIndex);
-			}
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
-	{
-	}
-
-	public void UpdateHelpButtonPage(int helpButtonPageIndex)
-	{
-		for (int i = 0; i < this.helpPopupScreens.Length; i++)
-		{
-			this.helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
-		}
-	}
-
-	public void UpdateNodePopupPage()
-	{
-		int num = (this.nodePopupState == SITechTreeStation.NodePopupState.Description) ? 0 : 1;
-		if (this.nodePopupScreens[0].activeSelf != (num == 0))
-		{
-			this.nodePopupScreens[0].SetActive(num == 0);
-		}
-		if (this.nodePopupScreens[1].activeSelf != (num == 1))
-		{
-			this.nodePopupScreens[1].SetActive(num == 1);
-		}
-	}
-
-	public void UpdateNodeData(SIPlayer player)
-	{
-		if (player == null)
-		{
-			for (int i = 0; i < this.techTreePages.Count; i++)
-			{
-				this.techTreePages[i].PopulateDefaultNodeData();
-			}
-			return;
-		}
-		for (int j = 0; j < this.techTreePages.Count; j++)
-		{
-			this.techTreePages[j].PopulatePlayerNodeData(player);
-		}
-	}
-
-	public string FormattedResearchCost(SITechTreeNode node)
-	{
-		SIProgression.SINode sinode;
-		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out sinode))
-		{
-			string text = "";
-			text = text + sinode.costs[SIResource.ResourceType.TechPoint].ToString() + "\n";
-			foreach (KeyValuePair<SIResource.ResourceType, int> keyValuePair in sinode.costs)
-			{
-				if (keyValuePair.Key != SIResource.ResourceType.TechPoint)
-				{
-					text += keyValuePair.Value.ToString();
-					return text;
-				}
-			}
-			return text;
-		}
-		return string.Join<int>("\n", from c in node.nodeCost
-		select c.amount);
-	}
-
-	public string FormattedCurrentResourceAmountsForNode(SITechTreeNode node)
-	{
-		string text = "";
-		SIProgression.SINode sinode;
-		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out sinode))
-		{
-			text = text + this.ActivePlayer.CurrentProgression.resourceArray[0].ToString() + "\n";
-			using (Dictionary<SIResource.ResourceType, int>.Enumerator enumerator = sinode.costs.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					KeyValuePair<SIResource.ResourceType, int> keyValuePair = enumerator.Current;
-					if (keyValuePair.Key != SIResource.ResourceType.TechPoint)
-					{
-						text = text + this.ActivePlayer.CurrentProgression.resourceArray[(int)keyValuePair.Key].ToString() + "\n";
-					}
-				}
-				return text;
-			}
-		}
-		for (int i = 0; i < node.nodeCost.Length; i++)
-		{
-			text = text + this.ActivePlayer.CurrentProgression.resourceArray[(int)node.nodeCost[i].type].ToString() + "\n";
-		}
-		return text;
-	}
-
-	public string FormattedCurrentResourceTypesForNode(SITechTreeNode node)
-	{
-		string text = "";
-		SIProgression.SINode sinode;
-		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out sinode))
-		{
-			text = text + SIResource.ResourceType.TechPoint.ToString().ToUpperInvariant() + "\n";
-			using (Dictionary<SIResource.ResourceType, int>.Enumerator enumerator = sinode.costs.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					KeyValuePair<SIResource.ResourceType, int> keyValuePair = enumerator.Current;
-					if (keyValuePair.Key != SIResource.ResourceType.TechPoint)
-					{
-						text = text + keyValuePair.Key.ToString().ToUpperInvariant() + "\n";
-						this.resourceCost.sprite = this.spriteByType[keyValuePair.Key];
-					}
-				}
-				return text;
-			}
-		}
-		for (int i = 0; i < node.nodeCost.Length; i++)
-		{
-			text = text + node.nodeCost[i].type.ToString().ToUpperInvariant() + "\n";
-		}
-		return text;
-	}
-
-	private void OnProgressionUpdate()
-	{
-		this.UpdateNodeData(this.ActivePlayer);
-		this.UpdateState(this.currentState);
-	}
-
-	private void OnProgressionUpdateNode(SIUpgradeType type)
-	{
-		this.OnProgressionUpdate();
-	}
-
-	public void SetActivePage()
-	{
-		if (this.CurrentNode == null)
-		{
-			this.currentNodeId = this.CurrentPage.AllNodes[0].Value.upgradeType.GetNodeId();
-		}
-		if (this.ActivePlayer != null)
-		{
-			this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.TechTreePage);
-			return;
-		}
-		this.UpdateState(SITechTreeStation.TechTreeStationTerminalState.WaitingForScan);
-	}
-
-	public bool IsValidPage(int pageId)
-	{
-		if (pageId < 0)
-		{
-			return false;
-		}
-		using (List<SITechTreeUIPage>.Enumerator enumerator = this.techTreePages.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current.id == (SITechTreePageId)pageId)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	GameObject ITouchScreenStation.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	[CompilerGenerated]
-	internal static void <CollectButtonColliders>g__RemoveButtonsInside|75_2(GameObject[] roots, ref SITechTreeStation.<>c__DisplayClass75_0 A_1)
-	{
-		for (int i = 0; i < roots.Length; i++)
-		{
-			foreach (SITouchscreenButton item in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
-			{
-				A_1.buttons.Remove(item);
-			}
-		}
+		WaitingForScan,
+		TechTreePagesList,
+		TechTreePage,
+		TechTreeNodePopup,
+		HelpScreen
 	}
 
 	private const string preLog = "[GT/SITechTreeStation]  ";
 
 	private const string preErr = "ERROR!!!  ";
 
-	private Dictionary<SITechTreeStation.TechTreeStationTerminalState, GameObject> screenData;
+	private Dictionary<TechTreeStationTerminalState, GameObject> screenData;
 
-	public SITechTreeStation.TechTreeStationTerminalState currentState;
+	public TechTreeStationTerminalState currentState;
 
-	public SITechTreeStation.TechTreeStationTerminalState lastState;
+	public TechTreeStationTerminalState lastState;
 
 	public SICombinedTerminal parentTerminal;
 
@@ -830,7 +140,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	[Header("Research Attempt")]
 	public TextMeshProUGUI nodeNameResearchMessageText;
 
-	public SITechTreeStation.NodePopupState nodePopupState;
+	public NodePopupState nodePopupState;
 
 	[Header("Help")]
 	public int helpScreenIndex;
@@ -852,21 +162,635 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 
 	private bool initialized;
 
-	public enum NodePopupState
+	public SIScreenRegion ScreenRegion => screenRegion;
+
+	public SITechTreeNode CurrentNode => techTreeSO.GetTreeNode(parentTerminal.ActivePage, currentNodeId);
+
+	public SITechTreePage CurrentPage => parentTerminal.superInfection.techTreeSO.GetTreePage((SITechTreePageId)parentTerminal.ActivePage);
+
+	public SIPlayer ActivePlayer => parentTerminal.activePlayer;
+
+	public string ActivePlayerName => ActivePlayer.gamePlayer.rig.Creator?.SanitizedNickName;
+
+	public bool IsAuthority => parentTerminal.superInfection.siManager.gameEntityManager.IsAuthority();
+
+	public GameEntityManager GameEntityManager => parentTerminal.superInfection.siManager.gameEntityManager;
+
+	public SuperInfectionManager SIManager => parentTerminal.superInfection.siManager;
+
+	private void CollectButtonColliders()
 	{
-		Description,
-		NotEnoughResources,
-		Success,
-		PurchaseInitiation,
-		Loading
+		List<SITouchscreenButton> buttons = GetComponentsInChildren<SITouchscreenButton>(includeInactive: true).ToList();
+		RemoveButtonsInside((from d in GetComponentsInChildren<DestroyIfNotBeta>()
+			select d.gameObject).ToArray());
+		RemoveButtonsInside(new GameObject[2] { techTreeHelpScreen, nodePopupScreen });
+		_nonPopupButtonColliders = buttons.Select((SITouchscreenButton b) => b.GetComponent<Collider>()).ToList();
+		void RemoveButtonsInside(GameObject[] roots)
+		{
+			for (int i = 0; i < roots.Length; i++)
+			{
+				SITouchscreenButton[] componentsInChildren = roots[i].GetComponentsInChildren<SITouchscreenButton>(includeInactive: true);
+				foreach (SITouchscreenButton item in componentsInChildren)
+				{
+					buttons.Remove(item);
+				}
+			}
+		}
 	}
 
-	public enum TechTreeStationTerminalState
+	private void SetNonPopupButtonsEnabled(bool enable)
 	{
-		WaitingForScan,
-		TechTreePagesList,
-		TechTreePage,
-		TechTreeNodePopup,
-		HelpScreen
+		foreach (Collider nonPopupButtonCollider in _nonPopupButtonColliders)
+		{
+			nonPopupButtonCollider.enabled = enable;
+		}
+	}
+
+	private void OnEnable()
+	{
+		SIProgression instance = SIProgression.Instance;
+		instance.OnTreeReady = (Action)Delegate.Combine(instance.OnTreeReady, new Action(OnProgressionUpdate));
+		SIProgression instance2 = SIProgression.Instance;
+		instance2.OnInventoryReady = (Action)Delegate.Combine(instance2.OnInventoryReady, new Action(OnProgressionUpdate));
+		SIProgression instance3 = SIProgression.Instance;
+		instance3.OnNodeUnlocked = (Action<SIUpgradeType>)Delegate.Combine(instance3.OnNodeUnlocked, new Action<SIUpgradeType>(OnProgressionUpdateNode));
+		_RefreshButtonsUsableState();
+	}
+
+	private void OnDisable()
+	{
+		SIProgression instance = SIProgression.Instance;
+		instance.OnTreeReady = (Action)Delegate.Remove(instance.OnTreeReady, new Action(OnProgressionUpdate));
+		SIProgression instance2 = SIProgression.Instance;
+		instance2.OnInventoryReady = (Action)Delegate.Remove(instance2.OnInventoryReady, new Action(OnProgressionUpdate));
+		SIProgression instance3 = SIProgression.Instance;
+		instance3.OnNodeUnlocked = (Action<SIUpgradeType>)Delegate.Remove(instance3.OnNodeUnlocked, new Action<SIUpgradeType>(OnProgressionUpdateNode));
+	}
+
+	public void Initialize()
+	{
+		if (initialized)
+		{
+			return;
+		}
+		initialized = true;
+		if (parentTerminal == null)
+		{
+			parentTerminal = GetComponentInParent<SICombinedTerminal>();
+		}
+		screenData = new Dictionary<TechTreeStationTerminalState, GameObject>();
+		screenData.Add(TechTreeStationTerminalState.WaitingForScan, waitingForScanScreen);
+		screenData.Add(TechTreeStationTerminalState.TechTreePagesList, pagesListScreen);
+		screenData.Add(TechTreeStationTerminalState.TechTreePage, pageScreen);
+		screenData.Add(TechTreeStationTerminalState.TechTreeNodePopup, nodePopupScreen);
+		screenData.Add(TechTreeStationTerminalState.HelpScreen, techTreeHelpScreen);
+		techTreeSO.EnsureInitialized();
+		pageButtons = new List<SIGadgetListEntry>();
+		techTreePages = new List<SITechTreeUIPage>();
+		spriteByType.Add(SIResource.ResourceType.TechPoint, techPointSprite);
+		spriteByType.Add(SIResource.ResourceType.StrangeWood, strangeWoodSprite);
+		spriteByType.Add(SIResource.ResourceType.WeirdGear, weirdGearSprite);
+		spriteByType.Add(SIResource.ResourceType.VibratingSpring, vibratingSpringSprite);
+		spriteByType.Add(SIResource.ResourceType.BouncySand, bouncySandSprite);
+		spriteByType.Add(SIResource.ResourceType.FloppyMetal, floppyMetalSprite);
+		int count = techTreeSO.TreePages.Count;
+		for (int i = 0; i < count; i++)
+		{
+			SITechTreePage sITechTreePage = techTreeSO.TreePages[i];
+			if (sITechTreePage.IsValid)
+			{
+				techTreeIconById.Add(sITechTreePage.pageId, sITechTreePage.icon);
+				SIGadgetListEntry sIGadgetListEntry = UnityEngine.Object.Instantiate(pageListEntryPrefab, pageListParent);
+				StaticLodManager.TryAddLateInstantiatedMembers(sIGadgetListEntry.gameObject);
+				sIGadgetListEntry.Configure(this, sITechTreePage, parentTerminal.zeroZeroImage, parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.PageSelect, i, -0.07f, count);
+				pageButtons.Add(sIGadgetListEntry);
+				SITechTreeUIPage sITechTreeUIPage = UnityEngine.Object.Instantiate(pagePrefab, pageParent);
+				StaticLodManager.TryAddLateInstantiatedMembers(sITechTreeUIPage.gameObject);
+				sITechTreeUIPage.Configure(this, sITechTreePage, parentTerminal.zeroZeroImage, parentTerminal.onePointTwoText);
+				techTreePages.Add(sITechTreeUIPage);
+			}
+		}
+		Reset();
+	}
+
+	private void _RefreshButtonsUsableState()
+	{
+		foreach (SIGadgetListEntry pageButton in pageButtons)
+		{
+			SITechTreePageId id = (SITechTreePageId)pageButton.Id;
+			if (techTreeSO.TryGetTreePage(id, out var treePage))
+			{
+				pageButton.ButtonContainer.SetUsable(treePage.IsAllowed);
+			}
+		}
+	}
+
+	public void Reset()
+	{
+		currentState = TechTreeStationTerminalState.WaitingForScan;
+		nodePopupState = NodePopupState.Description;
+		SetScreenVisibility(currentState, currentState);
+	}
+
+	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy)
+		{
+			UpdateState(TechTreeStationTerminalState.WaitingForScan, TechTreeStationTerminalState.WaitingForScan);
+		}
+		stream.SendNext(currentNodeId);
+		stream.SendNext(helpScreenIndex);
+		stream.SendNext((int)nodePopupState);
+		stream.SendNext((int)currentState);
+		stream.SendNext((int)lastState);
+	}
+
+	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		currentNodeId = (int)stream.ReceiveNext();
+		if (CurrentNode == null)
+		{
+			currentNodeId = (int)CurrentPage.AllNodes[0].Value.upgradeType;
+		}
+		helpScreenIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, helpPopupScreens.Length - 1);
+		nodePopupState = (NodePopupState)stream.ReceiveNext();
+		if (!Enum.IsDefined(typeof(NodePopupState), nodePopupState))
+		{
+			nodePopupState = NodePopupState.Description;
+		}
+		TechTreeStationTerminalState techTreeStationTerminalState = (TechTreeStationTerminalState)stream.ReceiveNext();
+		TechTreeStationTerminalState techTreeStationTerminalState2 = (TechTreeStationTerminalState)stream.ReceiveNext();
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(TechTreeStationTerminalState), techTreeStationTerminalState) || !Enum.IsDefined(typeof(TechTreeStationTerminalState), techTreeStationTerminalState2))
+		{
+			UpdateState(TechTreeStationTerminalState.WaitingForScan, TechTreeStationTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(techTreeStationTerminalState, techTreeStationTerminalState2);
+		}
+	}
+
+	public void ZoneDataSerializeWrite(BinaryWriter writer)
+	{
+		writer.Write(currentNodeId);
+		writer.Write(helpScreenIndex);
+		writer.Write((int)nodePopupState);
+		writer.Write((int)currentState);
+		writer.Write((int)lastState);
+	}
+
+	public void ZoneDataSerializeRead(BinaryReader reader)
+	{
+		currentNodeId = reader.ReadInt32();
+		if (CurrentNode == null || !Enum.IsDefined(typeof(SIUpgradeType), CurrentNode.upgradeType))
+		{
+			GTDev.LogError($"SITechTreeStation.ZoneDataSerializeRead: Invalid currentNodeId {currentNodeId} for page {parentTerminal.ActivePage}. Falling back to first node.");
+			currentNodeId = (int)CurrentPage.AllNodes[0].Value.upgradeType;
+		}
+		helpScreenIndex = Mathf.Clamp(reader.ReadInt32(), 0, helpPopupScreens.Length - 1);
+		nodePopupState = (NodePopupState)reader.ReadInt32();
+		if (!Enum.IsDefined(typeof(NodePopupState), nodePopupState))
+		{
+			nodePopupState = NodePopupState.Description;
+		}
+		TechTreeStationTerminalState techTreeStationTerminalState = (TechTreeStationTerminalState)reader.ReadInt32();
+		TechTreeStationTerminalState techTreeStationTerminalState2 = (TechTreeStationTerminalState)reader.ReadInt32();
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(TechTreeStationTerminalState), techTreeStationTerminalState) || !Enum.IsDefined(typeof(TechTreeStationTerminalState), techTreeStationTerminalState2))
+		{
+			UpdateState(TechTreeStationTerminalState.WaitingForScan, TechTreeStationTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(techTreeStationTerminalState, techTreeStationTerminalState2);
+		}
+	}
+
+	public void UpdateState(TechTreeStationTerminalState newState, TechTreeStationTerminalState newLastState)
+	{
+		if (!IsPopupState(newLastState))
+		{
+			currentState = newLastState;
+		}
+		UpdateState(newState);
+	}
+
+	public void UpdateState(TechTreeStationTerminalState newState)
+	{
+		if (!IsPopupState(currentState))
+		{
+			lastState = currentState;
+		}
+		currentState = newState;
+		SetScreenVisibility(currentState, lastState);
+		switch (currentState)
+		{
+		case TechTreeStationTerminalState.TechTreePagesList:
+			playerNameText.text = ActivePlayerName;
+			screenDescriptionText.text = "TECH TREE PAGES";
+			break;
+		case TechTreeStationTerminalState.TechTreePage:
+		{
+			playerNameText.text = ActivePlayerName;
+			UpdateNodeData(ActivePlayer);
+			screenDescriptionText.text = techTreeSO.GetTreePage((SITechTreePageId)parentTerminal.ActivePage)?.nickName;
+			foreach (SIGadgetListEntry pageButton in pageButtons)
+			{
+				pageButton.selectionIndicator.SetActive(pageButton.Id == parentTerminal.ActivePage);
+			}
+			foreach (SITechTreeUIPage techTreePage in techTreePages)
+			{
+				techTreePage.gameObject.SetActive(techTreePage.id == (SITechTreePageId)parentTerminal.ActivePage);
+			}
+			techTreeIconById.TryGetValue((SITechTreePageId)parentTerminal.ActivePage, out var value);
+			techTreeIcon.sprite = value;
+			break;
+		}
+		case TechTreeStationTerminalState.TechTreeNodePopup:
+			switch (nodePopupState)
+			{
+			case NodePopupState.Description:
+				nodeNameText.text = CurrentNode.nickName;
+				nodeDescriptionText.text = CurrentNode.description;
+				if (ActivePlayer.NodeResearched(CurrentNode.upgradeType))
+				{
+					nodeResearched.SetActive(value: true);
+					nodeLocked.SetActive(value: false);
+					nodeAvailable.SetActive(value: false);
+					nodeResearchButton.SetActive(value: false);
+					canAffordNode.SetActive(value: false);
+					cantAffordNode.SetActive(value: false);
+				}
+				else if (ActivePlayer.NodeParentsUnlocked(CurrentNode.upgradeType))
+				{
+					nodeResearched.SetActive(value: false);
+					nodeLocked.SetActive(value: false);
+					nodeAvailable.SetActive(value: true);
+					nodeResearchButton.SetActive(value: true);
+					bool flag = ActivePlayer.PlayerCanAffordNode(CurrentNode);
+					canAffordNode.SetActive(flag);
+					cantAffordNode.SetActive(!flag);
+				}
+				else
+				{
+					nodeResearched.SetActive(value: false);
+					nodeAvailable.SetActive(value: false);
+					nodeLocked.SetActive(value: true);
+					nodeResearchButton.SetActive(value: false);
+					canAffordNode.SetActive(value: false);
+					cantAffordNode.SetActive(value: false);
+				}
+				nodeResourceTypeText.text = FormattedCurrentResourceTypesForNode(CurrentNode);
+				nodeResourceCostText.text = FormattedResearchCost(CurrentNode);
+				playerCurrentResourceAmountsText.text = FormattedCurrentResourceAmountsForNode(CurrentNode);
+				break;
+			case NodePopupState.Loading:
+				if (ActivePlayer.NodeResearched(CurrentNode.upgradeType))
+				{
+					nodePopupState = NodePopupState.Success;
+					nodeNameResearchMessageText.text = "SUCCESSFULLY UNLOCKED TECH NODE!";
+				}
+				else
+				{
+					nodeNameResearchMessageText.text = "ATTEMPTING TO UNLOCK NODE\n\nLOADING . . .";
+				}
+				break;
+			case NodePopupState.Success:
+				nodeNameResearchMessageText.text = "SUCCESSFULLY UNLOCKED TECH NODE!";
+				break;
+			case NodePopupState.NotEnoughResources:
+				nodeNameResearchMessageText.text = "NOT ENOUGH RESOURCES TO UNLOCK NODE! GATHER MORE AND TRY AGAIN!";
+				break;
+			}
+			UpdateNodePopupPage();
+			break;
+		case TechTreeStationTerminalState.HelpScreen:
+			UpdateHelpButtonPage(helpScreenIndex);
+			break;
+		case TechTreeStationTerminalState.WaitingForScan:
+			break;
+		}
+	}
+
+	public void SetScreenVisibility(TechTreeStationTerminalState currentState, TechTreeStationTerminalState lastState)
+	{
+		bool flag = IsPopupState(currentState);
+		background.color = ((currentState == TechTreeStationTerminalState.WaitingForScan) ? Color.white : ((ActivePlayer != null && ActivePlayer.gamePlayer.IsLocal()) ? active : notActive));
+		foreach (TechTreeStationTerminalState key in screenData.Keys)
+		{
+			if (key == TechTreeStationTerminalState.TechTreePagesList)
+			{
+				screenData[key].SetActive(currentState != TechTreeStationTerminalState.WaitingForScan);
+				continue;
+			}
+			bool flag2 = key == currentState || (flag && key == lastState);
+			if (screenData[key].activeSelf != flag2)
+			{
+				screenData[key].SetActive(flag2);
+			}
+		}
+		if (popupScreen.activeSelf != flag)
+		{
+			popupScreen.SetActive(flag);
+		}
+		bool flag3 = currentState != TechTreeStationTerminalState.WaitingForScan;
+		screenDescriptionText.gameObject.SetActive(flag3);
+		playerNameText.gameObject.SetActive(flag3);
+		SetNonPopupButtonsEnabled(!flag);
+	}
+
+	public bool IsPopupState(TechTreeStationTerminalState state)
+	{
+		if (state != TechTreeStationTerminalState.TechTreeNodePopup)
+		{
+			return state == TechTreeStationTerminalState.HelpScreen;
+		}
+		return true;
+	}
+
+	public void PlayerHandScanned(int actorNr)
+	{
+		if (!IsAuthority)
+		{
+			parentTerminal.PlayerHandScanned(actorNr);
+		}
+		else
+		{
+			UpdateState(TechTreeStationTerminalState.TechTreePage);
+		}
+	}
+
+	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
+	{
+		if (!isPopupButton)
+		{
+			_nonPopupButtonColliders.Add(button.GetComponent<Collider>());
+		}
+	}
+
+	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
+	{
+		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (ActivePlayer == null || ActivePlayer != SIPlayer.LocalPlayer))
+		{
+			parentTerminal.PlayWrongPlayerBuzz(uiCenter);
+		}
+		else
+		{
+			soundBankPlayer.Play();
+		}
+		if (actorNr == SIPlayer.LocalPlayer.ActorNr && ActivePlayer == SIPlayer.LocalPlayer && currentState == TechTreeStationTerminalState.TechTreeNodePopup && nodePopupState == NodePopupState.Description && buttonType == SITouchscreenButton.SITouchscreenButtonType.Research && !SIPlayer.LocalPlayer.NodeResearched(CurrentNode.upgradeType) && SIPlayer.LocalPlayer.NodeParentsUnlocked(CurrentNode.upgradeType))
+		{
+			SIProgression.Instance.TryUnlock(CurrentNode.upgradeType);
+		}
+		if (!IsAuthority)
+		{
+			parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.TechTree);
+		}
+		else
+		{
+			if (ActivePlayer == null || actorNr != ActivePlayer.ActorNr)
+			{
+				return;
+			}
+			soundBankPlayer.Play();
+			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.PageSelect)
+			{
+				parentTerminal.SetActivePage(data);
+				UpdateState(TechTreeStationTerminalState.TechTreePage);
+				return;
+			}
+			switch (currentState)
+			{
+			case TechTreeStationTerminalState.WaitingForScan:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(TechTreeStationTerminalState.HelpScreen);
+				}
+				break;
+			case TechTreeStationTerminalState.TechTreePagesList:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(TechTreeStationTerminalState.HelpScreen);
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
+				{
+					parentTerminal.SetActivePage(data);
+					UpdateState(TechTreeStationTerminalState.TechTreePage);
+				}
+				break;
+			case TechTreeStationTerminalState.TechTreePage:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.Select:
+					currentNodeId = data;
+					UpdateState(TechTreeStationTerminalState.TechTreeNodePopup);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Back:
+					UpdateState(TechTreeStationTerminalState.TechTreePagesList);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Help:
+					UpdateState(TechTreeStationTerminalState.HelpScreen);
+					break;
+				}
+				break;
+			case TechTreeStationTerminalState.TechTreeNodePopup:
+				if (nodePopupState == NodePopupState.Description)
+				{
+					if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
+					{
+						UpdateState(lastState);
+					}
+					if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Research)
+					{
+						if (ActivePlayer.PlayerCanAffordNode(CurrentNode))
+						{
+							nodePopupState = NodePopupState.Loading;
+						}
+						else
+						{
+							nodePopupState = NodePopupState.NotEnoughResources;
+						}
+						UpdateState(TechTreeStationTerminalState.TechTreeNodePopup);
+					}
+				}
+				else if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
+				{
+					nodePopupState = NodePopupState.Description;
+					UpdateState(TechTreeStationTerminalState.TechTreeNodePopup);
+				}
+				break;
+			case TechTreeStationTerminalState.HelpScreen:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.Exit:
+					helpScreenIndex = 0;
+					UpdateState(lastState);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Next:
+					helpScreenIndex = Mathf.Clamp(helpScreenIndex + 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(helpScreenIndex);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Back:
+					helpScreenIndex = Mathf.Clamp(helpScreenIndex - 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(helpScreenIndex);
+					break;
+				}
+				break;
+			}
+		}
+	}
+
+	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
+	{
+	}
+
+	public void UpdateHelpButtonPage(int helpButtonPageIndex)
+	{
+		for (int i = 0; i < helpPopupScreens.Length; i++)
+		{
+			helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
+		}
+	}
+
+	public void UpdateNodePopupPage()
+	{
+		int num = ((nodePopupState != NodePopupState.Description) ? 1 : 0);
+		if (nodePopupScreens[0].activeSelf != (num == 0))
+		{
+			nodePopupScreens[0].SetActive(num == 0);
+		}
+		if (nodePopupScreens[1].activeSelf != (num == 1))
+		{
+			nodePopupScreens[1].SetActive(num == 1);
+		}
+	}
+
+	public void UpdateNodeData(SIPlayer player)
+	{
+		if (player == null)
+		{
+			for (int i = 0; i < techTreePages.Count; i++)
+			{
+				techTreePages[i].PopulateDefaultNodeData();
+			}
+		}
+		else
+		{
+			for (int j = 0; j < techTreePages.Count; j++)
+			{
+				techTreePages[j].PopulatePlayerNodeData(player);
+			}
+		}
+	}
+
+	public string FormattedResearchCost(SITechTreeNode node)
+	{
+		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out var node2))
+		{
+			string text = "";
+			text = text + node2.costs[SIResource.ResourceType.TechPoint] + "\n";
+			{
+				foreach (KeyValuePair<SIResource.ResourceType, int> cost in node2.costs)
+				{
+					if (cost.Key != SIResource.ResourceType.TechPoint)
+					{
+						return text + cost.Value;
+					}
+				}
+				return text;
+			}
+		}
+		return string.Join("\n", node.nodeCost.Select((SIResource.ResourceCost c) => c.amount));
+	}
+
+	public string FormattedCurrentResourceAmountsForNode(SITechTreeNode node)
+	{
+		string text = "";
+		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out var node2))
+		{
+			text = text + ActivePlayer.CurrentProgression.resourceArray[0] + "\n";
+			foreach (KeyValuePair<SIResource.ResourceType, int> cost in node2.costs)
+			{
+				if (cost.Key != SIResource.ResourceType.TechPoint)
+				{
+					text = text + ActivePlayer.CurrentProgression.resourceArray[(int)cost.Key] + "\n";
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < node.nodeCost.Length; i++)
+			{
+				text = text + ActivePlayer.CurrentProgression.resourceArray[(int)node.nodeCost[i].type] + "\n";
+			}
+		}
+		return text;
+	}
+
+	public string FormattedCurrentResourceTypesForNode(SITechTreeNode node)
+	{
+		string text = "";
+		if (SIProgression.Instance.GetOnlineNode(node.upgradeType, out var node2))
+		{
+			text = text + SIResource.ResourceType.TechPoint.ToString().ToUpperInvariant() + "\n";
+			foreach (KeyValuePair<SIResource.ResourceType, int> cost in node2.costs)
+			{
+				if (cost.Key != SIResource.ResourceType.TechPoint)
+				{
+					text = text + cost.Key.ToString().ToUpperInvariant() + "\n";
+					resourceCost.sprite = spriteByType[cost.Key];
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < node.nodeCost.Length; i++)
+			{
+				text = text + node.nodeCost[i].type.ToString().ToUpperInvariant() + "\n";
+			}
+		}
+		return text;
+	}
+
+	private void OnProgressionUpdate()
+	{
+		UpdateNodeData(ActivePlayer);
+		UpdateState(currentState);
+	}
+
+	private void OnProgressionUpdateNode(SIUpgradeType type)
+	{
+		OnProgressionUpdate();
+	}
+
+	public void SetActivePage()
+	{
+		if (CurrentNode == null)
+		{
+			currentNodeId = CurrentPage.AllNodes[0].Value.upgradeType.GetNodeId();
+		}
+		if (ActivePlayer != null)
+		{
+			UpdateState(TechTreeStationTerminalState.TechTreePage);
+		}
+		else
+		{
+			UpdateState(TechTreeStationTerminalState.WaitingForScan);
+		}
+	}
+
+	public bool IsValidPage(int pageId)
+	{
+		if (pageId < 0)
+		{
+			return false;
+		}
+		foreach (SITechTreeUIPage techTreePage in techTreePages)
+		{
+			if (techTreePage.id == (SITechTreePageId)pageId)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -1,9 +1,6 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public interface IRandomIntervalSource
 {
-	public interface IRandomIntervalSource
-	{
-		float GetNextIntervalSeconds();
-	}
+	float GetNextIntervalSeconds();
 }

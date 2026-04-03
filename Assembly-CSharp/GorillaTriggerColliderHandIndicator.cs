@@ -1,22 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaTriggerColliderHandIndicator : MonoBehaviourTick
 {
-	public override void Tick()
-	{
-		this.currentVelocity = (base.transform.position - this.lastPosition) / Time.deltaTime;
-		this.lastPosition = base.transform.position;
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		if (this.throwableController != null)
-		{
-			this.throwableController.GrabbableObjectHover(this.isLeftHand);
-		}
-	}
-
 	public Vector3 currentVelocity;
 
 	public Vector3 lastPosition = Vector3.zero;
@@ -24,4 +9,18 @@ public class GorillaTriggerColliderHandIndicator : MonoBehaviourTick
 	public bool isLeftHand;
 
 	public GorillaThrowableController throwableController;
+
+	public override void Tick()
+	{
+		currentVelocity = (base.transform.position - lastPosition) / Time.deltaTime;
+		lastPosition = base.transform.position;
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (throwableController != null)
+		{
+			throwableController.GrabbableObjectHover(isLeftHand);
+		}
+	}
 }

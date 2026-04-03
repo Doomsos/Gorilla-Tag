@@ -1,10 +1,15 @@
-﻿using System;
-
 public struct GameEntityId
 {
+	public static GameEntityId Invalid = new GameEntityId
+	{
+		index = -1
+	};
+
+	public int index;
+
 	public bool IsValid()
 	{
-		return this.index != -1;
+		return index != -1;
 	}
 
 	public static bool operator ==(GameEntityId obj1, GameEntityId obj2)
@@ -20,18 +25,11 @@ public struct GameEntityId
 	public override bool Equals(object obj)
 	{
 		GameEntityId gameEntityId = (GameEntityId)obj;
-		return this.index == gameEntityId.index;
+		return index == gameEntityId.index;
 	}
 
 	public override int GetHashCode()
 	{
-		return this.index.GetHashCode();
+		return index.GetHashCode();
 	}
-
-	public static GameEntityId Invalid = new GameEntityId
-	{
-		index = -1
-	};
-
-	public int index;
 }

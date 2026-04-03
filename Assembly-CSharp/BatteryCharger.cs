@@ -1,254 +1,41 @@
-﻿using System;
+using System;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class BatteryCharger : MonoBehaviour
 {
-	public int CurrentEventPhase
+	[Serializable]
+	private class EventPhaseObjects
 	{
-		get
-		{
-			if (!(this.state != null))
-			{
-				return -1;
-			}
-			return this.state.EventPhase;
-		}
+		public string friendlyName;
+
+		public GameObject[] objects;
 	}
 
-	internal int RegisterCrank(BatteryChargerCrank crank)
+	[Serializable]
+	private class BatteryChargerEvent
 	{
-		if (this.crankCount >= 20)
+		public enum VDirection
 		{
-			Debug.LogError(string.Format("BatteryCharger: too many cranks (max {0})", 20), this);
-			return -1;
+			Up,
+			Down
 		}
-		int num = this.crankCount;
-		this.cranks[num] = crank;
-		this.crankCount++;
-		return num;
-	}
 
-	private int LocalActorNr
-	{
-		get
-		{
-			if (PhotonNetwork.LocalPlayer == null)
-			{
-				return -1;
-			}
-			return PhotonNetwork.LocalPlayer.ActorNumber;
-		}
-	}
+		[SerializeField]
+		private VDirection direction;
 
-	private void OnEnable()
-	{
-		BatteryChargerState newState;
-		if (this.stateRef.TryResolve<BatteryChargerState>(out newState))
-		{
-			this.Bind(newState);
-			return;
-		}
-		this.stateRef.AddCallbackOnLoad(new Action(this.OnStateSceneLoaded));
-	}
+		[SerializeField]
+		private float value;
 
-	private void OnDisable()
-	{
-		this.stateRef.RemoveCallbackOnLoad(new Action(this.OnStateSceneLoaded));
-		this.Unbind();
-	}
+		[SerializeField]
+		private UnityEvent action;
 
-	private void OnStateSceneLoaded()
-	{
-		BatteryChargerState newState;
-		if (this.stateRef.TryResolve<BatteryChargerState>(out newState))
-		{
-			this.Bind(newState);
-		}
-	}
+		public VDirection Direction => direction;
 
-	private void Bind(BatteryChargerState newState)
-	{
-		if (this.state == newState)
-		{
-			return;
-		}
-		this.Unbind();
-		this.state = newState;
-		if (this.state == null)
-		{
-			return;
-		}
-		this.state.onChargeChanged += this.OnChargeChanged;
-		this.state.onFullyCharged += this.OnFullyCharged;
-		this.state.onEventPhaseChanged += this.OnEventPhaseChanged;
-		this.previousCharge = this.state.CurrentCharge;
-		this.ApplyChargeVisuals();
-		this.OnEventPhaseChanged(this.state.EventPhase);
-	}
+		public float Value => value;
 
-	private void Unbind()
-	{
-		if (this.state == null)
-		{
-			return;
-		}
-		this.state.onChargeChanged -= this.OnChargeChanged;
-		this.state.onFullyCharged -= this.OnFullyCharged;
-		this.state.onEventPhaseChanged -= this.OnEventPhaseChanged;
-		this.state = null;
-	}
-
-	private void LateUpdate()
-	{
-		if (this.state == null)
-		{
-			return;
-		}
-		int localActorNr = this.LocalActorNr;
-		for (int i = 0; i < this.crankCount; i++)
-		{
-			if (!(this.cranks[i] == null))
-			{
-				if (this.state.crankSyncs[i].holderActorNr == localActorNr)
-				{
-					this.state.UpdateLocalCrankState(i, this.cranks[i].IsHeldLeftHand, this.cranks[i].CurrentAngle);
-				}
-				this.UpdateRemoteCrankVisual(this.cranks[i], this.state.crankSyncs[i], localActorNr);
-			}
-		}
-		if (this.chargingLoopSound != null)
-		{
-			bool flag = false;
-			for (int j = 0; j < 20; j++)
-			{
-				if (this.state.crankSyncs[j].holderActorNr != -1)
-				{
-					flag = true;
-					break;
-				}
-			}
-			if (flag && !this.chargingLoopSound.isPlaying)
-			{
-				this.chargingLoopSound.Play();
-				return;
-			}
-			if (!flag && this.chargingLoopSound.isPlaying)
-			{
-				this.chargingLoopSound.Stop();
-			}
-		}
-	}
-
-	private void UpdateRemoteCrankVisual(BatteryChargerCrank crank, BatteryChargerState.CrankSyncState syncState, int localActor)
-	{
-		if (crank == null || syncState.holderActorNr == localActor)
-		{
-			return;
-		}
-		if (syncState.holderActorNr != -1)
-		{
-			VRRig vrrig = BatteryChargerState.FindRigForActor(syncState.holderActorNr);
-			if (vrrig != null)
-			{
-				crank.UpdateFromRemoteHand(vrrig, syncState.isLeftHand);
-				return;
-			}
-		}
-		crank.SetVisualAngle(syncState.angle);
-	}
-
-	internal bool IsCrankHeldLocally(int crankIndex)
-	{
-		return !(this.state == null) && crankIndex >= 0 && crankIndex < 20 && this.state.crankSyncs[crankIndex].holderActorNr == this.LocalActorNr;
-	}
-
-	public void SetEventPhase(int phase)
-	{
-		this.state.SetEventPhase(phase);
-	}
-
-	public void SetChargePerCrankDegree(float chargeRate)
-	{
-		this.state.SetChargePerCrankDegree(chargeRate);
-	}
-
-	internal bool OnCrankGrabbed(int crankIndex, bool isLeftHand)
-	{
-		return this.state.NotifyCrankGrabbed(crankIndex, isLeftHand);
-	}
-
-	internal void OnCrankReleased(int crankIndex, float finalAngle)
-	{
-		this.state.NotifyCrankReleased(crankIndex, finalAngle);
-	}
-
-	internal void OnCrankInput(int crankIndex, float degrees)
-	{
-		this.state.NotifyCrankInput(crankIndex, degrees);
-		this.ApplyChargeVisuals();
-	}
-
-	private void OnChargeChanged()
-	{
-		for (int i = 0; i < this.actions.Length; i++)
-		{
-			if ((this.actions[i].Direction == BatteryCharger.BatteryChargerEvent.VDirection.Up && this.previousCharge < this.state.CurrentCharge && this.previousCharge < this.actions[i].Value && this.state.CurrentCharge >= this.state.CurrentCharge) || (this.actions[i].Direction == BatteryCharger.BatteryChargerEvent.VDirection.Down && this.previousCharge > this.state.CurrentCharge && this.previousCharge > this.actions[i].Value && this.state.CurrentCharge <= this.state.CurrentCharge))
-			{
-				UnityEvent action = this.actions[i].Action;
-				if (action != null)
-				{
-					action.Invoke();
-				}
-			}
-		}
-		this.previousCharge = this.state.CurrentCharge;
-		this.ApplyChargeVisuals();
-	}
-
-	private void OnFullyCharged()
-	{
-		if (this.fullyChargedSound != null)
-		{
-			this.fullyChargedSound.GTPlay();
-		}
-	}
-
-	private void OnEventPhaseChanged(int phase)
-	{
-		for (int i = 0; i < this.eventPhases.Length; i++)
-		{
-			BatteryCharger.EventPhaseObjects eventPhaseObjects = this.eventPhases[i];
-			if (((eventPhaseObjects != null) ? eventPhaseObjects.objects : null) != null)
-			{
-				bool active = i == phase;
-				for (int j = 0; j < this.eventPhases[i].objects.Length; j++)
-				{
-					if (this.eventPhases[i].objects[j] != null)
-					{
-						this.eventPhases[i].objects[j].SetActive(active);
-					}
-				}
-			}
-		}
-	}
-
-	private void ApplyChargeVisuals()
-	{
-		if (this.state == null)
-		{
-			return;
-		}
-		float chargePercent = this.state.ChargePercent;
-		if (this.chargeFillTransform != null)
-		{
-			this.chargeFillTransform.localRotation = Quaternion.Euler(0f, 0f, chargePercent * this.chargeFullRollAngle);
-		}
-		if (this.chargeFillRenderer != null)
-		{
-			this.chargeFillRenderer.material.color = Color.Lerp(this.emptyColor, this.fullColor, chargePercent);
-		}
+		public UnityEvent Action => action;
 	}
 
 	[Header("Network State")]
@@ -283,7 +70,7 @@ public class BatteryCharger : MonoBehaviour
 
 	[Header("Event Phases")]
 	[SerializeField]
-	private BatteryCharger.EventPhaseObjects[] eventPhases;
+	private EventPhaseObjects[] eventPhases;
 
 	private BatteryChargerState state;
 
@@ -292,58 +79,249 @@ public class BatteryCharger : MonoBehaviour
 	private int crankCount;
 
 	[SerializeField]
-	private BatteryCharger.BatteryChargerEvent[] actions;
+	private BatteryChargerEvent[] actions;
 
 	private float previousCharge;
 
-	[Serializable]
-	private class EventPhaseObjects
+	public int CurrentEventPhase
 	{
-		public string friendlyName;
-
-		public GameObject[] objects;
+		get
+		{
+			if (!(state != null))
+			{
+				return -1;
+			}
+			return state.EventPhase;
+		}
 	}
 
-	[Serializable]
-	private class BatteryChargerEvent
+	private int LocalActorNr
 	{
-		public BatteryCharger.BatteryChargerEvent.VDirection Direction
+		get
 		{
-			get
+			if (PhotonNetwork.LocalPlayer == null)
 			{
-				return this.direction;
+				return -1;
+			}
+			return PhotonNetwork.LocalPlayer.ActorNumber;
+		}
+	}
+
+	internal int RegisterCrank(BatteryChargerCrank crank)
+	{
+		if (crankCount >= 20)
+		{
+			Debug.LogError($"BatteryCharger: too many cranks (max {20})", this);
+			return -1;
+		}
+		int num = crankCount;
+		cranks[num] = crank;
+		crankCount++;
+		return num;
+	}
+
+	private void OnEnable()
+	{
+		if (stateRef.TryResolve(out BatteryChargerState result))
+		{
+			Bind(result);
+		}
+		else
+		{
+			stateRef.AddCallbackOnLoad(OnStateSceneLoaded);
+		}
+	}
+
+	private void OnDisable()
+	{
+		stateRef.RemoveCallbackOnLoad(OnStateSceneLoaded);
+		Unbind();
+	}
+
+	private void OnStateSceneLoaded()
+	{
+		if (stateRef.TryResolve(out BatteryChargerState result))
+		{
+			Bind(result);
+		}
+	}
+
+	private void Bind(BatteryChargerState newState)
+	{
+		if (!(state == newState))
+		{
+			Unbind();
+			state = newState;
+			if (!(state == null))
+			{
+				state.onChargeChanged += OnChargeChanged;
+				state.onFullyCharged += OnFullyCharged;
+				state.onEventPhaseChanged += OnEventPhaseChanged;
+				previousCharge = state.CurrentCharge;
+				ApplyChargeVisuals();
+				OnEventPhaseChanged(state.EventPhase);
 			}
 		}
+	}
 
-		public float Value
+	private void Unbind()
+	{
+		if (!(state == null))
 		{
-			get
+			state.onChargeChanged -= OnChargeChanged;
+			state.onFullyCharged -= OnFullyCharged;
+			state.onEventPhaseChanged -= OnEventPhaseChanged;
+			state = null;
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (state == null)
+		{
+			return;
+		}
+		int localActorNr = LocalActorNr;
+		for (int i = 0; i < crankCount; i++)
+		{
+			if (!(cranks[i] == null))
 			{
-				return this.value;
+				if (state.crankSyncs[i].holderActorNr == localActorNr)
+				{
+					state.UpdateLocalCrankState(i, cranks[i].IsHeldLeftHand, cranks[i].CurrentAngle);
+				}
+				UpdateRemoteCrankVisual(cranks[i], state.crankSyncs[i], localActorNr);
 			}
 		}
-
-		public UnityEvent Action
+		if (!(chargingLoopSound != null))
 		{
-			get
+			return;
+		}
+		bool flag = false;
+		for (int j = 0; j < 20; j++)
+		{
+			if (state.crankSyncs[j].holderActorNr != -1)
 			{
-				return this.action;
+				flag = true;
+				break;
 			}
 		}
-
-		[SerializeField]
-		private BatteryCharger.BatteryChargerEvent.VDirection direction;
-
-		[SerializeField]
-		private float value;
-
-		[SerializeField]
-		private UnityEvent action;
-
-		public enum VDirection
+		if (flag && !chargingLoopSound.isPlaying)
 		{
-			Up,
-			Down
+			chargingLoopSound.Play();
+		}
+		else if (!flag && chargingLoopSound.isPlaying)
+		{
+			chargingLoopSound.Stop();
+		}
+	}
+
+	private void UpdateRemoteCrankVisual(BatteryChargerCrank crank, BatteryChargerState.CrankSyncState syncState, int localActor)
+	{
+		if (crank == null || syncState.holderActorNr == localActor)
+		{
+			return;
+		}
+		if (syncState.holderActorNr != -1)
+		{
+			VRRig vRRig = BatteryChargerState.FindRigForActor(syncState.holderActorNr);
+			if (vRRig != null)
+			{
+				crank.UpdateFromRemoteHand(vRRig, syncState.isLeftHand);
+				return;
+			}
+		}
+		crank.SetVisualAngle(syncState.angle);
+	}
+
+	internal bool IsCrankHeldLocally(int crankIndex)
+	{
+		if (state == null || crankIndex < 0 || crankIndex >= 20)
+		{
+			return false;
+		}
+		return state.crankSyncs[crankIndex].holderActorNr == LocalActorNr;
+	}
+
+	public void SetEventPhase(int phase)
+	{
+		state.SetEventPhase(phase);
+	}
+
+	public void SetChargePerCrankDegree(float chargeRate)
+	{
+		state.SetChargePerCrankDegree(chargeRate);
+	}
+
+	internal bool OnCrankGrabbed(int crankIndex, bool isLeftHand)
+	{
+		return state.NotifyCrankGrabbed(crankIndex, isLeftHand);
+	}
+
+	internal void OnCrankReleased(int crankIndex, float finalAngle)
+	{
+		state.NotifyCrankReleased(crankIndex, finalAngle);
+	}
+
+	internal void OnCrankInput(int crankIndex, float degrees)
+	{
+		state.NotifyCrankInput(crankIndex, degrees);
+		ApplyChargeVisuals();
+	}
+
+	private void OnChargeChanged()
+	{
+		for (int i = 0; i < actions.Length; i++)
+		{
+			if ((actions[i].Direction == BatteryChargerEvent.VDirection.Up && previousCharge < state.CurrentCharge && previousCharge < actions[i].Value && state.CurrentCharge >= state.CurrentCharge) || (actions[i].Direction == BatteryChargerEvent.VDirection.Down && previousCharge > state.CurrentCharge && previousCharge > actions[i].Value && state.CurrentCharge <= state.CurrentCharge))
+			{
+				actions[i].Action?.Invoke();
+			}
+		}
+		previousCharge = state.CurrentCharge;
+		ApplyChargeVisuals();
+	}
+
+	private void OnFullyCharged()
+	{
+		if (fullyChargedSound != null)
+		{
+			fullyChargedSound.GTPlay();
+		}
+	}
+
+	private void OnEventPhaseChanged(int phase)
+	{
+		for (int i = 0; i < eventPhases.Length; i++)
+		{
+			if (eventPhases[i]?.objects == null)
+			{
+				continue;
+			}
+			bool active = i == phase;
+			for (int j = 0; j < eventPhases[i].objects.Length; j++)
+			{
+				if (eventPhases[i].objects[j] != null)
+				{
+					eventPhases[i].objects[j].SetActive(active);
+				}
+			}
+		}
+	}
+
+	private void ApplyChargeVisuals()
+	{
+		if (!(state == null))
+		{
+			float chargePercent = state.ChargePercent;
+			if (chargeFillTransform != null)
+			{
+				chargeFillTransform.localRotation = Quaternion.Euler(0f, 0f, chargePercent * chargeFullRollAngle);
+			}
+			if (chargeFillRenderer != null)
+			{
+				chargeFillRenderer.material.color = Color.Lerp(emptyColor, fullColor, chargePercent);
+			}
 		}
 	}
 }

@@ -1,23 +1,21 @@
-﻿using System;
 using Liv.Lck.GorillaTag;
 
-namespace Docking
+namespace Docking;
+
+public class LivCameraDock : Dock
 {
-	public class LivCameraDock : Dock
+	public GtCameraDockSettings cameraSettings;
+
+	private void Reset()
 	{
-		private void Reset()
-		{
-			this.cameraSettings.fov = 80f;
-		}
+		cameraSettings.fov = 80f;
+	}
 
-		private void OnValidate()
+	private void OnValidate()
+	{
+		if (cameraSettings.forceFov && (cameraSettings.fov < 30f || cameraSettings.fov > 110f))
 		{
-			if (this.cameraSettings.forceFov && (this.cameraSettings.fov < 30f || this.cameraSettings.fov > 110f))
-			{
-				this.cameraSettings.fov = 80f;
-			}
+			cameraSettings.fov = 80f;
 		}
-
-		public GtCameraDockSettings cameraSettings;
 	}
 }

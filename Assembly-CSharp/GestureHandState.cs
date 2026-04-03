@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum GestureHandState : uint
 {
-	None = 0U,
-	IsLeft = 1U,
-	IsRight = 2U,
-	Open = 4U,
-	Closed = 8U
+	None = 0u,
+	IsLeft = 1u,
+	IsRight = 2u,
+	Open = 4u,
+	Closed = 8u
 }

@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 [Conditional("UNITY_EDITOR")]
 public class DarkBoxAttribute : Attribute
 {
+	public readonly bool withBorders;
+
 	public DarkBoxAttribute()
 	{
 	}
@@ -12,6 +14,4 @@ public class DarkBoxAttribute : Attribute
 	{
 		this.withBorders = withBorders;
 	}
-
-	public readonly bool withBorders;
 }

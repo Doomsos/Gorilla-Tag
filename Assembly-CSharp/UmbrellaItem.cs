@@ -1,142 +1,12 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 
 public class UmbrellaItem : TransferrableObject
 {
-	protected override void Start()
+	private enum UmbrellaStates
 	{
-		base.Start();
-		this.itemState = TransferrableObject.ItemStates.State1;
-	}
-
-	public override void OnActivate()
-	{
-		base.OnActivate();
-		float hapticStrength = GorillaTagger.Instance.tapHapticStrength / 4f;
-		float fixedDeltaTime = Time.fixedDeltaTime;
-		float soundVolume = 0.08f;
-		int soundIndex;
-		if (this.itemState == TransferrableObject.ItemStates.State1)
-		{
-			soundIndex = this.SoundIdOpen;
-			this.itemState = TransferrableObject.ItemStates.State0;
-			BetterDayNightManager.instance.collidersToAddToWeatherSystems.Add(this.umbrellaRainDestroyTrigger);
-		}
-		else
-		{
-			soundIndex = this.SoundIdClose;
-			this.itemState = TransferrableObject.ItemStates.State1;
-			BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(this.umbrellaRainDestroyTrigger);
-		}
-		base.ActivateItemFX(hapticStrength, fixedDeltaTime, soundIndex, soundVolume);
-		this.OnUmbrellaStateChanged();
-	}
-
-	internal override void OnEnable()
-	{
-		base.OnEnable();
-		this.OnUmbrellaStateChanged();
-	}
-
-	internal override void OnDisable()
-	{
-		base.OnDisable();
-		BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(this.umbrellaRainDestroyTrigger);
-	}
-
-	public override void ResetToDefaultState()
-	{
-		base.ResetToDefaultState();
-		BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(this.umbrellaRainDestroyTrigger);
-		this.itemState = TransferrableObject.ItemStates.State1;
-		this.OnUmbrellaStateChanged();
-	}
-
-	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-	{
-		if (!base.OnRelease(zoneReleased, releasingHand))
-		{
-			return false;
-		}
-		if (base.InHand())
-		{
-			return false;
-		}
-		if (this.itemState == TransferrableObject.ItemStates.State0)
-		{
-			this.OnActivate();
-		}
-		return true;
-	}
-
-	protected override void LateUpdateShared()
-	{
-		base.LateUpdateShared();
-		UmbrellaItem.UmbrellaStates itemState = (UmbrellaItem.UmbrellaStates)this.itemState;
-		if (itemState != this.previousUmbrellaState)
-		{
-			this.OnUmbrellaStateChanged();
-		}
-		this.UpdateAngles((itemState == UmbrellaItem.UmbrellaStates.UmbrellaOpen) ? this.startingAngles : this.endingAngles, this.lerpValue);
-		this.previousUmbrellaState = itemState;
-	}
-
-	protected virtual void OnUmbrellaStateChanged()
-	{
-		bool flag = this.itemState == TransferrableObject.ItemStates.State0;
-		GameObject[] array = this.gameObjectsActivatedOnOpen;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(flag);
-		}
-		ParticleSystem[] array2;
-		if (flag)
-		{
-			array2 = this.particlesEmitOnOpen;
-			for (int i = 0; i < array2.Length; i++)
-			{
-				array2[i].Play();
-			}
-			return;
-		}
-		array2 = this.particlesEmitOnOpen;
-		for (int i = 0; i < array2.Length; i++)
-		{
-			array2[i].Stop();
-		}
-	}
-
-	protected virtual void UpdateAngles(Quaternion[] toAngles, float t)
-	{
-		for (int i = 0; i < this.umbrellaBones.Length; i++)
-		{
-			this.umbrellaBones[i].localRotation = Quaternion.Lerp(this.umbrellaBones[i].localRotation, toAngles[i], t);
-		}
-	}
-
-	protected void GenerateAngles()
-	{
-		this.startingAngles = new Quaternion[this.umbrellaBones.Length];
-		for (int i = 0; i < this.endingAngles.Length; i++)
-		{
-			this.startingAngles[i] = this.umbrellaToCopy.startingAngles[i];
-		}
-		this.endingAngles = new Quaternion[this.umbrellaBones.Length];
-		for (int j = 0; j < this.endingAngles.Length; j++)
-		{
-			this.endingAngles[j] = this.umbrellaToCopy.endingAngles[j];
-		}
-	}
-
-	public override bool CanActivate()
-	{
-		return true;
-	}
-
-	public override bool CanDeactivate()
-	{
-		return true;
+		UmbrellaOpen = 1,
+		UmbrellaClosed
 	}
 
 	[AssignInCorePrefab]
@@ -170,11 +40,141 @@ public class UmbrellaItem : TransferrableObject
 	[GorillaSoundLookup]
 	public int SoundIdClose = 65;
 
-	private UmbrellaItem.UmbrellaStates previousUmbrellaState = UmbrellaItem.UmbrellaStates.UmbrellaOpen;
+	private UmbrellaStates previousUmbrellaState = UmbrellaStates.UmbrellaOpen;
 
-	private enum UmbrellaStates
+	protected override void Start()
 	{
-		UmbrellaOpen = 1,
-		UmbrellaClosed
+		base.Start();
+		itemState = ItemStates.State1;
+	}
+
+	public override void OnActivate()
+	{
+		base.OnActivate();
+		float hapticStrength = GorillaTagger.Instance.tapHapticStrength / 4f;
+		float fixedDeltaTime = Time.fixedDeltaTime;
+		float soundVolume = 0.08f;
+		int num = -1;
+		if (itemState == ItemStates.State1)
+		{
+			num = SoundIdOpen;
+			itemState = ItemStates.State0;
+			BetterDayNightManager.instance.collidersToAddToWeatherSystems.Add(umbrellaRainDestroyTrigger);
+		}
+		else
+		{
+			num = SoundIdClose;
+			itemState = ItemStates.State1;
+			BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(umbrellaRainDestroyTrigger);
+		}
+		ActivateItemFX(hapticStrength, fixedDeltaTime, num, soundVolume);
+		OnUmbrellaStateChanged();
+	}
+
+	internal override void OnEnable()
+	{
+		base.OnEnable();
+		OnUmbrellaStateChanged();
+	}
+
+	internal override void OnDisable()
+	{
+		base.OnDisable();
+		BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(umbrellaRainDestroyTrigger);
+	}
+
+	public override void ResetToDefaultState()
+	{
+		base.ResetToDefaultState();
+		BetterDayNightManager.instance.collidersToAddToWeatherSystems.Remove(umbrellaRainDestroyTrigger);
+		itemState = ItemStates.State1;
+		OnUmbrellaStateChanged();
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
+			return false;
+		}
+		if (InHand())
+		{
+			return false;
+		}
+		if (itemState == ItemStates.State0)
+		{
+			OnActivate();
+		}
+		return true;
+	}
+
+	protected override void LateUpdateShared()
+	{
+		base.LateUpdateShared();
+		UmbrellaStates umbrellaStates = (UmbrellaStates)itemState;
+		if (umbrellaStates != previousUmbrellaState)
+		{
+			OnUmbrellaStateChanged();
+		}
+		UpdateAngles((umbrellaStates == UmbrellaStates.UmbrellaOpen) ? startingAngles : endingAngles, lerpValue);
+		previousUmbrellaState = umbrellaStates;
+	}
+
+	protected virtual void OnUmbrellaStateChanged()
+	{
+		bool flag = itemState == ItemStates.State0;
+		GameObject[] array = gameObjectsActivatedOnOpen;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(flag);
+		}
+		if (flag)
+		{
+			ParticleSystem[] array2 = particlesEmitOnOpen;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].Play();
+			}
+		}
+		else
+		{
+			ParticleSystem[] array2 = particlesEmitOnOpen;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].Stop();
+			}
+		}
+	}
+
+	protected virtual void UpdateAngles(Quaternion[] toAngles, float t)
+	{
+		for (int i = 0; i < umbrellaBones.Length; i++)
+		{
+			umbrellaBones[i].localRotation = Quaternion.Lerp(umbrellaBones[i].localRotation, toAngles[i], t);
+		}
+	}
+
+	protected void GenerateAngles()
+	{
+		startingAngles = new Quaternion[umbrellaBones.Length];
+		for (int i = 0; i < endingAngles.Length; i++)
+		{
+			startingAngles[i] = umbrellaToCopy.startingAngles[i];
+		}
+		endingAngles = new Quaternion[umbrellaBones.Length];
+		for (int j = 0; j < endingAngles.Length; j++)
+		{
+			endingAngles[j] = umbrellaToCopy.endingAngles[j];
+		}
+	}
+
+	public override bool CanActivate()
+	{
+		return true;
+	}
+
+	public override bool CanDeactivate()
+	{
+		return true;
 	}
 }

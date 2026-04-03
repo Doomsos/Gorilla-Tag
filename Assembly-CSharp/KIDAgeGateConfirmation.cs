@@ -1,22 +1,27 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Localization.SmartFormat.PersistentVariables;
 
 public class KIDAgeGateConfirmation : MonoBehaviour
 {
+	[Header("Localization")]
+	[SerializeField]
+	private LocalizedText _localizedTextBody;
+
+	private IntVariable _userAgeVar;
+
 	private IntVariable UserAgeVar
 	{
 		get
 		{
-			if (this._userAgeVar == null)
+			if (_userAgeVar == null)
 			{
-				this._userAgeVar = (this._localizedTextBody.StringReference["user-age"] as IntVariable);
-				if (this._userAgeVar == null)
+				_userAgeVar = _localizedTextBody.StringReference["user-age"] as IntVariable;
+				if (_userAgeVar == null)
 				{
 					Debug.LogError("[Localization::KID_AGE_GATE_CONFIRMATION] Failed to get [user-age] smart variable as IntVariable");
 				}
 			}
-			return this._userAgeVar;
+			return _userAgeVar;
 		}
 	}
 
@@ -24,33 +29,29 @@ public class KIDAgeGateConfirmation : MonoBehaviour
 
 	private void Start()
 	{
-		this.Result = KidAgeConfirmationResult.None;
+		Result = KidAgeConfirmationResult.None;
 	}
 
 	public void OnConfirm()
 	{
-		this.Result = KidAgeConfirmationResult.Confirm;
+		Result = KidAgeConfirmationResult.Confirm;
 	}
 
 	public void OnBack()
 	{
-		this.Result = KidAgeConfirmationResult.Back;
+		Result = KidAgeConfirmationResult.Back;
 	}
 
 	public void Reset(int userAge)
 	{
-		this.Result = KidAgeConfirmationResult.None;
-		if (this.UserAgeVar == null)
+		Result = KidAgeConfirmationResult.None;
+		if (UserAgeVar == null)
 		{
 			Debug.LogError("[LOCALIZATION::KID_AGE_GATE_CONFIRMATION] Unable to update [UserAgeVar] value, as it is null");
-			return;
 		}
-		this.UserAgeVar.Value = userAge;
+		else
+		{
+			UserAgeVar.Value = userAge;
+		}
 	}
-
-	[Header("Localization")]
-	[SerializeField]
-	private LocalizedText _localizedTextBody;
-
-	private IntVariable _userAgeVar;
 }

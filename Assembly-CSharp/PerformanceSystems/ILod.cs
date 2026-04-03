@@ -1,21 +1,19 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace PerformanceSystems
+namespace PerformanceSystems;
+
+public interface ILod
 {
-	public interface ILod
-	{
-		int CurrentLod { get; }
+	int CurrentLod { get; }
 
-		Vector3 Position { get; }
+	Vector3 Position { get; }
 
-		float[] LodRanges { get; }
+	float[] LodRanges { get; }
 
-		UnityEvent[] OnLodRangeEvents { get; }
+	UnityEvent[] OnLodRangeEvents { get; }
 
-		UnityEvent OnCulledEvent { get; }
+	UnityEvent OnCulledEvent { get; }
 
-		void UpdateLod(Vector3 refPos);
-	}
+	void UpdateLod(Vector3 refPos);
 }

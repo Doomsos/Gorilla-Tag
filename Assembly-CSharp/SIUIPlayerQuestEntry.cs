@@ -1,16 +1,9 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SIUIPlayerQuestEntry : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.lastQuestId = -1;
-		this.lastQuestProgress = -1;
-	}
-
 	public Image background;
 
 	public SIUIProgressBar progress;
@@ -28,4 +21,10 @@ public class SIUIPlayerQuestEntry : MonoBehaviour
 	public int lastQuestId;
 
 	public int lastQuestProgress;
+
+	private void Awake()
+	{
+		lastQuestId = -1;
+		lastQuestProgress = -1;
+	}
 }

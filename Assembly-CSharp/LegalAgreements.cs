@@ -1,7 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GorillaNetworking;
+using Newtonsoft.Json;
 using PlayFab;
 using TMPro;
 using UnityEngine;
@@ -10,165 +13,6 @@ using UnityEngine.UI;
 [DefaultExecutionOrder(1)]
 public class LegalAgreements : MonoBehaviour
 {
-	public static LegalAgreements instance { get; private set; }
-
-	protected virtual void Awake()
-	{
-		if (LegalAgreements.instance != null)
-		{
-			Debug.LogError("Trying to set [LegalAgreements] instance but it is not null", this);
-			base.gameObject.SetActive(false);
-			return;
-		}
-		LegalAgreements.instance = this;
-		this.stickHeldDuration = 0f;
-		this.scrollSpeed = this._minScrollSpeed;
-		base.enabled = false;
-	}
-
-	private void Update()
-	{
-		if (!this.legalAgreementsStarted)
-		{
-			return;
-		}
-		float num = Time.deltaTime * this.scrollSpeed;
-		if (ControllerBehaviour.Instance.IsUpStick || ControllerBehaviour.Instance.IsDownStick)
-		{
-			if (ControllerBehaviour.Instance.IsDownStick)
-			{
-				num *= -1f;
-			}
-			this.scrollBar.value = Mathf.Clamp(this.scrollBar.value + num, 0f, 1f);
-			if (this.scrollBar.value > 0f && this.scrollBar.value < 1f)
-			{
-				HandRayController.Instance.PulseActiveHandray(this._stickVibrationStrength, this._stickVibrationDuration);
-			}
-			this.stickHeldDuration += Time.deltaTime;
-			this.scrollTime = Mathf.Clamp01(this.stickHeldDuration / this._scrollInterpTime);
-			this.scrollSpeed = Mathf.Lerp(this._minScrollSpeed, this._maxScrollSpeed, this._scrollInterpCurve.Evaluate(this.scrollTime));
-			this.scrollSpeed *= Mathf.Abs(ControllerBehaviour.Instance.StickYValue);
-		}
-		else
-		{
-			this.stickHeldDuration = 0f;
-			this.scrollSpeed = this._minScrollSpeed;
-		}
-		if (this._scrollToBottomText)
-		{
-			if ((double)this.scrollBar.value < 0.001)
-			{
-				this._scrollToBottomText.gameObject.SetActive(false);
-				this._pressAndHoldToConfirmButton.gameObject.SetActive(true);
-				return;
-			}
-			this._scrollToBottomText.text = LegalAgreements.SCROLL_TO_END_MESSAGE;
-			this._scrollToBottomText.gameObject.SetActive(true);
-			this._pressAndHoldToConfirmButton.gameObject.SetActive(false);
-		}
-	}
-
-	public virtual Task StartLegalAgreements()
-	{
-		LegalAgreements.<StartLegalAgreements>d__24 <StartLegalAgreements>d__;
-		<StartLegalAgreements>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<StartLegalAgreements>d__.<>4__this = this;
-		<StartLegalAgreements>d__.<>1__state = -1;
-		<StartLegalAgreements>d__.<>t__builder.Start<LegalAgreements.<StartLegalAgreements>d__24>(ref <StartLegalAgreements>d__);
-		return <StartLegalAgreements>d__.<>t__builder.Task;
-	}
-
-	public void OnAccepted(int currentAge)
-	{
-		this._accepted = true;
-	}
-
-	protected Task WaitForAcknowledgement()
-	{
-		LegalAgreements.<WaitForAcknowledgement>d__27 <WaitForAcknowledgement>d__;
-		<WaitForAcknowledgement>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForAcknowledgement>d__.<>4__this = this;
-		<WaitForAcknowledgement>d__.<>1__state = -1;
-		<WaitForAcknowledgement>d__.<>t__builder.Start<LegalAgreements.<WaitForAcknowledgement>d__27>(ref <WaitForAcknowledgement>d__);
-		return <WaitForAcknowledgement>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> UpdateText(LegalAgreementTextAsset asset, string version)
-	{
-		LegalAgreements.<UpdateText>d__28 <UpdateText>d__;
-		<UpdateText>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<UpdateText>d__.<>4__this = this;
-		<UpdateText>d__.asset = asset;
-		<UpdateText>d__.version = version;
-		<UpdateText>d__.<>1__state = -1;
-		<UpdateText>d__.<>t__builder.Start<LegalAgreements.<UpdateText>d__28>(ref <UpdateText>d__);
-		return <UpdateText>d__.<>t__builder.Task;
-	}
-
-	public Task<bool> UpdateTextFromPlayFabTitleData(string key, string version, TMP_Text target)
-	{
-		LegalAgreements.<UpdateTextFromPlayFabTitleData>d__33 <UpdateTextFromPlayFabTitleData>d__;
-		<UpdateTextFromPlayFabTitleData>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<UpdateTextFromPlayFabTitleData>d__.<>4__this = this;
-		<UpdateTextFromPlayFabTitleData>d__.key = key;
-		<UpdateTextFromPlayFabTitleData>d__.version = version;
-		<UpdateTextFromPlayFabTitleData>d__.target = target;
-		<UpdateTextFromPlayFabTitleData>d__.<>1__state = -1;
-		<UpdateTextFromPlayFabTitleData>d__.<>t__builder.Start<LegalAgreements.<UpdateTextFromPlayFabTitleData>d__33>(ref <UpdateTextFromPlayFabTitleData>d__);
-		return <UpdateTextFromPlayFabTitleData>d__.<>t__builder.Task;
-	}
-
-	private void OnPlayFabError(PlayFabError error)
-	{
-		this.state = -1;
-	}
-
-	private void OnTitleDataReceived(string obj)
-	{
-		this.cachedText = obj;
-		this.state = 1;
-	}
-
-	private Task<string> GetTitleDataAsync(string key)
-	{
-		LegalAgreements.<GetTitleDataAsync>d__36 <GetTitleDataAsync>d__;
-		<GetTitleDataAsync>d__.<>t__builder = AsyncTaskMethodBuilder<string>.Create();
-		<GetTitleDataAsync>d__.key = key;
-		<GetTitleDataAsync>d__.<>1__state = -1;
-		<GetTitleDataAsync>d__.<>t__builder.Start<LegalAgreements.<GetTitleDataAsync>d__36>(ref <GetTitleDataAsync>d__);
-		return <GetTitleDataAsync>d__.<>t__builder.Task;
-	}
-
-	private Task<Dictionary<string, string>> GetAcceptedAgreements(LegalAgreementTextAsset[] agreements)
-	{
-		LegalAgreements.<GetAcceptedAgreements>d__37 <GetAcceptedAgreements>d__;
-		<GetAcceptedAgreements>d__.<>t__builder = AsyncTaskMethodBuilder<Dictionary<string, string>>.Create();
-		<GetAcceptedAgreements>d__.agreements = agreements;
-		<GetAcceptedAgreements>d__.<>1__state = -1;
-		<GetAcceptedAgreements>d__.<>t__builder.Start<LegalAgreements.<GetAcceptedAgreements>d__37>(ref <GetAcceptedAgreements>d__);
-		return <GetAcceptedAgreements>d__.<>t__builder.Task;
-	}
-
-	private Task SubmitAcceptedAgreements(Dictionary<string, string> agreements)
-	{
-		LegalAgreements.<SubmitAcceptedAgreements>d__38 <SubmitAcceptedAgreements>d__;
-		<SubmitAcceptedAgreements>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<SubmitAcceptedAgreements>d__.agreements = agreements;
-		<SubmitAcceptedAgreements>d__.<>1__state = -1;
-		<SubmitAcceptedAgreements>d__.<>t__builder.Start<LegalAgreements.<SubmitAcceptedAgreements>d__38>(ref <SubmitAcceptedAgreements>d__);
-		return <SubmitAcceptedAgreements>d__.<>t__builder.Task;
-	}
-
-	public void OnDisable()
-	{
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
-	}
-
 	private static string SCROLL_TO_END_MESSAGE = "<b>Scroll to the bottom</b> to continue.";
 
 	[Header("Scroll Behavior")]
@@ -228,4 +72,269 @@ public class LegalAgreements : MonoBehaviour
 	private bool optIn;
 
 	private bool optional;
+
+	public static LegalAgreements instance { get; private set; }
+
+	protected virtual void Awake()
+	{
+		if (instance != null)
+		{
+			Debug.LogError("Trying to set [LegalAgreements] instance but it is not null", this);
+			base.gameObject.SetActive(value: false);
+			return;
+		}
+		instance = this;
+		stickHeldDuration = 0f;
+		scrollSpeed = _minScrollSpeed;
+		base.enabled = false;
+	}
+
+	private void Update()
+	{
+		if (!legalAgreementsStarted)
+		{
+			return;
+		}
+		float num = Time.deltaTime * scrollSpeed;
+		if (ControllerBehaviour.Instance.IsUpStick || ControllerBehaviour.Instance.IsDownStick)
+		{
+			if (ControllerBehaviour.Instance.IsDownStick)
+			{
+				num *= -1f;
+			}
+			scrollBar.value = Mathf.Clamp(scrollBar.value + num, 0f, 1f);
+			if (scrollBar.value > 0f && scrollBar.value < 1f)
+			{
+				HandRayController.Instance.PulseActiveHandray(_stickVibrationStrength, _stickVibrationDuration);
+			}
+			stickHeldDuration += Time.deltaTime;
+			scrollTime = Mathf.Clamp01(stickHeldDuration / _scrollInterpTime);
+			scrollSpeed = Mathf.Lerp(_minScrollSpeed, _maxScrollSpeed, _scrollInterpCurve.Evaluate(scrollTime));
+			scrollSpeed *= Mathf.Abs(ControllerBehaviour.Instance.StickYValue);
+		}
+		else
+		{
+			stickHeldDuration = 0f;
+			scrollSpeed = _minScrollSpeed;
+		}
+		if ((bool)_scrollToBottomText)
+		{
+			if ((double)scrollBar.value < 0.001)
+			{
+				_scrollToBottomText.gameObject.SetActive(value: false);
+				_pressAndHoldToConfirmButton.gameObject.SetActive(value: true);
+			}
+			else
+			{
+				_scrollToBottomText.text = SCROLL_TO_END_MESSAGE;
+				_scrollToBottomText.gameObject.SetActive(value: true);
+				_pressAndHoldToConfirmButton.gameObject.SetActive(value: false);
+			}
+		}
+	}
+
+	public virtual async Task StartLegalAgreements()
+	{
+		if (legalAgreementsStarted)
+		{
+			return;
+		}
+		legalAgreementsStarted = true;
+		while (!PlayFabClientAPI.IsClientLoggedIn())
+		{
+			if ((bool)PlayFabAuthenticator.instance && PlayFabAuthenticator.instance.loginFailed)
+			{
+				return;
+			}
+			await Task.Yield();
+		}
+		Dictionary<string, string> agreementResults = await GetAcceptedAgreements(legalAgreementScreens);
+		LegalAgreementTextAsset[] array = legalAgreementScreens;
+		foreach (LegalAgreementTextAsset screen in array)
+		{
+			string latestVersion = await GetTitleDataAsync(screen.latestVersionKey);
+			if (string.IsNullOrEmpty(latestVersion))
+			{
+				continue;
+			}
+			string value = string.Empty;
+			if ((agreementResults?.TryGetValue(screen.playFabKey, out value) ?? false) && latestVersion == value)
+			{
+				continue;
+			}
+			base.enabled = true;
+			PrivateUIRoom.ForceStartOverlay();
+			if (!screen.confirmString.IsNullOrEmpty())
+			{
+				_pressAndHoldToConfirmButton.SetText(screen.confirmString);
+			}
+			PrivateUIRoom.AddUI(uiParent);
+			HandRayController.Instance.EnableHandRays();
+			if (!(await UpdateText(screen, latestVersion)))
+			{
+				while (true)
+				{
+					await Task.Yield();
+				}
+			}
+			await WaitForAcknowledgement();
+			scrollBar.value = 1f;
+			PrivateUIRoom.RemoveUI(uiParent);
+			if (agreementResults == null)
+			{
+				agreementResults = new Dictionary<string, string>();
+			}
+			agreementResults.AddOrUpdate(screen.playFabKey, latestVersion);
+			if (optIn)
+			{
+				_ = screen.optInAction;
+			}
+		}
+		base.enabled = false;
+		await SubmitAcceptedAgreements(agreementResults);
+	}
+
+	public void OnAccepted(int currentAge)
+	{
+		_accepted = true;
+	}
+
+	protected async Task WaitForAcknowledgement()
+	{
+		_accepted = false;
+		while (!_accepted)
+		{
+			await Task.Yield();
+		}
+		_accepted = false;
+	}
+
+	private async Task<bool> UpdateText(LegalAgreementTextAsset asset, string version)
+	{
+		optional = asset.optional;
+		tmpTitle.text = asset.title;
+		bool num = await UpdateTextFromPlayFabTitleData(asset.playFabKey, version, tmpBody);
+		if (!num)
+		{
+			tmpBody.text = asset.errorMessage + "\n\nPlease restart the game and try again.";
+			scrollBar.value = 0f;
+			scrollBar.size = 1f;
+		}
+		return num;
+	}
+
+	public async Task<bool> UpdateTextFromPlayFabTitleData(string key, string version, TMP_Text target)
+	{
+		string text = key + "_" + version;
+		state = 0;
+		PlayFabTitleDataCache.Instance.GetTitleData(text, OnTitleDataReceived, OnPlayFabError);
+		while (state == 0)
+		{
+			await Task.Yield();
+		}
+		if (state == 1)
+		{
+			string text2 = Regex.Unescape(cachedText.Substring(1, cachedText.Length - 2));
+			try
+			{
+				if (string.IsNullOrEmpty(text2))
+				{
+					Debug.LogError("[LOCALIZATION] TItle Data for Legal Agreements is NULL or Empty. Unable to deserialize or proceed.");
+					return false;
+				}
+				text2 = JsonConvert.DeserializeObject<TitleDataLocalization>(text2).GetLocalizedText();
+			}
+			catch (Exception)
+			{
+				if (text2.StartsWith('{') && text2.EndsWith('}'))
+				{
+					Debug.LogError("[LOCALIZATION] TItle Data for Legal Agreements is likely in JSON format, but failed to deserialize into [TitleDataLocalization]");
+					return false;
+				}
+			}
+			target.text = text2;
+			return true;
+		}
+		return false;
+	}
+
+	private void OnPlayFabError(PlayFabError error)
+	{
+		state = -1;
+	}
+
+	private void OnTitleDataReceived(string obj)
+	{
+		cachedText = obj;
+		state = 1;
+	}
+
+	private async Task<string> GetTitleDataAsync(string key)
+	{
+		int state = 0;
+		string result = null;
+		PlayFabTitleDataCache.Instance.GetTitleData(key, delegate(string res)
+		{
+			result = res;
+			state = 1;
+		}, delegate(PlayFabError err)
+		{
+			result = null;
+			state = -1;
+			Debug.LogError("[GT/LegalAgreements]  ERROR!!!  GetTitleDataAsync: Encountered error while getting title data: " + err.ErrorMessage);
+		});
+		while (state == 0)
+		{
+			await Task.Yield();
+		}
+		return (state == 1) ? result : null;
+	}
+
+	private async Task<Dictionary<string, string>> GetAcceptedAgreements(LegalAgreementTextAsset[] agreements)
+	{
+		int state = 0;
+		Dictionary<string, string> returnValue = new Dictionary<string, string>();
+		string[] agreementKeys = agreements.Select((LegalAgreementTextAsset x) => x.playFabKey).ToArray();
+		GorillaServer.Instance.GetAcceptedAgreements(new GetAcceptedAgreementsRequest
+		{
+			AgreementKeys = agreementKeys
+		}, delegate(Dictionary<string, string> result)
+		{
+			state = 1;
+			returnValue = result;
+		}, delegate(PlayFabError error)
+		{
+			Debug.LogError(error.ErrorMessage);
+			state = -1;
+		});
+		while (state == 0)
+		{
+			await Task.Yield();
+		}
+		return returnValue;
+	}
+
+	private async Task SubmitAcceptedAgreements(Dictionary<string, string> agreements)
+	{
+		int state = 0;
+		GorillaServer.Instance.SubmitAcceptedAgreements(new SubmitAcceptedAgreementsRequest
+		{
+			Agreements = agreements
+		}, delegate
+		{
+			state = 1;
+		}, delegate
+		{
+			state = -1;
+		});
+		while (state == 0)
+		{
+			await Task.Yield();
+		}
+	}
+
+	public void OnDisable()
+	{
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+	}
 }

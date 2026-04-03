@@ -1,195 +1,143 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
+using GorillaNetworking;
 using UnityEngine;
 
-namespace CosmeticRoom
+namespace CosmeticRoom;
+
+public class EvolvingCosmeticKiosk : MonoBehaviour
 {
-	public class EvolvingCosmeticKiosk : MonoBehaviour
+	private record CosmeticData
 	{
-		public bool Initialized { get; private set; }
+		public EvolvingCosmetic EvolvingCosmetic;
 
-		public VRRig VRRig
+		public string PlayfabId;
+	}
+
+	[SerializeField]
+	private EvolvingCosmeticKioskButtonSet[] _buttonSets;
+
+	private readonly List<CosmeticData> _cosmetics = new List<CosmeticData>();
+
+	private int _cosmeticIdx;
+
+	public bool Initialized { get; private set; }
+
+	public VRRig VRRig => VRRig.LocalRig;
+
+	public bool CosmeticsListBuilding { get; private set; }
+
+	private void Awake()
+	{
+		EvolvingCosmeticKioskButtonSet[] buttonSets = _buttonSets;
+		for (int i = 0; i < buttonSets.Length; i++)
 		{
-			get
+			buttonSets[i].RegisterKiosk(this);
+		}
+		Initialized = true;
+	}
+
+	private async Task BuildCosmeticsList()
+	{
+		_cosmetics.Clear();
+		UpdateButtonSets();
+		CosmeticsListBuilding = true;
+		while (CosmeticsController.instance == null || !CosmeticsController.instance.v2_isCosmeticPlayFabCatalogDataLoaded || !CosmeticsV2Spawner_Dirty.isPrepared)
+		{
+			await Task.Yield();
+		}
+		CosmeticItemRegistry registry = VRRig.cosmeticsObjectRegistry;
+		HashSet<string> loadedCosmetics = new HashSet<string>();
+		CosmeticsController.CosmeticItem[] items = CosmeticsController.instance.currentWornSet.items;
+		for (int i = 0; i < items.Length; i++)
+		{
+			CosmeticsController.CosmeticItem item = items[i];
+			if (string.IsNullOrEmpty(item.itemName) || item.itemName == "null")
 			{
-				return VRRig.LocalRig;
+				continue;
 			}
-		}
-
-		public bool CosmeticsListBuilding { get; private set; }
-
-		private void Awake()
-		{
-			EvolvingCosmeticKioskButtonSet[] buttonSets = this._buttonSets;
-			for (int i = 0; i < buttonSets.Length; i++)
+			await Task.Yield();
+			CosmeticItemInstance cosmeticItemInstance;
+			try
 			{
-				buttonSets[i].RegisterKiosk(this);
+				Debug.Log("Fetching cosmetic " + item.itemName);
+				cosmeticItemInstance = registry.Cosmetic(item.itemName);
 			}
-			this.Initialized = true;
-		}
-
-		private Task BuildCosmeticsList()
-		{
-			EvolvingCosmeticKiosk.<BuildCosmeticsList>d__14 <BuildCosmeticsList>d__;
-			<BuildCosmeticsList>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-			<BuildCosmeticsList>d__.<>4__this = this;
-			<BuildCosmeticsList>d__.<>1__state = -1;
-			<BuildCosmeticsList>d__.<>t__builder.Start<EvolvingCosmeticKiosk.<BuildCosmeticsList>d__14>(ref <BuildCosmeticsList>d__);
-			return <BuildCosmeticsList>d__.<>t__builder.Task;
-		}
-
-		private void ResetButtonSets()
-		{
-			this._cosmeticIdx = 0;
-			EvolvingCosmeticKioskButtonSet[] buttonSets = this._buttonSets;
-			for (int i = 0; i < buttonSets.Length; i++)
+			catch (Exception exception)
 			{
-				buttonSets[i].Reset();
+				Debug.LogException(exception);
+				continue;
 			}
-		}
-
-		private void UpdateButtonSets()
-		{
-			for (int i = 0; i < this._buttonSets.Length; i++)
+			if (cosmeticItemInstance == null)
 			{
-				int num = this._cosmeticIdx + i;
-				if (num >= this._cosmetics.Count)
+				continue;
+			}
+			foreach (GameObject @object in cosmeticItemInstance.objects)
+			{
+				EvolvingCosmetic component = @object.GetComponent<EvolvingCosmetic>();
+				if ((object)component != null && loadedCosmetics.Add(item.itemName))
 				{
-					this._buttonSets[i].Reset();
-				}
-				else
-				{
-					EvolvingCosmeticKiosk.CosmeticData cosmeticData = this._cosmetics[num];
-					this._buttonSets[i].SetCosmetic(cosmeticData.PlayfabId, cosmeticData.EvolvingCosmetic);
-				}
-			}
-		}
-
-		public void OnHandScanned(NetPlayer player)
-		{
-			EvolvingCosmeticKiosk.<OnHandScanned>d__17 <OnHandScanned>d__;
-			<OnHandScanned>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-			<OnHandScanned>d__.<>4__this = this;
-			<OnHandScanned>d__.player = player;
-			<OnHandScanned>d__.<>1__state = -1;
-			<OnHandScanned>d__.<>t__builder.Start<EvolvingCosmeticKiosk.<OnHandScanned>d__17>(ref <OnHandScanned>d__);
-		}
-
-		public void ScrollForward()
-		{
-			this.Scroll(1);
-		}
-
-		public void ScrollBackward()
-		{
-			this.Scroll(-1);
-		}
-
-		private void Scroll(int direction)
-		{
-			this._cosmeticIdx = Math.Clamp(this._cosmeticIdx + direction, 0, this._cosmetics.Count - 1);
-			this.UpdateButtonSets();
-		}
-
-		[SerializeField]
-		private EvolvingCosmeticKioskButtonSet[] _buttonSets;
-
-		private readonly List<EvolvingCosmeticKiosk.CosmeticData> _cosmetics = new List<EvolvingCosmeticKiosk.CosmeticData>();
-
-		private int _cosmeticIdx;
-
-		[NullableContext(1)]
-		[Nullable(0)]
-		private class CosmeticData : IEquatable<EvolvingCosmeticKiosk.CosmeticData>
-		{
-			[CompilerGenerated]
-			protected virtual Type EqualityContract
-			{
-				[CompilerGenerated]
-				get
-				{
-					return typeof(EvolvingCosmeticKiosk.CosmeticData);
+					_cosmetics.Add(new CosmeticData
+					{
+						EvolvingCosmetic = component,
+						PlayfabId = item.itemName
+					});
 				}
 			}
-
-			[CompilerGenerated]
-			public override string ToString()
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				stringBuilder.Append("CosmeticData");
-				stringBuilder.Append(" { ");
-				if (this.PrintMembers(stringBuilder))
-				{
-					stringBuilder.Append(' ');
-				}
-				stringBuilder.Append('}');
-				return stringBuilder.ToString();
-			}
-
-			[CompilerGenerated]
-			protected virtual bool PrintMembers(StringBuilder builder)
-			{
-				RuntimeHelpers.EnsureSufficientExecutionStack();
-				builder.Append("EvolvingCosmetic = ");
-				builder.Append(this.EvolvingCosmetic);
-				builder.Append(", PlayfabId = ");
-				builder.Append(this.PlayfabId);
-				return true;
-			}
-
-			[NullableContext(2)]
-			[CompilerGenerated]
-			public static bool operator !=(EvolvingCosmeticKiosk.CosmeticData left, EvolvingCosmeticKiosk.CosmeticData right)
-			{
-				return !(left == right);
-			}
-
-			[NullableContext(2)]
-			[CompilerGenerated]
-			public static bool operator ==(EvolvingCosmeticKiosk.CosmeticData left, EvolvingCosmeticKiosk.CosmeticData right)
-			{
-				return left == right || (left != null && left.Equals(right));
-			}
-
-			[CompilerGenerated]
-			public override int GetHashCode()
-			{
-				return (EqualityComparer<Type>.Default.GetHashCode(this.EqualityContract) * -1521134295 + EqualityComparer<EvolvingCosmetic>.Default.GetHashCode(this.EvolvingCosmetic)) * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.PlayfabId);
-			}
-
-			[NullableContext(2)]
-			[CompilerGenerated]
-			public override bool Equals(object obj)
-			{
-				return this.Equals(obj as EvolvingCosmeticKiosk.CosmeticData);
-			}
-
-			[NullableContext(2)]
-			[CompilerGenerated]
-			public virtual bool Equals(EvolvingCosmeticKiosk.CosmeticData other)
-			{
-				return this == other || (other != null && this.EqualityContract == other.EqualityContract && EqualityComparer<EvolvingCosmetic>.Default.Equals(this.EvolvingCosmetic, other.EvolvingCosmetic) && EqualityComparer<string>.Default.Equals(this.PlayfabId, other.PlayfabId));
-			}
-
-			[CompilerGenerated]
-			protected CosmeticData(EvolvingCosmeticKiosk.CosmeticData original)
-			{
-				this.EvolvingCosmetic = original.EvolvingCosmetic;
-				this.PlayfabId = original.PlayfabId;
-			}
-
-			public CosmeticData()
-			{
-			}
-
-			[Nullable(0)]
-			public EvolvingCosmetic EvolvingCosmetic;
-
-			[Nullable(0)]
-			public string PlayfabId;
 		}
+		Debug.Log($"EvolvingCosmetics loaded ({_cosmetics.Count} found).");
+		CosmeticsListBuilding = false;
+		ResetButtonSets();
+		UpdateButtonSets();
+	}
+
+	private void ResetButtonSets()
+	{
+		_cosmeticIdx = 0;
+		EvolvingCosmeticKioskButtonSet[] buttonSets = _buttonSets;
+		for (int i = 0; i < buttonSets.Length; i++)
+		{
+			buttonSets[i].Reset();
+		}
+	}
+
+	private void UpdateButtonSets()
+	{
+		for (int i = 0; i < _buttonSets.Length; i++)
+		{
+			int num = _cosmeticIdx + i;
+			if (num >= _cosmetics.Count)
+			{
+				_buttonSets[i].Reset();
+				continue;
+			}
+			CosmeticData cosmeticData = _cosmetics[num];
+			_buttonSets[i].SetCosmetic(cosmeticData.PlayfabId, cosmeticData.EvolvingCosmetic);
+		}
+	}
+
+	public async void OnHandScanned(NetPlayer player)
+	{
+		if (player.IsLocal)
+		{
+			await BuildCosmeticsList();
+		}
+	}
+
+	public void ScrollForward()
+	{
+		Scroll(1);
+	}
+
+	public void ScrollBackward()
+	{
+		Scroll(-1);
+	}
+
+	private void Scroll(int direction)
+	{
+		_cosmeticIdx = Math.Clamp(_cosmeticIdx + direction, 0, _cosmetics.Count - 1);
+		UpdateButtonSets();
 	}
 }

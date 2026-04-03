@@ -1,189 +1,183 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[NetworkBehaviourWeaved(1)]
+public class ChristmasTree : NetworkComponent
 {
-	[NetworkBehaviourWeaved(1)]
-	public class ChristmasTree : NetworkComponent
+	public GameObject hangers;
+
+	public GameObject lights;
+
+	public GameObject topOrnament;
+
+	public float spinSpeed = 60f;
+
+	private readonly List<AttachPoint> attachPointsList = new List<AttachPoint>();
+
+	private MeshRenderer[] lightRenderers;
+
+	private bool wasActive;
+
+	private bool isActive;
+
+	private bool spinTheTop;
+
+	[SerializeField]
+	private Material lightsOffMaterial;
+
+	[SerializeField]
+	private Material[] lightsOnMaterials;
+
+	[WeaverGenerated]
+	[DefaultForProperty("Data", 0, 1)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private NetworkBool _Data;
+
+	[Networked]
+	[NetworkedWeaved(0, 1)]
+	private unsafe NetworkBool Data
 	{
-		protected override void Awake()
+		get
 		{
-			base.Awake();
-			foreach (AttachPoint attachPoint in this.hangers.GetComponentsInChildren<AttachPoint>())
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
-				this.attachPointsList.Add(attachPoint);
-				AttachPoint attachPoint2 = attachPoint;
-				attachPoint2.onHookedChanged = (UnityAction)Delegate.Combine(attachPoint2.onHookedChanged, new UnityAction(this.UpdateHangers));
+				throw new InvalidOperationException("Error when accessing ChristmasTree.Data. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			this.lightRenderers = this.lights.GetComponentsInChildren<MeshRenderer>();
-			MeshRenderer[] array = this.lightRenderers;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].material = this.lightsOffMaterial;
-			}
-			this.wasActive = false;
-			this.isActive = false;
+			return *(NetworkBool*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
-
-		private void Update()
+		set
 		{
-			if (this.spinTheTop && this.topOrnament)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
-				this.topOrnament.transform.Rotate(0f, this.spinSpeed * Time.deltaTime, 0f, Space.World);
+				throw new InvalidOperationException("Error when accessing ChristmasTree.Data. Networked properties can only be accessed when Spawned() has been called.");
 			}
+			*(NetworkBool*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
 		}
+	}
 
-		private void OnDestroy()
+	protected override void Awake()
+	{
+		base.Awake();
+		AttachPoint[] componentsInChildren = hangers.GetComponentsInChildren<AttachPoint>();
+		foreach (AttachPoint attachPoint in componentsInChildren)
 		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			foreach (AttachPoint attachPoint in this.attachPointsList)
-			{
-				attachPoint.onHookedChanged = (UnityAction)Delegate.Remove(attachPoint.onHookedChanged, new UnityAction(this.UpdateHangers));
-			}
-			this.attachPointsList.Clear();
+			attachPointsList.Add(attachPoint);
+			attachPoint.onHookedChanged = (UnityAction)Delegate.Combine(attachPoint.onHookedChanged, new UnityAction(UpdateHangers));
 		}
-
-		private void UpdateHangers()
+		lightRenderers = lights.GetComponentsInChildren<MeshRenderer>();
+		MeshRenderer[] array = lightRenderers;
+		for (int i = 0; i < array.Length; i++)
 		{
-			if (this.attachPointsList.Count == 0)
+			array[i].material = lightsOffMaterial;
+		}
+		wasActive = false;
+		isActive = false;
+	}
+
+	private void Update()
+	{
+		if (spinTheTop && (bool)topOrnament)
+		{
+			topOrnament.transform.Rotate(0f, spinSpeed * Time.deltaTime, 0f, Space.World);
+		}
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		foreach (AttachPoint attachPoints in attachPointsList)
+		{
+			attachPoints.onHookedChanged = (UnityAction)Delegate.Remove(attachPoints.onHookedChanged, new UnityAction(UpdateHangers));
+		}
+		attachPointsList.Clear();
+	}
+
+	private void UpdateHangers()
+	{
+		if (attachPointsList.Count == 0)
+		{
+			return;
+		}
+		foreach (AttachPoint attachPoints in attachPointsList)
+		{
+			if (attachPoints.IsHooked())
 			{
+				if (base.IsMine)
+				{
+					updateLight(enable: true);
+				}
 				return;
 			}
-			using (List<AttachPoint>.Enumerator enumerator = this.attachPointsList.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.IsHooked())
-					{
-						if (base.IsMine)
-						{
-							this.updateLight(true);
-						}
-						return;
-					}
-				}
-			}
-			if (base.IsMine)
-			{
-				this.updateLight(false);
-			}
 		}
-
-		private void updateLight(bool enable)
+		if (base.IsMine)
 		{
-			this.isActive = enable;
-			for (int i = 0; i < this.lightRenderers.Length; i++)
-			{
-				this.lightRenderers[i].material = (enable ? this.lightsOnMaterials[i % this.lightsOnMaterials.Length] : this.lightsOffMaterial);
-			}
-			this.spinTheTop = enable;
+			updateLight(enable: false);
 		}
+	}
 
-		[Networked]
-		[NetworkedWeaved(0, 1)]
-		private unsafe NetworkBool Data
+	private void updateLight(bool enable)
+	{
+		isActive = enable;
+		for (int i = 0; i < lightRenderers.Length; i++)
 		{
-			get
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing ChristmasTree.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				return *(NetworkBool*)(this.Ptr + 0);
-			}
-			set
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing ChristmasTree.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				*(NetworkBool*)(this.Ptr + 0) = value;
-			}
+			lightRenderers[i].material = (enable ? lightsOnMaterials[i % lightsOnMaterials.Length] : lightsOffMaterial);
 		}
+		spinTheTop = enable;
+	}
 
-		public override void WriteDataFusion()
+	public override void WriteDataFusion()
+	{
+		Data = isActive;
+	}
+
+	public override void ReadDataFusion()
+	{
+		wasActive = isActive;
+		isActive = Data;
+		if (wasActive != isActive)
 		{
-			this.Data = this.isActive;
+			updateLight(isActive);
 		}
+	}
 
-		public override void ReadDataFusion()
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender.IsMasterClient)
 		{
-			this.wasActive = this.isActive;
-			this.isActive = this.Data;
-			if (this.wasActive != this.isActive)
-			{
-				this.updateLight(this.isActive);
-			}
+			stream.SendNext(isActive);
 		}
+	}
 
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender.IsMasterClient)
 		{
-			if (!info.Sender.IsMasterClient)
+			wasActive = isActive;
+			isActive = (bool)stream.ReceiveNext();
+			if (wasActive != isActive)
 			{
-				return;
-			}
-			stream.SendNext(this.isActive);
-		}
-
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			this.wasActive = this.isActive;
-			this.isActive = (bool)stream.ReceiveNext();
-			if (this.wasActive != this.isActive)
-			{
-				this.updateLight(this.isActive);
+				updateLight(isActive);
 			}
 		}
+	}
 
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
-		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
-		}
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
 
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
-		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
-		}
-
-		public GameObject hangers;
-
-		public GameObject lights;
-
-		public GameObject topOrnament;
-
-		public float spinSpeed = 60f;
-
-		private readonly List<AttachPoint> attachPointsList = new List<AttachPoint>();
-
-		private MeshRenderer[] lightRenderers;
-
-		private bool wasActive;
-
-		private bool isActive;
-
-		private bool spinTheTop;
-
-		[SerializeField]
-		private Material lightsOffMaterial;
-
-		[SerializeField]
-		private Material[] lightsOnMaterials;
-
-		[WeaverGenerated]
-		[DefaultForProperty("Data", 0, 1)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private NetworkBool _Data;
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

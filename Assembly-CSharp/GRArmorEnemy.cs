@@ -1,126 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GRArmorEnemy : MonoBehaviour
 {
-	private void Awake()
+	[Serializable]
+	public struct GREnemyArmorLevel
 	{
-		this.SetHp(0);
-		this.entity = base.GetComponent<GameEntity>();
-	}
+		public int healthThreshold;
 
-	public void SetHp(int hp)
-	{
-		this.hp = hp;
-		this.RefreshArmor();
-	}
+		public Material mainRendererMaterial;
 
-	private void RefreshArmor()
-	{
-		bool flag = this.hp > 0;
-		GREnemy.HideRenderers(this.renderers, !flag);
-		GREnemy.HideObjects(this.visibleObjects, !flag);
-		if (this.armorStateData.Count > 0)
-		{
-			int num = -1;
-			Material mainRendererMaterial = this.armorStateData[0].mainRendererMaterial;
-			for (int i = 0; i < this.armorStateData.Count; i++)
-			{
-				num = i;
-				mainRendererMaterial = this.armorStateData[i].mainRendererMaterial;
-				if (this.hp >= this.armorStateData[i].healthThreshold)
-				{
-					break;
-				}
-			}
-			if (flag && this.materialSwapRenderer != null && mainRendererMaterial != this.materialSwapRenderer.material)
-			{
-				this.materialSwapRenderer.material = mainRendererMaterial;
-				this.SetArmorColor(this.GetArmorColor());
-			}
-			if (num != -1)
-			{
-				GREnemy.HideObjects(this.armorStateData[num].visibleObjects, !flag);
-				for (int j = 0; j < this.armorStateData[num].hiddenObjects.Count; j++)
-				{
-					GameObject gameObject = this.armorStateData[num].hiddenObjects[j];
-					if (gameObject.activeInHierarchy)
-					{
-						this.PlayDestroyFx(gameObject.transform.position);
-					}
-				}
-				GREnemy.HideObjects(this.armorStateData[num].hiddenObjects, true);
-			}
-		}
-	}
+		public List<GameObject> visibleObjects;
 
-	public void SetArmorColor(Color newColor)
-	{
-		if (this.renderers != null && this.renderers.Count > 0)
-		{
-			this.materialSwapRenderer.material.SetColor("_BaseColor", newColor);
-		}
-	}
-
-	public Color GetArmorColor()
-	{
-		Color result = Color.white;
-		if (this.materialSwapRenderer != null)
-		{
-			result = this.materialSwapRenderer.material.GetColor("_BaseColor");
-		}
-		return result;
-	}
-
-	public void PlayHitFx(Vector3 position)
-	{
-		this.PlayFx(this.fxHit, position);
-		this.PlaySound(this.hitSound, this.hitSoundVolume, position);
-	}
-
-	public void PlayBlockFx(Vector3 position)
-	{
-		this.PlayFx(this.fxBlock, position);
-		this.PlaySound(this.blockSound, this.blockSoundVolume, position);
-	}
-
-	public void PlayDestroyFx(Vector3 position)
-	{
-		this.PlayFx(this.fxDestroy, position);
-		this.PlaySound(this.destroySound, this.destroySoundVolume, position);
-	}
-
-	private void PlayFx(GameObject fx, Vector3 position)
-	{
-		if (fx == null)
-		{
-			return;
-		}
-		fx.SetActive(false);
-		fx.SetActive(true);
-	}
-
-	private void PlaySound(AudioClip clip, float volume, Vector3 position)
-	{
-		this.audioSource.clip = clip;
-		this.audioSource.volume = volume;
-		this.audioSource.Play();
-	}
-
-	public void FragmentArmor()
-	{
-		if (this.entity.IsAuthority())
-		{
-			float num = 0f;
-			for (int i = 0; i < this.numFragmentsWhenShattered; i++)
-			{
-				num += 360f / (float)this.numFragmentsWhenShattered;
-				Quaternion rotation = Quaternion.Euler(0f, num, this.fragmentLaunchPitch);
-				Vector3 b = rotation * this.fragmentSpawnOffset;
-				this.entity.manager.RequestCreateItem(this.armorFragmentPrefab.name.GetStaticHash(), base.transform.position + b, rotation, (long)this.entity.GetNetId());
-			}
-		}
+		public List<GameObject> hiddenObjects;
 	}
 
 	[SerializeField]
@@ -160,7 +53,7 @@ public class GRArmorEnemy : MonoBehaviour
 	private float destroySoundVolume;
 
 	[SerializeField]
-	public List<GRArmorEnemy.GREnemyArmorLevel> armorStateData;
+	public List<GREnemyArmorLevel> armorStateData;
 
 	[SerializeField]
 	public Renderer materialSwapRenderer;
@@ -177,15 +70,123 @@ public class GRArmorEnemy : MonoBehaviour
 
 	private int hp;
 
-	[Serializable]
-	public struct GREnemyArmorLevel
+	private void Awake()
 	{
-		public int healthThreshold;
+		SetHp(0);
+		entity = GetComponent<GameEntity>();
+	}
 
-		public Material mainRendererMaterial;
+	public void SetHp(int hp)
+	{
+		this.hp = hp;
+		RefreshArmor();
+	}
 
-		public List<GameObject> visibleObjects;
+	private void RefreshArmor()
+	{
+		bool flag = hp > 0;
+		GREnemy.HideRenderers(renderers, !flag);
+		GREnemy.HideObjects(visibleObjects, !flag);
+		if (armorStateData.Count <= 0)
+		{
+			return;
+		}
+		int num = -1;
+		Material mainRendererMaterial = armorStateData[0].mainRendererMaterial;
+		for (int i = 0; i < armorStateData.Count; i++)
+		{
+			num = i;
+			mainRendererMaterial = armorStateData[i].mainRendererMaterial;
+			if (hp >= armorStateData[i].healthThreshold)
+			{
+				break;
+			}
+		}
+		if (flag && materialSwapRenderer != null && mainRendererMaterial != materialSwapRenderer.material)
+		{
+			materialSwapRenderer.material = mainRendererMaterial;
+			SetArmorColor(GetArmorColor());
+		}
+		if (num == -1)
+		{
+			return;
+		}
+		GREnemy.HideObjects(armorStateData[num].visibleObjects, !flag);
+		for (int j = 0; j < armorStateData[num].hiddenObjects.Count; j++)
+		{
+			GameObject gameObject = armorStateData[num].hiddenObjects[j];
+			if (gameObject.activeInHierarchy)
+			{
+				PlayDestroyFx(gameObject.transform.position);
+			}
+		}
+		GREnemy.HideObjects(armorStateData[num].hiddenObjects, hide: true);
+	}
 
-		public List<GameObject> hiddenObjects;
+	public void SetArmorColor(Color newColor)
+	{
+		if (renderers != null && renderers.Count > 0)
+		{
+			materialSwapRenderer.material.SetColor("_BaseColor", newColor);
+		}
+	}
+
+	public Color GetArmorColor()
+	{
+		Color result = Color.white;
+		if (materialSwapRenderer != null)
+		{
+			result = materialSwapRenderer.material.GetColor("_BaseColor");
+		}
+		return result;
+	}
+
+	public void PlayHitFx(Vector3 position)
+	{
+		PlayFx(fxHit, position);
+		PlaySound(hitSound, hitSoundVolume, position);
+	}
+
+	public void PlayBlockFx(Vector3 position)
+	{
+		PlayFx(fxBlock, position);
+		PlaySound(blockSound, blockSoundVolume, position);
+	}
+
+	public void PlayDestroyFx(Vector3 position)
+	{
+		PlayFx(fxDestroy, position);
+		PlaySound(destroySound, destroySoundVolume, position);
+	}
+
+	private void PlayFx(GameObject fx, Vector3 position)
+	{
+		if (!(fx == null))
+		{
+			fx.SetActive(value: false);
+			fx.SetActive(value: true);
+		}
+	}
+
+	private void PlaySound(AudioClip clip, float volume, Vector3 position)
+	{
+		audioSource.clip = clip;
+		audioSource.volume = volume;
+		audioSource.Play();
+	}
+
+	public void FragmentArmor()
+	{
+		if (entity.IsAuthority())
+		{
+			float num = 0f;
+			for (int i = 0; i < numFragmentsWhenShattered; i++)
+			{
+				num += 360f / (float)numFragmentsWhenShattered;
+				Quaternion quaternion = Quaternion.Euler(0f, num, fragmentLaunchPitch);
+				Vector3 vector = quaternion * fragmentSpawnOffset;
+				entity.manager.RequestCreateItem(armorFragmentPrefab.name.GetStaticHash(), base.transform.position + vector, quaternion, entity.GetNetId());
+			}
+		}
 	}
 }

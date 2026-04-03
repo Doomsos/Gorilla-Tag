@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using GorillaGameModes;
 using GorillaTag;
@@ -12,1122 +11,42 @@ using UnityEngine.Pool;
 [DefaultExecutionOrder(0)]
 public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IFactoryItemProvider
 {
-	public bool HasActiveTryOnDispenser
+	public enum ClientToAuthorityRPC
 	{
-		get
-		{
-			return this.tryOnDispenserCount > 0;
-		}
+		CombinedTerminalButtonPress,
+		CombinedTerminalHandScan,
+		ResourceDepositDeposited,
+		CallEntityRPC,
+		CallEntityRPCData,
+		RequestStartRoomFX
 	}
 
-	internal void RegisterTryOnDispenser()
+	public enum RoomFXType
 	{
-		this.tryOnDispenserCount++;
+		Underwater,
+		LunarMode,
+		ConstLowG,
+		Bouncy,
+		Supercharge
 	}
 
-	internal void UnregisterTryOnDispenser()
+	public enum AuthorityToClientRPC
 	{
-		this.tryOnDispenserCount = Mathf.Max(this.tryOnDispenserCount - 1, 0);
+		TechPointGranted,
+		ResourceDepositTechPointGranted,
+		ResourceDepositTechPointRejected,
+		CallEntityRPC,
+		CallEntityRPCData,
+		TriggerMonkeIdolDepositCelebration,
+		StartRoomFX
 	}
 
-	private void Awake()
+	public enum ClientToClientRPC
 	{
-		GameEntityManager gameEntityManager = this.gameEntityManager;
-		gameEntityManager.OnEntityRemoved = (Action<GameEntity>)Delegate.Combine(gameEntityManager.OnEntityRemoved, new Action<GameEntity>(this.OnEntityRemoved));
-	}
-
-	public void OnEnableZoneSuperInfection(SuperInfection zone)
-	{
-		this.zoneSuperInfection = zone;
-		if (this.PendingZoneInit)
-		{
-			this.PendingZoneInit = false;
-			this.OnZoneInit();
-		}
-		if (this.gameEntityManager.PendingTableData)
-		{
-			this.gameEntityManager.ResolveTableData();
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (!SuperInfectionManager.siManagerByZone.TryAdd(this.gameEntityManager.zone, this))
-		{
-			Debug.LogError("[GT/SuperInfectionManager]  ERROR!!!  " + string.Format("Tried to add a duplicate Manager for zone `{0}`. Did you forget to change the ", this.gameEntityManager.zone) + "zone on the GameEntityManager on GameObject at path: " + base.transform.GetPathQ(), this);
-			return;
-		}
-		GameMode.OnStartGameMode += this._OnStartGameMode;
-	}
-
-	private void OnDisable()
-	{
-		SuperInfectionManager.siManagerByZone.Remove(this.gameEntityManager.zone);
-		GameMode.OnStartGameMode -= this._OnStartGameMode;
-	}
-
-	private void _OnStartGameMode(GameModeType newGameModeType)
-	{
-		if (!this.gameEntityManager.IsAuthority())
-		{
-			return;
-		}
-		List<GameEntityId> list;
-		using (CollectionPool<List<GameEntityId>, GameEntityId>.Get(out list))
-		{
-			ESuperGameModes esuperGameModes = (ESuperGameModes)(1 << (int)newGameModeType);
-			foreach (GameEntity gameEntity in this.gameEntityManager.GetGameEntities())
-			{
-				SIGadget sigadget;
-				SITechTreePage sitechTreePage;
-				if (!(gameEntity == null) && gameEntity.TryGetComponent<SIGadget>(out sigadget) && this.techTreeSO.TryGetTreePage(sigadget.PageId, out sitechTreePage) && (sitechTreePage.excludedGameModes & esuperGameModes) != (ESuperGameModes)0)
-				{
-					list.Add(gameEntity.id);
-				}
-			}
-			if (list.Count > 0)
-			{
-				this.gameEntityManager.RequestDestroyItems(list);
-			}
-		}
-	}
-
-	public static SuperInfectionManager GetSIManagerForZone(GTZone targetZone)
-	{
-		SuperInfectionManager result;
-		if (SuperInfectionManager.siManagerByZone.TryGetValue(targetZone, out result))
-		{
-			return result;
-		}
-		return null;
-	}
-
-	public bool IsSupercharged
-	{
-		get
-		{
-			return false;
-		}
-	}
-
-	public void OnZoneCreate()
-	{
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.zoneSuperInfection == null)
-		{
-			return;
-		}
-		if (!this.gameEntityManager.IsAuthority())
-		{
-			return;
-		}
-		for (int i = 0; i < this.zoneSuperInfection.siTerminals.Length; i++)
-		{
-			this.zoneSuperInfection.siTerminals[i].WriteDataPUN(stream, info);
-		}
-		for (int j = 0; j < this.zoneSuperInfection.siDeposits.Length; j++)
-		{
-			this.zoneSuperInfection.siDeposits[j].WriteDataPUN(stream, info);
-		}
-		this.zoneSuperInfection.questBoard.WriteDataPUN(stream, info);
-	}
-
-	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.zoneSuperInfection == null)
-		{
-			return;
-		}
-		if (!this.gameEntityManager.IsAuthorityPlayer(info.Sender))
-		{
-			return;
-		}
-		for (int i = 0; i < this.zoneSuperInfection.siTerminals.Length; i++)
-		{
-			this.zoneSuperInfection.siTerminals[i].ReadDataPUN(stream, info);
-		}
-		for (int j = 0; j < this.zoneSuperInfection.siDeposits.Length; j++)
-		{
-			this.zoneSuperInfection.siDeposits[j].ReadDataPUN(stream, info);
-		}
-		this.zoneSuperInfection.questBoard.ReadDataPUN(stream, info);
-	}
-
-	void IGameEntityZoneComponent.SerializeZoneData(BinaryWriter writer)
-	{
-		if (this.zoneSuperInfection == null)
-		{
-			return;
-		}
-		for (int i = 0; i < this.zoneSuperInfection.siTerminals.Length; i++)
-		{
-			this.zoneSuperInfection.siTerminals[i].SerializeZoneData(writer);
-		}
-	}
-
-	void IGameEntityZoneComponent.DeserializeZoneData(BinaryReader reader)
-	{
-		if (this.zoneSuperInfection == null)
-		{
-			return;
-		}
-		for (int i = 0; i < this.zoneSuperInfection.siTerminals.Length; i++)
-		{
-			this.zoneSuperInfection.siTerminals[i].DeserializeZoneData(reader);
-		}
-	}
-
-	public void SerializeZoneEntityData(BinaryWriter writer, GameEntity entity)
-	{
-	}
-
-	public void DeserializeZoneEntityData(BinaryReader reader, GameEntity entity)
-	{
-	}
-
-	void IGameEntityZoneComponent.SerializeZonePlayerData(BinaryWriter writer, int actorNumber)
-	{
-		SIPlayer siplayer = SIPlayer.Get(actorNumber);
-		siplayer.SerializeNetworkState(writer, siplayer.gamePlayer.rig.OwningNetPlayer);
-	}
-
-	void IGameEntityZoneComponent.DeserializeZonePlayerData(BinaryReader reader, int actorNumber)
-	{
-		SIPlayer player = SIPlayer.Get(actorNumber);
-		SIPlayer.DeserializeNetworkStateAndBurn(reader, player, this);
-	}
-
-	public bool IsZoneReady()
-	{
-		return NetworkSystem.Instance.InRoom && SuperInfectionManager.IsSuperGameMode() && this.zoneSuperInfection.IsNotNull() && VRRig.LocalRig.zoneEntity.currentZone == this.gameEntityManager.zone && SIProgression.Instance != null && SIProgression.Instance._treeReady;
-	}
-
-	public bool ShouldClearZone()
-	{
-		if (GameMode.ActiveGameMode != null)
-		{
-			GameModeType gameModeType = GameMode.ActiveGameMode.GameType();
-			return gameModeType != GameModeType.SuperInfect && gameModeType != GameModeType.SuperCasual;
-		}
-		return false;
-	}
-
-	public static bool IsSuperGameMode()
-	{
-		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
-		if (activeGameMode != null)
-		{
-			GameModeType gameModeType = activeGameMode.GameType();
-			return gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual;
-		}
-		return false;
-	}
-
-	public void OnCreateGameEntity(GameEntity entity)
-	{
-		SIGadget component = entity.GetComponent<SIGadget>();
-		bool flag = (entity.createData & long.MinValue) != 0L;
-		if (component != null)
-		{
-			SIPlayer siplayer = SIPlayer.Get((int)(entity.createData & (long)((ulong)-1)));
-			if (siplayer != null)
-			{
-				int num = 0;
-				for (int i = siplayer.activePlayerGadgets.Count - 1; i >= 0; i--)
-				{
-					GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(siplayer.activePlayerGadgets[i]);
-					if (gameEntityFromNetId == null)
-					{
-						siplayer.activePlayerGadgets.RemoveAt(i);
-					}
-					else
-					{
-						num++;
-						if (num >= siplayer.TotalGadgetLimit)
-						{
-							this.gameEntityManager.DestroyItemLocal(gameEntityFromNetId.id);
-							break;
-						}
-					}
-				}
-				if (!siplayer.activePlayerGadgets.Contains(entity.GetNetId()))
-				{
-					siplayer.activePlayerGadgets.Add(entity.GetNetId());
-				}
-			}
-			SIUpgradeSet siupgradeSet = new SIUpgradeSet((int)((entity.createData & 9223372032559808512L) >> 32));
-			siupgradeSet = component.FilterUpgradeNodes(siupgradeSet);
-			component.ApplyUpgradeNodes(siupgradeSet);
-			component.RefreshUpgradeVisuals(siupgradeSet);
-			if (this.zoneSuperInfection != null)
-			{
-				this.zoneSuperInfection.AddGadget(component);
-			}
-			if (flag)
-			{
-				entity.shouldDestroyOnZoneExit = true;
-				GameEntityDelayedDestroy gameEntityDelayedDestroy = entity.gameObject.AddComponent<GameEntityDelayedDestroy>();
-				gameEntityDelayedDestroy.Configure(SIGadgetDispenser.g_tryOnOptions);
-				gameEntityDelayedDestroy.ResetTimer();
-			}
-		}
-		List<SuperInfectionSnapPoint> list;
-		using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out list))
-		{
-			entity.GetComponentsInChildren<SuperInfectionSnapPoint>(true, list);
-			foreach (SuperInfectionSnapPoint snapPoint in list)
-			{
-				this.RegisterSnapPoint(snapPoint);
-			}
-		}
-	}
-
-	public void OnZoneClear(ZoneClearReason reason)
-	{
-		SuperInfection superInfection = this.zoneSuperInfection;
-		if (superInfection != null)
-		{
-			superInfection.OnZoneClear(reason);
-		}
-		SIPlayer localPlayer = SIPlayer.LocalPlayer;
-		if (localPlayer != null)
-		{
-			localPlayer.Reset();
-		}
-		SIPlayer.ClearPlayerCache();
-		this.allSnapPoints.Clear();
-	}
-
-	public void OnZoneInit()
-	{
-		if (this.zoneSuperInfection == null)
-		{
-			this.PendingZoneInit = true;
-			return;
-		}
-		SuperInfectionManager.activeSuperInfectionManager = this;
-		if (this.gameEntityManager.IsAuthority())
-		{
-			this.TestSpawnGadget();
-		}
-		this.zoneSuperInfection.OnZoneInit();
-		if (SIPlayer.Get(NetworkSystem.Instance.LocalPlayer.ActorNumber) != null)
-		{
-			this.progression.Init();
-			if (this.progression.ClientReady)
-			{
-				SIPlayer.SetAndBroadcastProgression();
-			}
-			else
-			{
-				this.progression.OnClientReady += this.<OnZoneInit>g__WhenReady|48_0;
-			}
-		}
-		this.allSnapPoints.Clear();
-		foreach (GameEntity gameEntity in this.gameEntityManager.GetGameEntities())
-		{
-			if (!(gameEntity == null))
-			{
-				List<SuperInfectionSnapPoint> list;
-				using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out list))
-				{
-					gameEntity.GetComponentsInChildren<SuperInfectionSnapPoint>(true, list);
-					foreach (SuperInfectionSnapPoint snapPoint in list)
-					{
-						this.RegisterSnapPoint(snapPoint);
-					}
-				}
-			}
-		}
-	}
-
-	public void RegisterSnapPoint(SuperInfectionSnapPoint snapPoint)
-	{
-		List<SuperInfectionSnapPoint> list;
-		if (!this.allSnapPoints.TryGetValue(snapPoint.jointType, out list))
-		{
-			list = (this.allSnapPoints[snapPoint.jointType] = new List<SuperInfectionSnapPoint>());
-		}
-		list.Add(snapPoint);
-	}
-
-	public void UnregisterSnapPoint(SuperInfectionSnapPoint snapPoint)
-	{
-		if (this.allSnapPoints.ContainsKey(snapPoint.jointType))
-		{
-			this.allSnapPoints[snapPoint.jointType].Remove(snapPoint);
-			if (this.allSnapPoints[snapPoint.jointType].Count == 0)
-			{
-				this.allSnapPoints.Remove(snapPoint.jointType);
-			}
-		}
-	}
-
-	public IEnumerable<SuperInfectionSnapPoint> GetPoints(SnapJointType jointType)
-	{
-		foreach (KeyValuePair<SnapJointType, List<SuperInfectionSnapPoint>> keyValuePair in this.allSnapPoints)
-		{
-			if ((keyValuePair.Key & jointType) != SnapJointType.None)
-			{
-				foreach (SuperInfectionSnapPoint superInfectionSnapPoint in keyValuePair.Value)
-				{
-					yield return superInfectionSnapPoint;
-				}
-				List<SuperInfectionSnapPoint>.Enumerator enumerator2 = default(List<SuperInfectionSnapPoint>.Enumerator);
-			}
-		}
-		Dictionary<SnapJointType, List<SuperInfectionSnapPoint>>.Enumerator enumerator = default(Dictionary<SnapJointType, List<SuperInfectionSnapPoint>>.Enumerator);
-		yield break;
-		yield break;
-	}
-
-	public SuperInfectionSnapPoint FindNearestSnapPoint(SnapJointType jointType, Vector3 origin, float maxDist, bool includeOccupied = false)
-	{
-		SuperInfectionSnapPoint result = null;
-		float num = maxDist * maxDist;
-		foreach (SuperInfectionSnapPoint superInfectionSnapPoint in this.GetPoints(jointType))
-		{
-			if (!(superInfectionSnapPoint == null) && superInfectionSnapPoint.isActiveAndEnabled && (includeOccupied || !superInfectionSnapPoint.HasSnapped()))
-			{
-				float sqrMagnitude = (superInfectionSnapPoint.transform.position - origin).sqrMagnitude;
-				if (sqrMagnitude < num)
-				{
-					result = superInfectionSnapPoint;
-					num = sqrMagnitude;
-				}
-			}
-		}
-		return result;
-	}
-
-	public void CallRPC(SuperInfectionManager.ClientToAuthorityRPC clientToAuthorityRPC, object[] data)
-	{
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.photonView.RPC("SIClientToAuthorityRPC", this.gameEntityManager.GetAuthorityPlayer(), new object[]
-			{
-				(int)clientToAuthorityRPC,
-				data
-			});
-		}
-	}
-
-	public void CallRPC(SuperInfectionManager.ClientToClientRPC clientToClientRPC, object[] data)
-	{
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.photonView.RPC("SIClientToClientRPC", RpcTarget.Others, new object[]
-			{
-				(int)clientToClientRPC,
-				data
-			});
-		}
-	}
-
-	public void CallRPC(SuperInfectionManager.AuthorityToClientRPC authorityToClientRPC, object[] data)
-	{
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.photonView.RPC("SIAuthorityToClientRPC", RpcTarget.Others, new object[]
-			{
-				(int)authorityToClientRPC,
-				data
-			});
-		}
-	}
-
-	public void CallRPC(SuperInfectionManager.AuthorityToClientRPC authorityToClientRPC, int actorNr, object[] data)
-	{
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.photonView.RPC("SIAuthorityToClientRPC", NetworkSystem.Instance.GetNetPlayerByID(actorNr).GetPlayerRef(), new object[]
-			{
-				(int)authorityToClientRPC,
-				data
-			});
-		}
-	}
-
-	[PunRPC]
-	public void SIClientToAuthorityRPC(int clientToAuthorityRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		if (!this.gameEntityManager.IsValidAuthorityRPC(info.Sender))
-		{
-			return;
-		}
-		if (data == null)
-		{
-			return;
-		}
-		SIPlayer siplayer = SIPlayer.Get(info.Sender.ActorNumber);
-		if (siplayer.IsNull() || !siplayer.clientToAuthorityRPCLimiter.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		this.ProcessClientToAuthorityRPC(clientToAuthorityRPCEnum, data, info);
-	}
-
-	public void ProcessClientToAuthorityRPC(int clientToAuthorityRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		switch (clientToAuthorityRPCEnum)
-		{
-		case 0:
-		{
-			if (data.Length != 4)
-			{
-				return;
-			}
-			int num;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out num))
-			{
-				return;
-			}
-			int data2;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out data2))
-			{
-				return;
-			}
-			int num2;
-			if (!GameEntityManager.ValidateDataType<int>(data[2], out num2))
-			{
-				return;
-			}
-			int num3;
-			if (!GameEntityManager.ValidateDataType<int>(data[3], out num3))
-			{
-				return;
-			}
-			if (num3 < 0 || num3 >= this.zoneSuperInfection.siTerminals.Length)
-			{
-				return;
-			}
-			if (!Enum.IsDefined(typeof(SITouchscreenButton.SITouchscreenButtonType), (SITouchscreenButton.SITouchscreenButtonType)num))
-			{
-				return;
-			}
-			if (!Enum.IsDefined(typeof(SICombinedTerminal.TerminalSubFunction), (SICombinedTerminal.TerminalSubFunction)num2))
-			{
-				return;
-			}
-			this.zoneSuperInfection.siTerminals[num3].TouchscreenButtonPressed((SITouchscreenButton.SITouchscreenButtonType)num, data2, info.Sender.ActorNumber, (SICombinedTerminal.TerminalSubFunction)num2);
-			return;
-		}
-		case 1:
-		{
-			if (data.Length != 1)
-			{
-				return;
-			}
-			int num4;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out num4))
-			{
-				return;
-			}
-			if (num4 < 0 || num4 >= this.zoneSuperInfection.siTerminals.Length)
-			{
-				return;
-			}
-			SIPlayer siplayer = SIPlayer.Get(info.Sender.ActorNumber);
-			if (siplayer == null)
-			{
-				return;
-			}
-			SICombinedTerminal sicombinedTerminal = this.zoneSuperInfection.siTerminals[num4];
-			if (!siplayer.gamePlayer.rig.IsPositionInRange(sicombinedTerminal.transform.position, 3f))
-			{
-				return;
-			}
-			sicombinedTerminal.PlayerHandScanned(info.Sender.ActorNumber);
-			return;
-		}
-		case 2:
-		{
-			if (data.Length != 2)
-			{
-				return;
-			}
-			int netId;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId))
-			{
-				return;
-			}
-			int num5;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out num5))
-			{
-				return;
-			}
-			if (num5 < 0 || num5 >= this.zoneSuperInfection.siDeposits.Length)
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(netId);
-			if (gameEntityFromNetId == null)
-			{
-				return;
-			}
-			SIResourceDeposit siresourceDeposit = this.zoneSuperInfection.siDeposits[num5];
-			if ((gameEntityFromNetId.transform.position - siresourceDeposit.transform.position).IsLongerThan(3f))
-			{
-				return;
-			}
-			SIResource component = gameEntityFromNetId.GetComponent<SIResource>();
-			if (component != null)
-			{
-				siresourceDeposit.ResourceDeposited(component);
-				return;
-			}
-			break;
-		}
-		case 3:
-		{
-			if (data.Length != 2)
-			{
-				return;
-			}
-			int netId2;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId2))
-			{
-				return;
-			}
-			int rpcID;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId2 = this.gameEntityManager.GetGameEntityFromNetId(netId2);
-			if (!gameEntityFromNetId2)
-			{
-				return;
-			}
-			SIGadget component2 = gameEntityFromNetId2.GetComponent<SIGadget>();
-			if (component2)
-			{
-				component2.ProcessClientToAuthorityRPC(info, rpcID, null);
-				return;
-			}
-			break;
-		}
-		case 4:
-		{
-			if (data.Length != 3)
-			{
-				return;
-			}
-			int netId3;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId3))
-			{
-				return;
-			}
-			int rpcID2;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID2))
-			{
-				return;
-			}
-			object[] data3;
-			if (!GameEntityManager.ValidateDataType<object[]>(data[2], out data3))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId3 = this.gameEntityManager.GetGameEntityFromNetId(netId3);
-			if (!gameEntityFromNetId3)
-			{
-				return;
-			}
-			SIGadget component3 = gameEntityFromNetId3.GetComponent<SIGadget>();
-			if (component3)
-			{
-				component3.ProcessClientToAuthorityRPC(info, rpcID2, data3);
-			}
-			break;
-		}
-		case 5:
-			break;
-		default:
-			return;
-		}
-	}
-
-	[PunRPC]
-	public void SIAuthorityToClientRPC(int authorityToClientRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		if (!this.gameEntityManager.IsValidClientRPC(info.Sender))
-		{
-			return;
-		}
-		if (data == null)
-		{
-			return;
-		}
-		SIPlayer siplayer = SIPlayer.Get(info.Sender.ActorNumber);
-		if (siplayer.IsNull() || !siplayer.authorityToClientRPCLimiter.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		this.ProcessAuthorityToClientRPC(authorityToClientRPCEnum, data, info);
-	}
-
-	public void ProcessAuthorityToClientRPC(int authorityToClientRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		switch (authorityToClientRPCEnum)
-		{
-		case 3:
-		{
-			if (data.Length != 2)
-			{
-				return;
-			}
-			int netId;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId))
-			{
-				return;
-			}
-			int rpcID;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(netId);
-			if (!gameEntityFromNetId)
-			{
-				return;
-			}
-			SIGadget component = gameEntityFromNetId.GetComponent<SIGadget>();
-			if (component)
-			{
-				component.ProcessAuthorityToClientRPC(info, rpcID, null);
-				return;
-			}
-			break;
-		}
-		case 4:
-		{
-			if (data.Length != 3)
-			{
-				return;
-			}
-			int netId2;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId2))
-			{
-				return;
-			}
-			int rpcID2;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID2))
-			{
-				return;
-			}
-			object[] data2;
-			if (!GameEntityManager.ValidateDataType<object[]>(data[2], out data2))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId2 = this.gameEntityManager.GetGameEntityFromNetId(netId2);
-			if (!gameEntityFromNetId2)
-			{
-				return;
-			}
-			SIGadget component2 = gameEntityFromNetId2.GetComponent<SIGadget>();
-			if (component2)
-			{
-				component2.ProcessAuthorityToClientRPC(info, rpcID2, data2);
-				return;
-			}
-			break;
-		}
-		case 5:
-		{
-			if (data.Length != 1)
-			{
-				return;
-			}
-			Vector3 position;
-			if (!GameEntityManager.ValidateDataType<Vector3>(data[0], out position))
-			{
-				return;
-			}
-			if (SIPlayer.LocalPlayer)
-			{
-				SIPlayer.LocalPlayer.TriggerIdolDepositedCelebration(position);
-				return;
-			}
-			break;
-		}
-		case 6:
-			break;
-		default:
-			return;
-		}
-	}
-
-	[PunRPC]
-	public void SIClientToClientRPC(int clientToClientRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		if (data == null)
-		{
-			return;
-		}
-		SIPlayer siplayer = SIPlayer.Get(info.Sender.ActorNumber);
-		if (siplayer.IsNull() || !siplayer.clientToClientRPCLimiter.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		this.ProcessClientToClientRPC(clientToClientRPCEnum, data, info);
-	}
-
-	public void ProcessClientToClientRPC(int clientToClientRPCEnum, object[] data, PhotonMessageInfo info)
-	{
-		switch (clientToClientRPCEnum)
-		{
-		case 0:
-		{
-			SIPlayer siplayer = SIPlayer.Get(info.Sender.ActorNumber);
-			if (siplayer == null)
-			{
-				return;
-			}
-			if (data.Length != 8)
-			{
-				return;
-			}
-			int[] resourceArray;
-			if (!GameEntityManager.ValidateDataType<int[]>(data[0], out resourceArray))
-			{
-				return;
-			}
-			int[] limitedDepositTimeArray;
-			if (!GameEntityManager.ValidateDataType<int[]>(data[1], out limitedDepositTimeArray))
-			{
-				return;
-			}
-			bool[][] techTreeData;
-			if (!GameEntityManager.ValidateDataType<bool[][]>(data[2], out techTreeData))
-			{
-				return;
-			}
-			int stashedQuests;
-			if (!GameEntityManager.ValidateDataType<int>(data[3], out stashedQuests))
-			{
-				return;
-			}
-			int stashedBonusPoints;
-			if (!GameEntityManager.ValidateDataType<int>(data[4], out stashedBonusPoints))
-			{
-				return;
-			}
-			int bonusProgress;
-			if (!GameEntityManager.ValidateDataType<int>(data[5], out bonusProgress))
-			{
-				return;
-			}
-			int[] currentQuestIds;
-			if (!GameEntityManager.ValidateDataType<int[]>(data[6], out currentQuestIds))
-			{
-				return;
-			}
-			int[] currentQuestProgresses;
-			if (!GameEntityManager.ValidateDataType<int[]>(data[7], out currentQuestProgresses))
-			{
-				return;
-			}
-			siplayer.UpdateProgression(resourceArray, limitedDepositTimeArray, techTreeData, stashedQuests, stashedBonusPoints, bonusProgress, currentQuestIds, currentQuestProgresses);
-			if (this.zoneSuperInfection != null)
-			{
-				this.zoneSuperInfection.RefreshStations(info.Sender.ActorNumber);
-				return;
-			}
-			break;
-		}
-		case 1:
-		{
-			if (data.Length != 5)
-			{
-				return;
-			}
-			if (SIPlayer.Get(info.Sender.ActorNumber) == null)
-			{
-				return;
-			}
-			int netId;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId))
-			{
-				return;
-			}
-			Vector3 velocity;
-			if (GameEntityManager.ValidateDataType<Vector3>(data[1], out velocity))
-			{
-				float num = 10000f;
-				if (velocity.IsValid(num))
-				{
-					Vector3 angVelocity;
-					if (GameEntityManager.ValidateDataType<Vector3>(data[2], out angVelocity))
-					{
-						num = 10000f;
-						if (angVelocity.IsValid(num))
-						{
-							Vector3 targetPosition;
-							if (GameEntityManager.ValidateDataType<Vector3>(data[3], out targetPosition))
-							{
-								num = 10000f;
-								if (targetPosition.IsValid(num))
-								{
-									Quaternion targetRotation;
-									if (!GameEntityManager.ValidateDataType<Quaternion>(data[4], out targetRotation) || !targetRotation.IsValid())
-									{
-										return;
-									}
-									GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(netId);
-									if (gameEntityFromNetId == null)
-									{
-										return;
-									}
-									if (gameEntityFromNetId.heldByActorNumber != info.Sender.ActorNumber && gameEntityFromNetId.snappedByActorNumber != info.Sender.ActorNumber)
-									{
-										return;
-									}
-									SIGadgetDashYoyo component = gameEntityFromNetId.GetComponent<SIGadgetDashYoyo>();
-									if (component == null)
-									{
-										return;
-									}
-									component.RemoteThrowYoYoTarget(velocity, angVelocity, targetPosition, targetRotation);
-									return;
-								}
-							}
-							return;
-						}
-					}
-					return;
-				}
-			}
-			return;
-		}
-		case 2:
-		{
-			if (data.Length != 2)
-			{
-				return;
-			}
-			int netId2;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId2))
-			{
-				return;
-			}
-			int rpcID;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId2 = this.gameEntityManager.GetGameEntityFromNetId(netId2);
-			if (!gameEntityFromNetId2)
-			{
-				return;
-			}
-			SIGadget component2 = gameEntityFromNetId2.GetComponent<SIGadget>();
-			if (component2)
-			{
-				component2.ProcessClientToClientRPC(info, rpcID, null);
-				return;
-			}
-			break;
-		}
-		case 3:
-		{
-			if (data.Length != 3)
-			{
-				return;
-			}
-			int netId3;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out netId3))
-			{
-				return;
-			}
-			int rpcID2;
-			if (!GameEntityManager.ValidateDataType<int>(data[1], out rpcID2))
-			{
-				return;
-			}
-			object[] data2;
-			if (!GameEntityManager.ValidateDataType<object[]>(data[2], out data2))
-			{
-				return;
-			}
-			GameEntity gameEntityFromNetId3 = this.gameEntityManager.GetGameEntityFromNetId(netId3);
-			if (!gameEntityFromNetId3)
-			{
-				return;
-			}
-			SIGadget component3 = gameEntityFromNetId3.GetComponent<SIGadget>();
-			if (component3)
-			{
-				component3.ProcessClientToClientRPC(info, rpcID2, data2);
-			}
-			break;
-		}
-		default:
-			return;
-		}
-	}
-
-	[ContextMenu("Spawn Debug Object")]
-	private void TestSpawnGadget()
-	{
-		this.testSpawner.Spawn(this.gameEntityManager);
-	}
-
-	public IEnumerable<GameEntity> GetFactoryItems()
-	{
-		return this.techTreeSO.SpawnableEntities;
-	}
-
-	private void OnEntityRemoved(GameEntity entity)
-	{
-		SIGadget sigadget;
-		entity.TryGetComponent<SIGadget>(out sigadget);
-		if (this.zoneSuperInfection != null && sigadget != null)
-		{
-			this.zoneSuperInfection.RemoveGadget(sigadget);
-		}
-		if (sigadget == null)
-		{
-			return;
-		}
-		SIPlayer siplayer = SIPlayer.Get((int)(entity.createData & (long)((ulong)-1)));
-		if (siplayer != null && siplayer.activePlayerGadgets.Contains(entity.GetNetId()))
-		{
-			siplayer.activePlayerGadgets.Remove(entity.GetNetId());
-		}
-	}
-
-	public long ProcessMigratedGameEntityCreateData(GameEntity entity, long createData)
-	{
-		if (entity.GetComponent<SIGadget>() == null)
-		{
-			return createData;
-		}
-		return (createData & -4294967296L) | ((long)SIPlayer.LocalPlayer.ActorNr & (long)((ulong)-1));
-	}
-
-	public bool ValidateMigratedGameEntity(int netId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int actorNr)
-	{
-		SIPlayer.Get(actorNr);
-		if ((createData & -9223372036854775808L) != 0L)
-		{
-			return false;
-		}
-		GameObject gameObject = this.gameEntityManager.FactoryPrefabById(entityTypeId);
-		if (gameObject == null)
-		{
-			return false;
-		}
-		if (gameObject.GetComponent<SIGadget>() == null)
-		{
-			return false;
-		}
-		SIPlayer siplayer = SIPlayer.Get(actorNr);
-		if (siplayer == null)
-		{
-			return false;
-		}
-		SIPlayer y = SIPlayer.Get((int)(createData & (long)((ulong)-1)));
-		if (siplayer != y)
-		{
-			return false;
-		}
-		int num = 0;
-		for (int i = 0; i < siplayer.activePlayerGadgets.Count; i++)
-		{
-			GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(siplayer.activePlayerGadgets[i]);
-			if (((gameEntityFromNetId != null) ? gameEntityFromNetId.GetComponent<SIGadget>() : null) != null)
-			{
-				num++;
-			}
-		}
-		if (num > siplayer.TotalGadgetLimit)
-		{
-			return false;
-		}
-		SIUpgradeType siupgradeType;
-		if (this.techTreeSO.TryGetUpgradeTypeByEntityTypeId(entityTypeId, out siupgradeType))
-		{
-			bool flag = siplayer.CurrentProgression.IsUnlocked(siupgradeType);
-			bool flag2 = SuperInfectionManager._ValidatePlayerHasGadgetUpgrades(createData, siplayer, siupgradeType);
-			new SIUpgradeSet((int)((createData & 9223372032559808512L) >> 32));
-			siplayer.GetUpgrades((SITechTreePageId)siupgradeType.GetPageId());
-			if (!flag || !flag2)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public bool ValidateCreateMultipleItems(int zoneId, byte[] compressedStateData, int EntityCount)
-	{
-		return false;
-	}
-
-	public bool ValidateCreateItem(int nedId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int createdByEntityNetId)
-	{
-		this.gameEntityManager.IsAuthority();
-		SIUpgradeType siupgradeType;
-		if (!this.techTreeSO.TryGetUpgradeTypeByEntityTypeId(entityTypeId, out siupgradeType))
-		{
-			return true;
-		}
-		if ((createData & -9223372036854775808L) != 0L && !this.HasActiveTryOnDispenser)
-		{
-			return this.HasActiveTryOnDispenser;
-		}
-		SIPlayer siplayer = SIPlayer.Get((int)(createData & (long)((ulong)-1)));
-		if (siplayer == null)
-		{
-			return false;
-		}
-		bool flag = siplayer.CurrentProgression.IsUnlocked(siupgradeType);
-		bool flag2 = SuperInfectionManager._ValidatePlayerHasGadgetUpgrades(createData, siplayer, siupgradeType);
-		if (!flag || !flag2)
-		{
-			new SIUpgradeSet((int)((createData & 9223372032559808512L) >> 32));
-			siplayer.GetUpgrades((SITechTreePageId)siupgradeType.GetPageId());
-		}
-		return flag && flag2;
-	}
-
-	private static bool _ValidatePlayerHasGadgetUpgrades(long createData, SIPlayer siPlayer, SIUpgradeType upgradeType)
-	{
-		SIUpgradeSet siupgradeSet = new SIUpgradeSet((int)((createData & 9223372032559808512L) >> 32));
-		SIUpgradeSet upgrades = siPlayer.GetUpgrades((SITechTreePageId)upgradeType.GetPageId());
-		return (siupgradeSet.GetBits() & ~upgrades.GetBits()) == 0;
-	}
-
-	public bool ValidateCreateItemBatchSize(int size)
-	{
-		return true;
-	}
-
-	public void ClearPlayerGadgets(SIPlayer siPlayer)
-	{
-		for (int i = siPlayer.activePlayerGadgets.Count - 1; i >= 0; i--)
-		{
-			if (i < siPlayer.activePlayerGadgets.Count && siPlayer.activePlayerGadgets[i] >= 0)
-			{
-				GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(siPlayer.activePlayerGadgets[i]);
-				if (!(gameEntityFromNetId == null) && !(gameEntityFromNetId.id == GameEntityId.Invalid))
-				{
-					this.gameEntityManager.RequestDestroyItem(gameEntityFromNetId.id);
-				}
-			}
-		}
-		siPlayer.activePlayerGadgets.Clear();
-	}
-
-	[CompilerGenerated]
-	private void <OnZoneInit>g__WhenReady|48_0()
-	{
-		this.progression.OnClientReady -= this.<OnZoneInit>g__WhenReady|48_0;
-		SIPlayer.SetAndBroadcastProgression();
+		BroadcastProgression,
+		LaunchDashYoyo,
+		CallEntityRPC,
+		CallEntityRPCData
 	}
 
 	private const string preLog = "[GT/SuperInfectionManager]  ";
@@ -1170,41 +89,802 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	private const int roomFXTypeCount = 5;
 
-	public enum ClientToAuthorityRPC
+	public bool HasActiveTryOnDispenser => tryOnDispenserCount > 0;
+
+	public bool IsSupercharged => false;
+
+	internal void RegisterTryOnDispenser()
 	{
-		CombinedTerminalButtonPress,
-		CombinedTerminalHandScan,
-		ResourceDepositDeposited,
-		CallEntityRPC,
-		CallEntityRPCData,
-		RequestStartRoomFX
+		tryOnDispenserCount++;
 	}
 
-	public enum RoomFXType
+	internal void UnregisterTryOnDispenser()
 	{
-		Underwater,
-		LunarMode,
-		ConstLowG,
-		Bouncy,
-		Supercharge
+		tryOnDispenserCount = Mathf.Max(tryOnDispenserCount - 1, 0);
 	}
 
-	public enum AuthorityToClientRPC
+	private void Awake()
 	{
-		TechPointGranted,
-		ResourceDepositTechPointGranted,
-		ResourceDepositTechPointRejected,
-		CallEntityRPC,
-		CallEntityRPCData,
-		TriggerMonkeIdolDepositCelebration,
-		StartRoomFX
+		GameEntityManager obj = gameEntityManager;
+		obj.OnEntityRemoved = (Action<GameEntity>)Delegate.Combine(obj.OnEntityRemoved, new Action<GameEntity>(OnEntityRemoved));
 	}
 
-	public enum ClientToClientRPC
+	public void OnEnableZoneSuperInfection(SuperInfection zone)
 	{
-		BroadcastProgression,
-		LaunchDashYoyo,
-		CallEntityRPC,
-		CallEntityRPCData
+		zoneSuperInfection = zone;
+		if (PendingZoneInit)
+		{
+			PendingZoneInit = false;
+			OnZoneInit();
+		}
+		if (gameEntityManager.PendingTableData)
+		{
+			gameEntityManager.ResolveTableData();
+		}
+	}
+
+	private void OnEnable()
+	{
+		if (!siManagerByZone.TryAdd(gameEntityManager.zone, this))
+		{
+			Debug.LogError("[GT/SuperInfectionManager]  ERROR!!!  " + $"Tried to add a duplicate Manager for zone `{gameEntityManager.zone}`. Did you forget to change the " + "zone on the GameEntityManager on GameObject at path: " + base.transform.GetPathQ(), this);
+		}
+		else
+		{
+			GameMode.OnStartGameMode += _OnStartGameMode;
+		}
+	}
+
+	private void OnDisable()
+	{
+		siManagerByZone.Remove(gameEntityManager.zone);
+		GameMode.OnStartGameMode -= _OnStartGameMode;
+	}
+
+	private void _OnStartGameMode(GameModeType newGameModeType)
+	{
+		if (!gameEntityManager.IsAuthority())
+		{
+			return;
+		}
+		List<GameEntityId> value;
+		using (CollectionPool<List<GameEntityId>, GameEntityId>.Get(out value))
+		{
+			ESuperGameModes eSuperGameModes = (ESuperGameModes)(1 << (int)newGameModeType);
+			foreach (GameEntity gameEntity in gameEntityManager.GetGameEntities())
+			{
+				if (!(gameEntity == null) && gameEntity.TryGetComponent<SIGadget>(out var component) && techTreeSO.TryGetTreePage(component.PageId, out var treePage) && (treePage.excludedGameModes & eSuperGameModes) != 0)
+				{
+					value.Add(gameEntity.id);
+				}
+			}
+			if (value.Count > 0)
+			{
+				gameEntityManager.RequestDestroyItems(value);
+			}
+		}
+	}
+
+	public static SuperInfectionManager GetSIManagerForZone(GTZone targetZone)
+	{
+		if (siManagerByZone.TryGetValue(targetZone, out var value))
+		{
+			return value;
+		}
+		return null;
+	}
+
+	public void OnZoneCreate()
+	{
+	}
+
+	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (!(zoneSuperInfection == null) && gameEntityManager.IsAuthority())
+		{
+			for (int i = 0; i < zoneSuperInfection.siTerminals.Length; i++)
+			{
+				zoneSuperInfection.siTerminals[i].WriteDataPUN(stream, info);
+			}
+			for (int j = 0; j < zoneSuperInfection.siDeposits.Length; j++)
+			{
+				zoneSuperInfection.siDeposits[j].WriteDataPUN(stream, info);
+			}
+			zoneSuperInfection.questBoard.WriteDataPUN(stream, info);
+		}
+	}
+
+	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (!(zoneSuperInfection == null) && gameEntityManager.IsAuthorityPlayer(info.Sender))
+		{
+			for (int i = 0; i < zoneSuperInfection.siTerminals.Length; i++)
+			{
+				zoneSuperInfection.siTerminals[i].ReadDataPUN(stream, info);
+			}
+			for (int j = 0; j < zoneSuperInfection.siDeposits.Length; j++)
+			{
+				zoneSuperInfection.siDeposits[j].ReadDataPUN(stream, info);
+			}
+			zoneSuperInfection.questBoard.ReadDataPUN(stream, info);
+		}
+	}
+
+	void IGameEntityZoneComponent.SerializeZoneData(BinaryWriter writer)
+	{
+		if (!(zoneSuperInfection == null))
+		{
+			for (int i = 0; i < zoneSuperInfection.siTerminals.Length; i++)
+			{
+				zoneSuperInfection.siTerminals[i].SerializeZoneData(writer);
+			}
+		}
+	}
+
+	void IGameEntityZoneComponent.DeserializeZoneData(BinaryReader reader)
+	{
+		if (!(zoneSuperInfection == null))
+		{
+			for (int i = 0; i < zoneSuperInfection.siTerminals.Length; i++)
+			{
+				zoneSuperInfection.siTerminals[i].DeserializeZoneData(reader);
+			}
+		}
+	}
+
+	public void SerializeZoneEntityData(BinaryWriter writer, GameEntity entity)
+	{
+	}
+
+	public void DeserializeZoneEntityData(BinaryReader reader, GameEntity entity)
+	{
+	}
+
+	void IGameEntityZoneComponent.SerializeZonePlayerData(BinaryWriter writer, int actorNumber)
+	{
+		SIPlayer sIPlayer = SIPlayer.Get(actorNumber);
+		sIPlayer.SerializeNetworkState(writer, sIPlayer.gamePlayer.rig.OwningNetPlayer);
+	}
+
+	void IGameEntityZoneComponent.DeserializeZonePlayerData(BinaryReader reader, int actorNumber)
+	{
+		SIPlayer player = SIPlayer.Get(actorNumber);
+		SIPlayer.DeserializeNetworkStateAndBurn(reader, player, this);
+	}
+
+	public bool IsZoneReady()
+	{
+		if (NetworkSystem.Instance.InRoom && IsSuperGameMode() && zoneSuperInfection.IsNotNull() && VRRig.LocalRig.zoneEntity.currentZone == gameEntityManager.zone && SIProgression.Instance != null)
+		{
+			return SIProgression.Instance._treeReady;
+		}
+		return false;
+	}
+
+	public bool ShouldClearZone()
+	{
+		if (GameMode.ActiveGameMode != null)
+		{
+			GameModeType gameModeType = GameMode.ActiveGameMode.GameType();
+			if (gameModeType != GameModeType.SuperInfect)
+			{
+				return gameModeType != GameModeType.SuperCasual;
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public static bool IsSuperGameMode()
+	{
+		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
+		if (activeGameMode != null)
+		{
+			GameModeType gameModeType = activeGameMode.GameType();
+			return gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual;
+		}
+		return false;
+	}
+
+	public void OnCreateGameEntity(GameEntity entity)
+	{
+		SIGadget component = entity.GetComponent<SIGadget>();
+		bool flag = (entity.createData & long.MinValue) != 0;
+		if (component != null)
+		{
+			SIPlayer sIPlayer = SIPlayer.Get((int)(entity.createData & 0xFFFFFFFFu));
+			if (sIPlayer != null)
+			{
+				int num = 0;
+				for (int num2 = sIPlayer.activePlayerGadgets.Count - 1; num2 >= 0; num2--)
+				{
+					GameEntity gameEntityFromNetId = gameEntityManager.GetGameEntityFromNetId(sIPlayer.activePlayerGadgets[num2]);
+					if (gameEntityFromNetId == null)
+					{
+						sIPlayer.activePlayerGadgets.RemoveAt(num2);
+					}
+					else
+					{
+						num++;
+						if (num >= sIPlayer.TotalGadgetLimit)
+						{
+							gameEntityManager.DestroyItemLocal(gameEntityFromNetId.id);
+							break;
+						}
+					}
+				}
+				if (!sIPlayer.activePlayerGadgets.Contains(entity.GetNetId()))
+				{
+					sIPlayer.activePlayerGadgets.Add(entity.GetNetId());
+				}
+			}
+			SIUpgradeSet upgrades = new SIUpgradeSet((int)((entity.createData & 0x7FFFFFFF00000000L) >> 32));
+			upgrades = component.FilterUpgradeNodes(upgrades);
+			component.ApplyUpgradeNodes(upgrades);
+			component.RefreshUpgradeVisuals(upgrades);
+			if (zoneSuperInfection != null)
+			{
+				zoneSuperInfection.AddGadget(component);
+			}
+			if (flag)
+			{
+				entity.shouldDestroyOnZoneExit = true;
+				GameEntityDelayedDestroy gameEntityDelayedDestroy = entity.gameObject.AddComponent<GameEntityDelayedDestroy>();
+				gameEntityDelayedDestroy.Configure(SIGadgetDispenser.g_tryOnOptions);
+				gameEntityDelayedDestroy.ResetTimer();
+			}
+		}
+		List<SuperInfectionSnapPoint> value;
+		using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out value))
+		{
+			entity.GetComponentsInChildren(includeInactive: true, value);
+			foreach (SuperInfectionSnapPoint item in value)
+			{
+				RegisterSnapPoint(item);
+			}
+		}
+	}
+
+	public void OnZoneClear(ZoneClearReason reason)
+	{
+		zoneSuperInfection?.OnZoneClear(reason);
+		SIPlayer.LocalPlayer?.Reset();
+		SIPlayer.ClearPlayerCache();
+		allSnapPoints.Clear();
+	}
+
+	public void OnZoneInit()
+	{
+		if ((object)zoneSuperInfection == null)
+		{
+			PendingZoneInit = true;
+			return;
+		}
+		activeSuperInfectionManager = this;
+		if (gameEntityManager.IsAuthority())
+		{
+			TestSpawnGadget();
+		}
+		zoneSuperInfection.OnZoneInit();
+		if (SIPlayer.Get(NetworkSystem.Instance.LocalPlayer.ActorNumber) != null)
+		{
+			progression.Init();
+			if (progression.ClientReady)
+			{
+				SIPlayer.SetAndBroadcastProgression();
+			}
+			else
+			{
+				progression.OnClientReady += WhenReady;
+			}
+		}
+		allSnapPoints.Clear();
+		foreach (GameEntity gameEntity in gameEntityManager.GetGameEntities())
+		{
+			if (gameEntity == null)
+			{
+				continue;
+			}
+			List<SuperInfectionSnapPoint> value;
+			using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out value))
+			{
+				gameEntity.GetComponentsInChildren(includeInactive: true, value);
+				foreach (SuperInfectionSnapPoint item in value)
+				{
+					RegisterSnapPoint(item);
+				}
+			}
+		}
+		void WhenReady()
+		{
+			progression.OnClientReady -= WhenReady;
+			SIPlayer.SetAndBroadcastProgression();
+		}
+	}
+
+	public void RegisterSnapPoint(SuperInfectionSnapPoint snapPoint)
+	{
+		if (!allSnapPoints.TryGetValue(snapPoint.jointType, out var value))
+		{
+			value = (allSnapPoints[snapPoint.jointType] = new List<SuperInfectionSnapPoint>());
+		}
+		value.Add(snapPoint);
+	}
+
+	public void UnregisterSnapPoint(SuperInfectionSnapPoint snapPoint)
+	{
+		if (allSnapPoints.ContainsKey(snapPoint.jointType))
+		{
+			allSnapPoints[snapPoint.jointType].Remove(snapPoint);
+			if (allSnapPoints[snapPoint.jointType].Count == 0)
+			{
+				allSnapPoints.Remove(snapPoint.jointType);
+			}
+		}
+	}
+
+	public IEnumerable<SuperInfectionSnapPoint> GetPoints(SnapJointType jointType)
+	{
+		foreach (KeyValuePair<SnapJointType, List<SuperInfectionSnapPoint>> allSnapPoint in allSnapPoints)
+		{
+			if ((allSnapPoint.Key & jointType) == 0)
+			{
+				continue;
+			}
+			foreach (SuperInfectionSnapPoint item in allSnapPoint.Value)
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public SuperInfectionSnapPoint FindNearestSnapPoint(SnapJointType jointType, Vector3 origin, float maxDist, bool includeOccupied = false)
+	{
+		SuperInfectionSnapPoint result = null;
+		float num = maxDist * maxDist;
+		foreach (SuperInfectionSnapPoint point in GetPoints(jointType))
+		{
+			if (!(point == null) && point.isActiveAndEnabled && (includeOccupied || !point.HasSnapped()))
+			{
+				float sqrMagnitude = (point.transform.position - origin).sqrMagnitude;
+				if (sqrMagnitude < num)
+				{
+					result = point;
+					num = sqrMagnitude;
+				}
+			}
+		}
+		return result;
+	}
+
+	public void CallRPC(ClientToAuthorityRPC clientToAuthorityRPC, object[] data)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			photonView.RPC("SIClientToAuthorityRPC", gameEntityManager.GetAuthorityPlayer(), (int)clientToAuthorityRPC, data);
+		}
+	}
+
+	public void CallRPC(ClientToClientRPC clientToClientRPC, object[] data)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			photonView.RPC("SIClientToClientRPC", RpcTarget.Others, (int)clientToClientRPC, data);
+		}
+	}
+
+	public void CallRPC(AuthorityToClientRPC authorityToClientRPC, object[] data)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			photonView.RPC("SIAuthorityToClientRPC", RpcTarget.Others, (int)authorityToClientRPC, data);
+		}
+	}
+
+	public void CallRPC(AuthorityToClientRPC authorityToClientRPC, int actorNr, object[] data)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			photonView.RPC("SIAuthorityToClientRPC", NetworkSystem.Instance.GetNetPlayerByID(actorNr).GetPlayerRef(), (int)authorityToClientRPC, data);
+		}
+	}
+
+	[PunRPC]
+	public void SIClientToAuthorityRPC(int clientToAuthorityRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		if (gameEntityManager.IsValidAuthorityRPC(info.Sender) && data != null)
+		{
+			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
+			if (!sIPlayer.IsNull() && sIPlayer.clientToAuthorityRPCLimiter.CheckCallTime(Time.unscaledTime))
+			{
+				ProcessClientToAuthorityRPC(clientToAuthorityRPCEnum, data, info);
+			}
+		}
+	}
+
+	public void ProcessClientToAuthorityRPC(int clientToAuthorityRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		switch ((ClientToAuthorityRPC)clientToAuthorityRPCEnum)
+		{
+		case ClientToAuthorityRPC.CombinedTerminalButtonPress:
+		{
+			if (data.Length == 4 && GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType4) && GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType5) && GameEntityManager.ValidateDataType<int>(data[2], out var dataAsType6) && GameEntityManager.ValidateDataType<int>(data[3], out var dataAsType7) && dataAsType7 >= 0 && dataAsType7 < zoneSuperInfection.siTerminals.Length && Enum.IsDefined(typeof(SITouchscreenButton.SITouchscreenButtonType), (SITouchscreenButton.SITouchscreenButtonType)dataAsType4) && Enum.IsDefined(typeof(SICombinedTerminal.TerminalSubFunction), (SICombinedTerminal.TerminalSubFunction)dataAsType6))
+			{
+				zoneSuperInfection.siTerminals[dataAsType7].TouchscreenButtonPressed((SITouchscreenButton.SITouchscreenButtonType)dataAsType4, dataAsType5, info.Sender.ActorNumber, (SICombinedTerminal.TerminalSubFunction)dataAsType6);
+			}
+			break;
+		}
+		case ClientToAuthorityRPC.CombinedTerminalHandScan:
+		{
+			if (data.Length != 1 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType12) || dataAsType12 < 0 || dataAsType12 >= zoneSuperInfection.siTerminals.Length)
+			{
+				break;
+			}
+			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
+			if (!(sIPlayer == null))
+			{
+				SICombinedTerminal sICombinedTerminal = zoneSuperInfection.siTerminals[dataAsType12];
+				if (sIPlayer.gamePlayer.rig.IsPositionInRange(sICombinedTerminal.transform.position, 3f))
+				{
+					sICombinedTerminal.PlayerHandScanned(info.Sender.ActorNumber);
+				}
+			}
+			break;
+		}
+		case ClientToAuthorityRPC.ResourceDepositDeposited:
+		{
+			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType8) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType9) || dataAsType9 < 0 || dataAsType9 >= zoneSuperInfection.siDeposits.Length)
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId2 = gameEntityManager.GetGameEntityFromNetId(dataAsType8);
+			if (gameEntityFromNetId2 == null)
+			{
+				break;
+			}
+			SIResourceDeposit sIResourceDeposit = zoneSuperInfection.siDeposits[dataAsType9];
+			if (!(gameEntityFromNetId2.transform.position - sIResourceDeposit.transform.position).IsLongerThan(3f))
+			{
+				SIResource component2 = gameEntityFromNetId2.GetComponent<SIResource>();
+				if (component2 != null)
+				{
+					sIResourceDeposit.ResourceDeposited(component2);
+				}
+			}
+			break;
+		}
+		case ClientToAuthorityRPC.CallEntityRPC:
+		{
+			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType10) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType11))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId3 = gameEntityManager.GetGameEntityFromNetId(dataAsType10);
+			if ((bool)gameEntityFromNetId3)
+			{
+				SIGadget component3 = gameEntityFromNetId3.GetComponent<SIGadget>();
+				if ((bool)component3)
+				{
+					component3.ProcessClientToAuthorityRPC(info, dataAsType11, null);
+				}
+			}
+			break;
+		}
+		case ClientToAuthorityRPC.CallEntityRPCData:
+		{
+			if (data.Length != 3 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType2) || !GameEntityManager.ValidateDataType<object[]>(data[2], out var dataAsType3))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId = gameEntityManager.GetGameEntityFromNetId(dataAsType);
+			if ((bool)gameEntityFromNetId)
+			{
+				SIGadget component = gameEntityFromNetId.GetComponent<SIGadget>();
+				if ((bool)component)
+				{
+					component.ProcessClientToAuthorityRPC(info, dataAsType2, dataAsType3);
+				}
+			}
+			break;
+		}
+		case ClientToAuthorityRPC.RequestStartRoomFX:
+			break;
+		}
+	}
+
+	[PunRPC]
+	public void SIAuthorityToClientRPC(int authorityToClientRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		if (gameEntityManager.IsValidClientRPC(info.Sender) && data != null)
+		{
+			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
+			if (!sIPlayer.IsNull() && sIPlayer.authorityToClientRPCLimiter.CheckCallTime(Time.unscaledTime))
+			{
+				ProcessAuthorityToClientRPC(authorityToClientRPCEnum, data, info);
+			}
+		}
+	}
+
+	public void ProcessAuthorityToClientRPC(int authorityToClientRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		switch ((AuthorityToClientRPC)authorityToClientRPCEnum)
+		{
+		case AuthorityToClientRPC.CallEntityRPC:
+		{
+			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType2) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType3))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId = gameEntityManager.GetGameEntityFromNetId(dataAsType2);
+			if ((bool)gameEntityFromNetId)
+			{
+				SIGadget component = gameEntityFromNetId.GetComponent<SIGadget>();
+				if ((bool)component)
+				{
+					component.ProcessAuthorityToClientRPC(info, dataAsType3, null);
+				}
+			}
+			break;
+		}
+		case AuthorityToClientRPC.CallEntityRPCData:
+		{
+			if (data.Length != 3 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType4) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType5) || !GameEntityManager.ValidateDataType<object[]>(data[2], out var dataAsType6))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId2 = gameEntityManager.GetGameEntityFromNetId(dataAsType4);
+			if ((bool)gameEntityFromNetId2)
+			{
+				SIGadget component2 = gameEntityFromNetId2.GetComponent<SIGadget>();
+				if ((bool)component2)
+				{
+					component2.ProcessAuthorityToClientRPC(info, dataAsType5, dataAsType6);
+				}
+			}
+			break;
+		}
+		case AuthorityToClientRPC.TriggerMonkeIdolDepositCelebration:
+		{
+			if (data.Length == 1 && GameEntityManager.ValidateDataType<Vector3>(data[0], out var dataAsType) && (bool)SIPlayer.LocalPlayer)
+			{
+				SIPlayer.LocalPlayer.TriggerIdolDepositedCelebration(dataAsType);
+			}
+			break;
+		}
+		case AuthorityToClientRPC.StartRoomFX:
+			break;
+		}
+	}
+
+	[PunRPC]
+	public void SIClientToClientRPC(int clientToClientRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		if (data != null)
+		{
+			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
+			if (!sIPlayer.IsNull() && sIPlayer.clientToClientRPCLimiter.CheckCallTime(Time.unscaledTime))
+			{
+				ProcessClientToClientRPC(clientToClientRPCEnum, data, info);
+			}
+		}
+	}
+
+	public void ProcessClientToClientRPC(int clientToClientRPCEnum, object[] data, PhotonMessageInfo info)
+	{
+		switch ((ClientToClientRPC)clientToClientRPCEnum)
+		{
+		case ClientToClientRPC.BroadcastProgression:
+		{
+			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
+			if (!(sIPlayer == null) && data.Length == 8 && GameEntityManager.ValidateDataType<int[]>(data[0], out var dataAsType6) && GameEntityManager.ValidateDataType<int[]>(data[1], out var dataAsType7) && GameEntityManager.ValidateDataType<bool[][]>(data[2], out var dataAsType8) && GameEntityManager.ValidateDataType<int>(data[3], out var dataAsType9) && GameEntityManager.ValidateDataType<int>(data[4], out var dataAsType10) && GameEntityManager.ValidateDataType<int>(data[5], out var dataAsType11) && GameEntityManager.ValidateDataType<int[]>(data[6], out var dataAsType12) && GameEntityManager.ValidateDataType<int[]>(data[7], out var dataAsType13))
+			{
+				sIPlayer.UpdateProgression(dataAsType6, dataAsType7, dataAsType8, dataAsType9, dataAsType10, dataAsType11, dataAsType12, dataAsType13);
+				if (zoneSuperInfection != null)
+				{
+					zoneSuperInfection.RefreshStations(info.Sender.ActorNumber);
+				}
+			}
+			break;
+		}
+		case ClientToClientRPC.LaunchDashYoyo:
+		{
+			if (data.Length != 5 || SIPlayer.Get(info.Sender.ActorNumber) == null || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType14) || !GameEntityManager.ValidateDataType<Vector3>(data[1], out var dataAsType15) || !dataAsType15.IsValid(10000f) || !GameEntityManager.ValidateDataType<Vector3>(data[2], out var dataAsType16) || !dataAsType16.IsValid(10000f) || !GameEntityManager.ValidateDataType<Vector3>(data[3], out var dataAsType17) || !dataAsType17.IsValid(10000f) || !GameEntityManager.ValidateDataType<Quaternion>(data[4], out var dataAsType18) || !dataAsType18.IsValid())
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId3 = gameEntityManager.GetGameEntityFromNetId(dataAsType14);
+			if (!(gameEntityFromNetId3 == null) && (gameEntityFromNetId3.heldByActorNumber == info.Sender.ActorNumber || gameEntityFromNetId3.snappedByActorNumber == info.Sender.ActorNumber))
+			{
+				SIGadgetDashYoyo component3 = gameEntityFromNetId3.GetComponent<SIGadgetDashYoyo>();
+				if (!(component3 == null))
+				{
+					component3.RemoteThrowYoYoTarget(dataAsType15, dataAsType16, dataAsType17, dataAsType18);
+				}
+			}
+			break;
+		}
+		case ClientToClientRPC.CallEntityRPC:
+		{
+			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType4) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType5))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId2 = gameEntityManager.GetGameEntityFromNetId(dataAsType4);
+			if ((bool)gameEntityFromNetId2)
+			{
+				SIGadget component2 = gameEntityFromNetId2.GetComponent<SIGadget>();
+				if ((bool)component2)
+				{
+					component2.ProcessClientToClientRPC(info, dataAsType5, null);
+				}
+			}
+			break;
+		}
+		case ClientToClientRPC.CallEntityRPCData:
+		{
+			if (data.Length != 3 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType2) || !GameEntityManager.ValidateDataType<object[]>(data[2], out var dataAsType3))
+			{
+				break;
+			}
+			GameEntity gameEntityFromNetId = gameEntityManager.GetGameEntityFromNetId(dataAsType);
+			if ((bool)gameEntityFromNetId)
+			{
+				SIGadget component = gameEntityFromNetId.GetComponent<SIGadget>();
+				if ((bool)component)
+				{
+					component.ProcessClientToClientRPC(info, dataAsType2, dataAsType3);
+				}
+			}
+			break;
+		}
+		}
+	}
+
+	[ContextMenu("Spawn Debug Object")]
+	private void TestSpawnGadget()
+	{
+		testSpawner.Spawn(gameEntityManager);
+	}
+
+	public IEnumerable<GameEntity> GetFactoryItems()
+	{
+		return techTreeSO.SpawnableEntities;
+	}
+
+	private void OnEntityRemoved(GameEntity entity)
+	{
+		entity.TryGetComponent<SIGadget>(out var component);
+		if (zoneSuperInfection != null && component != null)
+		{
+			zoneSuperInfection.RemoveGadget(component);
+		}
+		if (!(component == null))
+		{
+			SIPlayer sIPlayer = SIPlayer.Get((int)(entity.createData & 0xFFFFFFFFu));
+			if (sIPlayer != null && sIPlayer.activePlayerGadgets.Contains(entity.GetNetId()))
+			{
+				sIPlayer.activePlayerGadgets.Remove(entity.GetNetId());
+			}
+		}
+	}
+
+	public long ProcessMigratedGameEntityCreateData(GameEntity entity, long createData)
+	{
+		if (entity.GetComponent<SIGadget>() == null)
+		{
+			return createData;
+		}
+		return (createData & -4294967296L) | (SIPlayer.LocalPlayer.ActorNr & 0xFFFFFFFFu);
+	}
+
+	public bool ValidateMigratedGameEntity(int netId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int actorNr)
+	{
+		SIPlayer.Get(actorNr);
+		if ((createData & long.MinValue) != 0L)
+		{
+			return false;
+		}
+		GameObject gameObject = gameEntityManager.FactoryPrefabById(entityTypeId);
+		if (gameObject == null)
+		{
+			return false;
+		}
+		if (gameObject.GetComponent<SIGadget>() == null)
+		{
+			return false;
+		}
+		SIPlayer sIPlayer = SIPlayer.Get(actorNr);
+		if (sIPlayer == null)
+		{
+			return false;
+		}
+		SIPlayer sIPlayer2 = SIPlayer.Get((int)(createData & 0xFFFFFFFFu));
+		if (sIPlayer != sIPlayer2)
+		{
+			return false;
+		}
+		int num = 0;
+		for (int i = 0; i < sIPlayer.activePlayerGadgets.Count; i++)
+		{
+			if (gameEntityManager.GetGameEntityFromNetId(sIPlayer.activePlayerGadgets[i])?.GetComponent<SIGadget>() != null)
+			{
+				num++;
+			}
+		}
+		if (num > sIPlayer.TotalGadgetLimit)
+		{
+			return false;
+		}
+		if (techTreeSO.TryGetUpgradeTypeByEntityTypeId(entityTypeId, out var upgradeType))
+		{
+			bool num2 = sIPlayer.CurrentProgression.IsUnlocked(upgradeType);
+			bool flag = _ValidatePlayerHasGadgetUpgrades(createData, sIPlayer, upgradeType);
+			new SIUpgradeSet((int)((createData & 0x7FFFFFFF00000000L) >> 32));
+			sIPlayer.GetUpgrades((SITechTreePageId)upgradeType.GetPageId());
+			if (!num2 || !flag)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool ValidateCreateMultipleItems(int zoneId, byte[] compressedStateData, int EntityCount)
+	{
+		return false;
+	}
+
+	public bool ValidateCreateItem(int nedId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int createdByEntityNetId)
+	{
+		gameEntityManager.IsAuthority();
+		if (!techTreeSO.TryGetUpgradeTypeByEntityTypeId(entityTypeId, out var upgradeType))
+		{
+			return true;
+		}
+		if ((createData & long.MinValue) != 0L && !HasActiveTryOnDispenser)
+		{
+			return HasActiveTryOnDispenser;
+		}
+		SIPlayer sIPlayer = SIPlayer.Get((int)(createData & 0xFFFFFFFFu));
+		if (sIPlayer == null)
+		{
+			return false;
+		}
+		bool num = sIPlayer.CurrentProgression.IsUnlocked(upgradeType);
+		bool flag = _ValidatePlayerHasGadgetUpgrades(createData, sIPlayer, upgradeType);
+		if (!num || !flag)
+		{
+			new SIUpgradeSet((int)((createData & 0x7FFFFFFF00000000L) >> 32));
+			sIPlayer.GetUpgrades((SITechTreePageId)upgradeType.GetPageId());
+		}
+		return num && flag;
+	}
+
+	private static bool _ValidatePlayerHasGadgetUpgrades(long createData, SIPlayer siPlayer, SIUpgradeType upgradeType)
+	{
+		SIUpgradeSet sIUpgradeSet = new SIUpgradeSet((int)((createData & 0x7FFFFFFF00000000L) >> 32));
+		SIUpgradeSet upgrades = siPlayer.GetUpgrades((SITechTreePageId)upgradeType.GetPageId());
+		return (sIUpgradeSet.GetBits() & ~upgrades.GetBits()) == 0;
+	}
+
+	public bool ValidateCreateItemBatchSize(int size)
+	{
+		return true;
+	}
+
+	public void ClearPlayerGadgets(SIPlayer siPlayer)
+	{
+		for (int num = siPlayer.activePlayerGadgets.Count - 1; num >= 0; num--)
+		{
+			if (num < siPlayer.activePlayerGadgets.Count && siPlayer.activePlayerGadgets[num] >= 0)
+			{
+				GameEntity gameEntityFromNetId = gameEntityManager.GetGameEntityFromNetId(siPlayer.activePlayerGadgets[num]);
+				if (!(gameEntityFromNetId == null) && !(gameEntityFromNetId.id == GameEntityId.Invalid))
+				{
+					gameEntityManager.RequestDestroyItem(gameEntityFromNetId.id);
+				}
+			}
+		}
+		siPlayer.activePlayerGadgets.Clear();
 	}
 }

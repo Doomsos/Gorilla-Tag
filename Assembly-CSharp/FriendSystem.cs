@@ -1,36 +1,78 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FriendSystem : MonoBehaviour
 {
-	public FriendSystem.PlayerPrivacy LocalPlayerPrivacy
+	public delegate void FriendRequestCallback(GTZone zone, int localId, int friendId, bool success);
+
+	private struct FriendRequestData
 	{
-		get
-		{
-			return this.localPlayerPrivacy;
-		}
+		public GTZone zone;
+
+		public int sendingPlayerId;
+
+		public int targetPlayerId;
+
+		public float localTimeSent;
+
+		public FriendRequestCallback completionCallback;
 	}
+
+	public delegate void FriendRemovalCallback(int friendId, bool success);
+
+	private struct FriendRemovalData
+	{
+		public int targetPlayerId;
+
+		public float localTimeSent;
+
+		public FriendRemovalCallback completionCallback;
+	}
+
+	private enum FriendRequestStatus
+	{
+		Pending,
+		Succeeded,
+		Failed
+	}
+
+	public enum PlayerPrivacy
+	{
+		Visible,
+		PublicOnly,
+		Hidden
+	}
+
+	[OnEnterPlay_SetNull]
+	public static volatile FriendSystem Instance;
+
+	[SerializeField]
+	private float friendRequestExpirationTime = 10f;
+
+	private PlayerPrivacy localPlayerPrivacy;
+
+	private List<FriendRequestData> pendingFriendRequests = new List<FriendRequestData>();
+
+	private List<FriendRemovalData> pendingFriendRemovals = new List<FriendRemovalData>();
+
+	private List<int> indexesToRemove = new List<int>();
+
+	private float lastFriendsListRefresh;
+
+	public PlayerPrivacy LocalPlayerPrivacy => localPlayerPrivacy;
 
 	public event Action<List<FriendBackendController.Friend>> OnFriendListRefresh;
 
-	public void SetLocalPlayerPrivacy(FriendSystem.PlayerPrivacy privacyState)
+	public void SetLocalPlayerPrivacy(PlayerPrivacy privacyState)
 	{
-		this.localPlayerPrivacy = privacyState;
-		FriendBackendController.PrivacyState privacyState2;
-		switch (privacyState)
+		localPlayerPrivacy = privacyState;
+		FriendBackendController.Instance.SetPrivacyState(privacyState switch
 		{
-		default:
-			privacyState2 = FriendBackendController.PrivacyState.VISIBLE;
-			break;
-		case FriendSystem.PlayerPrivacy.PublicOnly:
-			privacyState2 = FriendBackendController.PrivacyState.PUBLIC_ONLY;
-			break;
-		case FriendSystem.PlayerPrivacy.Hidden:
-			privacyState2 = FriendBackendController.PrivacyState.HIDDEN;
-			break;
-		}
-		FriendBackendController.Instance.SetPrivacyState(privacyState2);
+			PlayerPrivacy.PublicOnly => FriendBackendController.PrivacyState.PUBLIC_ONLY, 
+			PlayerPrivacy.Hidden => FriendBackendController.PrivacyState.HIDDEN, 
+			_ => FriendBackendController.PrivacyState.VISIBLE, 
+		});
 	}
 
 	public void RefreshFriendsList()
@@ -38,9 +80,9 @@ public class FriendSystem : MonoBehaviour
 		FriendBackendController.Instance.GetFriends();
 	}
 
-	public void SendFriendRequest(NetPlayer targetPlayer, GTZone stationZone, FriendSystem.FriendRequestCallback callback)
+	public void SendFriendRequest(NetPlayer targetPlayer, GTZone stationZone, FriendRequestCallback callback)
 	{
-		FriendSystem.FriendRequestData item = new FriendSystem.FriendRequestData
+		FriendRequestData item = new FriendRequestData
 		{
 			completionCallback = callback,
 			sendingPlayerId = NetworkSystem.Instance.LocalPlayer.UserId.GetHashCode(),
@@ -48,13 +90,13 @@ public class FriendSystem : MonoBehaviour
 			localTimeSent = Time.realtimeSinceStartup,
 			zone = stationZone
 		};
-		this.pendingFriendRequests.Add(item);
+		pendingFriendRequests.Add(item);
 		FriendBackendController.Instance.AddFriend(targetPlayer);
 	}
 
-	public void RemoveFriend(FriendBackendController.Friend friend, FriendSystem.FriendRemovalCallback callback = null)
+	public void RemoveFriend(FriendBackendController.Friend friend, FriendRemovalCallback callback = null)
 	{
-		this.pendingFriendRemovals.Add(new FriendSystem.FriendRemovalData
+		pendingFriendRemovals.Add(new FriendRemovalData
 		{
 			completionCallback = callback,
 			targetPlayerId = friend.Presence.FriendLinkId.GetHashCode(),
@@ -65,9 +107,9 @@ public class FriendSystem : MonoBehaviour
 
 	public bool HasPendingFriendRequest(GTZone zone, int senderId)
 	{
-		for (int i = 0; i < this.pendingFriendRequests.Count; i++)
+		for (int i = 0; i < pendingFriendRequests.Count; i++)
 		{
-			if (this.pendingFriendRequests[i].zone == zone && this.pendingFriendRequests[i].sendingPlayerId == senderId)
+			if (pendingFriendRequests[i].zone == zone && pendingFriendRequests[i].sendingPlayerId == senderId)
 			{
 				return true;
 			}
@@ -95,28 +137,30 @@ public class FriendSystem : MonoBehaviour
 
 	private void Awake()
 	{
-		if (FriendSystem.Instance == null)
+		if (Instance == null)
 		{
-			FriendSystem.Instance = this;
-			return;
+			Instance = this;
 		}
-		Object.Destroy(this);
+		else
+		{
+			UnityEngine.Object.Destroy(this);
+		}
 	}
 
 	private void Start()
 	{
-		FriendBackendController.Instance.OnGetFriendsComplete += this.OnGetFriendsReturned;
-		FriendBackendController.Instance.OnAddFriendComplete += this.OnAddFriendReturned;
-		FriendBackendController.Instance.OnRemoveFriendComplete += this.OnRemoveFriendReturned;
+		FriendBackendController.Instance.OnGetFriendsComplete += OnGetFriendsReturned;
+		FriendBackendController.Instance.OnAddFriendComplete += OnAddFriendReturned;
+		FriendBackendController.Instance.OnRemoveFriendComplete += OnRemoveFriendReturned;
 	}
 
 	private void OnDestroy()
 	{
 		if (FriendBackendController.Instance != null)
 		{
-			FriendBackendController.Instance.OnGetFriendsComplete -= this.OnGetFriendsReturned;
-			FriendBackendController.Instance.OnAddFriendComplete -= this.OnAddFriendReturned;
-			FriendBackendController.Instance.OnRemoveFriendComplete -= this.OnRemoveFriendReturned;
+			FriendBackendController.Instance.OnGetFriendsComplete -= OnGetFriendsReturned;
+			FriendBackendController.Instance.OnAddFriendComplete -= OnAddFriendReturned;
+			FriendBackendController.Instance.OnRemoveFriendComplete -= OnRemoveFriendReturned;
 		}
 	}
 
@@ -124,136 +168,68 @@ public class FriendSystem : MonoBehaviour
 	{
 		if (succeeded)
 		{
-			this.lastFriendsListRefresh = Time.realtimeSinceStartup;
+			lastFriendsListRefresh = Time.realtimeSinceStartup;
 			switch (FriendBackendController.Instance.MyPrivacyState)
 			{
 			default:
-				this.localPlayerPrivacy = FriendSystem.PlayerPrivacy.Visible;
+				localPlayerPrivacy = PlayerPrivacy.Visible;
 				break;
 			case FriendBackendController.PrivacyState.PUBLIC_ONLY:
-				this.localPlayerPrivacy = FriendSystem.PlayerPrivacy.PublicOnly;
+				localPlayerPrivacy = PlayerPrivacy.PublicOnly;
 				break;
 			case FriendBackendController.PrivacyState.HIDDEN:
-				this.localPlayerPrivacy = FriendSystem.PlayerPrivacy.Hidden;
+				localPlayerPrivacy = PlayerPrivacy.Hidden;
 				break;
 			}
-			Action<List<FriendBackendController.Friend>> onFriendListRefresh = this.OnFriendListRefresh;
-			if (onFriendListRefresh == null)
-			{
-				return;
-			}
-			onFriendListRefresh(FriendBackendController.Instance.FriendsList);
+			this.OnFriendListRefresh?.Invoke(FriendBackendController.Instance.FriendsList);
 		}
 	}
 
 	private void OnAddFriendReturned(NetPlayer targetPlayer, bool succeeded)
 	{
 		int hashCode = targetPlayer.UserId.GetHashCode();
-		this.indexesToRemove.Clear();
-		for (int i = 0; i < this.pendingFriendRequests.Count; i++)
+		indexesToRemove.Clear();
+		for (int i = 0; i < pendingFriendRequests.Count; i++)
 		{
-			if (this.pendingFriendRequests[i].targetPlayerId == hashCode)
+			if (pendingFriendRequests[i].targetPlayerId == hashCode)
 			{
-				FriendSystem.FriendRequestCallback completionCallback = this.pendingFriendRequests[i].completionCallback;
-				if (completionCallback != null)
-				{
-					completionCallback(this.pendingFriendRequests[i].zone, this.pendingFriendRequests[i].sendingPlayerId, this.pendingFriendRequests[i].targetPlayerId, succeeded);
-				}
-				this.indexesToRemove.Add(i);
+				pendingFriendRequests[i].completionCallback?.Invoke(pendingFriendRequests[i].zone, pendingFriendRequests[i].sendingPlayerId, pendingFriendRequests[i].targetPlayerId, succeeded);
+				indexesToRemove.Add(i);
 			}
-			else if (this.pendingFriendRequests[i].localTimeSent + this.friendRequestExpirationTime < Time.realtimeSinceStartup)
+			else if (pendingFriendRequests[i].localTimeSent + friendRequestExpirationTime < Time.realtimeSinceStartup)
 			{
-				this.indexesToRemove.Add(i);
+				indexesToRemove.Add(i);
 			}
 		}
-		for (int j = this.indexesToRemove.Count - 1; j >= 0; j--)
+		for (int num = indexesToRemove.Count - 1; num >= 0; num--)
 		{
-			this.pendingFriendRequests.RemoveAt(this.indexesToRemove[j]);
+			pendingFriendRequests.RemoveAt(indexesToRemove[num]);
 		}
 	}
 
 	private void OnRemoveFriendReturned(FriendBackendController.Friend friend, bool succeeded)
 	{
-		if (friend != null && friend.Presence != null)
+		if (friend == null || friend.Presence == null)
 		{
-			int hashCode = friend.Presence.FriendLinkId.GetHashCode();
-			this.indexesToRemove.Clear();
-			for (int i = 0; i < this.pendingFriendRemovals.Count; i++)
+			return;
+		}
+		int hashCode = friend.Presence.FriendLinkId.GetHashCode();
+		indexesToRemove.Clear();
+		for (int i = 0; i < pendingFriendRemovals.Count; i++)
+		{
+			if (pendingFriendRemovals[i].targetPlayerId == hashCode)
 			{
-				if (this.pendingFriendRemovals[i].targetPlayerId == hashCode)
-				{
-					FriendSystem.FriendRemovalCallback completionCallback = this.pendingFriendRemovals[i].completionCallback;
-					if (completionCallback != null)
-					{
-						completionCallback(hashCode, succeeded);
-					}
-					this.indexesToRemove.Add(i);
-				}
-				else if (this.pendingFriendRemovals[i].localTimeSent + this.friendRequestExpirationTime < Time.realtimeSinceStartup)
-				{
-					this.indexesToRemove.Add(i);
-				}
+				pendingFriendRemovals[i].completionCallback?.Invoke(hashCode, succeeded);
+				indexesToRemove.Add(i);
 			}
-			for (int j = this.indexesToRemove.Count - 1; j >= 0; j--)
+			else if (pendingFriendRemovals[i].localTimeSent + friendRequestExpirationTime < Time.realtimeSinceStartup)
 			{
-				this.pendingFriendRemovals.RemoveAt(this.indexesToRemove[j]);
+				indexesToRemove.Add(i);
 			}
 		}
-	}
-
-	[OnEnterPlay_SetNull]
-	public static volatile FriendSystem Instance;
-
-	[SerializeField]
-	private float friendRequestExpirationTime = 10f;
-
-	private FriendSystem.PlayerPrivacy localPlayerPrivacy;
-
-	private List<FriendSystem.FriendRequestData> pendingFriendRequests = new List<FriendSystem.FriendRequestData>();
-
-	private List<FriendSystem.FriendRemovalData> pendingFriendRemovals = new List<FriendSystem.FriendRemovalData>();
-
-	private List<int> indexesToRemove = new List<int>();
-
-	private float lastFriendsListRefresh;
-
-	public delegate void FriendRequestCallback(GTZone zone, int localId, int friendId, bool success);
-
-	private struct FriendRequestData
-	{
-		public GTZone zone;
-
-		public int sendingPlayerId;
-
-		public int targetPlayerId;
-
-		public float localTimeSent;
-
-		public FriendSystem.FriendRequestCallback completionCallback;
-	}
-
-	public delegate void FriendRemovalCallback(int friendId, bool success);
-
-	private struct FriendRemovalData
-	{
-		public int targetPlayerId;
-
-		public float localTimeSent;
-
-		public FriendSystem.FriendRemovalCallback completionCallback;
-	}
-
-	private enum FriendRequestStatus
-	{
-		Pending,
-		Succeeded,
-		Failed
-	}
-
-	public enum PlayerPrivacy
-	{
-		Visible,
-		PublicOnly,
-		Hidden
+		for (int num = indexesToRemove.Count - 1; num >= 0; num--)
+		{
+			pendingFriendRemovals.RemoveAt(indexesToRemove[num]);
+		}
 	}
 }

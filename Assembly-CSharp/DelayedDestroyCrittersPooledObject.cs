@@ -1,26 +1,24 @@
-﻿using System;
 using UnityEngine;
 
 public class DelayedDestroyCrittersPooledObject : MonoBehaviour
 {
+	public float destroyDelay = 1f;
+
+	private float timeToDie = -1f;
+
 	protected void OnEnable()
 	{
-		if (ObjectPools.instance == null || !ObjectPools.instance.initialized)
+		if (!(ObjectPools.instance == null) && ObjectPools.instance.initialized)
 		{
-			return;
+			timeToDie = Time.time + destroyDelay;
 		}
-		this.timeToDie = Time.time + this.destroyDelay;
 	}
 
 	protected void LateUpdate()
 	{
-		if (Time.time >= this.timeToDie)
+		if (Time.time >= timeToDie)
 		{
 			CrittersPool.Return(base.gameObject);
 		}
 	}
-
-	public float destroyDelay = 1f;
-
-	private float timeToDie = -1f;
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaLocomotion;
 using GT_CustomMapSupportRuntime;
@@ -6,233 +5,13 @@ using UnityEngine;
 
 public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 {
-	private void Awake()
+	private enum AudioState
 	{
-		this.volume = base.GetComponent<Collider>();
-		this.audioState = ForceVolume.AudioState.None;
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-	}
-
-	public void SliceUpdate()
-	{
-		if (this.audioSource && this.audioSource != null && !this.audioSource.isPlaying && this.audioSource.enabled)
-		{
-			this.audioSource.enabled = false;
-		}
-	}
-
-	private bool TriggerFilter(Collider other, out Rigidbody rb, out Transform xf)
-	{
-		rb = null;
-		xf = null;
-		if (other.gameObject == GorillaTagger.Instance.headCollider.gameObject)
-		{
-			rb = GorillaTagger.Instance.GetComponent<Rigidbody>();
-			xf = GorillaTagger.Instance.headCollider.GetComponent<Transform>();
-		}
-		return rb != null && xf != null;
-	}
-
-	public void OnTriggerEnter(Collider other)
-	{
-		Rigidbody rigidbody = null;
-		Transform transform = null;
-		if (!this.TriggerFilter(other, out rigidbody, out transform))
-		{
-			return;
-		}
-		if (this.enterClip == null)
-		{
-			return;
-		}
-		if (this.audioSource)
-		{
-			this.audioSource.enabled = true;
-			this.audioSource.GTPlayOneShot(this.enterClip, 1f);
-			this.audioState = ForceVolume.AudioState.Enter;
-		}
-		this.enterPos = transform.position;
-	}
-
-	public void OnTriggerExit(Collider other)
-	{
-		Rigidbody rigidbody = null;
-		Transform transform = null;
-		if (!this.TriggerFilter(other, out rigidbody, out transform))
-		{
-			return;
-		}
-		if (this.audioSource)
-		{
-			this.audioSource.enabled = true;
-			this.audioSource.GTPlayOneShot(this.exitClip, 1f);
-			this.audioState = ForceVolume.AudioState.None;
-		}
-	}
-
-	public void OnTriggerStay(Collider other)
-	{
-		Rigidbody rigidbody = null;
-		Transform transform = null;
-		if (!this.TriggerFilter(other, out rigidbody, out transform))
-		{
-			return;
-		}
-		if (this.audioSource && !this.audioSource.isPlaying)
-		{
-			ForceVolume.AudioState audioState = this.audioState;
-			if (audioState != ForceVolume.AudioState.Enter)
-			{
-				if (audioState == ForceVolume.AudioState.Loop)
-				{
-					if (this.loopClip != null)
-					{
-						this.audioSource.enabled = true;
-						this.audioSource.GTPlayOneShot(this.loopClip, 1f);
-					}
-					this.audioState = ForceVolume.AudioState.Loop;
-				}
-			}
-			else
-			{
-				if (this.loopCresendoClip != null)
-				{
-					this.audioSource.enabled = true;
-					this.audioSource.GTPlayOneShot(this.loopCresendoClip, 1f);
-				}
-				this.audioState = ForceVolume.AudioState.Crescendo;
-			}
-		}
-		if (this.disableGrip)
-		{
-			GTPlayer.Instance.SetMaximumSlipThisFrame();
-		}
-		VRRig.LocalRig.BreakHandLinks();
-		SIPlayer localPlayer = SIPlayer.LocalPlayer;
-		if (localPlayer != null)
-		{
-			Vector3 up = base.transform.up;
-			localPlayer.PlayerKnockback(up * 0.1f, false, false);
-		}
-		SizeManager sizeManager = null;
-		if (this.scaleWithSize)
-		{
-			sizeManager = rigidbody.GetComponent<SizeManager>();
-		}
-		Vector3 vector = rigidbody.linearVelocity;
-		if (this.scaleWithSize && sizeManager)
-		{
-			vector /= sizeManager.currentScale;
-		}
-		Vector3 b = Vector3.Dot(transform.position - base.transform.position, base.transform.up) * base.transform.up;
-		Vector3 a = base.transform.position + b - transform.position;
-		float num = a.magnitude + 0.0001f;
-		Vector3 vector2 = a / num;
-		float num2 = Vector3.Dot(vector, vector2);
-		float d = this.accel;
-		if (this.maxDepth > -1f)
-		{
-			float num3 = Vector3.Dot(transform.position - this.enterPos, vector2);
-			float num4 = this.maxDepth - num3;
-			float b2 = 0f;
-			if (num4 > 0.0001f)
-			{
-				b2 = num2 * num2 / num4;
-			}
-			d = Mathf.Max(this.accel, b2);
-		}
-		float deltaTime = Time.deltaTime;
-		Vector3 b3 = base.transform.up * d * deltaTime;
-		vector += b3;
-		Vector3 a2 = Mathf.Min(Vector3.Dot(vector, base.transform.up), this.maxSpeed) * base.transform.up;
-		Vector3 a3 = Vector3.Dot(vector, base.transform.right) * base.transform.right;
-		Vector3 a4 = Vector3.Dot(vector, base.transform.forward) * base.transform.forward;
-		float d2 = 1f;
-		float d3 = 1f;
-		if (this.dampenLateralVelocity)
-		{
-			d2 = 1f - this.dampenXVelPerc * 0.01f * deltaTime;
-			d3 = 1f - this.dampenZVelPerc * 0.01f * deltaTime;
-		}
-		vector = a2 + d2 * a3 + d3 * a4;
-		if (this.applyPullToCenterAcceleration && this.pullToCenterAccel > 0f && this.pullToCenterMaxSpeed > 0f)
-		{
-			vector -= num2 * vector2;
-			if (num > this.pullTOCenterMinDistance)
-			{
-				num2 += this.pullToCenterAccel * deltaTime;
-				float b4 = Mathf.Min(this.pullToCenterMaxSpeed, num / deltaTime);
-				num2 = Mathf.Min(num2, b4);
-			}
-			else
-			{
-				num2 = 0f;
-			}
-			vector += num2 * vector2;
-			if (vector.magnitude > 0.0001f)
-			{
-				Vector3 vector3 = Vector3.Cross(base.transform.up, vector2);
-				float magnitude = vector3.magnitude;
-				if (magnitude > 0.0001f)
-				{
-					vector3 /= magnitude;
-					num2 = Vector3.Dot(vector, vector3);
-					vector -= num2 * vector3;
-					num2 -= this.pullToCenterAccel * deltaTime;
-					num2 = Mathf.Max(0f, num2);
-					vector += num2 * vector3;
-				}
-			}
-		}
-		if (this.scaleWithSize && sizeManager)
-		{
-			vector *= sizeManager.currentScale;
-		}
-		rigidbody.linearVelocity = vector;
-	}
-
-	public void OnDrawGizmosSelected()
-	{
-		base.GetComponents<Collider>();
-		Gizmos.color = Color.magenta;
-		Gizmos.matrix = base.transform.localToWorldMatrix;
-		Gizmos.DrawWireCube(Vector3.zero, new Vector3(this.pullTOCenterMinDistance / base.transform.lossyScale.x, 1f, this.pullTOCenterMinDistance / base.transform.lossyScale.z));
-	}
-
-	public void SetPropertiesFromPlaceholder(ForceVolumeProperties properties, AudioSource volumeAudioSource, Collider colliderVolume)
-	{
-		this.accel = properties.accel;
-		this.maxDepth = properties.maxDepth;
-		this.maxSpeed = properties.maxSpeed;
-		this.disableGrip = properties.disableGrip;
-		this.dampenLateralVelocity = properties.dampenLateralVelocity;
-		this.dampenXVelPerc = properties.dampenXVel;
-		this.dampenZVelPerc = properties.dampenZVel;
-		this.applyPullToCenterAcceleration = properties.applyPullToCenterAcceleration;
-		this.pullToCenterAccel = properties.pullToCenterAccel;
-		this.pullToCenterMaxSpeed = properties.pullToCenterMaxSpeed;
-		this.pullTOCenterMinDistance = properties.pullToCenterMinDistance;
-		this.enterClip = properties.enterClip;
-		this.exitClip = properties.exitClip;
-		this.loopClip = properties.loopClip;
-		this.loopCresendoClip = properties.loopCrescendoClip;
-		if (volumeAudioSource.IsNotNull())
-		{
-			this.audioSource = volumeAudioSource;
-		}
-		if (colliderVolume.IsNotNull())
-		{
-			this.volume = colliderVolume;
-		}
+		None,
+		Enter,
+		Crescendo,
+		Loop,
+		Exit
 	}
 
 	[SerializeField]
@@ -285,14 +64,226 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 
 	private Vector3 enterPos;
 
-	private ForceVolume.AudioState audioState;
+	private AudioState audioState;
 
-	private enum AudioState
+	private void Awake()
 	{
-		None,
-		Enter,
-		Crescendo,
-		Loop,
-		Exit
+		volume = GetComponent<Collider>();
+		audioState = AudioState.None;
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	public void SliceUpdate()
+	{
+		if ((bool)audioSource && audioSource != null && !audioSource.isPlaying && audioSource.enabled)
+		{
+			audioSource.enabled = false;
+		}
+	}
+
+	private bool TriggerFilter(Collider other, out Rigidbody rb, out Transform xf)
+	{
+		rb = null;
+		xf = null;
+		if (other.gameObject == GorillaTagger.Instance.headCollider.gameObject)
+		{
+			rb = GorillaTagger.Instance.GetComponent<Rigidbody>();
+			xf = GorillaTagger.Instance.headCollider.GetComponent<Transform>();
+		}
+		if (rb != null)
+		{
+			return xf != null;
+		}
+		return false;
+	}
+
+	public void OnTriggerEnter(Collider other)
+	{
+		Rigidbody rb = null;
+		Transform xf = null;
+		if (TriggerFilter(other, out rb, out xf) && !(enterClip == null))
+		{
+			if ((bool)audioSource)
+			{
+				audioSource.enabled = true;
+				audioSource.GTPlayOneShot(enterClip);
+				audioState = AudioState.Enter;
+			}
+			enterPos = xf.position;
+		}
+	}
+
+	public void OnTriggerExit(Collider other)
+	{
+		Rigidbody rb = null;
+		Transform xf = null;
+		if (TriggerFilter(other, out rb, out xf) && (bool)audioSource)
+		{
+			audioSource.enabled = true;
+			audioSource.GTPlayOneShot(exitClip);
+			audioState = AudioState.None;
+		}
+	}
+
+	public void OnTriggerStay(Collider other)
+	{
+		Rigidbody rb = null;
+		Transform xf = null;
+		if (!TriggerFilter(other, out rb, out xf))
+		{
+			return;
+		}
+		if ((bool)audioSource && !audioSource.isPlaying)
+		{
+			switch (audioState)
+			{
+			case AudioState.Enter:
+				if (loopCresendoClip != null)
+				{
+					audioSource.enabled = true;
+					audioSource.GTPlayOneShot(loopCresendoClip);
+				}
+				audioState = AudioState.Crescendo;
+				break;
+			case AudioState.Loop:
+				if (loopClip != null)
+				{
+					audioSource.enabled = true;
+					audioSource.GTPlayOneShot(loopClip);
+				}
+				audioState = AudioState.Loop;
+				break;
+			}
+		}
+		if (disableGrip)
+		{
+			GTPlayer.Instance.SetMaximumSlipThisFrame();
+		}
+		VRRig.LocalRig.BreakHandLinks();
+		SIPlayer localPlayer = SIPlayer.LocalPlayer;
+		if (localPlayer != null)
+		{
+			Vector3 up = base.transform.up;
+			localPlayer.PlayerKnockback(up * 0.1f, forceOffGround: false, applyExclusionZone: false);
+		}
+		SizeManager sizeManager = null;
+		if (scaleWithSize)
+		{
+			sizeManager = rb.GetComponent<SizeManager>();
+		}
+		Vector3 linearVelocity = rb.linearVelocity;
+		if (scaleWithSize && (bool)sizeManager)
+		{
+			linearVelocity /= sizeManager.currentScale;
+		}
+		Vector3 vector = Vector3.Dot(xf.position - base.transform.position, base.transform.up) * base.transform.up;
+		Vector3 vector2 = base.transform.position + vector - xf.position;
+		float num = vector2.magnitude + 0.0001f;
+		Vector3 vector3 = vector2 / num;
+		float num2 = Vector3.Dot(linearVelocity, vector3);
+		float num3 = accel;
+		if (maxDepth > -1f)
+		{
+			float num4 = Vector3.Dot(xf.position - enterPos, vector3);
+			float num5 = maxDepth - num4;
+			float b = 0f;
+			if (num5 > 0.0001f)
+			{
+				b = num2 * num2 / num5;
+			}
+			num3 = Mathf.Max(accel, b);
+		}
+		float deltaTime = Time.deltaTime;
+		Vector3 vector4 = base.transform.up * num3 * deltaTime;
+		linearVelocity += vector4;
+		Vector3 vector5 = Mathf.Min(Vector3.Dot(linearVelocity, base.transform.up), maxSpeed) * base.transform.up;
+		Vector3 vector6 = Vector3.Dot(linearVelocity, base.transform.right) * base.transform.right;
+		Vector3 vector7 = Vector3.Dot(linearVelocity, base.transform.forward) * base.transform.forward;
+		float num6 = 1f;
+		float num7 = 1f;
+		if (dampenLateralVelocity)
+		{
+			num6 = 1f - dampenXVelPerc * 0.01f * deltaTime;
+			num7 = 1f - dampenZVelPerc * 0.01f * deltaTime;
+		}
+		linearVelocity = vector5 + num6 * vector6 + num7 * vector7;
+		if (applyPullToCenterAcceleration && pullToCenterAccel > 0f && pullToCenterMaxSpeed > 0f)
+		{
+			linearVelocity -= num2 * vector3;
+			if (num > pullTOCenterMinDistance)
+			{
+				num2 += pullToCenterAccel * deltaTime;
+				float b2 = Mathf.Min(pullToCenterMaxSpeed, num / deltaTime);
+				num2 = Mathf.Min(num2, b2);
+			}
+			else
+			{
+				num2 = 0f;
+			}
+			linearVelocity += num2 * vector3;
+			if (linearVelocity.magnitude > 0.0001f)
+			{
+				Vector3 vector8 = Vector3.Cross(base.transform.up, vector3);
+				float magnitude = vector8.magnitude;
+				if (magnitude > 0.0001f)
+				{
+					vector8 /= magnitude;
+					num2 = Vector3.Dot(linearVelocity, vector8);
+					linearVelocity -= num2 * vector8;
+					num2 -= pullToCenterAccel * deltaTime;
+					num2 = Mathf.Max(0f, num2);
+					linearVelocity += num2 * vector8;
+				}
+			}
+		}
+		if (scaleWithSize && (bool)sizeManager)
+		{
+			linearVelocity *= sizeManager.currentScale;
+		}
+		rb.linearVelocity = linearVelocity;
+	}
+
+	public void OnDrawGizmosSelected()
+	{
+		GetComponents<Collider>();
+		Gizmos.color = Color.magenta;
+		Gizmos.matrix = base.transform.localToWorldMatrix;
+		Gizmos.DrawWireCube(Vector3.zero, new Vector3(pullTOCenterMinDistance / base.transform.lossyScale.x, 1f, pullTOCenterMinDistance / base.transform.lossyScale.z));
+	}
+
+	public void SetPropertiesFromPlaceholder(ForceVolumeProperties properties, AudioSource volumeAudioSource, Collider colliderVolume)
+	{
+		accel = properties.accel;
+		maxDepth = properties.maxDepth;
+		maxSpeed = properties.maxSpeed;
+		disableGrip = properties.disableGrip;
+		dampenLateralVelocity = properties.dampenLateralVelocity;
+		dampenXVelPerc = properties.dampenXVel;
+		dampenZVelPerc = properties.dampenZVel;
+		applyPullToCenterAcceleration = properties.applyPullToCenterAcceleration;
+		pullToCenterAccel = properties.pullToCenterAccel;
+		pullToCenterMaxSpeed = properties.pullToCenterMaxSpeed;
+		pullTOCenterMinDistance = properties.pullToCenterMinDistance;
+		enterClip = properties.enterClip;
+		exitClip = properties.exitClip;
+		loopClip = properties.loopClip;
+		loopCresendoClip = properties.loopCrescendoClip;
+		if (volumeAudioSource.IsNotNull())
+		{
+			audioSource = volumeAudioSource;
+		}
+		if (colliderVolume.IsNotNull())
+		{
+			volume = colliderVolume;
+		}
 	}
 }

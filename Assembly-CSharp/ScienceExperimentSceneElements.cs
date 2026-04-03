@@ -1,10 +1,24 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTag;
 using UnityEngine;
 
 public class ScienceExperimentSceneElements : MonoBehaviour
 {
+	[Serializable]
+	public struct DisableByLiquidData
+	{
+		public Transform target;
+
+		public float heightOffset;
+	}
+
+	public List<DisableByLiquidData> disableByLiquidList = new List<DisableByLiquidData>();
+
+	public ParticleSystem sodaFizzParticles;
+
+	public ParticleSystem sodaEruptionParticles;
+
 	private void Awake()
 	{
 		ScienceExperimentManager.instance.InitElements(this);
@@ -13,19 +27,5 @@ public class ScienceExperimentSceneElements : MonoBehaviour
 	private void OnDestroy()
 	{
 		ScienceExperimentManager.instance.DeInitElements();
-	}
-
-	public List<ScienceExperimentSceneElements.DisableByLiquidData> disableByLiquidList = new List<ScienceExperimentSceneElements.DisableByLiquidData>();
-
-	public ParticleSystem sodaFizzParticles;
-
-	public ParticleSystem sodaEruptionParticles;
-
-	[Serializable]
-	public struct DisableByLiquidData
-	{
-		public Transform target;
-
-		public float heightOffset;
 	}
 }

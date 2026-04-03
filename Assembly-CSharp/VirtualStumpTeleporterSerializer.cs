@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using Photon.Pun;
@@ -6,74 +5,6 @@ using UnityEngine;
 
 internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 {
-	public void NotifyPlayerTeleporting(short teleporterIdx, AudioSource localPlayerTeleporterAudioSource)
-	{
-		if ((int)teleporterIdx >= this.teleporters.Count)
-		{
-			return;
-		}
-		if (PhotonNetwork.InRoom)
-		{
-			base.SendRPC("ActivateTeleportVFX", true, new object[]
-			{
-				false,
-				teleporterIdx
-			});
-		}
-	}
-
-	public void NotifyPlayerReturning(short teleporterIdx)
-	{
-		if ((int)teleporterIdx >= this.teleporters.Count)
-		{
-			return;
-		}
-		Debug.Log(string.Format("[VRTeleporterSerializer::NotifyPlayerReturning] Sending RPC to activate VFX at idx: {0}", teleporterIdx));
-		if (PhotonNetwork.InRoom)
-		{
-			base.SendRPC("ActivateTeleportVFX", true, new object[]
-			{
-				true,
-				teleporterIdx
-			});
-		}
-	}
-
-	[PunRPC]
-	private void ActivateTeleportVFX(bool returning, short teleporterIdx, PhotonMessageInfo info)
-	{
-		MonkeAgent.IncrementRPCCall(info, "ActivateTeleportVFX");
-		if ((int)teleporterIdx >= this.teleporters.Count)
-		{
-			return;
-		}
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
-		RigContainer rigContainer;
-		if (!VRRigCache.Instance.TryGetVrrig(player, out rigContainer) || !rigContainer.Rig.fxSettings.callSettings[13].CallLimitSettings.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		VirtualStumpTeleporter virtualStumpTeleporter = this.teleporters[(int)teleporterIdx];
-		if (virtualStumpTeleporter.IsNotNull())
-		{
-			virtualStumpTeleporter.PlayTeleportEffects(false, !returning, null, false);
-		}
-	}
-
-	public short GetTeleporterIndex(VirtualStumpTeleporter teleporter)
-	{
-		short num = 0;
-		while ((int)num < this.teleporters.Count)
-		{
-			if (this.teleporters[(int)num] == teleporter)
-			{
-				return num;
-			}
-			num += 1;
-		}
-		return -1;
-	}
-
 	[SerializeField]
 	public List<VirtualStumpTeleporter> teleporters = new List<VirtualStumpTeleporter>();
 
@@ -91,4 +22,55 @@ internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 
 	[SerializeField]
 	public List<AudioClip> observerSoundClips = new List<AudioClip>();
+
+	public void NotifyPlayerTeleporting(short teleporterIdx, AudioSource localPlayerTeleporterAudioSource)
+	{
+		if (teleporterIdx < teleporters.Count && PhotonNetwork.InRoom)
+		{
+			SendRPC("ActivateTeleportVFX", true, false, teleporterIdx);
+		}
+	}
+
+	public void NotifyPlayerReturning(short teleporterIdx)
+	{
+		if (teleporterIdx < teleporters.Count)
+		{
+			Debug.Log($"[VRTeleporterSerializer::NotifyPlayerReturning] Sending RPC to activate VFX at idx: {teleporterIdx}");
+			if (PhotonNetwork.InRoom)
+			{
+				SendRPC("ActivateTeleportVFX", true, true, teleporterIdx);
+			}
+		}
+	}
+
+	[PunRPC]
+	private void ActivateTeleportVFX(bool returning, short teleporterIdx, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "ActivateTeleportVFX");
+		if (teleporterIdx >= teleporters.Count)
+		{
+			return;
+		}
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
+		if (VRRigCache.Instance.TryGetVrrig(player, out var playerRig) && playerRig.Rig.fxSettings.callSettings[13].CallLimitSettings.CheckCallTime(Time.unscaledTime))
+		{
+			VirtualStumpTeleporter virtualStumpTeleporter = teleporters[teleporterIdx];
+			if (virtualStumpTeleporter.IsNotNull())
+			{
+				virtualStumpTeleporter.PlayTeleportEffects(forLocalPlayer: false, !returning);
+			}
+		}
+	}
+
+	public short GetTeleporterIndex(VirtualStumpTeleporter teleporter)
+	{
+		for (short num = 0; num < teleporters.Count; num++)
+		{
+			if (teleporters[num] == teleporter)
+			{
+				return num;
+			}
+		}
+		return -1;
+	}
 }

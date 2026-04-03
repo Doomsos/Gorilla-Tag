@@ -1,9 +1,10 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class GRHazardousMaterial : MonoBehaviour
 {
+	private GhostReactor reactor;
+
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -14,7 +15,7 @@ public class GRHazardousMaterial : MonoBehaviour
 		GRPlayer component = VRRig.LocalRig.GetComponent<GRPlayer>();
 		if (component != null && component.State == GRPlayer.GRPlayerState.Alive)
 		{
-			this.reactor.grManager.RequestPlayerStateChange(component, GRPlayer.GRPlayerState.Ghost);
+			reactor.grManager.RequestPlayerStateChange(component, GRPlayer.GRPlayerState.Ghost);
 		}
 	}
 
@@ -22,7 +23,7 @@ public class GRHazardousMaterial : MonoBehaviour
 	{
 		if (collider == GTPlayer.Instance.headCollider || collider == GTPlayer.Instance.bodyCollider)
 		{
-			this.OnLocalPlayerOverlap();
+			OnLocalPlayerOverlap();
 		}
 	}
 
@@ -30,9 +31,7 @@ public class GRHazardousMaterial : MonoBehaviour
 	{
 		if (collision.collider == GTPlayer.Instance.headCollider || collision.collider == GTPlayer.Instance.bodyCollider)
 		{
-			this.OnLocalPlayerOverlap();
+			OnLocalPlayerOverlap();
 		}
 	}
-
-	private GhostReactor reactor;
 }

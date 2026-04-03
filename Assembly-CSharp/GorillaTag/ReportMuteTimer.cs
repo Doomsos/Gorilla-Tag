@@ -1,66 +1,61 @@
-﻿using System;
 using Photon.Realtime;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+internal class ReportMuteTimer : TickSystemTimerAbstract, ObjectPoolEvents
 {
-	internal class ReportMuteTimer : TickSystemTimerAbstract, ObjectPoolEvents
+	private static readonly NetEventOptions netEventOptions = new NetEventOptions
 	{
-		public int Muted { get; set; }
+		Flags = new WebFlags(3),
+		TargetActors = new int[1] { -1 }
+	};
 
-		public override void OnTimedEvent()
+	private static readonly object[] content = new object[6];
+
+	private const byte evCode = 51;
+
+	private string m_playerID;
+
+	private string m_nickName;
+
+	public int Muted { get; set; }
+
+	public override void OnTimedEvent()
+	{
+		if (!NetworkSystem.Instance.InRoom)
 		{
-			if (!NetworkSystem.Instance.InRoom)
-			{
-				this.Stop();
-				return;
-			}
-			ReportMuteTimer.content[0] = this.m_playerID;
-			ReportMuteTimer.content[1] = this.Muted;
-			ReportMuteTimer.content[2] = ((this.m_nickName.Length > 12) ? this.m_nickName.Remove(12) : this.m_nickName);
-			ReportMuteTimer.content[3] = NetworkSystem.Instance.LocalPlayer.NickName;
-			ReportMuteTimer.content[4] = !NetworkSystem.Instance.SessionIsPrivate;
-			ReportMuteTimer.content[5] = NetworkSystem.Instance.RoomStringStripped();
-			NetworkSystemRaiseEvent.RaiseEvent(51, ReportMuteTimer.content, ReportMuteTimer.netEventOptions, true);
-			this.Stop();
+			Stop();
+			return;
 		}
+		content[0] = m_playerID;
+		content[1] = Muted;
+		content[2] = ((m_nickName.Length > 12) ? m_nickName.Remove(12) : m_nickName);
+		content[3] = NetworkSystem.Instance.LocalPlayer.NickName;
+		content[4] = !NetworkSystem.Instance.SessionIsPrivate;
+		content[5] = NetworkSystem.Instance.RoomStringStripped();
+		NetworkSystemRaiseEvent.RaiseEvent(51, content, netEventOptions, reliable: true);
+		Stop();
+	}
 
-		public void SetReportData(string id, string name, int muted)
+	public void SetReportData(string id, string name, int muted)
+	{
+		Muted = muted;
+		m_playerID = id;
+		m_nickName = name;
+	}
+
+	void ObjectPoolEvents.OnTaken()
+	{
+	}
+
+	void ObjectPoolEvents.OnReturned()
+	{
+		if (base.Running)
 		{
-			this.Muted = muted;
-			this.m_playerID = id;
-			this.m_nickName = name;
+			OnTimedEvent();
 		}
-
-		void ObjectPoolEvents.OnTaken()
-		{
-		}
-
-		void ObjectPoolEvents.OnReturned()
-		{
-			if (base.Running)
-			{
-				this.OnTimedEvent();
-			}
-			this.m_playerID = string.Empty;
-			this.m_nickName = string.Empty;
-			this.Muted = 0;
-		}
-
-		private static readonly NetEventOptions netEventOptions = new NetEventOptions
-		{
-			Flags = new WebFlags(3),
-			TargetActors = new int[]
-			{
-				-1
-			}
-		};
-
-		private static readonly object[] content = new object[6];
-
-		private const byte evCode = 51;
-
-		private string m_playerID;
-
-		private string m_nickName;
+		m_playerID = string.Empty;
+		m_nickName = string.Empty;
+		Muted = 0;
 	}
 }

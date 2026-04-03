@@ -1,119 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class FixedSizeTrailAdjustBySpeed : MonoBehaviour
 {
-	private void Start()
+	[Serializable]
+	public struct GradientKey(Color color, float time)
 	{
-		this.Setup();
-	}
+		public Color color = color;
 
-	private void OnEnable()
-	{
-		this.ResetTrailState();
-	}
-
-	private void OnDisable()
-	{
-		this.ResetTrailState();
-	}
-
-	private void ResetTrailState()
-	{
-		this._rawVelocity = Vector3.zero;
-		this._rawSpeed = 0f;
-		this._speed = 0f;
-		this._lastSpeed = 0f;
-		this._lastPosition = base.transform.position;
-		if (!this.trail)
-		{
-			return;
-		}
-		this.trail.length = this.minLength;
-		this.trail.Setup();
-		this.LerpTrailColors(0f);
-	}
-
-	private void Setup()
-	{
-		this._lastPosition = base.transform.position;
-		this._rawVelocity = Vector3.zero;
-		this._rawSpeed = 0f;
-		this._speed = 0f;
-		if (this.trail)
-		{
-			this._initGravity = this.trail.gravity;
-			this.trail.applyPhysics = this.adjustPhysics;
-		}
-		this.LerpTrailColors(0.5f);
-	}
-
-	private void LerpTrailColors(float t = 0.5f)
-	{
-		GradientColorKey[] colorKeys = this._mixGradient.colorKeys;
-		int num = colorKeys.Length;
-		for (int i = 0; i < num; i++)
-		{
-			float time = (float)i / (float)(num - 1);
-			Color a = this.minColors.Evaluate(time);
-			Color b = this.maxColors.Evaluate(time);
-			Color color = Color.Lerp(a, b, t);
-			colorKeys[i].color = color;
-			colorKeys[i].time = time;
-		}
-		this._mixGradient.colorKeys = colorKeys;
-		if (this.trail)
-		{
-			this.trail.renderer.colorGradient = this._mixGradient;
-		}
-	}
-
-	private void Update()
-	{
-		float deltaTime = Time.deltaTime;
-		Vector3 position = base.transform.position;
-		this._rawVelocity = (position - this._lastPosition) / deltaTime;
-		this._rawSpeed = this._rawVelocity.magnitude;
-		if (this._rawSpeed > this.retractMin)
-		{
-			this._speed += this.expandSpeed * deltaTime;
-		}
-		if (this._rawSpeed <= this.retractMin)
-		{
-			this._speed -= this.retractSpeed * deltaTime;
-		}
-		if (this._speed > this.maxSpeed)
-		{
-			this._speed = this.maxSpeed;
-		}
-		this._speed = Mathf.Lerp(this._lastSpeed, this._speed, 0.5f);
-		if (this._speed < 0.01f)
-		{
-			this._speed = 0f;
-		}
-		this.AdjustTrail();
-		this._lastSpeed = this._speed;
-		this._lastPosition = position;
-	}
-
-	private void AdjustTrail()
-	{
-		if (!this.trail)
-		{
-			return;
-		}
-		float num = MathUtils.Linear(this._speed, this.minSpeed, this.maxSpeed, 0f, 1f);
-		float length = MathUtils.Linear(num, 0f, 1f, this.minLength, this.maxLength);
-		this.trail.length = length;
-		this.LerpTrailColors(num);
-		if (this.adjustPhysics)
-		{
-			Transform transform = base.transform;
-			Vector3 b = transform.forward * this.gravityOffset.z + transform.right * this.gravityOffset.x + transform.up * this.gravityOffset.y;
-			Vector3 b2 = (this._initGravity + b) * (1f - num);
-			this.trail.gravity = Vector3.Lerp(Vector3.zero, b2, 0.5f);
-		}
+		public float time = time;
 	}
 
 	public FixedSizeTrail trail;
@@ -166,17 +62,113 @@ public class FixedSizeTrailAdjustBySpeed : MonoBehaviour
 		alphaKeys = Array.Empty<GradientAlphaKey>()
 	};
 
-	[Serializable]
-	public struct GradientKey
+	private void Start()
 	{
-		public GradientKey(Color color, float time)
+		Setup();
+	}
+
+	private void OnEnable()
+	{
+		ResetTrailState();
+	}
+
+	private void OnDisable()
+	{
+		ResetTrailState();
+	}
+
+	private void ResetTrailState()
+	{
+		_rawVelocity = Vector3.zero;
+		_rawSpeed = 0f;
+		_speed = 0f;
+		_lastSpeed = 0f;
+		_lastPosition = base.transform.position;
+		if ((bool)trail)
 		{
-			this.color = color;
-			this.time = time;
+			trail.length = minLength;
+			trail.Setup();
+			LerpTrailColors(0f);
 		}
+	}
 
-		public Color color;
+	private void Setup()
+	{
+		_lastPosition = base.transform.position;
+		_rawVelocity = Vector3.zero;
+		_rawSpeed = 0f;
+		_speed = 0f;
+		if ((bool)trail)
+		{
+			_initGravity = trail.gravity;
+			trail.applyPhysics = adjustPhysics;
+		}
+		LerpTrailColors();
+	}
 
-		public float time;
+	private void LerpTrailColors(float t = 0.5f)
+	{
+		GradientColorKey[] colorKeys = _mixGradient.colorKeys;
+		int num = colorKeys.Length;
+		for (int i = 0; i < num; i++)
+		{
+			float time = (float)i / (float)(num - 1);
+			Color a = minColors.Evaluate(time);
+			Color b = maxColors.Evaluate(time);
+			Color color = Color.Lerp(a, b, t);
+			colorKeys[i].color = color;
+			colorKeys[i].time = time;
+		}
+		_mixGradient.colorKeys = colorKeys;
+		if ((bool)trail)
+		{
+			trail.renderer.colorGradient = _mixGradient;
+		}
+	}
+
+	private void Update()
+	{
+		float deltaTime = Time.deltaTime;
+		Vector3 position = base.transform.position;
+		_rawVelocity = (position - _lastPosition) / deltaTime;
+		_rawSpeed = _rawVelocity.magnitude;
+		if (_rawSpeed > retractMin)
+		{
+			_speed += expandSpeed * deltaTime;
+		}
+		if (_rawSpeed <= retractMin)
+		{
+			_speed -= retractSpeed * deltaTime;
+		}
+		if (_speed > maxSpeed)
+		{
+			_speed = maxSpeed;
+		}
+		_speed = Mathf.Lerp(_lastSpeed, _speed, 0.5f);
+		if (_speed < 0.01f)
+		{
+			_speed = 0f;
+		}
+		AdjustTrail();
+		_lastSpeed = _speed;
+		_lastPosition = position;
+	}
+
+	private void AdjustTrail()
+	{
+		if ((bool)trail)
+		{
+			float num = MathUtils.Linear(_speed, minSpeed, maxSpeed, 0f, 1f);
+			float length = MathUtils.Linear(num, 0f, 1f, minLength, maxLength);
+			trail.length = length;
+			LerpTrailColors(num);
+			if (adjustPhysics)
+			{
+				Transform transform = base.transform;
+				Vector3 vector = transform.forward * gravityOffset.z + transform.right * gravityOffset.x + transform.up * gravityOffset.y;
+				Vector3 b = (_initGravity + vector) * (1f - num);
+				trail.gravity = Vector3.Lerp(Vector3.zero, b, 0.5f);
+			}
+		}
 	}
 }

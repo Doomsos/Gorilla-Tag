@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 
@@ -7,6 +6,6 @@ public class PerfTestObjectDestroyer : MonoBehaviour
 {
 	private void Start()
 	{
-		Object.DestroyImmediate(base.gameObject, true);
+		Object.DestroyImmediate(base.gameObject, allowDestroyingAssets: true);
 	}
 }

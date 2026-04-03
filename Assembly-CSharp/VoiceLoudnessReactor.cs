@@ -1,166 +1,8 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 
 public class VoiceLoudnessReactor : MonoBehaviour
 {
-	private void Start()
-	{
-		for (int i = 0; i < this.transformPositionTargets.Length; i++)
-		{
-			this.transformPositionTargets[i].Initial = this.transformPositionTargets[i].transform.localPosition;
-		}
-		for (int j = 0; j < this.transformScaleTargets.Length; j++)
-		{
-			this.transformScaleTargets[j].Initial = this.transformScaleTargets[j].transform.localScale;
-		}
-		for (int k = 0; k < this.transformRotationTargets.Length; k++)
-		{
-			this.transformRotationTargets[k].Initial = this.transformRotationTargets[k].transform.localRotation;
-		}
-		for (int l = 0; l < this.particleTargets.Length; l++)
-		{
-			this.particleTargets[l].Main = this.particleTargets[l].particleSystem.main;
-			this.particleTargets[l].InitialSpeed = this.particleTargets[l].Main.startSpeedMultiplier;
-			this.particleTargets[l].InitialSize = this.particleTargets[l].Main.startSizeMultiplier;
-			this.particleTargets[l].Emission = this.particleTargets[l].particleSystem.emission;
-			this.particleTargets[l].InitialRate = this.particleTargets[l].Emission.rateOverTimeMultiplier;
-			this.particleTargets[l].Main.startSpeedMultiplier = 0f;
-			this.particleTargets[l].Main.startSizeMultiplier = 0f;
-			this.particleTargets[l].Emission.rateOverTimeMultiplier = 0f;
-		}
-		for (int m = 0; m < this.gameObjectEnableTargets.Length; m++)
-		{
-			this.gameObjectEnableTargets[m].GameObject.SetActive(!this.gameObjectEnableTargets[m].TurnOnAtThreshhold);
-		}
-		for (int n = 0; n < this.rendererColorTargets.Length; n++)
-		{
-			this.rendererColorTargets[n].Inititialize();
-		}
-		this.hasContinuousProperties = (this.continuousProperties != null && this.continuousProperties.Count > 0);
-	}
-
-	private void OnEnable()
-	{
-		if (this.loudness != null)
-		{
-			return;
-		}
-		this.loudness = base.GetComponentInParent<GorillaSpeakerLoudness>(true);
-		if (this.loudness == null)
-		{
-			GorillaTagger componentInParent = base.GetComponentInParent<GorillaTagger>();
-			if (componentInParent != null)
-			{
-				this.loudness = componentInParent.offlineVRRig.GetComponent<GorillaSpeakerLoudness>();
-			}
-		}
-		if (this.loudness != null)
-		{
-			this.frameLoudness = this.loudness.Loudness;
-			this.frameSmoothedLoudness = this.loudness.SmoothedLoudness;
-		}
-	}
-
-	private void Update()
-	{
-		if (this.loudness == null)
-		{
-			return;
-		}
-		float num = this.loudness.Loudness;
-		float num2 = this.frameLoudness;
-		float num3 = this.loudness.Loudness;
-		float num4 = this.frameLoudness;
-		if (this.attack > 0f && this.loudness.Loudness > this.frameLoudness)
-		{
-			this.frameLoudness = Mathf.MoveTowards(this.frameLoudness, this.loudness.Loudness, Time.deltaTime / this.attack);
-		}
-		else if (this.decay > 0f && this.loudness.Loudness < this.frameLoudness)
-		{
-			this.frameLoudness = Mathf.MoveTowards(this.frameLoudness, this.loudness.Loudness, Time.deltaTime / this.decay);
-		}
-		else
-		{
-			this.frameLoudness = this.loudness.Loudness;
-		}
-		if (this.attack > 0f && this.loudness.SmoothedLoudness > this.frameSmoothedLoudness)
-		{
-			this.frameSmoothedLoudness = Mathf.MoveTowards(this.frameLoudness, this.loudness.SmoothedLoudness, Time.deltaTime * this.attack);
-		}
-		else if (this.decay > 0f && this.loudness.SmoothedLoudness < this.frameSmoothedLoudness)
-		{
-			this.frameSmoothedLoudness = Mathf.MoveTowards(this.frameLoudness, this.loudness.SmoothedLoudness, Time.deltaTime * this.decay);
-		}
-		else
-		{
-			this.frameSmoothedLoudness = this.loudness.SmoothedLoudness;
-		}
-		for (int i = 0; i < this.blendShapeTargets.Length; i++)
-		{
-			float t = this.blendShapeTargets[i].UseSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness;
-			this.blendShapeTargets[i].SkinnedMeshRenderer.SetBlendShapeWeight(this.blendShapeTargets[i].BlendShapeIndex, Mathf.Lerp(this.blendShapeTargets[i].minValue, this.blendShapeTargets[i].maxValue, t));
-		}
-		for (int j = 0; j < this.transformPositionTargets.Length; j++)
-		{
-			float t2 = (this.transformPositionTargets[j].UseSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness) * this.transformPositionTargets[j].Scale;
-			this.transformPositionTargets[j].transform.localPosition = Vector3.Lerp(this.transformPositionTargets[j].Initial, this.transformPositionTargets[j].Max, t2);
-		}
-		for (int k = 0; k < this.transformScaleTargets.Length; k++)
-		{
-			float t3 = (this.transformScaleTargets[k].UseSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness) * this.transformScaleTargets[k].Scale;
-			this.transformScaleTargets[k].transform.localScale = Vector3.Lerp(this.transformScaleTargets[k].Initial, this.transformScaleTargets[k].Max, t3);
-		}
-		for (int l = 0; l < this.transformRotationTargets.Length; l++)
-		{
-			float t4 = (this.transformRotationTargets[l].UseSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness) * this.transformRotationTargets[l].Scale;
-			this.transformRotationTargets[l].transform.localRotation = Quaternion.Slerp(this.transformRotationTargets[l].Initial, this.transformRotationTargets[l].Max, t4);
-		}
-		for (int m = 0; m < this.particleTargets.Length; m++)
-		{
-			float time = (this.particleTargets[m].UseSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness) * this.particleTargets[m].Scale;
-			this.particleTargets[m].Main.startSpeedMultiplier = this.particleTargets[m].InitialSpeed * this.particleTargets[m].speed.Evaluate(time);
-			this.particleTargets[m].Main.startSizeMultiplier = this.particleTargets[m].InitialSize * this.particleTargets[m].size.Evaluate(time);
-			this.particleTargets[m].Emission.rateOverTimeMultiplier = this.particleTargets[m].InitialRate * this.particleTargets[m].rate.Evaluate(time);
-		}
-		for (int n = 0; n < this.gameObjectEnableTargets.Length; n++)
-		{
-			bool flag = (this.gameObjectEnableTargets[n].UseSmoothedLoudness ? this.frameSmoothedLoudness : (this.frameLoudness * this.gameObjectEnableTargets[n].Scale)) >= this.gameObjectEnableTargets[n].Threshold;
-			if (!this.gameObjectEnableTargets[n].TurnOnAtThreshhold)
-			{
-				flag = !flag;
-			}
-			if (this.gameObjectEnableTargets[n].GameObject.activeInHierarchy != flag)
-			{
-				this.gameObjectEnableTargets[n].GameObject.SetActive(flag);
-			}
-		}
-		for (int num5 = 0; num5 < this.rendererColorTargets.Length; num5++)
-		{
-			VoiceLoudnessReactorRendererColorTarget voiceLoudnessReactorRendererColorTarget = this.rendererColorTargets[num5];
-			float level = voiceLoudnessReactorRendererColorTarget.useSmoothedLoudness ? this.frameSmoothedLoudness : (this.frameLoudness * voiceLoudnessReactorRendererColorTarget.scale);
-			voiceLoudnessReactorRendererColorTarget.UpdateMaterialColor(level);
-		}
-		for (int num6 = 0; num6 < this.animatorTargets.Length; num6++)
-		{
-			VoiceLoudnessReactorAnimatorTarget voiceLoudnessReactorAnimatorTarget = this.animatorTargets[num6];
-			float num7 = voiceLoudnessReactorAnimatorTarget.useSmoothedLoudness ? this.frameSmoothedLoudness : this.frameLoudness;
-			if (voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness < 0f)
-			{
-				voiceLoudnessReactorAnimatorTarget.animator.speed = Mathf.Max(0f, (1f - num7) * -voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness);
-			}
-			else
-			{
-				voiceLoudnessReactorAnimatorTarget.animator.speed = Mathf.Max(0f, num7 * voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness);
-			}
-		}
-		if (this.hasContinuousProperties)
-		{
-			float f = this.smoothLoudnessForContinuousProperties ? this.frameSmoothedLoudness : this.frameLoudness;
-			this.continuousProperties.ApplyAll(f);
-		}
-	}
-
 	private GorillaSpeakerLoudness loudness;
 
 	[SerializeField]
@@ -206,4 +48,161 @@ public class VoiceLoudnessReactor : MonoBehaviour
 	[Tooltip("If > 0, The rate that the volume gets quieter = deltaTime/decay")]
 	[SerializeField]
 	private float decay;
+
+	private void Start()
+	{
+		for (int i = 0; i < transformPositionTargets.Length; i++)
+		{
+			transformPositionTargets[i].Initial = transformPositionTargets[i].transform.localPosition;
+		}
+		for (int j = 0; j < transformScaleTargets.Length; j++)
+		{
+			transformScaleTargets[j].Initial = transformScaleTargets[j].transform.localScale;
+		}
+		for (int k = 0; k < transformRotationTargets.Length; k++)
+		{
+			transformRotationTargets[k].Initial = transformRotationTargets[k].transform.localRotation;
+		}
+		for (int l = 0; l < particleTargets.Length; l++)
+		{
+			particleTargets[l].Main = particleTargets[l].particleSystem.main;
+			particleTargets[l].InitialSpeed = particleTargets[l].Main.startSpeedMultiplier;
+			particleTargets[l].InitialSize = particleTargets[l].Main.startSizeMultiplier;
+			particleTargets[l].Emission = particleTargets[l].particleSystem.emission;
+			particleTargets[l].InitialRate = particleTargets[l].Emission.rateOverTimeMultiplier;
+			particleTargets[l].Main.startSpeedMultiplier = 0f;
+			particleTargets[l].Main.startSizeMultiplier = 0f;
+			particleTargets[l].Emission.rateOverTimeMultiplier = 0f;
+		}
+		for (int m = 0; m < gameObjectEnableTargets.Length; m++)
+		{
+			gameObjectEnableTargets[m].GameObject.SetActive(!gameObjectEnableTargets[m].TurnOnAtThreshhold);
+		}
+		for (int n = 0; n < rendererColorTargets.Length; n++)
+		{
+			rendererColorTargets[n].Inititialize();
+		}
+		hasContinuousProperties = continuousProperties != null && continuousProperties.Count > 0;
+	}
+
+	private void OnEnable()
+	{
+		if (loudness != null)
+		{
+			return;
+		}
+		loudness = GetComponentInParent<GorillaSpeakerLoudness>(includeInactive: true);
+		if (loudness == null)
+		{
+			GorillaTagger componentInParent = GetComponentInParent<GorillaTagger>();
+			if (componentInParent != null)
+			{
+				loudness = componentInParent.offlineVRRig.GetComponent<GorillaSpeakerLoudness>();
+			}
+		}
+		if (loudness != null)
+		{
+			frameLoudness = loudness.Loudness;
+			frameSmoothedLoudness = loudness.SmoothedLoudness;
+		}
+	}
+
+	private void Update()
+	{
+		if (loudness == null)
+		{
+			return;
+		}
+		_ = loudness.Loudness;
+		_ = frameLoudness;
+		_ = loudness.Loudness;
+		_ = frameLoudness;
+		if (attack > 0f && loudness.Loudness > frameLoudness)
+		{
+			frameLoudness = Mathf.MoveTowards(frameLoudness, loudness.Loudness, Time.deltaTime / attack);
+		}
+		else if (decay > 0f && loudness.Loudness < frameLoudness)
+		{
+			frameLoudness = Mathf.MoveTowards(frameLoudness, loudness.Loudness, Time.deltaTime / decay);
+		}
+		else
+		{
+			frameLoudness = loudness.Loudness;
+		}
+		if (attack > 0f && loudness.SmoothedLoudness > frameSmoothedLoudness)
+		{
+			frameSmoothedLoudness = Mathf.MoveTowards(frameLoudness, loudness.SmoothedLoudness, Time.deltaTime * attack);
+		}
+		else if (decay > 0f && loudness.SmoothedLoudness < frameSmoothedLoudness)
+		{
+			frameSmoothedLoudness = Mathf.MoveTowards(frameLoudness, loudness.SmoothedLoudness, Time.deltaTime * decay);
+		}
+		else
+		{
+			frameSmoothedLoudness = loudness.SmoothedLoudness;
+		}
+		for (int i = 0; i < blendShapeTargets.Length; i++)
+		{
+			float t = (blendShapeTargets[i].UseSmoothedLoudness ? frameSmoothedLoudness : frameLoudness);
+			blendShapeTargets[i].SkinnedMeshRenderer.SetBlendShapeWeight(blendShapeTargets[i].BlendShapeIndex, Mathf.Lerp(blendShapeTargets[i].minValue, blendShapeTargets[i].maxValue, t));
+		}
+		for (int j = 0; j < transformPositionTargets.Length; j++)
+		{
+			float t2 = (transformPositionTargets[j].UseSmoothedLoudness ? frameSmoothedLoudness : frameLoudness) * transformPositionTargets[j].Scale;
+			transformPositionTargets[j].transform.localPosition = Vector3.Lerp(transformPositionTargets[j].Initial, transformPositionTargets[j].Max, t2);
+		}
+		for (int k = 0; k < transformScaleTargets.Length; k++)
+		{
+			float t3 = (transformScaleTargets[k].UseSmoothedLoudness ? frameSmoothedLoudness : frameLoudness) * transformScaleTargets[k].Scale;
+			transformScaleTargets[k].transform.localScale = Vector3.Lerp(transformScaleTargets[k].Initial, transformScaleTargets[k].Max, t3);
+		}
+		for (int l = 0; l < transformRotationTargets.Length; l++)
+		{
+			float t4 = (transformRotationTargets[l].UseSmoothedLoudness ? frameSmoothedLoudness : frameLoudness) * transformRotationTargets[l].Scale;
+			transformRotationTargets[l].transform.localRotation = Quaternion.Slerp(transformRotationTargets[l].Initial, transformRotationTargets[l].Max, t4);
+		}
+		for (int m = 0; m < particleTargets.Length; m++)
+		{
+			float time = (particleTargets[m].UseSmoothedLoudness ? frameSmoothedLoudness : frameLoudness) * particleTargets[m].Scale;
+			particleTargets[m].Main.startSpeedMultiplier = particleTargets[m].InitialSpeed * particleTargets[m].speed.Evaluate(time);
+			particleTargets[m].Main.startSizeMultiplier = particleTargets[m].InitialSize * particleTargets[m].size.Evaluate(time);
+			particleTargets[m].Emission.rateOverTimeMultiplier = particleTargets[m].InitialRate * particleTargets[m].rate.Evaluate(time);
+		}
+		for (int n = 0; n < gameObjectEnableTargets.Length; n++)
+		{
+			bool flag = (gameObjectEnableTargets[n].UseSmoothedLoudness ? frameSmoothedLoudness : (frameLoudness * gameObjectEnableTargets[n].Scale)) >= gameObjectEnableTargets[n].Threshold;
+			if (!gameObjectEnableTargets[n].TurnOnAtThreshhold)
+			{
+				flag = !flag;
+			}
+			if (gameObjectEnableTargets[n].GameObject.activeInHierarchy != flag)
+			{
+				gameObjectEnableTargets[n].GameObject.SetActive(flag);
+			}
+		}
+		for (int num = 0; num < rendererColorTargets.Length; num++)
+		{
+			VoiceLoudnessReactorRendererColorTarget voiceLoudnessReactorRendererColorTarget = rendererColorTargets[num];
+			float level = (voiceLoudnessReactorRendererColorTarget.useSmoothedLoudness ? frameSmoothedLoudness : (frameLoudness * voiceLoudnessReactorRendererColorTarget.scale));
+			voiceLoudnessReactorRendererColorTarget.UpdateMaterialColor(level);
+		}
+		for (int num2 = 0; num2 < animatorTargets.Length; num2++)
+		{
+			VoiceLoudnessReactorAnimatorTarget voiceLoudnessReactorAnimatorTarget = animatorTargets[num2];
+			float num3 = (voiceLoudnessReactorAnimatorTarget.useSmoothedLoudness ? frameSmoothedLoudness : frameLoudness);
+			if (voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness < 0f)
+			{
+				voiceLoudnessReactorAnimatorTarget.animator.speed = Mathf.Max(0f, (1f - num3) * (0f - voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness));
+			}
+			else
+			{
+				voiceLoudnessReactorAnimatorTarget.animator.speed = Mathf.Max(0f, num3 * voiceLoudnessReactorAnimatorTarget.animatorSpeedToLoudness);
+			}
+		}
+		if (hasContinuousProperties)
+		{
+			float f = (smoothLoudnessForContinuousProperties ? frameSmoothedLoudness : frameLoudness);
+			continuousProperties.ApplyAll(f);
+		}
+	}
 }

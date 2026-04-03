@@ -1,62 +1,20 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using UnityEngine;
 
 public class CosmeticCritterShadeFleeing : CosmeticCritter
 {
-	public override void OnSpawn()
+	[Serializable]
+	private class ModelSwap
 	{
-		this.spawnFX.Play();
-		this.spawnAudioSource.clip = this.spawnAudioClips.GetRandomItem<AudioClip>();
-		this.spawnAudioSource.GTPlay();
-		this.pullVector = Vector3.zero;
-	}
+		public float relativeProbability;
 
-	public void SetFleePosition(Vector3 position, Vector3 fleeFrom)
-	{
-		this.origin = position;
-		Vector3 vector = position - fleeFrom;
-		this.fleeForward = vector.normalized;
-		this.fleeRight = Vector3.Cross(this.fleeForward, Vector3.up);
-		this.fleeUp = Vector3.Cross(this.fleeForward, this.fleeRight);
-		this.trailingPosition = position + vector.normalized * 3f;
-	}
-
-	public override void SetRandomVariables()
-	{
-		float num = 0f;
-		for (int i = 0; i < this.modelSwaps.Length; i++)
-		{
-			num += this.modelSwaps[i].relativeProbability;
-			this.modelSwaps[i].gameObject.SetActive(false);
-		}
-		float num2 = Random.value * num;
-		for (int j = 0; j < this.modelSwaps.Length; j++)
-		{
-			if (num2 < this.modelSwaps[j].relativeProbability)
-			{
-				this.modelSwaps[j].gameObject.SetActive(true);
-				break;
-			}
-			num2 -= this.modelSwaps[j].relativeProbability;
-		}
-		this.fleeBobFrequencyXY = new Vector2(Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.x, Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.y);
-		this.fleeBobMagnitudeXY = new Vector2(Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.x, Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.y);
-	}
-
-	public override void Tick()
-	{
-		float num = (float)base.GetAliveTime();
-		Vector3 vector = this.origin + num * this.fleeForward + this.pullVector + Mathf.Sin(this.fleeBobFrequencyXY.x * num) * this.fleeBobMagnitudeXY.x * this.fleeRight + Mathf.Sin(this.fleeBobFrequencyXY.y * num) * this.fleeBobMagnitudeXY.y * this.fleeUp;
-		Quaternion rotation = Quaternion.LookRotation((vector - this.trailingPosition).normalized, Vector3.up);
-		this.trailingPosition = Vector3.Lerp(this.trailingPosition, vector, 0.05f);
-		base.transform.SetPositionAndRotation(vector, rotation);
-		this.animator.SetFloat(this.animatorProperty, Mathf.Sin(num * 3f) * 0.5f + 0.5f);
+		public GameObject gameObject;
 	}
 
 	[Tooltip("Randomly selects one of these models when spawned, accounting for relative probabilities. For example, if one model has a probability of 1 and another a probability of 2, the second is twice as likely to be picked (and thus will be picked 67% of the time).")]
 	[SerializeField]
-	private CosmeticCritterShadeFleeing.ModelSwap[] modelSwaps;
+	private ModelSwap[] modelSwaps;
 
 	[Space]
 	[Tooltip("Despawn the Shade after it has fled (fleed?) this many meters.")]
@@ -108,11 +66,54 @@ public class CosmeticCritterShadeFleeing : CosmeticCritter
 
 	private int animatorProperty = Animator.StringToHash("Distance");
 
-	[Serializable]
-	private class ModelSwap
+	public override void OnSpawn()
 	{
-		public float relativeProbability;
+		spawnFX.Play();
+		spawnAudioSource.clip = spawnAudioClips.GetRandomItem();
+		spawnAudioSource.GTPlay();
+		pullVector = Vector3.zero;
+	}
 
-		public GameObject gameObject;
+	public void SetFleePosition(Vector3 position, Vector3 fleeFrom)
+	{
+		origin = position;
+		Vector3 vector = position - fleeFrom;
+		fleeForward = vector.normalized;
+		fleeRight = Vector3.Cross(fleeForward, Vector3.up);
+		fleeUp = Vector3.Cross(fleeForward, fleeRight);
+		trailingPosition = position + vector.normalized * 3f;
+	}
+
+	public override void SetRandomVariables()
+	{
+		float num = 0f;
+		for (int i = 0; i < modelSwaps.Length; i++)
+		{
+			num += modelSwaps[i].relativeProbability;
+			modelSwaps[i].gameObject.SetActive(value: false);
+		}
+		float num2 = UnityEngine.Random.value * num;
+		for (int j = 0; j < modelSwaps.Length; j++)
+		{
+			if (num2 >= modelSwaps[j].relativeProbability)
+			{
+				num2 -= modelSwaps[j].relativeProbability;
+				continue;
+			}
+			modelSwaps[j].gameObject.SetActive(value: true);
+			break;
+		}
+		fleeBobFrequencyXY = new Vector2(UnityEngine.Random.Range(-1f, 1f) * fleeBobFrequencyXYMax.x, UnityEngine.Random.Range(-1f, 1f) * fleeBobFrequencyXYMax.y);
+		fleeBobMagnitudeXY = new Vector2(UnityEngine.Random.Range(-1f, 1f) * fleeBobMagnitudeXYMax.x, UnityEngine.Random.Range(-1f, 1f) * fleeBobMagnitudeXYMax.y);
+	}
+
+	public override void Tick()
+	{
+		float num = (float)GetAliveTime();
+		Vector3 vector = origin + num * fleeForward + pullVector + Mathf.Sin(fleeBobFrequencyXY.x * num) * fleeBobMagnitudeXY.x * fleeRight + Mathf.Sin(fleeBobFrequencyXY.y * num) * fleeBobMagnitudeXY.y * fleeUp;
+		Quaternion rotation = Quaternion.LookRotation((vector - trailingPosition).normalized, Vector3.up);
+		trailingPosition = Vector3.Lerp(trailingPosition, vector, 0.05f);
+		base.transform.SetPositionAndRotation(vector, rotation);
+		animator.SetFloat(animatorProperty, Mathf.Sin(num * 3f) * 0.5f + 0.5f);
 	}
 }

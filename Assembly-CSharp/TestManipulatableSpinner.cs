@@ -1,19 +1,18 @@
-﻿using System;
 using UnityEngine;
 
 public class TestManipulatableSpinner : MonoBehaviour
 {
+	public ManipulatableSpinner spinner;
+
+	public float rotationScale = 1f;
+
 	private void Start()
 	{
 	}
 
 	private void LateUpdate()
 	{
-		float angle = this.spinner.angle;
-		base.transform.rotation = Quaternion.Euler(0f, angle * this.rotationScale, 0f);
+		float angle = spinner.angle;
+		base.transform.rotation = Quaternion.Euler(0f, angle * rotationScale, 0f);
 	}
-
-	public ManipulatableSpinner spinner;
-
-	public float rotationScale = 1f;
 }

@@ -1,54 +1,53 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public static class CrittersBiomeExtensions
 {
+	private static List<CrittersBiome> _allScannableBiomes;
+
+	private static Dictionary<CrittersBiome, string> _habitatLookup;
+
+	private static List<CrittersBiome> _habitatBiomes;
+
 	static CrittersBiomeExtensions()
 	{
-		CrittersBiomeExtensions._allScannableBiomes = new List<CrittersBiome>();
-		foreach (object obj in Enum.GetValues(typeof(CrittersBiome)))
+		_habitatLookup = new Dictionary<CrittersBiome, string>();
+		_allScannableBiomes = new List<CrittersBiome>();
+		foreach (CrittersBiome value in Enum.GetValues(typeof(CrittersBiome)))
 		{
-			CrittersBiome crittersBiome = (CrittersBiome)obj;
-			if (crittersBiome != CrittersBiome.Any && crittersBiome != CrittersBiome.IntroArea)
+			if (value != CrittersBiome.Any && value != CrittersBiome.IntroArea)
 			{
-				CrittersBiomeExtensions._allScannableBiomes.Add(crittersBiome);
+				_allScannableBiomes.Add(value);
 			}
 		}
 	}
 
 	public static string GetHabitatDescription(this CrittersBiome biome)
 	{
-		string text;
-		if (!CrittersBiomeExtensions._habitatLookup.TryGetValue(biome, out text))
+		if (!_habitatLookup.TryGetValue(biome, out var value))
 		{
 			if (biome == CrittersBiome.Any)
 			{
-				text = "Any";
+				value = "Any";
 			}
 			else
 			{
-				if (CrittersBiomeExtensions._habitatBiomes == null)
+				if (_habitatBiomes == null)
 				{
-					CrittersBiomeExtensions._habitatBiomes = new List<CrittersBiome>();
+					_habitatBiomes = new List<CrittersBiome>();
 				}
-				CrittersBiomeExtensions._habitatBiomes.Clear();
-				for (int i = 0; i < CrittersBiomeExtensions._allScannableBiomes.Count; i++)
+				_habitatBiomes.Clear();
+				for (int i = 0; i < _allScannableBiomes.Count; i++)
 				{
-					if (biome.HasFlag(CrittersBiomeExtensions._allScannableBiomes[i]))
+					if (biome.HasFlag(_allScannableBiomes[i]))
 					{
-						CrittersBiomeExtensions._habitatBiomes.Add(CrittersBiomeExtensions._allScannableBiomes[i]);
+						_habitatBiomes.Add(_allScannableBiomes[i]);
 					}
 				}
 			}
-			text = ((CrittersBiomeExtensions._habitatBiomes.Count > 3) ? "Various" : string.Join<CrittersBiome>(", ", CrittersBiomeExtensions._habitatBiomes));
-			CrittersBiomeExtensions._habitatLookup[biome] = text;
+			value = ((_habitatBiomes.Count > 3) ? "Various" : string.Join(", ", _habitatBiomes));
+			_habitatLookup[biome] = value;
 		}
-		return text;
+		return value;
 	}
-
-	private static List<CrittersBiome> _allScannableBiomes;
-
-	private static Dictionary<CrittersBiome, string> _habitatLookup = new Dictionary<CrittersBiome, string>();
-
-	private static List<CrittersBiome> _habitatBiomes;
 }

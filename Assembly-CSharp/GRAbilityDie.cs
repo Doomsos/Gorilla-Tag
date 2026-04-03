@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTagScripts.GhostReactor;
 using UnityEngine;
@@ -6,201 +6,6 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityDie : GRAbilityBase
 {
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
-	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-		if (this.disableAllCollidersWhenDead)
-		{
-			agent.GetComponentsInChildren<Collider>(this.disableCollidersWhenDead);
-		}
-		if (this.disableAllRenderersWhenDead)
-		{
-			agent.GetComponentsInChildren<Renderer>(this.hideWhenDead);
-		}
-		GRAbilityDie.Disable(this.disableCollidersWhenDead, false);
-		this.staggerMovement.Setup(root);
-	}
-
-	protected override void OnStart()
-	{
-		this.totalDeathDelay = this.delayDeath;
-		if (this.animData.Count > 0)
-		{
-			int index = Random.Range(0, this.animData.Count);
-			this.totalDeathDelay += this.animData[index].duration;
-			this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.totalDeathDelay);
-			this.PlayAnim(this.animData[index].animName, 0.1f, this.animData[index].speed);
-		}
-		this.agent.SetIsPathing(false, true);
-		this.agent.SetDisableNetworkSync(true);
-		this.isDead = false;
-		if (this.doKnockback)
-		{
-			this.staggerMovement.Start();
-		}
-		this.soundDeath.soundSelectMode = AbilitySound.SoundSelectMode.Random;
-		this.soundOnHide.soundSelectMode = AbilitySound.SoundSelectMode.Random;
-		this.soundDeath.Play(null);
-		GRAbilityDie.Disable(this.disableCollidersWhenDead, true);
-		if (this.fxDeath != null)
-		{
-			this.fxDeath.SetActive(false);
-		}
-		this.events.Reset();
-		this.events.OnAbilityStart(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
-	}
-
-	protected override void OnStop()
-	{
-		this.staggerMovement.Stop();
-		this.agent.SetIsPathing(true, true);
-		this.agent.SetDisableNetworkSync(false);
-		GRAbilityDie.Hide(this.hideWhenDead, false);
-		GRAbilityDie.Disable(this.disableCollidersWhenDead, false);
-		this.events.OnAbilityStop(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
-	}
-
-	public void SetStaggerVelocity(Vector3 vel)
-	{
-		float magnitude = vel.magnitude;
-		if (magnitude > 0f)
-		{
-			Vector3 a = vel / magnitude;
-			a.y = 0f;
-			vel = a * magnitude;
-		}
-		this.staggerMovement.InitFromVelocityAndDuration(vel, this.totalDeathDelay);
-	}
-
-	public void SetInstigatingPlayerIndex(int actorNumber)
-	{
-		Debug.Log(string.Format("SetInstigatingPlayerIndex {0}", actorNumber));
-		this.instigatingActorNumber = actorNumber;
-	}
-
-	private void Die()
-	{
-		this.soundOnHide.Play(null);
-		if (this.fxDeath != null)
-		{
-			this.fxDeath.SetActive(false);
-			this.fxDeath.SetActive(true);
-		}
-		GRAbilityDie.Hide(this.hideWhenDead, true);
-		GRAbilityDie.Disable(this.disableCollidersWhenDead, true);
-		GameEntity entity = this.agent.entity;
-		GameEntity gameEntity;
-		if (this.lootTable != null && entity.IsAuthority() && this.lootTable.TryForRandomItem(entity, out gameEntity, 0))
-		{
-			Transform transform = this.lootSpawnMarker;
-			if (transform == null)
-			{
-				transform = this.agent.transform;
-			}
-			Vector3 vector = transform.position;
-			if (transform == null)
-			{
-				vector.y += 0.33f;
-			}
-			RaycastHit raycastHit;
-			if (this.spawnOnGround && Physics.Raycast(new Ray(vector + Vector3.up * 0.5f, -Vector3.up), out raycastHit, 5f, this.groundLayerMask.value, QueryTriggerInteraction.Ignore))
-			{
-				vector = raycastHit.point;
-			}
-			entity.manager.RequestCreateItem(gameEntity.gameObject.name.GetStaticHash(), vector, transform.rotation, 0L);
-		}
-		GREnemy component = entity.GetComponent<GREnemy>();
-		if (component != null && component.damageFlash != null)
-		{
-			component.damageFlash.Play();
-		}
-	}
-
-	public void DestroySelf()
-	{
-		Debug.Log("DESTROY SELF");
-		this.ReportDeathStat();
-		if (this.agent.entity.IsAuthority())
-		{
-			this.agent.entity.manager.RequestDestroyItem(this.agent.entity.id);
-		}
-	}
-
-	public void ReportDeathStat()
-	{
-		if (this.reported)
-		{
-			return;
-		}
-		this.reported = true;
-		GameEntity entity = this.agent.entity;
-		GRPlayer grplayer = GRPlayer.Get(this.instigatingActorNumber);
-		if (grplayer != null)
-		{
-			grplayer.IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat.Kills, 1f);
-		}
-		GhostReactor.instance.shiftManager.shiftStats.IncrementEnemyKills(entity.GetEnemyType());
-	}
-
-	public override bool IsDone()
-	{
-		return false;
-	}
-
-	protected override void OnUpdateShared(float dt)
-	{
-		if (this.startTime >= 0.0)
-		{
-			if (this.doKnockback)
-			{
-				this.staggerMovement.Update(dt);
-			}
-			double num = Time.timeAsDouble - this.startTime;
-			if (!this.isDead && num > (double)this.totalDeathDelay)
-			{
-				this.isDead = true;
-				this.Die();
-			}
-			else if (this.isDead && num > (double)(this.totalDeathDelay + this.destroyDelay))
-			{
-				GhostReactorManager.Get(this.entity).OnAbilityDie(this.entity, this.delayRespawn);
-				this.DestroySelf();
-				this.startTime = -1.0;
-			}
-			this.events.TryPlay((float)num, this.audioSource);
-		}
-	}
-
-	public static void Hide(List<Renderer> renderers, bool hide)
-	{
-		if (renderers == null)
-		{
-			return;
-		}
-		for (int i = 0; i < renderers.Count; i++)
-		{
-			if (renderers[i] != null)
-			{
-				renderers[i].enabled = !hide;
-			}
-		}
-	}
-
-	public static void Disable(List<Collider> colliders, bool disable)
-	{
-		if (colliders == null)
-		{
-			return;
-		}
-		for (int i = 0; i < colliders.Count; i++)
-		{
-			if (colliders[i] != null)
-			{
-				colliders[i].enabled = !disable;
-			}
-		}
-	}
-
 	public float delayDeath;
 
 	public float delayRespawn = -1f;
@@ -244,4 +49,196 @@ public class GRAbilityDie : GRAbilityBase
 	public GameAbilityEvents events;
 
 	private bool reported;
+
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	{
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+		if (disableAllCollidersWhenDead)
+		{
+			agent.GetComponentsInChildren(disableCollidersWhenDead);
+		}
+		if (disableAllRenderersWhenDead)
+		{
+			agent.GetComponentsInChildren(hideWhenDead);
+		}
+		Disable(disableCollidersWhenDead, disable: false);
+		staggerMovement.Setup(root);
+	}
+
+	protected override void OnStart()
+	{
+		totalDeathDelay = delayDeath;
+		if (animData.Count > 0)
+		{
+			int index = UnityEngine.Random.Range(0, animData.Count);
+			totalDeathDelay += animData[index].duration;
+			staggerMovement.InitFromVelocityAndDuration(staggerMovement.velocity, totalDeathDelay);
+			PlayAnim(animData[index].animName, 0.1f, animData[index].speed);
+		}
+		agent.SetIsPathing(isPathing: false, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: true);
+		isDead = false;
+		if (doKnockback)
+		{
+			staggerMovement.Start();
+		}
+		soundDeath.soundSelectMode = AbilitySound.SoundSelectMode.Random;
+		soundOnHide.soundSelectMode = AbilitySound.SoundSelectMode.Random;
+		soundDeath.Play(null);
+		Disable(disableCollidersWhenDead, disable: true);
+		if (fxDeath != null)
+		{
+			fxDeath.SetActive(value: false);
+		}
+		events.Reset();
+		events.OnAbilityStart(GetAbilityTime(Time.timeAsDouble), audioSource);
+	}
+
+	protected override void OnStop()
+	{
+		staggerMovement.Stop();
+		agent.SetIsPathing(isPathing: true, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: false);
+		Hide(hideWhenDead, hide: false);
+		Disable(disableCollidersWhenDead, disable: false);
+		events.OnAbilityStop(GetAbilityTime(Time.timeAsDouble), audioSource);
+	}
+
+	public void SetStaggerVelocity(Vector3 vel)
+	{
+		float magnitude = vel.magnitude;
+		if (magnitude > 0f)
+		{
+			Vector3 vector = vel / magnitude;
+			vector.y = 0f;
+			vel = vector * magnitude;
+		}
+		staggerMovement.InitFromVelocityAndDuration(vel, totalDeathDelay);
+	}
+
+	public void SetInstigatingPlayerIndex(int actorNumber)
+	{
+		Debug.Log($"SetInstigatingPlayerIndex {actorNumber}");
+		instigatingActorNumber = actorNumber;
+	}
+
+	private void Die()
+	{
+		soundOnHide.Play(null);
+		if (fxDeath != null)
+		{
+			fxDeath.SetActive(value: false);
+			fxDeath.SetActive(value: true);
+		}
+		Hide(hideWhenDead, hide: true);
+		Disable(disableCollidersWhenDead, disable: true);
+		GameEntity gameEntity = agent.entity;
+		if (lootTable != null && gameEntity.IsAuthority() && lootTable.TryForRandomItem(gameEntity, out var gameEntity2))
+		{
+			Transform transform = lootSpawnMarker;
+			if (transform == null)
+			{
+				transform = agent.transform;
+			}
+			Vector3 vector = transform.position;
+			if (transform == null)
+			{
+				vector.y += 0.33f;
+			}
+			if (spawnOnGround && Physics.Raycast(new Ray(vector + Vector3.up * 0.5f, -Vector3.up), out var hitInfo, 5f, groundLayerMask.value, QueryTriggerInteraction.Ignore))
+			{
+				vector = hitInfo.point;
+			}
+			gameEntity.manager.RequestCreateItem(gameEntity2.gameObject.name.GetStaticHash(), vector, transform.rotation, 0L);
+		}
+		GREnemy component = gameEntity.GetComponent<GREnemy>();
+		if (component != null && component.damageFlash != null)
+		{
+			component.damageFlash.Play();
+		}
+	}
+
+	public void DestroySelf()
+	{
+		Debug.Log("DESTROY SELF");
+		ReportDeathStat();
+		if (agent.entity.IsAuthority())
+		{
+			agent.entity.manager.RequestDestroyItem(agent.entity.id);
+		}
+	}
+
+	public void ReportDeathStat()
+	{
+		if (!reported)
+		{
+			reported = true;
+			GameEntity gameEntity = agent.entity;
+			GRPlayer gRPlayer = GRPlayer.Get(instigatingActorNumber);
+			if (gRPlayer != null)
+			{
+				gRPlayer.IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat.Kills, 1f);
+			}
+			GhostReactor.instance.shiftManager.shiftStats.IncrementEnemyKills(gameEntity.GetEnemyType());
+		}
+	}
+
+	public override bool IsDone()
+	{
+		return false;
+	}
+
+	protected override void OnUpdateShared(float dt)
+	{
+		if (startTime >= 0.0)
+		{
+			if (doKnockback)
+			{
+				staggerMovement.Update(dt);
+			}
+			double num = Time.timeAsDouble - startTime;
+			if (!isDead && num > (double)totalDeathDelay)
+			{
+				isDead = true;
+				Die();
+			}
+			else if (isDead && num > (double)(totalDeathDelay + destroyDelay))
+			{
+				GhostReactorManager.Get(entity).OnAbilityDie(entity, delayRespawn);
+				DestroySelf();
+				startTime = -1.0;
+			}
+			events.TryPlay((float)num, audioSource);
+		}
+	}
+
+	public static void Hide(List<Renderer> renderers, bool hide)
+	{
+		if (renderers == null)
+		{
+			return;
+		}
+		for (int i = 0; i < renderers.Count; i++)
+		{
+			if (renderers[i] != null)
+			{
+				renderers[i].enabled = !hide;
+			}
+		}
+	}
+
+	public static void Disable(List<Collider> colliders, bool disable)
+	{
+		if (colliders == null)
+		{
+			return;
+		}
+		for (int i = 0; i < colliders.Count; i++)
+		{
+			if (colliders[i] != null)
+			{
+				colliders[i].enabled = !disable;
+			}
+		}
+	}
 }

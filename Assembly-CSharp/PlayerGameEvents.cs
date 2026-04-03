@@ -1,7 +1,24 @@
-﻿using System;
+using System;
 
 public class PlayerGameEvents
 {
+	public enum EventType
+	{
+		NONE,
+		GameModeObjective,
+		GameModeCompleteRound,
+		GrabbedObject,
+		DroppedObject,
+		EatObject,
+		TapObject,
+		LaunchedProjectile,
+		PlayerMoved,
+		PlayerSwam,
+		TriggerHandEfffect,
+		EnterLocation,
+		MiscEvent
+	}
+
 	public static event Action<string> OnGameModeObjectiveTrigger;
 
 	public static event Action<string> OnGameModeCompleteRound;
@@ -31,149 +48,67 @@ public class PlayerGameEvents
 	public static void GameModeObjectiveTriggered()
 	{
 		string obj = GorillaGameManager.instance.GameModeName();
-		Action<string> onGameModeObjectiveTrigger = PlayerGameEvents.OnGameModeObjectiveTrigger;
-		if (onGameModeObjectiveTrigger == null)
-		{
-			return;
-		}
-		onGameModeObjectiveTrigger(obj);
+		PlayerGameEvents.OnGameModeObjectiveTrigger?.Invoke(obj);
 	}
 
 	public static void GameModeCompleteRound()
 	{
 		string obj = GorillaGameManager.instance.GameModeName();
-		Action<string> onGameModeCompleteRound = PlayerGameEvents.OnGameModeCompleteRound;
-		if (onGameModeCompleteRound == null)
-		{
-			return;
-		}
-		onGameModeCompleteRound(obj);
+		PlayerGameEvents.OnGameModeCompleteRound?.Invoke(obj);
 	}
 
 	public static void GrabbedObject(string objectName)
 	{
-		Action<string> onGrabbedObject = PlayerGameEvents.OnGrabbedObject;
-		if (onGrabbedObject == null)
-		{
-			return;
-		}
-		onGrabbedObject(objectName);
+		PlayerGameEvents.OnGrabbedObject?.Invoke(objectName);
 	}
 
 	public static void DroppedObject(string objectName)
 	{
-		Action<string> onDroppedObject = PlayerGameEvents.OnDroppedObject;
-		if (onDroppedObject == null)
-		{
-			return;
-		}
-		onDroppedObject(objectName);
+		PlayerGameEvents.OnDroppedObject?.Invoke(objectName);
 	}
 
 	public static void EatObject(string objectName)
 	{
-		Action<string> onEatObject = PlayerGameEvents.OnEatObject;
-		if (onEatObject == null)
-		{
-			return;
-		}
-		onEatObject(objectName);
+		PlayerGameEvents.OnEatObject?.Invoke(objectName);
 	}
 
 	public static void TapObject(string objectName)
 	{
-		Action<string> onTapObject = PlayerGameEvents.OnTapObject;
-		if (onTapObject == null)
-		{
-			return;
-		}
-		onTapObject(objectName);
+		PlayerGameEvents.OnTapObject?.Invoke(objectName);
 	}
 
 	public static void LaunchedProjectile(string objectName)
 	{
-		Action<string> onLaunchedProjectile = PlayerGameEvents.OnLaunchedProjectile;
-		if (onLaunchedProjectile == null)
-		{
-			return;
-		}
-		onLaunchedProjectile(objectName);
+		PlayerGameEvents.OnLaunchedProjectile?.Invoke(objectName);
 	}
 
 	public static void PlayerMoved(float distance, float speed)
 	{
-		Action<float, float> onPlayerMoved = PlayerGameEvents.OnPlayerMoved;
-		if (onPlayerMoved == null)
-		{
-			return;
-		}
-		onPlayerMoved(distance, speed);
+		PlayerGameEvents.OnPlayerMoved?.Invoke(distance, speed);
 	}
 
 	public static void PlayerSwam(float distance, float speed)
 	{
-		Action<float, float> onPlayerSwam = PlayerGameEvents.OnPlayerSwam;
-		if (onPlayerSwam == null)
-		{
-			return;
-		}
-		onPlayerSwam(distance, speed);
+		PlayerGameEvents.OnPlayerSwam?.Invoke(distance, speed);
 	}
 
 	public static void TriggerHandEffect(string effectName)
 	{
-		Action<string> onTriggerHandEffect = PlayerGameEvents.OnTriggerHandEffect;
-		if (onTriggerHandEffect == null)
-		{
-			return;
-		}
-		onTriggerHandEffect(effectName);
+		PlayerGameEvents.OnTriggerHandEffect?.Invoke(effectName);
 	}
 
 	public static void TriggerEnterLocation(string locationName)
 	{
-		Action<string> onEnterLocation = PlayerGameEvents.OnEnterLocation;
-		if (onEnterLocation == null)
-		{
-			return;
-		}
-		onEnterLocation(locationName);
+		PlayerGameEvents.OnEnterLocation?.Invoke(locationName);
 	}
 
 	public static void MiscEvent(string eventName, int count = 1)
 	{
-		Action<string, int> onMiscEvent = PlayerGameEvents.OnMiscEvent;
-		if (onMiscEvent == null)
-		{
-			return;
-		}
-		onMiscEvent(eventName, count);
+		PlayerGameEvents.OnMiscEvent?.Invoke(eventName, count);
 	}
 
 	public static void CritterEvent(string eventName)
 	{
-		Action<string> onCritterEvent = PlayerGameEvents.OnCritterEvent;
-		if (onCritterEvent == null)
-		{
-			return;
-		}
-		onCritterEvent(eventName);
-	}
-
-	public enum EventType
-	{
-		NONE,
-		GameModeObjective,
-		GameModeCompleteRound,
-		GrabbedObject,
-		DroppedObject,
-		EatObject,
-		TapObject,
-		LaunchedProjectile,
-		PlayerMoved,
-		PlayerSwam,
-		TriggerHandEfffect,
-		EnterLocation,
-		MiscEvent
+		PlayerGameEvents.OnCritterEvent?.Invoke(eventName);
 	}
 }

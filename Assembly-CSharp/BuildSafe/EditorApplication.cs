@@ -1,37 +1,36 @@
-﻿using System;
+using System;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public static class EditorApplication
 {
-	public static class EditorApplication
+	public static event Action hierarchyChanged
 	{
-		public static event Action hierarchyChanged
+		add
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
 		}
-
-		public static event Action update
+		remove
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
 		}
+	}
 
-		public static event Action delayCall
+	public static event Action update
+	{
+		add
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
+		}
+		remove
+		{
+		}
+	}
+
+	public static event Action delayCall
+	{
+		add
+		{
+		}
+		remove
+		{
 		}
 	}
 }

@@ -1,214 +1,205 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class Mole : Tappable
 {
-	public class Mole : Tappable
+	public delegate void MoleTapEvent(MoleTypes moleType, Vector3 position, bool isLocalTap, bool isLeft);
+
+	public enum MoleState
 	{
-		public event Mole.MoleTapEvent OnTapped;
+		Reset,
+		Ready,
+		TransitionToVisible,
+		Visible,
+		TransitionToHidden,
+		Hidden
+	}
 
-		public bool IsLeftSideMole { get; set; }
+	public float positionOffset = 0.2f;
 
-		private void Awake()
+	public MoleTypes[] moleTypes;
+
+	private float showMoleDuration;
+
+	private Vector3 visiblePosition;
+
+	private Vector3 hiddenPosition;
+
+	private float currentTime;
+
+	private float animStartTime;
+
+	private float travelTime;
+
+	private float normalTravelTime = 0.3f;
+
+	private float hitTravelTime = 0.2f;
+
+	private AnimationCurve animCurve;
+
+	private AnimationCurve normalAnimCurve;
+
+	private AnimationCurve hitAnimCurve;
+
+	private MoleState currentState;
+
+	private Vector3 origin;
+
+	private Vector3 target;
+
+	private int randomMolePickedIndex;
+
+	public CallLimiter rpcCooldown;
+
+	private int moleScore;
+
+	private List<int> safeMoles = new List<int>();
+
+	private List<int> hazardMoles = new List<int>();
+
+	public bool IsLeftSideMole { get; set; }
+
+	public event MoleTapEvent OnTapped;
+
+	private void Awake()
+	{
+		currentState = MoleState.Hidden;
+		Vector3 position = base.transform.position;
+		origin = (target = position);
+		visiblePosition = new Vector3(position.x, position.y + positionOffset, position.z);
+		hiddenPosition = new Vector3(position.x, position.y - positionOffset, position.z);
+		travelTime = normalTravelTime;
+		animCurve = (normalAnimCurve = AnimationCurves.EaseInOutQuad);
+		hitAnimCurve = AnimationCurves.EaseOutBack;
+		for (int i = 0; i < moleTypes.Length; i++)
 		{
-			this.currentState = Mole.MoleState.Hidden;
-			Vector3 position = base.transform.position;
-			this.origin = (this.target = position);
-			this.visiblePosition = new Vector3(position.x, position.y + this.positionOffset, position.z);
-			this.hiddenPosition = new Vector3(position.x, position.y - this.positionOffset, position.z);
-			this.travelTime = this.normalTravelTime;
-			this.animCurve = (this.normalAnimCurve = AnimationCurves.EaseInOutQuad);
-			this.hitAnimCurve = AnimationCurves.EaseOutBack;
-			for (int i = 0; i < this.moleTypes.Length; i++)
+			if (moleTypes[i].isHazard)
 			{
-				if (this.moleTypes[i].isHazard)
-				{
-					this.hazardMoles.Add(i);
-				}
-				else
-				{
-					this.safeMoles.Add(i);
-				}
+				hazardMoles.Add(i);
 			}
-			this.randomMolePickedIndex = -1;
+			else
+			{
+				safeMoles.Add(i);
+			}
 		}
+		randomMolePickedIndex = -1;
+	}
 
-		public void InvokeUpdate()
+	public void InvokeUpdate()
+	{
+		if (currentState == MoleState.Ready)
 		{
-			if (this.currentState == Mole.MoleState.Ready)
+			return;
+		}
+		switch (currentState)
+		{
+		case MoleState.TransitionToVisible:
+		case MoleState.TransitionToHidden:
+		{
+			float num = animCurve.Evaluate(Mathf.Clamp01((Time.time - animStartTime) / travelTime));
+			base.transform.position = Vector3.Lerp(origin, target, num);
+			if (num >= 1f)
 			{
-				return;
+				currentState++;
 			}
-			switch (this.currentState)
+			break;
+		}
+		case MoleState.Reset:
+		case MoleState.Hidden:
+			currentState = MoleState.Ready;
+			break;
+		}
+		if (Time.time - currentTime >= showMoleDuration && currentState > MoleState.Ready && currentState < MoleState.TransitionToHidden)
+		{
+			HideMole();
+		}
+	}
+
+	public bool CanPickMole()
+	{
+		return currentState == MoleState.Ready;
+	}
+
+	public void ShowMole(float _showMoleDuration, int randomMoleTypeIndex)
+	{
+		if (randomMoleTypeIndex >= moleTypes.Length || randomMoleTypeIndex < 0)
+		{
+			return;
+		}
+		randomMolePickedIndex = randomMoleTypeIndex;
+		for (int i = 0; i < moleTypes.Length; i++)
+		{
+			moleTypes[i].gameObject.SetActive(i == randomMoleTypeIndex);
+			if (moleTypes[i].monkeMoleDefaultMaterial != null)
 			{
-			case Mole.MoleState.Reset:
-			case Mole.MoleState.Hidden:
-				this.currentState = Mole.MoleState.Ready;
-				break;
-			case Mole.MoleState.TransitionToVisible:
-			case Mole.MoleState.TransitionToHidden:
-			{
-				float num = this.animCurve.Evaluate(Mathf.Clamp01((Time.time - this.animStartTime) / this.travelTime));
-				base.transform.position = Vector3.Lerp(this.origin, this.target, num);
-				if (num >= 1f)
-				{
-					this.currentState++;
-				}
-				break;
-			}
-			}
-			if (Time.time - this.currentTime >= this.showMoleDuration && this.currentState > Mole.MoleState.Ready && this.currentState < Mole.MoleState.TransitionToHidden)
-			{
-				this.HideMole(false);
+				moleTypes[i].MeshRenderer.material = moleTypes[i].monkeMoleDefaultMaterial;
 			}
 		}
+		showMoleDuration = _showMoleDuration;
+		origin = base.transform.position;
+		target = visiblePosition;
+		animCurve = normalAnimCurve;
+		currentState = MoleState.TransitionToVisible;
+		animStartTime = (currentTime = Time.time);
+		travelTime = normalTravelTime;
+	}
 
-		public bool CanPickMole()
+	public void HideMole(bool isHit = false)
+	{
+		if (currentState >= MoleState.TransitionToVisible && currentState <= MoleState.Visible)
 		{
-			return this.currentState == Mole.MoleState.Ready;
+			origin = base.transform.position;
+			target = hiddenPosition;
+			animCurve = (isHit ? hitAnimCurve : normalAnimCurve);
+			animStartTime = Time.time;
+			travelTime = (isHit ? hitTravelTime : normalTravelTime);
+			currentState = MoleState.TransitionToHidden;
 		}
+	}
 
-		public void ShowMole(float _showMoleDuration, int randomMoleTypeIndex)
-		{
-			if (randomMoleTypeIndex >= this.moleTypes.Length || randomMoleTypeIndex < 0)
-			{
-				return;
-			}
-			this.randomMolePickedIndex = randomMoleTypeIndex;
-			for (int i = 0; i < this.moleTypes.Length; i++)
-			{
-				this.moleTypes[i].gameObject.SetActive(i == randomMoleTypeIndex);
-				if (this.moleTypes[i].monkeMoleDefaultMaterial != null)
-				{
-					this.moleTypes[i].MeshRenderer.material = this.moleTypes[i].monkeMoleDefaultMaterial;
-				}
-			}
-			this.showMoleDuration = _showMoleDuration;
-			this.origin = base.transform.position;
-			this.target = this.visiblePosition;
-			this.animCurve = this.normalAnimCurve;
-			this.currentState = Mole.MoleState.TransitionToVisible;
-			this.animStartTime = (this.currentTime = Time.time);
-			this.travelTime = this.normalTravelTime;
-		}
+	public bool CanTap()
+	{
+		MoleState moleState = currentState;
+		return moleState == MoleState.TransitionToVisible || moleState == MoleState.Visible;
+	}
 
-		public void HideMole(bool isHit = false)
-		{
-			if (this.currentState < Mole.MoleState.TransitionToVisible || this.currentState > Mole.MoleState.Visible)
-			{
-				return;
-			}
-			this.origin = base.transform.position;
-			this.target = this.hiddenPosition;
-			this.animCurve = (isHit ? this.hitAnimCurve : this.normalAnimCurve);
-			this.animStartTime = Time.time;
-			this.travelTime = (isHit ? this.hitTravelTime : this.normalTravelTime);
-			this.currentState = Mole.MoleState.TransitionToHidden;
-		}
+	public override bool CanTap(bool isLeftHand)
+	{
+		return CanTap();
+	}
 
-		public bool CanTap()
+	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
+	{
+		if (CanTap())
 		{
-			Mole.MoleState moleState = this.currentState;
-			return moleState == Mole.MoleState.TransitionToVisible || moleState == Mole.MoleState.Visible;
-		}
-
-		public override bool CanTap(bool isLeftHand)
-		{
-			return this.CanTap();
-		}
-
-		public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
-		{
-			if (!this.CanTap())
-			{
-				return;
-			}
 			bool flag = info.Sender.ActorNumber == NetworkSystem.Instance.LocalPlayerID;
 			bool isLeft = flag && GorillaTagger.Instance.lastLeftTap >= GorillaTagger.Instance.lastRightTap;
 			MoleTypes moleTypes = null;
-			if (this.randomMolePickedIndex >= 0 && this.randomMolePickedIndex < this.moleTypes.Length)
+			if (randomMolePickedIndex >= 0 && randomMolePickedIndex < this.moleTypes.Length)
 			{
-				moleTypes = this.moleTypes[this.randomMolePickedIndex];
+				moleTypes = this.moleTypes[randomMolePickedIndex];
 			}
 			if (moleTypes != null)
 			{
-				Mole.MoleTapEvent onTapped = this.OnTapped;
-				if (onTapped == null)
-				{
-					return;
-				}
-				onTapped(moleTypes, base.transform.position, flag, isLeft);
+				this.OnTapped?.Invoke(moleTypes, base.transform.position, flag, isLeft);
 			}
 		}
+	}
 
-		public void ResetPosition()
+	public void ResetPosition()
+	{
+		base.transform.position = hiddenPosition;
+		currentState = MoleState.Reset;
+	}
+
+	public int GetMoleTypeIndex(bool useHazardMole)
+	{
+		if (!useHazardMole)
 		{
-			base.transform.position = this.hiddenPosition;
-			this.currentState = Mole.MoleState.Reset;
+			return safeMoles[Random.Range(0, safeMoles.Count)];
 		}
-
-		public int GetMoleTypeIndex(bool useHazardMole)
-		{
-			if (!useHazardMole)
-			{
-				return this.safeMoles[Random.Range(0, this.safeMoles.Count)];
-			}
-			return this.hazardMoles[Random.Range(0, this.hazardMoles.Count)];
-		}
-
-		public float positionOffset = 0.2f;
-
-		public MoleTypes[] moleTypes;
-
-		private float showMoleDuration;
-
-		private Vector3 visiblePosition;
-
-		private Vector3 hiddenPosition;
-
-		private float currentTime;
-
-		private float animStartTime;
-
-		private float travelTime;
-
-		private float normalTravelTime = 0.3f;
-
-		private float hitTravelTime = 0.2f;
-
-		private AnimationCurve animCurve;
-
-		private AnimationCurve normalAnimCurve;
-
-		private AnimationCurve hitAnimCurve;
-
-		private Mole.MoleState currentState;
-
-		private Vector3 origin;
-
-		private Vector3 target;
-
-		private int randomMolePickedIndex;
-
-		public CallLimiter rpcCooldown;
-
-		private int moleScore;
-
-		private List<int> safeMoles = new List<int>();
-
-		private List<int> hazardMoles = new List<int>();
-
-		public delegate void MoleTapEvent(MoleTypes moleType, Vector3 position, bool isLocalTap, bool isLeft);
-
-		public enum MoleState
-		{
-			Reset,
-			Ready,
-			TransitionToVisible,
-			Visible,
-			TransitionToHidden,
-			Hidden
-		}
+		return hazardMoles[Random.Range(0, hazardMoles.Count)];
 	}
 }

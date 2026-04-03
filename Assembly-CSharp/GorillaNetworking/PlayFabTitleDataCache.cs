@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,338 +12,287 @@ using PlayFab;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class PlayFabTitleDataCache : MonoBehaviour
 {
-	public class PlayFabTitleDataCache : MonoBehaviour
+	[Serializable]
+	public sealed class DataUpdate : UnityEvent<string>
 	{
-		public static PlayFabTitleDataCache Instance { get; private set; }
+	}
 
-		private static string FilePath
+	private class DataRequest
+	{
+		public string Name { get; set; }
+
+		public Action<string> Callback { get; set; }
+
+		public Action<PlayFabError> ErrorCallback { get; set; }
+	}
+
+	private static Action<PlayFabTitleDataCache> k_onnLoaded;
+
+	public DataUpdate OnTitleDataUpdate;
+
+	private const string FileName = "TitleDataCache.json";
+
+	private readonly List<DataRequest> requests = new List<DataRequest>();
+
+	private Dictionary<string, Dictionary<string, string>> localizedTitleData = new Dictionary<string, Dictionary<string, string>>();
+
+	private Dictionary<string, bool> localesUpdated = new Dictionary<string, bool>();
+
+	private bool isFirstLoad = true;
+
+	private Coroutine updateDataCoroutine;
+
+	[SerializeField]
+	private StringTable betaTitleDataOveride;
+
+	public static PlayFabTitleDataCache Instance { get; private set; }
+
+	private static string FilePath => Path.Combine(Application.persistentDataPath, "TitleDataCache.json");
+
+	public void GetTitleData(string name, Action<string> callback, Action<PlayFabError> errorCallback, bool ignoreCache = false)
+	{
+		if (!ignoreCache && !isFirstLoad && localizedTitleData.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, out var value) && value.TryGetValue(name, out var value2))
 		{
-			get
+			callback.SafeInvoke(value2);
+			return;
+		}
+		DataRequest item = new DataRequest
+		{
+			Name = name,
+			Callback = callback,
+			ErrorCallback = errorCallback
+		};
+		requests.Add(item);
+		TryUpdateData();
+	}
+
+	private void Awake()
+	{
+		if (Instance != null)
+		{
+			UnityEngine.Object.Destroy(this);
+			return;
+		}
+		Instance = this;
+		k_onnLoaded?.Invoke(this);
+		k_onnLoaded = null;
+	}
+
+	private void Start()
+	{
+		UpdateData();
+		LocalisationManager.RegisterOnLanguageChanged(TryUpdateData);
+	}
+
+	private void OnDestroy()
+	{
+		LocalisationManager.UnregisterOnLanguageChanged(TryUpdateData);
+	}
+
+	private void TryUpdateData()
+	{
+		if (!isFirstLoad && updateDataCoroutine == null)
+		{
+			UpdateData();
+		}
+	}
+
+	public CacheImport LoadDataFromFile()
+	{
+		try
+		{
+			if (!File.Exists(FilePath))
 			{
-				return Path.Combine(Application.persistentDataPath, "TitleDataCache.json");
+				UnityEngine.Debug.LogWarning("[PlayFabTitleDataCache::LoadDataFromFile] Title data file " + FilePath + " does not exist!");
+				return null;
 			}
+			return JsonMapper.ToObject<CacheImport>(File.ReadAllText(FilePath)) ?? new CacheImport();
 		}
-
-		public void GetTitleData(string name, Action<string> callback, Action<PlayFabError> errorCallback, bool ignoreCache = false)
+		catch (Exception arg)
 		{
-			Dictionary<string, string> dictionary;
-			string data;
-			if (!ignoreCache && !this.isFirstLoad && this.localizedTitleData.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, out dictionary) && dictionary.TryGetValue(name, out data))
+			UnityEngine.Debug.LogError($"[PlayFabTitleDataCache::LoadDataFromFile] Error reading PlayFab title data from file: {arg}");
+			return null;
+		}
+	}
+
+	private static void SaveDataToFile(string filepath, Dictionary<string, Dictionary<string, string>> titleData)
+	{
+		try
+		{
+			string contents = JsonMapper.ToJson(new CacheImport
 			{
-				callback.SafeInvoke(data);
-				return;
+				DeploymentId = MothershipClientApiUnity.DeploymentId,
+				TitleData = titleData
+			});
+			File.WriteAllText(filepath, contents);
+		}
+		catch (Exception arg)
+		{
+			UnityEngine.Debug.LogError($"[PlayFabTitleDataCache::SaveDataToFile] Error writing PlayFab title data to file: {arg}");
+		}
+	}
+
+	public void UpdateData()
+	{
+		updateDataCoroutine = StartCoroutine(UpdateDataCo());
+	}
+
+	private IEnumerator UpdateDataCo()
+	{
+		try
+		{
+			CacheImport oldCache = LoadDataFromFile();
+			string currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
+			if (!localizedTitleData.TryGetValue(currentLocale, out var titleData))
+			{
+				localizedTitleData[currentLocale] = new Dictionary<string, string>();
+				titleData = localizedTitleData[currentLocale];
 			}
-			PlayFabTitleDataCache.DataRequest item = new PlayFabTitleDataCache.DataRequest
+			if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(currentLocale, out var oldLocalizedCache))
 			{
-				Name = name,
-				Callback = callback,
-				ErrorCallback = errorCallback
-			};
-			this.requests.Add(item);
-			this.TryUpdateData();
-		}
-
-		private void Awake()
-		{
-			if (PlayFabTitleDataCache.Instance != null)
-			{
-				Object.Destroy(this);
-				return;
+				oldLocalizedCache = new Dictionary<string, string>();
 			}
-			PlayFabTitleDataCache.Instance = this;
-			Action<PlayFabTitleDataCache> action = PlayFabTitleDataCache.k_onnLoaded;
-			if (action != null)
+			yield return new WaitUntil(() => MothershipClientApiUnity.IsClientLoggedIn());
+			bool wipeOldData = oldCache == null || oldCache.DeploymentId != MothershipClientApiUnity.DeploymentId;
+			Dictionary<string, string> newTitleData = null;
+			string mothershipError = null;
+			Stopwatch.StartNew();
+			StringVector stringVector = new StringVector();
+			if (!isFirstLoad)
 			{
-				action(this);
-			}
-			PlayFabTitleDataCache.k_onnLoaded = null;
-		}
-
-		private void Start()
-		{
-			this.UpdateData();
-			LocalisationManager.RegisterOnLanguageChanged(new Action(this.TryUpdateData));
-		}
-
-		private void OnDestroy()
-		{
-			LocalisationManager.UnregisterOnLanguageChanged(new Action(this.TryUpdateData));
-		}
-
-		private void TryUpdateData()
-		{
-			if (!this.isFirstLoad && this.updateDataCoroutine == null)
-			{
-				this.UpdateData();
-			}
-		}
-
-		public CacheImport LoadDataFromFile()
-		{
-			CacheImport result;
-			try
-			{
-				if (!File.Exists(PlayFabTitleDataCache.FilePath))
+				foreach (DataRequest request in requests)
 				{
-					Debug.LogWarning("[PlayFabTitleDataCache::LoadDataFromFile] Title data file " + PlayFabTitleDataCache.FilePath + " does not exist!");
-					result = null;
+					stringVector.Add(request.Name);
+				}
+			}
+			bool finished = false;
+			if (!MothershipClientApiUnity.ListMothershipTitleData(MothershipClientApiUnity.TitleId, MothershipClientApiUnity.EnvironmentId, MothershipClientApiUnity.DeploymentId, stringVector, delegate(ListClientMothershipTitleDataResponse response)
+			{
+				if (response != null && response.Results != null)
+				{
+					newTitleData = new Dictionary<string, string>();
+					for (int i = 0; i < response.Results.Count; i++)
+					{
+						MothershipTitleDataShort mothershipTitleDataShort = response.Results[i];
+						if (!string.IsNullOrEmpty(mothershipTitleDataShort.key))
+						{
+							if (mothershipTitleDataShort.data.Contains("#EN_FALLBACK="))
+							{
+								UnityEngine.Debug.LogWarning("[PlayFabTitleDataCache::UpdateDataCo] Key '" + mothershipTitleDataShort.key + "' exists, but it doesn't have a translation for locale '" + currentLocale + "'. Falling back to English.");
+								mothershipTitleDataShort.data = mothershipTitleDataShort.data.Split("#EN_FALLBACK=")[1];
+							}
+							newTitleData[mothershipTitleDataShort.key] = mothershipTitleDataShort.data;
+						}
+					}
+					mothershipError = null;
 				}
 				else
 				{
-					result = (JsonMapper.ToObject<CacheImport>(File.ReadAllText(PlayFabTitleDataCache.FilePath)) ?? new CacheImport());
+					mothershipError = "Failed to fetch title data - response or results were null";
+					UnityEngine.Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] " + mothershipError);
 				}
-			}
-			catch (Exception arg)
+				finished = true;
+			}, delegate(MothershipError error, int statusCode)
 			{
-				Debug.LogError(string.Format("[PlayFabTitleDataCache::LoadDataFromFile] Error reading PlayFab title data from file: {0}", arg));
-				result = null;
-			}
-			return result;
-		}
-
-		private static void SaveDataToFile(string filepath, Dictionary<string, Dictionary<string, string>> titleData)
-		{
-			try
+				mothershipError = string.Format("Error fetching title data: {0} (Status: {1})", error?.Message ?? "Unknown error", statusCode);
+				UnityEngine.Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] Mothership API error callback - " + mothershipError);
+				finished = true;
+			}))
 			{
-				string contents = JsonMapper.ToJson(new CacheImport
-				{
-					DeploymentId = MothershipClientApiUnity.DeploymentId,
-					TitleData = titleData
-				});
-				File.WriteAllText(filepath, contents);
+				mothershipError = "Mothership API call was not sent.";
+				UnityEngine.Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] " + mothershipError);
 			}
-			catch (Exception arg)
+			yield return new WaitUntil(() => finished);
+			if (newTitleData == null)
 			{
-				Debug.LogError(string.Format("[PlayFabTitleDataCache::SaveDataToFile] Error writing PlayFab title data to file: {0}", arg));
+				yield break;
 			}
-		}
-
-		public void UpdateData()
-		{
-			this.updateDataCoroutine = base.StartCoroutine(this.UpdateDataCo());
-		}
-
-		private IEnumerator UpdateDataCo()
-		{
-			try
+			if (wipeOldData)
 			{
-				PlayFabTitleDataCache.<>c__DisplayClass25_0 CS$<>8__locals1 = new PlayFabTitleDataCache.<>c__DisplayClass25_0();
-				CacheImport oldCache = this.LoadDataFromFile();
-				CS$<>8__locals1.currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
-				Dictionary<string, string> titleData;
-				if (!this.localizedTitleData.TryGetValue(CS$<>8__locals1.currentLocale, out titleData))
+				localizedTitleData.Clear();
+				localizedTitleData[currentLocale] = new Dictionary<string, string>();
+				titleData = localizedTitleData[currentLocale];
+			}
+			if (!localesUpdated.ContainsKey(currentLocale))
+			{
+				titleData.Clear();
+			}
+			foreach (var (text3, text4) in newTitleData)
+			{
+				string text5 = (titleData[text3] = text4);
+				for (int num = requests.Count - 1; num >= 0; num--)
 				{
-					this.localizedTitleData[CS$<>8__locals1.currentLocale] = new Dictionary<string, string>();
-					titleData = this.localizedTitleData[CS$<>8__locals1.currentLocale];
-				}
-				Dictionary<string, string> oldLocalizedCache;
-				if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(CS$<>8__locals1.currentLocale, out oldLocalizedCache))
-				{
-					oldLocalizedCache = new Dictionary<string, string>();
-				}
-				yield return new WaitUntil(() => MothershipClientApiUnity.IsClientLoggedIn());
-				bool wipeOldData = oldCache == null || oldCache.DeploymentId != MothershipClientApiUnity.DeploymentId;
-				CS$<>8__locals1.newTitleData = null;
-				CS$<>8__locals1.mothershipError = null;
-				Stopwatch.StartNew();
-				StringVector stringVector = new StringVector();
-				if (!this.isFirstLoad)
-				{
-					foreach (PlayFabTitleDataCache.DataRequest dataRequest in this.requests)
+					DataRequest dataRequest = requests[num];
+					if (dataRequest.Name == text3)
 					{
-						stringVector.Add(dataRequest.Name);
-					}
-				}
-				CS$<>8__locals1.finished = false;
-				if (!MothershipClientApiUnity.ListMothershipTitleData(MothershipClientApiUnity.TitleId, MothershipClientApiUnity.EnvironmentId, MothershipClientApiUnity.DeploymentId, stringVector, delegate(ListClientMothershipTitleDataResponse response)
-				{
-					if (response != null && response.Results != null)
-					{
-						CS$<>8__locals1.newTitleData = new Dictionary<string, string>();
-						for (int j = 0; j < response.Results.Count; j++)
+						try
 						{
-							MothershipTitleDataShort mothershipTitleDataShort = response.Results[j];
-							if (!string.IsNullOrEmpty(mothershipTitleDataShort.key))
-							{
-								if (mothershipTitleDataShort.data.Contains("#EN_FALLBACK="))
-								{
-									Debug.LogWarning(string.Concat(new string[]
-									{
-										"[PlayFabTitleDataCache::UpdateDataCo] Key '",
-										mothershipTitleDataShort.key,
-										"' exists, but it doesn't have a translation for locale '",
-										CS$<>8__locals1.currentLocale,
-										"'. Falling back to English."
-									}));
-									mothershipTitleDataShort.data = mothershipTitleDataShort.data.Split("#EN_FALLBACK=", StringSplitOptions.None)[1];
-								}
-								CS$<>8__locals1.newTitleData[mothershipTitleDataShort.key] = mothershipTitleDataShort.data;
-							}
+							dataRequest.Callback?.Invoke(text5);
 						}
-						CS$<>8__locals1.mothershipError = null;
-					}
-					else
-					{
-						CS$<>8__locals1.mothershipError = "Failed to fetch title data - response or results were null";
-						Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] " + CS$<>8__locals1.mothershipError);
-					}
-					CS$<>8__locals1.finished = true;
-				}, delegate(MothershipError error, int statusCode)
-				{
-					CS$<>8__locals1.mothershipError = string.Format("Error fetching title data: {0} (Status: {1})", ((error != null) ? error.Message : null) ?? "Unknown error", statusCode);
-					Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] Mothership API error callback - " + CS$<>8__locals1.mothershipError);
-					CS$<>8__locals1.finished = true;
-				}))
-				{
-					CS$<>8__locals1.mothershipError = "Mothership API call was not sent.";
-					Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] " + CS$<>8__locals1.mothershipError);
-				}
-				yield return new WaitUntil(() => CS$<>8__locals1.finished);
-				if (CS$<>8__locals1.newTitleData != null)
-				{
-					if (wipeOldData)
-					{
-						this.localizedTitleData.Clear();
-						this.localizedTitleData[CS$<>8__locals1.currentLocale] = new Dictionary<string, string>();
-						titleData = this.localizedTitleData[CS$<>8__locals1.currentLocale];
-					}
-					if (!this.localesUpdated.ContainsKey(CS$<>8__locals1.currentLocale))
-					{
-						titleData.Clear();
-					}
-					foreach (KeyValuePair<string, string> keyValuePair in CS$<>8__locals1.newTitleData)
-					{
-						string text;
-						string text2;
-						keyValuePair.Deconstruct(out text, out text2);
-						string text3 = text;
-						string text4 = text2;
-						titleData[text3] = text4;
-						for (int i = this.requests.Count - 1; i >= 0; i--)
+						catch (Exception ex)
 						{
-							PlayFabTitleDataCache.DataRequest dataRequest2 = this.requests[i];
-							if (dataRequest2.Name == text3)
-							{
-								try
-								{
-									Action<string> callback = dataRequest2.Callback;
-									if (callback != null)
-									{
-										callback(text4);
-									}
-								}
-								catch (Exception ex)
-								{
-									Debug.LogError(string.Concat(new string[]
-									{
-										"[PlayFabTitleDataCache::UpdateDataCo] Error running callback for key: '",
-										text3,
-										"' value: '",
-										text4,
-										"' exception: ",
-										ex.Message
-									}));
-								}
-								this.requests.RemoveAt(i);
-							}
+							UnityEngine.Debug.LogError("[PlayFabTitleDataCache::UpdateDataCo] Error running callback for key: '" + text3 + "' value: '" + text5 + "' exception: " + ex.Message);
 						}
-						string a;
-						if (oldLocalizedCache.TryGetValue(text3, out a) && a != text4)
-						{
-							PlayFabTitleDataCache.DataUpdate onTitleDataUpdate = this.OnTitleDataUpdate;
-							if (onTitleDataUpdate != null)
-							{
-								onTitleDataUpdate.Invoke(text3);
-							}
-						}
+						requests.RemoveAt(num);
 					}
-					this.localesUpdated[CS$<>8__locals1.currentLocale] = true;
-					PlayFabTitleDataCache.SaveDataToFile(PlayFabTitleDataCache.FilePath, this.localizedTitleData);
 				}
-				CS$<>8__locals1 = null;
-				oldCache = null;
-				titleData = null;
-				oldLocalizedCache = null;
+				if (oldLocalizedCache.TryGetValue(text3, out var value) && value != text5)
+				{
+					OnTitleDataUpdate?.Invoke(text3);
+				}
 			}
-			finally
-			{
-				this.ClearRequestWithError(null);
-				this.isFirstLoad = false;
-				this.updateDataCoroutine = null;
-			}
-			yield break;
-			yield break;
+			localesUpdated[currentLocale] = true;
+			SaveDataToFile(FilePath, localizedTitleData);
 		}
-
-		private static string MD5(string value)
+		finally
 		{
-			HashAlgorithm hashAlgorithm = new MD5CryptoServiceProvider();
-			byte[] bytes = Encoding.Default.GetBytes(value);
-			byte[] array = hashAlgorithm.ComputeHash(bytes);
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (byte b in array)
-			{
-				stringBuilder.Append(b.ToString("x2"));
-			}
-			return stringBuilder.ToString();
+			PlayFabTitleDataCache playFabTitleDataCache = this;
+			playFabTitleDataCache.ClearRequestWithError();
+			playFabTitleDataCache.isFirstLoad = false;
+			playFabTitleDataCache.updateDataCoroutine = null;
 		}
+	}
 
-		private void ClearRequestWithError(PlayFabError e = null)
+	private static string MD5(string value)
+	{
+		MD5CryptoServiceProvider mD5CryptoServiceProvider = new MD5CryptoServiceProvider();
+		byte[] bytes = Encoding.Default.GetBytes(value);
+		byte[] array = mD5CryptoServiceProvider.ComputeHash(bytes);
+		StringBuilder stringBuilder = new StringBuilder();
+		byte[] array2 = array;
+		foreach (byte b in array2)
 		{
-			if (e == null)
-			{
-				e = new PlayFabError();
-			}
-			foreach (PlayFabTitleDataCache.DataRequest dataRequest in this.requests)
-			{
-				dataRequest.ErrorCallback.SafeInvoke(e);
-			}
-			this.requests.Clear();
+			stringBuilder.Append(b.ToString("x2"));
 		}
+		return stringBuilder.ToString();
+	}
 
-		public static void RegisterOnLoad(Action<PlayFabTitleDataCache> callback)
+	private void ClearRequestWithError(PlayFabError e = null)
+	{
+		if (e == null)
 		{
-			if (PlayFabTitleDataCache.Instance.IsNotNull())
-			{
-				callback(PlayFabTitleDataCache.Instance);
-				return;
-			}
-			PlayFabTitleDataCache.k_onnLoaded = (Action<PlayFabTitleDataCache>)Delegate.Combine(PlayFabTitleDataCache.k_onnLoaded, callback);
+			e = new PlayFabError();
 		}
-
-		private static Action<PlayFabTitleDataCache> k_onnLoaded;
-
-		public PlayFabTitleDataCache.DataUpdate OnTitleDataUpdate;
-
-		private const string FileName = "TitleDataCache.json";
-
-		private readonly List<PlayFabTitleDataCache.DataRequest> requests = new List<PlayFabTitleDataCache.DataRequest>();
-
-		private Dictionary<string, Dictionary<string, string>> localizedTitleData = new Dictionary<string, Dictionary<string, string>>();
-
-		private Dictionary<string, bool> localesUpdated = new Dictionary<string, bool>();
-
-		private bool isFirstLoad = true;
-
-		private Coroutine updateDataCoroutine;
-
-		[SerializeField]
-		private StringTable betaTitleDataOveride;
-
-		[Serializable]
-		public sealed class DataUpdate : UnityEvent<string>
+		foreach (DataRequest request in requests)
 		{
+			request.ErrorCallback.SafeInvoke(e);
 		}
+		requests.Clear();
+	}
 
-		private class DataRequest
+	public static void RegisterOnLoad(Action<PlayFabTitleDataCache> callback)
+	{
+		if (Instance.IsNotNull())
 		{
-			public string Name { get; set; }
-
-			public Action<string> Callback { get; set; }
-
-			public Action<PlayFabError> ErrorCallback { get; set; }
+			callback(Instance);
+		}
+		else
+		{
+			k_onnLoaded = (Action<PlayFabTitleDataCache>)Delegate.Combine(k_onnLoaded, callback);
 		}
 	}
 }

@@ -1,22 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class SpeedDrivenAnim : MonoBehaviour
 {
-	private void Start()
-	{
-		this.velocityEstimator = base.GetComponent<GorillaVelocityEstimator>();
-		this.animator = base.GetComponent<Animator>();
-		this.keyHash = Animator.StringToHash(this.animKey);
-	}
-
-	private void Update()
-	{
-		float target = Mathf.InverseLerp(this.speed0, this.speed1, this.velocityEstimator.linearVelocity.magnitude);
-		this.currentBlend = Mathf.MoveTowards(this.currentBlend, target, this.maxChangePerSecond * Time.deltaTime);
-		this.animator.SetFloat(this.keyHash, this.currentBlend);
-	}
-
 	[SerializeField]
 	private float speed0;
 
@@ -36,4 +21,18 @@ public class SpeedDrivenAnim : MonoBehaviour
 	private int keyHash;
 
 	private float currentBlend;
+
+	private void Start()
+	{
+		velocityEstimator = GetComponent<GorillaVelocityEstimator>();
+		animator = GetComponent<Animator>();
+		keyHash = Animator.StringToHash(animKey);
+	}
+
+	private void Update()
+	{
+		float target = Mathf.InverseLerp(speed0, speed1, velocityEstimator.linearVelocity.magnitude);
+		currentBlend = Mathf.MoveTowards(currentBlend, target, maxChangePerSecond * Time.deltaTime);
+		animator.SetFloat(keyHash, currentBlend);
+	}
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
@@ -7,113 +6,6 @@ using UnityEngine;
 
 public class WarningScreens : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (WarningScreens._activeReference == null)
-		{
-			WarningScreens._activeReference = this;
-			return;
-		}
-		Debug.LogError("[WARNINGS] WarningScreens already exists. Destroying this instance.");
-		Object.Destroy(this);
-	}
-
-	private Task<WarningButtonResult> StartWarningScreenInternal(CancellationToken cancellationToken)
-	{
-		WarningScreens.<StartWarningScreenInternal>d__14 <StartWarningScreenInternal>d__;
-		<StartWarningScreenInternal>d__.<>t__builder = AsyncTaskMethodBuilder<WarningButtonResult>.Create();
-		<StartWarningScreenInternal>d__.<>4__this = this;
-		<StartWarningScreenInternal>d__.cancellationToken = cancellationToken;
-		<StartWarningScreenInternal>d__.<>1__state = -1;
-		<StartWarningScreenInternal>d__.<>t__builder.Start<WarningScreens.<StartWarningScreenInternal>d__14>(ref <StartWarningScreenInternal>d__);
-		return <StartWarningScreenInternal>d__.<>t__builder.Task;
-	}
-
-	private Task<WarningButtonResult> StartOptInFollowUpScreenInternal(CancellationToken cancellationToken)
-	{
-		WarningScreens.<StartOptInFollowUpScreenInternal>d__15 <StartOptInFollowUpScreenInternal>d__;
-		<StartOptInFollowUpScreenInternal>d__.<>t__builder = AsyncTaskMethodBuilder<WarningButtonResult>.Create();
-		<StartOptInFollowUpScreenInternal>d__.<>4__this = this;
-		<StartOptInFollowUpScreenInternal>d__.cancellationToken = cancellationToken;
-		<StartOptInFollowUpScreenInternal>d__.<>1__state = -1;
-		<StartOptInFollowUpScreenInternal>d__.<>t__builder.Start<WarningScreens.<StartOptInFollowUpScreenInternal>d__15>(ref <StartOptInFollowUpScreenInternal>d__);
-		return <StartOptInFollowUpScreenInternal>d__.<>t__builder.Task;
-	}
-
-	public static Task<WarningButtonResult> StartWarningScreen(CancellationToken cancellationToken)
-	{
-		WarningScreens.<StartWarningScreen>d__16 <StartWarningScreen>d__;
-		<StartWarningScreen>d__.<>t__builder = AsyncTaskMethodBuilder<WarningButtonResult>.Create();
-		<StartWarningScreen>d__.cancellationToken = cancellationToken;
-		<StartWarningScreen>d__.<>1__state = -1;
-		<StartWarningScreen>d__.<>t__builder.Start<WarningScreens.<StartWarningScreen>d__16>(ref <StartWarningScreen>d__);
-		return <StartWarningScreen>d__.<>t__builder.Task;
-	}
-
-	public static Task<WarningButtonResult> StartOptInFollowUpScreen(CancellationToken cancellationToken)
-	{
-		WarningScreens.<StartOptInFollowUpScreen>d__17 <StartOptInFollowUpScreen>d__;
-		<StartOptInFollowUpScreen>d__.<>t__builder = AsyncTaskMethodBuilder<WarningButtonResult>.Create();
-		<StartOptInFollowUpScreen>d__.cancellationToken = cancellationToken;
-		<StartOptInFollowUpScreen>d__.<>1__state = -1;
-		<StartOptInFollowUpScreen>d__.<>t__builder.Start<WarningScreens.<StartOptInFollowUpScreen>d__17>(ref <StartOptInFollowUpScreen>d__);
-		return <StartOptInFollowUpScreen>d__.<>t__builder.Task;
-	}
-
-	private static Task WaitForResponse(CancellationToken cancellationToken)
-	{
-		WarningScreens.<WaitForResponse>d__18 <WaitForResponse>d__;
-		<WaitForResponse>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForResponse>d__.cancellationToken = cancellationToken;
-		<WaitForResponse>d__.<>1__state = -1;
-		<WaitForResponse>d__.<>t__builder.Start<WarningScreens.<WaitForResponse>d__18>(ref <WaitForResponse>d__);
-		return <WaitForResponse>d__.<>t__builder.Task;
-	}
-
-	public void OnDisable()
-	{
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
-	}
-
-	public static void OnLeftButtonClicked()
-	{
-		WarningScreens._result = WarningScreens._leftButtonResult;
-		WarningScreens._closedMessageBox = true;
-		WarningScreens activeReference = WarningScreens._activeReference;
-		if (activeReference == null)
-		{
-			return;
-		}
-		Action onLeftButtonPressedAction = activeReference._onLeftButtonPressedAction;
-		if (onLeftButtonPressedAction == null)
-		{
-			return;
-		}
-		onLeftButtonPressedAction();
-	}
-
-	public static void OnRightButtonClicked()
-	{
-		WarningScreens._result = WarningScreens._rightButtonResult;
-		WarningScreens._closedMessageBox = true;
-		WarningScreens activeReference = WarningScreens._activeReference;
-		if (activeReference == null)
-		{
-			return;
-		}
-		Action onRightButtonPressedAction = activeReference._onRightButtonPressedAction;
-		if (onRightButtonPressedAction == null)
-		{
-			return;
-		}
-		onRightButtonPressedAction();
-	}
-
 	private static WarningScreens _activeReference;
 
 	[SerializeField]
@@ -145,4 +37,135 @@ public class WarningScreens : MonoBehaviour
 	private static WarningButtonResult _rightButtonResult;
 
 	private static bool _closedMessageBox;
+
+	private void Awake()
+	{
+		if (_activeReference == null)
+		{
+			_activeReference = this;
+			return;
+		}
+		Debug.LogError("[WARNINGS] WarningScreens already exists. Destroying this instance.");
+		UnityEngine.Object.Destroy(this);
+	}
+
+	private async Task<WarningButtonResult> StartWarningScreenInternal(CancellationToken cancellationToken)
+	{
+		_closedMessageBox = false;
+		_result = WarningButtonResult.CloseWarning;
+		PlayerAgeGateWarningStatus? playerAgeGateWarningStatus = await WarningsServer.Instance.FetchPlayerData(cancellationToken);
+		if (cancellationToken.IsCancellationRequested || !playerAgeGateWarningStatus.HasValue)
+		{
+			return WarningButtonResult.None;
+		}
+		PlayerAgeGateWarningStatus value = playerAgeGateWarningStatus.Value;
+		if (value.header.IsNullOrEmpty() || value.body.IsNullOrEmpty())
+		{
+			Debug.Log("[WARNINGS] Not showing warning screen.");
+			return value.noWarningResult;
+		}
+		_messageBox.Header = value.header;
+		_messageBox.Body = value.body;
+		_messageBox.LeftButton = value.leftButtonText;
+		_messageBox.RightButton = value.rightButtonText;
+		_leftButtonResult = value.leftButtonResult;
+		_rightButtonResult = value.rightButtonResult;
+		_onLeftButtonPressedAction = value.onLeftButtonPressedAction;
+		_onRightButtonPressedAction = value.onRightButtonPressedAction;
+		if ((bool)_imageContainerAfter && (bool)_withImageTextBefore && (bool)_imageContainerBefore && (bool)_withImageTextAfter && (bool)_noImageText)
+		{
+			_imageContainerAfter.SetActive(value.showImage == EImageVisibility.AfterBody);
+			_imageContainerBefore.SetActive(value.showImage == EImageVisibility.BeforeBody);
+			_withImageTextBefore.text = value.body;
+			_withImageTextBefore.gameObject.SetActive(value.showImage == EImageVisibility.AfterBody);
+			_withImageTextAfter.text = value.body;
+			_withImageTextAfter.gameObject.SetActive(value.showImage == EImageVisibility.BeforeBody);
+			_noImageText.gameObject.SetActive(value.showImage == EImageVisibility.None);
+		}
+		_messageBox.gameObject.SetActive(value: true);
+		GameObject canvas = _messageBox.GetCanvas();
+		PrivateUIRoom.AddUI(canvas.transform);
+		HandRayController.Instance.EnableHandRays();
+		await WaitForResponse(cancellationToken);
+		HandRayController.Instance.DisableHandRays();
+		PrivateUIRoom.RemoveUI(canvas.transform);
+		_messageBox.gameObject.SetActive(value: false);
+		return _result;
+	}
+
+	private async Task<WarningButtonResult> StartOptInFollowUpScreenInternal(CancellationToken cancellationToken)
+	{
+		_closedMessageBox = false;
+		_result = WarningButtonResult.CloseWarning;
+		PlayerAgeGateWarningStatus? playerAgeGateWarningStatus = await WarningsServer.Instance.GetOptInFollowUpMessage(cancellationToken);
+		if (cancellationToken.IsCancellationRequested || !playerAgeGateWarningStatus.HasValue)
+		{
+			return WarningButtonResult.None;
+		}
+		Debug.Log("[KID::WARNING_SCREEN] Body: " + playerAgeGateWarningStatus.Value.body);
+		_messageBox.Header = playerAgeGateWarningStatus.Value.header;
+		_messageBox.Body = playerAgeGateWarningStatus.Value.body;
+		_messageBox.LeftButton = playerAgeGateWarningStatus.Value.leftButtonText;
+		_messageBox.RightButton = playerAgeGateWarningStatus.Value.rightButtonText;
+		_leftButtonResult = playerAgeGateWarningStatus.Value.leftButtonResult;
+		_rightButtonResult = playerAgeGateWarningStatus.Value.rightButtonResult;
+		_onLeftButtonPressedAction = playerAgeGateWarningStatus.Value.onLeftButtonPressedAction;
+		_onRightButtonPressedAction = playerAgeGateWarningStatus.Value.onRightButtonPressedAction;
+		if ((bool)_imageContainerAfter && (bool)_withImageTextBefore && (bool)_imageContainerBefore && (bool)_withImageTextAfter && (bool)_noImageText)
+		{
+			_imageContainerAfter.SetActive(playerAgeGateWarningStatus.Value.showImage == EImageVisibility.AfterBody);
+			_imageContainerBefore.SetActive(playerAgeGateWarningStatus.Value.showImage == EImageVisibility.BeforeBody);
+			_withImageTextBefore.text = playerAgeGateWarningStatus.Value.body;
+			_withImageTextBefore.gameObject.SetActive(playerAgeGateWarningStatus.Value.showImage == EImageVisibility.AfterBody);
+			_withImageTextAfter.text = playerAgeGateWarningStatus.Value.body;
+			_withImageTextAfter.gameObject.SetActive(playerAgeGateWarningStatus.Value.showImage == EImageVisibility.BeforeBody);
+			_noImageText.gameObject.SetActive(playerAgeGateWarningStatus.Value.showImage == EImageVisibility.None);
+		}
+		_messageBox.gameObject.SetActive(value: true);
+		GameObject canvas = _messageBox.GetCanvas();
+		PrivateUIRoom.AddUI(canvas.transform);
+		HandRayController.Instance.EnableHandRays();
+		await WaitForResponse(cancellationToken);
+		HandRayController.Instance.DisableHandRays();
+		PrivateUIRoom.RemoveUI(canvas.transform);
+		_messageBox.gameObject.SetActive(value: false);
+		return _result;
+	}
+
+	public static async Task<WarningButtonResult> StartWarningScreen(CancellationToken cancellationToken)
+	{
+		return await _activeReference.StartWarningScreenInternal(cancellationToken);
+	}
+
+	public static async Task<WarningButtonResult> StartOptInFollowUpScreen(CancellationToken cancellationToken)
+	{
+		return await _activeReference.StartOptInFollowUpScreenInternal(cancellationToken);
+	}
+
+	private static async Task WaitForResponse(CancellationToken cancellationToken)
+	{
+		while (!_closedMessageBox && !cancellationToken.IsCancellationRequested)
+		{
+			await Task.Yield();
+		}
+	}
+
+	public void OnDisable()
+	{
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+	}
+
+	public static void OnLeftButtonClicked()
+	{
+		_result = _leftButtonResult;
+		_closedMessageBox = true;
+		_activeReference?._onLeftButtonPressedAction?.Invoke();
+	}
+
+	public static void OnRightButtonClicked()
+	{
+		_result = _rightButtonResult;
+		_closedMessageBox = true;
+		_activeReference?._onRightButtonPressedAction?.Invoke();
+	}
 }

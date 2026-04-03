@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -20,8 +20,8 @@ public class Vector3Converter : JsonConverter
 
 	public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 	{
-		JObject jobject = JObject.Load(reader);
-		return new Vector3((float)jobject["x"], (float)jobject["y"], (float)jobject["z"]);
+		JObject jObject = JObject.Load(reader);
+		return new Vector3((float)jObject["x"], (float)jObject["y"], (float)jObject["z"]);
 	}
 
 	public override bool CanConvert(Type objectType)

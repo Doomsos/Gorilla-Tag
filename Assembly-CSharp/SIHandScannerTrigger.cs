@@ -1,39 +1,37 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class SIHandScannerTrigger : MonoBehaviour, IClickable
 {
+	public SIHandScanner parentScanner;
+
+	public UnityEvent onHandScanned;
+
 	private void Awake()
 	{
-		if (this.parentScanner == null)
+		if (parentScanner == null)
 		{
-			this.parentScanner = base.GetComponentInParent<SIHandScanner>();
+			parentScanner = GetComponentInParent<SIHandScanner>();
 		}
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
 		SIScannableHand component = other.GetComponent<SIScannableHand>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
+			OnPlayerScanned(component.parentPlayer);
 		}
-		this.OnPlayerScanned(component.parentPlayer);
 	}
 
 	private void OnPlayerScanned(SIPlayer player)
 	{
-		this.parentScanner.HandScanned(player);
-		this.onHandScanned.Invoke();
+		parentScanner.HandScanned(player);
+		onHandScanned.Invoke();
 	}
 
 	public void Click(bool leftHand = false)
 	{
-		this.OnPlayerScanned(VRRig.LocalRig.GetComponent<SIPlayer>());
+		OnPlayerScanned(VRRig.LocalRig.GetComponent<SIPlayer>());
 	}
-
-	public SIHandScanner parentScanner;
-
-	public UnityEvent onHandScanned;
 }

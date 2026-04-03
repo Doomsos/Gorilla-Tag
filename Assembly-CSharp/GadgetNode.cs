@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,232 +5,11 @@ using XNode;
 
 public class GadgetNode : TechTreeNodeBase
 {
-	private static bool InEditor
-	{
-		get
-		{
-			return NodeInspectorBridge.InNodeEditor;
-		}
-	}
+	[Input(ShowBackingValue.Unconnected, ConnectionType.Multiple, TypeConstraint.None, false)]
+	public Empty input;
 
-	public bool IsValid
-	{
-		get
-		{
-			EAssetReleaseTier eassetReleaseTier = this.releaseTier;
-			return eassetReleaseTier != EAssetReleaseTier.Disabled && eassetReleaseTier <= EAssetReleaseTier.PublicRC;
-		}
-	}
-
-	public bool IsDispensableGadget
-	{
-		get
-		{
-			return this.unlockedGadgetPrefab;
-		}
-	}
-
-	private bool ShowGadgetPrefab
-	{
-		get
-		{
-			return !GadgetNode.InEditor || this.IsDispensableGadget;
-		}
-	}
-
-	private bool ShowExcludedGameModes
-	{
-		get
-		{
-			return !GadgetNode.InEditor || this.excludedGameModes > (ESuperGameModes)0;
-		}
-	}
-
-	private bool ShowReleaseTier
-	{
-		get
-		{
-			return !GadgetNode.InEditor || this.releaseTier != EAssetReleaseTier.PublicRC;
-		}
-	}
-
-	public void ConfigureFrom(SITechTreeNode sourceNode)
-	{
-		this.releaseTier = sourceNode.EdReleaseTier;
-		this.upgradeType = sourceNode.upgradeType;
-		this.nickName = sourceNode.nickName;
-		this.description = sourceNode.description;
-		this.unlockedGadgetPrefab = sourceNode.unlockedGadgetPrefab;
-		this.excludedGameModes = sourceNode.excludedGameModes;
-		this.nodeCost = sourceNode.nodeCost.ToArray<SIResource.ResourceCost>();
-		this.costOverride = sourceNode.costOverride;
-		base.name = this.nickName;
-	}
-
-	public void AssignParentUpgrades(SIUpgradeType[] prerequisites)
-	{
-		NodePort port = base.GetPort("input");
-		port.ClearConnections();
-		for (int i = 0; i < prerequisites.Length; i++)
-		{
-			SIUpgradeType id = prerequisites[i];
-			GadgetNode gadgetNode = this.graph.nodes.FirstOrDefault(delegate(Node n)
-			{
-				GadgetNode gadgetNode2 = n as GadgetNode;
-				return gadgetNode2 != null && gadgetNode2.upgradeType == id;
-			}) as GadgetNode;
-			if (gadgetNode != null)
-			{
-				NodePort port2 = gadgetNode.GetPort("output");
-				port.Connect(port2);
-			}
-		}
-	}
-
-	public List<SIUpgradeType> GetParentUpgradeTypes()
-	{
-		List<SIUpgradeType> list = new List<SIUpgradeType>();
-		foreach (Node node in from n in base.GetPort("input").GetConnections()
-		select n.node)
-		{
-			GadgetNode gadgetNode = node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				list.Add(gadgetNode.upgradeType);
-			}
-		}
-		return list;
-	}
-
-	public SITechTreeNode GenerateTechTreeNode()
-	{
-		return new SITechTreeNode
-		{
-			upgradeType = this.upgradeType,
-			nickName = this.nickName,
-			description = this.description,
-			unlockedGadgetPrefab = this.unlockedGadgetPrefab,
-			nodeCost = this.nodeCost.ToArray<SIResource.ResourceCost>(),
-			excludedGameModes = this.excludedGameModes,
-			EdReleaseTier = this.releaseTier,
-			parentUpgrades = this.GetParentUpgradeTypes().ToArray()
-		};
-	}
-
-	public int GetDepth()
-	{
-		int num = 0;
-		NodePort inputPort = base.GetInputPort("input");
-		IEnumerable<NodePort> enumerable = (inputPort != null) ? inputPort.GetConnections() : null;
-		foreach (NodePort nodePort in (enumerable ?? Enumerable.Empty<NodePort>()))
-		{
-			GadgetNode gadgetNode = nodePort.node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				num = Mathf.Max(num, gadgetNode.GetDepth() + 1);
-			}
-		}
-		return num;
-	}
-
-	public int GetTreeDepth()
-	{
-		int num = this.GetDepth();
-		foreach (NodePort nodePort in base.GetOutputPort("output").GetConnections())
-		{
-			GadgetNode gadgetNode = nodePort.node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				num = Mathf.Max(num, gadgetNode.GetTreeDepth());
-			}
-		}
-		return num;
-	}
-
-	public List<GadgetNode> GetTreeNodes()
-	{
-		List<GadgetNode> list = new List<GadgetNode>();
-		this.GetTreeNodes(list);
-		return list;
-	}
-
-	public void GetTreeNodes(List<GadgetNode> nodes)
-	{
-		nodes.Add(this);
-		foreach (NodePort nodePort in base.GetOutputPort("output").GetConnections())
-		{
-			GadgetNode gadgetNode = nodePort.node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				gadgetNode.GetTreeNodes(nodes);
-			}
-		}
-	}
-
-	public List<GadgetNode> GetParentNodes()
-	{
-		List<GadgetNode> list = new List<GadgetNode>();
-		foreach (NodePort nodePort in base.GetPort("input").GetConnections())
-		{
-			GadgetNode gadgetNode = nodePort.node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				list.Add(gadgetNode);
-			}
-		}
-		return list;
-	}
-
-	public List<GadgetNode> GetChildNodes()
-	{
-		List<GadgetNode> list = new List<GadgetNode>();
-		foreach (NodePort nodePort in base.GetOutputPort("output").GetConnections())
-		{
-			GadgetNode gadgetNode = nodePort.node as GadgetNode;
-			if (gadgetNode != null)
-			{
-				list.Add(gadgetNode);
-			}
-		}
-		return list;
-	}
-
-	public int GetTreeWidth()
-	{
-		List<GadgetNode> childNodes = this.GetChildNodes();
-		if (childNodes.Count == 0)
-		{
-			return 1;
-		}
-		int num = 0;
-		foreach (GadgetNode gadgetNode in childNodes)
-		{
-			num += gadgetNode.GetTreeWidth();
-		}
-		return num;
-	}
-
-	public bool CostEquals(SIResource.ResourceCost[] cost)
-	{
-		if (cost.Length != this.nodeCost.Length)
-		{
-			return false;
-		}
-		for (int i = 0; i < cost.Length; i++)
-		{
-			if (!cost[i].Equals(this.nodeCost[i]))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	[Node.InputAttribute(Node.ShowBackingValue.Unconnected, Node.ConnectionType.Multiple, Node.TypeConstraint.None, false)]
-	public TechTreeNodeBase.Empty input;
-
-	[Node.OutputAttribute(Node.ShowBackingValue.Never, Node.ConnectionType.Multiple, Node.TypeConstraint.None, false)]
-	public TechTreeNodeBase.Empty output;
+	[Output(ShowBackingValue.Never, ConnectionType.Multiple, TypeConstraint.None, false)]
+	public Empty output;
 
 	public SIUpgradeType upgradeType;
 
@@ -250,4 +28,221 @@ public class GadgetNode : TechTreeNodeBase
 	public ESuperGameModes excludedGameModes;
 
 	public EAssetReleaseTier releaseTier = (EAssetReleaseTier)(-1);
+
+	private static bool InEditor => NodeInspectorBridge.InNodeEditor;
+
+	public bool IsValid
+	{
+		get
+		{
+			EAssetReleaseTier eAssetReleaseTier = releaseTier;
+			if (eAssetReleaseTier != EAssetReleaseTier.Disabled)
+			{
+				return eAssetReleaseTier <= EAssetReleaseTier.PublicRC;
+			}
+			return false;
+		}
+	}
+
+	public bool IsDispensableGadget => unlockedGadgetPrefab;
+
+	private bool ShowGadgetPrefab
+	{
+		get
+		{
+			if (InEditor)
+			{
+				return IsDispensableGadget;
+			}
+			return true;
+		}
+	}
+
+	private bool ShowExcludedGameModes
+	{
+		get
+		{
+			if (InEditor)
+			{
+				return excludedGameModes != (ESuperGameModes)0;
+			}
+			return true;
+		}
+	}
+
+	private bool ShowReleaseTier
+	{
+		get
+		{
+			if (InEditor)
+			{
+				return releaseTier != EAssetReleaseTier.PublicRC;
+			}
+			return true;
+		}
+	}
+
+	public void ConfigureFrom(SITechTreeNode sourceNode)
+	{
+		releaseTier = sourceNode.EdReleaseTier;
+		upgradeType = sourceNode.upgradeType;
+		nickName = sourceNode.nickName;
+		description = sourceNode.description;
+		unlockedGadgetPrefab = sourceNode.unlockedGadgetPrefab;
+		excludedGameModes = sourceNode.excludedGameModes;
+		nodeCost = sourceNode.nodeCost.ToArray();
+		costOverride = sourceNode.costOverride;
+		base.name = nickName;
+	}
+
+	public void AssignParentUpgrades(SIUpgradeType[] prerequisites)
+	{
+		NodePort port = GetPort("input");
+		port.ClearConnections();
+		foreach (SIUpgradeType id in prerequisites)
+		{
+			GadgetNode gadgetNode = graph.nodes.FirstOrDefault(delegate(Node n)
+			{
+				GadgetNode obj = n as GadgetNode;
+				return (object)obj != null && obj.upgradeType == id;
+			}) as GadgetNode;
+			if (gadgetNode != null)
+			{
+				NodePort port2 = gadgetNode.GetPort("output");
+				port.Connect(port2);
+			}
+		}
+	}
+
+	public List<SIUpgradeType> GetParentUpgradeTypes()
+	{
+		List<SIUpgradeType> list = new List<SIUpgradeType>();
+		foreach (Node item in from n in GetPort("input").GetConnections()
+			select n.node)
+		{
+			if (item is GadgetNode gadgetNode)
+			{
+				list.Add(gadgetNode.upgradeType);
+			}
+		}
+		return list;
+	}
+
+	public SITechTreeNode GenerateTechTreeNode()
+	{
+		return new SITechTreeNode
+		{
+			upgradeType = upgradeType,
+			nickName = nickName,
+			description = description,
+			unlockedGadgetPrefab = unlockedGadgetPrefab,
+			nodeCost = nodeCost.ToArray(),
+			excludedGameModes = excludedGameModes,
+			EdReleaseTier = releaseTier,
+			parentUpgrades = GetParentUpgradeTypes().ToArray()
+		};
+	}
+
+	public int GetDepth()
+	{
+		int num = 0;
+		IEnumerable<NodePort> enumerable = GetInputPort("input")?.GetConnections();
+		foreach (NodePort item in enumerable ?? Enumerable.Empty<NodePort>())
+		{
+			if (item.node is GadgetNode gadgetNode)
+			{
+				num = Mathf.Max(num, gadgetNode.GetDepth() + 1);
+			}
+		}
+		return num;
+	}
+
+	public int GetTreeDepth()
+	{
+		int num = GetDepth();
+		foreach (NodePort connection in GetOutputPort("output").GetConnections())
+		{
+			if (connection.node is GadgetNode gadgetNode)
+			{
+				num = Mathf.Max(num, gadgetNode.GetTreeDepth());
+			}
+		}
+		return num;
+	}
+
+	public List<GadgetNode> GetTreeNodes()
+	{
+		List<GadgetNode> list = new List<GadgetNode>();
+		GetTreeNodes(list);
+		return list;
+	}
+
+	public void GetTreeNodes(List<GadgetNode> nodes)
+	{
+		nodes.Add(this);
+		foreach (NodePort connection in GetOutputPort("output").GetConnections())
+		{
+			if (connection.node is GadgetNode gadgetNode)
+			{
+				gadgetNode.GetTreeNodes(nodes);
+			}
+		}
+	}
+
+	public List<GadgetNode> GetParentNodes()
+	{
+		List<GadgetNode> list = new List<GadgetNode>();
+		foreach (NodePort connection in GetPort("input").GetConnections())
+		{
+			if (connection.node is GadgetNode item)
+			{
+				list.Add(item);
+			}
+		}
+		return list;
+	}
+
+	public List<GadgetNode> GetChildNodes()
+	{
+		List<GadgetNode> list = new List<GadgetNode>();
+		foreach (NodePort connection in GetOutputPort("output").GetConnections())
+		{
+			if (connection.node is GadgetNode item)
+			{
+				list.Add(item);
+			}
+		}
+		return list;
+	}
+
+	public int GetTreeWidth()
+	{
+		List<GadgetNode> childNodes = GetChildNodes();
+		if (childNodes.Count == 0)
+		{
+			return 1;
+		}
+		int num = 0;
+		foreach (GadgetNode item in childNodes)
+		{
+			num += item.GetTreeWidth();
+		}
+		return num;
+	}
+
+	public bool CostEquals(SIResource.ResourceCost[] cost)
+	{
+		if (cost.Length != nodeCost.Length)
+		{
+			return false;
+		}
+		for (int i = 0; i < cost.Length; i++)
+		{
+			if (!cost[i].Equals(nodeCost[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }

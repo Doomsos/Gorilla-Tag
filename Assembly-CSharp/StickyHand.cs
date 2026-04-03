@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
@@ -6,85 +5,6 @@ using UnityEngine;
 
 public class StickyHand : MonoBehaviour, ISpawnable
 {
-	bool ISpawnable.IsSpawned { get; set; }
-
-	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
-
-	void ISpawnable.OnSpawn(VRRig rig)
-	{
-		this.myRig = rig;
-		this.isLocal = rig.isLocal;
-		this.flatHand.enabled = false;
-		this.defaultLocalPosition = this.stringParent.transform.InverseTransformPoint(this.rb.transform.position);
-		int num = (this.CosmeticSelectedSide == ECosmeticSelectSide.Left) ? 1 : 2;
-		this.stateBitIndex = VRRig.WearablePackedStatesBitWriteInfos[num].index;
-	}
-
-	void ISpawnable.OnDespawn()
-	{
-	}
-
-	private void Update()
-	{
-		if (this.isLocal)
-		{
-			if (this.rb.isKinematic && (this.rb.transform.position - this.stringParent.transform.position).IsLongerThan(this.stringDetachLength))
-			{
-				this.Unstick();
-			}
-			else if (!this.rb.isKinematic && (this.rb.transform.position - this.stringParent.transform.position).IsLongerThan(this.stringTeleportLength))
-			{
-				this.rb.transform.position = this.stringParent.transform.TransformPoint(this.defaultLocalPosition);
-			}
-			this.myRig.WearablePackedStates = GTBitOps.WriteBit(this.myRig.WearablePackedStates, this.stateBitIndex, this.rb.isKinematic);
-			return;
-		}
-		if (GTBitOps.ReadBit(this.myRig.WearablePackedStates, this.stateBitIndex) != this.rb.isKinematic)
-		{
-			if (this.rb.isKinematic)
-			{
-				this.Unstick();
-				return;
-			}
-			this.Stick();
-		}
-	}
-
-	private void Stick()
-	{
-		this.thwackSound.Play();
-		this.flatHand.enabled = true;
-		this.regularHand.enabled = false;
-		this.rb.isKinematic = true;
-	}
-
-	private void Unstick()
-	{
-		this.schlupSound.Play();
-		this.rb.isKinematic = false;
-		this.flatHand.enabled = false;
-		this.regularHand.enabled = true;
-	}
-
-	private void OnCollisionStay(Collision collision)
-	{
-		if (!this.isLocal || this.rb.isKinematic)
-		{
-			return;
-		}
-		if ((this.rb.transform.position - this.stringParent.transform.position).IsLongerThan(this.stringMaxAttachLength))
-		{
-			return;
-		}
-		this.Stick();
-		Vector3 point = collision.contacts[0].point;
-		Vector3 normal = collision.contacts[0].normal;
-		this.rb.transform.rotation = Quaternion.LookRotation(normal, this.rb.transform.up);
-		Vector3 vector = this.rb.transform.position - point;
-		vector -= Vector3.Dot(vector, normal) * normal;
-		this.rb.transform.position = point + vector + this.surfaceOffsetDistance * normal;
-	}
-
 	[SerializeField]
 	private MeshRenderer flatHand;
 
@@ -122,4 +42,79 @@ public class StickyHand : MonoBehaviour, ISpawnable
 	private int stateBitIndex;
 
 	private Vector3 defaultLocalPosition;
+
+	bool ISpawnable.IsSpawned { get; set; }
+
+	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
+
+	void ISpawnable.OnSpawn(VRRig rig)
+	{
+		myRig = rig;
+		isLocal = rig.isLocal;
+		flatHand.enabled = false;
+		defaultLocalPosition = stringParent.transform.InverseTransformPoint(rb.transform.position);
+		int num = ((CosmeticSelectedSide == ECosmeticSelectSide.Left) ? 1 : 2);
+		stateBitIndex = VRRig.WearablePackedStatesBitWriteInfos[num].index;
+	}
+
+	void ISpawnable.OnDespawn()
+	{
+	}
+
+	private void Update()
+	{
+		if (isLocal)
+		{
+			if (rb.isKinematic && (rb.transform.position - stringParent.transform.position).IsLongerThan(stringDetachLength))
+			{
+				Unstick();
+			}
+			else if (!rb.isKinematic && (rb.transform.position - stringParent.transform.position).IsLongerThan(stringTeleportLength))
+			{
+				rb.transform.position = stringParent.transform.TransformPoint(defaultLocalPosition);
+			}
+			myRig.WearablePackedStates = GTBitOps.WriteBit(myRig.WearablePackedStates, stateBitIndex, rb.isKinematic);
+		}
+		else if (GTBitOps.ReadBit(myRig.WearablePackedStates, stateBitIndex) != rb.isKinematic)
+		{
+			if (rb.isKinematic)
+			{
+				Unstick();
+			}
+			else
+			{
+				Stick();
+			}
+		}
+	}
+
+	private void Stick()
+	{
+		thwackSound.Play();
+		flatHand.enabled = true;
+		regularHand.enabled = false;
+		rb.isKinematic = true;
+	}
+
+	private void Unstick()
+	{
+		schlupSound.Play();
+		rb.isKinematic = false;
+		flatHand.enabled = false;
+		regularHand.enabled = true;
+	}
+
+	private void OnCollisionStay(Collision collision)
+	{
+		if (isLocal && !rb.isKinematic && !(rb.transform.position - stringParent.transform.position).IsLongerThan(stringMaxAttachLength))
+		{
+			Stick();
+			Vector3 point = collision.contacts[0].point;
+			Vector3 normal = collision.contacts[0].normal;
+			rb.transform.rotation = Quaternion.LookRotation(normal, rb.transform.up);
+			Vector3 vector = rb.transform.position - point;
+			vector -= Vector3.Dot(vector, normal) * normal;
+			rb.transform.position = point + vector + surfaceOffsetDistance * normal;
+		}
+	}
 }

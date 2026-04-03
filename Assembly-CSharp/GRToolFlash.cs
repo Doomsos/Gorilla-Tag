@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -6,291 +6,22 @@ using UnityEngine.XR;
 
 public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntityComponent
 {
-	private void Awake()
+	[Flags]
+	public enum UpgradeTypes
 	{
-		this.state = GRToolFlash.State.Idle;
-		this.stateTimeRemaining = -1f;
-		this.gameHitter = base.GetComponent<GameHitter>();
+		None = 1,
+		UpagredA = 2,
+		UpagredB = 4,
+		UpagredC = 8
 	}
 
-	private void OnEnable()
+	private enum State
 	{
-		this.StopFlash();
-		this.SetState(GRToolFlash.State.Idle);
-	}
-
-	public void OnEntityInit()
-	{
-		if (this.tool != null)
-		{
-			this.tool.onToolUpgraded += this.OnToolUpgraded;
-			this.OnToolUpgraded(this.tool);
-		}
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnToolUpgraded(GRTool tool)
-	{
-		this.stunDuration = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.FlashStunDuration);
-		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage1))
-		{
-			this.flashSound = this.upgrade1FlashSound;
-			this.flash = this.upgrade1FlashCone;
-			return;
-		}
-		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage2))
-		{
-			this.flashSound = this.upgrade2FlashSound;
-			this.flash = this.upgrade2FlashCone;
-			return;
-		}
-		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
-		{
-			this.flashSound = this.upgrade3FlashSound;
-			this.flash = this.upgrade3FlashCone;
-		}
-	}
-
-	private bool IsHeldLocal()
-	{
-		return this.item.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
-	}
-
-	public void OnUpdate(float dt)
-	{
-		if (this.IsHeldLocal())
-		{
-			this.OnUpdateAuthority(dt);
-			return;
-		}
-		this.OnUpdateRemote(dt);
-	}
-
-	public void Update()
-	{
-		float deltaTime = Time.deltaTime;
-		if (this.IsHeldLocal() || this.activatedLocally)
-		{
-			this.OnUpdateAuthority(deltaTime);
-			return;
-		}
-		this.OnUpdateRemote(deltaTime);
-	}
-
-	private void OnUpdateAuthority(float dt)
-	{
-		switch (this.state)
-		{
-		case GRToolFlash.State.Idle:
-			if (this.tool.HasEnoughEnergy() && this.IsButtonHeld())
-			{
-				this.SetStateAuthority(GRToolFlash.State.Charging);
-				this.activatedLocally = true;
-				return;
-			}
-			break;
-		case GRToolFlash.State.Charging:
-		{
-			bool flag = this.IsButtonHeld();
-			this.stateTimeRemaining -= dt;
-			if (this.stateTimeRemaining <= 0f)
-			{
-				this.SetStateAuthority(GRToolFlash.State.Flash);
-				return;
-			}
-			if (!flag)
-			{
-				this.SetStateAuthority(GRToolFlash.State.Idle);
-				this.activatedLocally = false;
-				return;
-			}
-			break;
-		}
-		case GRToolFlash.State.Flash:
-			this.stateTimeRemaining -= dt;
-			if (this.stateTimeRemaining <= 0f)
-			{
-				this.SetStateAuthority(GRToolFlash.State.Cooldown);
-				return;
-			}
-			break;
-		case GRToolFlash.State.Cooldown:
-			this.stateTimeRemaining -= dt;
-			if (this.stateTimeRemaining <= 0f && !this.IsButtonHeld())
-			{
-				this.SetStateAuthority(GRToolFlash.State.Idle);
-				this.activatedLocally = false;
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void OnUpdateRemote(float dt)
-	{
-		GRToolFlash.State state = (GRToolFlash.State)this.gameEntity.GetState();
-		if (state != this.state)
-		{
-			if (this.state == GRToolFlash.State.Charging && state == GRToolFlash.State.Cooldown)
-			{
-				this.SetState(GRToolFlash.State.Flash);
-				return;
-			}
-			if (this.state == GRToolFlash.State.Flash && state == GRToolFlash.State.Cooldown)
-			{
-				if (Time.time > this.timeLastFlashed + this.flashDuration)
-				{
-					this.SetState(GRToolFlash.State.Cooldown);
-					return;
-				}
-			}
-			else
-			{
-				this.SetState(state);
-			}
-		}
-	}
-
-	private void SetStateAuthority(GRToolFlash.State newState)
-	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void SetState(GRToolFlash.State newState)
-	{
-		if (!this.CanChangeState((long)newState))
-		{
-			return;
-		}
-		this.state = newState;
-		switch (this.state)
-		{
-		case GRToolFlash.State.Idle:
-			this.stateTimeRemaining = -1f;
-			return;
-		case GRToolFlash.State.Charging:
-			this.StartCharge();
-			this.stateTimeRemaining = this.chargeDuration;
-			return;
-		case GRToolFlash.State.Flash:
-			this.StartFlash();
-			this.stateTimeRemaining = this.flashDuration;
-			return;
-		case GRToolFlash.State.Cooldown:
-			this.StopFlash();
-			this.stateTimeRemaining = this.cooldownDuration;
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void StartCharge()
-	{
-		this.audioSource.volume = this.chargeSoundVolume;
-		this.audioSource.clip = this.chargeSound;
-		this.audioSource.Play();
-		if (this.IsHeldLocal())
-		{
-			this.PlayVibration(GorillaTagger.Instance.tapHapticStrength, this.chargeDuration);
-		}
-	}
-
-	private void StartFlash()
-	{
-		this.flash.SetActive(true);
-		this.audioSource.volume = this.flashSoundVolume;
-		this.audioSource.clip = this.flashSound;
-		this.audioSource.Play();
-		this.tool.UseEnergy();
-		this.timeLastFlashed = Time.time;
-		if (this.IsHeldLocal())
-		{
-			int num = Physics.SphereCastNonAlloc(this.shootFrom.position, 1f, this.shootFrom.rotation * Vector3.forward, this.tempHitResults, 5f, this.enemyLayerMask);
-			for (int i = 0; i < num; i++)
-			{
-				RaycastHit raycastHit = this.tempHitResults[i];
-				Rigidbody attachedRigidbody = raycastHit.collider.attachedRigidbody;
-				if (attachedRigidbody != null)
-				{
-					GameHittable component = attachedRigidbody.GetComponent<GameHittable>();
-					if (component != null && this.gameHitter != null)
-					{
-						GameHitData hitData = new GameHitData
-						{
-							hitTypeId = 1,
-							hitEntityId = component.gameEntity.id,
-							hitByEntityId = this.gameEntity.id,
-							hitEntityPosition = component.gameEntity.transform.position,
-							hitPosition = ((raycastHit.distance == 0f) ? this.shootFrom.position : raycastHit.point),
-							hitImpulse = Vector3.zero,
-							hitAmount = this.gameHitter.CalcHitAmount(GameHitType.Flash, component, this.gameEntity),
-							hittablePoint = component.FindHittablePoint(raycastHit.collider)
-						};
-						component.RequestHit(hitData);
-					}
-				}
-			}
-		}
-	}
-
-	private void StopFlash()
-	{
-		this.flash.SetActive(false);
-	}
-
-	private bool IsButtonHeld()
-	{
-		if (!this.IsHeldLocal())
-		{
-			return false;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			return false;
-		}
-		int num = gamePlayer.FindHandIndex(this.item.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
-	}
-
-	private void PlayVibration(float strength, float duration)
-	{
-		if (!this.IsHeldLocal())
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			return;
-		}
-		int num = gamePlayer.FindHandIndex(this.item.id);
-		if (num == -1)
-		{
-			return;
-		}
-		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
-	}
-
-	public bool CanChangeState(long newStateIndex)
-	{
-		return newStateIndex >= 0L && newStateIndex < 4L && ((int)newStateIndex != 2 || Time.time > this.timeLastFlashed + this.cooldownMinimum);
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("Stun Duration: <color=\"yellow\">{0}<color=\"white\">", this.stunDuration));
+		Idle,
+		Charging,
+		Flash,
+		Cooldown,
+		Count
 	}
 
 	public GameEntity gameEntity;
@@ -329,7 +60,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 
 	public float stunDuration;
 
-	public GRToolFlash.UpgradeTypes upgradesApplied;
+	public UpgradeTypes upgradesApplied;
 
 	public float chargeDuration = 0.75f;
 
@@ -347,27 +78,293 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 
 	private GameHitter gameHitter;
 
-	private GRToolFlash.State state;
+	private State state;
 
 	private float stateTimeRemaining;
 
 	private RaycastHit[] tempHitResults = new RaycastHit[128];
 
-	[Flags]
-	public enum UpgradeTypes
+	private void Awake()
 	{
-		None = 1,
-		UpagredA = 2,
-		UpagredB = 4,
-		UpagredC = 8
+		state = State.Idle;
+		stateTimeRemaining = -1f;
+		gameHitter = GetComponent<GameHitter>();
 	}
 
-	private enum State
+	private void OnEnable()
 	{
-		Idle,
-		Charging,
-		Flash,
-		Cooldown,
-		Count
+		StopFlash();
+		SetState(State.Idle);
+	}
+
+	public void OnEntityInit()
+	{
+		if (tool != null)
+		{
+			tool.onToolUpgraded += OnToolUpgraded;
+			OnToolUpgraded(tool);
+		}
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnToolUpgraded(GRTool tool)
+	{
+		stunDuration = attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.FlashStunDuration);
+		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage1))
+		{
+			flashSound = upgrade1FlashSound;
+			flash = upgrade1FlashCone;
+		}
+		else if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage2))
+		{
+			flashSound = upgrade2FlashSound;
+			flash = upgrade2FlashCone;
+		}
+		else if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
+		{
+			flashSound = upgrade3FlashSound;
+			flash = upgrade3FlashCone;
+		}
+	}
+
+	private bool IsHeldLocal()
+	{
+		return item.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+	}
+
+	public void OnUpdate(float dt)
+	{
+		if (IsHeldLocal())
+		{
+			OnUpdateAuthority(dt);
+		}
+		else
+		{
+			OnUpdateRemote(dt);
+		}
+	}
+
+	public void Update()
+	{
+		float deltaTime = Time.deltaTime;
+		if (IsHeldLocal() || activatedLocally)
+		{
+			OnUpdateAuthority(deltaTime);
+		}
+		else
+		{
+			OnUpdateRemote(deltaTime);
+		}
+	}
+
+	private void OnUpdateAuthority(float dt)
+	{
+		switch (state)
+		{
+		case State.Idle:
+			if (tool.HasEnoughEnergy() && IsButtonHeld())
+			{
+				SetStateAuthority(State.Charging);
+				activatedLocally = true;
+			}
+			break;
+		case State.Charging:
+		{
+			bool flag = IsButtonHeld();
+			stateTimeRemaining -= dt;
+			if (stateTimeRemaining <= 0f)
+			{
+				SetStateAuthority(State.Flash);
+			}
+			else if (!flag)
+			{
+				SetStateAuthority(State.Idle);
+				activatedLocally = false;
+			}
+			break;
+		}
+		case State.Flash:
+			stateTimeRemaining -= dt;
+			if (stateTimeRemaining <= 0f)
+			{
+				SetStateAuthority(State.Cooldown);
+			}
+			break;
+		case State.Cooldown:
+			stateTimeRemaining -= dt;
+			if (stateTimeRemaining <= 0f && !IsButtonHeld())
+			{
+				SetStateAuthority(State.Idle);
+				activatedLocally = false;
+			}
+			break;
+		}
+	}
+
+	private void OnUpdateRemote(float dt)
+	{
+		State state = (State)gameEntity.GetState();
+		if (state == this.state)
+		{
+			return;
+		}
+		if (this.state == State.Charging && state == State.Cooldown)
+		{
+			SetState(State.Flash);
+		}
+		else if (this.state == State.Flash && state == State.Cooldown)
+		{
+			if (Time.time > timeLastFlashed + flashDuration)
+			{
+				SetState(State.Cooldown);
+			}
+		}
+		else
+		{
+			SetState(state);
+		}
+	}
+
+	private void SetStateAuthority(State newState)
+	{
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void SetState(State newState)
+	{
+		if (CanChangeState((long)newState))
+		{
+			state = newState;
+			switch (state)
+			{
+			case State.Charging:
+				StartCharge();
+				stateTimeRemaining = chargeDuration;
+				break;
+			case State.Flash:
+				StartFlash();
+				stateTimeRemaining = flashDuration;
+				break;
+			case State.Cooldown:
+				StopFlash();
+				stateTimeRemaining = cooldownDuration;
+				break;
+			case State.Idle:
+				stateTimeRemaining = -1f;
+				break;
+			}
+		}
+	}
+
+	private void StartCharge()
+	{
+		audioSource.volume = chargeSoundVolume;
+		audioSource.clip = chargeSound;
+		audioSource.Play();
+		if (IsHeldLocal())
+		{
+			PlayVibration(GorillaTagger.Instance.tapHapticStrength, chargeDuration);
+		}
+	}
+
+	private void StartFlash()
+	{
+		flash.SetActive(value: true);
+		audioSource.volume = flashSoundVolume;
+		audioSource.clip = flashSound;
+		audioSource.Play();
+		tool.UseEnergy();
+		timeLastFlashed = Time.time;
+		if (!IsHeldLocal())
+		{
+			return;
+		}
+		int num = Physics.SphereCastNonAlloc(shootFrom.position, 1f, shootFrom.rotation * Vector3.forward, tempHitResults, 5f, enemyLayerMask);
+		for (int i = 0; i < num; i++)
+		{
+			RaycastHit raycastHit = tempHitResults[i];
+			Rigidbody attachedRigidbody = raycastHit.collider.attachedRigidbody;
+			if (attachedRigidbody != null)
+			{
+				GameHittable component = attachedRigidbody.GetComponent<GameHittable>();
+				if (component != null && gameHitter != null)
+				{
+					GameHitData hitData = new GameHitData
+					{
+						hitTypeId = 1,
+						hitEntityId = component.gameEntity.id,
+						hitByEntityId = gameEntity.id,
+						hitEntityPosition = component.gameEntity.transform.position,
+						hitPosition = ((raycastHit.distance == 0f) ? shootFrom.position : raycastHit.point),
+						hitImpulse = Vector3.zero,
+						hitAmount = gameHitter.CalcHitAmount(GameHitType.Flash, component, gameEntity),
+						hittablePoint = component.FindHittablePoint(raycastHit.collider)
+					};
+					component.RequestHit(hitData);
+				}
+			}
+		}
+	}
+
+	private void StopFlash()
+	{
+		flash.SetActive(value: false);
+	}
+
+	private bool IsButtonHeld()
+	{
+		if (!IsHeldLocal())
+		{
+			return false;
+		}
+		if (!GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			return false;
+		}
+		int num = out_gamePlayer.FindHandIndex(item.id);
+		if (num == -1)
+		{
+			return false;
+		}
+		return ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+	}
+
+	private void PlayVibration(float strength, float duration)
+	{
+		if (IsHeldLocal() && GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			int num = out_gamePlayer.FindHandIndex(item.id);
+			if (num != -1)
+			{
+				GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
+			}
+		}
+	}
+
+	public bool CanChangeState(long newStateIndex)
+	{
+		if (newStateIndex < 0 || newStateIndex >= 4)
+		{
+			return false;
+		}
+		if ((int)newStateIndex == 2)
+		{
+			return Time.time > timeLastFlashed + cooldownMinimum;
+		}
+		return true;
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"Stun Duration: <color=\"yellow\">{stunDuration}<color=\"white\">");
 	}
 }

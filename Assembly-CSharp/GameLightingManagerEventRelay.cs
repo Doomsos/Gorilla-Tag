@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class GameLightingManagerEventRelay : MonoBehaviour
@@ -8,9 +7,11 @@ public class GameLightingManagerEventRelay : MonoBehaviour
 		if (GameLightingManager.instance == null)
 		{
 			Debug.LogError("GameLightingManagerEventRelay :: GameLightingManager has not been instanced!");
-			return;
 		}
-		GameLightingManager.instance.SetCustomDynamicLightingEnabled(value);
+		else
+		{
+			GameLightingManager.instance.SetCustomDynamicLightingEnabled(value);
+		}
 	}
 
 	public void SetNearsightedDimLightIntensity(float value)
@@ -18,8 +19,10 @@ public class GameLightingManagerEventRelay : MonoBehaviour
 		if (GameLightingManager.instance == null)
 		{
 			Debug.LogError("GameLightingManagerEventRelay :: GameLightingManager has not been instanced!");
-			return;
 		}
-		GameLightingManager.instance.GR_NearsightedDimLight.intensity = value;
+		else
+		{
+			GameLightingManager.instance.GR_NearsightedDimLight.intensity = value;
+		}
 	}
 }

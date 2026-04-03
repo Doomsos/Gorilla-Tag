@@ -1,25 +1,24 @@
-﻿using System;
 using UnityEngine;
 
 public class TransferrableObjectGripPosition : MonoBehaviour
 {
+	[SerializeField]
+	private TransferrableItemSlotTransformOverride parentObject;
+
+	[SerializeField]
+	private TransferrableObject.PositionState attachmentType;
+
 	private void Awake()
 	{
-		if (this.parentObject == null)
+		if (parentObject == null)
 		{
-			this.parentObject = base.transform.parent.GetComponent<TransferrableItemSlotTransformOverride>();
+			parentObject = base.transform.parent.GetComponent<TransferrableItemSlotTransformOverride>();
 		}
-		this.parentObject.AddGripPosition(this.attachmentType, this);
+		parentObject.AddGripPosition(attachmentType, this);
 	}
 
 	public SubGrabPoint CreateSubGrabPoint(SlotTransformOverride overrideContainer)
 	{
 		return new SubGrabPoint();
 	}
-
-	[SerializeField]
-	private TransferrableItemSlotTransformOverride parentObject;
-
-	[SerializeField]
-	private TransferrableObject.PositionState attachmentType;
 }

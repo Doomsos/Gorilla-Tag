@@ -1,47 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BuilderMaterialOptions01a", menuName = "Gorilla Tag/Builder/Options", order = 0)]
 public class BuilderMaterialOptions : ScriptableObject
 {
-	public void GetMaterialFromType(int materialType, out Material material, out int soundIndex)
-	{
-		if (this.options == null)
-		{
-			material = null;
-			soundIndex = -1;
-			return;
-		}
-		foreach (BuilderMaterialOptions.Options options in this.options)
-		{
-			if (options.materialId.GetHashCode() == materialType)
-			{
-				material = options.material;
-				soundIndex = options.soundIndex;
-				return;
-			}
-		}
-		material = null;
-		soundIndex = -1;
-	}
-
-	public void GetDefaultMaterial(out int materialType, out Material material, out int soundIndex)
-	{
-		if (this.options.Count > 0)
-		{
-			materialType = this.options[0].materialId.GetHashCode();
-			material = this.options[0].material;
-			soundIndex = this.options[0].soundIndex;
-			return;
-		}
-		materialType = -1;
-		material = null;
-		soundIndex = -1;
-	}
-
-	public List<BuilderMaterialOptions.Options> options;
-
 	[Serializable]
 	public class Options
 	{
@@ -54,5 +17,44 @@ public class BuilderMaterialOptions : ScriptableObject
 
 		[NonSerialized]
 		public int materialType;
+	}
+
+	public List<Options> options;
+
+	public void GetMaterialFromType(int materialType, out Material material, out int soundIndex)
+	{
+		if (options == null)
+		{
+			material = null;
+			soundIndex = -1;
+			return;
+		}
+		foreach (Options option in options)
+		{
+			if (option.materialId.GetHashCode() == materialType)
+			{
+				material = option.material;
+				soundIndex = option.soundIndex;
+				return;
+			}
+		}
+		material = null;
+		soundIndex = -1;
+	}
+
+	public void GetDefaultMaterial(out int materialType, out Material material, out int soundIndex)
+	{
+		if (options.Count > 0)
+		{
+			materialType = options[0].materialId.GetHashCode();
+			material = options[0].material;
+			soundIndex = options[0].soundIndex;
+		}
+		else
+		{
+			materialType = -1;
+			material = null;
+			soundIndex = -1;
+		}
 	}
 }

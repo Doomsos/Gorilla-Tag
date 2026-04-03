@@ -1,43 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class RaceConsoleVisual : MonoBehaviour
 {
-	public void ShowRaceInProgress(int laps)
-	{
-		this.button1.sharedMaterial = this.inactiveButton;
-		this.button3.sharedMaterial = this.inactiveButton;
-		this.button5.sharedMaterial = this.inactiveButton;
-		this.button1.transform.localPosition = Vector3.zero;
-		this.button3.transform.localPosition = Vector3.zero;
-		this.button5.transform.localPosition = Vector3.zero;
-		switch (laps)
-		{
-		default:
-			this.button1.sharedMaterial = this.selectedButton;
-			this.button1.transform.localPosition = this.buttonPressedOffset;
-			return;
-		case 3:
-			this.button3.sharedMaterial = this.selectedButton;
-			this.button3.transform.localPosition = this.buttonPressedOffset;
-			return;
-		case 5:
-			this.button5.sharedMaterial = this.selectedButton;
-			this.button5.transform.localPosition = this.buttonPressedOffset;
-			return;
-		}
-	}
-
-	public void ShowCanStartRace()
-	{
-		this.button1.transform.localPosition = Vector3.zero;
-		this.button3.transform.localPosition = Vector3.zero;
-		this.button5.transform.localPosition = Vector3.zero;
-		this.button1.sharedMaterial = this.pressableButton;
-		this.button3.sharedMaterial = this.pressableButton;
-		this.button5.sharedMaterial = this.pressableButton;
-	}
-
 	[SerializeField]
 	private MeshRenderer button1;
 
@@ -58,4 +22,39 @@ public class RaceConsoleVisual : MonoBehaviour
 
 	[SerializeField]
 	private Material inactiveButton;
+
+	public void ShowRaceInProgress(int laps)
+	{
+		button1.sharedMaterial = inactiveButton;
+		button3.sharedMaterial = inactiveButton;
+		button5.sharedMaterial = inactiveButton;
+		button1.transform.localPosition = Vector3.zero;
+		button3.transform.localPosition = Vector3.zero;
+		button5.transform.localPosition = Vector3.zero;
+		switch (laps)
+		{
+		default:
+			button1.sharedMaterial = selectedButton;
+			button1.transform.localPosition = buttonPressedOffset;
+			break;
+		case 3:
+			button3.sharedMaterial = selectedButton;
+			button3.transform.localPosition = buttonPressedOffset;
+			break;
+		case 5:
+			button5.sharedMaterial = selectedButton;
+			button5.transform.localPosition = buttonPressedOffset;
+			break;
+		}
+	}
+
+	public void ShowCanStartRace()
+	{
+		button1.transform.localPosition = Vector3.zero;
+		button3.transform.localPosition = Vector3.zero;
+		button5.transform.localPosition = Vector3.zero;
+		button1.sharedMaterial = pressableButton;
+		button3.sharedMaterial = pressableButton;
+		button5.sharedMaterial = pressableButton;
+	}
 }

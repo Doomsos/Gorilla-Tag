@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GorillaTag;
@@ -10,540 +10,21 @@ using UnityEngine.UI;
 
 public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 {
-	internal bool isTryOn
+	public enum GadgetDispenserTerminalState
 	{
-		get
-		{
-			return this.m_isTryOn;
-		}
+		WaitingForScan,
+		GadgetType,
+		GadgetList,
+		GadgetInformation,
+		GadgetDispensed,
+		HelpScreen
 	}
 
-	public SIScreenRegion ScreenRegion
-	{
-		get
-		{
-			return this.screenRegion;
-		}
-	}
+	public GadgetDispenserTerminalState handScannedState = GadgetDispenserTerminalState.GadgetList;
 
-	public SIPlayer ActivePlayer
-	{
-		get
-		{
-			return this.parentTerminal.activePlayer;
-		}
-	}
+	public GadgetDispenserTerminalState currentState;
 
-	public string ActivePlayerName
-	{
-		get
-		{
-			return this.ActivePlayer.gamePlayer.rig.Creator.SanitizedNickName;
-		}
-	}
-
-	public bool IsAuthority
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager.gameEntityManager.IsAuthority();
-		}
-	}
-
-	public SuperInfectionManager SIManager
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager;
-		}
-	}
-
-	public GameEntityManager GameEntityManager
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.siManager.gameEntityManager;
-		}
-	}
-
-	public SITechTreeNode CurrentNode
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.techTreeSO.GetTreeNode(this.parentTerminal.ActivePage, this._currentNode);
-		}
-	}
-
-	public SITechTreePage CurrentPage
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.techTreeSO.GetTreePage((SITechTreePageId)this.parentTerminal.ActivePage);
-		}
-	}
-
-	public SITechTreeSO TechTreeSO
-	{
-		get
-		{
-			return this.parentTerminal.superInfection.techTreeSO;
-		}
-	}
-
-	protected void OnEnable()
-	{
-		if (this.m_isTryOn)
-		{
-			SIGadgetDispenser.g_tryOnOptions = this.m_tryOnOptions;
-		}
-		this._RefreshButtonsUsableState();
-	}
-
-	private void _RefreshButtonsUsableState()
-	{
-		foreach (SIGadgetListEntry sigadgetListEntry in this.gadgetPages)
-		{
-			SITechTreePageId id = (SITechTreePageId)sigadgetListEntry.Id;
-			SITechTreePage sitechTreePage;
-			if (this.TechTreeSO.TryGetTreePage(id, out sitechTreePage))
-			{
-				sigadgetListEntry.ButtonContainer.SetUsable(sitechTreePage.IsAllowed);
-			}
-		}
-	}
-
-	private void SetNonPopupButtonsEnabled(bool enable)
-	{
-		foreach (Collider collider in this._nonPopupButtonColliders)
-		{
-			collider.enabled = enable;
-		}
-	}
-
-	public void Initialize()
-	{
-		if (this.initialized)
-		{
-			return;
-		}
-		this.initialized = true;
-		if (this.parentTerminal == null)
-		{
-			this.parentTerminal = base.GetComponentInParent<SICombinedTerminal>();
-		}
-		this.screenData = new Dictionary<SIGadgetDispenser.GadgetDispenserTerminalState, GameObject>();
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan, this.waitingForScanScreen);
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetType, this.gadgetTypeScreen);
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList, this.gadgetListScreen);
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetInformation, this.gadgetInformationScreen);
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed, this.gadgetDispensedScreen);
-		this.screenData.Add(SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen, this.gadgetsHelpScreen);
-		this.parentTerminal.superInfection.techTreeSO.EnsureInitialized();
-		int num = 0;
-		int count = this.parentTerminal.superInfection.techTreeSO.TreePages.Count;
-		for (int i = 0; i < count; i++)
-		{
-			SITechTreePage sitechTreePage = this.parentTerminal.superInfection.techTreeSO.TreePages[i];
-			SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
-			StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
-			sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.Select, i, -0.07f, count);
-			this.gadgetPages.Add(sigadgetListEntry);
-			num = Math.Max(num, sitechTreePage.DispensableGadgets.Count);
-		}
-		this.gadgetEntries = new List<SIDispenserGadgetListEntry>();
-		for (int j = 0; j < num; j++)
-		{
-			SIDispenserGadgetListEntry sidispenserGadgetListEntry = Object.Instantiate<SIDispenserGadgetListEntry>(this.gadgetListEntryPrefab, this.gadgetListParent);
-			sidispenserGadgetListEntry.transform.localPosition += new Vector3(0f, (float)j * -0.07f, 0f);
-			sidispenserGadgetListEntry.SetStation(this, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText);
-			this.gadgetEntries.Add(sidispenserGadgetListEntry);
-		}
-		if (this.m_isTryOn && base.isActiveAndEnabled)
-		{
-			SIGadgetDispenser.g_tryOnOptions = this.m_tryOnOptions;
-		}
-		this._RefreshButtonsUsableState();
-		this.Reset();
-	}
-
-	public void Reset()
-	{
-		this.currentState = SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan;
-		this.SetScreenVisibility(this.currentState, this.currentState);
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy)
-		{
-			this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan, SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan);
-		}
-		stream.SendNext(this.helpScreenIndex);
-		stream.SendNext(this._currentNode);
-		stream.SendNext((int)this.currentState);
-		stream.SendNext((int)this.lastState);
-	}
-
-	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.helpScreenIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, this.helpPopupScreens.Length - 1);
-		this._currentNode = (int)stream.ReceiveNext();
-		if (this.CurrentNode == null && this.CurrentPage != null && this.CurrentPage.AllNodes.Count > 0 && this.CurrentPage.AllNodes[0].Value != null)
-		{
-			this._currentNode = (int)this.CurrentPage.AllNodes[0].Value.upgradeType;
-		}
-		SIGadgetDispenser.GadgetDispenserTerminalState gadgetDispenserTerminalState = (SIGadgetDispenser.GadgetDispenserTerminalState)stream.ReceiveNext();
-		SIGadgetDispenser.GadgetDispenserTerminalState gadgetDispenserTerminalState2 = (SIGadgetDispenser.GadgetDispenserTerminalState)stream.ReceiveNext();
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SIGadgetDispenser.GadgetDispenserTerminalState), gadgetDispenserTerminalState) || !Enum.IsDefined(typeof(SIGadgetDispenser.GadgetDispenserTerminalState), gadgetDispenserTerminalState2))
-		{
-			this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan, SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(gadgetDispenserTerminalState, gadgetDispenserTerminalState2);
-	}
-
-	public void ZoneDataSerializeWrite(BinaryWriter writer)
-	{
-		writer.Write(this.helpScreenIndex);
-		writer.Write(this._currentNode);
-		writer.Write((int)this.currentState);
-		writer.Write((int)this.lastState);
-	}
-
-	public void ZoneDataSerializeRead(BinaryReader reader)
-	{
-		this.helpScreenIndex = Mathf.Clamp(reader.ReadInt32(), 0, this.helpPopupScreens.Length - 1);
-		int value = reader.ReadInt32();
-		if (this.CurrentPage != null && this.CurrentPage.AllNodes != null)
-		{
-			this._currentNode = Mathf.Clamp(value, 0, this.CurrentPage.AllNodes.Count - 1);
-		}
-		else
-		{
-			this._currentNode = 0;
-		}
-		SIGadgetDispenser.GadgetDispenserTerminalState gadgetDispenserTerminalState = (SIGadgetDispenser.GadgetDispenserTerminalState)reader.ReadInt32();
-		SIGadgetDispenser.GadgetDispenserTerminalState gadgetDispenserTerminalState2 = (SIGadgetDispenser.GadgetDispenserTerminalState)reader.ReadInt32();
-		if (this.ActivePlayer == null || !this.ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(SIGadgetDispenser.GadgetDispenserTerminalState), gadgetDispenserTerminalState) || !Enum.IsDefined(typeof(SIGadgetDispenser.GadgetDispenserTerminalState), gadgetDispenserTerminalState2))
-		{
-			this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan, SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan);
-			return;
-		}
-		this.UpdateState(gadgetDispenserTerminalState, gadgetDispenserTerminalState2);
-	}
-
-	public void UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState newState, SIGadgetDispenser.GadgetDispenserTerminalState newLastState)
-	{
-		if (!this.IsPopupState(newLastState))
-		{
-			this.currentState = newLastState;
-		}
-		this.UpdateState(newState);
-	}
-
-	public void UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState newState)
-	{
-		if (!this.IsPopupState(this.currentState))
-		{
-			this.lastState = this.currentState;
-		}
-		this.currentState = newState;
-		this.SetScreenVisibility(this.currentState, this.lastState);
-		switch (this.currentState)
-		{
-		case SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan:
-			break;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetType:
-			this.screenDescription.text = "GADGET TYPES";
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList:
-			this.screenDescription.text = "UNLOCKED " + this.CurrentPage.nickName + " GADGETS";
-			this.UpdateGadgetListVisibility();
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetInformation:
-			this.screenDescription.text = this.CurrentNode.nickName;
-			this.gadgetDescriptionText.text = this.CurrentNode.description;
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed:
-			this.gadgetDispensedText.text = this.ActivePlayerName + " HAS DISPENSED A " + this.CurrentNode.nickName + "!";
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen:
-			this.UpdateHelpButtonPage(this.helpScreenIndex);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void SetScreenVisibility(SIGadgetDispenser.GadgetDispenserTerminalState currentState, SIGadgetDispenser.GadgetDispenserTerminalState lastState)
-	{
-		bool flag = this.IsPopupState(currentState);
-		this.background.color = ((currentState == SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan) ? Color.white : ((this.ActivePlayer != null && this.ActivePlayer.gamePlayer.IsLocal()) ? this.active : this.notActive));
-		foreach (SIGadgetDispenser.GadgetDispenserTerminalState gadgetDispenserTerminalState in this.screenData.Keys)
-		{
-			bool flag2 = gadgetDispenserTerminalState == currentState || (flag && gadgetDispenserTerminalState == lastState);
-			if (this.screenData[gadgetDispenserTerminalState].activeSelf != flag2)
-			{
-				this.screenData[gadgetDispenserTerminalState].SetActive(flag2);
-			}
-		}
-		if (this.popupScreen.activeSelf != flag)
-		{
-			this.popupScreen.SetActive(flag);
-		}
-		this.screenDescription.gameObject.SetActive(currentState > SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan);
-		this.SetNonPopupButtonsEnabled(!flag);
-	}
-
-	public void UpdateGadgetListVisibility()
-	{
-		foreach (SIDispenserGadgetListEntry sidispenserGadgetListEntry in this.gadgetEntries)
-		{
-			sidispenserGadgetListEntry.gameObject.SetActive(false);
-		}
-		int num = 0;
-		foreach (SITechTreeNode sitechTreeNode in this.CurrentPage.DispensableGadgets)
-		{
-			if (this.m_isTryOn || this.ActivePlayer.CurrentProgression.IsUnlocked(sitechTreeNode.upgradeType))
-			{
-				SIDispenserGadgetListEntry sidispenserGadgetListEntry2 = this.gadgetEntries[num++];
-				sidispenserGadgetListEntry2.SetTechTreeNode(sitechTreeNode);
-				sidispenserGadgetListEntry2.gameObject.SetActive(true);
-				sidispenserGadgetListEntry2.DispenseButton.SetUsable(this.m_isTryOn || sitechTreeNode.IsAllowed);
-			}
-		}
-		this.noDispensableGadgetsMessage.SetActive(num == 0);
-	}
-
-	public bool IsPopupState(SIGadgetDispenser.GadgetDispenserTerminalState state)
-	{
-		return state == SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed || state == SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen;
-	}
-
-	public void PlayerHandScanned(int actorNr)
-	{
-		this.UpdateState(this.handScannedState);
-	}
-
-	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
-	{
-		if (!isPopupButton)
-		{
-			this._nonPopupButtonColliders.Add(button.GetComponent<Collider>());
-		}
-	}
-
-	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
-	{
-		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (this.ActivePlayer == null || this.ActivePlayer != SIPlayer.LocalPlayer))
-		{
-			this.parentTerminal.PlayWrongPlayerBuzz(this.uiCenter);
-		}
-		else
-		{
-			this.touchSoundBankPlayer.Play();
-		}
-		if (!this.IsAuthority)
-		{
-			this.parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.GadgetDispenser);
-			return;
-		}
-		if (actorNr != this.ActivePlayer.ActorNr)
-		{
-			return;
-		}
-		this.touchSoundBankPlayer.Play();
-		switch (this.currentState)
-		{
-		case SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen);
-			}
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetType:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
-			{
-				this.parentTerminal.SetActivePage(data);
-			}
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen);
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetType);
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
-			{
-				SITechTreeNode treeNode = this.TechTreeSO.GetTreeNode((int)this.CurrentPage.pageId, data);
-				if (treeNode != null && treeNode.IsDispensableGadget)
-				{
-					this._currentNode = data;
-					this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetInformation);
-				}
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Dispense)
-			{
-				SITechTreeNode treeNode2 = this.TechTreeSO.GetTreeNode((int)this.CurrentPage.pageId, data);
-				if (treeNode2 != null && treeNode2.IsDispensableGadget)
-				{
-					this._currentNode = data;
-					this.AuthorityDispenseGadgetForPlayer(this.ActivePlayer);
-					this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed);
-				}
-			}
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetInformation:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
-			{
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen);
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList);
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Dispense)
-			{
-				this.AuthorityDispenseGadgetForPlayer(this.ActivePlayer);
-				this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed);
-			}
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.GadgetDispensed:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-			{
-				this.UpdateState(this.lastState);
-			}
-			return;
-		case SIGadgetDispenser.GadgetDispenserTerminalState.HelpScreen:
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
-			{
-				this.helpScreenIndex = 0;
-				this.UpdateState(this.lastState);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Next)
-			{
-				this.helpScreenIndex = Mathf.Clamp(this.helpScreenIndex + 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.helpScreenIndex);
-				return;
-			}
-			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
-			{
-				this.helpScreenIndex = Mathf.Clamp(this.helpScreenIndex - 1, 0, this.helpPopupScreens.Length - 1);
-				this.UpdateHelpButtonPage(this.helpScreenIndex);
-			}
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
-	{
-	}
-
-	public void UpdateHelpButtonPage(int helpButtonPageIndex)
-	{
-		for (int i = 0; i < this.helpPopupScreens.Length; i++)
-		{
-			this.helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
-		}
-	}
-
-	public void AuthorityDispenseGadgetForPlayer(SIPlayer player)
-	{
-		if (!this.IsAuthority)
-		{
-			return;
-		}
-		int num = 0;
-		int staticHash = this.CurrentNode.unlockedGadgetPrefab.name.GetStaticHash();
-		for (int i = player.activePlayerGadgets.Count - 1; i >= 0; i--)
-		{
-			GameEntity gameEntityFromNetId = this.GameEntityManager.GetGameEntityFromNetId(player.activePlayerGadgets[i]);
-			if (gameEntityFromNetId == null)
-			{
-				player.activePlayerGadgets.RemoveAt(i);
-			}
-			else
-			{
-				num++;
-				if (num >= player.TotalGadgetLimit)
-				{
-					this.GameEntityManager.RequestDestroyItem(gameEntityFromNetId.id);
-					break;
-				}
-			}
-		}
-		SIUpgradeSet upgrades = player.GetUpgrades(this.CurrentPage.pageId);
-		int num2 = 0;
-		foreach (GraphNode<SITechTreeNode> graphNode in this.CurrentPage.AllNodes)
-		{
-			num2 |= 1 << graphNode.Value.upgradeType.GetNodeId();
-		}
-		upgrades.SetBits(this.m_isTryOn ? num2 : (upgrades.GetBits() & num2));
-		foreach (SITechTreeNode sitechTreeNode in this.CurrentPage.DispensableGadgets)
-		{
-			if (sitechTreeNode != this.CurrentNode)
-			{
-				upgrades.Remove(sitechTreeNode.upgradeType);
-			}
-		}
-		long num3 = upgrades.GetCreateData(player);
-		if (this.m_isTryOn)
-		{
-			num3 |= long.MinValue;
-		}
-		this.GameEntityManager.RequestCreateItem(staticHash, this.gadgetDispensePosition.position, this.gadgetDispensePosition.rotation, num3);
-		this.dispenseSoundBankPlayer.Play();
-	}
-
-	public void SetActivePage()
-	{
-		if (this.CurrentNode == null)
-		{
-			this._currentNode = this.CurrentPage.AllNodes[0].Value.upgradeType.GetNodeId();
-		}
-		if (this.ActivePlayer != null)
-		{
-			this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList);
-			return;
-		}
-		this.UpdateState(SIGadgetDispenser.GadgetDispenserTerminalState.WaitingForScan);
-	}
-
-	public bool IsValidPage(int pageId)
-	{
-		if (pageId < 0)
-		{
-			return false;
-		}
-		using (List<SIGadgetListEntry>.Enumerator enumerator = this.gadgetPages.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current.Id == pageId)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	GameObject ITouchScreenStation.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	public SIGadgetDispenser.GadgetDispenserTerminalState handScannedState = SIGadgetDispenser.GadgetDispenserTerminalState.GadgetList;
-
-	public SIGadgetDispenser.GadgetDispenserTerminalState currentState;
-
-	public SIGadgetDispenser.GadgetDispenserTerminalState lastState;
+	public GadgetDispenserTerminalState lastState;
 
 	public Transform gadgetDispensePosition;
 
@@ -561,7 +42,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		delay = 30f,
 		explosionVolume = 1f,
 		beepVolume = 1f,
-		beepPhases = new GameEntityDelayedDestroy.BeepPhase[]
+		beepPhases = new GameEntityDelayedDestroy.BeepPhase[3]
 		{
 			new GameEntityDelayedDestroy.BeepPhase
 			{
@@ -660,17 +141,472 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	[SerializeField]
 	private List<Collider> _nonPopupButtonColliders;
 
-	private Dictionary<SIGadgetDispenser.GadgetDispenserTerminalState, GameObject> screenData;
+	private Dictionary<GadgetDispenserTerminalState, GameObject> screenData;
 
 	private bool initialized;
 
-	public enum GadgetDispenserTerminalState
+	internal bool isTryOn => m_isTryOn;
+
+	public SIScreenRegion ScreenRegion => screenRegion;
+
+	public SIPlayer ActivePlayer => parentTerminal.activePlayer;
+
+	public string ActivePlayerName => ActivePlayer.gamePlayer.rig.Creator.SanitizedNickName;
+
+	public bool IsAuthority => parentTerminal.superInfection.siManager.gameEntityManager.IsAuthority();
+
+	public SuperInfectionManager SIManager => parentTerminal.superInfection.siManager;
+
+	public GameEntityManager GameEntityManager => parentTerminal.superInfection.siManager.gameEntityManager;
+
+	public SITechTreeNode CurrentNode => parentTerminal.superInfection.techTreeSO.GetTreeNode(parentTerminal.ActivePage, _currentNode);
+
+	public SITechTreePage CurrentPage => parentTerminal.superInfection.techTreeSO.GetTreePage((SITechTreePageId)parentTerminal.ActivePage);
+
+	public SITechTreeSO TechTreeSO => parentTerminal.superInfection.techTreeSO;
+
+	protected void OnEnable()
 	{
-		WaitingForScan,
-		GadgetType,
-		GadgetList,
-		GadgetInformation,
-		GadgetDispensed,
-		HelpScreen
+		if (m_isTryOn)
+		{
+			g_tryOnOptions = m_tryOnOptions;
+		}
+		_RefreshButtonsUsableState();
+	}
+
+	private void _RefreshButtonsUsableState()
+	{
+		foreach (SIGadgetListEntry gadgetPage in gadgetPages)
+		{
+			SITechTreePageId id = (SITechTreePageId)gadgetPage.Id;
+			if (TechTreeSO.TryGetTreePage(id, out var treePage))
+			{
+				gadgetPage.ButtonContainer.SetUsable(treePage.IsAllowed);
+			}
+		}
+	}
+
+	private void SetNonPopupButtonsEnabled(bool enable)
+	{
+		foreach (Collider nonPopupButtonCollider in _nonPopupButtonColliders)
+		{
+			nonPopupButtonCollider.enabled = enable;
+		}
+	}
+
+	public void Initialize()
+	{
+		if (!initialized)
+		{
+			initialized = true;
+			if (parentTerminal == null)
+			{
+				parentTerminal = GetComponentInParent<SICombinedTerminal>();
+			}
+			screenData = new Dictionary<GadgetDispenserTerminalState, GameObject>();
+			screenData.Add(GadgetDispenserTerminalState.WaitingForScan, waitingForScanScreen);
+			screenData.Add(GadgetDispenserTerminalState.GadgetType, gadgetTypeScreen);
+			screenData.Add(GadgetDispenserTerminalState.GadgetList, gadgetListScreen);
+			screenData.Add(GadgetDispenserTerminalState.GadgetInformation, gadgetInformationScreen);
+			screenData.Add(GadgetDispenserTerminalState.GadgetDispensed, gadgetDispensedScreen);
+			screenData.Add(GadgetDispenserTerminalState.HelpScreen, gadgetsHelpScreen);
+			parentTerminal.superInfection.techTreeSO.EnsureInitialized();
+			int num = 0;
+			int count = parentTerminal.superInfection.techTreeSO.TreePages.Count;
+			for (int i = 0; i < count; i++)
+			{
+				SITechTreePage sITechTreePage = parentTerminal.superInfection.techTreeSO.TreePages[i];
+				SIGadgetListEntry sIGadgetListEntry = UnityEngine.Object.Instantiate(pageListEntryPrefab, pageListParent);
+				StaticLodManager.TryAddLateInstantiatedMembers(sIGadgetListEntry.gameObject);
+				sIGadgetListEntry.Configure(this, sITechTreePage, parentTerminal.zeroZeroImage, parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.Select, i, -0.07f, count);
+				gadgetPages.Add(sIGadgetListEntry);
+				num = Math.Max(num, sITechTreePage.DispensableGadgets.Count);
+			}
+			gadgetEntries = new List<SIDispenserGadgetListEntry>();
+			for (int j = 0; j < num; j++)
+			{
+				SIDispenserGadgetListEntry sIDispenserGadgetListEntry = UnityEngine.Object.Instantiate(gadgetListEntryPrefab, gadgetListParent);
+				sIDispenserGadgetListEntry.transform.localPosition += new Vector3(0f, (float)j * -0.07f, 0f);
+				sIDispenserGadgetListEntry.SetStation(this, parentTerminal.zeroZeroImage, parentTerminal.onePointTwoText);
+				gadgetEntries.Add(sIDispenserGadgetListEntry);
+			}
+			if (m_isTryOn && base.isActiveAndEnabled)
+			{
+				g_tryOnOptions = m_tryOnOptions;
+			}
+			_RefreshButtonsUsableState();
+			Reset();
+		}
+	}
+
+	public void Reset()
+	{
+		currentState = GadgetDispenserTerminalState.WaitingForScan;
+		SetScreenVisibility(currentState, currentState);
+	}
+
+	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy)
+		{
+			UpdateState(GadgetDispenserTerminalState.WaitingForScan, GadgetDispenserTerminalState.WaitingForScan);
+		}
+		stream.SendNext(helpScreenIndex);
+		stream.SendNext(_currentNode);
+		stream.SendNext((int)currentState);
+		stream.SendNext((int)lastState);
+	}
+
+	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		helpScreenIndex = Mathf.Clamp((int)stream.ReceiveNext(), 0, helpPopupScreens.Length - 1);
+		_currentNode = (int)stream.ReceiveNext();
+		if (CurrentNode == null && CurrentPage != null && CurrentPage.AllNodes.Count > 0 && CurrentPage.AllNodes[0].Value != null)
+		{
+			_currentNode = (int)CurrentPage.AllNodes[0].Value.upgradeType;
+		}
+		GadgetDispenserTerminalState gadgetDispenserTerminalState = (GadgetDispenserTerminalState)stream.ReceiveNext();
+		GadgetDispenserTerminalState gadgetDispenserTerminalState2 = (GadgetDispenserTerminalState)stream.ReceiveNext();
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(GadgetDispenserTerminalState), gadgetDispenserTerminalState) || !Enum.IsDefined(typeof(GadgetDispenserTerminalState), gadgetDispenserTerminalState2))
+		{
+			UpdateState(GadgetDispenserTerminalState.WaitingForScan, GadgetDispenserTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(gadgetDispenserTerminalState, gadgetDispenserTerminalState2);
+		}
+	}
+
+	public void ZoneDataSerializeWrite(BinaryWriter writer)
+	{
+		writer.Write(helpScreenIndex);
+		writer.Write(_currentNode);
+		writer.Write((int)currentState);
+		writer.Write((int)lastState);
+	}
+
+	public void ZoneDataSerializeRead(BinaryReader reader)
+	{
+		helpScreenIndex = Mathf.Clamp(reader.ReadInt32(), 0, helpPopupScreens.Length - 1);
+		int value = reader.ReadInt32();
+		if (CurrentPage != null && CurrentPage.AllNodes != null)
+		{
+			_currentNode = Mathf.Clamp(value, 0, CurrentPage.AllNodes.Count - 1);
+		}
+		else
+		{
+			_currentNode = 0;
+		}
+		GadgetDispenserTerminalState gadgetDispenserTerminalState = (GadgetDispenserTerminalState)reader.ReadInt32();
+		GadgetDispenserTerminalState gadgetDispenserTerminalState2 = (GadgetDispenserTerminalState)reader.ReadInt32();
+		if (ActivePlayer == null || !ActivePlayer.gameObject.activeInHierarchy || !Enum.IsDefined(typeof(GadgetDispenserTerminalState), gadgetDispenserTerminalState) || !Enum.IsDefined(typeof(GadgetDispenserTerminalState), gadgetDispenserTerminalState2))
+		{
+			UpdateState(GadgetDispenserTerminalState.WaitingForScan, GadgetDispenserTerminalState.WaitingForScan);
+		}
+		else
+		{
+			UpdateState(gadgetDispenserTerminalState, gadgetDispenserTerminalState2);
+		}
+	}
+
+	public void UpdateState(GadgetDispenserTerminalState newState, GadgetDispenserTerminalState newLastState)
+	{
+		if (!IsPopupState(newLastState))
+		{
+			currentState = newLastState;
+		}
+		UpdateState(newState);
+	}
+
+	public void UpdateState(GadgetDispenserTerminalState newState)
+	{
+		if (!IsPopupState(currentState))
+		{
+			lastState = currentState;
+		}
+		currentState = newState;
+		SetScreenVisibility(currentState, lastState);
+		switch (currentState)
+		{
+		case GadgetDispenserTerminalState.GadgetType:
+			screenDescription.text = "GADGET TYPES";
+			break;
+		case GadgetDispenserTerminalState.GadgetList:
+			screenDescription.text = "UNLOCKED " + CurrentPage.nickName + " GADGETS";
+			UpdateGadgetListVisibility();
+			break;
+		case GadgetDispenserTerminalState.GadgetInformation:
+			screenDescription.text = CurrentNode.nickName;
+			gadgetDescriptionText.text = CurrentNode.description;
+			break;
+		case GadgetDispenserTerminalState.GadgetDispensed:
+			gadgetDispensedText.text = ActivePlayerName + " HAS DISPENSED A " + CurrentNode.nickName + "!";
+			break;
+		case GadgetDispenserTerminalState.HelpScreen:
+			UpdateHelpButtonPage(helpScreenIndex);
+			break;
+		case GadgetDispenserTerminalState.WaitingForScan:
+			break;
+		}
+	}
+
+	public void SetScreenVisibility(GadgetDispenserTerminalState currentState, GadgetDispenserTerminalState lastState)
+	{
+		bool flag = IsPopupState(currentState);
+		background.color = ((currentState == GadgetDispenserTerminalState.WaitingForScan) ? Color.white : ((ActivePlayer != null && ActivePlayer.gamePlayer.IsLocal()) ? active : notActive));
+		foreach (GadgetDispenserTerminalState key in screenData.Keys)
+		{
+			bool flag2 = key == currentState || (flag && key == lastState);
+			if (screenData[key].activeSelf != flag2)
+			{
+				screenData[key].SetActive(flag2);
+			}
+		}
+		if (popupScreen.activeSelf != flag)
+		{
+			popupScreen.SetActive(flag);
+		}
+		screenDescription.gameObject.SetActive(currentState != GadgetDispenserTerminalState.WaitingForScan);
+		SetNonPopupButtonsEnabled(!flag);
+	}
+
+	public void UpdateGadgetListVisibility()
+	{
+		foreach (SIDispenserGadgetListEntry gadgetEntry in gadgetEntries)
+		{
+			gadgetEntry.gameObject.SetActive(value: false);
+		}
+		int num = 0;
+		foreach (SITechTreeNode dispensableGadget in CurrentPage.DispensableGadgets)
+		{
+			if (m_isTryOn || ActivePlayer.CurrentProgression.IsUnlocked(dispensableGadget.upgradeType))
+			{
+				SIDispenserGadgetListEntry sIDispenserGadgetListEntry = gadgetEntries[num++];
+				sIDispenserGadgetListEntry.SetTechTreeNode(dispensableGadget);
+				sIDispenserGadgetListEntry.gameObject.SetActive(value: true);
+				sIDispenserGadgetListEntry.DispenseButton.SetUsable(m_isTryOn || dispensableGadget.IsAllowed);
+			}
+		}
+		noDispensableGadgetsMessage.SetActive(num == 0);
+	}
+
+	public bool IsPopupState(GadgetDispenserTerminalState state)
+	{
+		if (state != GadgetDispenserTerminalState.GadgetDispensed)
+		{
+			return state == GadgetDispenserTerminalState.HelpScreen;
+		}
+		return true;
+	}
+
+	public void PlayerHandScanned(int actorNr)
+	{
+		UpdateState(handScannedState);
+	}
+
+	public void AddButton(SITouchscreenButton button, bool isPopupButton = false)
+	{
+		if (!isPopupButton)
+		{
+			_nonPopupButtonColliders.Add(button.GetComponent<Collider>());
+		}
+	}
+
+	public void TouchscreenButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr)
+	{
+		if (actorNr == SIPlayer.LocalPlayer.ActorNr && (ActivePlayer == null || ActivePlayer != SIPlayer.LocalPlayer))
+		{
+			parentTerminal.PlayWrongPlayerBuzz(uiCenter);
+		}
+		else
+		{
+			touchSoundBankPlayer.Play();
+		}
+		if (!IsAuthority)
+		{
+			parentTerminal.TouchscreenButtonPressed(buttonType, data, actorNr, SICombinedTerminal.TerminalSubFunction.GadgetDispenser);
+		}
+		else
+		{
+			if (actorNr != ActivePlayer.ActorNr)
+			{
+				return;
+			}
+			touchSoundBankPlayer.Play();
+			switch (currentState)
+			{
+			case GadgetDispenserTerminalState.WaitingForScan:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(GadgetDispenserTerminalState.HelpScreen);
+				}
+				break;
+			case GadgetDispenserTerminalState.GadgetType:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
+				{
+					parentTerminal.SetActivePage(data);
+				}
+				break;
+			case GadgetDispenserTerminalState.GadgetList:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(GadgetDispenserTerminalState.HelpScreen);
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
+				{
+					UpdateState(GadgetDispenserTerminalState.GadgetType);
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Select)
+				{
+					SITechTreeNode treeNode = TechTreeSO.GetTreeNode((int)CurrentPage.pageId, data);
+					if (treeNode != null && treeNode.IsDispensableGadget)
+					{
+						_currentNode = data;
+						UpdateState(GadgetDispenserTerminalState.GadgetInformation);
+					}
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Dispense)
+				{
+					SITechTreeNode treeNode2 = TechTreeSO.GetTreeNode((int)CurrentPage.pageId, data);
+					if (treeNode2 != null && treeNode2.IsDispensableGadget)
+					{
+						_currentNode = data;
+						AuthorityDispenseGadgetForPlayer(ActivePlayer);
+						UpdateState(GadgetDispenserTerminalState.GadgetDispensed);
+					}
+				}
+				break;
+			case GadgetDispenserTerminalState.GadgetInformation:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Help)
+				{
+					UpdateState(GadgetDispenserTerminalState.HelpScreen);
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Back)
+				{
+					UpdateState(GadgetDispenserTerminalState.GadgetList);
+				}
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Dispense)
+				{
+					AuthorityDispenseGadgetForPlayer(ActivePlayer);
+					UpdateState(GadgetDispenserTerminalState.GadgetDispensed);
+				}
+				break;
+			case GadgetDispenserTerminalState.GadgetDispensed:
+				if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Exit)
+				{
+					UpdateState(lastState);
+				}
+				break;
+			case GadgetDispenserTerminalState.HelpScreen:
+				switch (buttonType)
+				{
+				case SITouchscreenButton.SITouchscreenButtonType.Exit:
+					helpScreenIndex = 0;
+					UpdateState(lastState);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Next:
+					helpScreenIndex = Mathf.Clamp(helpScreenIndex + 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(helpScreenIndex);
+					break;
+				case SITouchscreenButton.SITouchscreenButtonType.Back:
+					helpScreenIndex = Mathf.Clamp(helpScreenIndex - 1, 0, helpPopupScreens.Length - 1);
+					UpdateHelpButtonPage(helpScreenIndex);
+					break;
+				}
+				break;
+			}
+		}
+	}
+
+	public void TouchscreenToggleButtonPressed(SITouchscreenButton.SITouchscreenButtonType buttonType, int data, int actorNr, bool isToggledOn)
+	{
+	}
+
+	public void UpdateHelpButtonPage(int helpButtonPageIndex)
+	{
+		for (int i = 0; i < helpPopupScreens.Length; i++)
+		{
+			helpPopupScreens[i].SetActive(i == helpButtonPageIndex);
+		}
+	}
+
+	public void AuthorityDispenseGadgetForPlayer(SIPlayer player)
+	{
+		if (!IsAuthority)
+		{
+			return;
+		}
+		int num = 0;
+		int staticHash = CurrentNode.unlockedGadgetPrefab.name.GetStaticHash();
+		for (int num2 = player.activePlayerGadgets.Count - 1; num2 >= 0; num2--)
+		{
+			GameEntity gameEntityFromNetId = GameEntityManager.GetGameEntityFromNetId(player.activePlayerGadgets[num2]);
+			if (gameEntityFromNetId == null)
+			{
+				player.activePlayerGadgets.RemoveAt(num2);
+			}
+			else
+			{
+				num++;
+				if (num >= player.TotalGadgetLimit)
+				{
+					GameEntityManager.RequestDestroyItem(gameEntityFromNetId.id);
+					break;
+				}
+			}
+		}
+		SIUpgradeSet upgrades = player.GetUpgrades(CurrentPage.pageId);
+		int num3 = 0;
+		foreach (GraphNode<SITechTreeNode> allNode in CurrentPage.AllNodes)
+		{
+			num3 |= 1 << allNode.Value.upgradeType.GetNodeId();
+		}
+		upgrades.SetBits(m_isTryOn ? num3 : (upgrades.GetBits() & num3));
+		foreach (SITechTreeNode dispensableGadget in CurrentPage.DispensableGadgets)
+		{
+			if (dispensableGadget != CurrentNode)
+			{
+				upgrades.Remove(dispensableGadget.upgradeType);
+			}
+		}
+		long num4 = upgrades.GetCreateData(player);
+		if (m_isTryOn)
+		{
+			num4 |= long.MinValue;
+		}
+		GameEntityManager.RequestCreateItem(staticHash, gadgetDispensePosition.position, gadgetDispensePosition.rotation, num4);
+		dispenseSoundBankPlayer.Play();
+	}
+
+	public void SetActivePage()
+	{
+		if (CurrentNode == null)
+		{
+			_currentNode = CurrentPage.AllNodes[0].Value.upgradeType.GetNodeId();
+		}
+		if (ActivePlayer != null)
+		{
+			UpdateState(GadgetDispenserTerminalState.GadgetList);
+		}
+		else
+		{
+			UpdateState(GadgetDispenserTerminalState.WaitingForScan);
+		}
+	}
+
+	public bool IsValidPage(int pageId)
+	{
+		if (pageId < 0)
+		{
+			return false;
+		}
+		foreach (SIGadgetListEntry gadgetPage in gadgetPages)
+		{
+			if (gadgetPage.Id == pageId)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

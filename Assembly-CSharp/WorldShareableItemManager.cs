@@ -1,26 +1,33 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTag;
 using UnityEngine;
 
 public class WorldShareableItemManager : MonoBehaviour
 {
+	public static WorldShareableItemManager instance;
+
+	private static bool hasInstance = false;
+
+	public static readonly List<WorldShareableItem> worldShareableItems = new List<WorldShareableItem>(1024);
+
 	protected void Awake()
 	{
-		if (WorldShareableItemManager.hasInstance && WorldShareableItemManager.instance != this)
+		if (hasInstance && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		WorldShareableItemManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	protected void OnDestroy()
 	{
-		if (WorldShareableItemManager.instance == this)
+		if (instance == this)
 		{
-			WorldShareableItemManager.hasInstance = false;
-			WorldShareableItemManager.instance = null;
+			hasInstance = false;
+			instance = null;
 		}
 	}
 
@@ -30,73 +37,63 @@ public class WorldShareableItemManager : MonoBehaviour
 		{
 			return;
 		}
-		for (int i = 0; i < WorldShareableItemManager.worldShareableItems.Count; i++)
+		for (int i = 0; i < worldShareableItems.Count; i++)
 		{
-			if (WorldShareableItemManager.worldShareableItems[i] != null)
+			if (worldShareableItems[i] != null)
 			{
-				WorldShareableItemManager.worldShareableItems[i].TriggeredUpdate();
+				worldShareableItems[i].TriggeredUpdate();
 			}
 		}
 	}
 
 	public static void CreateManager()
 	{
-		if (GTAppState.isQuitting)
+		if (!GTAppState.isQuitting)
 		{
-			return;
+			SetInstance(new GameObject("WorldShareableItemManager").AddComponent<WorldShareableItemManager>());
 		}
-		WorldShareableItemManager.SetInstance(new GameObject("WorldShareableItemManager").AddComponent<WorldShareableItemManager>());
 	}
 
 	private static void SetInstance(WorldShareableItemManager manager)
 	{
-		if (GTAppState.isQuitting)
+		if (!GTAppState.isQuitting)
 		{
-			return;
-		}
-		WorldShareableItemManager.instance = manager;
-		WorldShareableItemManager.hasInstance = true;
-		if (Application.isPlaying)
-		{
-			Object.DontDestroyOnLoad(manager);
+			instance = manager;
+			hasInstance = true;
+			if (Application.isPlaying)
+			{
+				Object.DontDestroyOnLoad(manager);
+			}
 		}
 	}
 
 	public static void Register(WorldShareableItem worldShareableItem)
 	{
-		if (GTAppState.isQuitting)
+		if (!GTAppState.isQuitting)
 		{
-			return;
-		}
-		if (!WorldShareableItemManager.hasInstance)
-		{
-			WorldShareableItemManager.CreateManager();
-		}
-		if (!WorldShareableItemManager.worldShareableItems.Contains(worldShareableItem))
-		{
-			WorldShareableItemManager.worldShareableItems.Add(worldShareableItem);
+			if (!hasInstance)
+			{
+				CreateManager();
+			}
+			if (!worldShareableItems.Contains(worldShareableItem))
+			{
+				worldShareableItems.Add(worldShareableItem);
+			}
 		}
 	}
 
 	public static void Unregister(WorldShareableItem worldShareableItem)
 	{
-		if (GTAppState.isQuitting)
+		if (!GTAppState.isQuitting)
 		{
-			return;
-		}
-		if (!WorldShareableItemManager.hasInstance)
-		{
-			WorldShareableItemManager.CreateManager();
-		}
-		if (WorldShareableItemManager.worldShareableItems.Contains(worldShareableItem))
-		{
-			WorldShareableItemManager.worldShareableItems.Remove(worldShareableItem);
+			if (!hasInstance)
+			{
+				CreateManager();
+			}
+			if (worldShareableItems.Contains(worldShareableItem))
+			{
+				worldShareableItems.Remove(worldShareableItem);
+			}
 		}
 	}
-
-	public static WorldShareableItemManager instance;
-
-	private static bool hasInstance = false;
-
-	public static readonly List<WorldShareableItem> worldShareableItems = new List<WorldShareableItem>(1024);
 }

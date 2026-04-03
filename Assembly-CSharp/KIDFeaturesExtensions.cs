@@ -1,58 +1,37 @@
-﻿using System;
-
 public static class KIDFeaturesExtensions
 {
 	public static string ToStandardisedString(this EKIDFeatures feature)
 	{
-		switch (feature)
+		return feature switch
 		{
-		case EKIDFeatures.Multiplayer:
-			return "multiplayer";
-		case EKIDFeatures.Custom_Nametags:
-			return "custom-username";
-		case EKIDFeatures.Voice_Chat:
-			return "voice-chat";
-		case EKIDFeatures.Mods:
-			return "mods";
-		case EKIDFeatures.Groups:
-			return "join-groups";
-		default:
-			return feature.ToString();
-		}
+			EKIDFeatures.Custom_Nametags => "custom-username", 
+			EKIDFeatures.Voice_Chat => "voice-chat", 
+			EKIDFeatures.Multiplayer => "multiplayer", 
+			EKIDFeatures.Mods => "mods", 
+			EKIDFeatures.Groups => "join-groups", 
+			_ => feature.ToString(), 
+		};
 	}
 
 	public static EKIDFeatures? FromString(string name)
 	{
-		string a = name.ToLower();
-		if (a == "voice-chat")
+		return name.ToLower() switch
 		{
-			return new EKIDFeatures?(EKIDFeatures.Voice_Chat);
-		}
-		if (a == "custom-username")
-		{
-			return new EKIDFeatures?(EKIDFeatures.Custom_Nametags);
-		}
-		if (a == "multiplayer")
-		{
-			return new EKIDFeatures?(EKIDFeatures.Multiplayer);
-		}
-		if (a == "mods")
-		{
-			return new EKIDFeatures?(EKIDFeatures.Mods);
-		}
-		if (!(a == "join-groups"))
-		{
-			return null;
-		}
-		return new EKIDFeatures?(EKIDFeatures.Groups);
+			"voice-chat" => EKIDFeatures.Voice_Chat, 
+			"custom-username" => EKIDFeatures.Custom_Nametags, 
+			"multiplayer" => EKIDFeatures.Multiplayer, 
+			"mods" => EKIDFeatures.Mods, 
+			"join-groups" => EKIDFeatures.Groups, 
+			_ => null, 
+		};
 	}
 
 	public static bool TryGetFromString(string name, out EKIDFeatures result)
 	{
-		EKIDFeatures? ekidfeatures = KIDFeaturesExtensions.FromString(name);
-		if (ekidfeatures != null)
+		EKIDFeatures? eKIDFeatures = FromString(name);
+		if (eKIDFeatures.HasValue)
 		{
-			result = ekidfeatures.Value;
+			result = eKIDFeatures.Value;
 			return true;
 		}
 		result = EKIDFeatures.Voice_Chat;

@@ -1,21 +1,25 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class XformNode
 {
+	public Vector4 localPosition;
+
+	public Transform parent;
+
 	public Vector4 worldPosition
 	{
 		get
 		{
-			if (!this.parent)
+			if (!parent)
 			{
-				return this.localPosition;
+				return localPosition;
 			}
-			Matrix4x4 localToWorldMatrix = this.parent.localToWorldMatrix;
-			Vector4 result = this.localPosition;
-			MatrixUtils.MultiplyXYZ3x4(ref localToWorldMatrix, ref result);
-			return result;
+			Matrix4x4 m = parent.localToWorldMatrix;
+			Vector4 point = localPosition;
+			MatrixUtils.MultiplyXYZ3x4(ref m, ref point);
+			return point;
 		}
 	}
 
@@ -23,20 +27,16 @@ public class XformNode
 	{
 		get
 		{
-			return this.localPosition.w;
+			return localPosition.w;
 		}
 		set
 		{
-			this.localPosition.w = value;
+			localPosition.w = value;
 		}
 	}
 
 	public Matrix4x4 LocalTRS()
 	{
-		return Matrix4x4.TRS(this.localPosition, Quaternion.identity, Vector3.one);
+		return Matrix4x4.TRS(localPosition, Quaternion.identity, Vector3.one);
 	}
-
-	public Vector4 localPosition;
-
-	public Transform parent;
 }

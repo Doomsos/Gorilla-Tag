@@ -1,11 +1,8 @@
-﻿using System;
+namespace GorillaTag;
 
-namespace GorillaTag
+public interface ObjectPoolEvents
 {
-	public interface ObjectPoolEvents
-	{
-		void OnTaken();
+	void OnTaken();
 
-		void OnReturned();
-	}
+	void OnReturned();
 }

@@ -1,10 +1,8 @@
-﻿using System;
-
 public class GRDebugGodmodeButton : GorillaPressableReleaseButton
 {
 	private void Awake()
 	{
-		base.gameObject.SetActive(false);
+		base.gameObject.SetActive(value: false);
 	}
 
 	public void OnPressedButton()
@@ -14,12 +12,12 @@ public class GRDebugGodmodeButton : GorillaPressableReleaseButton
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		this.UpdateColor();
+		UpdateColor();
 	}
 
 	public override void ButtonDeactivation()
 	{
 		base.ButtonDeactivation();
-		this.UpdateColor();
+		UpdateColor();
 	}
 }

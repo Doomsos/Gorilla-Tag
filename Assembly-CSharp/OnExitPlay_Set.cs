@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 
 [AttributeUsage(AttributeTargets.Field)]
 public class OnExitPlay_Set : OnExitPlay_Attribute
 {
+	private object value;
+
 	public OnExitPlay_Set(object value)
 	{
 		this.value = value;
@@ -14,11 +16,11 @@ public class OnExitPlay_Set : OnExitPlay_Attribute
 	{
 		if (!field.IsStatic)
 		{
-			Debug.LogError(string.Format("Can't Set non-static field {0}.{1}", field.DeclaringType, field.Name));
-			return;
+			Debug.LogError($"Can't Set non-static field {field.DeclaringType}.{field.Name}");
 		}
-		field.SetValue(null, this.value);
+		else
+		{
+			field.SetValue(null, value);
+		}
 	}
-
-	private object value;
 }

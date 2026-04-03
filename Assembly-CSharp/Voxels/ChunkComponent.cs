@@ -1,26 +1,24 @@
-﻿using System;
 using UnityEngine;
 
-namespace Voxels
+namespace Voxels;
+
+[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshCollider))]
+public class ChunkComponent : MonoBehaviour
 {
-	[RequireComponent(typeof(MeshFilter))]
-	[RequireComponent(typeof(MeshRenderer))]
-	[RequireComponent(typeof(MeshCollider))]
-	public class ChunkComponent : MonoBehaviour
+	public MeshFilter meshFilter;
+
+	public MeshRenderer meshRenderer;
+
+	public MeshCollider meshCollider;
+
+	public VoxelWorld World { get; set; }
+
+	private void Reset()
 	{
-		public VoxelWorld World { get; set; }
-
-		private void Reset()
-		{
-			this.meshFilter = base.GetComponent<MeshFilter>();
-			this.meshRenderer = base.GetComponent<MeshRenderer>();
-			this.meshCollider = base.GetComponent<MeshCollider>();
-		}
-
-		public MeshFilter meshFilter;
-
-		public MeshRenderer meshRenderer;
-
-		public MeshCollider meshCollider;
+		meshFilter = GetComponent<MeshFilter>();
+		meshRenderer = GetComponent<MeshRenderer>();
+		meshCollider = GetComponent<MeshCollider>();
 	}
 }

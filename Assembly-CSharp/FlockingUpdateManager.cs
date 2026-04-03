@@ -1,28 +1,35 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FlockingUpdateManager : MonoBehaviour
 {
+	public static FlockingUpdateManager instance;
+
+	public static bool hasInstance = false;
+
+	public static List<Flocking> allFlockings = new List<Flocking>();
+
 	protected void Awake()
 	{
-		if (FlockingUpdateManager.hasInstance && FlockingUpdateManager.instance != null && FlockingUpdateManager.instance != this)
+		if (hasInstance && instance != null && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		FlockingUpdateManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	public static void CreateManager()
 	{
-		FlockingUpdateManager.SetInstance(new GameObject("FlockingUpdateManager").AddComponent<FlockingUpdateManager>());
+		SetInstance(new GameObject("FlockingUpdateManager").AddComponent<FlockingUpdateManager>());
 	}
 
 	private static void SetInstance(FlockingUpdateManager manager)
 	{
-		FlockingUpdateManager.instance = manager;
-		FlockingUpdateManager.hasInstance = true;
+		instance = manager;
+		hasInstance = true;
 		if (Application.isPlaying)
 		{
 			Object.DontDestroyOnLoad(manager);
@@ -31,39 +38,33 @@ public class FlockingUpdateManager : MonoBehaviour
 
 	public static void RegisterFlocking(Flocking flocking)
 	{
-		if (!FlockingUpdateManager.hasInstance)
+		if (!hasInstance)
 		{
-			FlockingUpdateManager.CreateManager();
+			CreateManager();
 		}
-		if (!FlockingUpdateManager.allFlockings.Contains(flocking))
+		if (!allFlockings.Contains(flocking))
 		{
-			FlockingUpdateManager.allFlockings.Add(flocking);
+			allFlockings.Add(flocking);
 		}
 	}
 
 	public static void UnregisterFlocking(Flocking flocking)
 	{
-		if (!FlockingUpdateManager.hasInstance)
+		if (!hasInstance)
 		{
-			FlockingUpdateManager.CreateManager();
+			CreateManager();
 		}
-		if (FlockingUpdateManager.allFlockings.Contains(flocking))
+		if (allFlockings.Contains(flocking))
 		{
-			FlockingUpdateManager.allFlockings.Remove(flocking);
+			allFlockings.Remove(flocking);
 		}
 	}
 
 	public void Update()
 	{
-		for (int i = 0; i < FlockingUpdateManager.allFlockings.Count; i++)
+		for (int i = 0; i < allFlockings.Count; i++)
 		{
-			FlockingUpdateManager.allFlockings[i].InvokeUpdate();
+			allFlockings[i].InvokeUpdate();
 		}
 	}
-
-	public static FlockingUpdateManager instance;
-
-	public static bool hasInstance = false;
-
-	public static List<Flocking> allFlockings = new List<Flocking>();
 }

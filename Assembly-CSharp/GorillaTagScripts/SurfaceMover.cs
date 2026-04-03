@@ -1,249 +1,244 @@
-﻿using System;
+using System;
 using GorillaTagScripts.Builder;
 using GT_CustomMapSupportRuntime;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class SurfaceMover : MonoBehaviour
 {
-	public class SurfaceMover : MonoBehaviour
+	[SerializeField]
+	private BuilderMovingPart.BuilderMovingPartType moveType;
+
+	[SerializeField]
+	private float startPercentage = 0.5f;
+
+	[SerializeField]
+	private float velocity;
+
+	[SerializeField]
+	private bool reverseDirOnCycle = true;
+
+	[SerializeField]
+	private bool reverseDir;
+
+	[SerializeField]
+	private float cycleDelay = 0.25f;
+
+	[SerializeField]
+	protected Transform startXf;
+
+	[SerializeField]
+	protected Transform endXf;
+
+	[SerializeField]
+	public RotationAxis rotationAxis = RotationAxis.Y;
+
+	[SerializeField]
+	public float rotationAmount = 360f;
+
+	[SerializeField]
+	public bool rotationRelativeToStarting;
+
+	private AnimationCurve lerpAlpha;
+
+	private float cycleDuration;
+
+	private float distance;
+
+	private Vector3 startingRotation;
+
+	private float currT;
+
+	private float percent;
+
+	private bool currForward;
+
+	private float dtSinceServerUpdate;
+
+	private int lastServerTimeStamp;
+
+	private float rotateStartAmt;
+
+	private float rotateAmt;
+
+	private uint startPercentageCycleOffset;
+
+	private void Start()
 	{
-		private void Start()
-		{
-			MovingSurfaceManager.instance == null;
-			MovingSurfaceManager.instance.RegisterSurfaceMover(this);
-		}
+		_ = MovingSurfaceManager.instance == null;
+		MovingSurfaceManager.instance.RegisterSurfaceMover(this);
+	}
 
-		private void OnDestroy()
+	private void OnDestroy()
+	{
+		if (MovingSurfaceManager.instance != null)
 		{
-			if (MovingSurfaceManager.instance != null)
+			MovingSurfaceManager.instance.UnregisterSurfaceMover(this);
+		}
+	}
+
+	public void InitMovingSurface()
+	{
+		if (moveType == BuilderMovingPart.BuilderMovingPartType.Translation)
+		{
+			distance = Vector3.Distance(endXf.position, startXf.position);
+			float num = distance / velocity;
+			cycleDuration = num + cycleDelay;
+		}
+		else
+		{
+			if (rotationRelativeToStarting)
 			{
-				MovingSurfaceManager.instance.UnregisterSurfaceMover(this);
+				startingRotation = base.transform.localRotation.eulerAngles;
 			}
+			cycleDuration = rotationAmount / 360f / velocity;
+			cycleDuration += cycleDelay;
 		}
-
-		public void InitMovingSurface()
+		float num2 = cycleDelay / cycleDuration;
+		Vector2 vector = new Vector2(num2 / 2f, 0f);
+		Vector2 vector2 = new Vector2(1f - num2 / 2f, 1f);
+		float num3 = (vector2.y - vector.y) / (vector2.x - vector.x);
+		lerpAlpha = new AnimationCurve(new Keyframe(num2 / 2f, 0f, 0f, num3), new Keyframe(1f - num2 / 2f, 1f, num3, 0f));
+		currT = startPercentage;
+		uint num4 = (uint)(cycleDuration * 1000f);
+		if (num4 == 0)
 		{
-			if (this.moveType == BuilderMovingPart.BuilderMovingPartType.Translation)
+			num4 = 1u;
+		}
+		uint num5 = 2147483648u % num4;
+		uint num6 = (uint)(startPercentage * (float)num4);
+		if (num6 >= num5)
+		{
+			startPercentageCycleOffset = num6 - num5;
+		}
+		else
+		{
+			startPercentageCycleOffset = num6 + num4 + num4 - num5;
+		}
+	}
+
+	private long NetworkTimeMs()
+	{
+		if (PhotonNetwork.InRoom)
+		{
+			return (uint)(PhotonNetwork.ServerTimestamp + (int)startPercentageCycleOffset + int.MinValue);
+		}
+		return (long)(Time.time * 1000f);
+	}
+
+	private long CycleLengthMs()
+	{
+		return (long)(cycleDuration * 1000f);
+	}
+
+	public double PlatformTime()
+	{
+		long num = NetworkTimeMs();
+		long num2 = CycleLengthMs();
+		return (double)(num - num / num2 * num2) / 1000.0;
+	}
+
+	public int CycleCount()
+	{
+		return (int)(NetworkTimeMs() / CycleLengthMs());
+	}
+
+	public float CycleCompletionPercent()
+	{
+		return Mathf.Clamp((float)(PlatformTime() / (double)cycleDuration), 0f, 1f);
+	}
+
+	public bool IsEvenCycle()
+	{
+		return CycleCount() % 2 == 0;
+	}
+
+	public void Move()
+	{
+		Progress();
+		switch (moveType)
+		{
+		case BuilderMovingPart.BuilderMovingPartType.Translation:
+			base.transform.localPosition = UpdatePointToPoint(percent);
+			break;
+		case BuilderMovingPart.BuilderMovingPartType.Rotation:
+			UpdateRotation(percent);
+			break;
+		}
+	}
+
+	private Vector3 UpdatePointToPoint(float perc)
+	{
+		float t = lerpAlpha.Evaluate(perc);
+		return Vector3.Lerp(startXf.localPosition, endXf.localPosition, t);
+	}
+
+	private void UpdateRotation(float perc)
+	{
+		float num = lerpAlpha.Evaluate(perc) * rotationAmount;
+		if (rotationRelativeToStarting)
+		{
+			Vector3 euler = startingRotation;
+			switch (rotationAxis)
 			{
-				this.distance = Vector3.Distance(this.endXf.position, this.startXf.position);
-				float num = this.distance / this.velocity;
-				this.cycleDuration = num + this.cycleDelay;
+			case RotationAxis.X:
+				euler.x += num;
+				break;
+			case RotationAxis.Y:
+				euler.y += num;
+				break;
+			case RotationAxis.Z:
+				euler.z += num;
+				break;
 			}
-			else
-			{
-				if (this.rotationRelativeToStarting)
-				{
-					this.startingRotation = base.transform.localRotation.eulerAngles;
-				}
-				this.cycleDuration = this.rotationAmount / 360f / this.velocity;
-				this.cycleDuration += this.cycleDelay;
-			}
-			float num2 = this.cycleDelay / this.cycleDuration;
-			Vector2 vector = new Vector2(num2 / 2f, 0f);
-			Vector2 vector2 = new Vector2(1f - num2 / 2f, 1f);
-			float num3 = (vector2.y - vector.y) / (vector2.x - vector.x);
-			this.lerpAlpha = new AnimationCurve(new Keyframe[]
-			{
-				new Keyframe(num2 / 2f, 0f, 0f, num3),
-				new Keyframe(1f - num2 / 2f, 1f, num3, 0f)
-			});
-			this.currT = this.startPercentage;
-			uint num4 = (uint)(this.cycleDuration * 1000f);
-			if (num4 == 0U)
-			{
-				num4 = 1U;
-			}
-			uint num5 = 2147483648U % num4;
-			uint num6 = (uint)(this.startPercentage * num4);
-			if (num6 >= num5)
-			{
-				this.startPercentageCycleOffset = num6 - num5;
-				return;
-			}
-			this.startPercentageCycleOffset = num6 + num4 + num4 - num5;
+			base.transform.localRotation = Quaternion.Euler(euler);
 		}
-
-		private long NetworkTimeMs()
+		else
 		{
-			if (PhotonNetwork.InRoom)
-			{
-				return (long)((ulong)(PhotonNetwork.ServerTimestamp + (int)this.startPercentageCycleOffset + int.MinValue));
-			}
-			return (long)(Time.time * 1000f);
-		}
-
-		private long CycleLengthMs()
-		{
-			return (long)(this.cycleDuration * 1000f);
-		}
-
-		public double PlatformTime()
-		{
-			long num = this.NetworkTimeMs();
-			long num2 = this.CycleLengthMs();
-			return (double)(num - num / num2 * num2) / 1000.0;
-		}
-
-		public int CycleCount()
-		{
-			return (int)(this.NetworkTimeMs() / this.CycleLengthMs());
-		}
-
-		public float CycleCompletionPercent()
-		{
-			return Mathf.Clamp((float)(this.PlatformTime() / (double)this.cycleDuration), 0f, 1f);
-		}
-
-		public bool IsEvenCycle()
-		{
-			return this.CycleCount() % 2 == 0;
-		}
-
-		public void Move()
-		{
-			this.Progress();
-			BuilderMovingPart.BuilderMovingPartType builderMovingPartType = this.moveType;
-			if (builderMovingPartType == BuilderMovingPart.BuilderMovingPartType.Translation)
-			{
-				base.transform.localPosition = this.UpdatePointToPoint(this.percent);
-				return;
-			}
-			if (builderMovingPartType != BuilderMovingPart.BuilderMovingPartType.Rotation)
-			{
-				return;
-			}
-			this.UpdateRotation(this.percent);
-		}
-
-		private Vector3 UpdatePointToPoint(float perc)
-		{
-			float t = this.lerpAlpha.Evaluate(perc);
-			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, t);
-		}
-
-		private void UpdateRotation(float perc)
-		{
-			float num = this.lerpAlpha.Evaluate(perc) * this.rotationAmount;
-			if (this.rotationRelativeToStarting)
-			{
-				Vector3 euler = this.startingRotation;
-				switch (this.rotationAxis)
-				{
-				case RotationAxis.X:
-					euler.x += num;
-					break;
-				case RotationAxis.Y:
-					euler.y += num;
-					break;
-				case RotationAxis.Z:
-					euler.z += num;
-					break;
-				}
-				base.transform.localRotation = Quaternion.Euler(euler);
-				return;
-			}
-			switch (this.rotationAxis)
+			switch (rotationAxis)
 			{
 			case RotationAxis.X:
 				base.transform.localRotation = Quaternion.AngleAxis(num, Vector3.right);
-				return;
+				break;
 			case RotationAxis.Y:
 				base.transform.localRotation = Quaternion.AngleAxis(num, Vector3.up);
-				return;
+				break;
 			case RotationAxis.Z:
 				base.transform.localRotation = Quaternion.AngleAxis(num, Vector3.forward);
-				return;
-			default:
-				return;
+				break;
 			}
 		}
+	}
 
-		private void Progress()
+	private void Progress()
+	{
+		currT = CycleCompletionPercent();
+		currForward = IsEvenCycle();
+		percent = currT;
+		if (reverseDirOnCycle)
 		{
-			this.currT = this.CycleCompletionPercent();
-			this.currForward = this.IsEvenCycle();
-			this.percent = this.currT;
-			if (this.reverseDirOnCycle)
-			{
-				this.percent = (this.currForward ? this.currT : (1f - this.currT));
-			}
-			if (this.reverseDir)
-			{
-				this.percent = 1f - this.percent;
-			}
+			percent = (currForward ? currT : (1f - currT));
 		}
-
-		public void CopySettings(SurfaceMoverSettings settings)
+		if (reverseDir)
 		{
-			this.moveType = (BuilderMovingPart.BuilderMovingPartType)settings.moveType;
-			this.startPercentage = 0f;
-			this.velocity = Math.Clamp(settings.velocity, 0.001f, Math.Abs(settings.velocity));
-			this.reverseDirOnCycle = settings.reverseDirOnCycle;
-			this.reverseDir = settings.reverseDir;
-			this.cycleDelay = Math.Clamp(settings.cycleDelay, 0f, Math.Abs(settings.cycleDelay));
-			this.startXf = settings.start;
-			this.endXf = settings.end;
-			this.rotationAxis = (RotationAxis)settings.rotationAxis;
-			this.rotationAmount = Math.Clamp(settings.rotationAmount, 0.001f, Math.Abs(settings.rotationAmount));
-			this.rotationRelativeToStarting = settings.rotationRelativeToStarting;
+			percent = 1f - percent;
 		}
+	}
 
-		[SerializeField]
-		private BuilderMovingPart.BuilderMovingPartType moveType;
-
-		[SerializeField]
-		private float startPercentage = 0.5f;
-
-		[SerializeField]
-		private float velocity;
-
-		[SerializeField]
-		private bool reverseDirOnCycle = true;
-
-		[SerializeField]
-		private bool reverseDir;
-
-		[SerializeField]
-		private float cycleDelay = 0.25f;
-
-		[SerializeField]
-		protected Transform startXf;
-
-		[SerializeField]
-		protected Transform endXf;
-
-		[SerializeField]
-		public RotationAxis rotationAxis = RotationAxis.Y;
-
-		[SerializeField]
-		public float rotationAmount = 360f;
-
-		[SerializeField]
-		public bool rotationRelativeToStarting;
-
-		private AnimationCurve lerpAlpha;
-
-		private float cycleDuration;
-
-		private float distance;
-
-		private Vector3 startingRotation;
-
-		private float currT;
-
-		private float percent;
-
-		private bool currForward;
-
-		private float dtSinceServerUpdate;
-
-		private int lastServerTimeStamp;
-
-		private float rotateStartAmt;
-
-		private float rotateAmt;
-
-		private uint startPercentageCycleOffset;
+	public void CopySettings(SurfaceMoverSettings settings)
+	{
+		moveType = (BuilderMovingPart.BuilderMovingPartType)settings.moveType;
+		startPercentage = 0f;
+		velocity = Math.Clamp(settings.velocity, 0.001f, Math.Abs(settings.velocity));
+		reverseDirOnCycle = settings.reverseDirOnCycle;
+		reverseDir = settings.reverseDir;
+		cycleDelay = Math.Clamp(settings.cycleDelay, 0f, Math.Abs(settings.cycleDelay));
+		startXf = settings.start;
+		endXf = settings.end;
+		rotationAxis = (RotationAxis)settings.rotationAxis;
+		rotationAmount = Math.Clamp(settings.rotationAmount, 0.001f, Math.Abs(settings.rotationAmount));
+		rotationRelativeToStarting = settings.rotationRelativeToStarting;
 	}
 }

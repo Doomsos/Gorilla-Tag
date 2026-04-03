@@ -1,14 +1,23 @@
-﻿using System;
 using GorillaExtensions;
 using Photon.Pun;
 using UnityEngine;
 
 internal class GuardianRPCs : RPCNetworkBase
 {
+	private GameModeSerializer serializer;
+
+	private GorillaGuardianManager guardianManager;
+
+	private CallLimiter launchCallLimit = new CallLimiter(5, 0.5f);
+
+	private CallLimiter slapFXCallLimit = new CallLimiter(5, 0.5f);
+
+	private CallLimiter slamFXCallLimit = new CallLimiter(5, 0.5f);
+
 	public override void SetClassTarget(IWrappedSerializable target, GorillaWrappedSerializer netHandler)
 	{
-		this.guardianManager = (GorillaGuardianManager)target;
-		this.serializer = (GameModeSerializer)netHandler;
+		guardianManager = (GorillaGuardianManager)target;
+		serializer = (GameModeSerializer)netHandler;
 	}
 
 	[PunRPC]
@@ -18,7 +27,7 @@ internal class GuardianRPCs : RPCNetworkBase
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
 		if (photonMessageInfoWrapped.Sender != null)
 		{
-			this.guardianManager.EjectGuardian(photonMessageInfoWrapped.Sender);
+			guardianManager.EjectGuardian(photonMessageInfoWrapped.Sender);
 		}
 	}
 
@@ -27,21 +36,14 @@ internal class GuardianRPCs : RPCNetworkBase
 	{
 		MonkeAgent.IncrementRPCCall(info, "GuardianLaunchPlayer");
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
-		if (!this.guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
+		if (!guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
 		{
 			MonkeAgent.instance.SendReport("Sent LaunchPlayer when not a guardian", photonMessageInfoWrapped.Sender.UserId, photonMessageInfoWrapped.Sender.NickName);
-			return;
 		}
-		float num = 10000f;
-		if (!velocity.IsValid(num))
+		else if (velocity.IsValid(10000f) && launchCallLimit.CheckCallTime(Time.time))
 		{
-			return;
+			guardianManager.LaunchPlayer(photonMessageInfoWrapped.Sender, velocity);
 		}
-		if (!this.launchCallLimit.CheckCallTime(Time.time))
-		{
-			return;
-		}
-		this.guardianManager.LaunchPlayer(photonMessageInfoWrapped.Sender, velocity);
 	}
 
 	[PunRPC]
@@ -49,24 +51,13 @@ internal class GuardianRPCs : RPCNetworkBase
 	{
 		MonkeAgent.IncrementRPCCall(info, "ShowSlapEffects");
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
-		if (!this.guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
+		if (!guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
 		{
 			MonkeAgent.instance.SendReport("Sent ShowSlapEffects when not a guardian", photonMessageInfoWrapped.Sender.UserId, photonMessageInfoWrapped.Sender.NickName);
-			return;
 		}
-		float num = 10000f;
-		if (location.IsValid(num))
+		else if (location.IsValid(10000f) && direction.IsValid(10000f) && slapFXCallLimit.CheckCallTime(Time.time))
 		{
-			float num2 = 10000f;
-			if (direction.IsValid(num2))
-			{
-				if (!this.slapFXCallLimit.CheckCallTime(Time.time))
-				{
-					return;
-				}
-				this.guardianManager.PlaySlapEffect(location, direction);
-				return;
-			}
+			guardianManager.PlaySlapEffect(location, direction);
 		}
 	}
 
@@ -75,34 +66,13 @@ internal class GuardianRPCs : RPCNetworkBase
 	{
 		MonkeAgent.IncrementRPCCall(info, "ShowSlamEffect");
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
-		if (!this.guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
+		if (!guardianManager.IsPlayerGuardian(photonMessageInfoWrapped.Sender))
 		{
 			MonkeAgent.instance.SendReport("Sent ShowSlamEffect when not a guardian", photonMessageInfoWrapped.Sender.UserId, photonMessageInfoWrapped.Sender.NickName);
-			return;
 		}
-		float num = 10000f;
-		if (location.IsValid(num))
+		else if (location.IsValid(10000f) && direction.IsValid(10000f) && slamFXCallLimit.CheckCallTime(Time.time))
 		{
-			float num2 = 10000f;
-			if (direction.IsValid(num2))
-			{
-				if (!this.slamFXCallLimit.CheckCallTime(Time.time))
-				{
-					return;
-				}
-				this.guardianManager.PlaySlamEffect(location, direction);
-				return;
-			}
+			guardianManager.PlaySlamEffect(location, direction);
 		}
 	}
-
-	private GameModeSerializer serializer;
-
-	private GorillaGuardianManager guardianManager;
-
-	private CallLimiter launchCallLimit = new CallLimiter(5, 0.5f, 0.5f);
-
-	private CallLimiter slapFXCallLimit = new CallLimiter(5, 0.5f, 0.5f);
-
-	private CallLimiter slamFXCallLimit = new CallLimiter(5, 0.5f, 0.5f);
 }

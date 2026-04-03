@@ -1,55 +1,10 @@
-﻿using System;
+using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
 [Serializable]
 public class GRAbilityWatch : GRAbilityBase
 {
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
-	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-		this.target = null;
-	}
-
-	protected override void OnStart()
-	{
-		this.PlayAnim(this.animName, 0.1f, this.animSpeed);
-		this.endTime = -1.0;
-		if (this.duration > 0f)
-		{
-			this.endTime = Time.timeAsDouble + (double)this.duration;
-		}
-		this.agent.SetStopped(true);
-	}
-
-	protected override void OnStop()
-	{
-		this.agent.SetStopped(false);
-	}
-
-	public override bool IsDone()
-	{
-		return this.endTime > 0.0 && Time.timeAsDouble >= this.endTime;
-	}
-
-	protected override void OnUpdateShared(float dt)
-	{
-		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
-	}
-
-	public void SetTargetPlayer(NetPlayer targetPlayer)
-	{
-		this.target = null;
-		if (targetPlayer != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(targetPlayer.ActorNumber);
-			if (grplayer != null && grplayer.State == GRPlayer.GRPlayerState.Alive)
-			{
-				this.target = grplayer.transform;
-			}
-		}
-	}
-
 	public float duration;
 
 	public string animName;
@@ -62,4 +17,53 @@ public class GRAbilityWatch : GRAbilityBase
 
 	[ReadOnly]
 	public double endTime;
+
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	{
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+		target = null;
+	}
+
+	protected override void OnStart()
+	{
+		PlayAnim(animName, 0.1f, animSpeed);
+		endTime = -1.0;
+		if (duration > 0f)
+		{
+			endTime = Time.timeAsDouble + (double)duration;
+		}
+		agent.SetStopped(stopMovement: true);
+	}
+
+	protected override void OnStop()
+	{
+		agent.SetStopped(stopMovement: false);
+	}
+
+	public override bool IsDone()
+	{
+		if (endTime > 0.0)
+		{
+			return Time.timeAsDouble >= endTime;
+		}
+		return false;
+	}
+
+	protected override void OnUpdateShared(float dt)
+	{
+		GameAgent.UpdateFacingTarget(root, agent.navAgent, target, maxTurnSpeed);
+	}
+
+	public void SetTargetPlayer(NetPlayer targetPlayer)
+	{
+		target = null;
+		if (targetPlayer != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (gRPlayer != null && gRPlayer.State == GRPlayer.GRPlayerState.Alive)
+			{
+				target = gRPlayer.transform;
+			}
+		}
+	}
 }

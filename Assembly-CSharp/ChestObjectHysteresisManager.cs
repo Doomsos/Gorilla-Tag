@@ -1,29 +1,36 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [DefaultExecutionOrder(2000)]
 public class ChestObjectHysteresisManager : MonoBehaviourTick
 {
+	public static ChestObjectHysteresisManager instance;
+
+	public static bool hasInstance = false;
+
+	public static List<ChestObjectHysteresis> allChests = new List<ChestObjectHysteresis>();
+
 	protected void Awake()
 	{
-		if (ChestObjectHysteresisManager.hasInstance && ChestObjectHysteresisManager.instance != this)
+		if (hasInstance && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		ChestObjectHysteresisManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	public static void CreateManager()
 	{
-		ChestObjectHysteresisManager.SetInstance(new GameObject("ChestObjectHysteresisManager").AddComponent<ChestObjectHysteresisManager>());
+		SetInstance(new GameObject("ChestObjectHysteresisManager").AddComponent<ChestObjectHysteresisManager>());
 	}
 
 	private static void SetInstance(ChestObjectHysteresisManager manager)
 	{
-		ChestObjectHysteresisManager.instance = manager;
-		ChestObjectHysteresisManager.hasInstance = true;
+		instance = manager;
+		hasInstance = true;
 		if (Application.isPlaying)
 		{
 			Object.DontDestroyOnLoad(manager);
@@ -32,39 +39,33 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 
 	public static void RegisterCH(ChestObjectHysteresis cOH)
 	{
-		if (!ChestObjectHysteresisManager.hasInstance)
+		if (!hasInstance)
 		{
-			ChestObjectHysteresisManager.CreateManager();
+			CreateManager();
 		}
-		if (!ChestObjectHysteresisManager.allChests.Contains(cOH))
+		if (!allChests.Contains(cOH))
 		{
-			ChestObjectHysteresisManager.allChests.Add(cOH);
+			allChests.Add(cOH);
 		}
 	}
 
 	public static void UnregisterCH(ChestObjectHysteresis cOH)
 	{
-		if (!ChestObjectHysteresisManager.hasInstance)
+		if (!hasInstance)
 		{
-			ChestObjectHysteresisManager.CreateManager();
+			CreateManager();
 		}
-		if (ChestObjectHysteresisManager.allChests.Contains(cOH))
+		if (allChests.Contains(cOH))
 		{
-			ChestObjectHysteresisManager.allChests.Remove(cOH);
+			allChests.Remove(cOH);
 		}
 	}
 
 	public override void Tick()
 	{
-		for (int i = 0; i < ChestObjectHysteresisManager.allChests.Count; i++)
+		for (int i = 0; i < allChests.Count; i++)
 		{
-			ChestObjectHysteresisManager.allChests[i].InvokeUpdate();
+			allChests[i].InvokeUpdate();
 		}
 	}
-
-	public static ChestObjectHysteresisManager instance;
-
-	public static bool hasInstance = false;
-
-	public static List<ChestObjectHysteresis> allChests = new List<ChestObjectHysteresis>();
 }

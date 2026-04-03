@@ -1,84 +1,77 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class UniqueQueue<T> : IEnumerable<!0>, IEnumerable
+public class UniqueQueue<T> : IEnumerable<T>, IEnumerable
 {
-	public int Count
-	{
-		get
-		{
-			return this.queue.Count;
-		}
-	}
+	private HashSet<T> queuedItems;
+
+	private Queue<T> queue;
+
+	public int Count => queue.Count;
 
 	public UniqueQueue()
 	{
-		this.queuedItems = new HashSet<T>();
-		this.queue = new Queue<T>();
+		queuedItems = new HashSet<T>();
+		queue = new Queue<T>();
 	}
 
 	public UniqueQueue(int capacity)
 	{
-		this.queuedItems = new HashSet<T>(capacity);
-		this.queue = new Queue<T>(capacity);
+		queuedItems = new HashSet<T>(capacity);
+		queue = new Queue<T>(capacity);
 	}
 
 	public void Clear()
 	{
-		this.queuedItems.Clear();
-		this.queue.Clear();
+		queuedItems.Clear();
+		queue.Clear();
 	}
 
 	public bool Enqueue(T item)
 	{
-		if (!this.queuedItems.Add(item))
+		if (!queuedItems.Add(item))
 		{
 			return false;
 		}
-		this.queue.Enqueue(item);
+		queue.Enqueue(item);
 		return true;
 	}
 
 	public T Dequeue()
 	{
-		T t = this.queue.Dequeue();
-		this.queuedItems.Remove(t);
-		return t;
+		T val = queue.Dequeue();
+		queuedItems.Remove(val);
+		return val;
 	}
 
 	public bool TryDequeue(out T item)
 	{
-		if (this.queue.Count < 1)
+		if (queue.Count < 1)
 		{
 			item = default(T);
 			return false;
 		}
-		item = this.Dequeue();
+		item = Dequeue();
 		return true;
 	}
 
 	public T Peek()
 	{
-		return this.queue.Peek();
+		return queue.Peek();
 	}
 
 	public bool Contains(T item)
 	{
-		return this.queuedItems.Contains(item);
+		return queuedItems.Contains(item);
 	}
 
-	IEnumerator<T> IEnumerable<!0>.GetEnumerator()
+	IEnumerator<T> IEnumerable<T>.GetEnumerator()
 	{
-		return this.queue.GetEnumerator();
+		return queue.GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()
 	{
-		return this.queue.GetEnumerator();
+		return queue.GetEnumerator();
 	}
-
-	private HashSet<T> queuedItems;
-
-	private Queue<T> queue;
 }

@@ -1,114 +1,120 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class MenorahCandle : MonoBehaviourPun
 {
-	public class MenorahCandle : MonoBehaviourPun
+	public int day;
+
+	public int month;
+
+	public int year;
+
+	public GameObject flame;
+
+	public GameObject candle;
+
+	private DateTime litDate;
+
+	private bool activeTimeEventDay;
+
+	private DateTime currentDate;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-		}
+	}
 
-		private void Start()
+	private void Start()
+	{
+		EnableCandle(enable: false);
+		EnableFlame(enable: false);
+		litDate = new DateTime(year, month, day);
+		currentDate = DateTime.Now;
+		EnableCandle(CandleShouldBeVisible());
+		EnableFlame(enable: false);
+		GorillaComputer instance = GorillaComputer.instance;
+		instance.OnServerTimeUpdated = (Action)Delegate.Combine(instance.OnServerTimeUpdated, new Action(OnTimeChanged));
+	}
+
+	private void UpdateMenorah()
+	{
+		EnableCandle(CandleShouldBeVisible());
+		if (ShouldLightCandle())
 		{
-			this.EnableCandle(false);
-			this.EnableFlame(false);
-			this.litDate = new DateTime(this.year, this.month, this.day);
-			this.currentDate = DateTime.Now;
-			this.EnableCandle(this.CandleShouldBeVisible());
-			this.EnableFlame(false);
+			EnableFlame(enable: true);
+		}
+		else if (ShouldSnuffCandle())
+		{
+			EnableFlame(enable: false);
+		}
+	}
+
+	private void OnTimeChanged()
+	{
+		currentDate = GorillaComputer.instance.GetServerTime();
+		UpdateMenorah();
+	}
+
+	public void OnTimeEventStart()
+	{
+		activeTimeEventDay = true;
+		UpdateMenorah();
+	}
+
+	public void OnTimeEventEnd()
+	{
+		activeTimeEventDay = false;
+		UpdateMenorah();
+	}
+
+	private void EnableCandle(bool enable)
+	{
+		if ((bool)candle)
+		{
+			candle.SetActive(enable);
+		}
+	}
+
+	private bool CandleShouldBeVisible()
+	{
+		return currentDate >= litDate;
+	}
+
+	private void EnableFlame(bool enable)
+	{
+		if ((bool)flame)
+		{
+			flame.SetActive(enable);
+		}
+	}
+
+	private bool ShouldLightCandle()
+	{
+		if (!activeTimeEventDay && CandleShouldBeVisible())
+		{
+			return !flame.activeSelf;
+		}
+		return false;
+	}
+
+	private bool ShouldSnuffCandle()
+	{
+		if (activeTimeEventDay)
+		{
+			return flame.activeSelf;
+		}
+		return false;
+	}
+
+	private void OnDestroy()
+	{
+		if ((bool)GorillaComputer.instance)
+		{
 			GorillaComputer instance = GorillaComputer.instance;
-			instance.OnServerTimeUpdated = (Action)Delegate.Combine(instance.OnServerTimeUpdated, new Action(this.OnTimeChanged));
+			instance.OnServerTimeUpdated = (Action)Delegate.Remove(instance.OnServerTimeUpdated, new Action(OnTimeChanged));
 		}
-
-		private void UpdateMenorah()
-		{
-			this.EnableCandle(this.CandleShouldBeVisible());
-			if (this.ShouldLightCandle())
-			{
-				this.EnableFlame(true);
-				return;
-			}
-			if (this.ShouldSnuffCandle())
-			{
-				this.EnableFlame(false);
-			}
-		}
-
-		private void OnTimeChanged()
-		{
-			this.currentDate = GorillaComputer.instance.GetServerTime();
-			this.UpdateMenorah();
-		}
-
-		public void OnTimeEventStart()
-		{
-			this.activeTimeEventDay = true;
-			this.UpdateMenorah();
-		}
-
-		public void OnTimeEventEnd()
-		{
-			this.activeTimeEventDay = false;
-			this.UpdateMenorah();
-		}
-
-		private void EnableCandle(bool enable)
-		{
-			if (this.candle)
-			{
-				this.candle.SetActive(enable);
-			}
-		}
-
-		private bool CandleShouldBeVisible()
-		{
-			return this.currentDate >= this.litDate;
-		}
-
-		private void EnableFlame(bool enable)
-		{
-			if (this.flame)
-			{
-				this.flame.SetActive(enable);
-			}
-		}
-
-		private bool ShouldLightCandle()
-		{
-			return !this.activeTimeEventDay && this.CandleShouldBeVisible() && !this.flame.activeSelf;
-		}
-
-		private bool ShouldSnuffCandle()
-		{
-			return this.activeTimeEventDay && this.flame.activeSelf;
-		}
-
-		private void OnDestroy()
-		{
-			if (GorillaComputer.instance)
-			{
-				GorillaComputer instance = GorillaComputer.instance;
-				instance.OnServerTimeUpdated = (Action)Delegate.Remove(instance.OnServerTimeUpdated, new Action(this.OnTimeChanged));
-			}
-		}
-
-		public int day;
-
-		public int month;
-
-		public int year;
-
-		public GameObject flame;
-
-		public GameObject candle;
-
-		private DateTime litDate;
-
-		private bool activeTimeEventDay;
-
-		private DateTime currentDate;
 	}
 }

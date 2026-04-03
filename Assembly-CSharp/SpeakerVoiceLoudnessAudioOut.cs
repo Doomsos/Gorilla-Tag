@@ -1,13 +1,15 @@
-﻿using System;
 using Photon.Voice;
 using Photon.Voice.Unity;
 using UnityEngine;
 
 public class SpeakerVoiceLoudnessAudioOut : UnityAudioOut
 {
-	public SpeakerVoiceLoudnessAudioOut(SpeakerVoiceToLoudness speaker, AudioSource audioSource, AudioOutDelayControl.PlayDelayConfig playDelayConfig, Photon.Voice.ILogger logger, string logPrefix, bool debugInfo) : base(audioSource, playDelayConfig, logger, logPrefix, debugInfo)
+	private SpeakerVoiceToLoudness voiceToLoudness;
+
+	public SpeakerVoiceLoudnessAudioOut(SpeakerVoiceToLoudness speaker, AudioSource audioSource, PlayDelayConfig playDelayConfig, Photon.Voice.ILogger logger, string logPrefix, bool debugInfo)
+		: base(audioSource, playDelayConfig, logger, logPrefix, debugInfo)
 	{
-		this.voiceToLoudness = speaker;
+		voiceToLoudness = speaker;
 	}
 
 	public override void OutWrite(float[] data, int offsetSamples)
@@ -18,25 +20,22 @@ public class SpeakerVoiceLoudnessAudioOut : UnityAudioOut
 			float num2 = data[i];
 			if (!float.IsFinite(num2))
 			{
-				num2 = 0f;
-				data[i] = num2;
+				num2 = (data[i] = 0f);
 			}
 			else if (num2 > 1f)
 			{
-				num2 = 1f;
-				data[i] = num2;
+				num2 = (data[i] = 1f);
 			}
 			else if (num2 < -1f)
 			{
-				num2 = -1f;
-				data[i] = num2;
+				num2 = (data[i] = -1f);
 			}
 			num += Mathf.Abs(num2);
 		}
 		if (num > 0f)
 		{
 			float num3 = num / (float)data.Length;
-			this.voiceToLoudness.loudness = num3;
+			voiceToLoudness.loudness = num3;
 			if (SpeakerVoiceToLoudnessConfig.EnableLoudnessLimit && num3 > SpeakerVoiceToLoudnessConfig.LoudnessLimitThreshold)
 			{
 				data = SpeakerVoiceToLoudnessConfig.StaticArrays.GetStaticArray(data.Length);
@@ -44,6 +43,4 @@ public class SpeakerVoiceLoudnessAudioOut : UnityAudioOut
 		}
 		base.OutWrite(data, offsetSamples);
 	}
-
-	private SpeakerVoiceToLoudness voiceToLoudness;
 }

@@ -1,21 +1,19 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class SimpleUnloadUnusedAssets : MonoBehaviour
 {
+	public float WaitForUnload = 5f;
+
 	private void OnEnable()
 	{
-		base.StartCoroutine(this.UnloadUnusedAssets());
+		StartCoroutine(UnloadUnusedAssets());
 	}
 
 	private IEnumerator UnloadUnusedAssets()
 	{
-		yield return new WaitForSeconds(this.WaitForUnload);
-		Debug.Log(string.Format("SimpleUnloadUnusedAssets: Forcing unload unused assets after waiting {0} seconds!", this.WaitForUnload));
+		yield return new WaitForSeconds(WaitForUnload);
+		Debug.Log($"SimpleUnloadUnusedAssets: Forcing unload unused assets after waiting {WaitForUnload} seconds!");
 		Resources.UnloadUnusedAssets();
-		yield break;
 	}
-
-	public float WaitForUnload = 5f;
 }

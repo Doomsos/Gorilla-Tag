@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 
-namespace TagEffects
+namespace TagEffects;
+
+[Serializable]
+public class TagEffectsComboResult
 {
-	[Serializable]
-	public class TagEffectsComboResult
-	{
-		public TagEffectsCombo input;
+	public TagEffectsCombo input;
 
-		public TagEffectPack[] output;
-	}
+	public TagEffectPack[] output;
 }

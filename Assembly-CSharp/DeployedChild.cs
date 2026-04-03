@@ -1,31 +1,37 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class DeployedChild : MonoBehaviour
 {
+	[SerializeField]
+	private Rigidbody _rigidbody;
+
+	[SerializeReference]
+	private DeployableObject _parent;
+
+	private bool _isRemote;
+
 	public void Deploy(DeployableObject parent, Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel, bool isRemote = false)
 	{
-		this._parent = parent;
-		this._parent.DeployChild();
-		Transform transform = base.transform;
-		transform.position = launchPos;
-		transform.rotation = launchRot;
-		transform.localScale = this._parent.transform.lossyScale;
-		this._rigidbody.linearVelocity = releaseVel;
-		this._isRemote = isRemote;
+		_parent = parent;
+		_parent.DeployChild();
+		Transform obj = base.transform;
+		obj.position = launchPos;
+		obj.rotation = launchRot;
+		obj.localScale = _parent.transform.lossyScale;
+		_rigidbody.linearVelocity = releaseVel;
+		_isRemote = isRemote;
 	}
 
 	public void ReturnToParent(float delay)
 	{
 		if (delay > 0f)
 		{
-			base.StartCoroutine(this.ReturnToParentDelayed(delay));
-			return;
+			StartCoroutine(ReturnToParentDelayed(delay));
 		}
-		if (this._parent != null)
+		else if (_parent != null)
 		{
-			this._parent.ReturnChild();
+			_parent.ReturnChild();
 		}
 	}
 
@@ -36,18 +42,9 @@ public class DeployedChild : MonoBehaviour
 		{
 			yield return null;
 		}
-		if (this._parent != null)
+		if (_parent != null)
 		{
-			this._parent.ReturnChild();
+			_parent.ReturnChild();
 		}
-		yield break;
 	}
-
-	[SerializeField]
-	private Rigidbody _rigidbody;
-
-	[SerializeReference]
-	private DeployableObject _parent;
-
-	private bool _isRemote;
 }

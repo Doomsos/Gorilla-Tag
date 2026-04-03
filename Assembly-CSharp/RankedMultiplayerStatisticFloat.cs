@@ -1,14 +1,21 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 {
-	public RankedMultiplayerStatisticFloat(string n, float val, float min = 0f, float max = 3.4028235E+38f, RankedMultiplayerStatistic.SerializationType s = RankedMultiplayerStatistic.SerializationType.None) : base(n, s)
+	private float floatValue;
+
+	private float minValue;
+
+	private float maxValue;
+
+	public RankedMultiplayerStatisticFloat(string n, float val, float min = 0f, float max = float.MaxValue, SerializationType s = SerializationType.None)
+		: base(n, s)
 	{
-		this.floatValue = val;
-		this.minValue = min;
-		this.maxValue = max;
+		floatValue = val;
+		minValue = min;
+		maxValue = max;
 	}
 
 	public static implicit operator float(RankedMultiplayerStatisticFloat stat)
@@ -23,74 +30,64 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 
 	public void Set(float val)
 	{
-		this.floatValue = Mathf.Clamp(val, this.minValue, this.maxValue);
-		this.Save();
+		floatValue = Mathf.Clamp(val, minValue, maxValue);
+		Save();
 	}
 
 	public float Get()
 	{
-		return this.floatValue;
+		return floatValue;
 	}
 
 	public override bool TrySetValue(string valAsString)
 	{
-		float value;
-		bool flag = float.TryParse(valAsString, out value);
-		if (flag)
+		float result;
+		bool num = float.TryParse(valAsString, out result);
+		if (num)
 		{
-			this.floatValue = Mathf.Clamp(value, this.minValue, this.maxValue);
+			floatValue = Mathf.Clamp(result, minValue, maxValue);
 		}
-		return flag;
+		return num;
 	}
 
 	public void Increment()
 	{
-		this.AddTo(1f);
+		AddTo(1f);
 	}
 
 	public void AddTo(float amount)
 	{
-		this.floatValue += amount;
-		this.floatValue = Mathf.Clamp(this.floatValue, this.minValue, this.maxValue);
-		this.Save();
+		floatValue += amount;
+		floatValue = Mathf.Clamp(floatValue, minValue, maxValue);
+		Save();
 	}
 
 	protected override void Save()
 	{
-		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
-		if (serializationType != RankedMultiplayerStatistic.SerializationType.Mothership && serializationType == RankedMultiplayerStatistic.SerializationType.PlayerPrefs)
+		SerializationType serializationType = base.serializationType;
+		if (serializationType != SerializationType.Mothership && serializationType == SerializationType.PlayerPrefs)
 		{
-			PlayerPrefs.SetFloat(this.name, this.floatValue);
+			PlayerPrefs.SetFloat(name, floatValue);
 			PlayerPrefs.Save();
 		}
 	}
 
 	public override void Load()
 	{
-		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
-		if (serializationType != RankedMultiplayerStatistic.SerializationType.Mothership)
+		switch (serializationType)
 		{
-			if (serializationType == RankedMultiplayerStatistic.SerializationType.PlayerPrefs)
-			{
-				base.IsValid = true;
-				this.floatValue = PlayerPrefs.GetFloat(this.name, this.floatValue);
-				return;
-			}
-		}
-		else
-		{
+		case SerializationType.PlayerPrefs:
+			base.IsValid = true;
+			floatValue = PlayerPrefs.GetFloat(name, floatValue);
+			break;
+		case SerializationType.Mothership:
 			base.IsValid = false;
+			break;
 		}
 	}
 
 	public override string ToString()
 	{
-		return this.floatValue.ToString();
+		return floatValue.ToString();
 	}
-
-	private float floatValue;
-
-	private float minValue;
-
-	private float maxValue;
 }

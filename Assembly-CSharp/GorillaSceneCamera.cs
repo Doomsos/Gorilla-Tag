@@ -1,13 +1,12 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaSceneCamera : MonoBehaviour
 {
+	public GorillaSceneTransform[] sceneTransforms;
+
 	public void SetSceneCamera(int sceneIndex)
 	{
-		base.transform.position = this.sceneTransforms[sceneIndex].scenePosition;
-		base.transform.eulerAngles = this.sceneTransforms[sceneIndex].sceneRotation;
+		base.transform.position = sceneTransforms[sceneIndex].scenePosition;
+		base.transform.eulerAngles = sceneTransforms[sceneIndex].sceneRotation;
 	}
-
-	public GorillaSceneTransform[] sceneTransforms;
 }

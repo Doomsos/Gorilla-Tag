@@ -1,9 +1,7 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class StaticLodGroupExcluder : MonoBehaviour
 {
-	public class StaticLodGroupExcluder : MonoBehaviour
-	{
-	}
 }

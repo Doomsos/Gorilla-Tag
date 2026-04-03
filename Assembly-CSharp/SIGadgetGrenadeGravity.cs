@@ -1,188 +1,14 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class SIGadgetGrenadeGravity : SIGadgetGrenade
 {
-	protected override void OnEnable()
+	private enum State
 	{
-		base.OnEnable();
-		this.gravityField.SetActive(false);
-		this.state = SIGadgetGrenadeGravity.State.Idle;
-		this.stateRemainingDuration = -1f;
-		this.isLocalPlayerInEffect = false;
-	}
-
-	protected override void HandleActivated()
-	{
-		if (this.state == SIGadgetGrenadeGravity.State.Idle)
-		{
-			this.activatedLocally = true;
-			this.SetStateAuthority(SIGadgetGrenadeGravity.State.Activated);
-			return;
-		}
-		this.SetStateAuthority(SIGadgetGrenadeGravity.State.Idle);
-	}
-
-	protected override void HandleThrown()
-	{
-	}
-
-	protected override void HandleHitSurface()
-	{
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		switch (this.state)
-		{
-		case SIGadgetGrenadeGravity.State.Idle:
-			break;
-		case SIGadgetGrenadeGravity.State.Activated:
-			this.stateRemainingDuration -= dt;
-			if (this.stateRemainingDuration <= 0f)
-			{
-				this.SetStateAuthority(SIGadgetGrenadeGravity.State.Triggered);
-				return;
-			}
-			break;
-		case SIGadgetGrenadeGravity.State.Triggered:
-			this.stateRemainingDuration -= dt;
-			if (this.stateRemainingDuration <= 0f)
-			{
-				this.SetStateAuthority(SIGadgetGrenadeGravity.State.Idle);
-				return;
-			}
-			if (this.freezePositionOnTrigger)
-			{
-				this.CheckReenabledFreezePosition();
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		SIGadgetGrenadeGravity.State state = (SIGadgetGrenadeGravity.State)this.gameEntity.GetState();
-		if (state != this.state)
-		{
-			this.SetState(state);
-		}
-		if (this.freezePositionOnTrigger)
-		{
-			this.CheckReenabledFreezePosition();
-		}
-	}
-
-	private void SetStateAuthority(SIGadgetGrenadeGravity.State newState)
-	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void SetState(SIGadgetGrenadeGravity.State newState)
-	{
-		if (newState == this.state || !this.CanChangeState((long)newState))
-		{
-			return;
-		}
-		this.state = newState;
-		switch (this.state)
-		{
-		case SIGadgetGrenadeGravity.State.Idle:
-			this.activatedLocally = false;
-			this.stateRemainingDuration = -1f;
-			this.mesh.material = this.idleMat;
-			this.DeactivateGravityEffect();
-			return;
-		case SIGadgetGrenadeGravity.State.Activated:
-			this.stateRemainingDuration = this.counterDuration;
-			this.mesh.material = this.activatedMat;
-			this.DeactivateGravityEffect();
-			return;
-		case SIGadgetGrenadeGravity.State.Triggered:
-			this.stateRemainingDuration = this.triggerDuration;
-			this.mesh.material = this.triggeredMat;
-			this.ActivateGravityEffect();
-			return;
-		default:
-			return;
-		}
-	}
-
-	public bool CanChangeState(long newStateIndex)
-	{
-		return newStateIndex >= 0L && newStateIndex < 3L;
-	}
-
-	private void ActivateGravityEffect()
-	{
-		this.gravityField.SetActive(true);
-		if (this.freezePositionOnTrigger)
-		{
-			this.rb.isKinematic = true;
-			this.rb.linearVelocity = Vector3.zero;
-		}
-	}
-
-	private void DeactivateGravityEffect()
-	{
-		this.gravityField.SetActive(false);
-		if (this.isLocalPlayerInEffect)
-		{
-			this.isLocalPlayerInEffect = false;
-			GTPlayer instance = GTPlayer.Instance;
-			if (instance != null)
-			{
-				instance.UnsetGravityOverride(this);
-			}
-		}
-		if (this.freezePositionOnTrigger && !this.thrownGadget.IsHeld())
-		{
-			this.rb.isKinematic = false;
-		}
-	}
-
-	private void CheckReenabledFreezePosition()
-	{
-		if (this.state == SIGadgetGrenadeGravity.State.Triggered && !this.thrownGadget.IsHeld() && !this.rb.isKinematic)
-		{
-			this.rb.isKinematic = true;
-			this.rb.linearVelocity = Vector3.zero;
-		}
-	}
-
-	private void OnTriggerEnter(Collider collider)
-	{
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance != null && collider == instance.headCollider)
-		{
-			this.isLocalPlayerInEffect = true;
-			instance.SetGravityOverride(this, new Action<GTPlayer>(this.GravityOverrideFunction));
-		}
-	}
-
-	private void OnTriggerExit(Collider collider)
-	{
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance != null && collider == instance.headCollider)
-		{
-			this.isLocalPlayerInEffect = false;
-			instance.UnsetGravityOverride(this);
-		}
-	}
-
-	public void GravityOverrideFunction(GTPlayer player)
-	{
-		Vector3 a = Physics.gravity * this.standardGravityMultiplier;
-		Vector3 b = Vector3.zero;
-		if (!this.thrownGadget.IsHeldLocal())
-		{
-			b = (base.transform.position - player.headCollider.transform.position).normalized * this.attractorStrength;
-		}
-		player.AddForce((a + b) * player.scale, ForceMode.Acceleration);
+		Idle,
+		Activated,
+		Triggered,
+		Count
 	}
 
 	[Header("Activation")]
@@ -218,17 +44,189 @@ public class SIGadgetGrenadeGravity : SIGadgetGrenade
 	[SerializeField]
 	private Material triggeredMat;
 
-	private SIGadgetGrenadeGravity.State state;
+	private State state;
 
 	private float stateRemainingDuration;
 
 	private bool isLocalPlayerInEffect;
 
-	private enum State
+	protected override void OnEnable()
 	{
-		Idle,
-		Activated,
-		Triggered,
-		Count
+		base.OnEnable();
+		gravityField.SetActive(value: false);
+		state = State.Idle;
+		stateRemainingDuration = -1f;
+		isLocalPlayerInEffect = false;
+	}
+
+	protected override void HandleActivated()
+	{
+		if (state == State.Idle)
+		{
+			activatedLocally = true;
+			SetStateAuthority(State.Activated);
+		}
+		else
+		{
+			SetStateAuthority(State.Idle);
+		}
+	}
+
+	protected override void HandleThrown()
+	{
+	}
+
+	protected override void HandleHitSurface()
+	{
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		switch (state)
+		{
+		case State.Activated:
+			stateRemainingDuration -= dt;
+			if (stateRemainingDuration <= 0f)
+			{
+				SetStateAuthority(State.Triggered);
+			}
+			break;
+		case State.Triggered:
+			stateRemainingDuration -= dt;
+			if (stateRemainingDuration <= 0f)
+			{
+				SetStateAuthority(State.Idle);
+			}
+			else if (freezePositionOnTrigger)
+			{
+				CheckReenabledFreezePosition();
+			}
+			break;
+		case State.Idle:
+			break;
+		}
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		State state = (State)gameEntity.GetState();
+		if (state != this.state)
+		{
+			SetState(state);
+		}
+		if (freezePositionOnTrigger)
+		{
+			CheckReenabledFreezePosition();
+		}
+	}
+
+	private void SetStateAuthority(State newState)
+	{
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void SetState(State newState)
+	{
+		if (newState != state && CanChangeState((long)newState))
+		{
+			state = newState;
+			switch (state)
+			{
+			case State.Idle:
+				activatedLocally = false;
+				stateRemainingDuration = -1f;
+				mesh.material = idleMat;
+				DeactivateGravityEffect();
+				break;
+			case State.Activated:
+				stateRemainingDuration = counterDuration;
+				mesh.material = activatedMat;
+				DeactivateGravityEffect();
+				break;
+			case State.Triggered:
+				stateRemainingDuration = triggerDuration;
+				mesh.material = triggeredMat;
+				ActivateGravityEffect();
+				break;
+			}
+		}
+	}
+
+	public bool CanChangeState(long newStateIndex)
+	{
+		if (newStateIndex < 0 || newStateIndex >= 3)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private void ActivateGravityEffect()
+	{
+		gravityField.SetActive(value: true);
+		if (freezePositionOnTrigger)
+		{
+			rb.isKinematic = true;
+			rb.linearVelocity = Vector3.zero;
+		}
+	}
+
+	private void DeactivateGravityEffect()
+	{
+		gravityField.SetActive(value: false);
+		if (isLocalPlayerInEffect)
+		{
+			isLocalPlayerInEffect = false;
+			GTPlayer instance = GTPlayer.Instance;
+			if (instance != null)
+			{
+				instance.UnsetGravityOverride(this);
+			}
+		}
+		if (freezePositionOnTrigger && !thrownGadget.IsHeld())
+		{
+			rb.isKinematic = false;
+		}
+	}
+
+	private void CheckReenabledFreezePosition()
+	{
+		if (state == State.Triggered && !thrownGadget.IsHeld() && !rb.isKinematic)
+		{
+			rb.isKinematic = true;
+			rb.linearVelocity = Vector3.zero;
+		}
+	}
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance != null && collider == instance.headCollider)
+		{
+			isLocalPlayerInEffect = true;
+			instance.SetGravityOverride(this, GravityOverrideFunction);
+		}
+	}
+
+	private void OnTriggerExit(Collider collider)
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance != null && collider == instance.headCollider)
+		{
+			isLocalPlayerInEffect = false;
+			instance.UnsetGravityOverride(this);
+		}
+	}
+
+	public void GravityOverrideFunction(GTPlayer player)
+	{
+		Vector3 vector = Physics.gravity * standardGravityMultiplier;
+		Vector3 vector2 = Vector3.zero;
+		if (!thrownGadget.IsHeldLocal())
+		{
+			vector2 = (base.transform.position - player.headCollider.transform.position).normalized * attractorStrength;
+		}
+		player.AddForce((vector + vector2) * player.scale, ForceMode.Acceleration);
 	}
 }

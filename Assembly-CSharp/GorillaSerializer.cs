@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTag;
 using Photon.Pun;
@@ -8,56 +8,64 @@ using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiateMagicCallback
 {
+	protected bool successfullInstantiate;
+
+	protected IGorillaSerializeable serializeTarget;
+
+	private Type targetType;
+
+	protected GameObject targetObject;
+
+	[SerializeField]
+	protected PhotonView photonView;
+
 	void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (!this.successfullInstantiate || this.serializeTarget == null || !this.ValidOnSerialize(stream, info))
+		if (successfullInstantiate && serializeTarget != null && ValidOnSerialize(stream, in info))
 		{
-			return;
+			if (stream.IsReading)
+			{
+				serializeTarget.OnSerializeRead(stream, info);
+			}
+			else
+			{
+				serializeTarget.OnSerializeWrite(stream, info);
+			}
 		}
-		if (stream.IsReading)
-		{
-			this.serializeTarget.OnSerializeRead(stream, info);
-			return;
-		}
-		this.serializeTarget.OnSerializeWrite(stream, info);
 	}
 
 	public virtual void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
-		if (this.photonView == null)
+		if (photonView == null)
 		{
 			return;
 		}
-		this.successfullInstantiate = this.OnInstantiateSetup(info, out this.targetObject, out this.targetType);
-		if (this.successfullInstantiate)
+		successfullInstantiate = OnInstantiateSetup(info, out targetObject, out targetType);
+		if (successfullInstantiate)
 		{
-			if (this.targetType != null && this.targetObject.IsNotNull())
+			if (targetType != null && targetObject.IsNotNull() && targetObject.GetComponent(targetType) is IGorillaSerializeable gorillaSerializeable)
 			{
-				IGorillaSerializeable gorillaSerializeable = this.targetObject.GetComponent(this.targetType) as IGorillaSerializeable;
-				if (gorillaSerializeable != null)
-				{
-					this.serializeTarget = gorillaSerializeable;
-				}
+				serializeTarget = gorillaSerializeable;
 			}
-			if (this.serializeTarget == null)
+			if (serializeTarget == null)
 			{
-				this.successfullInstantiate = false;
+				successfullInstantiate = false;
 			}
 		}
-		if (this.successfullInstantiate)
+		if (successfullInstantiate)
 		{
-			this.OnSuccessfullInstantiate(info);
+			OnSuccessfullInstantiate(info);
 			return;
 		}
-		if (PhotonNetwork.InRoom && this.photonView.IsMine)
+		if (PhotonNetwork.InRoom && photonView.IsMine)
 		{
-			MonkeAgentCleanup.RegisterForDestroy(this.photonView);
+			MonkeAgentCleanup.RegisterForDestroy(photonView);
 		}
 		else
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
-		this.photonView.ObservedComponents.Remove(this);
+		photonView.ObservedComponents.Remove(this);
 	}
 
 	protected virtual void OnSuccessfullInstantiate(PhotonMessageInfo info)
@@ -73,35 +81,28 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 
 	protected virtual bool ValidOnSerialize(PhotonStream stream, in PhotonMessageInfo info)
 	{
-		return info.Sender == info.photonView.Owner;
+		if (info.Sender != info.photonView.Owner)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public virtual T AddRPCComponent<T>() where T : RPCNetworkBase
 	{
 		T result = base.gameObject.AddComponent<T>();
-		this.photonView.RefreshRpcMonoBehaviourCache();
+		photonView.RefreshRpcMonoBehaviourCache();
 		return result;
 	}
 
 	public void SendRPC(string rpcName, bool targetOthers, params object[] data)
 	{
-		RpcTarget target = targetOthers ? RpcTarget.Others : RpcTarget.MasterClient;
-		this.photonView.RPC(rpcName, target, data);
+		RpcTarget target = (targetOthers ? RpcTarget.Others : RpcTarget.MasterClient);
+		photonView.RPC(rpcName, target, data);
 	}
 
 	public void SendRPC(string rpcName, Player targetPlayer, params object[] data)
 	{
-		this.photonView.RPC(rpcName, targetPlayer, data);
+		photonView.RPC(rpcName, targetPlayer, data);
 	}
-
-	protected bool successfullInstantiate;
-
-	protected IGorillaSerializeable serializeTarget;
-
-	private Type targetType;
-
-	protected GameObject targetObject;
-
-	[SerializeField]
-	protected PhotonView photonView;
 }

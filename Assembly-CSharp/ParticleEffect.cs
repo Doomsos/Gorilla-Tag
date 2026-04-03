@@ -1,46 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(ParticleSystem))]
 public class ParticleEffect : MonoBehaviour
 {
-	public long effectID
-	{
-		get
-		{
-			return this._effectID;
-		}
-	}
-
-	public bool isPlaying
-	{
-		get
-		{
-			return this.system && this.system.isPlaying;
-		}
-	}
-
-	public virtual void Play()
-	{
-		base.gameObject.SetActive(true);
-		this.system.Play(true);
-	}
-
-	public virtual void Stop()
-	{
-		this.system.Stop(true);
-		base.gameObject.SetActive(false);
-	}
-
-	private void OnParticleSystemStopped()
-	{
-		base.gameObject.SetActive(false);
-		if (this.pool)
-		{
-			this.pool.Return(this);
-		}
-	}
-
 	public ParticleSystem system;
 
 	[SerializeField]
@@ -50,4 +13,39 @@ public class ParticleEffect : MonoBehaviour
 
 	[NonSerialized]
 	public int poolIndex = -1;
+
+	public long effectID => _effectID;
+
+	public bool isPlaying
+	{
+		get
+		{
+			if ((bool)system)
+			{
+				return system.isPlaying;
+			}
+			return false;
+		}
+	}
+
+	public virtual void Play()
+	{
+		base.gameObject.SetActive(value: true);
+		system.Play(withChildren: true);
+	}
+
+	public virtual void Stop()
+	{
+		system.Stop(withChildren: true);
+		base.gameObject.SetActive(value: false);
+	}
+
+	private void OnParticleSystemStopped()
+	{
+		base.gameObject.SetActive(value: false);
+		if ((bool)pool)
+		{
+			pool.Return(this);
+		}
+	}
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,466 +5,483 @@ using GorillaGameModes;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public sealed class GorillaFreezeTagManager : GorillaTagManager
 {
-	public sealed class GorillaFreezeTagManager : GorillaTagManager
+	public Dictionary<NetPlayer, float> currentFrozen = new Dictionary<NetPlayer, float>(10);
+
+	public float freezeDuration;
+
+	public int infectMorePlayerLowerThreshold = 6;
+
+	public int infectMorePlayerUpperThreshold = 10;
+
+	[Space]
+	[Header("Frozen player jump settings")]
+	public float frozenPlayerFastJumpLimit;
+
+	public float frozenPlayerFastJumpMultiplier;
+
+	public float frozenPlayerSlowJumpLimit;
+
+	public float frozenPlayerSlowJumpMultiplier;
+
+	[GorillaSoundLookup]
+	public int[] frozenHandTapIndices;
+
+	private float fastJumpLimitCached;
+
+	private float fastJumpMultiplierCached;
+
+	private float slowJumpLimitCached;
+
+	private float slowJumpMultiplierCached;
+
+	private VRRig localVRRig;
+
+	private int hapticStrength;
+
+	private List<NetPlayer> currentRoundInfectedPlayers = new List<NetPlayer>(10);
+
+	private List<NetPlayer> lastRoundInfectedPlayers = new List<NetPlayer>(10);
+
+	public override GameModeType GameType()
 	{
-		public override GameModeType GameType()
-		{
-			return GameModeType.FreezeTag;
-		}
+		return GameModeType.FreezeTag;
+	}
 
-		public override string GameModeName()
-		{
-			return "FREEZE TAG";
-		}
+	public override string GameModeName()
+	{
+		return "FREEZE TAG";
+	}
 
-		public override string GameModeNameRoomLabel()
+	public override string GameModeNameRoomLabel()
+	{
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_FREEZE_TAG_ROOM_LABEL", out var result, "(FREEZE TAG GAME)"))
 		{
-			string result;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_FREEZE_TAG_ROOM_LABEL", out result, "(FREEZE TAG GAME)"))
+			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_FREEZE_TAG_ROOM_LABEL]");
+		}
+		return result;
+	}
+
+	public override void Awake()
+	{
+		base.Awake();
+		fastJumpLimitCached = fastJumpLimit;
+		fastJumpMultiplierCached = fastJumpMultiplier;
+		slowJumpLimitCached = slowJumpLimit;
+		slowJumpMultiplierCached = slowJumpMultiplier;
+	}
+
+	public override void UpdateState()
+	{
+		if (!NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		foreach (KeyValuePair<NetPlayer, float> item in currentFrozen.ToList())
+		{
+			if (Time.time - item.Value >= freezeDuration)
 			{
-				Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_FREEZE_TAG_ROOM_LABEL]");
-			}
-			return result;
-		}
-
-		public override void Awake()
-		{
-			base.Awake();
-			this.fastJumpLimitCached = this.fastJumpLimit;
-			this.fastJumpMultiplierCached = this.fastJumpMultiplier;
-			this.slowJumpLimitCached = this.slowJumpLimit;
-			this.slowJumpMultiplierCached = this.slowJumpMultiplier;
-		}
-
-		public override void UpdateState()
-		{
-			if (NetworkSystem.Instance.IsMasterClient)
-			{
-				foreach (KeyValuePair<NetPlayer, float> keyValuePair in this.currentFrozen.ToList<KeyValuePair<NetPlayer, float>>())
-				{
-					if (Time.time - keyValuePair.Value >= this.freezeDuration)
-					{
-						this.currentFrozen.Remove(keyValuePair.Key);
-						this.AddInfectedPlayer(keyValuePair.Key, false);
-						RoomSystem.SendSoundEffectAll(11, 0.25f, false);
-					}
-				}
-				if (GameMode.ParticipatingPlayers.Count < 1)
-				{
-					this.ResetGame();
-					base.SetisCurrentlyTag(true);
-					return;
-				}
-				if (this.isCurrentlyTag && this.currentIt == null)
-				{
-					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
-				}
-				else if (this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
-				{
-					this.ResetGame();
-					int index2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index2], true);
-				}
-				else if (!this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count < this.infectedModeThreshold)
-				{
-					this.ResetGame();
-					base.SetisCurrentlyTag(true);
-					int index3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index3], false);
-				}
-				else if (!this.isCurrentlyTag && this.currentInfected.Count == 0)
-				{
-					int index4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index4], true);
-				}
-				bool flag = true;
-				foreach (NetPlayer player in GameMode.ParticipatingPlayers)
-				{
-					if (!this.IsFrozen(player) && !base.IsInfected(player))
-					{
-						flag = false;
-						break;
-					}
-				}
-				if (flag && !this.isCurrentlyTag)
-				{
-					this.InfectionRoundEnd();
-				}
+				currentFrozen.Remove(item.Key);
+				AddInfectedPlayer(item.Key, withTagStop: false);
+				RoomSystem.SendSoundEffectAll(11, 0.25f);
 			}
 		}
-
-		public override void Tick()
+		if (GameMode.ParticipatingPlayers.Count < 1)
 		{
-			base.Tick();
-			if (this.localVRRig)
+			ResetGame();
+			SetisCurrentlyTag(newTagSetting: true);
+			return;
+		}
+		if (isCurrentlyTag && currentIt == null)
+		{
+			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			ChangeCurrentIt(GameMode.ParticipatingPlayers[index], withTagFreeze: false);
+		}
+		else if (isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= infectedModeThreshold)
+		{
+			ResetGame();
+			int index2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			AddInfectedPlayer(GameMode.ParticipatingPlayers[index2]);
+		}
+		else if (!isCurrentlyTag && GameMode.ParticipatingPlayers.Count < infectedModeThreshold)
+		{
+			ResetGame();
+			SetisCurrentlyTag(newTagSetting: true);
+			int index3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			ChangeCurrentIt(GameMode.ParticipatingPlayers[index3], withTagFreeze: false);
+		}
+		else if (!isCurrentlyTag && currentInfected.Count == 0)
+		{
+			int index4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			AddInfectedPlayer(GameMode.ParticipatingPlayers[index4]);
+		}
+		bool flag = true;
+		foreach (NetPlayer participatingPlayer in GameMode.ParticipatingPlayers)
+		{
+			if (!IsFrozen(participatingPlayer) && !IsInfected(participatingPlayer))
 			{
-				this.localVRRig.IsFrozen = this.IsFrozen(NetworkSystem.Instance.LocalPlayer);
+				flag = false;
+				break;
 			}
 		}
-
-		public override void StartPlaying()
+		if (flag && !isCurrentlyTag)
 		{
-			base.StartPlaying();
-			this.localVRRig = this.FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer);
-			if (NetworkSystem.Instance.IsMasterClient)
+			InfectionRoundEnd();
+		}
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+		if ((bool)localVRRig)
+		{
+			localVRRig.IsFrozen = IsFrozen(NetworkSystem.Instance.LocalPlayer);
+		}
+	}
+
+	public override void StartPlaying()
+	{
+		base.StartPlaying();
+		localVRRig = FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer);
+		if (!NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		NetPlayer[] array = lastRoundInfectedPlayers.ToArray();
+		foreach (NetPlayer netPlayer in array)
+		{
+			if (netPlayer != null && !netPlayer.InRoom)
 			{
-				foreach (NetPlayer netPlayer in this.lastRoundInfectedPlayers.ToArray())
-				{
-					if (netPlayer != null && !netPlayer.InRoom)
-					{
-						this.lastRoundInfectedPlayers.Remove(netPlayer);
-					}
-				}
-				foreach (NetPlayer netPlayer2 in this.currentRoundInfectedPlayers.ToArray())
-				{
-					if (netPlayer2 != null && !netPlayer2.InRoom)
-					{
-						this.currentRoundInfectedPlayers.Remove(netPlayer2);
-					}
-				}
+				lastRoundInfectedPlayers.Remove(netPlayer);
 			}
 		}
-
-		public override void ReportTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
+		array = currentRoundInfectedPlayers.ToArray();
+		foreach (NetPlayer netPlayer2 in array)
 		{
-			if (NetworkSystem.Instance.IsMasterClient)
+			if (netPlayer2 != null && !netPlayer2.InRoom)
 			{
-				this.taggingRig = this.FindPlayerVRRig(taggingPlayer);
-				this.taggedRig = this.FindPlayerVRRig(taggedPlayer);
-				if (this.taggingRig == null || this.taggedRig == null)
-				{
-					return;
-				}
-				Debug.LogWarning("Report TAG - tagged " + this.taggedRig.playerNameVisible + ", tagging " + this.taggingRig.playerNameVisible);
-				if (this.isCurrentlyTag)
-				{
-					if (taggingPlayer == this.currentIt && taggingPlayer != taggedPlayer && (double)Time.time > this.lastTag + (double)this.tagCoolDown)
-					{
-						base.AddLastTagged(taggedPlayer, taggingPlayer);
-						this.ChangeCurrentIt(taggedPlayer, false);
-						this.lastTag = (double)Time.time;
-						return;
-					}
-				}
-				else if (this.currentInfected.Contains(taggingPlayer) && !this.currentInfected.Contains(taggedPlayer) && !this.currentFrozen.ContainsKey(taggedPlayer) && (double)Time.time > this.lastTag + (double)this.tagCoolDown)
-				{
-					if (!this.taggingRig.IsPositionInRange(this.taggedRig.transform.position, 6f) && !this.taggingRig.CheckTagDistanceRollback(this.taggedRig, 6f, 0.2f))
-					{
-						MonkeAgent.instance.SendReport("extremely far tag", taggingPlayer.UserId, taggingPlayer.NickName);
-						return;
-					}
-					base.AddLastTagged(taggedPlayer, taggingPlayer);
-					this.AddFrozenPlayer(taggedPlayer);
-					return;
-				}
-				else if (!this.currentInfected.Contains(taggingPlayer) && !this.currentInfected.Contains(taggedPlayer) && this.currentFrozen.ContainsKey(taggedPlayer) && (double)Time.time > this.lastTag + (double)this.tagCoolDown)
-				{
-					if (!this.taggingRig.IsPositionInRange(this.taggedRig.transform.position, 6f) && !this.taggingRig.CheckTagDistanceRollback(this.taggedRig, 6f, 0.2f))
-					{
-						MonkeAgent.instance.SendReport("extremely far tag", taggingPlayer.UserId, taggingPlayer.NickName);
-						return;
-					}
-					this.UnfreezePlayer(taggedPlayer);
-				}
+				currentRoundInfectedPlayers.Remove(netPlayer2);
 			}
 		}
+	}
 
-		public override bool LocalCanTag(NetPlayer myPlayer, NetPlayer otherPlayer)
+	public override void ReportTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
+	{
+		if (!NetworkSystem.Instance.IsMasterClient)
 		{
-			if (this.isCurrentlyTag)
-			{
-				return myPlayer == this.currentIt && myPlayer != otherPlayer;
-			}
-			return (this.currentInfected.Contains(myPlayer) && !this.currentFrozen.ContainsKey(otherPlayer) && !this.currentInfected.Contains(otherPlayer)) || (!this.currentInfected.Contains(myPlayer) && !this.currentFrozen.ContainsKey(myPlayer) && (this.currentInfected.Contains(otherPlayer) || this.currentFrozen.ContainsKey(otherPlayer)));
+			return;
 		}
-
-		public override bool LocalIsTagged(NetPlayer player)
+		taggingRig = FindPlayerVRRig(taggingPlayer);
+		taggedRig = FindPlayerVRRig(taggedPlayer);
+		if (taggingRig == null || taggedRig == null)
 		{
-			if (this.isCurrentlyTag)
-			{
-				return this.currentIt == player;
-			}
-			return this.currentInfected.Contains(player) || this.currentFrozen.ContainsKey(player);
+			return;
 		}
-
-		public override void NewVRRig(NetPlayer player, int vrrigPhotonViewID, bool didTutorial)
+		Debug.LogWarning("Report TAG - tagged " + taggedRig.playerNameVisible + ", tagging " + taggingRig.playerNameVisible);
+		if (isCurrentlyTag)
 		{
-			if (NetworkSystem.Instance.IsMasterClient)
+			if (taggingPlayer == currentIt && taggingPlayer != taggedPlayer && (double)Time.time > lastTag + (double)tagCoolDown)
 			{
-				GameMode.RefreshPlayers();
-				if (!this.isCurrentlyTag && !base.IsInfected(player))
-				{
-					this.AddInfectedPlayer(player, true);
-					this.currentRoundInfectedPlayers.Add(player);
-				}
-				this.UpdateInfectionState();
+				AddLastTagged(taggedPlayer, taggingPlayer);
+				ChangeCurrentIt(taggedPlayer, withTagFreeze: false);
+				lastTag = Time.time;
 			}
 		}
-
-		protected override IEnumerator InfectionRoundEndingCoroutine()
+		else if (currentInfected.Contains(taggingPlayer) && !currentInfected.Contains(taggedPlayer) && !currentFrozen.ContainsKey(taggedPlayer) && (double)Time.time > lastTag + (double)tagCoolDown)
 		{
-			while ((double)Time.time < this.timeInfectedGameEnded + (double)this.tagCoolDown)
+			if (!taggingRig.IsPositionInRange(taggedRig.transform.position, 6f) && !taggingRig.CheckTagDistanceRollback(taggedRig, 6f, 0.2f))
 			{
-				yield return new WaitForSeconds(0.1f);
+				MonkeAgent.instance.SendReport("extremely far tag", taggingPlayer.UserId, taggingPlayer.NickName);
+				return;
 			}
-			if (!this.isCurrentlyTag && this.waitingToStartNextInfectionGame)
+			AddLastTagged(taggedPlayer, taggingPlayer);
+			AddFrozenPlayer(taggedPlayer);
+		}
+		else if (!currentInfected.Contains(taggingPlayer) && !currentInfected.Contains(taggedPlayer) && currentFrozen.ContainsKey(taggedPlayer) && (double)Time.time > lastTag + (double)tagCoolDown)
+		{
+			if (!taggingRig.IsPositionInRange(taggedRig.transform.position, 6f) && !taggingRig.CheckTagDistanceRollback(taggedRig, 6f, 0.2f))
 			{
-				base.ClearInfectionState();
-				this.currentFrozen.Clear();
-				GameMode.RefreshPlayers();
-				this.lastRoundInfectedPlayers.Clear();
-				this.lastRoundInfectedPlayers.AddRange(this.currentRoundInfectedPlayers);
-				this.currentRoundInfectedPlayers.Clear();
-				List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
-				int num = 0;
-				if (participatingPlayers.Count > 0 && participatingPlayers.Count < this.infectMorePlayerLowerThreshold)
-				{
-					num = 1;
-				}
-				else if (participatingPlayers.Count >= this.infectMorePlayerLowerThreshold && participatingPlayers.Count < this.infectMorePlayerUpperThreshold)
-				{
-					num = 2;
-				}
-				else if (participatingPlayers.Count >= this.infectMorePlayerUpperThreshold)
-				{
-					num = 3;
-				}
-				for (int i = 0; i < num; i++)
-				{
-					this.TryAddNewInfectedPlayer();
-				}
-				this.lastTag = (double)Time.time;
-			}
-			yield return null;
-			yield break;
-		}
-
-		public override void ResetGame()
-		{
-			base.ResetGame();
-			this.currentFrozen.Clear();
-			this.currentRoundInfectedPlayers.Clear();
-			this.lastRoundInfectedPlayers.Clear();
-		}
-
-		private new void AddInfectedPlayer(NetPlayer infectedPlayer, bool withTagStop = true)
-		{
-			if (NetworkSystem.Instance.IsMasterClient)
-			{
-				this.currentInfected.Add(infectedPlayer);
-				if (!withTagStop)
-				{
-					RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, infectedPlayer);
-				}
-				else
-				{
-					RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.TaggedTime, infectedPlayer);
-				}
-				RoomSystem.SendSoundEffectOnOther(0, 0.25f, infectedPlayer, false);
-				this.UpdateInfectionState();
-			}
-		}
-
-		private void TryAddNewInfectedPlayer()
-		{
-			List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
-			int index = Random.Range(0, participatingPlayers.Count);
-			int num = 0;
-			while (num < 10 && this.lastRoundInfectedPlayers.Contains(participatingPlayers[index]))
-			{
-				index = Random.Range(0, participatingPlayers.Count);
-				num++;
-			}
-			this.AddInfectedPlayer(participatingPlayers[index], true);
-			this.currentRoundInfectedPlayers.Add(participatingPlayers[index]);
-		}
-
-		public override int MyMatIndex(NetPlayer forPlayer)
-		{
-			if (this.isCurrentlyTag && forPlayer == this.currentIt)
-			{
-				return 14;
-			}
-			if (this.currentInfected.Contains(forPlayer))
-			{
-				return 14;
-			}
-			return 0;
-		}
-
-		public override void UpdatePlayerAppearance(VRRig rig)
-		{
-			NetPlayer netPlayer = rig.isOfflineVRRig ? NetworkSystem.Instance.LocalPlayer : rig.creator;
-			rig.UpdateFrozenEffect(this.IsFrozen(netPlayer));
-			int materialIndex = this.MyMatIndex(netPlayer);
-			rig.ChangeMaterialLocal(materialIndex);
-		}
-
-		private void UnfreezePlayer(NetPlayer taggedPlayer)
-		{
-			if (NetworkSystem.Instance.IsMasterClient && this.currentFrozen.ContainsKey(taggedPlayer))
-			{
-				this.currentFrozen.Remove(taggedPlayer);
-				RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.UnTagged, taggedPlayer);
-				RoomSystem.SendSoundEffectAll(10, 0.25f, true);
-			}
-		}
-
-		private void AddFrozenPlayer(NetPlayer taggedPlayer)
-		{
-			if (NetworkSystem.Instance.IsMasterClient && !this.currentFrozen.ContainsKey(taggedPlayer))
-			{
-				this.currentFrozen.Add(taggedPlayer, Time.time);
-				RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.FrozenTime, taggedPlayer);
-				RoomSystem.SendSoundEffectAll(9, 0.25f, false);
-				RoomSystem.SendSoundEffectToPlayer(12, 0.05f, taggedPlayer, false);
-			}
-		}
-
-		public bool IsFrozen(NetPlayer player)
-		{
-			return this.currentFrozen.ContainsKey(player);
-		}
-
-		public override float[] LocalPlayerSpeed()
-		{
-			this.fastJumpLimit = this.fastJumpLimitCached;
-			this.fastJumpMultiplier = this.fastJumpMultiplierCached;
-			this.slowJumpLimit = this.slowJumpLimitCached;
-			this.slowJumpMultiplier = this.slowJumpMultiplierCached;
-			if (this.isCurrentlyTag)
-			{
-				if (NetworkSystem.Instance.LocalPlayer == this.currentIt)
-				{
-					this.playerSpeed[0] = this.fastJumpLimit;
-					this.playerSpeed[1] = this.fastJumpMultiplier;
-					return this.playerSpeed;
-				}
-				this.playerSpeed[0] = this.slowJumpLimit;
-				this.playerSpeed[1] = this.slowJumpMultiplier;
-				return this.playerSpeed;
+				MonkeAgent.instance.SendReport("extremely far tag", taggingPlayer.UserId, taggingPlayer.NickName);
 			}
 			else
 			{
-				if (!this.currentInfected.Contains(NetworkSystem.Instance.LocalPlayer) && !this.currentFrozen.ContainsKey(NetworkSystem.Instance.LocalPlayer))
-				{
-					this.playerSpeed[0] = base.InterpolatedNoobJumpSpeed(this.currentInfected.Count);
-					this.playerSpeed[1] = base.InterpolatedNoobJumpMultiplier(this.currentInfected.Count);
-					return this.playerSpeed;
-				}
-				if (this.currentFrozen.ContainsKey(NetworkSystem.Instance.LocalPlayer))
-				{
-					this.fastJumpLimit = this.frozenPlayerFastJumpLimit;
-					this.fastJumpMultiplier = this.frozenPlayerFastJumpMultiplier;
-					this.slowJumpLimit = this.frozenPlayerSlowJumpLimit;
-					this.slowJumpMultiplier = this.frozenPlayerSlowJumpMultiplier;
-				}
-				this.playerSpeed[0] = base.InterpolatedInfectedJumpSpeed(this.currentInfected.Count);
-				this.playerSpeed[1] = base.InterpolatedInfectedJumpMultiplier(this.currentInfected.Count);
-				return this.playerSpeed;
+				UnfreezePlayer(taggedPlayer);
 			}
 		}
+	}
 
-		public int GetFrozenHandTapAudioIndex()
+	public override bool LocalCanTag(NetPlayer myPlayer, NetPlayer otherPlayer)
+	{
+		if (isCurrentlyTag)
 		{
-			int num = Random.Range(0, this.frozenHandTapIndices.Length);
-			return this.frozenHandTapIndices[num];
-		}
-
-		public override void OnPlayerLeftRoom(NetPlayer otherPlayer)
-		{
-			base.OnPlayerLeftRoom(otherPlayer);
-			if (NetworkSystem.Instance.IsMasterClient)
+			if (myPlayer == currentIt)
 			{
-				if (this.isCurrentlyTag && ((otherPlayer != null && otherPlayer == this.currentIt) || this.currentIt.ActorNumber == otherPlayer.ActorNumber) && GameMode.ParticipatingPlayers.Count > 0)
-				{
-					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
-				}
-				if (this.currentInfected.Contains(otherPlayer))
-				{
-					this.currentInfected.Remove(otherPlayer);
-				}
-				if (this.currentFrozen.ContainsKey(otherPlayer))
-				{
-					this.currentFrozen.Remove(otherPlayer);
-				}
-				this.UpdateState();
+				return myPlayer != otherPlayer;
 			}
+			return false;
 		}
-
-		public override void StopPlaying()
+		if (currentInfected.Contains(myPlayer) && !currentFrozen.ContainsKey(otherPlayer) && !currentInfected.Contains(otherPlayer))
 		{
-			base.StopPlaying();
-			foreach (VRRig vrrig in VRRigCache.ActiveRigs)
+			return true;
+		}
+		if (!currentInfected.Contains(myPlayer) && !currentFrozen.ContainsKey(myPlayer) && (currentInfected.Contains(otherPlayer) || currentFrozen.ContainsKey(otherPlayer)))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public override bool LocalIsTagged(NetPlayer player)
+	{
+		if (isCurrentlyTag)
+		{
+			return currentIt == player;
+		}
+		if (!currentInfected.Contains(player))
+		{
+			return currentFrozen.ContainsKey(player);
+		}
+		return true;
+	}
+
+	public override void NewVRRig(NetPlayer player, int vrrigPhotonViewID, bool didTutorial)
+	{
+		if (NetworkSystem.Instance.IsMasterClient)
+		{
+			GameMode.RefreshPlayers();
+			if (!isCurrentlyTag && !IsInfected(player))
 			{
-				vrrig.ForceResetFrozenEffect();
+				AddInfectedPlayer(player);
+				currentRoundInfectedPlayers.Add(player);
 			}
+			UpdateInfectionState();
 		}
+	}
 
-		public override void OnSerializeRead(PhotonStream stream, PhotonMessageInfo info)
+	protected override IEnumerator InfectionRoundEndingCoroutine()
+	{
+		while ((double)Time.time < timeInfectedGameEnded + (double)tagCoolDown)
 		{
-			base.OnSerializeRead(stream, info);
-			this.currentFrozen.Clear();
-			int num = (int)stream.ReceiveNext();
+			yield return new WaitForSeconds(0.1f);
+		}
+		if (!isCurrentlyTag && waitingToStartNextInfectionGame)
+		{
+			ClearInfectionState();
+			currentFrozen.Clear();
+			GameMode.RefreshPlayers();
+			lastRoundInfectedPlayers.Clear();
+			lastRoundInfectedPlayers.AddRange(currentRoundInfectedPlayers);
+			currentRoundInfectedPlayers.Clear();
+			List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
+			int num = 0;
+			if (participatingPlayers.Count > 0 && participatingPlayers.Count < infectMorePlayerLowerThreshold)
+			{
+				num = 1;
+			}
+			else if (participatingPlayers.Count >= infectMorePlayerLowerThreshold && participatingPlayers.Count < infectMorePlayerUpperThreshold)
+			{
+				num = 2;
+			}
+			else if (participatingPlayers.Count >= infectMorePlayerUpperThreshold)
+			{
+				num = 3;
+			}
 			for (int i = 0; i < num; i++)
 			{
-				int playerID = (int)stream.ReceiveNext();
-				float value = (float)stream.ReceiveNext();
-				NetPlayer player = NetworkSystem.Instance.GetPlayer(playerID);
-				this.currentFrozen.Add(player, value);
+				TryAddNewInfectedPlayer();
 			}
+			lastTag = Time.time;
 		}
+		yield return null;
+	}
 
-		public override void OnSerializeWrite(PhotonStream stream, PhotonMessageInfo info)
+	public override void ResetGame()
+	{
+		base.ResetGame();
+		currentFrozen.Clear();
+		currentRoundInfectedPlayers.Clear();
+		lastRoundInfectedPlayers.Clear();
+	}
+
+	private new void AddInfectedPlayer(NetPlayer infectedPlayer, bool withTagStop = true)
+	{
+		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			base.OnSerializeWrite(stream, info);
-			stream.SendNext(this.currentFrozen.Count);
-			foreach (KeyValuePair<NetPlayer, float> keyValuePair in this.currentFrozen)
+			currentInfected.Add(infectedPlayer);
+			if (!withTagStop)
 			{
-				stream.SendNext(keyValuePair.Key.ActorNumber);
-				stream.SendNext(keyValuePair.Value);
+				RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, infectedPlayer);
 			}
+			else
+			{
+				RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.TaggedTime, infectedPlayer);
+			}
+			RoomSystem.SendSoundEffectOnOther(0, 0.25f, infectedPlayer);
+			UpdateInfectionState();
 		}
+	}
 
-		public Dictionary<NetPlayer, float> currentFrozen = new Dictionary<NetPlayer, float>(10);
+	private void TryAddNewInfectedPlayer()
+	{
+		List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
+		int index = Random.Range(0, participatingPlayers.Count);
+		for (int i = 0; i < 10; i++)
+		{
+			if (!lastRoundInfectedPlayers.Contains(participatingPlayers[index]))
+			{
+				break;
+			}
+			index = Random.Range(0, participatingPlayers.Count);
+		}
+		AddInfectedPlayer(participatingPlayers[index]);
+		currentRoundInfectedPlayers.Add(participatingPlayers[index]);
+	}
 
-		public float freezeDuration;
+	public override int MyMatIndex(NetPlayer forPlayer)
+	{
+		if (isCurrentlyTag && forPlayer == currentIt)
+		{
+			return 14;
+		}
+		if (currentInfected.Contains(forPlayer))
+		{
+			return 14;
+		}
+		return 0;
+	}
 
-		public int infectMorePlayerLowerThreshold = 6;
+	public override void UpdatePlayerAppearance(VRRig rig)
+	{
+		NetPlayer netPlayer = (rig.isOfflineVRRig ? NetworkSystem.Instance.LocalPlayer : rig.creator);
+		rig.UpdateFrozenEffect(IsFrozen(netPlayer));
+		int materialIndex = MyMatIndex(netPlayer);
+		rig.ChangeMaterialLocal(materialIndex);
+	}
 
-		public int infectMorePlayerUpperThreshold = 10;
+	private void UnfreezePlayer(NetPlayer taggedPlayer)
+	{
+		if (NetworkSystem.Instance.IsMasterClient && currentFrozen.ContainsKey(taggedPlayer))
+		{
+			currentFrozen.Remove(taggedPlayer);
+			RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.UnTagged, taggedPlayer);
+			RoomSystem.SendSoundEffectAll(10, 0.25f, stopCurrentAudio: true);
+		}
+	}
 
-		[Space]
-		[Header("Frozen player jump settings")]
-		public float frozenPlayerFastJumpLimit;
+	private void AddFrozenPlayer(NetPlayer taggedPlayer)
+	{
+		if (NetworkSystem.Instance.IsMasterClient && !currentFrozen.ContainsKey(taggedPlayer))
+		{
+			currentFrozen.Add(taggedPlayer, Time.time);
+			RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.FrozenTime, taggedPlayer);
+			RoomSystem.SendSoundEffectAll(9, 0.25f);
+			RoomSystem.SendSoundEffectToPlayer(12, 0.05f, taggedPlayer);
+		}
+	}
 
-		public float frozenPlayerFastJumpMultiplier;
+	public bool IsFrozen(NetPlayer player)
+	{
+		return currentFrozen.ContainsKey(player);
+	}
 
-		public float frozenPlayerSlowJumpLimit;
+	public override float[] LocalPlayerSpeed()
+	{
+		fastJumpLimit = fastJumpLimitCached;
+		fastJumpMultiplier = fastJumpMultiplierCached;
+		slowJumpLimit = slowJumpLimitCached;
+		slowJumpMultiplier = slowJumpMultiplierCached;
+		if (isCurrentlyTag)
+		{
+			if (NetworkSystem.Instance.LocalPlayer == currentIt)
+			{
+				playerSpeed[0] = fastJumpLimit;
+				playerSpeed[1] = fastJumpMultiplier;
+				return playerSpeed;
+			}
+			playerSpeed[0] = slowJumpLimit;
+			playerSpeed[1] = slowJumpMultiplier;
+			return playerSpeed;
+		}
+		if (!currentInfected.Contains(NetworkSystem.Instance.LocalPlayer) && !currentFrozen.ContainsKey(NetworkSystem.Instance.LocalPlayer))
+		{
+			playerSpeed[0] = InterpolatedNoobJumpSpeed(currentInfected.Count);
+			playerSpeed[1] = InterpolatedNoobJumpMultiplier(currentInfected.Count);
+			return playerSpeed;
+		}
+		if (currentFrozen.ContainsKey(NetworkSystem.Instance.LocalPlayer))
+		{
+			fastJumpLimit = frozenPlayerFastJumpLimit;
+			fastJumpMultiplier = frozenPlayerFastJumpMultiplier;
+			slowJumpLimit = frozenPlayerSlowJumpLimit;
+			slowJumpMultiplier = frozenPlayerSlowJumpMultiplier;
+		}
+		playerSpeed[0] = InterpolatedInfectedJumpSpeed(currentInfected.Count);
+		playerSpeed[1] = InterpolatedInfectedJumpMultiplier(currentInfected.Count);
+		return playerSpeed;
+	}
 
-		public float frozenPlayerSlowJumpMultiplier;
+	public int GetFrozenHandTapAudioIndex()
+	{
+		int num = Random.Range(0, frozenHandTapIndices.Length);
+		return frozenHandTapIndices[num];
+	}
 
-		[GorillaSoundLookup]
-		public int[] frozenHandTapIndices;
+	public override void OnPlayerLeftRoom(NetPlayer otherPlayer)
+	{
+		base.OnPlayerLeftRoom(otherPlayer);
+		if (NetworkSystem.Instance.IsMasterClient)
+		{
+			if (isCurrentlyTag && ((otherPlayer != null && otherPlayer == currentIt) || currentIt.ActorNumber == otherPlayer.ActorNumber) && GameMode.ParticipatingPlayers.Count > 0)
+			{
+				int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+				ChangeCurrentIt(GameMode.ParticipatingPlayers[index], withTagFreeze: false);
+			}
+			if (currentInfected.Contains(otherPlayer))
+			{
+				currentInfected.Remove(otherPlayer);
+			}
+			if (currentFrozen.ContainsKey(otherPlayer))
+			{
+				currentFrozen.Remove(otherPlayer);
+			}
+			UpdateState();
+		}
+	}
 
-		private float fastJumpLimitCached;
+	public override void StopPlaying()
+	{
+		base.StopPlaying();
+		foreach (VRRig activeRig in VRRigCache.ActiveRigs)
+		{
+			activeRig.ForceResetFrozenEffect();
+		}
+	}
 
-		private float fastJumpMultiplierCached;
+	public override void OnSerializeRead(PhotonStream stream, PhotonMessageInfo info)
+	{
+		base.OnSerializeRead(stream, info);
+		currentFrozen.Clear();
+		int num = (int)stream.ReceiveNext();
+		for (int i = 0; i < num; i++)
+		{
+			int playerID = (int)stream.ReceiveNext();
+			float value = (float)stream.ReceiveNext();
+			NetPlayer player = NetworkSystem.Instance.GetPlayer(playerID);
+			currentFrozen.Add(player, value);
+		}
+	}
 
-		private float slowJumpLimitCached;
-
-		private float slowJumpMultiplierCached;
-
-		private VRRig localVRRig;
-
-		private int hapticStrength;
-
-		private List<NetPlayer> currentRoundInfectedPlayers = new List<NetPlayer>(10);
-
-		private List<NetPlayer> lastRoundInfectedPlayers = new List<NetPlayer>(10);
+	public override void OnSerializeWrite(PhotonStream stream, PhotonMessageInfo info)
+	{
+		base.OnSerializeWrite(stream, info);
+		stream.SendNext(currentFrozen.Count);
+		foreach (KeyValuePair<NetPlayer, float> item in currentFrozen)
+		{
+			stream.SendNext(item.Key.ActorNumber);
+			stream.SendNext(item.Value);
+		}
 	}
 }

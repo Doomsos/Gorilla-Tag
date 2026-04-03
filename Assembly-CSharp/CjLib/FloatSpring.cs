@@ -1,83 +1,81 @@
-﻿using System;
 using UnityEngine;
 
-namespace CjLib
+namespace CjLib;
+
+public struct FloatSpring
 {
-	public struct FloatSpring
+	public static readonly int Stride = 8;
+
+	public float Value;
+
+	public float Velocity;
+
+	public void Reset()
 	{
-		public void Reset()
+		Value = 0f;
+		Velocity = 0f;
+	}
+
+	public void Reset(float initValue)
+	{
+		Value = initValue;
+		Velocity = 0f;
+	}
+
+	public void Reset(float initValue, float initVelocity)
+	{
+		Value = initValue;
+		Velocity = initVelocity;
+	}
+
+	public float TrackDampingRatio(float targetValue, float angularFrequency, float dampingRatio, float deltaTime)
+	{
+		if (angularFrequency < MathUtil.Epsilon)
 		{
-			this.Value = 0f;
-			this.Velocity = 0f;
+			Velocity = 0f;
+			return Value;
 		}
-
-		public void Reset(float initValue)
+		float num = targetValue - Value;
+		float num2 = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
+		float num3 = angularFrequency * angularFrequency;
+		float num4 = deltaTime * num3;
+		float num5 = deltaTime * num4;
+		float num6 = 1f / (num2 + num5);
+		float num7 = num2 * Value + deltaTime * Velocity + num5 * targetValue;
+		float num8 = Velocity + num4 * num;
+		Velocity = num8 * num6;
+		Value = num7 * num6;
+		if (Mathf.Abs(Velocity) < MathUtil.Epsilon && Mathf.Abs(num) < MathUtil.Epsilon)
 		{
-			this.Value = initValue;
-			this.Velocity = 0f;
+			Velocity = 0f;
+			Value = targetValue;
 		}
+		return Value;
+	}
 
-		public void Reset(float initValue, float initVelocity)
+	public float TrackHalfLife(float targetValue, float frequencyHz, float halfLife, float deltaTime)
+	{
+		if (halfLife < MathUtil.Epsilon)
 		{
-			this.Value = initValue;
-			this.Velocity = initVelocity;
+			Velocity = 0f;
+			Value = targetValue;
+			return Value;
 		}
+		float num = frequencyHz * MathUtil.TwoPi;
+		float dampingRatio = 0.6931472f / (num * halfLife);
+		return TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
+	}
 
-		public float TrackDampingRatio(float targetValue, float angularFrequency, float dampingRatio, float deltaTime)
+	public float TrackExponential(float targetValue, float halfLife, float deltaTime)
+	{
+		if (halfLife < MathUtil.Epsilon)
 		{
-			if (angularFrequency < MathUtil.Epsilon)
-			{
-				this.Velocity = 0f;
-				return this.Value;
-			}
-			float num = targetValue - this.Value;
-			float num2 = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
-			float num3 = angularFrequency * angularFrequency;
-			float num4 = deltaTime * num3;
-			float num5 = deltaTime * num4;
-			float num6 = 1f / (num2 + num5);
-			float num7 = num2 * this.Value + deltaTime * this.Velocity + num5 * targetValue;
-			float num8 = this.Velocity + num4 * num;
-			this.Velocity = num8 * num6;
-			this.Value = num7 * num6;
-			if (Mathf.Abs(this.Velocity) < MathUtil.Epsilon && Mathf.Abs(num) < MathUtil.Epsilon)
-			{
-				this.Velocity = 0f;
-				this.Value = targetValue;
-			}
-			return this.Value;
+			Velocity = 0f;
+			Value = targetValue;
+			return Value;
 		}
-
-		public float TrackHalfLife(float targetValue, float frequencyHz, float halfLife, float deltaTime)
-		{
-			if (halfLife < MathUtil.Epsilon)
-			{
-				this.Velocity = 0f;
-				this.Value = targetValue;
-				return this.Value;
-			}
-			float num = frequencyHz * MathUtil.TwoPi;
-			float dampingRatio = 0.6931472f / (num * halfLife);
-			return this.TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
-		}
-
-		public float TrackExponential(float targetValue, float halfLife, float deltaTime)
-		{
-			if (halfLife < MathUtil.Epsilon)
-			{
-				this.Velocity = 0f;
-				this.Value = targetValue;
-				return this.Value;
-			}
-			float angularFrequency = 0.6931472f / halfLife;
-			float dampingRatio = 1f;
-			return this.TrackDampingRatio(targetValue, angularFrequency, dampingRatio, deltaTime);
-		}
-
-		public static readonly int Stride = 8;
-
-		public float Value;
-
-		public float Velocity;
+		float angularFrequency = 0.6931472f / halfLife;
+		float dampingRatio = 1f;
+		return TrackDampingRatio(targetValue, angularFrequency, dampingRatio, deltaTime);
 	}
 }

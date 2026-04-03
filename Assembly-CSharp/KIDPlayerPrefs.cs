@@ -1,5 +1,3 @@
-﻿using System;
-
 public class KIDPlayerPrefs
 {
 	public const string SESSION_ID_PREFIX_PLAYER_PREF = "kIDSessionID-";

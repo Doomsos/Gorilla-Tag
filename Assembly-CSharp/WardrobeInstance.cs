@@ -1,9 +1,12 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public class WardrobeInstance : MonoBehaviour
 {
+	public WardrobeItemButton[] wardrobeItemButtons;
+
+	public HeadModel selfDoll;
+
 	public void Start()
 	{
 		CosmeticsController.instance.AddWardrobeInstance(this);
@@ -13,8 +16,4 @@ public class WardrobeInstance : MonoBehaviour
 	{
 		CosmeticsController.instance.RemoveWardrobeInstance(this);
 	}
-
-	public WardrobeItemButton[] wardrobeItemButtons;
-
-	public HeadModel selfDoll;
 }

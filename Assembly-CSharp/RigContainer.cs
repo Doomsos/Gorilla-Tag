@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,452 +13,6 @@ using UnityEngine;
 [RequireComponent(typeof(VRRig), typeof(VRRigReliableState))]
 public class RigContainer : MonoBehaviour
 {
-	public bool Initialized { get; private set; }
-
-	public VRRig Rig
-	{
-		get
-		{
-			return this.vrrig;
-		}
-	}
-
-	public VRRigReliableState ReliableState
-	{
-		get
-		{
-			return this.reliableState;
-		}
-	}
-
-	public Transform SpeakerHead
-	{
-		get
-		{
-			return this.speakerHead;
-		}
-	}
-
-	public AudioSource ReplacementVoiceSource
-	{
-		get
-		{
-			return this.replacementVoiceSource;
-		}
-	}
-
-	public List<LoudSpeakerNetwork> LoudSpeakerNetworks
-	{
-		get
-		{
-			return this.loudSpeakerNetworks;
-		}
-	}
-
-	public LCKSocialCameraFollower LckCococamFollower
-	{
-		get
-		{
-			return this.m_lckCococamFollower;
-		}
-	}
-
-	public LCKSocialCameraFollower LCKTabletFollower
-	{
-		get
-		{
-			return this.m_lckTablet;
-		}
-	}
-
-	public PhotonVoiceView Voice
-	{
-		get
-		{
-			return this.voiceView;
-		}
-		set
-		{
-			if (value == this.voiceView)
-			{
-				return;
-			}
-			if (this.voiceView != null)
-			{
-				this.voiceView.SpeakerInUse.enabled = false;
-			}
-			this.voiceView = value;
-			this.RefreshVoiceChat();
-		}
-	}
-
-	public NetworkView netView
-	{
-		get
-		{
-			return this.vrrig.netView;
-		}
-	}
-
-	public int CachedNetViewID
-	{
-		get
-		{
-			return this.m_cachedNetViewID;
-		}
-	}
-
-	public bool Muted
-	{
-		get
-		{
-			return !this.enableVoice;
-		}
-		set
-		{
-			this.enableVoice = !value;
-			this.RefreshVoiceChat();
-		}
-	}
-
-	public NetPlayer Creator
-	{
-		get
-		{
-			return this.vrrig.creator;
-		}
-		set
-		{
-			if (this.vrrig.isOfflineVRRig || (this.vrrig.creator != null && this.vrrig.creator.InRoom))
-			{
-				return;
-			}
-			this.vrrig.creator = value;
-		}
-	}
-
-	public bool ForceMute
-	{
-		get
-		{
-			return this.forceMute;
-		}
-		set
-		{
-			this.forceMute = value;
-			this.RefreshVoiceChat();
-		}
-	}
-
-	public SphereCollider HeadCollider
-	{
-		get
-		{
-			return this.headCollider;
-		}
-	}
-
-	public CapsuleCollider BodyCollider
-	{
-		get
-		{
-			return this.bodyCollider;
-		}
-	}
-
-	public VRRigEvents RigEvents
-	{
-		get
-		{
-			return this.rigEvents;
-		}
-	}
-
-	public bool GetIsPlayerAutoMuted()
-	{
-		return this.bPlayerAutoMuted;
-	}
-
-	public void UpdateAutomuteLevel(string autoMuteLevel)
-	{
-		if (autoMuteLevel.Equals("LOW", StringComparison.OrdinalIgnoreCase))
-		{
-			this.playerChatQuality = 1;
-		}
-		else if (autoMuteLevel.Equals("HIGH", StringComparison.OrdinalIgnoreCase))
-		{
-			this.playerChatQuality = 0;
-		}
-		else if (autoMuteLevel.Equals("ERROR", StringComparison.OrdinalIgnoreCase))
-		{
-			this.playerChatQuality = 2;
-		}
-		else
-		{
-			this.playerChatQuality = 2;
-		}
-		this.RefreshVoiceChat();
-	}
-
-	private void Awake()
-	{
-		this.loudSpeakerNetworks = new List<LoudSpeakerNetwork>();
-	}
-
-	private void Start()
-	{
-		if (this.Rig.isOfflineVRRig)
-		{
-			this.vrrig.creator = NetworkSystem.Instance.LocalPlayer;
-			RoomSystem.JoinedRoomEvent += new Action(this.OnMultiPlayerStarted);
-			RoomSystem.LeftRoomEvent += new Action(this.OnReturnedToSinglePlayer);
-		}
-		else
-		{
-			this.rigEvents.enableEvent += this.RigPostEnable;
-		}
-		this.Rig.rigContainer = this;
-	}
-
-	private void RigPostEnable(RigContainer _)
-	{
-		this.vrrig.UpdateName();
-	}
-
-	private void OnMultiPlayerStarted()
-	{
-		if (this.Rig.isOfflineVRRig)
-		{
-			this.vrrig.creator = NetworkSystem.Instance.GetLocalPlayer();
-		}
-	}
-
-	private void OnReturnedToSinglePlayer()
-	{
-		if (this.Rig.isOfflineVRRig)
-		{
-			RigContainer.CancelAutomuteRequest();
-		}
-	}
-
-	private void OnDisable()
-	{
-		this.Initialized = false;
-		this.enableVoice = true;
-		this.voiceView = null;
-		base.gameObject.transform.localPosition = Vector3.zero;
-		base.gameObject.transform.localRotation = Quaternion.identity;
-		this.vrrig.syncPos = base.gameObject.transform.position;
-		this.vrrig.syncRotation = base.gameObject.transform.rotation;
-		this.forceMute = false;
-	}
-
-	internal void InitializeNetwork(NetworkView netView, PhotonVoiceView voiceView, VRRigSerializer vrRigSerializer)
-	{
-		if (!netView || !voiceView)
-		{
-			return;
-		}
-		this.InitializeNetwork_Shared(netView, vrRigSerializer);
-		this.Voice = voiceView;
-		this.vrrig.voiceAudio = voiceView.SpeakerInUse.GetComponent<AudioSource>();
-	}
-
-	private void InitializeNetwork_Shared(NetworkView netView, VRRigSerializer vrRigSerializer)
-	{
-		if (this.vrrig.netView)
-		{
-			MonkeAgent.instance.SendReport("inappropriate tag data being sent creating multiple vrrigs", this.Creator.UserId, this.Creator.NickName);
-			if (this.vrrig.netView.IsMine)
-			{
-				NetworkSystem.Instance.NetDestroy(this.vrrig.gameObject);
-			}
-			else
-			{
-				this.vrrig.netView.gameObject.SetActive(false);
-			}
-		}
-		this.vrrig.netView = netView;
-		this.vrrig.rigSerializer = vrRigSerializer;
-		this.vrrig.OwningNetPlayer = NetworkSystem.Instance.GetPlayer(NetworkSystem.Instance.GetOwningPlayerID(vrRigSerializer.gameObject));
-		this.m_cachedNetViewID = netView.ViewID;
-		if (!this.Initialized)
-		{
-			this.vrrig.NetInitialize();
-			if (GorillaGameManager.instance != null && NetworkSystem.Instance.IsMasterClient)
-			{
-				int owningPlayerID = NetworkSystem.Instance.GetOwningPlayerID(vrRigSerializer.gameObject);
-				bool playerTutorialCompletion = NetworkSystem.Instance.GetPlayerTutorialCompletion(owningPlayerID);
-				GorillaGameManager.instance.NewVRRig(netView.Owner, netView.ViewID, playerTutorialCompletion);
-			}
-			bool isLocal = this.vrrig.OwningNetPlayer.IsLocal;
-			if (!this.vrrig.isOfflineVRRig && this.vrrig.InitializedCosmetics)
-			{
-				netView.SendRPC("RPC_RequestCosmetics", netView.Owner, Array.Empty<object>());
-			}
-		}
-		this.Initialized = true;
-		if (!this.vrrig.isOfflineVRRig)
-		{
-			base.StartCoroutine(RigContainer.QueueAutomute(this.Creator));
-		}
-	}
-
-	private static IEnumerator QueueAutomute(NetPlayer player)
-	{
-		RigContainer.playersToCheckAutomute.Add(player);
-		if (!RigContainer.automuteQueued)
-		{
-			RigContainer.automuteQueued = true;
-			yield return new WaitForSecondsRealtime(1f);
-			while (RigContainer.waitingForAutomuteCallback)
-			{
-				yield return null;
-			}
-			RigContainer.automuteQueued = false;
-			RigContainer.RequestAutomuteSettings();
-		}
-		yield break;
-	}
-
-	private static void RequestAutomuteSettings()
-	{
-		if (RigContainer.playersToCheckAutomute.Count == 0)
-		{
-			return;
-		}
-		RigContainer.waitingForAutomuteCallback = true;
-		RigContainer.playersToCheckAutomute.RemoveAll((NetPlayer player) => player == null);
-		RigContainer.requestedAutomutePlayers = new List<NetPlayer>(RigContainer.playersToCheckAutomute);
-		RigContainer.playersToCheckAutomute.Clear();
-		string[] value = (from x in RigContainer.requestedAutomutePlayers
-		select x.UserId).ToArray<string>();
-		foreach (NetPlayer netPlayer in RigContainer.requestedAutomutePlayers)
-		{
-		}
-		ExecuteFunctionRequest executeFunctionRequest = new ExecuteFunctionRequest();
-		executeFunctionRequest.Entity = new EntityKey
-		{
-			Id = PlayFabSettings.staticPlayer.EntityId,
-			Type = PlayFabSettings.staticPlayer.EntityType
-		};
-		executeFunctionRequest.FunctionName = "ShouldUserAutomutePlayer";
-		executeFunctionRequest.FunctionParameter = string.Join(",", value);
-		PlayFabCloudScriptAPI.ExecuteFunction(executeFunctionRequest, delegate(ExecuteFunctionResult result)
-		{
-			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(result.FunctionResult.ToString());
-			if (dictionary == null)
-			{
-				using (List<NetPlayer>.Enumerator enumerator2 = RigContainer.requestedAutomutePlayers.GetEnumerator())
-				{
-					while (enumerator2.MoveNext())
-					{
-						NetPlayer netPlayer2 = enumerator2.Current;
-						if (netPlayer2 != null)
-						{
-							RigContainer.ReceiveAutomuteSettings(netPlayer2, "none");
-						}
-					}
-					goto IL_A6;
-				}
-			}
-			foreach (NetPlayer netPlayer3 in RigContainer.requestedAutomutePlayers)
-			{
-				if (netPlayer3 != null)
-				{
-					string score;
-					if (dictionary.TryGetValue(netPlayer3.UserId, out score))
-					{
-						RigContainer.ReceiveAutomuteSettings(netPlayer3, score);
-					}
-					else
-					{
-						RigContainer.ReceiveAutomuteSettings(netPlayer3, "none");
-					}
-				}
-			}
-			IL_A6:
-			RigContainer.requestedAutomutePlayers.Clear();
-			RigContainer.waitingForAutomuteCallback = false;
-		}, delegate(PlayFabError error)
-		{
-			foreach (NetPlayer player in RigContainer.requestedAutomutePlayers)
-			{
-				RigContainer.ReceiveAutomuteSettings(player, "ERROR");
-			}
-			RigContainer.requestedAutomutePlayers.Clear();
-			RigContainer.waitingForAutomuteCallback = false;
-		}, null, null);
-	}
-
-	private static void CancelAutomuteRequest()
-	{
-		RigContainer.playersToCheckAutomute.Clear();
-		RigContainer.automuteQueued = false;
-		if (RigContainer.requestedAutomutePlayers != null)
-		{
-			RigContainer.requestedAutomutePlayers.Clear();
-		}
-		RigContainer.waitingForAutomuteCallback = false;
-	}
-
-	private static void ReceiveAutomuteSettings(NetPlayer player, string score)
-	{
-		RigContainer rigContainer;
-		VRRigCache.Instance.TryGetVrrig(player, out rigContainer);
-		if (rigContainer != null)
-		{
-			rigContainer.UpdateAutomuteLevel(score);
-		}
-	}
-
-	private void ProcessAutomute()
-	{
-		int @int = PlayerPrefs.GetInt("autoMute", 1);
-		this.bPlayerAutoMuted = (!this.hasManualMute && this.playerChatQuality < @int);
-	}
-
-	public void RefreshVoiceChat()
-	{
-		if (this.Voice == null)
-		{
-			return;
-		}
-		this.ProcessAutomute();
-		this.Voice.SpeakerInUse.enabled = (!this.forceMute && this.enableVoice && !this.bPlayerAutoMuted && GorillaComputer.instance.voiceChatOn == "TRUE");
-		this.replacementVoiceSource.mute = (this.forceMute || !this.enableVoice || this.bPlayerAutoMuted || GorillaComputer.instance.voiceChatOn == "OFF");
-	}
-
-	public void AddLoudSpeakerNetwork(LoudSpeakerNetwork network)
-	{
-		if (this.loudSpeakerNetworks.Contains(network))
-		{
-			return;
-		}
-		this.loudSpeakerNetworks.Add(network);
-	}
-
-	public void RemoveLoudSpeakerNetwork(LoudSpeakerNetwork network)
-	{
-		this.loudSpeakerNetworks.Remove(network);
-	}
-
-	public static void RefreshAllRigVoices()
-	{
-		RigContainer.staticTempRC = null;
-		if (!NetworkSystem.Instance.InRoom || VRRigCache.Instance == null)
-		{
-			return;
-		}
-		foreach (NetPlayer targetPlayer in NetworkSystem.Instance.AllNetPlayers)
-		{
-			if (VRRigCache.Instance.TryGetVrrig(targetPlayer, out RigContainer.staticTempRC))
-			{
-				RigContainer.staticTempRC.RefreshVoiceChat();
-			}
-		}
-	}
-
 	[SerializeField]
 	private VRRig vrrig;
 
@@ -511,4 +65,369 @@ public class RigContainer : MonoBehaviour
 	private static bool waitingForAutomuteCallback = false;
 
 	private static RigContainer staticTempRC;
+
+	public bool Initialized { get; private set; }
+
+	public VRRig Rig => vrrig;
+
+	public VRRigReliableState ReliableState => reliableState;
+
+	public Transform SpeakerHead => speakerHead;
+
+	public AudioSource ReplacementVoiceSource => replacementVoiceSource;
+
+	public List<LoudSpeakerNetwork> LoudSpeakerNetworks => loudSpeakerNetworks;
+
+	public LCKSocialCameraFollower LckCococamFollower => m_lckCococamFollower;
+
+	public LCKSocialCameraFollower LCKTabletFollower => m_lckTablet;
+
+	public PhotonVoiceView Voice
+	{
+		get
+		{
+			return voiceView;
+		}
+		set
+		{
+			if (!(value == voiceView))
+			{
+				if (voiceView != null)
+				{
+					voiceView.SpeakerInUse.enabled = false;
+				}
+				voiceView = value;
+				RefreshVoiceChat();
+			}
+		}
+	}
+
+	public NetworkView netView => vrrig.netView;
+
+	public int CachedNetViewID => m_cachedNetViewID;
+
+	public bool Muted
+	{
+		get
+		{
+			return !enableVoice;
+		}
+		set
+		{
+			enableVoice = !value;
+			RefreshVoiceChat();
+		}
+	}
+
+	public NetPlayer Creator
+	{
+		get
+		{
+			return vrrig.creator;
+		}
+		set
+		{
+			if (!vrrig.isOfflineVRRig && (vrrig.creator == null || !vrrig.creator.InRoom))
+			{
+				vrrig.creator = value;
+			}
+		}
+	}
+
+	public bool ForceMute
+	{
+		get
+		{
+			return forceMute;
+		}
+		set
+		{
+			forceMute = value;
+			RefreshVoiceChat();
+		}
+	}
+
+	public SphereCollider HeadCollider => headCollider;
+
+	public CapsuleCollider BodyCollider => bodyCollider;
+
+	public VRRigEvents RigEvents => rigEvents;
+
+	public bool GetIsPlayerAutoMuted()
+	{
+		return bPlayerAutoMuted;
+	}
+
+	public void UpdateAutomuteLevel(string autoMuteLevel)
+	{
+		if (autoMuteLevel.Equals("LOW", StringComparison.OrdinalIgnoreCase))
+		{
+			playerChatQuality = 1;
+		}
+		else if (autoMuteLevel.Equals("HIGH", StringComparison.OrdinalIgnoreCase))
+		{
+			playerChatQuality = 0;
+		}
+		else if (autoMuteLevel.Equals("ERROR", StringComparison.OrdinalIgnoreCase))
+		{
+			playerChatQuality = 2;
+		}
+		else
+		{
+			playerChatQuality = 2;
+		}
+		RefreshVoiceChat();
+	}
+
+	private void Awake()
+	{
+		loudSpeakerNetworks = new List<LoudSpeakerNetwork>();
+	}
+
+	private void Start()
+	{
+		if (Rig.isOfflineVRRig)
+		{
+			vrrig.creator = NetworkSystem.Instance.LocalPlayer;
+			RoomSystem.JoinedRoomEvent += new Action(OnMultiPlayerStarted);
+			RoomSystem.LeftRoomEvent += new Action(OnReturnedToSinglePlayer);
+		}
+		else
+		{
+			rigEvents.enableEvent += new Action<RigContainer>(RigPostEnable);
+		}
+		Rig.rigContainer = this;
+	}
+
+	private void RigPostEnable(RigContainer _)
+	{
+		vrrig.UpdateName();
+	}
+
+	private void OnMultiPlayerStarted()
+	{
+		if (Rig.isOfflineVRRig)
+		{
+			vrrig.creator = NetworkSystem.Instance.GetLocalPlayer();
+		}
+	}
+
+	private void OnReturnedToSinglePlayer()
+	{
+		if (Rig.isOfflineVRRig)
+		{
+			CancelAutomuteRequest();
+		}
+	}
+
+	private void OnDisable()
+	{
+		Initialized = false;
+		enableVoice = true;
+		voiceView = null;
+		base.gameObject.transform.localPosition = Vector3.zero;
+		base.gameObject.transform.localRotation = Quaternion.identity;
+		vrrig.syncPos = base.gameObject.transform.position;
+		vrrig.syncRotation = base.gameObject.transform.rotation;
+		forceMute = false;
+	}
+
+	internal void InitializeNetwork(NetworkView netView, PhotonVoiceView voiceView, VRRigSerializer vrRigSerializer)
+	{
+		if ((bool)netView && (bool)voiceView)
+		{
+			InitializeNetwork_Shared(netView, vrRigSerializer);
+			Voice = voiceView;
+			vrrig.voiceAudio = voiceView.SpeakerInUse.GetComponent<AudioSource>();
+		}
+	}
+
+	private void InitializeNetwork_Shared(NetworkView netView, VRRigSerializer vrRigSerializer)
+	{
+		if ((bool)vrrig.netView)
+		{
+			MonkeAgent.instance.SendReport("inappropriate tag data being sent creating multiple vrrigs", Creator.UserId, Creator.NickName);
+			if (vrrig.netView.IsMine)
+			{
+				NetworkSystem.Instance.NetDestroy(vrrig.gameObject);
+			}
+			else
+			{
+				vrrig.netView.gameObject.SetActive(value: false);
+			}
+		}
+		vrrig.netView = netView;
+		vrrig.rigSerializer = vrRigSerializer;
+		vrrig.OwningNetPlayer = NetworkSystem.Instance.GetPlayer(NetworkSystem.Instance.GetOwningPlayerID(vrRigSerializer.gameObject));
+		m_cachedNetViewID = netView.ViewID;
+		if (!Initialized)
+		{
+			vrrig.NetInitialize();
+			if (GorillaGameManager.instance != null && NetworkSystem.Instance.IsMasterClient)
+			{
+				int owningPlayerID = NetworkSystem.Instance.GetOwningPlayerID(vrRigSerializer.gameObject);
+				bool playerTutorialCompletion = NetworkSystem.Instance.GetPlayerTutorialCompletion(owningPlayerID);
+				GorillaGameManager.instance.NewVRRig(netView.Owner, netView.ViewID, playerTutorialCompletion);
+			}
+			_ = vrrig.OwningNetPlayer.IsLocal;
+			if (!vrrig.isOfflineVRRig && vrrig.InitializedCosmetics)
+			{
+				netView.SendRPC("RPC_RequestCosmetics", netView.Owner);
+			}
+		}
+		Initialized = true;
+		if (!vrrig.isOfflineVRRig)
+		{
+			StartCoroutine(QueueAutomute(Creator));
+		}
+	}
+
+	private static IEnumerator QueueAutomute(NetPlayer player)
+	{
+		playersToCheckAutomute.Add(player);
+		if (!automuteQueued)
+		{
+			automuteQueued = true;
+			yield return new WaitForSecondsRealtime(1f);
+			while (waitingForAutomuteCallback)
+			{
+				yield return null;
+			}
+			automuteQueued = false;
+			RequestAutomuteSettings();
+		}
+	}
+
+	private static void RequestAutomuteSettings()
+	{
+		if (playersToCheckAutomute.Count == 0)
+		{
+			return;
+		}
+		waitingForAutomuteCallback = true;
+		playersToCheckAutomute.RemoveAll((NetPlayer player) => player == null);
+		requestedAutomutePlayers = new List<NetPlayer>(playersToCheckAutomute);
+		playersToCheckAutomute.Clear();
+		string[] value = requestedAutomutePlayers.Select((NetPlayer x) => x.UserId).ToArray();
+		foreach (NetPlayer requestedAutomutePlayer in requestedAutomutePlayers)
+		{
+			_ = requestedAutomutePlayer;
+		}
+		PlayFabCloudScriptAPI.ExecuteFunction(new ExecuteFunctionRequest
+		{
+			Entity = new EntityKey
+			{
+				Id = PlayFabSettings.staticPlayer.EntityId,
+				Type = PlayFabSettings.staticPlayer.EntityType
+			},
+			FunctionName = "ShouldUserAutomutePlayer",
+			FunctionParameter = string.Join(",", value)
+		}, delegate(ExecuteFunctionResult result)
+		{
+			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(result.FunctionResult.ToString());
+			if (dictionary == null)
+			{
+				foreach (NetPlayer requestedAutomutePlayer2 in requestedAutomutePlayers)
+				{
+					if (requestedAutomutePlayer2 != null)
+					{
+						ReceiveAutomuteSettings(requestedAutomutePlayer2, "none");
+					}
+				}
+			}
+			else
+			{
+				foreach (NetPlayer requestedAutomutePlayer3 in requestedAutomutePlayers)
+				{
+					if (requestedAutomutePlayer3 != null)
+					{
+						if (dictionary.TryGetValue(requestedAutomutePlayer3.UserId, out var value2))
+						{
+							ReceiveAutomuteSettings(requestedAutomutePlayer3, value2);
+						}
+						else
+						{
+							ReceiveAutomuteSettings(requestedAutomutePlayer3, "none");
+						}
+					}
+				}
+			}
+			requestedAutomutePlayers.Clear();
+			waitingForAutomuteCallback = false;
+		}, delegate
+		{
+			foreach (NetPlayer requestedAutomutePlayer4 in requestedAutomutePlayers)
+			{
+				ReceiveAutomuteSettings(requestedAutomutePlayer4, "ERROR");
+			}
+			requestedAutomutePlayers.Clear();
+			waitingForAutomuteCallback = false;
+		});
+	}
+
+	private static void CancelAutomuteRequest()
+	{
+		playersToCheckAutomute.Clear();
+		automuteQueued = false;
+		if (requestedAutomutePlayers != null)
+		{
+			requestedAutomutePlayers.Clear();
+		}
+		waitingForAutomuteCallback = false;
+	}
+
+	private static void ReceiveAutomuteSettings(NetPlayer player, string score)
+	{
+		VRRigCache.Instance.TryGetVrrig(player, out var playerRig);
+		if (playerRig != null)
+		{
+			playerRig.UpdateAutomuteLevel(score);
+		}
+	}
+
+	private void ProcessAutomute()
+	{
+		int num = PlayerPrefs.GetInt("autoMute", 1);
+		bPlayerAutoMuted = !hasManualMute && playerChatQuality < num;
+	}
+
+	public void RefreshVoiceChat()
+	{
+		if (!(Voice == null))
+		{
+			ProcessAutomute();
+			Voice.SpeakerInUse.enabled = !forceMute && enableVoice && !bPlayerAutoMuted && GorillaComputer.instance.voiceChatOn == "TRUE";
+			replacementVoiceSource.mute = forceMute || !enableVoice || bPlayerAutoMuted || GorillaComputer.instance.voiceChatOn == "OFF";
+		}
+	}
+
+	public void AddLoudSpeakerNetwork(LoudSpeakerNetwork network)
+	{
+		if (!loudSpeakerNetworks.Contains(network))
+		{
+			loudSpeakerNetworks.Add(network);
+		}
+	}
+
+	public void RemoveLoudSpeakerNetwork(LoudSpeakerNetwork network)
+	{
+		loudSpeakerNetworks.Remove(network);
+	}
+
+	public static void RefreshAllRigVoices()
+	{
+		staticTempRC = null;
+		if (!NetworkSystem.Instance.InRoom || VRRigCache.Instance == null)
+		{
+			return;
+		}
+		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
+		foreach (NetPlayer targetPlayer in allNetPlayers)
+		{
+			if (VRRigCache.Instance.TryGetVrrig(targetPlayer, out staticTempRC))
+			{
+				staticTempRC.RefreshVoiceChat();
+			}
+		}
+	}
 }

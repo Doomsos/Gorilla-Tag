@@ -1,59 +1,49 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MazePlayerCollection : MonoBehaviour
 {
+	public List<VRRig> containedRigs = new List<VRRig>();
+
+	public List<MonkeyeAI> monkeyeAis = new List<MonkeyeAI>();
+
 	private void Start()
 	{
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(OnPlayerLeftRoom);
 	}
 
 	private void OnDestroy()
 	{
-		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(OnPlayerLeftRoom);
 	}
 
 	public void OnTriggerEnter(Collider other)
 	{
-		if (!other.GetComponent<SphereCollider>())
+		if ((bool)other.GetComponent<SphereCollider>())
 		{
-			return;
-		}
-		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null)
-		{
-			return;
-		}
-		if (!this.containedRigs.Contains(component))
-		{
-			this.containedRigs.Add(component);
+			VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(component == null) && !containedRigs.Contains(component))
+			{
+				containedRigs.Add(component);
+			}
 		}
 	}
 
 	public void OnTriggerExit(Collider other)
 	{
-		if (!other.GetComponent<SphereCollider>())
+		if ((bool)other.GetComponent<SphereCollider>())
 		{
-			return;
-		}
-		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null)
-		{
-			return;
-		}
-		if (this.containedRigs.Contains(component))
-		{
-			this.containedRigs.Remove(component);
+			VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(component == null) && containedRigs.Contains(component))
+			{
+				containedRigs.Remove(component);
+			}
 		}
 	}
 
 	public void OnPlayerLeftRoom(NetPlayer otherPlayer)
 	{
-		this.containedRigs.RemoveAll((VRRig r) => ((r != null) ? r.creator : null) == null || r.creator == otherPlayer);
+		containedRigs.RemoveAll((VRRig r) => r?.creator == null || r.creator == otherPlayer);
 	}
-
-	public List<VRRig> containedRigs = new List<VRRig>();
-
-	public List<MonkeyeAI> monkeyeAis = new List<MonkeyeAI>();
 }

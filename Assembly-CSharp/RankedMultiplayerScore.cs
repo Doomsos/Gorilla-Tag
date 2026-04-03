@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GorillaGameModes;
@@ -7,394 +7,66 @@ using UnityEngine;
 
 public class RankedMultiplayerScore : MonoBehaviourTick
 {
-	public RankedProgressionManager Progression { get; private set; }
-
-	public void Initialize()
+	public struct PlayerScore
 	{
-		GorillaTagCompetitiveManager.onStateChanged += this.OnStateChanged;
-		GorillaTagCompetitiveManager.onRoundStart += this.OnGameStarted;
-		GorillaTagCompetitiveManager.onRoundEnd += this.OnGameEnded;
-		GorillaTagCompetitiveManager.onPlayerJoined += this.OnPlayerJoined;
-		GorillaTagCompetitiveManager.onPlayerLeft += this.OnPlayerLeft;
-		GorillaTagCompetitiveManager.onTagOccurred += this.OnTagReported;
-		GorillaGameManager instance = GorillaGameManager.instance;
-		if (instance != null)
+		public int PlayerId;
+
+		public float GameScore;
+
+		public float EloScore;
+
+		public int NumTags;
+
+		public float TimeUntagged;
+
+		public float PointsOnDefense;
+	}
+
+	public struct PlayerScoreInRound(int id, bool initInfected = false)
+	{
+		public int PlayerId = id;
+
+		public int NumTags = 0;
+
+		public float PointsOnDefense = 0f;
+
+		public float JoinTime = Time.time;
+
+		public float TaggedTime = (initInfected ? Time.time : 0f);
+
+		public bool Infected = initInfected;
+	}
+
+	public struct ResultData
+	{
+		public float Elo;
+
+		public int Rank;
+
+		public int MostTags;
+
+		public float LongestUntagged;
+
+		public int MostTagsPlayerId;
+
+		public int LongestUntaggedPlayerId;
+
+		public bool IsMostTagsTied()
 		{
-			this.CompetitiveManager = (instance as GorillaTagCompetitiveManager);
+			return MostTagsPlayerId == RESULT_TIE;
 		}
-		this.Progression = RankedProgressionManager.Instance;
-		RankedProgressionManager progression = this.Progression;
-		progression.OnPlayerEloAcquired = (Action<int, float, int>)Delegate.Combine(progression.OnPlayerEloAcquired, new Action<int, float, int>(this.HandlePlayerEloAcquired));
-	}
 
-	private void HandlePlayerEloAcquired(int playerId, float elo, int tier)
-	{
-		this.CachePlayerRankedProgressionData(playerId, tier, elo);
-	}
-
-	private void OnDestroy()
-	{
-		this.Unsubscribe();
-	}
-
-	public void Unsubscribe()
-	{
-		GorillaTagCompetitiveManager.onStateChanged -= this.OnStateChanged;
-		GorillaTagCompetitiveManager.onRoundStart -= this.OnGameStarted;
-		GorillaTagCompetitiveManager.onRoundEnd -= this.OnGameEnded;
-		GorillaTagCompetitiveManager.onPlayerJoined -= this.OnPlayerJoined;
-		GorillaTagCompetitiveManager.onPlayerLeft -= this.OnPlayerLeft;
-		GorillaTagCompetitiveManager.onTagOccurred -= this.OnTagReported;
-		if (this.Progression != null)
+		public bool IsLongestUntaggedTied()
 		{
-			RankedProgressionManager progression = this.Progression;
-			progression.OnPlayerEloAcquired = (Action<int, float, int>)Delegate.Remove(progression.OnPlayerEloAcquired, new Action<int, float, int>(this.HandlePlayerEloAcquired));
-		}
-	}
-
-	public override void Tick()
-	{
-		if (this.PerSecondTimer > 0f && Time.time >= this.PerSecondTimer + 1f)
-		{
-			if (this.CompetitiveManager == null)
-			{
-				return;
-			}
-			this.OnPerSecondTimerElapsed(NetworkSystem.Instance.AllNetPlayers.Length, this.CompetitiveManager.currentInfected.Count);
-			this.PerSecondTimer = Time.time;
+			return LongestUntaggedPlayerId == RESULT_TIE;
 		}
 	}
 
-	private void OnPerSecondTimerElapsed(int playersInGame, int infectedPlayers)
+	public struct RecordHolder<T>
 	{
-		foreach (int num in this.AllPlayerInRoundScores.Keys.ToList<int>())
-		{
-			RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = this.AllPlayerInRoundScores[num];
-			playerScoreInRound.Infected = this.CompetitiveManager.IsInfected(NetworkSystem.Instance.GetPlayer(num));
-			if (!playerScoreInRound.Infected)
-			{
-				float t = (float)infectedPlayers / (float)playersInGame;
-				playerScoreInRound.PointsOnDefense += Mathf.Lerp(this.PointsPerUninfectedSecMin, this.PointsPerUninfectedSecMax, t);
-			}
-			this.AllPlayerInRoundScores[num] = playerScoreInRound;
-		}
-	}
+		public int PlayerId;
 
-	public void ResetMatch()
-	{
-		this.AllFinalPlayerScores.Clear();
-		this.AllPlayerInRoundScores.Clear();
-	}
-
-	private void OnStateChanged(GorillaTagCompetitiveManager.GameState state)
-	{
-		if (state == GorillaTagCompetitiveManager.GameState.StartingCountdown)
-		{
-			this.OnGameStarted();
-			this.Progression.AcquireRoomRankInformation(true);
-		}
-	}
-
-	public void OnGameStarted()
-	{
-		this.PerSecondTimer = Time.time;
-		if (!this.IsLateJoiner)
-		{
-			this.ResetMatch();
-			for (int i = 0; i < NetworkSystem.Instance.AllNetPlayers.Length; i++)
-			{
-				this.StartTrackingPlayer(NetworkSystem.Instance.AllNetPlayers[i], false);
-			}
-		}
-	}
-
-	public void OnGameEnded()
-	{
-		foreach (int key in this.AllPlayerInRoundScores.Keys.ToList<int>())
-		{
-			RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = this.AllPlayerInRoundScores[key];
-			if (!playerScoreInRound.Infected)
-			{
-				playerScoreInRound.TaggedTime = Time.time;
-			}
-			this.AllPlayerInRoundScores[key] = playerScoreInRound;
-		}
-		this.PerSecondTimer = -1f;
-		this.ReportScore();
-		this.WasInfectedInitially = false;
-		this.IsLateJoiner = false;
-	}
-
-	private void OnPlayerJoined(NetPlayer player)
-	{
-		if (NetworkSystem.Instance.IsMasterClient && this.CompetitiveManager.IsMatchActive())
-		{
-			List<int> list = new List<int>();
-			List<int> list2 = new List<int>();
-			List<float> list3 = new List<float>();
-			List<float> list4 = new List<float>();
-			List<bool> list5 = new List<bool>();
-			List<float> list6 = new List<float>();
-			foreach (KeyValuePair<int, RankedMultiplayerScore.PlayerScoreInRound> keyValuePair in this.AllPlayerInRoundScores)
-			{
-				list.Add(keyValuePair.Value.PlayerId);
-				list2.Add(keyValuePair.Value.NumTags);
-				list3.Add(keyValuePair.Value.PointsOnDefense);
-				list4.Add(Time.time - keyValuePair.Value.JoinTime);
-				list5.Add(keyValuePair.Value.Infected);
-				if (!keyValuePair.Value.Infected)
-				{
-					list6.Add(0f);
-				}
-				else
-				{
-					list6.Add(Time.time - keyValuePair.Value.TaggedTime);
-				}
-			}
-			GameMode.ActiveNetworkHandler.SendRPC("SendScoresToLateJoinerRPC", player, new object[]
-			{
-				list.ToArray(),
-				list2.ToArray(),
-				list3.ToArray(),
-				list4.ToArray(),
-				list5.ToArray(),
-				list6.ToArray()
-			});
-		}
-		this.StartTrackingPlayer(player, true);
-	}
-
-	public void ReceivedScoresForLateJoiner(int[] playerIds, int[] numTags, float[] pointsOnDefense, float[] joinTime, bool[] infected, float[] taggedTime)
-	{
-		if (!NetworkSystem.Instance.IsMasterClient)
-		{
-			this.IsLateJoiner = true;
-			for (int i = 0; i < playerIds.Length; i++)
-			{
-				int num = playerIds[i];
-				RankedMultiplayerScore.PlayerScoreInRound value = new RankedMultiplayerScore.PlayerScoreInRound(num, infected[i]);
-				value.NumTags = numTags[i];
-				value.PointsOnDefense = pointsOnDefense[i];
-				value.JoinTime = Time.time - joinTime[i];
-				if (!infected[i])
-				{
-					value.TaggedTime = 0f;
-				}
-				else
-				{
-					value.TaggedTime = Time.time - taggedTime[i];
-				}
-				this.AllPlayerInRoundScores.TryAdd(num, value);
-			}
-		}
-	}
-
-	private void OnPlayerLeft(NetPlayer player)
-	{
-		this.AllPlayerInRoundScores.Remove(player.ActorNumber);
-	}
-
-	private void StartTrackingPlayer(NetPlayer player, bool lateJoin)
-	{
-		bool initInfected = lateJoin;
-		if (!lateJoin && this.CompetitiveManager != null)
-		{
-			initInfected = this.CompetitiveManager.IsInfected(player);
-			if (player.ActorNumber == NetworkSystem.Instance.LocalPlayerID)
-			{
-				this.WasInfectedInitially = true;
-			}
-		}
-		if (player == NetworkSystem.Instance.LocalPlayer)
-		{
-			this.CachePlayerRankedProgressionData(player.ActorNumber, this.Progression.GetProgressionRankIndex(), this.Progression.GetEloScore());
-		}
-		this.AllPlayerInRoundScores.TryAdd(player.ActorNumber, new RankedMultiplayerScore.PlayerScoreInRound(player.ActorNumber, initInfected));
-	}
-
-	public RankedMultiplayerScore.PlayerScoreInRound GetInGameScoreForSelf()
-	{
-		RankedMultiplayerScore.PlayerScoreInRound result;
-		if (this.AllPlayerInRoundScores.TryGetValue(NetworkSystem.Instance.LocalPlayerID, out result))
-		{
-			return result;
-		}
-		return default(RankedMultiplayerScore.PlayerScoreInRound);
-	}
-
-	public void OnTagReported(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
-	{
-		RankedMultiplayerScore.PlayerScoreInRound value;
-		if (this.AllPlayerInRoundScores.TryGetValue(taggingPlayer.ActorNumber, out value))
-		{
-			value.NumTags++;
-			this.AllPlayerInRoundScores[taggingPlayer.ActorNumber] = value;
-		}
-		RankedMultiplayerScore.PlayerScoreInRound value2;
-		if (this.AllPlayerInRoundScores.TryGetValue(taggedPlayer.ActorNumber, out value2))
-		{
-			value2.Infected = true;
-			value2.TaggedTime = Time.time;
-			this.AllPlayerInRoundScores[taggedPlayer.ActorNumber] = value2;
-		}
-	}
-
-	private void ReportScore()
-	{
-		object obj;
-		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
-		{
-			foreach (KeyValuePair<int, RankedMultiplayerScore.PlayerScoreInRound> keyValuePair in this.AllPlayerInRoundScores)
-			{
-				this.AllFinalPlayerScores.Add(new RankedMultiplayerScore.PlayerScore
-				{
-					PlayerId = keyValuePair.Key,
-					GameScore = this.ComputeGameScore(keyValuePair.Value.NumTags, keyValuePair.Value.PointsOnDefense),
-					EloScore = (this.PlayerRankedElos.ContainsKey(keyValuePair.Key) ? this.PlayerRankedElos[keyValuePair.Key] : 0f),
-					NumTags = keyValuePair.Value.NumTags,
-					TimeUntagged = keyValuePair.Value.TaggedTime - keyValuePair.Value.JoinTime,
-					PointsOnDefense = keyValuePair.Value.PointsOnDefense
-				});
-			}
-			GorillaTagCompetitiveServerApi.Instance.RequestSubmitMatchScores((string)obj, this.AllFinalPlayerScores);
-		}
-		this.PredictPlayerEloChanges();
-	}
-
-	public float ComputeGameScore(int tags, float pointsOnDefense)
-	{
-		return (float)(tags * this.PointsPerTag) + pointsOnDefense;
-	}
-
-	private void PredictPlayerEloChanges()
-	{
-		this.VisitedScoreCombintations.Clear();
-		this.AllFinalPlayerScores = (from s in this.AllFinalPlayerScores
-		orderby s.GameScore descending
-		select s).ToList<RankedMultiplayerScore.PlayerScore>();
-		float k = this.Progression.MaxEloConstant / (float)(this.AllFinalPlayerScores.Count - 1);
-		this.InProgressEloDeltaPerPlayer.Clear();
-		for (int i = 0; i < this.AllFinalPlayerScores.Count; i++)
-		{
-			this.InProgressEloDeltaPerPlayer.Add(this.AllFinalPlayerScores[i].PlayerId, 0f);
-		}
-		for (int j = 0; j < this.AllFinalPlayerScores.Count; j++)
-		{
-			for (int l = 0; l < this.AllFinalPlayerScores.Count; l++)
-			{
-				if (j != l)
-				{
-					bool flag = this.AllFinalPlayerScores[j].GameScore.Approx(this.AllFinalPlayerScores[l].GameScore, 1E-06f);
-					float eloWinProbability = RankedProgressionManager.GetEloWinProbability(this.AllFinalPlayerScores[l].EloScore, this.AllFinalPlayerScores[j].EloScore);
-					float eloWinProbability2 = RankedProgressionManager.GetEloWinProbability(this.AllFinalPlayerScores[j].EloScore, this.AllFinalPlayerScores[l].EloScore);
-					int key = j * this.AllFinalPlayerScores.Count + l;
-					if (!this.VisitedScoreCombintations.ContainsKey(key))
-					{
-						RankedMultiplayerScore.PlayerScore playerScore = this.AllFinalPlayerScores[j];
-						float actualResult;
-						if (flag)
-						{
-							actualResult = 0.5f;
-						}
-						else
-						{
-							actualResult = (float)((j < l) ? 1 : 0);
-						}
-						float eloScore = playerScore.EloScore;
-						float num = RankedProgressionManager.UpdateEloScore(eloScore, eloWinProbability, actualResult, k);
-						Dictionary<int, float> inProgressEloDeltaPerPlayer = this.InProgressEloDeltaPerPlayer;
-						int playerId = playerScore.PlayerId;
-						inProgressEloDeltaPerPlayer[playerId] += num - eloScore;
-						this.VisitedScoreCombintations.Add(key, true);
-					}
-					int key2 = l * this.AllFinalPlayerScores.Count + j;
-					if (!this.VisitedScoreCombintations.ContainsKey(key2))
-					{
-						RankedMultiplayerScore.PlayerScore playerScore2 = this.AllFinalPlayerScores[l];
-						float actualResult;
-						if (flag)
-						{
-							actualResult = 0.5f;
-						}
-						else
-						{
-							actualResult = (float)((l < j) ? 1 : 0);
-						}
-						float eloScore2 = playerScore2.EloScore;
-						float num2 = RankedProgressionManager.UpdateEloScore(eloScore2, eloWinProbability2, actualResult, k);
-						Dictionary<int, float> inProgressEloDeltaPerPlayer = this.InProgressEloDeltaPerPlayer;
-						int playerId = playerScore2.PlayerId;
-						inProgressEloDeltaPerPlayer[playerId] += num2 - eloScore2;
-						this.VisitedScoreCombintations.Add(key2, true);
-					}
-				}
-			}
-		}
-	}
-
-	public void CachePlayerRankedProgressionData(int playerId, int tierIdx, float elo)
-	{
-		if (this.PlayerRankedTierIndices.ContainsKey(playerId))
-		{
-			this.PlayerRankedTierIndices[playerId] = tierIdx;
-		}
-		else
-		{
-			this.PlayerRankedTierIndices.Add(playerId, tierIdx);
-		}
-		if (this.PlayerRankedElos.ContainsKey(playerId))
-		{
-			this.PlayerRankedElos[playerId] = elo;
-			return;
-		}
-		this.PlayerRankedElos.Add(playerId, elo);
-	}
-
-	public Dictionary<int, int> PlayerRankedTiers
-	{
-		get
-		{
-			return this.PlayerRankedTierIndices;
-		}
-		set
-		{
-			this.PlayerRankedTierIndices = value;
-		}
-	}
-
-	public Dictionary<int, float> PlayerRankedEloScores
-	{
-		get
-		{
-			return this.PlayerRankedElos;
-		}
-		set
-		{
-			this.PlayerRankedElos = value;
-		}
-	}
-
-	public Dictionary<int, float> ProjectedEloDeltas
-	{
-		get
-		{
-			return this.InProgressEloDeltaPerPlayer;
-		}
-		set
-		{
-			this.InProgressEloDeltaPerPlayer = value;
-		}
-	}
-
-	public List<RankedMultiplayerScore.PlayerScoreInRound> GetSortedScores()
-	{
-		List<RankedMultiplayerScore.PlayerScoreInRound> list = new List<RankedMultiplayerScore.PlayerScoreInRound>();
-		foreach (KeyValuePair<int, RankedMultiplayerScore.PlayerScoreInRound> keyValuePair in this.AllPlayerInRoundScores)
-		{
-			list.Add(keyValuePair.Value);
-		}
-		list.Sort((RankedMultiplayerScore.PlayerScoreInRound s1, RankedMultiplayerScore.PlayerScoreInRound s2) => this.ComputeGameScore(s2.NumTags, s2.PointsOnDefense).CompareTo(this.ComputeGameScore(s1.NumTags, s1.PointsOnDefense)));
-		return list;
+		public T Value;
 	}
 
 	public static float LongestUntaggedTieEpsilon = 0.2f;
@@ -416,9 +88,9 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	private GorillaTagCompetitiveManager CompetitiveManager;
 
-	protected Dictionary<int, RankedMultiplayerScore.PlayerScoreInRound> AllPlayerInRoundScores = new Dictionary<int, RankedMultiplayerScore.PlayerScoreInRound>();
+	protected Dictionary<int, PlayerScoreInRound> AllPlayerInRoundScores = new Dictionary<int, PlayerScoreInRound>();
 
-	protected List<RankedMultiplayerScore.PlayerScore> AllFinalPlayerScores = new List<RankedMultiplayerScore.PlayerScore>();
+	protected List<PlayerScore> AllFinalPlayerScores = new List<PlayerScore>();
 
 	protected Dictionary<int, bool> VisitedScoreCombintations = new Dictionary<int, bool>();
 
@@ -428,83 +100,367 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	protected Dictionary<int, float> PlayerRankedElos = new Dictionary<int, float>();
 
-	private RankedMultiplayerScore.ResultData PendingResults;
+	private ResultData PendingResults;
 
-	private RankedMultiplayerScore.RecordHolder<int> ResultsMostTags;
+	private RecordHolder<int> ResultsMostTags;
 
-	private RankedMultiplayerScore.RecordHolder<float> ResultsLongestUntagged;
+	private RecordHolder<float> ResultsLongestUntagged;
 
 	private bool IsLateJoiner;
 
-	public struct PlayerScore
+	public RankedProgressionManager Progression { get; private set; }
+
+	public Dictionary<int, int> PlayerRankedTiers
 	{
-		public int PlayerId;
-
-		public float GameScore;
-
-		public float EloScore;
-
-		public int NumTags;
-
-		public float TimeUntagged;
-
-		public float PointsOnDefense;
+		get
+		{
+			return PlayerRankedTierIndices;
+		}
+		set
+		{
+			PlayerRankedTierIndices = value;
+		}
 	}
 
-	public struct PlayerScoreInRound
+	public Dictionary<int, float> PlayerRankedEloScores
 	{
-		public PlayerScoreInRound(int id, bool initInfected = false)
+		get
 		{
-			this.PlayerId = id;
-			this.NumTags = 0;
-			this.PointsOnDefense = 0f;
-			this.JoinTime = Time.time;
-			this.Infected = initInfected;
-			this.TaggedTime = (initInfected ? Time.time : 0f);
+			return PlayerRankedElos;
 		}
-
-		public int PlayerId;
-
-		public int NumTags;
-
-		public float PointsOnDefense;
-
-		public float JoinTime;
-
-		public float TaggedTime;
-
-		public bool Infected;
+		set
+		{
+			PlayerRankedElos = value;
+		}
 	}
 
-	public struct ResultData
+	public Dictionary<int, float> ProjectedEloDeltas
 	{
-		public bool IsMostTagsTied()
+		get
 		{
-			return this.MostTagsPlayerId == RankedMultiplayerScore.RESULT_TIE;
+			return InProgressEloDeltaPerPlayer;
 		}
-
-		public bool IsLongestUntaggedTied()
+		set
 		{
-			return this.LongestUntaggedPlayerId == RankedMultiplayerScore.RESULT_TIE;
+			InProgressEloDeltaPerPlayer = value;
 		}
-
-		public float Elo;
-
-		public int Rank;
-
-		public int MostTags;
-
-		public float LongestUntagged;
-
-		public int MostTagsPlayerId;
-
-		public int LongestUntaggedPlayerId;
 	}
 
-	public struct RecordHolder<T>
+	public void Initialize()
 	{
-		public int PlayerId;
+		GorillaTagCompetitiveManager.onStateChanged += OnStateChanged;
+		GorillaTagCompetitiveManager.onRoundStart += OnGameStarted;
+		GorillaTagCompetitiveManager.onRoundEnd += OnGameEnded;
+		GorillaTagCompetitiveManager.onPlayerJoined += OnPlayerJoined;
+		GorillaTagCompetitiveManager.onPlayerLeft += OnPlayerLeft;
+		GorillaTagCompetitiveManager.onTagOccurred += OnTagReported;
+		GorillaGameManager instance = GorillaGameManager.instance;
+		if (instance != null)
+		{
+			CompetitiveManager = instance as GorillaTagCompetitiveManager;
+		}
+		Progression = RankedProgressionManager.Instance;
+		RankedProgressionManager progression = Progression;
+		progression.OnPlayerEloAcquired = (Action<int, float, int>)Delegate.Combine(progression.OnPlayerEloAcquired, new Action<int, float, int>(HandlePlayerEloAcquired));
+	}
 
-		public T Value;
+	private void HandlePlayerEloAcquired(int playerId, float elo, int tier)
+	{
+		CachePlayerRankedProgressionData(playerId, tier, elo);
+	}
+
+	private void OnDestroy()
+	{
+		Unsubscribe();
+	}
+
+	public void Unsubscribe()
+	{
+		GorillaTagCompetitiveManager.onStateChanged -= OnStateChanged;
+		GorillaTagCompetitiveManager.onRoundStart -= OnGameStarted;
+		GorillaTagCompetitiveManager.onRoundEnd -= OnGameEnded;
+		GorillaTagCompetitiveManager.onPlayerJoined -= OnPlayerJoined;
+		GorillaTagCompetitiveManager.onPlayerLeft -= OnPlayerLeft;
+		GorillaTagCompetitiveManager.onTagOccurred -= OnTagReported;
+		if (Progression != null)
+		{
+			RankedProgressionManager progression = Progression;
+			progression.OnPlayerEloAcquired = (Action<int, float, int>)Delegate.Remove(progression.OnPlayerEloAcquired, new Action<int, float, int>(HandlePlayerEloAcquired));
+		}
+	}
+
+	public override void Tick()
+	{
+		if (PerSecondTimer > 0f && Time.time >= PerSecondTimer + 1f && !(CompetitiveManager == null))
+		{
+			OnPerSecondTimerElapsed(NetworkSystem.Instance.AllNetPlayers.Length, CompetitiveManager.currentInfected.Count);
+			PerSecondTimer = Time.time;
+		}
+	}
+
+	private void OnPerSecondTimerElapsed(int playersInGame, int infectedPlayers)
+	{
+		foreach (int item in AllPlayerInRoundScores.Keys.ToList())
+		{
+			PlayerScoreInRound value = AllPlayerInRoundScores[item];
+			value.Infected = CompetitiveManager.IsInfected(NetworkSystem.Instance.GetPlayer(item));
+			if (!value.Infected)
+			{
+				float t = (float)infectedPlayers / (float)playersInGame;
+				value.PointsOnDefense += Mathf.Lerp(PointsPerUninfectedSecMin, PointsPerUninfectedSecMax, t);
+			}
+			AllPlayerInRoundScores[item] = value;
+		}
+	}
+
+	public void ResetMatch()
+	{
+		AllFinalPlayerScores.Clear();
+		AllPlayerInRoundScores.Clear();
+	}
+
+	private void OnStateChanged(GorillaTagCompetitiveManager.GameState state)
+	{
+		if (state == GorillaTagCompetitiveManager.GameState.StartingCountdown)
+		{
+			OnGameStarted();
+			Progression.AcquireRoomRankInformation();
+		}
+	}
+
+	public void OnGameStarted()
+	{
+		PerSecondTimer = Time.time;
+		if (!IsLateJoiner)
+		{
+			ResetMatch();
+			for (int i = 0; i < NetworkSystem.Instance.AllNetPlayers.Length; i++)
+			{
+				StartTrackingPlayer(NetworkSystem.Instance.AllNetPlayers[i], lateJoin: false);
+			}
+		}
+	}
+
+	public void OnGameEnded()
+	{
+		foreach (int item in AllPlayerInRoundScores.Keys.ToList())
+		{
+			PlayerScoreInRound value = AllPlayerInRoundScores[item];
+			if (!value.Infected)
+			{
+				value.TaggedTime = Time.time;
+			}
+			AllPlayerInRoundScores[item] = value;
+		}
+		PerSecondTimer = -1f;
+		ReportScore();
+		WasInfectedInitially = false;
+		IsLateJoiner = false;
+	}
+
+	private void OnPlayerJoined(NetPlayer player)
+	{
+		if (NetworkSystem.Instance.IsMasterClient && CompetitiveManager.IsMatchActive())
+		{
+			List<int> list = new List<int>();
+			List<int> list2 = new List<int>();
+			List<float> list3 = new List<float>();
+			List<float> list4 = new List<float>();
+			List<bool> list5 = new List<bool>();
+			List<float> list6 = new List<float>();
+			foreach (KeyValuePair<int, PlayerScoreInRound> allPlayerInRoundScore in AllPlayerInRoundScores)
+			{
+				list.Add(allPlayerInRoundScore.Value.PlayerId);
+				list2.Add(allPlayerInRoundScore.Value.NumTags);
+				list3.Add(allPlayerInRoundScore.Value.PointsOnDefense);
+				list4.Add(Time.time - allPlayerInRoundScore.Value.JoinTime);
+				list5.Add(allPlayerInRoundScore.Value.Infected);
+				if (!allPlayerInRoundScore.Value.Infected)
+				{
+					list6.Add(0f);
+				}
+				else
+				{
+					list6.Add(Time.time - allPlayerInRoundScore.Value.TaggedTime);
+				}
+			}
+			GameMode.ActiveNetworkHandler.SendRPC("SendScoresToLateJoinerRPC", player, list.ToArray(), list2.ToArray(), list3.ToArray(), list4.ToArray(), list5.ToArray(), list6.ToArray());
+		}
+		StartTrackingPlayer(player, lateJoin: true);
+	}
+
+	public void ReceivedScoresForLateJoiner(int[] playerIds, int[] numTags, float[] pointsOnDefense, float[] joinTime, bool[] infected, float[] taggedTime)
+	{
+		if (NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		IsLateJoiner = true;
+		for (int i = 0; i < playerIds.Length; i++)
+		{
+			int num = playerIds[i];
+			PlayerScoreInRound value = new PlayerScoreInRound(num, infected[i]);
+			value.NumTags = numTags[i];
+			value.PointsOnDefense = pointsOnDefense[i];
+			value.JoinTime = Time.time - joinTime[i];
+			if (!infected[i])
+			{
+				value.TaggedTime = 0f;
+			}
+			else
+			{
+				value.TaggedTime = Time.time - taggedTime[i];
+			}
+			AllPlayerInRoundScores.TryAdd(num, value);
+		}
+	}
+
+	private void OnPlayerLeft(NetPlayer player)
+	{
+		AllPlayerInRoundScores.Remove(player.ActorNumber);
+	}
+
+	private void StartTrackingPlayer(NetPlayer player, bool lateJoin)
+	{
+		bool initInfected = lateJoin;
+		if (!lateJoin && CompetitiveManager != null)
+		{
+			initInfected = CompetitiveManager.IsInfected(player);
+			if (player.ActorNumber == NetworkSystem.Instance.LocalPlayerID)
+			{
+				WasInfectedInitially = true;
+			}
+		}
+		if (player == NetworkSystem.Instance.LocalPlayer)
+		{
+			CachePlayerRankedProgressionData(player.ActorNumber, Progression.GetProgressionRankIndex(), Progression.GetEloScore());
+		}
+		AllPlayerInRoundScores.TryAdd(player.ActorNumber, new PlayerScoreInRound(player.ActorNumber, initInfected));
+	}
+
+	public PlayerScoreInRound GetInGameScoreForSelf()
+	{
+		if (AllPlayerInRoundScores.TryGetValue(NetworkSystem.Instance.LocalPlayerID, out var value))
+		{
+			return value;
+		}
+		return default(PlayerScoreInRound);
+	}
+
+	public void OnTagReported(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
+	{
+		if (AllPlayerInRoundScores.TryGetValue(taggingPlayer.ActorNumber, out var value))
+		{
+			value.NumTags++;
+			AllPlayerInRoundScores[taggingPlayer.ActorNumber] = value;
+		}
+		if (AllPlayerInRoundScores.TryGetValue(taggedPlayer.ActorNumber, out var value2))
+		{
+			value2.Infected = true;
+			value2.TaggedTime = Time.time;
+			AllPlayerInRoundScores[taggedPlayer.ActorNumber] = value2;
+		}
+	}
+
+	private void ReportScore()
+	{
+		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out var value))
+		{
+			foreach (KeyValuePair<int, PlayerScoreInRound> allPlayerInRoundScore in AllPlayerInRoundScores)
+			{
+				AllFinalPlayerScores.Add(new PlayerScore
+				{
+					PlayerId = allPlayerInRoundScore.Key,
+					GameScore = ComputeGameScore(allPlayerInRoundScore.Value.NumTags, allPlayerInRoundScore.Value.PointsOnDefense),
+					EloScore = (PlayerRankedElos.ContainsKey(allPlayerInRoundScore.Key) ? PlayerRankedElos[allPlayerInRoundScore.Key] : 0f),
+					NumTags = allPlayerInRoundScore.Value.NumTags,
+					TimeUntagged = allPlayerInRoundScore.Value.TaggedTime - allPlayerInRoundScore.Value.JoinTime,
+					PointsOnDefense = allPlayerInRoundScore.Value.PointsOnDefense
+				});
+			}
+			GorillaTagCompetitiveServerApi.Instance.RequestSubmitMatchScores((string)value, AllFinalPlayerScores);
+		}
+		PredictPlayerEloChanges();
+	}
+
+	public float ComputeGameScore(int tags, float pointsOnDefense)
+	{
+		return (float)(tags * PointsPerTag) + pointsOnDefense;
+	}
+
+	private void PredictPlayerEloChanges()
+	{
+		VisitedScoreCombintations.Clear();
+		AllFinalPlayerScores = AllFinalPlayerScores.OrderByDescending((PlayerScore s) => s.GameScore).ToList();
+		float k = Progression.MaxEloConstant / (float)(AllFinalPlayerScores.Count - 1);
+		InProgressEloDeltaPerPlayer.Clear();
+		for (int num = 0; num < AllFinalPlayerScores.Count; num++)
+		{
+			InProgressEloDeltaPerPlayer.Add(AllFinalPlayerScores[num].PlayerId, 0f);
+		}
+		for (int num2 = 0; num2 < AllFinalPlayerScores.Count; num2++)
+		{
+			for (int num3 = 0; num3 < AllFinalPlayerScores.Count; num3++)
+			{
+				if (num2 != num3)
+				{
+					bool flag = AllFinalPlayerScores[num2].GameScore.Approx(AllFinalPlayerScores[num3].GameScore);
+					float num4 = 0f;
+					float eloWinProbability = RankedProgressionManager.GetEloWinProbability(AllFinalPlayerScores[num3].EloScore, AllFinalPlayerScores[num2].EloScore);
+					float eloWinProbability2 = RankedProgressionManager.GetEloWinProbability(AllFinalPlayerScores[num2].EloScore, AllFinalPlayerScores[num3].EloScore);
+					int key = num2 * AllFinalPlayerScores.Count + num3;
+					if (!VisitedScoreCombintations.ContainsKey(key))
+					{
+						PlayerScore playerScore = AllFinalPlayerScores[num2];
+						num4 = ((!flag) ? ((float)((num2 < num3) ? 1 : 0)) : 0.5f);
+						float eloScore = playerScore.EloScore;
+						float num5 = RankedProgressionManager.UpdateEloScore(eloScore, eloWinProbability, num4, k);
+						InProgressEloDeltaPerPlayer[playerScore.PlayerId] += num5 - eloScore;
+						VisitedScoreCombintations.Add(key, value: true);
+					}
+					int key2 = num3 * AllFinalPlayerScores.Count + num2;
+					if (!VisitedScoreCombintations.ContainsKey(key2))
+					{
+						PlayerScore playerScore2 = AllFinalPlayerScores[num3];
+						num4 = ((!flag) ? ((float)((num3 < num2) ? 1 : 0)) : 0.5f);
+						float eloScore2 = playerScore2.EloScore;
+						float num6 = RankedProgressionManager.UpdateEloScore(eloScore2, eloWinProbability2, num4, k);
+						InProgressEloDeltaPerPlayer[playerScore2.PlayerId] += num6 - eloScore2;
+						VisitedScoreCombintations.Add(key2, value: true);
+					}
+				}
+			}
+		}
+	}
+
+	public void CachePlayerRankedProgressionData(int playerId, int tierIdx, float elo)
+	{
+		if (PlayerRankedTierIndices.ContainsKey(playerId))
+		{
+			PlayerRankedTierIndices[playerId] = tierIdx;
+		}
+		else
+		{
+			PlayerRankedTierIndices.Add(playerId, tierIdx);
+		}
+		if (PlayerRankedElos.ContainsKey(playerId))
+		{
+			PlayerRankedElos[playerId] = elo;
+		}
+		else
+		{
+			PlayerRankedElos.Add(playerId, elo);
+		}
+	}
+
+	public List<PlayerScoreInRound> GetSortedScores()
+	{
+		List<PlayerScoreInRound> list = new List<PlayerScoreInRound>();
+		foreach (KeyValuePair<int, PlayerScoreInRound> allPlayerInRoundScore in AllPlayerInRoundScores)
+		{
+			list.Add(allPlayerInRoundScore.Value);
+		}
+		list.Sort((PlayerScoreInRound s1, PlayerScoreInRound s2) => ComputeGameScore(s2.NumTags, s2.PointsOnDefense).CompareTo(ComputeGameScore(s1.NumTags, s1.PointsOnDefense)));
+		return list;
 	}
 }

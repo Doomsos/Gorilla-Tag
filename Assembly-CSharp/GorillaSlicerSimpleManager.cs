@@ -1,234 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
 public class GorillaSlicerSimpleManager : MonoBehaviour
 {
-	protected void Awake()
+	public enum UpdateStep
 	{
-		if (GorillaSlicerSimpleManager.hasInstance && GorillaSlicerSimpleManager.instance != this)
-		{
-			Object.Destroy(this);
-			return;
-		}
-		GorillaSlicerSimpleManager.SetInstance(this);
-	}
-
-	public static void CreateManager()
-	{
-		GorillaSlicerSimpleManager gorillaSlicerSimpleManager = new GameObject("GorillaSlicerSimpleManager").AddComponent<GorillaSlicerSimpleManager>();
-		gorillaSlicerSimpleManager.fixedUpdateSlice = new List<IGorillaSliceableSimple>();
-		gorillaSlicerSimpleManager.updateSlice = new List<IGorillaSliceableSimple>();
-		gorillaSlicerSimpleManager.lateUpdateSlice = new List<IGorillaSliceableSimple>();
-		gorillaSlicerSimpleManager.sW = new Stopwatch();
-		GorillaSlicerSimpleManager.SetInstance(gorillaSlicerSimpleManager);
-	}
-
-	private static void SetInstance(GorillaSlicerSimpleManager manager)
-	{
-		GorillaSlicerSimpleManager.instance = manager;
-		GorillaSlicerSimpleManager.hasInstance = true;
-		if (Application.isPlaying)
-		{
-			Object.DontDestroyOnLoad(manager);
-		}
-	}
-
-	public static void RegisterSliceable(IGorillaSliceableSimple gSS)
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(gSS, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public static void RegisterSliceable(IGorillaSliceableSimple gSS, GorillaSlicerSimpleManager.UpdateStep step)
-	{
-		if (!GorillaSlicerSimpleManager.hasInstance)
-		{
-			GorillaSlicerSimpleManager.CreateManager();
-		}
-		GorillaSlicerSimpleManager.instance.lastRunTicks.TryAdd(gSS, 0L);
-		switch (step)
-		{
-		case GorillaSlicerSimpleManager.UpdateStep.FixedUpdate:
-			if (!GorillaSlicerSimpleManager.instance.fixedUpdateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.fixedUpdateSlice.Add(gSS);
-				return;
-			}
-			break;
-		case GorillaSlicerSimpleManager.UpdateStep.Update:
-			if (!GorillaSlicerSimpleManager.instance.updateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.updateSlice.Add(gSS);
-				return;
-			}
-			break;
-		case GorillaSlicerSimpleManager.UpdateStep.LateUpdate:
-			if (!GorillaSlicerSimpleManager.instance.lateUpdateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.lateUpdateSlice.Add(gSS);
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public static bool UnregisterSliceable(IGorillaSliceableSimple gSS)
-	{
-		return GorillaSlicerSimpleManager.UnregisterSliceable(gSS, GorillaSlicerSimpleManager.UpdateStep.Update) || GorillaSlicerSimpleManager.UnregisterSliceable(gSS, GorillaSlicerSimpleManager.UpdateStep.LateUpdate) || GorillaSlicerSimpleManager.UnregisterSliceable(gSS, GorillaSlicerSimpleManager.UpdateStep.FixedUpdate);
-	}
-
-	public static bool UnregisterSliceable(IGorillaSliceableSimple gSS, GorillaSlicerSimpleManager.UpdateStep step)
-	{
-		if (!GorillaSlicerSimpleManager.hasInstance)
-		{
-			GorillaSlicerSimpleManager.CreateManager();
-		}
-		switch (step)
-		{
-		case GorillaSlicerSimpleManager.UpdateStep.FixedUpdate:
-			if (GorillaSlicerSimpleManager.instance.fixedUpdateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.fixedUpdateSlice.Remove(gSS);
-				return true;
-			}
-			break;
-		case GorillaSlicerSimpleManager.UpdateStep.Update:
-			if (GorillaSlicerSimpleManager.instance.updateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.updateSlice.Remove(gSS);
-				return true;
-			}
-			break;
-		case GorillaSlicerSimpleManager.UpdateStep.LateUpdate:
-			if (GorillaSlicerSimpleManager.instance.lateUpdateSlice.Contains(gSS))
-			{
-				GorillaSlicerSimpleManager.instance.lateUpdateSlice.Remove(gSS);
-				return true;
-			}
-			break;
-		}
-		return false;
-	}
-
-	public void FixedUpdate()
-	{
-		this.startingIndex = this.updateIndex;
-		if (this.updateIndex < 0 || this.updateIndex >= this.fixedUpdateSlice.Count + this.updateSlice.Count + this.lateUpdateSlice.Count)
-		{
-			this.updateIndex = 0;
-		}
-		this.sW.Restart();
-		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && this.updateIndex < this.fixedUpdateSlice.Count)
-		{
-			IGorillaSliceableSimple gorillaSliceableSimple = this.fixedUpdateSlice[this.updateIndex];
-			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
-			{
-				this.ticksThisFrame = this.ticksPerFrame;
-				break;
-			}
-			long elapsedTicks = this.sW.ElapsedTicks;
-			if (0 <= this.updateIndex && this.updateIndex < this.fixedUpdateSlice.Count)
-			{
-				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
-				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
-				{
-					try
-					{
-						gorillaSliceableSimple.SliceUpdate();
-					}
-					catch (Exception exception)
-					{
-						Debug.LogException(exception);
-					}
-				}
-			}
-			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
-			this.updateIndex++;
-		}
-		this.ticksThisFrame += this.sW.ElapsedTicks;
-		this.sW.Stop();
-	}
-
-	public void Update()
-	{
-		int count = this.fixedUpdateSlice.Count;
-		int count2 = this.updateSlice.Count;
-		int num = count + count2;
-		this.sW.Restart();
-		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && count <= this.updateIndex && this.updateIndex < num)
-		{
-			IGorillaSliceableSimple gorillaSliceableSimple = this.updateSlice[this.updateIndex - count];
-			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
-			{
-				this.ticksThisFrame = this.ticksPerFrame;
-				break;
-			}
-			long elapsedTicks = this.sW.ElapsedTicks;
-			if (0 <= this.updateIndex - count && this.updateIndex - count < this.updateSlice.Count)
-			{
-				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
-				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
-				{
-					try
-					{
-						gorillaSliceableSimple.SliceUpdate();
-					}
-					catch (Exception exception)
-					{
-						Debug.LogException(exception);
-					}
-				}
-			}
-			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
-			this.updateIndex++;
-		}
-		this.ticksThisFrame += this.sW.ElapsedTicks;
-		this.sW.Stop();
-	}
-
-	public void LateUpdate()
-	{
-		int count = this.fixedUpdateSlice.Count;
-		int count2 = this.updateSlice.Count;
-		int count3 = this.lateUpdateSlice.Count;
-		int num = count + count2;
-		int num2 = num + count3;
-		this.sW.Restart();
-		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && num <= this.updateIndex && this.updateIndex < num2)
-		{
-			IGorillaSliceableSimple gorillaSliceableSimple = this.lateUpdateSlice[this.updateIndex - num];
-			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
-			{
-				this.ticksThisFrame = this.ticksPerFrame;
-				break;
-			}
-			long elapsedTicks = this.sW.ElapsedTicks;
-			if (0 <= this.updateIndex - num && this.updateIndex - num < this.lateUpdateSlice.Count)
-			{
-				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
-				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
-				{
-					try
-					{
-						gorillaSliceableSimple.SliceUpdate();
-					}
-					catch (Exception exception)
-					{
-						Debug.LogException(exception);
-					}
-				}
-			}
-			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
-			this.updateIndex++;
-		}
-		this.sW.Stop();
-		if (this.updateIndex >= num2)
-		{
-			this.updateIndex = -1;
-		}
-		this.ticksThisFrame = 0L;
+		FixedUpdate,
+		Update,
+		LateUpdate
 	}
 
 	public static GorillaSlicerSimpleManager instance;
@@ -253,10 +34,223 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 
 	public Dictionary<IGorillaSliceableSimple, long> lastRunTicks = new Dictionary<IGorillaSliceableSimple, long>();
 
-	public enum UpdateStep
+	protected void Awake()
 	{
-		FixedUpdate,
-		Update,
-		LateUpdate
+		if (hasInstance && instance != this)
+		{
+			UnityEngine.Object.Destroy(this);
+		}
+		else
+		{
+			SetInstance(this);
+		}
+	}
+
+	public static void CreateManager()
+	{
+		GorillaSlicerSimpleManager gorillaSlicerSimpleManager = new GameObject("GorillaSlicerSimpleManager").AddComponent<GorillaSlicerSimpleManager>();
+		gorillaSlicerSimpleManager.fixedUpdateSlice = new List<IGorillaSliceableSimple>();
+		gorillaSlicerSimpleManager.updateSlice = new List<IGorillaSliceableSimple>();
+		gorillaSlicerSimpleManager.lateUpdateSlice = new List<IGorillaSliceableSimple>();
+		gorillaSlicerSimpleManager.sW = new Stopwatch();
+		SetInstance(gorillaSlicerSimpleManager);
+	}
+
+	private static void SetInstance(GorillaSlicerSimpleManager manager)
+	{
+		instance = manager;
+		hasInstance = true;
+		if (Application.isPlaying)
+		{
+			UnityEngine.Object.DontDestroyOnLoad(manager);
+		}
+	}
+
+	public static void RegisterSliceable(IGorillaSliceableSimple gSS)
+	{
+		RegisterSliceable(gSS, UpdateStep.Update);
+	}
+
+	public static void RegisterSliceable(IGorillaSliceableSimple gSS, UpdateStep step)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		instance.lastRunTicks.TryAdd(gSS, 0L);
+		switch (step)
+		{
+		case UpdateStep.FixedUpdate:
+			if (!instance.fixedUpdateSlice.Contains(gSS))
+			{
+				instance.fixedUpdateSlice.Add(gSS);
+			}
+			break;
+		case UpdateStep.Update:
+			if (!instance.updateSlice.Contains(gSS))
+			{
+				instance.updateSlice.Add(gSS);
+			}
+			break;
+		case UpdateStep.LateUpdate:
+			if (!instance.lateUpdateSlice.Contains(gSS))
+			{
+				instance.lateUpdateSlice.Add(gSS);
+			}
+			break;
+		}
+	}
+
+	public static bool UnregisterSliceable(IGorillaSliceableSimple gSS)
+	{
+		if (UnregisterSliceable(gSS, UpdateStep.Update))
+		{
+			return true;
+		}
+		if (UnregisterSliceable(gSS, UpdateStep.LateUpdate))
+		{
+			return true;
+		}
+		return UnregisterSliceable(gSS, UpdateStep.FixedUpdate);
+	}
+
+	public static bool UnregisterSliceable(IGorillaSliceableSimple gSS, UpdateStep step)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		switch (step)
+		{
+		case UpdateStep.FixedUpdate:
+			if (instance.fixedUpdateSlice.Contains(gSS))
+			{
+				instance.fixedUpdateSlice.Remove(gSS);
+				return true;
+			}
+			break;
+		case UpdateStep.Update:
+			if (instance.updateSlice.Contains(gSS))
+			{
+				instance.updateSlice.Remove(gSS);
+				return true;
+			}
+			break;
+		case UpdateStep.LateUpdate:
+			if (instance.lateUpdateSlice.Contains(gSS))
+			{
+				instance.lateUpdateSlice.Remove(gSS);
+				return true;
+			}
+			break;
+		}
+		return false;
+	}
+
+	public void FixedUpdate()
+	{
+		startingIndex = updateIndex;
+		if (updateIndex < 0 || updateIndex >= fixedUpdateSlice.Count + updateSlice.Count + lateUpdateSlice.Count)
+		{
+			updateIndex = 0;
+		}
+		sW.Restart();
+		while (ticksThisFrame + sW.ElapsedTicks < ticksPerFrame && updateIndex < fixedUpdateSlice.Count)
+		{
+			IGorillaSliceableSimple gorillaSliceableSimple = fixedUpdateSlice[updateIndex];
+			if (startingIndex != updateIndex && ticksThisFrame + sW.ElapsedTicks + lastRunTicks[gorillaSliceableSimple] >= ticksPerFrame)
+			{
+				ticksThisFrame = ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = sW.ElapsedTicks;
+			if (0 <= updateIndex && updateIndex < fixedUpdateSlice.Count && !(gorillaSliceableSimple is MonoBehaviour { isActiveAndEnabled: false }))
+			{
+				try
+				{
+					gorillaSliceableSimple.SliceUpdate();
+				}
+				catch (Exception exception)
+				{
+					UnityEngine.Debug.LogException(exception);
+				}
+			}
+			lastRunTicks[gorillaSliceableSimple] = sW.ElapsedTicks - elapsedTicks;
+			updateIndex++;
+		}
+		ticksThisFrame += sW.ElapsedTicks;
+		sW.Stop();
+	}
+
+	public void Update()
+	{
+		int count = fixedUpdateSlice.Count;
+		int count2 = updateSlice.Count;
+		int num = count + count2;
+		sW.Restart();
+		while (ticksThisFrame + sW.ElapsedTicks < ticksPerFrame && count <= updateIndex && updateIndex < num)
+		{
+			IGorillaSliceableSimple gorillaSliceableSimple = updateSlice[updateIndex - count];
+			if (startingIndex != updateIndex && ticksThisFrame + sW.ElapsedTicks + lastRunTicks[gorillaSliceableSimple] >= ticksPerFrame)
+			{
+				ticksThisFrame = ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = sW.ElapsedTicks;
+			if (0 <= updateIndex - count && updateIndex - count < updateSlice.Count && !(gorillaSliceableSimple is MonoBehaviour { isActiveAndEnabled: false }))
+			{
+				try
+				{
+					gorillaSliceableSimple.SliceUpdate();
+				}
+				catch (Exception exception)
+				{
+					UnityEngine.Debug.LogException(exception);
+				}
+			}
+			lastRunTicks[gorillaSliceableSimple] = sW.ElapsedTicks - elapsedTicks;
+			updateIndex++;
+		}
+		ticksThisFrame += sW.ElapsedTicks;
+		sW.Stop();
+	}
+
+	public void LateUpdate()
+	{
+		int count = fixedUpdateSlice.Count;
+		int count2 = updateSlice.Count;
+		int count3 = lateUpdateSlice.Count;
+		int num = count + count2;
+		int num2 = num + count3;
+		sW.Restart();
+		while (ticksThisFrame + sW.ElapsedTicks < ticksPerFrame && num <= updateIndex && updateIndex < num2)
+		{
+			IGorillaSliceableSimple gorillaSliceableSimple = lateUpdateSlice[updateIndex - num];
+			if (startingIndex != updateIndex && ticksThisFrame + sW.ElapsedTicks + lastRunTicks[gorillaSliceableSimple] >= ticksPerFrame)
+			{
+				ticksThisFrame = ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = sW.ElapsedTicks;
+			if (0 <= updateIndex - num && updateIndex - num < lateUpdateSlice.Count && !(gorillaSliceableSimple is MonoBehaviour { isActiveAndEnabled: false }))
+			{
+				try
+				{
+					gorillaSliceableSimple.SliceUpdate();
+				}
+				catch (Exception exception)
+				{
+					UnityEngine.Debug.LogException(exception);
+				}
+			}
+			lastRunTicks[gorillaSliceableSimple] = sW.ElapsedTicks - elapsedTicks;
+			updateIndex++;
+		}
+		sW.Stop();
+		if (updateIndex >= num2)
+		{
+			updateIndex = -1;
+		}
+		ticksThisFrame = 0L;
 	}
 }

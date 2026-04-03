@@ -1,18 +1,21 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Hand Gesture", menuName = "Gorilla/Hand Gesture")]
 public class GorillaHandGesture : ScriptableObject
 {
+	public bool track = true;
+
+	public GestureNode[] nodes = InitNodes();
+
 	public GestureHandNode hand
 	{
 		get
 		{
-			return (GestureHandNode)this.nodes[0];
+			return (GestureHandNode)nodes[0];
 		}
 		set
 		{
-			this.nodes[0] = value;
+			nodes[0] = value;
 		}
 	}
 
@@ -20,11 +23,11 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return this.nodes[1];
+			return nodes[1];
 		}
 		set
 		{
-			this.nodes[1] = value;
+			nodes[1] = value;
 		}
 	}
 
@@ -32,11 +35,11 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return this.nodes[2];
+			return nodes[2];
 		}
 		set
 		{
-			this.nodes[2] = value;
+			nodes[2] = value;
 		}
 	}
 
@@ -44,11 +47,11 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return this.nodes[3];
+			return nodes[3];
 		}
 		set
 		{
-			this.nodes[3] = value;
+			nodes[3] = value;
 		}
 	}
 
@@ -56,11 +59,11 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return (GestureDigitNode)this.nodes[4];
+			return (GestureDigitNode)nodes[4];
 		}
 		set
 		{
-			this.nodes[4] = value;
+			nodes[4] = value;
 		}
 	}
 
@@ -68,11 +71,11 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return (GestureDigitNode)this.nodes[5];
+			return (GestureDigitNode)nodes[5];
 		}
 		set
 		{
-			this.nodes[5] = value;
+			nodes[5] = value;
 		}
 	}
 
@@ -80,17 +83,17 @@ public class GorillaHandGesture : ScriptableObject
 	{
 		get
 		{
-			return (GestureDigitNode)this.nodes[6];
+			return (GestureDigitNode)nodes[6];
 		}
 		set
 		{
-			this.nodes[6] = value;
+			nodes[6] = value;
 		}
 	}
 
 	private static GestureNode[] InitNodes()
 	{
-		return new GestureNode[]
+		return new GestureNode[7]
 		{
 			new GestureHandNode(),
 			new GestureNode(),
@@ -101,8 +104,4 @@ public class GorillaHandGesture : ScriptableObject
 			new GestureDigitNode()
 		};
 	}
-
-	public bool track = true;
-
-	public GestureNode[] nodes = GorillaHandGesture.InitNodes();
 }

@@ -1,28 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class CosmeticCritterShadeHidden : CosmeticCritter
 {
-	public void SetCenterAndRadius(Vector3 center, float radius)
-	{
-		this.orbitCenter = center;
-		this.orbitRadius = radius;
-	}
-
-	public override void SetRandomVariables()
-	{
-		this.initialAngle = Random.Range(0f, 6.2831855f);
-		this.orbitDirection = ((Random.value > 0.5f) ? 1f : -1f);
-	}
-
-	public override void Tick()
-	{
-		float num = (float)base.GetAliveTime();
-		float f = this.initialAngle + this.orbitDegreesPerSecond * num * this.orbitDirection;
-		float y = this.verticalBobMagnitude * Mathf.Sin(num * this.verticalBobFrequency);
-		base.transform.position = this.orbitCenter + new Vector3(this.orbitRadius * Mathf.Cos(f), y, this.orbitRadius * Mathf.Sin(f));
-	}
-
 	[Space]
 	[Tooltip("How quickly the Shade orbits around the point where it spawned (the spawner's position).")]
 	[SerializeField]
@@ -43,4 +23,24 @@ public class CosmeticCritterShadeHidden : CosmeticCritter
 	private float orbitRadius;
 
 	private float orbitDirection;
+
+	public void SetCenterAndRadius(Vector3 center, float radius)
+	{
+		orbitCenter = center;
+		orbitRadius = radius;
+	}
+
+	public override void SetRandomVariables()
+	{
+		initialAngle = UnityEngine.Random.Range(0f, MathF.PI * 2f);
+		orbitDirection = ((UnityEngine.Random.value > 0.5f) ? 1f : (-1f));
+	}
+
+	public override void Tick()
+	{
+		float num = (float)GetAliveTime();
+		float f = initialAngle + orbitDegreesPerSecond * num * orbitDirection;
+		float y = verticalBobMagnitude * Mathf.Sin(num * verticalBobFrequency);
+		base.transform.position = orbitCenter + new Vector3(orbitRadius * Mathf.Cos(f), y, orbitRadius * Mathf.Sin(f));
+	}
 }

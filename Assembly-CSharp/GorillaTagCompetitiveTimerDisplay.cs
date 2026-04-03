@@ -1,254 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.prevTime = -1;
-		if (this.waitingForPlayersBackground)
-		{
-			this.waitingForPlayersBackground.SetActive(true);
-			this.currentBackground = this.waitingForPlayersBackground;
-		}
-		if (this.startCountdownBackground)
-		{
-			this.startCountdownBackground.SetActive(false);
-		}
-		if (this.playingBackground)
-		{
-			this.playingBackground.SetActive(false);
-		}
-		if (this.postRoundBackground)
-		{
-			this.postRoundBackground.SetActive(false);
-		}
-		this.timerDisplay.gameObject.SetActive(false);
-		if (this.timerDisplay2)
-		{
-			this.timerDisplay2.gameObject.SetActive(false);
-		}
-	}
-
-	private void OnEnable()
-	{
-		GorillaTagCompetitiveManager.onStateChanged += this.HandleOnGameStateChanged;
-		GorillaTagCompetitiveManager.onUpdateRemainingTime += this.HandleOnTimeChanged;
-		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
-		if (gorillaTagCompetitiveManager != null)
-		{
-			this.HandleOnGameStateChanged(gorillaTagCompetitiveManager.GetCurrentGameState());
-		}
-		this.myRig = base.GetComponentInParent<VRRig>();
-		this.DisplayStandardTimer(false);
-	}
-
-	private void OnDisable()
-	{
-		GorillaTagCompetitiveManager.onStateChanged -= this.HandleOnGameStateChanged;
-		GorillaTagCompetitiveManager.onUpdateRemainingTime -= this.HandleOnTimeChanged;
-	}
-
-	private void HandleOnGameStateChanged(GorillaTagCompetitiveManager.GameState newState)
-	{
-		this.SetNewBackground(newState);
-		switch (newState)
-		{
-		case GorillaTagCompetitiveManager.GameState.WaitingForPlayers:
-			this.DisplayStandardTimer(false);
-			this.resultsDisplay.gameObject.SetActive(false);
-			return;
-		case GorillaTagCompetitiveManager.GameState.StartingCountdown:
-		case GorillaTagCompetitiveManager.GameState.Playing:
-			this.DisplayStandardTimer(true);
-			return;
-		case GorillaTagCompetitiveManager.GameState.PostRound:
-			this.DoPostRoundShow();
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void DisplayStandardTimer(bool bShow)
-	{
-		if (bShow)
-		{
-			this.resultsDisplay.gameObject.SetActive(false);
-		}
-		this.timerDisplay.gameObject.SetActive(bShow);
-		if (this.timerDisplay2 != null)
-		{
-			this.timerDisplay2.gameObject.SetActive(bShow);
-		}
-	}
-
-	private void DoPostRoundShow()
-	{
-		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
-		if (gorillaTagCompetitiveManager == null)
-		{
-			return;
-		}
-		this.DisplayStandardTimer(false);
-		this.resultsDisplay.gameObject.SetActive(true);
-		List<VRRig> list = new List<VRRig>();
-		List<RankedMultiplayerScore.PlayerScoreInRound> sortedScores = gorillaTagCompetitiveManager.GetScoring().GetSortedScores();
-		float b = gorillaTagCompetitiveManager.GetScoring().ComputeGameScore(sortedScores[0].NumTags, sortedScores[0].PointsOnDefense);
-		int num = 0;
-		while (num < sortedScores.Count && num < 3)
-		{
-			RigContainer rigContainer;
-			if (VRRigCache.Instance.TryGetVrrig(sortedScores[num].PlayerId, out rigContainer))
-			{
-				float a = gorillaTagCompetitiveManager.GetScoring().ComputeGameScore(sortedScores[num].NumTags, sortedScores[num].PointsOnDefense);
-				if (num == 0 || a.Approx(b, 0.01f))
-				{
-					list.Add(rigContainer.Rig);
-				}
-				switch (num)
-				{
-				case 0:
-					if (this.tintableCelebration != null)
-					{
-						Color playerColor = rigContainer.Rig.playerColor;
-						float h;
-						float s;
-						float num2;
-						Color.RGBToHSV(playerColor, out h, out s, out num2);
-						Color max = Color.HSVToRGB(h, s, (num2 < 0.5f) ? (num2 + 0.5f) : (num2 - 0.5f));
-						this.tintableCelebration.main.startColor = new ParticleSystem.MinMaxGradient(playerColor, max);
-						this.tintableCelebration.gameObject.SetActive(true);
-					}
-					if (this.goldCelebration != null && rigContainer.Rig == this.myRig)
-					{
-						this.goldCelebration.gameObject.SetActive(true);
-					}
-					if (this.celebrationAudio != null)
-					{
-						this.celebrationAudio.Play();
-					}
-					break;
-				case 1:
-					if (this.silverCelebration != null && rigContainer.Rig == this.myRig)
-					{
-						this.silverCelebration.gameObject.SetActive(true);
-					}
-					if (this.celebrationAudio != null)
-					{
-						this.celebrationAudio.Play();
-					}
-					break;
-				case 2:
-					if (this.bronzeCelebration != null && rigContainer.Rig == this.myRig)
-					{
-						this.bronzeCelebration.gameObject.SetActive(true);
-					}
-					if (this.celebrationAudio != null)
-					{
-						this.celebrationAudio.Play();
-					}
-					break;
-				}
-			}
-			num++;
-		}
-		for (int i = 0; i < this.postRoundTimerText.Length; i++)
-		{
-			this.postRoundTimerText[i].text = ((list.Count > 1) ? "SHARED WIN" : "WINNER");
-		}
-		string text = string.Empty;
-		for (int j = 0; j < list.Count; j++)
-		{
-			text = text + list[j].playerText1.text.ToUpper() + "\n";
-		}
-		this.resultsDisplay.text = text.Trim();
-		if (this.timerDisplay2 != null)
-		{
-			this.timerDisplay2.text = this.resultsDisplay.text;
-		}
-	}
-
-	private void HandleOnTimeChanged(float time)
-	{
-		int num = Mathf.CeilToInt(time);
-		num = Mathf.Max(num, 1);
-		if (this.prevTime != num)
-		{
-			this.prevTime = num;
-			if (this.currentState == GorillaTagCompetitiveManager.GameState.Playing)
-			{
-				int num2 = this.prevTime / 60;
-				int num3 = this.prevTime % 60;
-				this.timerDisplay.text = string.Format("{0}:{1:D2}", num2, num3);
-				if (this.timerDisplay2)
-				{
-					this.timerDisplay2.text = string.Format("{0}:{1:D2}", num2, num3);
-					return;
-				}
-			}
-			else if (this.currentState != GorillaTagCompetitiveManager.GameState.PostRound)
-			{
-				this.timerDisplay.text = this.prevTime.ToString("#00");
-				if (this.timerDisplay2)
-				{
-					this.timerDisplay2.text = this.prevTime.ToString("#00");
-				}
-			}
-		}
-	}
-
-	private void SetNewBackground(GorillaTagCompetitiveManager.GameState newState)
-	{
-		if (this.currentBackground != null)
-		{
-			this.currentBackground.SetActive(false);
-		}
-		this.currentState = newState;
-		GameObject x = this.SelectBackground(newState);
-		this.GetTextColor(newState);
-		this.currentBackground = null;
-		if (x != null)
-		{
-			this.currentBackground = x;
-			this.currentBackground.SetActive(true);
-		}
-	}
-
-	private GameObject SelectBackground(GorillaTagCompetitiveManager.GameState newState)
-	{
-		switch (newState)
-		{
-		case GorillaTagCompetitiveManager.GameState.WaitingForPlayers:
-			return this.waitingForPlayersBackground;
-		case GorillaTagCompetitiveManager.GameState.StartingCountdown:
-			return this.startCountdownBackground;
-		case GorillaTagCompetitiveManager.GameState.Playing:
-			return this.playingBackground;
-		case GorillaTagCompetitiveManager.GameState.PostRound:
-			return this.postRoundBackground;
-		default:
-			return null;
-		}
-	}
-
-	private Color GetTextColor(GorillaTagCompetitiveManager.GameState newState)
-	{
-		switch (newState)
-		{
-		case GorillaTagCompetitiveManager.GameState.StartingCountdown:
-			return this.timerColorStart;
-		case GorillaTagCompetitiveManager.GameState.Playing:
-			return this.timerColorPlaying;
-		case GorillaTagCompetitiveManager.GameState.PostRound:
-			return this.timerColorPostRound;
-		default:
-			return Color.white;
-		}
-	}
-
 	public TextMeshPro timerDisplay;
 
 	public TextMeshPro timerDisplay2;
@@ -293,4 +48,233 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 
 	[SerializeField]
 	private AudioSource celebrationAudio;
+
+	private void Awake()
+	{
+		prevTime = -1;
+		if ((bool)waitingForPlayersBackground)
+		{
+			waitingForPlayersBackground.SetActive(value: true);
+			currentBackground = waitingForPlayersBackground;
+		}
+		if ((bool)startCountdownBackground)
+		{
+			startCountdownBackground.SetActive(value: false);
+		}
+		if ((bool)playingBackground)
+		{
+			playingBackground.SetActive(value: false);
+		}
+		if ((bool)postRoundBackground)
+		{
+			postRoundBackground.SetActive(value: false);
+		}
+		timerDisplay.gameObject.SetActive(value: false);
+		if ((bool)timerDisplay2)
+		{
+			timerDisplay2.gameObject.SetActive(value: false);
+		}
+	}
+
+	private void OnEnable()
+	{
+		GorillaTagCompetitiveManager.onStateChanged += HandleOnGameStateChanged;
+		GorillaTagCompetitiveManager.onUpdateRemainingTime += HandleOnTimeChanged;
+		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
+		if (gorillaTagCompetitiveManager != null)
+		{
+			HandleOnGameStateChanged(gorillaTagCompetitiveManager.GetCurrentGameState());
+		}
+		myRig = GetComponentInParent<VRRig>();
+		DisplayStandardTimer(bShow: false);
+	}
+
+	private void OnDisable()
+	{
+		GorillaTagCompetitiveManager.onStateChanged -= HandleOnGameStateChanged;
+		GorillaTagCompetitiveManager.onUpdateRemainingTime -= HandleOnTimeChanged;
+	}
+
+	private void HandleOnGameStateChanged(GorillaTagCompetitiveManager.GameState newState)
+	{
+		SetNewBackground(newState);
+		switch (newState)
+		{
+		case GorillaTagCompetitiveManager.GameState.WaitingForPlayers:
+			DisplayStandardTimer(bShow: false);
+			resultsDisplay.gameObject.SetActive(value: false);
+			break;
+		case GorillaTagCompetitiveManager.GameState.StartingCountdown:
+		case GorillaTagCompetitiveManager.GameState.Playing:
+			DisplayStandardTimer(bShow: true);
+			break;
+		case GorillaTagCompetitiveManager.GameState.PostRound:
+			DoPostRoundShow();
+			break;
+		}
+	}
+
+	private void DisplayStandardTimer(bool bShow)
+	{
+		if (bShow)
+		{
+			resultsDisplay.gameObject.SetActive(value: false);
+		}
+		timerDisplay.gameObject.SetActive(bShow);
+		if (timerDisplay2 != null)
+		{
+			timerDisplay2.gameObject.SetActive(bShow);
+		}
+	}
+
+	private void DoPostRoundShow()
+	{
+		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
+		if (gorillaTagCompetitiveManager == null)
+		{
+			return;
+		}
+		DisplayStandardTimer(bShow: false);
+		resultsDisplay.gameObject.SetActive(value: true);
+		List<VRRig> list = new List<VRRig>();
+		List<RankedMultiplayerScore.PlayerScoreInRound> sortedScores = gorillaTagCompetitiveManager.GetScoring().GetSortedScores();
+		float b = gorillaTagCompetitiveManager.GetScoring().ComputeGameScore(sortedScores[0].NumTags, sortedScores[0].PointsOnDefense);
+		for (int i = 0; i < sortedScores.Count && i < 3; i++)
+		{
+			if (!VRRigCache.Instance.TryGetVrrig(sortedScores[i].PlayerId, out var playerRig))
+			{
+				continue;
+			}
+			float a = gorillaTagCompetitiveManager.GetScoring().ComputeGameScore(sortedScores[i].NumTags, sortedScores[i].PointsOnDefense);
+			if (i == 0 || a.Approx(b, 0.01f))
+			{
+				list.Add(playerRig.Rig);
+			}
+			switch (i)
+			{
+			case 0:
+				if (tintableCelebration != null)
+				{
+					Color playerColor = playerRig.Rig.playerColor;
+					Color.RGBToHSV(playerColor, out var H, out var S, out var V);
+					Color max = Color.HSVToRGB(H, S, (V < 0.5f) ? (V + 0.5f) : (V - 0.5f));
+					ParticleSystem.MainModule main = tintableCelebration.main;
+					main.startColor = new ParticleSystem.MinMaxGradient(playerColor, max);
+					tintableCelebration.gameObject.SetActive(value: true);
+				}
+				if (goldCelebration != null && playerRig.Rig == myRig)
+				{
+					goldCelebration.gameObject.SetActive(value: true);
+				}
+				if (celebrationAudio != null)
+				{
+					celebrationAudio.Play();
+				}
+				break;
+			case 1:
+				if (silverCelebration != null && playerRig.Rig == myRig)
+				{
+					silverCelebration.gameObject.SetActive(value: true);
+				}
+				if (celebrationAudio != null)
+				{
+					celebrationAudio.Play();
+				}
+				break;
+			case 2:
+				if (bronzeCelebration != null && playerRig.Rig == myRig)
+				{
+					bronzeCelebration.gameObject.SetActive(value: true);
+				}
+				if (celebrationAudio != null)
+				{
+					celebrationAudio.Play();
+				}
+				break;
+			}
+		}
+		for (int j = 0; j < postRoundTimerText.Length; j++)
+		{
+			postRoundTimerText[j].text = ((list.Count > 1) ? "SHARED WIN" : "WINNER");
+		}
+		string text = string.Empty;
+		for (int k = 0; k < list.Count; k++)
+		{
+			text = text + list[k].playerText1.text.ToUpper() + "\n";
+		}
+		resultsDisplay.text = text.Trim();
+		if (timerDisplay2 != null)
+		{
+			timerDisplay2.text = resultsDisplay.text;
+		}
+	}
+
+	private void HandleOnTimeChanged(float time)
+	{
+		int a = Mathf.CeilToInt(time);
+		a = Mathf.Max(a, 1);
+		if (prevTime == a)
+		{
+			return;
+		}
+		prevTime = a;
+		if (currentState == GorillaTagCompetitiveManager.GameState.Playing)
+		{
+			int num = prevTime / 60;
+			int num2 = prevTime % 60;
+			timerDisplay.text = $"{num}:{num2:D2}";
+			if ((bool)timerDisplay2)
+			{
+				timerDisplay2.text = $"{num}:{num2:D2}";
+			}
+		}
+		else if (currentState != GorillaTagCompetitiveManager.GameState.PostRound)
+		{
+			timerDisplay.text = prevTime.ToString("#00");
+			if ((bool)timerDisplay2)
+			{
+				timerDisplay2.text = prevTime.ToString("#00");
+			}
+		}
+	}
+
+	private void SetNewBackground(GorillaTagCompetitiveManager.GameState newState)
+	{
+		if (currentBackground != null)
+		{
+			currentBackground.SetActive(value: false);
+		}
+		currentState = newState;
+		GameObject gameObject = SelectBackground(newState);
+		GetTextColor(newState);
+		currentBackground = null;
+		if (gameObject != null)
+		{
+			currentBackground = gameObject;
+			currentBackground.SetActive(value: true);
+		}
+	}
+
+	private GameObject SelectBackground(GorillaTagCompetitiveManager.GameState newState)
+	{
+		return newState switch
+		{
+			GorillaTagCompetitiveManager.GameState.StartingCountdown => startCountdownBackground, 
+			GorillaTagCompetitiveManager.GameState.Playing => playingBackground, 
+			GorillaTagCompetitiveManager.GameState.PostRound => postRoundBackground, 
+			GorillaTagCompetitiveManager.GameState.WaitingForPlayers => waitingForPlayersBackground, 
+			_ => null, 
+		};
+	}
+
+	private Color GetTextColor(GorillaTagCompetitiveManager.GameState newState)
+	{
+		return newState switch
+		{
+			GorillaTagCompetitiveManager.GameState.StartingCountdown => timerColorStart, 
+			GorillaTagCompetitiveManager.GameState.Playing => timerColorPlaying, 
+			GorillaTagCompetitiveManager.GameState.PostRound => timerColorPostRound, 
+			_ => Color.white, 
+		};
+	}
 }

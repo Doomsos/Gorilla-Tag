@@ -1,8 +1,12 @@
-﻿using System;
+using System;
 
 [Serializable]
 public struct GroupJoinZoneAB
 {
+	public GroupJoinZoneA a;
+
+	public GroupJoinZoneB b;
+
 	public static GroupJoinZoneAB operator &(GroupJoinZoneAB one, GroupJoinZoneAB two)
 	{
 		return new GroupJoinZoneAB
@@ -32,17 +36,29 @@ public struct GroupJoinZoneAB
 
 	public static bool operator ==(GroupJoinZoneAB one, GroupJoinZoneAB two)
 	{
-		return one.a == two.a && one.b == two.b;
+		if (one.a == two.a)
+		{
+			return one.b == two.b;
+		}
+		return false;
 	}
 
 	public static bool operator !=(GroupJoinZoneAB one, GroupJoinZoneAB two)
 	{
-		return one.a != two.a || one.b != two.b;
+		if (one.a == two.a)
+		{
+			return one.b != two.b;
+		}
+		return true;
 	}
 
 	public bool HasAnyFlag(GroupJoinZoneAB other)
 	{
-		return (this.a & other.a) != ~(GroupJoinZoneA.Basement | GroupJoinZoneA.Beach | GroupJoinZoneA.Cave | GroupJoinZoneA.Canyon | GroupJoinZoneA.City | GroupJoinZoneA.Clouds | GroupJoinZoneA.Forest | GroupJoinZoneA.Mountain | GroupJoinZoneA.Rotating | GroupJoinZoneA.Mines | GroupJoinZoneA.Arena | GroupJoinZoneA.ArenaTunnel | GroupJoinZoneA.Hoverboard | GroupJoinZoneA.TreeRoom | GroupJoinZoneA.MountainTunnel | GroupJoinZoneA.BasementTunnel | GroupJoinZoneA.RotatingTunnel | GroupJoinZoneA.BeachTunnel | GroupJoinZoneA.CloudsElevator | GroupJoinZoneA.MinesTunnel | GroupJoinZoneA.CavesComputer | GroupJoinZoneA.Metropolis | GroupJoinZoneA.MetropolisTunnel | GroupJoinZoneA.Attic | GroupJoinZoneA.Arcade | GroupJoinZoneA.ArcadeTunnel | GroupJoinZoneA.Bayou | GroupJoinZoneA.BayouTunnel | GroupJoinZoneA.CustomMaps | GroupJoinZoneA.MallConnector | GroupJoinZoneA.MonkeBlocks | GroupJoinZoneA.GTFC) || (this.b & other.b) > (GroupJoinZoneB)0;
+		if ((a & other.a) == 0)
+		{
+			return (b & other.b) != 0;
+		}
+		return true;
 	}
 
 	public override bool Equals(object other)
@@ -52,7 +68,7 @@ public struct GroupJoinZoneAB
 
 	public override int GetHashCode()
 	{
-		return this.a.GetHashCode() ^ this.b.GetHashCode();
+		return a.GetHashCode() ^ b.GetHashCode();
 	}
 
 	public static implicit operator GroupJoinZoneAB(int d)
@@ -65,18 +81,14 @@ public struct GroupJoinZoneAB
 
 	public override string ToString()
 	{
-		if (this.b == (GroupJoinZoneB)0)
+		if (b != 0)
 		{
-			return this.a.ToString();
+			if (a != 0)
+			{
+				return a.ToString() + "," + b;
+			}
+			return b.ToString();
 		}
-		if (this.a != ~(GroupJoinZoneA.Basement | GroupJoinZoneA.Beach | GroupJoinZoneA.Cave | GroupJoinZoneA.Canyon | GroupJoinZoneA.City | GroupJoinZoneA.Clouds | GroupJoinZoneA.Forest | GroupJoinZoneA.Mountain | GroupJoinZoneA.Rotating | GroupJoinZoneA.Mines | GroupJoinZoneA.Arena | GroupJoinZoneA.ArenaTunnel | GroupJoinZoneA.Hoverboard | GroupJoinZoneA.TreeRoom | GroupJoinZoneA.MountainTunnel | GroupJoinZoneA.BasementTunnel | GroupJoinZoneA.RotatingTunnel | GroupJoinZoneA.BeachTunnel | GroupJoinZoneA.CloudsElevator | GroupJoinZoneA.MinesTunnel | GroupJoinZoneA.CavesComputer | GroupJoinZoneA.Metropolis | GroupJoinZoneA.MetropolisTunnel | GroupJoinZoneA.Attic | GroupJoinZoneA.Arcade | GroupJoinZoneA.ArcadeTunnel | GroupJoinZoneA.Bayou | GroupJoinZoneA.BayouTunnel | GroupJoinZoneA.CustomMaps | GroupJoinZoneA.MallConnector | GroupJoinZoneA.MonkeBlocks | GroupJoinZoneA.GTFC))
-		{
-			return this.a.ToString() + "," + this.b.ToString();
-		}
-		return this.b.ToString();
+		return a.ToString();
 	}
-
-	public GroupJoinZoneA a;
-
-	public GroupJoinZoneB b;
 }

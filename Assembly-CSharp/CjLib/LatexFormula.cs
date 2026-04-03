@@ -1,18 +1,16 @@
-﻿using System;
 using UnityEngine;
 
-namespace CjLib
+namespace CjLib;
+
+[ExecuteInEditMode]
+public class LatexFormula : MonoBehaviour
 {
-	[ExecuteInEditMode]
-	public class LatexFormula : MonoBehaviour
-	{
-		public static readonly string BaseUrl = "http://tex.s2cms.ru/svg/f(x) ";
+	public static readonly string BaseUrl = "http://tex.s2cms.ru/svg/f(x) ";
 
-		private int m_hash = LatexFormula.BaseUrl.GetHashCode();
+	private int m_hash = BaseUrl.GetHashCode();
 
-		[SerializeField]
-		private string m_formula = "";
+	[SerializeField]
+	private string m_formula = "";
 
-		private Texture m_texture;
-	}
+	private Texture m_texture;
 }

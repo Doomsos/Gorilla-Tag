@@ -1,16 +1,14 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class GTSignalTest : GTSignalListener
 {
-	public class GTSignalTest : GTSignalListener
-	{
-		public MeshRenderer[] targets = new MeshRenderer[0];
+	public MeshRenderer[] targets = new MeshRenderer[0];
 
-		[Space]
-		public MeshRenderer target;
+	[Space]
+	public MeshRenderer target;
 
-		public List<GTSignalListener> listeners = new List<GTSignalListener>(12);
-	}
+	public List<GTSignalListener> listeners = new List<GTSignalListener>(12);
 }

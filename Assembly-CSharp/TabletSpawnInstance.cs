@@ -1,199 +1,9 @@
-﻿using System;
+using System;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
 
 public class TabletSpawnInstance : IDisposable
 {
-	public event Action onGrabbed;
-
-	public event Action onReleased;
-
-	public LckDirectGrabbable directGrabbable
-	{
-		get
-		{
-			return this._lckSocialCameraManager.lckDirectGrabbable;
-		}
-	}
-
-	public bool ResetLocalPose()
-	{
-		if (this._cameraSpawnInstanceTransform == null)
-		{
-			return false;
-		}
-		this._cameraSpawnInstanceTransform.localPosition = Vector3.zero;
-		this._cameraSpawnInstanceTransform.localRotation = Quaternion.identity;
-		return true;
-	}
-
-	public bool ResetParent()
-	{
-		if (this._cameraSpawnInstanceTransform == null)
-		{
-			return false;
-		}
-		this._cameraSpawnInstanceTransform.SetParent(this._cameraSpawnParentTransform);
-		return true;
-	}
-
-	public bool SetParent(Transform transform)
-	{
-		if (this._cameraSpawnInstanceTransform == null)
-		{
-			return false;
-		}
-		this._cameraSpawnInstanceTransform.SetParent(transform);
-		return true;
-	}
-
-	public bool cameraActive
-	{
-		get
-		{
-			return this._cameraActive;
-		}
-		set
-		{
-			this._cameraActive = value;
-			if (!this._cameraActive && this.Controller != null)
-			{
-				this.Controller.StopRecording();
-			}
-			if (this._lckSocialCameraManager != null)
-			{
-				this._lckSocialCameraManager.cameraActive = this._cameraActive;
-			}
-		}
-	}
-
-	public bool uiVisible
-	{
-		get
-		{
-			return this._uiVisible;
-		}
-		set
-		{
-			this._uiVisible = value;
-			if (this._lckSocialCameraManager != null)
-			{
-				this._lckSocialCameraManager.uiVisible = this._uiVisible;
-			}
-		}
-	}
-
-	public bool isSpawned
-	{
-		get
-		{
-			return this._cameraGameObjectInstance != null;
-		}
-	}
-
-	public TabletSpawnInstance(GameObject cameraSpawnPrefab, Transform cameraSpawnParentTransform)
-	{
-		this._cameraSpawnPrefab = cameraSpawnPrefab;
-		this._cameraSpawnParentTransform = cameraSpawnParentTransform;
-	}
-
-	public void Update()
-	{
-		if (this.Controller == null)
-		{
-			return;
-		}
-		Camera activeCamera = this.Controller.GetActiveCamera();
-		Camera main = Camera.main;
-		if (main != null)
-		{
-			activeCamera.nearClipPlane = main.nearClipPlane;
-			activeCamera.farClipPlane = main.farClipPlane;
-		}
-	}
-
-	public void SpawnCamera()
-	{
-		if (!this.isSpawned)
-		{
-			this._cameraGameObjectInstance = Object.Instantiate<GameObject>(this._cameraSpawnPrefab, this._cameraSpawnParentTransform);
-			this._lckSocialCameraManager = this._cameraGameObjectInstance.GetComponent<LckSocialCameraManager>();
-			this._lckSocialCameraManager.lckDirectGrabbable.onGrabbed += delegate()
-			{
-				Action action = this.onGrabbed;
-				if (action == null)
-				{
-					return;
-				}
-				action();
-			};
-			this._lckSocialCameraManager.lckDirectGrabbable.onReleased += delegate()
-			{
-				Action action = this.onReleased;
-				if (action == null)
-				{
-					return;
-				}
-				action();
-			};
-			this._cameraSpawnInstanceTransform = this._cameraGameObjectInstance.transform;
-			this.Controller = this._cameraGameObjectInstance.GetComponent<GTLckController>();
-		}
-		this.uiVisible = this.uiVisible;
-		this.cameraActive = this.cameraActive;
-	}
-
-	public Vector3 position
-	{
-		get
-		{
-			if (this._cameraSpawnInstanceTransform == null)
-			{
-				return Vector3.zero;
-			}
-			return this._cameraSpawnInstanceTransform.position;
-		}
-	}
-
-	public Quaternion rotation
-	{
-		get
-		{
-			if (this._cameraSpawnInstanceTransform == null)
-			{
-				return Quaternion.identity;
-			}
-			return this._cameraSpawnInstanceTransform.rotation;
-		}
-	}
-
-	public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
-	{
-		if (this._cameraSpawnInstanceTransform == null)
-		{
-			return;
-		}
-		this._cameraSpawnInstanceTransform.SetPositionAndRotation(position, rotation);
-	}
-
-	public void SetLocalScale(Vector3 scale)
-	{
-		if (this._cameraSpawnInstanceTransform == null)
-		{
-			return;
-		}
-		this._cameraSpawnInstanceTransform.localScale = scale;
-	}
-
-	public void Dispose()
-	{
-		if (this._cameraGameObjectInstance != null)
-		{
-			Object.Destroy(this._cameraGameObjectInstance);
-			this._cameraGameObjectInstance = null;
-		}
-	}
-
 	private GameObject _cameraGameObjectInstance;
 
 	private GameObject _cameraSpawnPrefab;
@@ -211,4 +21,169 @@ public class TabletSpawnInstance : IDisposable
 	private bool _cameraActive;
 
 	private bool _uiVisible;
+
+	public LckDirectGrabbable directGrabbable => _lckSocialCameraManager.lckDirectGrabbable;
+
+	public bool cameraActive
+	{
+		get
+		{
+			return _cameraActive;
+		}
+		set
+		{
+			_cameraActive = value;
+			if (!_cameraActive && Controller != null)
+			{
+				Controller.StopRecording();
+			}
+			if (_lckSocialCameraManager != null)
+			{
+				_lckSocialCameraManager.cameraActive = _cameraActive;
+			}
+		}
+	}
+
+	public bool uiVisible
+	{
+		get
+		{
+			return _uiVisible;
+		}
+		set
+		{
+			_uiVisible = value;
+			if (_lckSocialCameraManager != null)
+			{
+				_lckSocialCameraManager.uiVisible = _uiVisible;
+			}
+		}
+	}
+
+	public bool isSpawned => _cameraGameObjectInstance != null;
+
+	public Vector3 position
+	{
+		get
+		{
+			if (_cameraSpawnInstanceTransform == null)
+			{
+				return Vector3.zero;
+			}
+			return _cameraSpawnInstanceTransform.position;
+		}
+	}
+
+	public Quaternion rotation
+	{
+		get
+		{
+			if (_cameraSpawnInstanceTransform == null)
+			{
+				return Quaternion.identity;
+			}
+			return _cameraSpawnInstanceTransform.rotation;
+		}
+	}
+
+	public event Action onGrabbed;
+
+	public event Action onReleased;
+
+	public bool ResetLocalPose()
+	{
+		if (_cameraSpawnInstanceTransform == null)
+		{
+			return false;
+		}
+		_cameraSpawnInstanceTransform.localPosition = Vector3.zero;
+		_cameraSpawnInstanceTransform.localRotation = Quaternion.identity;
+		return true;
+	}
+
+	public bool ResetParent()
+	{
+		if (_cameraSpawnInstanceTransform == null)
+		{
+			return false;
+		}
+		_cameraSpawnInstanceTransform.SetParent(_cameraSpawnParentTransform);
+		return true;
+	}
+
+	public bool SetParent(Transform transform)
+	{
+		if (_cameraSpawnInstanceTransform == null)
+		{
+			return false;
+		}
+		_cameraSpawnInstanceTransform.SetParent(transform);
+		return true;
+	}
+
+	public TabletSpawnInstance(GameObject cameraSpawnPrefab, Transform cameraSpawnParentTransform)
+	{
+		_cameraSpawnPrefab = cameraSpawnPrefab;
+		_cameraSpawnParentTransform = cameraSpawnParentTransform;
+	}
+
+	public void Update()
+	{
+		if (!(Controller == null))
+		{
+			Camera activeCamera = Controller.GetActiveCamera();
+			Camera main = Camera.main;
+			if (main != null)
+			{
+				activeCamera.nearClipPlane = main.nearClipPlane;
+				activeCamera.farClipPlane = main.farClipPlane;
+			}
+		}
+	}
+
+	public void SpawnCamera()
+	{
+		if (!isSpawned)
+		{
+			_cameraGameObjectInstance = UnityEngine.Object.Instantiate(_cameraSpawnPrefab, _cameraSpawnParentTransform);
+			_lckSocialCameraManager = _cameraGameObjectInstance.GetComponent<LckSocialCameraManager>();
+			_lckSocialCameraManager.lckDirectGrabbable.onGrabbed += delegate
+			{
+				this.onGrabbed?.Invoke();
+			};
+			_lckSocialCameraManager.lckDirectGrabbable.onReleased += delegate
+			{
+				this.onReleased?.Invoke();
+			};
+			_cameraSpawnInstanceTransform = _cameraGameObjectInstance.transform;
+			Controller = _cameraGameObjectInstance.GetComponent<GTLckController>();
+		}
+		uiVisible = uiVisible;
+		cameraActive = cameraActive;
+	}
+
+	public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+	{
+		if (!(_cameraSpawnInstanceTransform == null))
+		{
+			_cameraSpawnInstanceTransform.SetPositionAndRotation(position, rotation);
+		}
+	}
+
+	public void SetLocalScale(Vector3 scale)
+	{
+		if (!(_cameraSpawnInstanceTransform == null))
+		{
+			_cameraSpawnInstanceTransform.localScale = scale;
+		}
+	}
+
+	public void Dispose()
+	{
+		if (_cameraGameObjectInstance != null)
+		{
+			UnityEngine.Object.Destroy(_cameraGameObjectInstance);
+			_cameraGameObjectInstance = null;
+		}
+	}
 }

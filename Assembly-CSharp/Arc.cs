@@ -1,13 +1,19 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEngine;
 
 [Serializable]
 public struct Arc
 {
+	public Vector3 start;
+
+	public Vector3 end;
+
+	public Vector3 control;
+
 	public Vector3[] GetArcPoints(int count = 12)
 	{
-		return Arc.ComputeArcPoints(this.start, this.end, new Vector3?(this.control), count);
+		return ComputeArcPoints(start, end, control, count);
 	}
 
 	[Conditional("UNITY_EDITOR")]
@@ -17,7 +23,7 @@ public struct Arc
 
 	public static Arc From(Vector3 start, Vector3 end)
 	{
-		Vector3 vector = Arc.DeriveArcControlPoint(start, end, null, null);
+		Vector3 vector = DeriveArcControlPoint(start, end);
 		return new Arc
 		{
 			start = start,
@@ -30,28 +36,16 @@ public struct Arc
 	{
 		Vector3[] array = new Vector3[count];
 		float num = 1f / (float)count;
-		Vector3 value = c.GetValueOrDefault();
-		if (c == null)
+		Vector3 valueOrDefault = c.GetValueOrDefault();
+		if (!c.HasValue)
 		{
-			value = Arc.DeriveArcControlPoint(a, b, null, null);
-			c = new Vector3?(value);
+			valueOrDefault = DeriveArcControlPoint(a, b);
+			c = valueOrDefault;
 		}
 		for (int i = 0; i < count; i++)
 		{
-			float t;
-			if (i == 0)
-			{
-				t = 0f;
-			}
-			else if (i == count - 1)
-			{
-				t = 1f;
-			}
-			else
-			{
-				t = num * (float)i;
-			}
-			array[i] = Arc.BezierLerp(a, b, c.Value, t);
+			float t = ((i != 0) ? ((i != count - 1) ? (num * (float)i) : 1f) : 0f);
+			array[i] = BezierLerp(a, b, c.Value, t);
 		}
 		return array;
 	}
@@ -65,26 +59,20 @@ public struct Arc
 
 	public static Vector3 DeriveArcControlPoint(Vector3 a, Vector3 b, Vector3? dir = null, float? height = null)
 	{
-		Vector3 b2 = (b - a) * 0.5f;
-		Vector3 normalized = b2.normalized;
-		float value = height.GetValueOrDefault();
-		if (height == null)
+		Vector3 vector = (b - a) * 0.5f;
+		Vector3 normalized = vector.normalized;
+		float valueOrDefault = height.GetValueOrDefault();
+		if (!height.HasValue)
 		{
-			value = b2.magnitude;
-			height = new float?(value);
+			valueOrDefault = vector.magnitude;
+			height = valueOrDefault;
 		}
-		if (dir == null)
+		if (!dir.HasValue)
 		{
 			Vector3 rhs = Vector3.Cross(normalized, Vector3.up);
-			dir = new Vector3?(Vector3.Cross(normalized, rhs));
+			dir = Vector3.Cross(normalized, rhs);
 		}
-		Vector3 b3 = dir.Value * -height.Value;
-		return a + b2 + b3;
+		Vector3 vector2 = dir.Value * (0f - height.Value);
+		return a + vector + vector2;
 	}
-
-	public Vector3 start;
-
-	public Vector3 end;
-
-	public Vector3 control;
 }

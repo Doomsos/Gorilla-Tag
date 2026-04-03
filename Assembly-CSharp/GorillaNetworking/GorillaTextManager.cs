@@ -1,54 +1,54 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class GorillaTextManager : MonoBehaviourPostTick
 {
-	public class GorillaTextManager : MonoBehaviourPostTick
+	public static GorillaTextManager instance;
+
+	public List<GorillaText> gorillaTexts = new List<GorillaText>();
+
+	public static void RegisterText(GorillaText text)
 	{
-		public static void RegisterText(GorillaText text)
+		if (instance == null)
 		{
-			if (GorillaTextManager.instance == null)
-			{
-				GorillaTextManager.CreateManager();
-			}
-			if (!GorillaTextManager.instance.gorillaTexts.Contains(text))
-			{
-				GorillaTextManager.instance.gorillaTexts.Add(text);
-			}
+			CreateManager();
 		}
-
-		private void Awake()
+		if (!instance.gorillaTexts.Contains(text))
 		{
-			if (GorillaTextManager.instance != null)
-			{
-				Object.Destroy(base.gameObject);
-				return;
-			}
-			GorillaTextManager.instance = this;
+			instance.gorillaTexts.Add(text);
 		}
+	}
 
-		public override void PostTick()
+	private void Awake()
+	{
+		if (instance != null)
 		{
-			for (int i = 0; i < this.gorillaTexts.Count; i++)
-			{
-				this.gorillaTexts[i].InvokeIfUpdated();
-			}
+			Object.Destroy(base.gameObject);
 		}
-
-		public static void CreateManager()
+		else
 		{
-			GorillaTextManager gorillaTextManager = new GameObject("GorillaTextManager").AddComponent<GorillaTextManager>();
-			gorillaTextManager.gorillaTexts = new List<GorillaText>();
-			GorillaTextManager.instance = gorillaTextManager;
-			if (Application.isPlaying)
-			{
-				Object.DontDestroyOnLoad(gorillaTextManager);
-			}
+			instance = this;
 		}
+	}
 
-		public static GorillaTextManager instance;
+	public override void PostTick()
+	{
+		for (int i = 0; i < gorillaTexts.Count; i++)
+		{
+			gorillaTexts[i].InvokeIfUpdated();
+		}
+	}
 
-		public List<GorillaText> gorillaTexts = new List<GorillaText>();
+	public static void CreateManager()
+	{
+		GorillaTextManager gorillaTextManager = new GameObject("GorillaTextManager").AddComponent<GorillaTextManager>();
+		gorillaTextManager.gorillaTexts = new List<GorillaText>();
+		instance = gorillaTextManager;
+		if (Application.isPlaying)
+		{
+			Object.DontDestroyOnLoad(gorillaTextManager);
+		}
 	}
 }

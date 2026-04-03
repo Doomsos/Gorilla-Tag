@@ -1,188 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class GRToolPurchaseStation : MonoBehaviour
 {
-	public int ActiveEntryIndex
+	[Serializable]
+	public struct ToolEntry
 	{
-		get
+		public Transform displayToolParent;
+
+		public GameEntity entityPrefab;
+
+		public string toolName;
+
+		public int toolCost;
+
+		private int entityTypeId;
+
+		private bool entityTypeIdSet;
+
+		public int GetEntityTypeId()
 		{
-			return this.activeEntryIndex;
-		}
-	}
-
-	public void Init(GhostReactorManager grManager, GhostReactor reactor)
-	{
-		this.grManager = grManager;
-		this.reactor = reactor;
-	}
-
-	public void RequestPurchaseButton(int actorNumber)
-	{
-		if (actorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			this.grManager.ToolPurchaseStationRequest(this.PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.TryPurchase);
-		}
-	}
-
-	public void ShiftRightButton()
-	{
-		this.grManager.ToolPurchaseStationRequest(this.PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftRight);
-	}
-
-	public void ShiftLeftButton()
-	{
-		this.grManager.ToolPurchaseStationRequest(this.PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftLeft);
-	}
-
-	public void ShiftRightAuthority()
-	{
-		this.activeEntryIndex = (this.activeEntryIndex + 1) % this.toolEntries.Count;
-	}
-
-	public void ShiftLeftAuthority()
-	{
-		this.activeEntryIndex = ((this.activeEntryIndex > 0) ? (this.activeEntryIndex - 1) : (this.toolEntries.Count - 1));
-	}
-
-	public void DebugPurchase()
-	{
-		int entityTypeId = this.toolEntries[this.activeEntryIndex].GetEntityTypeId();
-		Vector3 localPosition = this.toolEntries[this.activeEntryIndex].displayToolParent.GetChild(0).localPosition;
-		Quaternion localRotation = this.toolEntries[this.activeEntryIndex].displayToolParent.GetChild(0).localRotation;
-		Quaternion rotation = this.depositTransform.rotation * localRotation;
-		Vector3 position = this.depositTransform.position + this.depositTransform.rotation * localPosition;
-		this.grManager.gameEntityManager.RequestCreateItem(entityTypeId, position, rotation, 0L);
-		this.OnPurchaseSucceeded();
-	}
-
-	public bool TryPurchaseAuthority(GRPlayer player, out int itemCost)
-	{
-		int entityTypeId = this.toolEntries[this.activeEntryIndex].GetEntityTypeId();
-		itemCost = this.reactor.GetItemCost(entityTypeId);
-		if (this.debugIgnoreToolCost || player.ShiftCredits >= itemCost)
-		{
-			Vector3 localPosition = this.toolEntries[this.activeEntryIndex].displayToolParent.GetChild(0).localPosition;
-			Quaternion localRotation = this.toolEntries[this.activeEntryIndex].displayToolParent.GetChild(0).localRotation;
-			Quaternion rotation = this.depositTransform.rotation * localRotation;
-			Vector3 position = this.depositTransform.position + this.depositTransform.rotation * localPosition;
-			this.grManager.gameEntityManager.RequestCreateItem(entityTypeId, position, rotation, 0L);
-			return true;
-		}
-		return false;
-	}
-
-	public void OnSelectionUpdate(int newSelectedIndex)
-	{
-		this.activeEntryIndex = Mathf.Clamp(newSelectedIndex % this.toolEntries.Count, 0, this.toolEntries.Count - 1);
-		this.audioSource.PlayOneShot(this.nextItemAudio, this.nextItemVolume);
-		this.displayItemNameText.text = this.toolEntries[this.activeEntryIndex].toolName;
-		this.displayItemCostText.text = this.toolEntries[this.activeEntryIndex].toolCost.ToString();
-	}
-
-	public void OnPurchaseSucceeded()
-	{
-		this.animatingDeposit = true;
-		this.animationStartTime = Time.time;
-		this.audioSource.PlayOneShot(this.purchaseAudio, this.purchaseVolume);
-		UnityEvent onSucceeded = this.idCardScanner.onSucceeded;
-		if (onSucceeded != null)
-		{
-			onSucceeded.Invoke();
-		}
-		if (this.displayedEntryIndex < 0 || this.displayedEntryIndex >= this.toolEntries.Count)
-		{
-			this.displayedEntryIndex = this.activeEntryIndex;
-		}
-	}
-
-	public void OnPurchaseFailed()
-	{
-		this.audioSource.PlayOneShot(this.purchaseFailedAudio, this.purchaseFailedVolume);
-		UnityEvent onFailed = this.idCardScanner.onFailed;
-		if (onFailed == null)
-		{
-			return;
-		}
-		onFailed.Invoke();
-	}
-
-	public Transform GetSpawnMarker()
-	{
-		return this.toolSpawnLocation;
-	}
-
-	public string GetCurrentToolName()
-	{
-		return this.toolEntries[this.activeEntryIndex].toolName;
-	}
-
-	private void Awake()
-	{
-		this.depositLidOpenRot = Quaternion.Euler(this.depositLidOpenEuler);
-		this.toolEntryRot = Quaternion.Euler(this.toolEntryRotEuler);
-		this.toolExitRot = Quaternion.Euler(this.toolExitRotEuler);
-	}
-
-	private void Update()
-	{
-		if (!this.animatingSwap && !this.animatingDeposit && this.activeEntryIndex != this.displayedEntryIndex)
-		{
-			this.animatingSwap = true;
-			this.animationStartTime = Time.time;
-			this.animPrevToolIndex = this.displayedEntryIndex;
-			this.animNextToolIndex = this.activeEntryIndex;
-			this.toolEntryRot = Quaternion.AngleAxis(this.toolEntryRotDegrees, Random.onUnitSphere);
-		}
-		if (this.animatingSwap)
-		{
-			float num = (Time.time - this.animationStartTime) / this.nextToolAnimationTime;
-			Transform transform = null;
-			if (this.animPrevToolIndex >= 0 && this.animPrevToolIndex < this.toolEntries.Count)
+			if (!entityTypeIdSet)
 			{
-				transform = this.toolEntries[this.animPrevToolIndex].displayToolParent;
-				transform.localRotation = Quaternion.Slerp(Quaternion.identity, this.toolExitRot, this.toolExitRotTimingCurve.Evaluate(num));
-				transform.localPosition = Vector3.Lerp(Vector3.zero, this.toolExitPosOffset, this.toolExitPosTimingCurve.Evaluate(num));
+				entityTypeId = entityPrefab.gameObject.name.GetStaticHash();
+				entityTypeIdSet = true;
 			}
-			Transform displayToolParent = this.toolEntries[this.animNextToolIndex].displayToolParent;
-			displayToolParent.localRotation = Quaternion.Slerp(this.toolEntryRot, Quaternion.identity, this.toolEntryRotTimingCurve.Evaluate(num));
-			displayToolParent.localPosition = Vector3.Lerp(this.toolEntryPosOffset, Vector3.zero, this.toolEntryPosTimingCurve.Evaluate(num));
-			displayToolParent.gameObject.SetActive(true);
-			if (num >= 1f)
-			{
-				if (transform != null)
-				{
-					transform.gameObject.SetActive(false);
-				}
-				this.displayedEntryIndex = this.animNextToolIndex;
-				this.animatingSwap = false;
-				return;
-			}
-		}
-		else if (this.animatingDeposit)
-		{
-			float num2 = (Time.time - this.animationStartTime) / this.toolDepositAnimationTime;
-			Transform displayToolParent2 = this.toolEntries[this.displayedEntryIndex].displayToolParent;
-			Vector3 localPosition = displayToolParent2.localPosition;
-			localPosition.y = Mathf.Lerp(0f, this.depositTransform.localPosition.y, this.toolDepositMotionCurveY.Evaluate(this.toolDepositTimingCurve.Evaluate(num2)));
-			localPosition.z = Mathf.Lerp(0f, this.depositTransform.localPosition.z, this.toolDepositMotionCurveZ.Evaluate(this.toolDepositTimingCurve.Evaluate(num2)));
-			displayToolParent2.localPosition = localPosition;
-			this.depositLidTransform.localRotation = Quaternion.Slerp(Quaternion.identity, this.depositLidOpenRot, this.depositLidTimingCurve.Evaluate(num2));
-			if (num2 >= 1f)
-			{
-				this.depositLidTransform.localRotation = Quaternion.identity;
-				displayToolParent2.gameObject.SetActive(false);
-				this.displayedEntryIndex = -1;
-				this.animatingDeposit = false;
-			}
+			return entityTypeId;
 		}
 	}
 
 	[SerializeField]
-	private List<GRToolPurchaseStation.ToolEntry> toolEntries = new List<GRToolPurchaseStation.ToolEntry>();
+	private List<ToolEntry> toolEntries = new List<ToolEntry>();
 
 	[SerializeField]
 	private Transform displayTransform;
@@ -305,29 +155,162 @@ public class GRToolPurchaseStation : MonoBehaviour
 
 	private GhostReactor reactor;
 
-	[Serializable]
-	public struct ToolEntry
+	public int ActiveEntryIndex => activeEntryIndex;
+
+	public void Init(GhostReactorManager grManager, GhostReactor reactor)
 	{
-		public int GetEntityTypeId()
+		this.grManager = grManager;
+		this.reactor = reactor;
+	}
+
+	public void RequestPurchaseButton(int actorNumber)
+	{
+		if (actorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
 		{
-			if (!this.entityTypeIdSet)
-			{
-				this.entityTypeId = this.entityPrefab.gameObject.name.GetStaticHash();
-				this.entityTypeIdSet = true;
-			}
-			return this.entityTypeId;
+			grManager.ToolPurchaseStationRequest(PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.TryPurchase);
 		}
+	}
 
-		public Transform displayToolParent;
+	public void ShiftRightButton()
+	{
+		grManager.ToolPurchaseStationRequest(PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftRight);
+	}
 
-		public GameEntity entityPrefab;
+	public void ShiftLeftButton()
+	{
+		grManager.ToolPurchaseStationRequest(PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftLeft);
+	}
 
-		public string toolName;
+	public void ShiftRightAuthority()
+	{
+		activeEntryIndex = (activeEntryIndex + 1) % toolEntries.Count;
+	}
 
-		public int toolCost;
+	public void ShiftLeftAuthority()
+	{
+		activeEntryIndex = ((activeEntryIndex > 0) ? (activeEntryIndex - 1) : (toolEntries.Count - 1));
+	}
 
-		private int entityTypeId;
+	public void DebugPurchase()
+	{
+		int entityTypeId = toolEntries[activeEntryIndex].GetEntityTypeId();
+		Vector3 localPosition = toolEntries[activeEntryIndex].displayToolParent.GetChild(0).localPosition;
+		Quaternion localRotation = toolEntries[activeEntryIndex].displayToolParent.GetChild(0).localRotation;
+		Quaternion rotation = depositTransform.rotation * localRotation;
+		Vector3 position = depositTransform.position + depositTransform.rotation * localPosition;
+		grManager.gameEntityManager.RequestCreateItem(entityTypeId, position, rotation, 0L);
+		OnPurchaseSucceeded();
+	}
 
-		private bool entityTypeIdSet;
+	public bool TryPurchaseAuthority(GRPlayer player, out int itemCost)
+	{
+		int entityTypeId = toolEntries[activeEntryIndex].GetEntityTypeId();
+		itemCost = reactor.GetItemCost(entityTypeId);
+		if (debugIgnoreToolCost || player.ShiftCredits >= itemCost)
+		{
+			Vector3 localPosition = toolEntries[activeEntryIndex].displayToolParent.GetChild(0).localPosition;
+			Quaternion localRotation = toolEntries[activeEntryIndex].displayToolParent.GetChild(0).localRotation;
+			Quaternion rotation = depositTransform.rotation * localRotation;
+			Vector3 position = depositTransform.position + depositTransform.rotation * localPosition;
+			grManager.gameEntityManager.RequestCreateItem(entityTypeId, position, rotation, 0L);
+			return true;
+		}
+		return false;
+	}
+
+	public void OnSelectionUpdate(int newSelectedIndex)
+	{
+		activeEntryIndex = Mathf.Clamp(newSelectedIndex % toolEntries.Count, 0, toolEntries.Count - 1);
+		audioSource.PlayOneShot(nextItemAudio, nextItemVolume);
+		displayItemNameText.text = toolEntries[activeEntryIndex].toolName;
+		displayItemCostText.text = toolEntries[activeEntryIndex].toolCost.ToString();
+	}
+
+	public void OnPurchaseSucceeded()
+	{
+		animatingDeposit = true;
+		animationStartTime = Time.time;
+		audioSource.PlayOneShot(purchaseAudio, purchaseVolume);
+		idCardScanner.onSucceeded?.Invoke();
+		if (displayedEntryIndex < 0 || displayedEntryIndex >= toolEntries.Count)
+		{
+			displayedEntryIndex = activeEntryIndex;
+		}
+	}
+
+	public void OnPurchaseFailed()
+	{
+		audioSource.PlayOneShot(purchaseFailedAudio, purchaseFailedVolume);
+		idCardScanner.onFailed?.Invoke();
+	}
+
+	public Transform GetSpawnMarker()
+	{
+		return toolSpawnLocation;
+	}
+
+	public string GetCurrentToolName()
+	{
+		return toolEntries[activeEntryIndex].toolName;
+	}
+
+	private void Awake()
+	{
+		depositLidOpenRot = Quaternion.Euler(depositLidOpenEuler);
+		toolEntryRot = Quaternion.Euler(toolEntryRotEuler);
+		toolExitRot = Quaternion.Euler(toolExitRotEuler);
+	}
+
+	private void Update()
+	{
+		if (!animatingSwap && !animatingDeposit && activeEntryIndex != displayedEntryIndex)
+		{
+			animatingSwap = true;
+			animationStartTime = Time.time;
+			animPrevToolIndex = displayedEntryIndex;
+			animNextToolIndex = activeEntryIndex;
+			toolEntryRot = Quaternion.AngleAxis(toolEntryRotDegrees, UnityEngine.Random.onUnitSphere);
+		}
+		if (animatingSwap)
+		{
+			float num = (Time.time - animationStartTime) / nextToolAnimationTime;
+			Transform transform = null;
+			if (animPrevToolIndex >= 0 && animPrevToolIndex < toolEntries.Count)
+			{
+				transform = toolEntries[animPrevToolIndex].displayToolParent;
+				transform.localRotation = Quaternion.Slerp(Quaternion.identity, toolExitRot, toolExitRotTimingCurve.Evaluate(num));
+				transform.localPosition = Vector3.Lerp(Vector3.zero, toolExitPosOffset, toolExitPosTimingCurve.Evaluate(num));
+			}
+			Transform displayToolParent = toolEntries[animNextToolIndex].displayToolParent;
+			displayToolParent.localRotation = Quaternion.Slerp(toolEntryRot, Quaternion.identity, toolEntryRotTimingCurve.Evaluate(num));
+			displayToolParent.localPosition = Vector3.Lerp(toolEntryPosOffset, Vector3.zero, toolEntryPosTimingCurve.Evaluate(num));
+			displayToolParent.gameObject.SetActive(value: true);
+			if (num >= 1f)
+			{
+				if (transform != null)
+				{
+					transform.gameObject.SetActive(value: false);
+				}
+				displayedEntryIndex = animNextToolIndex;
+				animatingSwap = false;
+			}
+		}
+		else if (animatingDeposit)
+		{
+			float num2 = (Time.time - animationStartTime) / toolDepositAnimationTime;
+			Transform displayToolParent2 = toolEntries[displayedEntryIndex].displayToolParent;
+			Vector3 localPosition = displayToolParent2.localPosition;
+			localPosition.y = Mathf.Lerp(0f, depositTransform.localPosition.y, toolDepositMotionCurveY.Evaluate(toolDepositTimingCurve.Evaluate(num2)));
+			localPosition.z = Mathf.Lerp(0f, depositTransform.localPosition.z, toolDepositMotionCurveZ.Evaluate(toolDepositTimingCurve.Evaluate(num2)));
+			displayToolParent2.localPosition = localPosition;
+			depositLidTransform.localRotation = Quaternion.Slerp(Quaternion.identity, depositLidOpenRot, depositLidTimingCurve.Evaluate(num2));
+			if (num2 >= 1f)
+			{
+				depositLidTransform.localRotation = Quaternion.identity;
+				displayToolParent2.gameObject.SetActive(value: false);
+				displayedEntryIndex = -1;
+				animatingDeposit = false;
+			}
+		}
 	}
 }

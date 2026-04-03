@@ -1,9 +1,7 @@
-﻿using System;
-
 public enum GTShaderVolumeType : uint
 {
-	None,
-	Fog,
-	Tint,
-	Decal = 4U
+	None = 0u,
+	Fog = 1u,
+	Tint = 2u,
+	Decal = 4u
 }

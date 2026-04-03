@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using GorillaExtensions;
@@ -10,992 +10,26 @@ using UnityEngine;
 [NetworkBehaviourWeaved(0)]
 public class MonkeBallGame : NetworkComponent, ITickSystemTick
 {
-	public Transform BallLauncher
+	public enum GameState
 	{
-		get
-		{
-			return this._ballLauncher;
-		}
+		None,
+		PreGame,
+		Playing,
+		PostScore,
+		PostGame
 	}
 
-	public bool TickRunning { get; set; }
-
-	protected override void Awake()
+	private enum RPC
 	{
-		base.Awake();
-		MonkeBallGame.Instance = this;
-		this.gameState = MonkeBallGame.GameState.None;
-		this._callLimiters = new CallLimiter[8];
-		this._callLimiters[0] = new CallLimiter(20, 1f, 0.5f);
-		this._callLimiters[1] = new CallLimiter(20, 10f, 0.5f);
-		this._callLimiters[2] = new CallLimiter(20, 10f, 0.5f);
-		this._callLimiters[3] = new CallLimiter(20, 1f, 0.5f);
-		this._callLimiters[4] = new CallLimiter(20, 1f, 0.5f);
-		this._callLimiters[5] = new CallLimiter(20, 1f, 0.5f);
-		this._callLimiters[6] = new CallLimiter(20, 1f, 0.5f);
-		this._callLimiters[7] = new CallLimiter(5, 10f, 0.5f);
-		this.AssignNetworkListeners();
-	}
-
-	private bool ValidateCallLimits(MonkeBallGame.RPC rpcCall, PhotonMessageInfo info)
-	{
-		if (rpcCall < MonkeBallGame.RPC.SetGameState || rpcCall >= MonkeBallGame.RPC.Count)
-		{
-			return false;
-		}
-		bool flag = this._callLimiters[(int)rpcCall].CheckCallTime(Time.time);
-		if (!flag)
-		{
-			this.ReportRPCCall(rpcCall, info, "Too many RPC Calls!");
-		}
-		return flag;
-	}
-
-	private void ReportRPCCall(MonkeBallGame.RPC rpcCall, PhotonMessageInfo info, string susReason)
-	{
-		MonkeAgent.instance.SendReport(string.Format("Reason: {0}   RPC: {1}", susReason, rpcCall), info.Sender.UserId, info.Sender.NickName);
-	}
-
-	protected override void Start()
-	{
-		base.Start();
-		for (int i = 0; i < this.startingBalls.Count; i++)
-		{
-			GameBallManager.Instance.AddGameBall(this.startingBalls[i].gameBall);
-		}
-		for (int j = 0; j < this.scoreboards.Count; j++)
-		{
-			this.scoreboards[j].Setup(this);
-		}
-		this.gameEndTime = -1.0;
-	}
-
-	private new void OnEnable()
-	{
-		NetworkBehaviourUtils.InternalOnEnable(this);
-		base.OnEnable();
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private new void OnDisable()
-	{
-		NetworkBehaviourUtils.InternalOnDisable(this);
-		base.OnDisable();
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public override void Despawned(NetworkRunner runner, bool hasState)
-	{
-		base.Despawned(runner, hasState);
-		this.UnassignNetworkListeners();
-	}
-
-	public void OnPlayerDestroy()
-	{
-		if (this._setStoredLocalPlayerColor)
-		{
-			PlayerPrefs.SetFloat("redValue", this._storedLocalPlayerColor.r);
-			PlayerPrefs.SetFloat("greenValue", this._storedLocalPlayerColor.g);
-			PlayerPrefs.SetFloat("blueValue", this._storedLocalPlayerColor.b);
-			PlayerPrefs.Save();
-		}
-	}
-
-	private void AssignNetworkListeners()
-	{
-		NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerJoined;
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeft;
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent += this.OnMasterClientSwitched;
-	}
-
-	private void UnassignNetworkListeners()
-	{
-		NetworkSystem.Instance.OnPlayerJoined -= this.OnPlayerJoined;
-		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeft;
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= this.OnMasterClientSwitched;
-	}
-
-	public void Tick()
-	{
-		if (this.IsMasterClient() && this.gameState != MonkeBallGame.GameState.None && this.gameEndTime >= 0.0 && PhotonNetwork.Time > this.gameEndTime)
-		{
-			this.gameEndTime = -1.0;
-			this.RequestGameState(MonkeBallGame.GameState.PostGame);
-		}
-		if (!ZoneManagement.IsInZone(GTZone.arena))
-		{
-			return;
-		}
-		this.RefreshTime();
-		if (this._forceSync)
-		{
-			this._forceSyncDelay -= Time.deltaTime;
-			if (this._forceSyncDelay <= 0f)
-			{
-				this._forceSync = false;
-				this.ForceSyncPlayersVisuals();
-				this.RefreshTeamPlayers(false);
-			}
-		}
-		if (this._forceOrigColorFix)
-		{
-			this._forceOrigColorDelay -= Time.deltaTime;
-			if (this._forceOrigColorDelay <= 0f)
-			{
-				this._forceOrigColorFix = false;
-				this.ForceOriginalColorSync();
-			}
-		}
-	}
-
-	private void OnPlayerJoined(NetPlayer player)
-	{
-		this._forceSync = true;
-		this._forceSyncDelay = 5f;
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		int[] array;
-		int[] array2;
-		int[] array3;
-		long[] array4;
-		long[] array5;
-		this.GetCurrentGameState(out array, out array2, out array3, out array4, out array5);
-		this.photonView.RPC("RequestSetGameStateRPC", player.GetPlayerRef(), new object[]
-		{
-			(int)this.gameState,
-			this.gameEndTime,
-			array,
-			array2,
-			array3,
-			array4,
-			array5
-		});
-	}
-
-	private void OnPlayerLeft(NetPlayer player)
-	{
-		this._forceSync = true;
-		this._forceSyncDelay = 5f;
-		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(player.ActorNumber);
-		if (gamePlayer != null)
-		{
-			gamePlayer.CleanupPlayer();
-		}
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		this.photonView.RPC("SetTeamRPC", RpcTarget.All, new object[]
-		{
-			-1,
-			player.GetPlayerRef()
-		});
-	}
-
-	private void OnMasterClientSwitched(NetPlayer player)
-	{
-		if (!NetworkSystem.Instance.IsMasterClient)
-		{
-			return;
-		}
-		int[] array;
-		int[] array2;
-		int[] array3;
-		long[] array4;
-		long[] array5;
-		this.GetCurrentGameState(out array, out array2, out array3, out array4, out array5);
-		this.photonView.RPC("RequestSetGameStateRPC", RpcTarget.Others, new object[]
-		{
-			(int)this.gameState,
-			this.gameEndTime,
-			array,
-			array2,
-			array3,
-			array4,
-			array5
-		});
-	}
-
-	private void GetCurrentGameState(out int[] playerIds, out int[] playerTeams, out int[] scores, out long[] packedBallPosRot, out long[] packedBallVel)
-	{
-		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
-		playerIds = new int[allNetPlayers.Length];
-		playerTeams = new int[allNetPlayers.Length];
-		for (int i = 0; i < allNetPlayers.Length; i++)
-		{
-			playerIds[i] = allNetPlayers[i].ActorNumber;
-			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(allNetPlayers[i].ActorNumber);
-			if (gamePlayer != null)
-			{
-				playerTeams[i] = gamePlayer.teamId;
-			}
-			else
-			{
-				playerTeams[i] = -1;
-			}
-		}
-		scores = new int[this.team.Count];
-		for (int j = 0; j < this.team.Count; j++)
-		{
-			scores[j] = this.team[j].score;
-		}
-		packedBallPosRot = new long[this.startingBalls.Count];
-		packedBallVel = new long[this.startingBalls.Count];
-		for (int k = 0; k < this.startingBalls.Count; k++)
-		{
-			packedBallPosRot[k] = BitPackUtils.PackHandPosRotForNetwork(this.startingBalls[k].transform.position, this.startingBalls[k].transform.rotation);
-			packedBallVel[k] = BitPackUtils.PackWorldPosForNetwork(this.startingBalls[k].gameBall.GetVelocity());
-		}
-	}
-
-	private bool IsMasterClient()
-	{
-		return PhotonNetwork.IsMasterClient;
-	}
-
-	public MonkeBallGame.GameState GetGameState()
-	{
-		return this.gameState;
-	}
-
-	public void RequestGameState(MonkeBallGame.GameState newGameState)
-	{
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		this.photonView.RPC("SetGameStateRPC", RpcTarget.All, new object[]
-		{
-			(int)newGameState
-		});
-	}
-
-	[PunRPC]
-	private void SetGameStateRPC(int newGameState, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SetGameStateRPC");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.SetGameState, info))
-		{
-			return;
-		}
-		if (newGameState < 0 || newGameState > 4)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetGameState, info, "newGameState outside of enum range.");
-			return;
-		}
-		this.SetGameState((MonkeBallGame.GameState)newGameState);
-		if (newGameState == 1)
-		{
-			this.gameEndTime = info.SentServerTime + (double)this.gameDuration;
-		}
-	}
-
-	private void SetGameState(MonkeBallGame.GameState newGameState)
-	{
-		this.gameState = newGameState;
-		switch (this.gameState)
-		{
-		case MonkeBallGame.GameState.PreGame:
-			this.OnEnterStatePreGame();
-			return;
-		case MonkeBallGame.GameState.Playing:
-			this.OnEnterStatePlaying();
-			return;
-		case MonkeBallGame.GameState.PostScore:
-			this.OnEnterStatePostScore();
-			return;
-		case MonkeBallGame.GameState.PostGame:
-			this.OnEnterStatePostGame();
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void OnEnterStatePreGame()
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].PlayGameStartFx();
-		}
-	}
-
-	private void OnEnterStatePlaying()
-	{
-		this._forceSync = true;
-		this._forceSyncDelay = 0.1f;
-	}
-
-	private void OnEnterStatePostScore()
-	{
-	}
-
-	private void OnEnterStatePostGame()
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].PlayGameEndFx();
-		}
-	}
-
-	[PunRPC]
-	private void RequestSetGameStateRPC(int newGameState, double newGameEndTime, int[] playerIds, int[] playerTeams, int[] scores, long[] packedBallPosRot, long[] packedBallVel, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "RequestSetGameStateRPC");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.RequestSetGameState, info))
-		{
-			return;
-		}
-		if (playerIds.IsNullOrEmpty<int>() || playerTeams.IsNullOrEmpty<int>() || scores.IsNullOrEmpty<int>() || packedBallPosRot.IsNullOrEmpty<long>() || packedBallVel.IsNullOrEmpty<long>())
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "Array params are null or empty.");
-			return;
-		}
-		if (newGameState < 0 || newGameState > 4)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "newGameState outside of enum range.");
-			return;
-		}
-		if (playerIds.Length != playerTeams.Length)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "playerIDs and playerTeams are not the same length.");
-			return;
-		}
-		if (scores.Length > this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "scores and team are not the same length.");
-			return;
-		}
-		if (packedBallPosRot.Length != this.startingBalls.Count || packedBallPosRot.Length != packedBallVel.Length)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "packedBall arrays are not the same length.");
-			return;
-		}
-		if (double.IsNaN(newGameEndTime) || double.IsInfinity(newGameEndTime))
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "newGameEndTime is not valid.");
-			return;
-		}
-		if (newGameEndTime < -1.0 || newGameEndTime > PhotonNetwork.Time + (double)this.gameDuration)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetGameState, info, "newGameEndTime exceeds possible time limits.");
-			return;
-		}
-		this.gameState = (MonkeBallGame.GameState)newGameState;
-		this.gameEndTime = newGameEndTime;
-		for (int i = 0; i < playerIds.Length; i++)
-		{
-			if (VRRigCache.Instance.localRig.Creator.ActorNumber != playerIds[i])
-			{
-				GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(playerIds[i]);
-				if (!(gamePlayer == null))
-				{
-					gamePlayer.teamId = playerTeams[i];
-					RigContainer rigContainer;
-					if (playerTeams[i] >= 0 && playerTeams[i] < this.team.Count && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(playerIds[i]), out rigContainer))
-					{
-						Color color = this.team[playerTeams[i]].color;
-						rigContainer.Rig.InitializeNoobMaterialLocal(color.r, color.g, color.b);
-						rigContainer.Rig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, false);
-					}
-				}
-			}
-		}
-		this.RefreshTeamPlayers(false);
-		for (int j = 0; j < scores.Length; j++)
-		{
-			this.SetScore(j, scores[j], false);
-		}
-		for (int k = 0; k < packedBallPosRot.Length; k++)
-		{
-			Vector3 position;
-			Quaternion rotation;
-			BitPackUtils.UnpackHandPosRotFromNetwork(packedBallPosRot[k], out position, out rotation);
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid())
-			{
-				this.startingBalls[k].transform.position = position;
-				this.startingBalls[k].transform.rotation = rotation;
-				if ((this.startingBalls[k].transform.position - base.transform.position).sqrMagnitude > 6400f)
-				{
-					this.startingBalls[k].transform.position = this._neutralBallStartLocation.transform.position;
-				}
-				Vector3 velocity = BitPackUtils.UnpackWorldPosFromNetwork(packedBallVel[k]);
-				num = 10000f;
-				if (velocity.IsValid(num))
-				{
-					this.startingBalls[k].gameBall.SetVelocity(velocity);
-					this.startingBalls[k].TriggerDelayedResync();
-				}
-			}
-		}
-		this._forceSync = true;
-		this._forceSyncDelay = 5f;
-	}
-
-	public void RequestResetGame()
-	{
-		this.photonView.RPC("RequestResetGameRPC", RpcTarget.All, Array.Empty<object>());
-	}
-
-	[PunRPC]
-	private void RequestResetGameRPC(PhotonMessageInfo info)
-	{
-		MonkeAgent.IncrementRPCCall(info, "RequestResetGameRPC");
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.RequestResetGame, info))
-		{
-			return;
-		}
-		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(info.Sender.ActorNumber);
-		if (gamePlayer == null)
-		{
-			return;
-		}
-		if (gamePlayer.teamId != this.resetButton.allowedTeamId)
-		{
-			return;
-		}
-		for (int i = 0; i < this.startingBalls.Count; i++)
-		{
-			this.RequestResetBall(this.startingBalls[i].gameBall.id, -1);
-		}
-		for (int j = 0; j < this.team.Count; j++)
-		{
-			this.RequestSetScore(j, 0);
-		}
-		this.RequestGameState(MonkeBallGame.GameState.PreGame);
-		this.resetButton.ToggleReset(false, -1, true);
-		if (this.centerResetButton != null)
-		{
-			this.centerResetButton.ToggleReset(false, -1, true);
-		}
-	}
-
-	public void ToggleResetButton(bool toggle, int teamId)
-	{
-		int otherTeam = this.GetOtherTeam(teamId);
-		this.photonView.RPC("SetResetButtonRPC", RpcTarget.All, new object[]
-		{
-			toggle,
-			otherTeam
-		});
-	}
-
-	[PunRPC]
-	private void SetResetButtonRPC(bool toggleReset, int teamId, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SetResetButtonRPC");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.SetResetButton, info))
-		{
-			return;
-		}
-		if (teamId < -1 || teamId >= this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetResetButton, info, "teamID exceeds possible range.");
-			return;
-		}
-		this.resetButton.ToggleReset(toggleReset, teamId, false);
-		if (this.centerResetButton != null)
-		{
-			this.centerResetButton.ToggleReset(toggleReset, teamId, false);
-		}
-	}
-
-	public void OnBallGrabbed(GameBallId gameBallId)
-	{
-		if (this.gameState == MonkeBallGame.GameState.PreGame)
-		{
-			this.SetGameState(MonkeBallGame.GameState.Playing);
-		}
-		if (this.gameState == MonkeBallGame.GameState.PostScore)
-		{
-			this.SetGameState(MonkeBallGame.GameState.Playing);
-		}
-	}
-
-	private void RefreshTime()
-	{
-		this._frameIndex++;
-		if (this._frameIndex > 2)
-		{
-			this._frameIndex = 0;
-		}
-		if (this._frameIndex != 0)
-		{
-			return;
-		}
-		float a = (float)(this.gameEndTime - PhotonNetwork.Time);
-		if (this.gameEndTime < 0.0)
-		{
-			a = 0f;
-		}
-		string timeString = Mathf.Max(a, 0f).ToString("#00.00");
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].RefreshTime(timeString);
-		}
-	}
-
-	public void RequestResetBall(GameBallId gameBallId, int teamId)
-	{
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		if (teamId >= 0)
-		{
-			this.LaunchBallWithTeam(gameBallId, teamId, this.team[teamId].ballLaunchPosition, this.team[teamId].ballLaunchVelocityRange, this.team[teamId].ballLaunchAngleXRange, this.team[teamId].ballLaunchAngleXRange);
-			return;
-		}
-		this.LaunchBallNeutral(gameBallId);
-	}
-
-	public void RequestScore(int teamId)
-	{
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		if (teamId < 0 || teamId >= this.team.Count)
-		{
-			return;
-		}
-		this.photonView.RPC("SetScoreRPC", RpcTarget.All, new object[]
-		{
-			teamId,
-			this.team[teamId].score + 1
-		});
-		this.RequestGameState(MonkeBallGame.GameState.PostScore);
-	}
-
-	public void RequestSetScore(int teamId, int score)
-	{
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		this.photonView.RPC("SetScoreRPC", RpcTarget.All, new object[]
-		{
-			teamId,
-			score
-		});
-	}
-
-	[PunRPC]
-	private void SetScoreRPC(int teamId, int score, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SetScoreRPC");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.SetScore, info))
-		{
-			return;
-		}
-		if (teamId < 0 || teamId >= this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetScore, info, "teamID exceeds possible range.");
-			return;
-		}
-		if (score != 0 && score != this.team[teamId].score + 1)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetScore, info, "Score is being set to a non-achievable value.");
-			return;
-		}
-		this.SetScore(teamId, Mathf.Clamp(score, 0, 999), true);
-	}
-
-	private void SetScore(int teamId, int score, bool playFX = true)
-	{
-		if (teamId < 0 || teamId > this.team.Count)
-		{
-			return;
-		}
-		int score2 = this.team[teamId].score;
-		this.team[teamId].score = score;
-		if (playFX && score > score2)
-		{
-			this.PlayScoreFx();
-			Color color = this.team[teamId].color;
-			for (int i = 0; i < this.endZoneEffects.Length; i++)
-			{
-				this.endZoneEffects[i].startColor = color;
-				this.endZoneEffects[i].Play();
-			}
-		}
-		this.RefreshScore();
-	}
-
-	private void RefreshScore()
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].RefreshScore();
-		}
-	}
-
-	private void PlayScoreFx()
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].PlayScoreFx();
-		}
-	}
-
-	public MonkeBallTeam GetTeam(int teamId)
-	{
-		return this.team[teamId];
-	}
-
-	public int GetOtherTeam(int teamId)
-	{
-		return (teamId + 1) % this.team.Count;
-	}
-
-	public void RequestSetTeam(int teamId)
-	{
-		if (!ZoneManagement.IsInZone(GTZone.arena))
-		{
-			return;
-		}
-		this.photonView.RPC("RequestSetTeamRPC", RpcTarget.MasterClient, new object[]
-		{
-			teamId
-		});
-		bool flag = false;
-		Color color = Color.white;
-		if (teamId >= 0 && teamId < this.team.Count)
-		{
-			flag = true;
-			if (!this._setStoredLocalPlayerColor)
-			{
-				this._storedLocalPlayerColor = new Color(PlayerPrefs.GetFloat("redValue", 1f), PlayerPrefs.GetFloat("greenValue", 1f), PlayerPrefs.GetFloat("blueValue", 1f));
-				this._setStoredLocalPlayerColor = true;
-			}
-			this._forceOrigColorFix = false;
-			color = this.team[teamId].color;
-		}
-		else
-		{
-			color = this._storedLocalPlayerColor;
-			this._setStoredLocalPlayerColor = false;
-		}
-		PlayerPrefs.SetFloat("redValue", color.r);
-		PlayerPrefs.SetFloat("greenValue", color.g);
-		PlayerPrefs.SetFloat("blueValue", color.b);
-		PlayerPrefs.Save();
-		GorillaTagger.Instance.UpdateColor(color.r, color.g, color.b);
-		GorillaComputer.instance.UpdateColor(color.r, color.g, color.b);
-		if (NetworkSystem.Instance.InRoom)
-		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
-			{
-				color.r,
-				color.g,
-				color.b
-			});
-			if (flag)
-			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All, Array.Empty<object>());
-			}
-			else
-			{
-				this._forceOrigColorFix = true;
-				this._forceOrigColorDelay = 3f;
-				CosmeticsController.instance.UpdateWornCosmetics(true);
-			}
-			this.ForceSyncPlayersVisuals();
-		}
-	}
-
-	private MonkeBall GetMonkeBall(GameBallId gameBallId)
-	{
-		GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
-		if (!(gameBall == null))
-		{
-			return gameBall.GetComponent<MonkeBall>();
-		}
-		return null;
-	}
-
-	[PunRPC]
-	private void RequestSetTeamRPC(int teamId, PhotonMessageInfo info)
-	{
-		MonkeAgent.IncrementRPCCall(info, "RequestSetTeamRPC");
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.RequestSetTeam, info))
-		{
-			return;
-		}
-		if (teamId < -1 || teamId >= this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetTeam, info, "teamID exceeds possible range.");
-			return;
-		}
-		this.photonView.RPC("SetTeamRPC", RpcTarget.All, new object[]
-		{
-			teamId,
-			info.Sender
-		});
-	}
-
-	[PunRPC]
-	private void SetTeamRPC(int teamId, Player player, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SetTeamRPC");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.SetTeam, info))
-		{
-			return;
-		}
-		if (teamId < -1 || teamId >= this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetTeam, info, "teamID exceeds possible range.");
-			return;
-		}
-		this.SetTeamPlayer(teamId, player);
-	}
-
-	private void SetTeamPlayer(int teamId, Player player)
-	{
-		if (player == null)
-		{
-			return;
-		}
-		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(player.ActorNumber);
-		if (gamePlayer != null)
-		{
-			gamePlayer.teamId = teamId;
-		}
-		this.RefreshTeamPlayers(true);
-	}
-
-	private void RefreshTeamPlayers(bool playSounds)
-	{
-		int[] array = new int[this.team.Count];
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i] = 0;
-		}
-		int num = 0;
-		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
-		for (int j = 0; j < allNetPlayers.Length; j++)
-		{
-			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(allNetPlayers[j].ActorNumber);
-			if (!(gamePlayer == null))
-			{
-				int teamId = gamePlayer.teamId;
-				if (teamId >= 0)
-				{
-					array[teamId]++;
-					num++;
-				}
-			}
-		}
-		for (int k = 0; k < this.scoreboards.Count; k++)
-		{
-			for (int l = 0; l < array.Length; l++)
-			{
-				this.scoreboards[k].RefreshTeamPlayers(l, array[l]);
-			}
-			if (playSounds)
-			{
-				if (this._currentPlayerTotal < num)
-				{
-					this.scoreboards[k].PlayPlayerJoinFx();
-				}
-				else if (this._currentPlayerTotal > num)
-				{
-					this.scoreboards[k].PlayPlayerLeaveFx();
-				}
-			}
-		}
-		this._currentPlayerTotal = num;
-	}
-
-	private void ForceSyncPlayersVisuals()
-	{
-		for (int i = 0; i < NetworkSystem.Instance.AllNetPlayers.Length; i++)
-		{
-			int actorNumber = NetworkSystem.Instance.AllNetPlayers[i].ActorNumber;
-			if (VRRigCache.Instance.localRig.Creator.ActorNumber != actorNumber)
-			{
-				GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(actorNumber);
-				RigContainer rigContainer;
-				if (!(gamePlayer == null) && gamePlayer.teamId >= 0 && gamePlayer.teamId < this.team.Count && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(actorNumber), out rigContainer))
-				{
-					Color color = this.team[gamePlayer.teamId].color;
-					rigContainer.Rig.InitializeNoobMaterialLocal(color.r, color.g, color.b);
-					rigContainer.Rig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, false);
-				}
-			}
-		}
-	}
-
-	private void ForceOriginalColorSync()
-	{
-		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(VRRigCache.Instance.localRig.Creator.ActorNumber);
-		if (gamePlayer == null || (gamePlayer.teamId >= 0 && gamePlayer.teamId < this.team.Count))
-		{
-			return;
-		}
-		Color storedLocalPlayerColor = this._storedLocalPlayerColor;
-		if (NetworkSystem.Instance.InRoom)
-		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
-			{
-				storedLocalPlayerColor.r,
-				storedLocalPlayerColor.g,
-				storedLocalPlayerColor.b
-			});
-		}
-	}
-
-	public void RequestRestrictBallToTeam(GameBallId gameBallId, int teamId)
-	{
-		this.RestrictBallToTeam(gameBallId, teamId, this.restrictBallDuration);
-	}
-
-	public void RequestRestrictBallToTeamOnScore(GameBallId gameBallId, int teamId)
-	{
-		this.RestrictBallToTeam(gameBallId, teamId, this.restrictBallDurationAfterScore);
-	}
-
-	private void RestrictBallToTeam(GameBallId gameBallId, int teamId, float restrictDuration)
-	{
-		if (!this.IsMasterClient())
-		{
-			return;
-		}
-		this.photonView.RPC("SetRestrictBallToTeam", RpcTarget.All, new object[]
-		{
-			gameBallId.index,
-			teamId,
-			restrictDuration
-		});
-	}
-
-	[PunRPC]
-	private void SetRestrictBallToTeam(int gameBallIndex, int teamId, float restrictDuration, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SetRestrictBallToTeam");
-		if (!this.ValidateCallLimits(MonkeBallGame.RPC.SetRestrictBallToTeam, info))
-		{
-			return;
-		}
-		if (gameBallIndex < 0 || gameBallIndex >= this.startingBalls.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetRestrictBallToTeam, info, "gameBallIndex exceeds possible range.");
-			return;
-		}
-		if (teamId < -1 || teamId >= this.team.Count)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetRestrictBallToTeam, info, "teamID exceeds possible range.");
-			return;
-		}
-		if (float.IsNaN(restrictDuration) || float.IsInfinity(restrictDuration) || restrictDuration < 0f || restrictDuration > this.restrictBallDurationAfterScore + this.restrictBallDuration)
-		{
-			this.ReportRPCCall(MonkeBallGame.RPC.SetRestrictBallToTeam, info, "restrictDuration is not a feasible value.");
-			return;
-		}
-		GameBallId gameBallId = new GameBallId(gameBallIndex);
-		MonkeBall monkeBall = this.GetMonkeBall(gameBallId);
-		bool flag = false;
-		if (monkeBall != null)
-		{
-			flag = monkeBall.RestrictBallToTeam(teamId, restrictDuration);
-		}
-		if (flag)
-		{
-			for (int i = 0; i < this.shotclocks.Count; i++)
-			{
-				this.shotclocks[i].SetTime(teamId, restrictDuration);
-			}
-		}
-	}
-
-	public void LaunchBallNeutral(GameBallId gameBallId)
-	{
-		this.LaunchBall(gameBallId, this._ballLauncher, this.ballLauncherVelocityRange.x, this.ballLauncherVelocityRange.y, this.ballLaunchAngleXRange.x, this.ballLaunchAngleXRange.y, this.ballLaunchAngleYRange.x, this.ballLaunchAngleYRange.y);
-	}
-
-	public void LaunchBallWithTeam(GameBallId gameBallId, int teamId, Transform launcher, Vector2 velocityRange, Vector2 angleXRange, Vector2 angleYRange)
-	{
-		this.LaunchBall(gameBallId, launcher, velocityRange.x, velocityRange.y, angleXRange.x, angleXRange.y, angleYRange.x, angleYRange.y);
-	}
-
-	private void LaunchBall(GameBallId gameBallId, Transform launcher, float minVelocity, float maxVelocity, float minXAngle, float maxXAngle, float minYAngle, float maxYAngle)
-	{
-		GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
-		if (gameBall == null)
-		{
-			return;
-		}
-		gameBall.transform.position = launcher.transform.position;
-		Quaternion rotation = launcher.transform.rotation;
-		launcher.transform.Rotate(Vector3.up, Random.Range(minXAngle, maxXAngle));
-		launcher.transform.Rotate(Vector3.right, Random.Range(minYAngle, maxYAngle));
-		gameBall.transform.rotation = launcher.transform.rotation;
-		Vector3 velocity = launcher.transform.forward * Random.Range(minVelocity, maxVelocity);
-		launcher.transform.rotation = rotation;
-		GameBallManager.Instance.RequestLaunchBall(gameBallId, velocity);
-	}
-
-	public override void WriteDataFusion()
-	{
-	}
-
-	public override void ReadDataFusion()
-	{
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
+		SetGameState,
+		RequestSetGameState,
+		RequestResetGame,
+		SetScore,
+		RequestSetTeam,
+		SetTeam,
+		SetRestrictBallToTeam,
+		SetResetButton,
+		Count
 	}
 
 	public static MonkeBallGame Instance;
@@ -1054,7 +88,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 	[SerializeField]
 	private ParticleSystem[] endZoneEffects;
 
-	private MonkeBallGame.GameState gameState;
+	private GameState gameState;
 
 	public double gameEndTime;
 
@@ -1074,25 +108,882 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 
 	private CallLimiter[] _callLimiters;
 
-	public enum GameState
+	public Transform BallLauncher => _ballLauncher;
+
+	public bool TickRunning { get; set; }
+
+	protected override void Awake()
 	{
-		None,
-		PreGame,
-		Playing,
-		PostScore,
-		PostGame
+		base.Awake();
+		Instance = this;
+		gameState = GameState.None;
+		_callLimiters = new CallLimiter[8];
+		_callLimiters[0] = new CallLimiter(20, 1f);
+		_callLimiters[1] = new CallLimiter(20, 10f);
+		_callLimiters[2] = new CallLimiter(20, 10f);
+		_callLimiters[3] = new CallLimiter(20, 1f);
+		_callLimiters[4] = new CallLimiter(20, 1f);
+		_callLimiters[5] = new CallLimiter(20, 1f);
+		_callLimiters[6] = new CallLimiter(20, 1f);
+		_callLimiters[7] = new CallLimiter(5, 10f);
+		AssignNetworkListeners();
 	}
 
-	private enum RPC
+	private bool ValidateCallLimits(RPC rpcCall, PhotonMessageInfo info)
 	{
-		SetGameState,
-		RequestSetGameState,
-		RequestResetGame,
-		SetScore,
-		RequestSetTeam,
-		SetTeam,
-		SetRestrictBallToTeam,
-		SetResetButton,
-		Count
+		if (rpcCall < RPC.SetGameState || rpcCall >= RPC.Count)
+		{
+			return false;
+		}
+		bool num = _callLimiters[(int)rpcCall].CheckCallTime(Time.time);
+		if (!num)
+		{
+			ReportRPCCall(rpcCall, info, "Too many RPC Calls!");
+		}
+		return num;
+	}
+
+	private void ReportRPCCall(RPC rpcCall, PhotonMessageInfo info, string susReason)
+	{
+		MonkeAgent.instance.SendReport($"Reason: {susReason}   RPC: {rpcCall}", info.Sender.UserId, info.Sender.NickName);
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		for (int i = 0; i < startingBalls.Count; i++)
+		{
+			GameBallManager.Instance.AddGameBall(startingBalls[i].gameBall);
+		}
+		for (int j = 0; j < scoreboards.Count; j++)
+		{
+			scoreboards[j].Setup(this);
+		}
+		gameEndTime = -1.0;
+	}
+
+	private new void OnEnable()
+	{
+		NetworkBehaviourUtils.InternalOnEnable(this);
+		base.OnEnable();
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private new void OnDisable()
+	{
+		NetworkBehaviourUtils.InternalOnDisable(this);
+		base.OnDisable();
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		UnassignNetworkListeners();
+	}
+
+	public void OnPlayerDestroy()
+	{
+		if (_setStoredLocalPlayerColor)
+		{
+			PlayerPrefs.SetFloat("redValue", _storedLocalPlayerColor.r);
+			PlayerPrefs.SetFloat("greenValue", _storedLocalPlayerColor.g);
+			PlayerPrefs.SetFloat("blueValue", _storedLocalPlayerColor.b);
+			PlayerPrefs.Save();
+		}
+	}
+
+	private void AssignNetworkListeners()
+	{
+		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(OnPlayerJoined);
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(OnPlayerLeft);
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent += new Action<NetPlayer>(OnMasterClientSwitched);
+	}
+
+	private void UnassignNetworkListeners()
+	{
+		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(OnPlayerJoined);
+		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(OnPlayerLeft);
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= new Action<NetPlayer>(OnMasterClientSwitched);
+	}
+
+	public void Tick()
+	{
+		if (IsMasterClient() && gameState != GameState.None && gameEndTime >= 0.0 && PhotonNetwork.Time > gameEndTime)
+		{
+			gameEndTime = -1.0;
+			RequestGameState(GameState.PostGame);
+		}
+		if (!ZoneManagement.IsInZone(GTZone.arena))
+		{
+			return;
+		}
+		RefreshTime();
+		if (_forceSync)
+		{
+			_forceSyncDelay -= Time.deltaTime;
+			if (_forceSyncDelay <= 0f)
+			{
+				_forceSync = false;
+				ForceSyncPlayersVisuals();
+				RefreshTeamPlayers(playSounds: false);
+			}
+		}
+		if (_forceOrigColorFix)
+		{
+			_forceOrigColorDelay -= Time.deltaTime;
+			if (_forceOrigColorDelay <= 0f)
+			{
+				_forceOrigColorFix = false;
+				ForceOriginalColorSync();
+			}
+		}
+	}
+
+	private void OnPlayerJoined(NetPlayer player)
+	{
+		_forceSync = true;
+		_forceSyncDelay = 5f;
+		if (IsMasterClient())
+		{
+			GetCurrentGameState(out var playerIds, out var playerTeams, out var scores, out var packedBallPosRot, out var packedBallVel);
+			photonView.RPC("RequestSetGameStateRPC", player.GetPlayerRef(), (int)gameState, gameEndTime, playerIds, playerTeams, scores, packedBallPosRot, packedBallVel);
+		}
+	}
+
+	private void OnPlayerLeft(NetPlayer player)
+	{
+		_forceSync = true;
+		_forceSyncDelay = 5f;
+		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(player.ActorNumber);
+		if (gamePlayer != null)
+		{
+			gamePlayer.CleanupPlayer();
+		}
+		if (IsMasterClient())
+		{
+			photonView.RPC("SetTeamRPC", RpcTarget.All, -1, player.GetPlayerRef());
+		}
+	}
+
+	private void OnMasterClientSwitched(NetPlayer player)
+	{
+		if (NetworkSystem.Instance.IsMasterClient)
+		{
+			GetCurrentGameState(out var playerIds, out var playerTeams, out var scores, out var packedBallPosRot, out var packedBallVel);
+			photonView.RPC("RequestSetGameStateRPC", RpcTarget.Others, (int)gameState, gameEndTime, playerIds, playerTeams, scores, packedBallPosRot, packedBallVel);
+		}
+	}
+
+	private void GetCurrentGameState(out int[] playerIds, out int[] playerTeams, out int[] scores, out long[] packedBallPosRot, out long[] packedBallVel)
+	{
+		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
+		playerIds = new int[allNetPlayers.Length];
+		playerTeams = new int[allNetPlayers.Length];
+		for (int i = 0; i < allNetPlayers.Length; i++)
+		{
+			playerIds[i] = allNetPlayers[i].ActorNumber;
+			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(allNetPlayers[i].ActorNumber);
+			if (gamePlayer != null)
+			{
+				playerTeams[i] = gamePlayer.teamId;
+			}
+			else
+			{
+				playerTeams[i] = -1;
+			}
+		}
+		scores = new int[team.Count];
+		for (int j = 0; j < team.Count; j++)
+		{
+			scores[j] = team[j].score;
+		}
+		packedBallPosRot = new long[startingBalls.Count];
+		packedBallVel = new long[startingBalls.Count];
+		for (int k = 0; k < startingBalls.Count; k++)
+		{
+			packedBallPosRot[k] = BitPackUtils.PackHandPosRotForNetwork(startingBalls[k].transform.position, startingBalls[k].transform.rotation);
+			packedBallVel[k] = BitPackUtils.PackWorldPosForNetwork(startingBalls[k].gameBall.GetVelocity());
+		}
+	}
+
+	private bool IsMasterClient()
+	{
+		return PhotonNetwork.IsMasterClient;
+	}
+
+	public GameState GetGameState()
+	{
+		return gameState;
+	}
+
+	public void RequestGameState(GameState newGameState)
+	{
+		if (IsMasterClient())
+		{
+			photonView.RPC("SetGameStateRPC", RpcTarget.All, (int)newGameState);
+		}
+	}
+
+	[PunRPC]
+	private void SetGameStateRPC(int newGameState, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SetGameStateRPC");
+		if (!ValidateCallLimits(RPC.SetGameState, info))
+		{
+			return;
+		}
+		if (newGameState < 0 || newGameState > 4)
+		{
+			ReportRPCCall(RPC.SetGameState, info, "newGameState outside of enum range.");
+			return;
+		}
+		SetGameState((GameState)newGameState);
+		if (newGameState == 1)
+		{
+			gameEndTime = info.SentServerTime + (double)gameDuration;
+		}
+	}
+
+	private void SetGameState(GameState newGameState)
+	{
+		gameState = newGameState;
+		switch (gameState)
+		{
+		case GameState.PreGame:
+			OnEnterStatePreGame();
+			break;
+		case GameState.Playing:
+			OnEnterStatePlaying();
+			break;
+		case GameState.PostScore:
+			OnEnterStatePostScore();
+			break;
+		case GameState.PostGame:
+			OnEnterStatePostGame();
+			break;
+		}
+	}
+
+	private void OnEnterStatePreGame()
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			scoreboards[i].PlayGameStartFx();
+		}
+	}
+
+	private void OnEnterStatePlaying()
+	{
+		_forceSync = true;
+		_forceSyncDelay = 0.1f;
+	}
+
+	private void OnEnterStatePostScore()
+	{
+	}
+
+	private void OnEnterStatePostGame()
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			scoreboards[i].PlayGameEndFx();
+		}
+	}
+
+	[PunRPC]
+	private void RequestSetGameStateRPC(int newGameState, double newGameEndTime, int[] playerIds, int[] playerTeams, int[] scores, long[] packedBallPosRot, long[] packedBallVel, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "RequestSetGameStateRPC");
+		if (!ValidateCallLimits(RPC.RequestSetGameState, info))
+		{
+			return;
+		}
+		if (playerIds.IsNullOrEmpty() || playerTeams.IsNullOrEmpty() || scores.IsNullOrEmpty() || packedBallPosRot.IsNullOrEmpty() || packedBallVel.IsNullOrEmpty())
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "Array params are null or empty.");
+			return;
+		}
+		if (newGameState < 0 || newGameState > 4)
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "newGameState outside of enum range.");
+			return;
+		}
+		if (playerIds.Length != playerTeams.Length)
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "playerIDs and playerTeams are not the same length.");
+			return;
+		}
+		if (scores.Length > team.Count)
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "scores and team are not the same length.");
+			return;
+		}
+		if (packedBallPosRot.Length != startingBalls.Count || packedBallPosRot.Length != packedBallVel.Length)
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "packedBall arrays are not the same length.");
+			return;
+		}
+		if (double.IsNaN(newGameEndTime) || double.IsInfinity(newGameEndTime))
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "newGameEndTime is not valid.");
+			return;
+		}
+		if (newGameEndTime < -1.0 || newGameEndTime > PhotonNetwork.Time + (double)gameDuration)
+		{
+			ReportRPCCall(RPC.RequestSetGameState, info, "newGameEndTime exceeds possible time limits.");
+			return;
+		}
+		gameState = (GameState)newGameState;
+		gameEndTime = newGameEndTime;
+		for (int i = 0; i < playerIds.Length; i++)
+		{
+			if (VRRigCache.Instance.localRig.Creator.ActorNumber == playerIds[i])
+			{
+				continue;
+			}
+			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(playerIds[i]);
+			if (!(gamePlayer == null))
+			{
+				gamePlayer.teamId = playerTeams[i];
+				if (playerTeams[i] >= 0 && playerTeams[i] < team.Count && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(playerIds[i]), out var playerRig))
+				{
+					Color color = team[playerTeams[i]].color;
+					playerRig.Rig.InitializeNoobMaterialLocal(color.r, color.g, color.b);
+					playerRig.Rig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, playfx: false);
+				}
+			}
+		}
+		RefreshTeamPlayers(playSounds: false);
+		for (int j = 0; j < scores.Length; j++)
+		{
+			SetScore(j, scores[j], playFX: false);
+		}
+		for (int k = 0; k < packedBallPosRot.Length; k++)
+		{
+			BitPackUtils.UnpackHandPosRotFromNetwork(packedBallPosRot[k], out var localPos, out var handRot);
+			if (localPos.IsValid(10000f) && handRot.IsValid())
+			{
+				startingBalls[k].transform.position = localPos;
+				startingBalls[k].transform.rotation = handRot;
+				if ((startingBalls[k].transform.position - base.transform.position).sqrMagnitude > 6400f)
+				{
+					startingBalls[k].transform.position = _neutralBallStartLocation.transform.position;
+				}
+				Vector3 v = BitPackUtils.UnpackWorldPosFromNetwork(packedBallVel[k]);
+				if (v.IsValid(10000f))
+				{
+					startingBalls[k].gameBall.SetVelocity(v);
+					startingBalls[k].TriggerDelayedResync();
+				}
+			}
+		}
+		_forceSync = true;
+		_forceSyncDelay = 5f;
+	}
+
+	public void RequestResetGame()
+	{
+		photonView.RPC("RequestResetGameRPC", RpcTarget.All);
+	}
+
+	[PunRPC]
+	private void RequestResetGameRPC(PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestResetGameRPC");
+		if (!IsMasterClient() || !ValidateCallLimits(RPC.RequestResetGame, info))
+		{
+			return;
+		}
+		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(info.Sender.ActorNumber);
+		if (!(gamePlayer == null) && gamePlayer.teamId == resetButton.allowedTeamId)
+		{
+			for (int i = 0; i < startingBalls.Count; i++)
+			{
+				RequestResetBall(startingBalls[i].gameBall.id, -1);
+			}
+			for (int j = 0; j < team.Count; j++)
+			{
+				RequestSetScore(j, 0);
+			}
+			RequestGameState(GameState.PreGame);
+			resetButton.ToggleReset(toggle: false, -1, force: true);
+			if (centerResetButton != null)
+			{
+				centerResetButton.ToggleReset(toggle: false, -1, force: true);
+			}
+		}
+	}
+
+	public void ToggleResetButton(bool toggle, int teamId)
+	{
+		int otherTeam = GetOtherTeam(teamId);
+		photonView.RPC("SetResetButtonRPC", RpcTarget.All, toggle, otherTeam);
+	}
+
+	[PunRPC]
+	private void SetResetButtonRPC(bool toggleReset, int teamId, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SetResetButtonRPC");
+		if (!ValidateCallLimits(RPC.SetResetButton, info))
+		{
+			return;
+		}
+		if (teamId < -1 || teamId >= team.Count)
+		{
+			ReportRPCCall(RPC.SetResetButton, info, "teamID exceeds possible range.");
+			return;
+		}
+		resetButton.ToggleReset(toggleReset, teamId);
+		if (centerResetButton != null)
+		{
+			centerResetButton.ToggleReset(toggleReset, teamId);
+		}
+	}
+
+	public void OnBallGrabbed(GameBallId gameBallId)
+	{
+		if (gameState == GameState.PreGame)
+		{
+			SetGameState(GameState.Playing);
+		}
+		if (gameState == GameState.PostScore)
+		{
+			SetGameState(GameState.Playing);
+		}
+	}
+
+	private void RefreshTime()
+	{
+		_frameIndex++;
+		if (_frameIndex > 2)
+		{
+			_frameIndex = 0;
+		}
+		if (_frameIndex == 0)
+		{
+			float a = (float)(gameEndTime - PhotonNetwork.Time);
+			if (gameEndTime < 0.0)
+			{
+				a = 0f;
+			}
+			string timeString = Mathf.Max(a, 0f).ToString("#00.00");
+			for (int i = 0; i < scoreboards.Count; i++)
+			{
+				scoreboards[i].RefreshTime(timeString);
+			}
+		}
+	}
+
+	public void RequestResetBall(GameBallId gameBallId, int teamId)
+	{
+		if (IsMasterClient())
+		{
+			if (teamId >= 0)
+			{
+				LaunchBallWithTeam(gameBallId, teamId, team[teamId].ballLaunchPosition, team[teamId].ballLaunchVelocityRange, team[teamId].ballLaunchAngleXRange, team[teamId].ballLaunchAngleXRange);
+			}
+			else
+			{
+				LaunchBallNeutral(gameBallId);
+			}
+		}
+	}
+
+	public void RequestScore(int teamId)
+	{
+		if (IsMasterClient() && teamId >= 0 && teamId < team.Count)
+		{
+			photonView.RPC("SetScoreRPC", RpcTarget.All, teamId, team[teamId].score + 1);
+			RequestGameState(GameState.PostScore);
+		}
+	}
+
+	public void RequestSetScore(int teamId, int score)
+	{
+		if (IsMasterClient())
+		{
+			photonView.RPC("SetScoreRPC", RpcTarget.All, teamId, score);
+		}
+	}
+
+	[PunRPC]
+	private void SetScoreRPC(int teamId, int score, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SetScoreRPC");
+		if (ValidateCallLimits(RPC.SetScore, info))
+		{
+			if (teamId < 0 || teamId >= team.Count)
+			{
+				ReportRPCCall(RPC.SetScore, info, "teamID exceeds possible range.");
+			}
+			else if (score != 0 && score != team[teamId].score + 1)
+			{
+				ReportRPCCall(RPC.SetScore, info, "Score is being set to a non-achievable value.");
+			}
+			else
+			{
+				SetScore(teamId, Mathf.Clamp(score, 0, 999));
+			}
+		}
+	}
+
+	private void SetScore(int teamId, int score, bool playFX = true)
+	{
+		if (teamId < 0 || teamId > team.Count)
+		{
+			return;
+		}
+		int score2 = team[teamId].score;
+		team[teamId].score = score;
+		if (playFX && score > score2)
+		{
+			PlayScoreFx();
+			Color color = team[teamId].color;
+			for (int i = 0; i < endZoneEffects.Length; i++)
+			{
+				endZoneEffects[i].startColor = color;
+				endZoneEffects[i].Play();
+			}
+		}
+		RefreshScore();
+	}
+
+	private void RefreshScore()
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			scoreboards[i].RefreshScore();
+		}
+	}
+
+	private void PlayScoreFx()
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			scoreboards[i].PlayScoreFx();
+		}
+	}
+
+	public MonkeBallTeam GetTeam(int teamId)
+	{
+		return team[teamId];
+	}
+
+	public int GetOtherTeam(int teamId)
+	{
+		return (teamId + 1) % team.Count;
+	}
+
+	public void RequestSetTeam(int teamId)
+	{
+		if (!ZoneManagement.IsInZone(GTZone.arena))
+		{
+			return;
+		}
+		photonView.RPC("RequestSetTeamRPC", RpcTarget.MasterClient, teamId);
+		bool flag = false;
+		Color white = Color.white;
+		if (teamId >= 0 && teamId < team.Count)
+		{
+			flag = true;
+			if (!_setStoredLocalPlayerColor)
+			{
+				_storedLocalPlayerColor = new Color(PlayerPrefs.GetFloat("redValue", 1f), PlayerPrefs.GetFloat("greenValue", 1f), PlayerPrefs.GetFloat("blueValue", 1f));
+				_setStoredLocalPlayerColor = true;
+			}
+			_forceOrigColorFix = false;
+			white = team[teamId].color;
+		}
+		else
+		{
+			white = _storedLocalPlayerColor;
+			_setStoredLocalPlayerColor = false;
+		}
+		PlayerPrefs.SetFloat("redValue", white.r);
+		PlayerPrefs.SetFloat("greenValue", white.g);
+		PlayerPrefs.SetFloat("blueValue", white.b);
+		PlayerPrefs.Save();
+		GorillaTagger.Instance.UpdateColor(white.r, white.g, white.b);
+		GorillaComputer.instance.UpdateColor(white.r, white.g, white.b);
+		if (NetworkSystem.Instance.InRoom)
+		{
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, white.r, white.g, white.b);
+			if (flag)
+			{
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All);
+			}
+			else
+			{
+				_forceOrigColorFix = true;
+				_forceOrigColorDelay = 3f;
+				CosmeticsController.instance.UpdateWornCosmetics(sync: true);
+			}
+			ForceSyncPlayersVisuals();
+		}
+	}
+
+	private MonkeBall GetMonkeBall(GameBallId gameBallId)
+	{
+		GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
+		if (!(gameBall == null))
+		{
+			return gameBall.GetComponent<MonkeBall>();
+		}
+		return null;
+	}
+
+	[PunRPC]
+	private void RequestSetTeamRPC(int teamId, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestSetTeamRPC");
+		if (IsMasterClient() && ValidateCallLimits(RPC.RequestSetTeam, info))
+		{
+			if (teamId < -1 || teamId >= team.Count)
+			{
+				ReportRPCCall(RPC.RequestSetTeam, info, "teamID exceeds possible range.");
+				return;
+			}
+			photonView.RPC("SetTeamRPC", RpcTarget.All, teamId, info.Sender);
+		}
+	}
+
+	[PunRPC]
+	private void SetTeamRPC(int teamId, Player player, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SetTeamRPC");
+		if (ValidateCallLimits(RPC.SetTeam, info))
+		{
+			if (teamId < -1 || teamId >= team.Count)
+			{
+				ReportRPCCall(RPC.SetTeam, info, "teamID exceeds possible range.");
+			}
+			else
+			{
+				SetTeamPlayer(teamId, player);
+			}
+		}
+	}
+
+	private void SetTeamPlayer(int teamId, Player player)
+	{
+		if (player != null)
+		{
+			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(player.ActorNumber);
+			if (gamePlayer != null)
+			{
+				gamePlayer.teamId = teamId;
+			}
+			RefreshTeamPlayers(playSounds: true);
+		}
+	}
+
+	private void RefreshTeamPlayers(bool playSounds)
+	{
+		int[] array = new int[team.Count];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = 0;
+		}
+		int num = 0;
+		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
+		for (int j = 0; j < allNetPlayers.Length; j++)
+		{
+			GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(allNetPlayers[j].ActorNumber);
+			if (!(gamePlayer == null))
+			{
+				int teamId = gamePlayer.teamId;
+				if (teamId >= 0)
+				{
+					array[teamId]++;
+					num++;
+				}
+			}
+		}
+		for (int k = 0; k < scoreboards.Count; k++)
+		{
+			for (int l = 0; l < array.Length; l++)
+			{
+				scoreboards[k].RefreshTeamPlayers(l, array[l]);
+			}
+			if (playSounds)
+			{
+				if (_currentPlayerTotal < num)
+				{
+					scoreboards[k].PlayPlayerJoinFx();
+				}
+				else if (_currentPlayerTotal > num)
+				{
+					scoreboards[k].PlayPlayerLeaveFx();
+				}
+			}
+		}
+		_currentPlayerTotal = num;
+	}
+
+	private void ForceSyncPlayersVisuals()
+	{
+		for (int i = 0; i < NetworkSystem.Instance.AllNetPlayers.Length; i++)
+		{
+			int actorNumber = NetworkSystem.Instance.AllNetPlayers[i].ActorNumber;
+			if (VRRigCache.Instance.localRig.Creator.ActorNumber != actorNumber)
+			{
+				GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(actorNumber);
+				if (!(gamePlayer == null) && gamePlayer.teamId >= 0 && gamePlayer.teamId < team.Count && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(actorNumber), out var playerRig))
+				{
+					Color color = team[gamePlayer.teamId].color;
+					playerRig.Rig.InitializeNoobMaterialLocal(color.r, color.g, color.b);
+					playerRig.Rig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, playfx: false);
+				}
+			}
+		}
+	}
+
+	private void ForceOriginalColorSync()
+	{
+		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(VRRigCache.Instance.localRig.Creator.ActorNumber);
+		if (!(gamePlayer == null) && (gamePlayer.teamId < 0 || gamePlayer.teamId >= team.Count))
+		{
+			Color storedLocalPlayerColor = _storedLocalPlayerColor;
+			if (NetworkSystem.Instance.InRoom)
+			{
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, storedLocalPlayerColor.r, storedLocalPlayerColor.g, storedLocalPlayerColor.b);
+			}
+		}
+	}
+
+	public void RequestRestrictBallToTeam(GameBallId gameBallId, int teamId)
+	{
+		RestrictBallToTeam(gameBallId, teamId, restrictBallDuration);
+	}
+
+	public void RequestRestrictBallToTeamOnScore(GameBallId gameBallId, int teamId)
+	{
+		RestrictBallToTeam(gameBallId, teamId, restrictBallDurationAfterScore);
+	}
+
+	private void RestrictBallToTeam(GameBallId gameBallId, int teamId, float restrictDuration)
+	{
+		if (IsMasterClient())
+		{
+			photonView.RPC("SetRestrictBallToTeam", RpcTarget.All, gameBallId.index, teamId, restrictDuration);
+		}
+	}
+
+	[PunRPC]
+	private void SetRestrictBallToTeam(int gameBallIndex, int teamId, float restrictDuration, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SetRestrictBallToTeam");
+		if (!ValidateCallLimits(RPC.SetRestrictBallToTeam, info))
+		{
+			return;
+		}
+		if (gameBallIndex < 0 || gameBallIndex >= startingBalls.Count)
+		{
+			ReportRPCCall(RPC.SetRestrictBallToTeam, info, "gameBallIndex exceeds possible range.");
+			return;
+		}
+		if (teamId < -1 || teamId >= team.Count)
+		{
+			ReportRPCCall(RPC.SetRestrictBallToTeam, info, "teamID exceeds possible range.");
+			return;
+		}
+		if (float.IsNaN(restrictDuration) || float.IsInfinity(restrictDuration) || restrictDuration < 0f || restrictDuration > restrictBallDurationAfterScore + restrictBallDuration)
+		{
+			ReportRPCCall(RPC.SetRestrictBallToTeam, info, "restrictDuration is not a feasible value.");
+			return;
+		}
+		GameBallId gameBallId = new GameBallId(gameBallIndex);
+		MonkeBall monkeBall = GetMonkeBall(gameBallId);
+		bool flag = false;
+		if (monkeBall != null)
+		{
+			flag = monkeBall.RestrictBallToTeam(teamId, restrictDuration);
+		}
+		if (flag)
+		{
+			for (int i = 0; i < shotclocks.Count; i++)
+			{
+				shotclocks[i].SetTime(teamId, restrictDuration);
+			}
+		}
+	}
+
+	public void LaunchBallNeutral(GameBallId gameBallId)
+	{
+		LaunchBall(gameBallId, _ballLauncher, ballLauncherVelocityRange.x, ballLauncherVelocityRange.y, ballLaunchAngleXRange.x, ballLaunchAngleXRange.y, ballLaunchAngleYRange.x, ballLaunchAngleYRange.y);
+	}
+
+	public void LaunchBallWithTeam(GameBallId gameBallId, int teamId, Transform launcher, Vector2 velocityRange, Vector2 angleXRange, Vector2 angleYRange)
+	{
+		LaunchBall(gameBallId, launcher, velocityRange.x, velocityRange.y, angleXRange.x, angleXRange.y, angleYRange.x, angleYRange.y);
+	}
+
+	private void LaunchBall(GameBallId gameBallId, Transform launcher, float minVelocity, float maxVelocity, float minXAngle, float maxXAngle, float minYAngle, float maxYAngle)
+	{
+		GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
+		if (!(gameBall == null))
+		{
+			gameBall.transform.position = launcher.transform.position;
+			Quaternion rotation = launcher.transform.rotation;
+			launcher.transform.Rotate(Vector3.up, UnityEngine.Random.Range(minXAngle, maxXAngle));
+			launcher.transform.Rotate(Vector3.right, UnityEngine.Random.Range(minYAngle, maxYAngle));
+			gameBall.transform.rotation = launcher.transform.rotation;
+			Vector3 velocity = launcher.transform.forward * UnityEngine.Random.Range(minVelocity, maxVelocity);
+			launcher.transform.rotation = rotation;
+			GameBallManager.Instance.RequestLaunchBall(gameBallId, velocity);
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+	}
+
+	public override void ReadDataFusion()
+	{
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
 	}
 }

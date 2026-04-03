@@ -1,18 +1,10 @@
-﻿using System;
 using System.Runtime.InteropServices;
 
-public struct RPCArgBuffer<T> where T : struct
+public struct RPCArgBuffer<T>(T argStruct) where T : struct
 {
-	public RPCArgBuffer(T argStruct)
-	{
-		this.DataLength = Marshal.SizeOf(typeof(T));
-		this.Data = new byte[this.DataLength];
-		this.Args = argStruct;
-	}
+	public T Args = argStruct;
 
-	public T Args;
+	public byte[] Data = new byte[DataLength];
 
-	public byte[] Data;
-
-	public int DataLength;
+	public int DataLength = Marshal.SizeOf(typeof(T));
 }

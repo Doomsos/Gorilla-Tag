@@ -1,34 +1,16 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class GRDoor
 {
-	public void Setup()
+	public enum DoorState
 	{
-		this.doorState = GRDoor.DoorState.Closed;
+		Closed,
+		Open
 	}
 
-	public void SetDoorState(GRDoor.DoorState newState)
-	{
-		if (newState == this.doorState)
-		{
-			return;
-		}
-		this.doorState = newState;
-		if (this.doorState == GRDoor.DoorState.Closed)
-		{
-			this.animation.clip = this.closeAnim;
-			this.animation.Play();
-			this.closeDoorSound.Play(null);
-			return;
-		}
-		this.animation.clip = this.openAnim;
-		this.animation.Play();
-		this.openDoorSound.Play(null);
-	}
-
-	public GRDoor.DoorState doorState;
+	public DoorState doorState;
 
 	public Animation animation;
 
@@ -40,9 +22,28 @@ public class GRDoor
 
 	public AbilitySound closeDoorSound;
 
-	public enum DoorState
+	public void Setup()
 	{
-		Closed,
-		Open
+		doorState = DoorState.Closed;
+	}
+
+	public void SetDoorState(DoorState newState)
+	{
+		if (newState != doorState)
+		{
+			doorState = newState;
+			if (doorState == DoorState.Closed)
+			{
+				animation.clip = closeAnim;
+				animation.Play();
+				closeDoorSound.Play(null);
+			}
+			else
+			{
+				animation.clip = openAnim;
+				animation.Play();
+				openDoorSound.Play(null);
+			}
+		}
 	}
 }

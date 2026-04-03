@@ -1,86 +1,84 @@
-﻿using System;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class LayerChanger : MonoBehaviour
 {
-	public class LayerChanger : MonoBehaviour
+	public LayerMask restrictedLayers;
+
+	public bool includeChildren = true;
+
+	private Dictionary<Transform, int> originalLayers = new Dictionary<Transform, int>();
+
+	private bool layersStored;
+
+	public void InitializeLayers(Transform parent)
 	{
-		public void InitializeLayers(Transform parent)
+		if (!layersStored)
 		{
-			if (!this.layersStored)
+			StoreOriginalLayers(parent);
+			layersStored = true;
+		}
+	}
+
+	private void StoreOriginalLayers(Transform parent)
+	{
+		if (!includeChildren)
+		{
+			StoreOriginalLayers(parent);
+			return;
+		}
+		foreach (Transform item in parent)
+		{
+			originalLayers[item] = item.gameObject.layer;
+			StoreOriginalLayers(item);
+		}
+	}
+
+	public void ChangeLayer(Transform parent, string newLayer)
+	{
+		if (!layersStored)
+		{
+			Debug.LogWarning("Layers have not been initialized. Call InitializeLayers first.");
+		}
+		else
+		{
+			ChangeLayers(parent, LayerMask.NameToLayer(newLayer));
+		}
+	}
+
+	private void ChangeLayers(Transform parent, int newLayer)
+	{
+		if (!includeChildren)
+		{
+			if (!restrictedLayers.Contains(parent.gameObject.layer))
 			{
-				this.StoreOriginalLayers(parent);
-				this.layersStored = true;
+				parent.gameObject.layer = newLayer;
+			}
+			return;
+		}
+		foreach (Transform item in parent)
+		{
+			if (!restrictedLayers.Contains(item.gameObject.layer))
+			{
+				item.gameObject.layer = newLayer;
+				ChangeLayers(item, newLayer);
 			}
 		}
+	}
 
-		private void StoreOriginalLayers(Transform parent)
+	public void RestoreOriginalLayers()
+	{
+		if (!layersStored)
 		{
-			if (!this.includeChildren)
-			{
-				this.StoreOriginalLayers(parent);
-				return;
-			}
-			foreach (object obj in parent)
-			{
-				Transform transform = (Transform)obj;
-				this.originalLayers[transform] = transform.gameObject.layer;
-				this.StoreOriginalLayers(transform);
-			}
+			Debug.LogWarning("Layers have not been initialized. Call InitializeLayers first.");
+			return;
 		}
-
-		public void ChangeLayer(Transform parent, string newLayer)
+		foreach (KeyValuePair<Transform, int> originalLayer in originalLayers)
 		{
-			if (!this.layersStored)
-			{
-				Debug.LogWarning("Layers have not been initialized. Call InitializeLayers first.");
-				return;
-			}
-			this.ChangeLayers(parent, LayerMask.NameToLayer(newLayer));
+			originalLayer.Key.gameObject.layer = originalLayer.Value;
 		}
-
-		private void ChangeLayers(Transform parent, int newLayer)
-		{
-			if (!this.includeChildren)
-			{
-				if (!this.restrictedLayers.Contains(parent.gameObject.layer))
-				{
-					parent.gameObject.layer = newLayer;
-				}
-				return;
-			}
-			foreach (object obj in parent)
-			{
-				Transform transform = (Transform)obj;
-				if (!this.restrictedLayers.Contains(transform.gameObject.layer))
-				{
-					transform.gameObject.layer = newLayer;
-					this.ChangeLayers(transform, newLayer);
-				}
-			}
-		}
-
-		public void RestoreOriginalLayers()
-		{
-			if (!this.layersStored)
-			{
-				Debug.LogWarning("Layers have not been initialized. Call InitializeLayers first.");
-				return;
-			}
-			foreach (KeyValuePair<Transform, int> keyValuePair in this.originalLayers)
-			{
-				keyValuePair.Key.gameObject.layer = keyValuePair.Value;
-			}
-		}
-
-		public LayerMask restrictedLayers;
-
-		public bool includeChildren = true;
-
-		private Dictionary<Transform, int> originalLayers = new Dictionary<Transform, int>();
-
-		private bool layersStored;
 	}
 }

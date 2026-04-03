@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -8,907 +8,49 @@ using UnityEngine;
 
 public class GRSeedExtractor : MonoBehaviour
 {
-	public bool StationOpen
+	public struct PlayerData
 	{
-		get
-		{
-			return this.stationOpen;
-		}
+		public int actorNumber;
+
+		public int coreCount;
+
+		public float coreProcessingPercentage;
+
+		public float overdriveSupply;
+
+		public int coresProcessedByOverdrive;
+
+		public int coresPendingOverdriveProcessing;
+
+		public int researchPoints;
+
+		public float latestRefreshTime;
 	}
 
-	public bool StationOpenForLocalPlayer
+	private struct ScreenDisplayData
 	{
-		get
-		{
-			return this.stationOpen && this.currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber;
-		}
+		public int playerActorNumber;
+
+		public int coreCount;
+
+		public float overdriveSupply;
+
+		public int researchPoints;
+
+		public int juiceSecondsLeft;
 	}
 
-	public int CurrentPlayerActorNumber
+	private struct SeedProcessingVisualState
 	{
-		get
-		{
-			return this.currentPlayerActorNumber;
-		}
-	}
+		public int poolIndex;
 
-	private void Awake()
-	{
-		this.triggerNotifier.TriggerEnterEvent += this.TriggerEntered;
-		this.triggerNotifier.TriggerExitEvent += this.TriggerExited;
-		this.coreDepositTriggerNotifier.TriggerEnterEvent += this.DepositorTriggerEntered;
-		this.idCardScanner.OnPlayerCardSwipe += this.OnPlayerCardSwipe;
-		for (int i = 0; i < this.maxVisualChaosSeedCount; i++)
-		{
-			GameObject gameObject = Object.Instantiate<GameObject>(this.chaosSeedVisualPrefab, base.transform);
-			gameObject.SetActive(false);
-			this.chaosSeedVisuals.Add(gameObject);
-		}
-		this.UpdateOverdrivePurchaseButtons();
-		base.enabled = false;
-	}
+		public float speed;
 
-	public void Init(GRToolProgressionManager progression, GhostReactor gr)
-	{
-		this.ghostReactor = gr;
-		this.toolProgressionManager = progression;
-		this.toolProgressionManager.OnProgressionUpdated += this.OnResearchPointsUpdated;
-		ProgressionManager.Instance.OnJucierStatusUpdated += this.OnPlayerStatusReceived;
-		ProgressionManager.Instance.OnPurchaseOverdrive += this.OnPurchaseOverdrive;
-		ProgressionManager.Instance.OnChaosDepositSuccess += this.TryDepositSeedServerResponse;
-	}
+		public float rollAngle;
 
-	private void OnEnable()
-	{
-	}
+		public float rampProgress;
 
-	private void OnDisable()
-	{
-		this.ClearSeedVisuals();
-		this.machineHumAudioSource.gameObject.SetActive(false);
-		this.juicerSlowParticles.gameObject.SetActive(false);
-		base.StopAllCoroutines();
-		for (int i = 0; i < this.disableDuringOverdrive.Count; i++)
-		{
-			this.disableDuringOverdrive[i].gameObject.SetActive(true);
-		}
-		for (int j = 0; j < this.enableDuringOverdrive.Count; j++)
-		{
-			this.enableDuringOverdrive[j].gameObject.SetActive(false);
-		}
-		this.overdriveLightSpinnerOff.localRotation = this.overdriveLightSpinnerOn.localRotation;
-		this.overdriveBeepAudioSource.Stop();
-		this.overdriveActive = false;
-		this.processingAmount = 0f;
-		this.processingAmountVisual = 0f;
-		this.overdriveAmount = 0f;
-		this.overdriveAmountVisual = 0f;
-		this.currentPlayerData = default(GRSeedExtractor.PlayerData);
-		this.overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.overdriveAmountVisual), 1f);
-		this.processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.processingAmountVisual), 1f);
-	}
-
-	private void Update()
-	{
-		this.ValidateCurrentPlayer();
-		if (this.stationOpen && this.shutterDoorOpenAmount < 1f)
-		{
-			float num = Time.time - this.currentPlayerData.latestRefreshTime;
-			if (Time.time - this.stationOpenRequestTime >= 1f || num <= 5f)
-			{
-				float num2 = 1f / this.shutterDoorAnimTime;
-				this.shutterDoorOpenAmount = Mathf.MoveTowards(this.shutterDoorOpenAmount, 1f, num2 * Time.deltaTime);
-				Vector3 localPosition = this.shutterDoorParent.transform.localPosition;
-				localPosition.y = Mathf.Lerp(this.shutterDoorLiftRange.x, this.shutterDoorLiftRange.y, this.shutterDoorOpenAmount);
-				this.shutterDoorParent.transform.localPosition = localPosition;
-			}
-		}
-		else if (!this.stationOpen && this.shutterDoorOpenAmount > 0f)
-		{
-			float num3 = 1f / this.shutterDoorAnimTime;
-			this.shutterDoorOpenAmount = Mathf.MoveTowards(this.shutterDoorOpenAmount, 0f, num3 * Time.deltaTime);
-			Vector3 localPosition2 = this.shutterDoorParent.transform.localPosition;
-			localPosition2.y = Mathf.Lerp(this.shutterDoorLiftRange.x, this.shutterDoorLiftRange.y, this.shutterDoorOpenAmount);
-			this.shutterDoorParent.transform.localPosition = localPosition2;
-			if (this.shutterDoorOpenAmount <= 0f)
-			{
-				this.processingAmount = 0f;
-				this.overdriveAmount = 0f;
-			}
-		}
-		bool flag = this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f;
-		if (this.overdriveActive)
-		{
-			this.overdriveLightSpinnerOn.Rotate(Vector3.forward, 360f * this.overdriveLightSpinRate * Time.deltaTime, Space.Self);
-			this.overdriveAmountVisual = this.overdriveAmount;
-			this.overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.overdriveAmountVisual), 1f);
-			this.processingAmountVisual = this.processingAmount;
-			this.processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.processingAmountVisual), 1f);
-		}
-		else
-		{
-			float num4 = 1f / this.overdriveFillTime;
-			if (flag || this.overdriveAmount > this.overdriveAmountVisual || !this.stationOpen)
-			{
-				this.overdriveAmountVisual = Mathf.MoveTowards(this.overdriveAmountVisual, this.overdriveAmount, num4 * Time.deltaTime);
-			}
-			this.overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.overdriveAmountVisual), 1f);
-			if (this.stationOpen)
-			{
-				float num5 = Mathf.Max(Time.time - this.currentPlayerData.latestRefreshTime, 0f);
-				float num6 = this.currentPlayerData.coreProcessingPercentage + num5 / this.PROCESSING_TIME_SECONDS;
-				this.processingAmount = Mathf.Clamp01(num6);
-				this.estimatedJuiceTimeRemaining = (1f - this.processingAmount) * this.PROCESSING_TIME_SECONDS;
-				if (this.StationOpenForLocalPlayer && num6 >= 1f && Time.time - this.lastServerRequestTime > this.timeBetweenServerRequests)
-				{
-					this.lastServerRequestTime = Time.time;
-					ProgressionManager.Instance.GetJuicerStatus();
-				}
-			}
-			if (flag)
-			{
-				this.machineHumAudioSource.gameObject.SetActive(true);
-				this.juicerSlowParticles.gameObject.SetActive(true);
-				this.processingAmountVisual = Mathf.MoveTowards(this.processingAmountVisual, this.processingAmount, num4 * Time.deltaTime);
-			}
-			else
-			{
-				this.processingAmountVisual = Mathf.MoveTowards(this.processingAmountVisual, 0f, num4 * Time.deltaTime);
-				this.machineHumAudioSource.gameObject.SetActive(false);
-				this.juicerSlowParticles.gameObject.SetActive(false);
-			}
-			this.processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.processingAmountVisual), 1f);
-		}
-		this.StepSeedVisualAnimation(Time.deltaTime);
-		this.UpdateScreenDisplay();
-		if (!this.stationOpen && this.shutterDoorOpenAmount <= 0f && this.overdriveAmountVisual <= 0f)
-		{
-			base.enabled = false;
-		}
-	}
-
-	private void ValidateCurrentPlayer()
-	{
-		if (!NetworkSystem.Instance.InRoom)
-		{
-			this.CloseStation();
-			return;
-		}
-		if (this.ghostReactor.grManager.IsAuthority() && this.stationOpen)
-		{
-			bool flag = false;
-			NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentPlayerActorNumber);
-			RigContainer rigContainer;
-			if (player != null && VRRigCache.Instance.TryGetVrrig(player, out rigContainer))
-			{
-				float num = 5f;
-				if (rigContainer.Rig != null && rigContainer.Rig.OwningNetPlayer == player && (rigContainer.Rig.GetMouthPosition() - base.transform.position).sqrMagnitude < num * num)
-				{
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-				this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorCloseStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
-			}
-		}
-	}
-
-	public void TriggerEntered(TriggerEventNotifier notifier, Collider other)
-	{
-		VRRig component = other.GetComponent<VRRig>();
-		if (component != null && component.OwningNetPlayer != null && component.OwningNetPlayer.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
-		{
-			ProgressionManager.Instance.GetJuicerStatus();
-		}
-	}
-
-	public void TriggerExited(TriggerEventNotifier notifier, Collider other)
-	{
-		VRRig component = other.GetComponent<VRRig>();
-		if (component != null && component.OwningNetPlayer != null)
-		{
-			if (component.OwningNetPlayer.ActorNumber == this.currentPlayerActorNumber && this.stationOpen && this.ghostReactor.grManager.IsAuthority() && NetworkSystem.Instance.InRoom)
-			{
-				this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorCloseStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
-			}
-			if (component.OwningNetPlayer.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				this.localPlayerData = default(GRSeedExtractor.PlayerData);
-			}
-		}
-	}
-
-	public void OnPlayerCardSwipe(int playerActorNumber)
-	{
-		if (playerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
-		{
-			this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorOpenStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
-			ProgressionManager.Instance.GetJuicerStatus();
-		}
-	}
-
-	public void DepositorTriggerEntered(TriggerEventNotifier notifier, Collider other)
-	{
-		if (this.ghostReactor == null || this.ghostReactor.grManager == null || other == null || !NetworkSystem.Instance.InRoom)
-		{
-			return;
-		}
-		if (this.ghostReactor.grManager.IsAuthority() && other.attachedRigidbody != null)
-		{
-			GRCollectible component = other.attachedRigidbody.GetComponent<GRCollectible>();
-			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
-			if (managerForZone != null && component != null && component.type == ProgressionManager.CoreType.ChaosSeed)
-			{
-				int netIdFromEntityId = managerForZone.GetNetIdFromEntityId(component.entity.id);
-				int lastHeldByActorNumber = component.entity.lastHeldByActorNumber;
-				bool player = NetworkSystem.Instance.GetPlayer(lastHeldByActorNumber) != null;
-				float time = Time.time;
-				if (player)
-				{
-					bool flag = false;
-					for (int i = this.seedDepositsPending.Count - 1; i >= 0; i--)
-					{
-						if (time - this.seedDepositsPending[i].Item3 > 5f || managerForZone.GetGameEntityFromNetId(this.seedDepositsPending[i].Item1) == null || NetworkSystem.Instance.GetPlayer(this.seedDepositsPending[i].Item2) == null)
-						{
-							this.seedDepositsPending.RemoveAt(i);
-						}
-						else if (this.seedDepositsPending[i].Item1 == netIdFromEntityId)
-						{
-							flag = true;
-						}
-					}
-					if (!flag)
-					{
-						this.seedDepositsPending.Add(new ValueTuple<int, int, float, bool>(netIdFromEntityId, lastHeldByActorNumber, Time.time, false));
-						this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorTryDepositSeed, lastHeldByActorNumber, netIdFromEntityId);
-					}
-				}
-			}
-		}
-	}
-
-	public void OverdrivePurchaseButtonPressed()
-	{
-		if (this.overdrivePurchasePending)
-		{
-			this.overdrivePurchasePending = false;
-		}
-		else if (this.LocalPlayerCanPurchaseOverdrive())
-		{
-			this.overdrivePurchasePending = true;
-		}
-		this.UpdateOverdrivePurchaseButtons();
-	}
-
-	private bool LocalPlayerCanPurchaseOverdrive()
-	{
-		if (Time.time - this.overdrivePurchaseTime > 5f)
-		{
-			this.overdriveServerConfirmationPending = false;
-		}
-		return this.StationOpenForLocalPlayer && !this.overdriveServerConfirmationPending && CosmeticsController.instance.CurrencyBalance >= 250 && this.localPlayerData.overdriveSupply <= 0f;
-	}
-
-	public void OverdrivePurchaseConfirmButtonPressed()
-	{
-		if (this.overdrivePurchasePending)
-		{
-			this.overdrivePurchasePending = false;
-			if (this.stationOpen && this.currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				this.overdriveServerConfirmationPending = true;
-				this.overdrivePurchaseTime = Time.time;
-				ProgressionManager.Instance.PurchaseOverdrive();
-			}
-		}
-		this.UpdateOverdrivePurchaseButtons();
-	}
-
-	public void OnPlayerStatusReceived(ProgressionManager.JuicerStatusResponse statusResponse)
-	{
-		if (statusResponse.MothershipId == GRPlayer.GetLocal().mothershipId && statusResponse.RefreshJuice)
-		{
-			this.toolProgressionManager.UpdateInventory();
-		}
-		this.PROCESSING_TIME_SECONDS = (float)statusResponse.CoreProcessingTimeSec;
-		this.MAX_OVERDRIVE_USES = statusResponse.OverdriveCap / 100;
-		float num = Mathf.Clamp01((float)statusResponse.OverdriveSupply / (float)statusResponse.OverdriveCap);
-		int num2 = 0;
-		bool flag = num < this.localPlayerData.overdriveSupply;
-		bool flag2 = this.localPlayerData.overdriveSupply == 0f && this.localPlayerData.coreCount > statusResponse.CurrentCoreCount;
-		if (statusResponse.CoresProcessedByOverdrive > 0 && (flag || flag2))
-		{
-			num2 = statusResponse.CoresProcessedByOverdrive;
-		}
-		this.localPlayerData.actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
-		this.localPlayerData.coreCount = statusResponse.CurrentCoreCount;
-		this.localPlayerData.coreProcessingPercentage = Mathf.Clamp01(statusResponse.CoreProcessingPercent);
-		this.localPlayerData.overdriveSupply = num;
-		this.localPlayerData.coresProcessedByOverdrive = statusResponse.CoresProcessedByOverdrive;
-		this.localPlayerData.coresPendingOverdriveProcessing = this.localPlayerData.coresPendingOverdriveProcessing + num2;
-		this.localPlayerData.latestRefreshTime = Time.time;
-		this.localPlayerData.researchPoints = this.toolProgressionManager.GetNumberOfResearchPoints();
-		if (this.overdriveServerConfirmationPending && (this.localPlayerData.overdriveSupply > 0f || this.localPlayerData.coresProcessedByOverdrive > 0))
-		{
-			this.overdriveServerConfirmationPending = false;
-		}
-		if (this.stationOpen && this.currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
-		{
-			this.currentPlayerData = this.localPlayerData;
-			this.ghostReactor.grManager.RequestApplySeedExtractorState(this.localPlayerData.coreCount, this.localPlayerData.coresProcessedByOverdrive, this.localPlayerData.researchPoints, this.localPlayerData.coreProcessingPercentage, this.localPlayerData.overdriveSupply);
-			this.OnStateUpdated();
-		}
-	}
-
-	private void TryDepositSeedServerResponse(bool succeeded)
-	{
-		if (!NetworkSystem.Instance.InRoom)
-		{
-			return;
-		}
-		int num = -1;
-		int actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
-		for (int i = 0; i < this.seedDepositsPending.Count; i++)
-		{
-			if (this.seedDepositsPending[i].Item2 == actorNumber)
-			{
-				num = this.seedDepositsPending[i].Item1;
-			}
-		}
-		if (num == -1)
-		{
-			return;
-		}
-		if (succeeded)
-		{
-			this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorDepositSeedSucceeded, actorNumber, num);
-			this.RemovePendingSeedDeposit(num);
-			GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-			grplayer.SendSeedDepositedTelemetry(this.PROCESSING_TIME_SECONDS.ToString(), this.currentPlayerData.coreCount);
-			grplayer.IncrementChaosSeedsCollected(1);
-			return;
-		}
-		this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorDepositSeedFailed, actorNumber, num);
-	}
-
-	public void CardSwipeSuccess()
-	{
-		this.idCardScanner.onSucceeded.Invoke();
-	}
-
-	public void CardSwipeFail()
-	{
-		this.idCardScanner.onFailed.Invoke();
-	}
-
-	public void TryDepositSeed(int playerActorNumber, int seedNetId)
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(playerActorNumber);
-		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
-		if (player == null || managerForZone == null)
-		{
-			return;
-		}
-		this.depositorAudioSource.PlayOneShot(this.seedDepositAttemptAudio, this.seedDepositAttemptVolume);
-		if (player.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			bool flag = false;
-			float time = Time.time;
-			for (int i = this.seedDepositsPending.Count - 1; i >= 0; i--)
-			{
-				if (time - this.seedDepositsPending[i].Item3 > 5f || managerForZone.GetGameEntityFromNetId(this.seedDepositsPending[i].Item1) == null || NetworkSystem.Instance.GetPlayer(this.seedDepositsPending[i].Item2) == null)
-				{
-					this.seedDepositsPending.RemoveAt(i);
-				}
-				else if (this.seedDepositsPending[i].Item1 == seedNetId)
-				{
-					flag = true;
-					if (this.seedDepositsPending[i].Item2 == NetworkSystem.Instance.LocalPlayer.ActorNumber && !this.seedDepositsPending[i].Item4)
-					{
-						ValueTuple<int, int, float, bool> value = this.seedDepositsPending[i];
-						value.Item4 = true;
-						this.seedDepositsPending[i] = value;
-						ProgressionManager.Instance.DepositCore(ProgressionManager.CoreType.ChaosSeed);
-					}
-				}
-			}
-			if (!flag)
-			{
-				this.seedDepositsPending.Add(new ValueTuple<int, int, float, bool>(seedNetId, playerActorNumber, Time.time, true));
-				ProgressionManager.Instance.DepositCore(ProgressionManager.CoreType.ChaosSeed);
-			}
-		}
-	}
-
-	public bool ValidateSeedDepositSucceeded(int playerActorNumber, int entityNetId)
-	{
-		if (this.ghostReactor.grManager.IsAuthority())
-		{
-			bool result = false;
-			for (int i = 0; i < this.seedDepositsPending.Count; i++)
-			{
-				if (this.seedDepositsPending[i].Item1 == entityNetId && this.seedDepositsPending[i].Item2 == playerActorNumber)
-				{
-					result = true;
-				}
-			}
-			return result;
-		}
-		return false;
-	}
-
-	public void SeedDepositSucceeded(int playerActorNumber, int entityNetId)
-	{
-		if (!NetworkSystem.Instance.InRoom)
-		{
-			return;
-		}
-		this.depositorParticles.Play();
-		this.depositorAudioSource.PlayOneShot(this.seedDepositAudio, this.seedDepositVolume);
-		this.RemovePendingSeedDeposit(entityNetId);
-		if (playerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-		{
-			ProgressionManager.Instance.GetJuicerStatus();
-		}
-		if (!this.stationOpen && this.ghostReactor.grManager.IsAuthority())
-		{
-			this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorOpenStation, playerActorNumber, 0);
-		}
-	}
-
-	public void SeedDepositFailed(int playerActorNumber, int entityNetId)
-	{
-		this.depositorAudioSource.PlayOneShot(this.seedDepositFailedAudio, this.seedDepositFailedVolume);
-		this.RemovePendingSeedDeposit(entityNetId);
-	}
-
-	private void RemovePendingSeedDeposit(int entityId)
-	{
-		for (int i = this.seedDepositsPending.Count - 1; i >= 0; i--)
-		{
-			if (this.seedDepositsPending[i].Item1 == entityId)
-			{
-				this.seedDepositsPending.RemoveAt(i);
-			}
-		}
-	}
-
-	public void ApplyState(int playerActorNumber, int coreCount, int coresProcessedByOverdrive, int researchPoints, float coreProcessingPercentage, float overdriveSupply)
-	{
-		if (playerActorNumber == this.currentPlayerActorNumber)
-		{
-			if (this.currentPlayerData.actorNumber != playerActorNumber)
-			{
-				this.currentPlayerData = default(GRSeedExtractor.PlayerData);
-			}
-			coreCount = Mathf.Clamp(coreCount, 0, this.maxVisualChaosSeedCount);
-			coresProcessedByOverdrive = Mathf.Clamp(coresProcessedByOverdrive, 0, this.MAX_OVERDRIVE_USES);
-			coreProcessingPercentage = Mathf.Clamp(coreProcessingPercentage, 0f, 1f);
-			overdriveSupply = Mathf.Clamp(overdriveSupply, 0f, 1f);
-			bool flag = overdriveSupply < this.currentPlayerData.overdriveSupply;
-			bool flag2 = this.currentPlayerData.overdriveSupply == 0f && this.currentPlayerData.coreCount > coreCount;
-			if (playerActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber && coresProcessedByOverdrive > 0 && (flag || flag2))
-			{
-				this.currentPlayerData.coresPendingOverdriveProcessing = this.currentPlayerData.coresPendingOverdriveProcessing + coresProcessedByOverdrive;
-			}
-			this.currentPlayerData.actorNumber = playerActorNumber;
-			this.currentPlayerData.coreCount = coreCount;
-			this.currentPlayerData.coresProcessedByOverdrive = coresProcessedByOverdrive;
-			this.currentPlayerData.coreProcessingPercentage = coreProcessingPercentage;
-			this.currentPlayerData.overdriveSupply = overdriveSupply;
-			this.currentPlayerData.latestRefreshTime = Time.time;
-			this.currentPlayerData.researchPoints = researchPoints;
-			this.OnStateUpdated();
-		}
-	}
-
-	public void OpenStation(int playerActorNumber)
-	{
-		if (NetworkSystem.Instance.GetPlayer(playerActorNumber) == null)
-		{
-			return;
-		}
-		if (!this.stationOpen)
-		{
-			this.doorAudioSource.PlayOneShot(this.doorOpenAudio, this.doorOpenVolume);
-		}
-		base.enabled = true;
-		this.currentPlayerActorNumber = playerActorNumber;
-		this.stationOpen = true;
-		this.stationOpenRequestTime = Time.time;
-		this.UpdateOverdrivePurchaseButtons();
-	}
-
-	public void CloseStation()
-	{
-		if (this.stationOpen)
-		{
-			this.doorAudioSource.PlayOneShot(this.doorCloseAudio, this.doorCloseVolume);
-		}
-		this.currentPlayerActorNumber = -1;
-		this.stationOpen = false;
-		this.UpdateOverdrivePurchaseButtons();
-	}
-
-	private void UpdateOverdrivePurchaseButtons()
-	{
-		if (!this.LocalPlayerCanPurchaseOverdrive())
-		{
-			this.overdrivePurchaseButton.myTmpText.text = "";
-			this.overdrivePurchaseButton.buttonRenderer.material = this.defaultButtonMaterial;
-			this.overdriveConfirmButton.myTmpText.text = "";
-			this.overdriveConfirmButton.buttonRenderer.material = this.defaultButtonMaterial;
-			return;
-		}
-		if (this.overdrivePurchasePending)
-		{
-			this.overdrivePurchaseButton.myTmpText.text = "CANCEL";
-			this.overdrivePurchaseButton.buttonRenderer.material = this.redButtonMaterial;
-			this.overdriveConfirmButton.myTmpText.text = "CONFIRM";
-			this.overdriveConfirmButton.buttonRenderer.material = this.greenButtonMaterial;
-			return;
-		}
-		this.overdrivePurchaseButton.myTmpText.text = "BUY";
-		this.overdrivePurchaseButton.buttonRenderer.material = this.defaultButtonMaterial;
-		this.overdriveConfirmButton.myTmpText.text = "";
-		this.overdriveConfirmButton.buttonRenderer.material = this.defaultButtonMaterial;
-	}
-
-	public void OnStateUpdated()
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentPlayerActorNumber);
-		if (player == null)
-		{
-			this.CloseStation();
-		}
-		this.UpdateOverdrivePurchaseButtons();
-		if (this.stationOpen && player != null)
-		{
-			if (this.overdriveActive)
-			{
-				return;
-			}
-			if (this.currentPlayerData.coresPendingOverdriveProcessing > 0)
-			{
-				int coresPendingOverdriveProcessing = this.currentPlayerData.coresPendingOverdriveProcessing;
-				this.currentPlayerData.coresPendingOverdriveProcessing = 0;
-				if (this.StationOpenForLocalPlayer)
-				{
-					this.localPlayerData.coresPendingOverdriveProcessing = 0;
-				}
-				this.overdrivePurchaseAnimationRoutine = base.StartCoroutine(this.OverdrivePurchaseAnimationVisual(coresPendingOverdriveProcessing));
-				return;
-			}
-			this.processingAmount = this.currentPlayerData.coreProcessingPercentage;
-			this.overdriveAmount = this.currentPlayerData.overdriveSupply;
-			int num = Mathf.Clamp(this.currentPlayerData.coreCount, 0, this.maxVisualChaosSeedCount) - this.seedProcessingStates.Count;
-			if (num > 0)
-			{
-				for (int i = 0; i < num; i++)
-				{
-					this.DepositSeedVisual();
-				}
-				return;
-			}
-			if (num < 0)
-			{
-				for (int j = 0; j > num; j--)
-				{
-					this.CompleteSeedVisual();
-				}
-				return;
-			}
-		}
-		else
-		{
-			this.screenText.text = "Player Data Lookup Failed.";
-			this.overdriveAmount = 0f;
-			this.processingAmount = 0f;
-		}
-	}
-
-	private void DepositSeedVisual()
-	{
-		for (int i = 0; i < this.chaosSeedVisuals.Count; i++)
-		{
-			if (!this.chaosSeedVisuals[i].activeSelf)
-			{
-				GRSeedExtractor.SeedProcessingVisualState item = new GRSeedExtractor.SeedProcessingVisualState
-				{
-					poolIndex = i,
-					rollAngle = 0f,
-					speed = 0f,
-					rampProgress = 0f,
-					dropProgress = 0f
-				};
-				this.seedProcessingStates.Add(item);
-				this.chaosSeedVisuals[i].SetActive(true);
-				this.chaosSeedVisuals[i].transform.localPosition = this.seedTubeStart.localPosition;
-				this.chaosSeedVisuals[i].transform.localRotation = Quaternion.identity;
-				this.chaosSeedVisuals[i].transform.localScale = Vector3.one * this.seedVisualScaleRange.y;
-				this.seedTubeAudioSource.PlayOneShot(this.seedMovementAudio, this.seedMovementVolume);
-				return;
-			}
-		}
-	}
-
-	private void CompleteSeedVisual()
-	{
-		if (this.seedProcessingStates.Count > 0)
-		{
-			GRSeedExtractor.SeedProcessingVisualState seedProcessingVisualState = this.seedProcessingStates[0];
-			this.chaosSeedVisuals[seedProcessingVisualState.poolIndex].SetActive(false);
-			this.seedProcessingStates.RemoveAt(0);
-		}
-	}
-
-	private void ClearSeedVisuals()
-	{
-		int count = this.seedProcessingStates.Count;
-		for (int i = 0; i < count; i++)
-		{
-			this.CompleteSeedVisual();
-		}
-	}
-
-	private void UpdateScreenDisplay()
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentPlayerActorNumber);
-		if (player == null || !this.stationOpen)
-		{
-			return;
-		}
-		int num = (int)this.estimatedJuiceTimeRemaining;
-		if (this.currentPlayerActorNumber != this.currentDisplayData.playerActorNumber || this.currentPlayerData.coreCount != this.currentDisplayData.coreCount || this.currentPlayerData.overdriveSupply != this.currentDisplayData.overdriveSupply || this.currentPlayerData.researchPoints != this.currentDisplayData.researchPoints || num != this.currentDisplayData.juiceSecondsLeft)
-		{
-			this.currentDisplayData.playerActorNumber = this.currentPlayerActorNumber;
-			this.currentDisplayData.coreCount = this.currentPlayerData.coreCount;
-			this.currentDisplayData.overdriveSupply = this.currentPlayerData.overdriveSupply;
-			this.currentDisplayData.researchPoints = this.currentPlayerData.researchPoints;
-			this.currentDisplayData.juiceSecondsLeft = num;
-			this.UpdateScreenSB.Clear();
-			this.UpdateScreenSB.Append(player.SanitizedNickName + "\n");
-			this.UpdateScreenSB.Append(string.Format("JUICE: <color=purple>⑮ {0}</color>\n\n", this.currentDisplayData.researchPoints));
-			if (this.currentDisplayData.coreCount > 0)
-			{
-				this.UpdateScreenSB.Append(string.Format("Processing {0} Seeds", this.currentDisplayData.coreCount));
-				int num2 = this.currentDisplayData.juiceSecondsLeft % 3;
-				if (num2 == 2)
-				{
-					this.UpdateScreenSB.Append(".");
-				}
-				else if (num2 == 1)
-				{
-					this.UpdateScreenSB.Append("..");
-				}
-				else
-				{
-					this.UpdateScreenSB.Append("...");
-				}
-				int num3 = num / 3600;
-				int num4 = num / 60 % 60;
-				int num5 = num % 60;
-				if (num3 > 0)
-				{
-					this.UpdateScreenSB.Append(string.Format("\nNext <color=purple>⑮</color> in {0}:{1:00}:{2:00}\n", num3, num4, num5));
-				}
-				else
-				{
-					this.UpdateScreenSB.Append(string.Format("\nNext <color=purple>⑮</color> in {0}:{1:00}\n", num4, num5));
-				}
-			}
-			else
-			{
-				this.UpdateScreenSB.Append("Deposit Chaos Seed\nFor Juice Processing\n");
-			}
-			this.screenText.text = this.UpdateScreenSB.ToString();
-		}
-	}
-
-	private void StepSeedVisualAnimation(float dt)
-	{
-		float magnitude = (this.seedTubeStart.position - this.seedTubeEnd.position).magnitude;
-		float num = magnitude / this.seedVisualRollTime;
-		for (int i = 0; i < this.seedProcessingStates.Count; i++)
-		{
-			GRSeedExtractor.SeedProcessingVisualState seedProcessingVisualState = this.seedProcessingStates[i];
-			float num2 = 2f;
-			if (i > 0)
-			{
-				num2 = this.seedProcessingStates[i - 1].rampProgress - 2f * this.visualChaosSeedRadius / magnitude;
-			}
-			if (seedProcessingVisualState.rampProgress < 1f)
-			{
-				GameObject gameObject = this.chaosSeedVisuals[seedProcessingVisualState.poolIndex];
-				seedProcessingVisualState.speed = Mathf.MoveTowards(seedProcessingVisualState.speed, num, num * dt);
-				float num3 = seedProcessingVisualState.speed * dt;
-				float num4 = num3 / magnitude;
-				seedProcessingVisualState.rampProgress = Mathf.Clamp01(seedProcessingVisualState.rampProgress + num4);
-				if (seedProcessingVisualState.rampProgress >= num2)
-				{
-					seedProcessingVisualState.rampProgress = num2;
-					seedProcessingVisualState.speed = 0f;
-					num3 = 0f;
-				}
-				gameObject.transform.localPosition = Vector3.Lerp(this.seedTubeStart.localPosition, this.seedTubeEnd.localPosition, seedProcessingVisualState.rampProgress);
-				seedProcessingVisualState.rollAngle += num3 / this.visualChaosSeedRadius;
-				gameObject.transform.localRotation = Quaternion.AngleAxis(seedProcessingVisualState.rollAngle * 57.29578f, Vector3.forward);
-			}
-			if (i == 0 && seedProcessingVisualState.rampProgress >= 1f)
-			{
-				GameObject gameObject2 = this.chaosSeedVisuals[seedProcessingVisualState.poolIndex];
-				if (seedProcessingVisualState.dropProgress < 1f)
-				{
-					seedProcessingVisualState.dropProgress += 1f / this.seedVisualDropTime * dt;
-					seedProcessingVisualState.rampProgress = 1f + seedProcessingVisualState.dropProgress;
-					float t = this.tubeEndToProcessingPathY.Evaluate(seedProcessingVisualState.dropProgress);
-					float t2 = this.tubeEndToProcessingPathX.Evaluate(seedProcessingVisualState.dropProgress);
-					Vector3 localPosition = gameObject2.transform.localPosition;
-					localPosition.y = Mathf.Lerp(this.seedTubeEnd.localPosition.y, this.seedProcessingPosition.localPosition.y, t);
-					localPosition.x = Mathf.Lerp(this.seedTubeEnd.localPosition.x, this.seedProcessingPosition.localPosition.x, t2);
-					gameObject2.transform.localPosition = localPosition;
-					float num5 = seedProcessingVisualState.speed * dt;
-					seedProcessingVisualState.rollAngle += num5 / this.visualChaosSeedRadius;
-					gameObject2.transform.localRotation = Quaternion.AngleAxis(seedProcessingVisualState.rollAngle * 57.29578f, Vector3.forward);
-					if (seedProcessingVisualState.dropProgress >= 1f)
-					{
-						this.juicerAudioSource.PlayOneShot(this.seedDropAudio, this.seedDropVolume);
-					}
-				}
-				if (seedProcessingVisualState.dropProgress >= 1f && !this.drainingProcessingBeaker)
-				{
-					gameObject2.transform.localScale = Vector3.one * Mathf.Lerp(this.seedVisualScaleRange.y, this.seedVisualScaleRange.x, this.processingAmountVisual);
-				}
-			}
-			this.seedProcessingStates[i] = seedProcessingVisualState;
-		}
-	}
-
-	private IEnumerator OverdrivePurchaseAnimationVisual(int coresToProcess)
-	{
-		this.overdriveActive = true;
-		this.overdriveBeepAudioSource.loop = true;
-		this.overdriveBeepAudioSource.volume = this.overdriveBeepingVolume;
-		this.overdriveBeepAudioSource.clip = this.overdriveBeepingAudio;
-		this.overdriveBeepAudioSource.Play();
-		int num = Math.Min(coresToProcess + this.currentPlayerData.coreCount, this.maxVisualChaosSeedCount);
-		while (this.seedProcessingStates.Count < num)
-		{
-			this.DepositSeedVisual();
-		}
-		for (int j = 0; j < this.disableDuringOverdrive.Count; j++)
-		{
-			this.disableDuringOverdrive[j].gameObject.SetActive(false);
-		}
-		for (int k = 0; k < this.enableDuringOverdrive.Count; k++)
-		{
-			this.enableDuringOverdrive[k].gameObject.SetActive(true);
-		}
-		this.overdriveMeterAudioSource.PlayOneShot(this.overdriveFillAudio, this.overdriveFillVolume);
-		float overdriveFillRate = 1f / this.overdriveFillTime;
-		float maxOverdriveFill = Mathf.Clamp01(this.currentPlayerData.overdriveSupply + (float)coresToProcess / (float)this.MAX_OVERDRIVE_USES);
-		while (this.overdriveAmount < maxOverdriveFill)
-		{
-			this.overdriveAmount = Mathf.MoveTowards(this.overdriveAmount, maxOverdriveFill, overdriveFillRate * Time.deltaTime);
-			yield return null;
-		}
-		this.overdriveMeterAudioSource.Stop();
-		int num4;
-		for (int i = 0; i < coresToProcess; i = num4)
-		{
-			float waitForSeedDepositStartTime = Time.time;
-			bool flag = this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f;
-			while (!flag && Time.time - waitForSeedDepositStartTime < 3f)
-			{
-				yield return null;
-				flag = (this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f);
-			}
-			this.juicerAudioSource.PlayOneShot(this.seedJuicingAudio, this.seedJuicingVolume);
-			this.juicerOverdriveParticles.gameObject.SetActive(true);
-			float num2 = Mathf.Clamp01(1f - this.processingAmount);
-			float timeToProcess = num2 * this.overdriveProcessTime;
-			float startingProcessingAmount = this.processingAmount;
-			float num3 = num2 / (float)this.MAX_OVERDRIVE_USES;
-			float startingOverdrive = this.overdriveAmount;
-			float resultingOverdrive = Mathf.Clamp01(this.overdriveAmount - num3);
-			float timeProcessing = 0f;
-			while (timeProcessing < timeToProcess)
-			{
-				timeProcessing += Time.deltaTime;
-				float t = timeProcessing / timeToProcess;
-				this.overdriveAmount = Mathf.Lerp(startingOverdrive, resultingOverdrive, t);
-				this.processingAmount = Mathf.Lerp(startingProcessingAmount, 1f, t);
-				this.estimatedJuiceTimeRemaining = timeToProcess - timeProcessing;
-				yield return null;
-			}
-			this.CompleteSeedVisual();
-			this.juicerOverdriveParticles.gameObject.SetActive(false);
-			this.drainingProcessingBeaker = true;
-			float timeDepositing = 0f;
-			while (timeDepositing < this.juiceDepositTime)
-			{
-				timeDepositing += Time.deltaTime;
-				float t2 = timeDepositing / this.juiceDepositTime;
-				this.processingAmount = Mathf.Lerp(1f, 0f, t2);
-				yield return null;
-			}
-			this.drainingProcessingBeaker = false;
-			num4 = i + 1;
-		}
-		if (this.currentPlayerData.coresPendingOverdriveProcessing == 0 && this.currentPlayerData.coreCount == 1)
-		{
-			if (this.seedProcessingStates.Count == 0)
-			{
-				this.DepositSeedVisual();
-			}
-			float timeDepositing = Time.time;
-			bool flag2 = this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f;
-			while (!flag2 && Time.time - timeDepositing < 3f)
-			{
-				yield return null;
-				flag2 = (this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f);
-			}
-			float timeProcessing = 0f;
-			float resultingOverdrive = this.processingAmount;
-			float startingOverdrive = this.overdriveAmount;
-			float startingProcessingAmount = Mathf.Clamp01(this.currentPlayerData.coreProcessingPercentage - resultingOverdrive) * this.overdriveProcessTime;
-			while (timeProcessing < startingProcessingAmount)
-			{
-				timeProcessing += Time.deltaTime;
-				float t3 = timeProcessing / startingProcessingAmount;
-				this.processingAmount = Mathf.Clamp01(Mathf.Lerp(resultingOverdrive, this.currentPlayerData.coreProcessingPercentage, t3));
-				this.overdriveAmount = Mathf.Clamp01(Mathf.Lerp(startingOverdrive, this.currentPlayerData.overdriveSupply, t3));
-				yield return null;
-			}
-		}
-		for (int l = 0; l < this.disableDuringOverdrive.Count; l++)
-		{
-			this.disableDuringOverdrive[l].gameObject.SetActive(true);
-		}
-		for (int m = 0; m < this.enableDuringOverdrive.Count; m++)
-		{
-			this.enableDuringOverdrive[m].gameObject.SetActive(false);
-		}
-		this.overdriveLightSpinnerOff.localRotation = this.overdriveLightSpinnerOn.localRotation;
-		this.overdriveBeepAudioSource.Stop();
-		this.overdriveActive = false;
-		if (this.StationOpenForLocalPlayer)
-		{
-			ProgressionManager.Instance.GetJuicerStatus();
-		}
-		this.OnStateUpdated();
-		yield break;
-	}
-
-	public void OnResearchPointsUpdated()
-	{
-		int numberOfResearchPoints = this.toolProgressionManager.GetNumberOfResearchPoints();
-		if (numberOfResearchPoints > this.localPlayerData.researchPoints)
-		{
-			GRPlayer.GetLocal().SendJuiceCollectedTelemetry(numberOfResearchPoints - this.localPlayerData.researchPoints, this.localPlayerData.coresProcessedByOverdrive);
-		}
-		this.localPlayerData.researchPoints = numberOfResearchPoints;
-		if (this.StationOpenForLocalPlayer)
-		{
-			bool flag = this.currentPlayerData.researchPoints != this.localPlayerData.researchPoints;
-			this.currentPlayerData.researchPoints = this.localPlayerData.researchPoints;
-			if (flag)
-			{
-				this.ghostReactor.grManager.RequestApplySeedExtractorState(this.localPlayerData.coreCount, this.localPlayerData.coresProcessedByOverdrive, this.localPlayerData.researchPoints, this.localPlayerData.coreProcessingPercentage, this.localPlayerData.overdriveSupply);
-				this.OnStateUpdated();
-			}
-		}
-	}
-
-	public void OnPurchaseOverdrive(bool success)
-	{
-		this.overdriveServerConfirmationPending = false;
-		if (!success)
-		{
-			return;
-		}
-		GRPlayer.GetLocal().SendOverdrivePurchasedTelemetry(250, this.localPlayerData.coreCount);
+		public float dropProgress;
 	}
 
 	private float PROCESSING_TIME_SECONDS = 600f;
@@ -1128,11 +270,11 @@ public class GRSeedExtractor : MonoBehaviour
 	[SerializeField]
 	private float overdriveBeepingVolume = 0.5f;
 
-	private GRSeedExtractor.PlayerData localPlayerData;
+	private PlayerData localPlayerData;
 
-	private GRSeedExtractor.PlayerData currentPlayerData;
+	private PlayerData currentPlayerData;
 
-	private GRSeedExtractor.ScreenDisplayData currentDisplayData;
+	private ScreenDisplayData currentDisplayData;
 
 	private bool stationOpen;
 
@@ -1158,11 +300,11 @@ public class GRSeedExtractor : MonoBehaviour
 
 	private float processingLiquidFollowRate = Mathf.Exp(2f);
 
-	private List<ValueTuple<int, int, float, bool>> seedDepositsPending = new List<ValueTuple<int, int, float, bool>>();
+	private List<(int, int, float, bool)> seedDepositsPending = new List<(int, int, float, bool)>();
 
 	private Coroutine overdrivePurchaseAnimationRoutine;
 
-	private List<GRSeedExtractor.SeedProcessingVisualState> seedProcessingStates = new List<GRSeedExtractor.SeedProcessingVisualState>();
+	private List<SeedProcessingVisualState> seedProcessingStates = new List<SeedProcessingVisualState>();
 
 	private float timeBetweenServerRequests = 3f;
 
@@ -1185,48 +327,904 @@ public class GRSeedExtractor : MonoBehaviour
 
 	public float juiceDepositTime = 0.75f;
 
-	public struct PlayerData
+	public bool StationOpen => stationOpen;
+
+	public bool StationOpenForLocalPlayer
 	{
-		public int actorNumber;
-
-		public int coreCount;
-
-		public float coreProcessingPercentage;
-
-		public float overdriveSupply;
-
-		public int coresProcessedByOverdrive;
-
-		public int coresPendingOverdriveProcessing;
-
-		public int researchPoints;
-
-		public float latestRefreshTime;
+		get
+		{
+			if (stationOpen)
+			{
+				return currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber;
+			}
+			return false;
+		}
 	}
 
-	private struct ScreenDisplayData
+	public int CurrentPlayerActorNumber => currentPlayerActorNumber;
+
+	private void Awake()
 	{
-		public int playerActorNumber;
-
-		public int coreCount;
-
-		public float overdriveSupply;
-
-		public int researchPoints;
-
-		public int juiceSecondsLeft;
+		triggerNotifier.TriggerEnterEvent += TriggerEntered;
+		triggerNotifier.TriggerExitEvent += TriggerExited;
+		coreDepositTriggerNotifier.TriggerEnterEvent += DepositorTriggerEntered;
+		idCardScanner.OnPlayerCardSwipe += OnPlayerCardSwipe;
+		for (int i = 0; i < maxVisualChaosSeedCount; i++)
+		{
+			GameObject gameObject = UnityEngine.Object.Instantiate(chaosSeedVisualPrefab, base.transform);
+			gameObject.SetActive(value: false);
+			chaosSeedVisuals.Add(gameObject);
+		}
+		UpdateOverdrivePurchaseButtons();
+		base.enabled = false;
 	}
 
-	private struct SeedProcessingVisualState
+	public void Init(GRToolProgressionManager progression, GhostReactor gr)
 	{
-		public int poolIndex;
+		ghostReactor = gr;
+		toolProgressionManager = progression;
+		toolProgressionManager.OnProgressionUpdated += OnResearchPointsUpdated;
+		ProgressionManager.Instance.OnJucierStatusUpdated += OnPlayerStatusReceived;
+		ProgressionManager.Instance.OnPurchaseOverdrive += OnPurchaseOverdrive;
+		ProgressionManager.Instance.OnChaosDepositSuccess += TryDepositSeedServerResponse;
+	}
 
-		public float speed;
+	private void OnEnable()
+	{
+	}
 
-		public float rollAngle;
+	private void OnDisable()
+	{
+		ClearSeedVisuals();
+		machineHumAudioSource.gameObject.SetActive(value: false);
+		juicerSlowParticles.gameObject.SetActive(value: false);
+		StopAllCoroutines();
+		for (int i = 0; i < disableDuringOverdrive.Count; i++)
+		{
+			disableDuringOverdrive[i].gameObject.SetActive(value: true);
+		}
+		for (int j = 0; j < enableDuringOverdrive.Count; j++)
+		{
+			enableDuringOverdrive[j].gameObject.SetActive(value: false);
+		}
+		overdriveLightSpinnerOff.localRotation = overdriveLightSpinnerOn.localRotation;
+		overdriveBeepAudioSource.Stop();
+		overdriveActive = false;
+		processingAmount = 0f;
+		processingAmountVisual = 0f;
+		overdriveAmount = 0f;
+		overdriveAmountVisual = 0f;
+		currentPlayerData = default(PlayerData);
+		overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(overdriveAmountVisual), 1f);
+		processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(processingAmountVisual), 1f);
+	}
 
-		public float rampProgress;
+	private void Update()
+	{
+		ValidateCurrentPlayer();
+		if (stationOpen && shutterDoorOpenAmount < 1f)
+		{
+			float num = Time.time - currentPlayerData.latestRefreshTime;
+			if (!(Time.time - stationOpenRequestTime < 1f) || !(num > 5f))
+			{
+				float num2 = 1f / shutterDoorAnimTime;
+				shutterDoorOpenAmount = Mathf.MoveTowards(shutterDoorOpenAmount, 1f, num2 * Time.deltaTime);
+				Vector3 localPosition = shutterDoorParent.transform.localPosition;
+				localPosition.y = Mathf.Lerp(shutterDoorLiftRange.x, shutterDoorLiftRange.y, shutterDoorOpenAmount);
+				shutterDoorParent.transform.localPosition = localPosition;
+			}
+		}
+		else if (!stationOpen && shutterDoorOpenAmount > 0f)
+		{
+			float num3 = 1f / shutterDoorAnimTime;
+			shutterDoorOpenAmount = Mathf.MoveTowards(shutterDoorOpenAmount, 0f, num3 * Time.deltaTime);
+			Vector3 localPosition2 = shutterDoorParent.transform.localPosition;
+			localPosition2.y = Mathf.Lerp(shutterDoorLiftRange.x, shutterDoorLiftRange.y, shutterDoorOpenAmount);
+			shutterDoorParent.transform.localPosition = localPosition2;
+			if (shutterDoorOpenAmount <= 0f)
+			{
+				processingAmount = 0f;
+				overdriveAmount = 0f;
+			}
+		}
+		bool flag = seedProcessingStates.Count > 0 && seedProcessingStates[0].dropProgress >= 1f;
+		if (overdriveActive)
+		{
+			overdriveLightSpinnerOn.Rotate(Vector3.forward, 360f * overdriveLightSpinRate * Time.deltaTime, Space.Self);
+			overdriveAmountVisual = overdriveAmount;
+			overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(overdriveAmountVisual), 1f);
+			processingAmountVisual = processingAmount;
+			processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(processingAmountVisual), 1f);
+		}
+		else
+		{
+			float num4 = 1f / overdriveFillTime;
+			if (flag || overdriveAmount > overdriveAmountVisual || !stationOpen)
+			{
+				overdriveAmountVisual = Mathf.MoveTowards(overdriveAmountVisual, overdriveAmount, num4 * Time.deltaTime);
+			}
+			overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(overdriveAmountVisual), 1f);
+			if (stationOpen)
+			{
+				float num5 = Mathf.Max(Time.time - currentPlayerData.latestRefreshTime, 0f);
+				float num6 = currentPlayerData.coreProcessingPercentage + num5 / PROCESSING_TIME_SECONDS;
+				processingAmount = Mathf.Clamp01(num6);
+				estimatedJuiceTimeRemaining = (1f - processingAmount) * PROCESSING_TIME_SECONDS;
+				if (StationOpenForLocalPlayer && num6 >= 1f && Time.time - lastServerRequestTime > timeBetweenServerRequests)
+				{
+					lastServerRequestTime = Time.time;
+					ProgressionManager.Instance.GetJuicerStatus();
+				}
+			}
+			if (flag)
+			{
+				machineHumAudioSource.gameObject.SetActive(value: true);
+				juicerSlowParticles.gameObject.SetActive(value: true);
+				processingAmountVisual = Mathf.MoveTowards(processingAmountVisual, processingAmount, num4 * Time.deltaTime);
+			}
+			else
+			{
+				processingAmountVisual = Mathf.MoveTowards(processingAmountVisual, 0f, num4 * Time.deltaTime);
+				machineHumAudioSource.gameObject.SetActive(value: false);
+				juicerSlowParticles.gameObject.SetActive(value: false);
+			}
+			processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(processingAmountVisual), 1f);
+		}
+		StepSeedVisualAnimation(Time.deltaTime);
+		UpdateScreenDisplay();
+		if (!stationOpen && shutterDoorOpenAmount <= 0f && overdriveAmountVisual <= 0f)
+		{
+			base.enabled = false;
+		}
+	}
 
-		public float dropProgress;
+	private void ValidateCurrentPlayer()
+	{
+		if (!NetworkSystem.Instance.InRoom)
+		{
+			CloseStation();
+		}
+		else
+		{
+			if (!ghostReactor.grManager.IsAuthority() || !stationOpen)
+			{
+				return;
+			}
+			bool flag = false;
+			NetPlayer player = NetworkSystem.Instance.GetPlayer(currentPlayerActorNumber);
+			if (player != null && VRRigCache.Instance.TryGetVrrig(player, out var playerRig))
+			{
+				float num = 5f;
+				if (playerRig.Rig != null && playerRig.Rig.OwningNetPlayer == player && (playerRig.Rig.GetMouthPosition() - base.transform.position).sqrMagnitude < num * num)
+				{
+					flag = true;
+				}
+			}
+			if (!flag)
+			{
+				ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorCloseStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
+			}
+		}
+	}
+
+	public void TriggerEntered(TriggerEventNotifier notifier, Collider other)
+	{
+		VRRig component = other.GetComponent<VRRig>();
+		if (component != null && component.OwningNetPlayer != null && component.OwningNetPlayer.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
+		{
+			ProgressionManager.Instance.GetJuicerStatus();
+		}
+	}
+
+	public void TriggerExited(TriggerEventNotifier notifier, Collider other)
+	{
+		VRRig component = other.GetComponent<VRRig>();
+		if (component != null && component.OwningNetPlayer != null)
+		{
+			if (component.OwningNetPlayer.ActorNumber == currentPlayerActorNumber && stationOpen && ghostReactor.grManager.IsAuthority() && NetworkSystem.Instance.InRoom)
+			{
+				ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorCloseStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
+			}
+			if (component.OwningNetPlayer.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				localPlayerData = default(PlayerData);
+			}
+		}
+	}
+
+	public void OnPlayerCardSwipe(int playerActorNumber)
+	{
+		if (playerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
+		{
+			ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorOpenStation, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
+			ProgressionManager.Instance.GetJuicerStatus();
+		}
+	}
+
+	public void DepositorTriggerEntered(TriggerEventNotifier notifier, Collider other)
+	{
+		if (ghostReactor == null || ghostReactor.grManager == null || other == null || !NetworkSystem.Instance.InRoom || !ghostReactor.grManager.IsAuthority() || !(other.attachedRigidbody != null))
+		{
+			return;
+		}
+		GRCollectible component = other.attachedRigidbody.GetComponent<GRCollectible>();
+		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(zone);
+		if (!(managerForZone != null) || !(component != null) || component.type != ProgressionManager.CoreType.ChaosSeed)
+		{
+			return;
+		}
+		int netIdFromEntityId = managerForZone.GetNetIdFromEntityId(component.entity.id);
+		int lastHeldByActorNumber = component.entity.lastHeldByActorNumber;
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(lastHeldByActorNumber);
+		float time = Time.time;
+		if (player == null)
+		{
+			return;
+		}
+		bool flag = false;
+		for (int num = seedDepositsPending.Count - 1; num >= 0; num--)
+		{
+			if (time - seedDepositsPending[num].Item3 > 5f || managerForZone.GetGameEntityFromNetId(seedDepositsPending[num].Item1) == null || NetworkSystem.Instance.GetPlayer(seedDepositsPending[num].Item2) == null)
+			{
+				seedDepositsPending.RemoveAt(num);
+			}
+			else if (seedDepositsPending[num].Item1 == netIdFromEntityId)
+			{
+				flag = true;
+			}
+		}
+		if (!flag)
+		{
+			seedDepositsPending.Add((netIdFromEntityId, lastHeldByActorNumber, Time.time, false));
+			ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorTryDepositSeed, lastHeldByActorNumber, netIdFromEntityId);
+		}
+	}
+
+	public void OverdrivePurchaseButtonPressed()
+	{
+		if (overdrivePurchasePending)
+		{
+			overdrivePurchasePending = false;
+		}
+		else if (LocalPlayerCanPurchaseOverdrive())
+		{
+			overdrivePurchasePending = true;
+		}
+		UpdateOverdrivePurchaseButtons();
+	}
+
+	private bool LocalPlayerCanPurchaseOverdrive()
+	{
+		if (Time.time - overdrivePurchaseTime > 5f)
+		{
+			overdriveServerConfirmationPending = false;
+		}
+		if (StationOpenForLocalPlayer && !overdriveServerConfirmationPending && CosmeticsController.instance.CurrencyBalance >= 250)
+		{
+			return localPlayerData.overdriveSupply <= 0f;
+		}
+		return false;
+	}
+
+	public void OverdrivePurchaseConfirmButtonPressed()
+	{
+		if (overdrivePurchasePending)
+		{
+			overdrivePurchasePending = false;
+			if (stationOpen && currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				overdriveServerConfirmationPending = true;
+				overdrivePurchaseTime = Time.time;
+				ProgressionManager.Instance.PurchaseOverdrive();
+			}
+		}
+		UpdateOverdrivePurchaseButtons();
+	}
+
+	public void OnPlayerStatusReceived(ProgressionManager.JuicerStatusResponse statusResponse)
+	{
+		if (statusResponse.MothershipId == GRPlayer.GetLocal().mothershipId && statusResponse.RefreshJuice)
+		{
+			toolProgressionManager.UpdateInventory();
+		}
+		PROCESSING_TIME_SECONDS = statusResponse.CoreProcessingTimeSec;
+		MAX_OVERDRIVE_USES = statusResponse.OverdriveCap / 100;
+		float num = Mathf.Clamp01((float)statusResponse.OverdriveSupply / (float)statusResponse.OverdriveCap);
+		int num2 = 0;
+		bool flag = num < localPlayerData.overdriveSupply;
+		bool flag2 = localPlayerData.overdriveSupply == 0f && localPlayerData.coreCount > statusResponse.CurrentCoreCount;
+		if (statusResponse.CoresProcessedByOverdrive > 0 && (flag || flag2))
+		{
+			num2 = statusResponse.CoresProcessedByOverdrive;
+		}
+		localPlayerData.actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
+		localPlayerData.coreCount = statusResponse.CurrentCoreCount;
+		localPlayerData.coreProcessingPercentage = Mathf.Clamp01(statusResponse.CoreProcessingPercent);
+		localPlayerData.overdriveSupply = num;
+		localPlayerData.coresProcessedByOverdrive = statusResponse.CoresProcessedByOverdrive;
+		localPlayerData.coresPendingOverdriveProcessing += num2;
+		localPlayerData.latestRefreshTime = Time.time;
+		localPlayerData.researchPoints = toolProgressionManager.GetNumberOfResearchPoints();
+		if (overdriveServerConfirmationPending && (localPlayerData.overdriveSupply > 0f || localPlayerData.coresProcessedByOverdrive > 0))
+		{
+			overdriveServerConfirmationPending = false;
+		}
+		if (stationOpen && currentPlayerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
+		{
+			currentPlayerData = localPlayerData;
+			ghostReactor.grManager.RequestApplySeedExtractorState(localPlayerData.coreCount, localPlayerData.coresProcessedByOverdrive, localPlayerData.researchPoints, localPlayerData.coreProcessingPercentage, localPlayerData.overdriveSupply);
+			OnStateUpdated();
+		}
+	}
+
+	private void TryDepositSeedServerResponse(bool succeeded)
+	{
+		if (!NetworkSystem.Instance.InRoom)
+		{
+			return;
+		}
+		int num = -1;
+		int actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
+		for (int i = 0; i < seedDepositsPending.Count; i++)
+		{
+			if (seedDepositsPending[i].Item2 == actorNumber)
+			{
+				num = seedDepositsPending[i].Item1;
+			}
+		}
+		if (num != -1)
+		{
+			if (succeeded)
+			{
+				ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorDepositSeedSucceeded, actorNumber, num);
+				RemovePendingSeedDeposit(num);
+				GRPlayer gRPlayer = GRPlayer.Get(VRRig.LocalRig);
+				gRPlayer.SendSeedDepositedTelemetry(PROCESSING_TIME_SECONDS.ToString(), currentPlayerData.coreCount);
+				gRPlayer.IncrementChaosSeedsCollected(1);
+			}
+			else
+			{
+				ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorDepositSeedFailed, actorNumber, num);
+			}
+		}
+	}
+
+	public void CardSwipeSuccess()
+	{
+		idCardScanner.onSucceeded.Invoke();
+	}
+
+	public void CardSwipeFail()
+	{
+		idCardScanner.onFailed.Invoke();
+	}
+
+	public void TryDepositSeed(int playerActorNumber, int seedNetId)
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(playerActorNumber);
+		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(zone);
+		if (player == null || managerForZone == null)
+		{
+			return;
+		}
+		depositorAudioSource.PlayOneShot(seedDepositAttemptAudio, seedDepositAttemptVolume);
+		if (player.ActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			return;
+		}
+		bool flag = false;
+		float time = Time.time;
+		for (int num = seedDepositsPending.Count - 1; num >= 0; num--)
+		{
+			if (time - seedDepositsPending[num].Item3 > 5f || managerForZone.GetGameEntityFromNetId(seedDepositsPending[num].Item1) == null || NetworkSystem.Instance.GetPlayer(seedDepositsPending[num].Item2) == null)
+			{
+				seedDepositsPending.RemoveAt(num);
+			}
+			else if (seedDepositsPending[num].Item1 == seedNetId)
+			{
+				flag = true;
+				if (seedDepositsPending[num].Item2 == NetworkSystem.Instance.LocalPlayer.ActorNumber && !seedDepositsPending[num].Item4)
+				{
+					(int, int, float, bool) value = seedDepositsPending[num];
+					value.Item4 = true;
+					seedDepositsPending[num] = value;
+					ProgressionManager.Instance.DepositCore(ProgressionManager.CoreType.ChaosSeed);
+				}
+			}
+		}
+		if (!flag)
+		{
+			seedDepositsPending.Add((seedNetId, playerActorNumber, Time.time, true));
+			ProgressionManager.Instance.DepositCore(ProgressionManager.CoreType.ChaosSeed);
+		}
+	}
+
+	public bool ValidateSeedDepositSucceeded(int playerActorNumber, int entityNetId)
+	{
+		if (ghostReactor.grManager.IsAuthority())
+		{
+			bool result = false;
+			for (int i = 0; i < seedDepositsPending.Count; i++)
+			{
+				if (seedDepositsPending[i].Item1 == entityNetId && seedDepositsPending[i].Item2 == playerActorNumber)
+				{
+					result = true;
+				}
+			}
+			return result;
+		}
+		return false;
+	}
+
+	public void SeedDepositSucceeded(int playerActorNumber, int entityNetId)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			depositorParticles.Play();
+			depositorAudioSource.PlayOneShot(seedDepositAudio, seedDepositVolume);
+			RemovePendingSeedDeposit(entityNetId);
+			if (playerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				ProgressionManager.Instance.GetJuicerStatus();
+			}
+			if (!stationOpen && ghostReactor.grManager.IsAuthority())
+			{
+				ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorOpenStation, playerActorNumber, 0);
+			}
+		}
+	}
+
+	public void SeedDepositFailed(int playerActorNumber, int entityNetId)
+	{
+		depositorAudioSource.PlayOneShot(seedDepositFailedAudio, seedDepositFailedVolume);
+		RemovePendingSeedDeposit(entityNetId);
+	}
+
+	private void RemovePendingSeedDeposit(int entityId)
+	{
+		for (int num = seedDepositsPending.Count - 1; num >= 0; num--)
+		{
+			if (seedDepositsPending[num].Item1 == entityId)
+			{
+				seedDepositsPending.RemoveAt(num);
+			}
+		}
+	}
+
+	public void ApplyState(int playerActorNumber, int coreCount, int coresProcessedByOverdrive, int researchPoints, float coreProcessingPercentage, float overdriveSupply)
+	{
+		if (playerActorNumber == currentPlayerActorNumber)
+		{
+			if (currentPlayerData.actorNumber != playerActorNumber)
+			{
+				currentPlayerData = default(PlayerData);
+			}
+			coreCount = Mathf.Clamp(coreCount, 0, maxVisualChaosSeedCount);
+			coresProcessedByOverdrive = Mathf.Clamp(coresProcessedByOverdrive, 0, MAX_OVERDRIVE_USES);
+			coreProcessingPercentage = Mathf.Clamp(coreProcessingPercentage, 0f, 1f);
+			overdriveSupply = Mathf.Clamp(overdriveSupply, 0f, 1f);
+			bool flag = overdriveSupply < currentPlayerData.overdriveSupply;
+			bool flag2 = currentPlayerData.overdriveSupply == 0f && currentPlayerData.coreCount > coreCount;
+			if (playerActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber && coresProcessedByOverdrive > 0 && (flag || flag2))
+			{
+				currentPlayerData.coresPendingOverdriveProcessing += coresProcessedByOverdrive;
+			}
+			currentPlayerData.actorNumber = playerActorNumber;
+			currentPlayerData.coreCount = coreCount;
+			currentPlayerData.coresProcessedByOverdrive = coresProcessedByOverdrive;
+			currentPlayerData.coreProcessingPercentage = coreProcessingPercentage;
+			currentPlayerData.overdriveSupply = overdriveSupply;
+			currentPlayerData.latestRefreshTime = Time.time;
+			currentPlayerData.researchPoints = researchPoints;
+			OnStateUpdated();
+		}
+	}
+
+	public void OpenStation(int playerActorNumber)
+	{
+		if (NetworkSystem.Instance.GetPlayer(playerActorNumber) != null)
+		{
+			if (!stationOpen)
+			{
+				doorAudioSource.PlayOneShot(doorOpenAudio, doorOpenVolume);
+			}
+			base.enabled = true;
+			currentPlayerActorNumber = playerActorNumber;
+			stationOpen = true;
+			stationOpenRequestTime = Time.time;
+			UpdateOverdrivePurchaseButtons();
+		}
+	}
+
+	public void CloseStation()
+	{
+		if (stationOpen)
+		{
+			doorAudioSource.PlayOneShot(doorCloseAudio, doorCloseVolume);
+		}
+		currentPlayerActorNumber = -1;
+		stationOpen = false;
+		UpdateOverdrivePurchaseButtons();
+	}
+
+	private void UpdateOverdrivePurchaseButtons()
+	{
+		if (LocalPlayerCanPurchaseOverdrive())
+		{
+			if (overdrivePurchasePending)
+			{
+				overdrivePurchaseButton.myTmpText.text = "CANCEL";
+				overdrivePurchaseButton.buttonRenderer.material = redButtonMaterial;
+				overdriveConfirmButton.myTmpText.text = "CONFIRM";
+				overdriveConfirmButton.buttonRenderer.material = greenButtonMaterial;
+			}
+			else
+			{
+				overdrivePurchaseButton.myTmpText.text = "BUY";
+				overdrivePurchaseButton.buttonRenderer.material = defaultButtonMaterial;
+				overdriveConfirmButton.myTmpText.text = "";
+				overdriveConfirmButton.buttonRenderer.material = defaultButtonMaterial;
+			}
+		}
+		else
+		{
+			overdrivePurchaseButton.myTmpText.text = "";
+			overdrivePurchaseButton.buttonRenderer.material = defaultButtonMaterial;
+			overdriveConfirmButton.myTmpText.text = "";
+			overdriveConfirmButton.buttonRenderer.material = defaultButtonMaterial;
+		}
+	}
+
+	public void OnStateUpdated()
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(currentPlayerActorNumber);
+		if (player == null)
+		{
+			CloseStation();
+		}
+		UpdateOverdrivePurchaseButtons();
+		if (stationOpen && player != null)
+		{
+			if (overdriveActive)
+			{
+				return;
+			}
+			if (currentPlayerData.coresPendingOverdriveProcessing > 0)
+			{
+				int coresPendingOverdriveProcessing = currentPlayerData.coresPendingOverdriveProcessing;
+				currentPlayerData.coresPendingOverdriveProcessing = 0;
+				if (StationOpenForLocalPlayer)
+				{
+					localPlayerData.coresPendingOverdriveProcessing = 0;
+				}
+				overdrivePurchaseAnimationRoutine = StartCoroutine(OverdrivePurchaseAnimationVisual(coresPendingOverdriveProcessing));
+				return;
+			}
+			processingAmount = currentPlayerData.coreProcessingPercentage;
+			overdriveAmount = currentPlayerData.overdriveSupply;
+			int num = Mathf.Clamp(currentPlayerData.coreCount, 0, maxVisualChaosSeedCount) - seedProcessingStates.Count;
+			if (num > 0)
+			{
+				for (int i = 0; i < num; i++)
+				{
+					DepositSeedVisual();
+				}
+			}
+			else if (num < 0)
+			{
+				for (int num2 = 0; num2 > num; num2--)
+				{
+					CompleteSeedVisual();
+				}
+			}
+		}
+		else
+		{
+			screenText.text = "Player Data Lookup Failed.";
+			overdriveAmount = 0f;
+			processingAmount = 0f;
+		}
+	}
+
+	private void DepositSeedVisual()
+	{
+		for (int i = 0; i < chaosSeedVisuals.Count; i++)
+		{
+			if (!chaosSeedVisuals[i].activeSelf)
+			{
+				SeedProcessingVisualState item = new SeedProcessingVisualState
+				{
+					poolIndex = i,
+					rollAngle = 0f,
+					speed = 0f,
+					rampProgress = 0f,
+					dropProgress = 0f
+				};
+				seedProcessingStates.Add(item);
+				chaosSeedVisuals[i].SetActive(value: true);
+				chaosSeedVisuals[i].transform.localPosition = seedTubeStart.localPosition;
+				chaosSeedVisuals[i].transform.localRotation = Quaternion.identity;
+				chaosSeedVisuals[i].transform.localScale = Vector3.one * seedVisualScaleRange.y;
+				seedTubeAudioSource.PlayOneShot(seedMovementAudio, seedMovementVolume);
+				break;
+			}
+		}
+	}
+
+	private void CompleteSeedVisual()
+	{
+		if (seedProcessingStates.Count > 0)
+		{
+			SeedProcessingVisualState seedProcessingVisualState = seedProcessingStates[0];
+			chaosSeedVisuals[seedProcessingVisualState.poolIndex].SetActive(value: false);
+			seedProcessingStates.RemoveAt(0);
+		}
+	}
+
+	private void ClearSeedVisuals()
+	{
+		int count = seedProcessingStates.Count;
+		for (int i = 0; i < count; i++)
+		{
+			CompleteSeedVisual();
+		}
+	}
+
+	private void UpdateScreenDisplay()
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(currentPlayerActorNumber);
+		if (player == null || !stationOpen)
+		{
+			return;
+		}
+		int num = (int)estimatedJuiceTimeRemaining;
+		if (currentPlayerActorNumber == currentDisplayData.playerActorNumber && currentPlayerData.coreCount == currentDisplayData.coreCount && currentPlayerData.overdriveSupply == currentDisplayData.overdriveSupply && currentPlayerData.researchPoints == currentDisplayData.researchPoints && num == currentDisplayData.juiceSecondsLeft)
+		{
+			return;
+		}
+		currentDisplayData.playerActorNumber = currentPlayerActorNumber;
+		currentDisplayData.coreCount = currentPlayerData.coreCount;
+		currentDisplayData.overdriveSupply = currentPlayerData.overdriveSupply;
+		currentDisplayData.researchPoints = currentPlayerData.researchPoints;
+		currentDisplayData.juiceSecondsLeft = num;
+		UpdateScreenSB.Clear();
+		UpdateScreenSB.Append(player.SanitizedNickName + "\n");
+		UpdateScreenSB.Append($"JUICE: <color=purple>⑮ {currentDisplayData.researchPoints}</color>\n\n");
+		if (currentDisplayData.coreCount > 0)
+		{
+			UpdateScreenSB.Append($"Processing {currentDisplayData.coreCount} Seeds");
+			switch (currentDisplayData.juiceSecondsLeft % 3)
+			{
+			case 2:
+				UpdateScreenSB.Append(".");
+				break;
+			case 1:
+				UpdateScreenSB.Append("..");
+				break;
+			default:
+				UpdateScreenSB.Append("...");
+				break;
+			}
+			int num2 = num / 3600;
+			int num3 = num / 60 % 60;
+			int num4 = num % 60;
+			if (num2 > 0)
+			{
+				UpdateScreenSB.Append($"\nNext <color=purple>⑮</color> in {num2}:{num3:00}:{num4:00}\n");
+			}
+			else
+			{
+				UpdateScreenSB.Append($"\nNext <color=purple>⑮</color> in {num3}:{num4:00}\n");
+			}
+		}
+		else
+		{
+			UpdateScreenSB.Append("Deposit Chaos Seed\nFor Juice Processing\n");
+		}
+		screenText.text = UpdateScreenSB.ToString();
+	}
+
+	private void StepSeedVisualAnimation(float dt)
+	{
+		float magnitude = (seedTubeStart.position - seedTubeEnd.position).magnitude;
+		float num = magnitude / seedVisualRollTime;
+		for (int i = 0; i < seedProcessingStates.Count; i++)
+		{
+			SeedProcessingVisualState value = seedProcessingStates[i];
+			float num2 = 2f;
+			if (i > 0)
+			{
+				num2 = seedProcessingStates[i - 1].rampProgress - 2f * visualChaosSeedRadius / magnitude;
+			}
+			if (value.rampProgress < 1f)
+			{
+				GameObject obj = chaosSeedVisuals[value.poolIndex];
+				value.speed = Mathf.MoveTowards(value.speed, num, num * dt);
+				float num3 = value.speed * dt;
+				float num4 = num3 / magnitude;
+				value.rampProgress = Mathf.Clamp01(value.rampProgress + num4);
+				if (value.rampProgress >= num2)
+				{
+					value.rampProgress = num2;
+					value.speed = 0f;
+					num3 = (num4 = 0f);
+				}
+				obj.transform.localPosition = Vector3.Lerp(seedTubeStart.localPosition, seedTubeEnd.localPosition, value.rampProgress);
+				value.rollAngle += num3 / visualChaosSeedRadius;
+				obj.transform.localRotation = Quaternion.AngleAxis(value.rollAngle * 57.29578f, Vector3.forward);
+			}
+			if (i == 0 && value.rampProgress >= 1f)
+			{
+				GameObject gameObject = chaosSeedVisuals[value.poolIndex];
+				if (value.dropProgress < 1f)
+				{
+					value.dropProgress += 1f / seedVisualDropTime * dt;
+					value.rampProgress = 1f + value.dropProgress;
+					float t = tubeEndToProcessingPathY.Evaluate(value.dropProgress);
+					float t2 = tubeEndToProcessingPathX.Evaluate(value.dropProgress);
+					Vector3 localPosition = gameObject.transform.localPosition;
+					localPosition.y = Mathf.Lerp(seedTubeEnd.localPosition.y, seedProcessingPosition.localPosition.y, t);
+					localPosition.x = Mathf.Lerp(seedTubeEnd.localPosition.x, seedProcessingPosition.localPosition.x, t2);
+					gameObject.transform.localPosition = localPosition;
+					float num5 = value.speed * dt;
+					value.rollAngle += num5 / visualChaosSeedRadius;
+					gameObject.transform.localRotation = Quaternion.AngleAxis(value.rollAngle * 57.29578f, Vector3.forward);
+					if (value.dropProgress >= 1f)
+					{
+						juicerAudioSource.PlayOneShot(seedDropAudio, seedDropVolume);
+					}
+				}
+				if (value.dropProgress >= 1f && !drainingProcessingBeaker)
+				{
+					gameObject.transform.localScale = Vector3.one * Mathf.Lerp(seedVisualScaleRange.y, seedVisualScaleRange.x, processingAmountVisual);
+				}
+			}
+			seedProcessingStates[i] = value;
+		}
+	}
+
+	private IEnumerator OverdrivePurchaseAnimationVisual(int coresToProcess)
+	{
+		overdriveActive = true;
+		overdriveBeepAudioSource.loop = true;
+		overdriveBeepAudioSource.volume = overdriveBeepingVolume;
+		overdriveBeepAudioSource.clip = overdriveBeepingAudio;
+		overdriveBeepAudioSource.Play();
+		int num = Math.Min(coresToProcess + currentPlayerData.coreCount, maxVisualChaosSeedCount);
+		while (seedProcessingStates.Count < num)
+		{
+			DepositSeedVisual();
+		}
+		for (int i = 0; i < disableDuringOverdrive.Count; i++)
+		{
+			disableDuringOverdrive[i].gameObject.SetActive(value: false);
+		}
+		for (int j = 0; j < enableDuringOverdrive.Count; j++)
+		{
+			enableDuringOverdrive[j].gameObject.SetActive(value: true);
+		}
+		overdriveMeterAudioSource.PlayOneShot(overdriveFillAudio, overdriveFillVolume);
+		float overdriveFillRate = 1f / overdriveFillTime;
+		float maxOverdriveFill = Mathf.Clamp01(currentPlayerData.overdriveSupply + (float)coresToProcess / (float)MAX_OVERDRIVE_USES);
+		while (overdriveAmount < maxOverdriveFill)
+		{
+			overdriveAmount = Mathf.MoveTowards(overdriveAmount, maxOverdriveFill, overdriveFillRate * Time.deltaTime);
+			yield return null;
+		}
+		overdriveMeterAudioSource.Stop();
+		int i2 = 0;
+		while (i2 < coresToProcess)
+		{
+			float waitForSeedDepositStartTime = Time.time;
+			bool flag = seedProcessingStates.Count > 0 && seedProcessingStates[0].dropProgress >= 1f;
+			while (!flag && Time.time - waitForSeedDepositStartTime < 3f)
+			{
+				yield return null;
+				flag = seedProcessingStates.Count > 0 && seedProcessingStates[0].dropProgress >= 1f;
+			}
+			juicerAudioSource.PlayOneShot(seedJuicingAudio, seedJuicingVolume);
+			juicerOverdriveParticles.gameObject.SetActive(value: true);
+			float num2 = Mathf.Clamp01(1f - processingAmount);
+			float timeToProcess = num2 * overdriveProcessTime;
+			float startingProcessingAmount = processingAmount;
+			float num3 = num2 / (float)MAX_OVERDRIVE_USES;
+			float startingOverdrive = overdriveAmount;
+			float resultingOverdrive = Mathf.Clamp01(overdriveAmount - num3);
+			float timeProcessing = 0f;
+			while (timeProcessing < timeToProcess)
+			{
+				timeProcessing += Time.deltaTime;
+				float t = timeProcessing / timeToProcess;
+				overdriveAmount = Mathf.Lerp(startingOverdrive, resultingOverdrive, t);
+				processingAmount = Mathf.Lerp(startingProcessingAmount, 1f, t);
+				estimatedJuiceTimeRemaining = timeToProcess - timeProcessing;
+				yield return null;
+			}
+			CompleteSeedVisual();
+			juicerOverdriveParticles.gameObject.SetActive(value: false);
+			drainingProcessingBeaker = true;
+			float timeDepositing = 0f;
+			while (timeDepositing < juiceDepositTime)
+			{
+				timeDepositing += Time.deltaTime;
+				float t2 = timeDepositing / juiceDepositTime;
+				processingAmount = Mathf.Lerp(1f, 0f, t2);
+				yield return null;
+			}
+			drainingProcessingBeaker = false;
+			int num4 = i2 + 1;
+			i2 = num4;
+		}
+		if (currentPlayerData.coresPendingOverdriveProcessing == 0 && currentPlayerData.coreCount == 1)
+		{
+			if (seedProcessingStates.Count == 0)
+			{
+				DepositSeedVisual();
+			}
+			float timeDepositing = Time.time;
+			bool flag2 = seedProcessingStates.Count > 0 && seedProcessingStates[0].dropProgress >= 1f;
+			while (!flag2 && Time.time - timeDepositing < 3f)
+			{
+				yield return null;
+				flag2 = seedProcessingStates.Count > 0 && seedProcessingStates[0].dropProgress >= 1f;
+			}
+			float timeProcessing = 0f;
+			float resultingOverdrive = processingAmount;
+			float startingOverdrive = overdriveAmount;
+			float startingProcessingAmount = Mathf.Clamp01(currentPlayerData.coreProcessingPercentage - resultingOverdrive) * overdriveProcessTime;
+			while (timeProcessing < startingProcessingAmount)
+			{
+				timeProcessing += Time.deltaTime;
+				float t3 = timeProcessing / startingProcessingAmount;
+				processingAmount = Mathf.Clamp01(Mathf.Lerp(resultingOverdrive, currentPlayerData.coreProcessingPercentage, t3));
+				overdriveAmount = Mathf.Clamp01(Mathf.Lerp(startingOverdrive, currentPlayerData.overdriveSupply, t3));
+				yield return null;
+			}
+		}
+		for (int k = 0; k < disableDuringOverdrive.Count; k++)
+		{
+			disableDuringOverdrive[k].gameObject.SetActive(value: true);
+		}
+		for (int l = 0; l < enableDuringOverdrive.Count; l++)
+		{
+			enableDuringOverdrive[l].gameObject.SetActive(value: false);
+		}
+		overdriveLightSpinnerOff.localRotation = overdriveLightSpinnerOn.localRotation;
+		overdriveBeepAudioSource.Stop();
+		overdriveActive = false;
+		if (StationOpenForLocalPlayer)
+		{
+			ProgressionManager.Instance.GetJuicerStatus();
+		}
+		OnStateUpdated();
+	}
+
+	public void OnResearchPointsUpdated()
+	{
+		int numberOfResearchPoints = toolProgressionManager.GetNumberOfResearchPoints();
+		if (numberOfResearchPoints > localPlayerData.researchPoints)
+		{
+			GRPlayer.GetLocal().SendJuiceCollectedTelemetry(numberOfResearchPoints - localPlayerData.researchPoints, localPlayerData.coresProcessedByOverdrive);
+		}
+		localPlayerData.researchPoints = numberOfResearchPoints;
+		if (StationOpenForLocalPlayer)
+		{
+			bool num = currentPlayerData.researchPoints != localPlayerData.researchPoints;
+			currentPlayerData.researchPoints = localPlayerData.researchPoints;
+			if (num)
+			{
+				ghostReactor.grManager.RequestApplySeedExtractorState(localPlayerData.coreCount, localPlayerData.coresProcessedByOverdrive, localPlayerData.researchPoints, localPlayerData.coreProcessingPercentage, localPlayerData.overdriveSupply);
+				OnStateUpdated();
+			}
+		}
+	}
+
+	public void OnPurchaseOverdrive(bool success)
+	{
+		overdriveServerConfirmationPending = false;
+		if (success)
+		{
+			GRPlayer.GetLocal().SendOverdrivePurchasedTelemetry(250, localPlayerData.coreCount);
+		}
 	}
 }

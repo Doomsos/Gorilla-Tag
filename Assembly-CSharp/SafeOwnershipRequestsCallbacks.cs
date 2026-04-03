@@ -1,11 +1,13 @@
-﻿using System;
 using UnityEngine;
 
 public class SafeOwnershipRequestsCallbacks : MonoBehaviour, IRequestableOwnershipGuardCallbacks
 {
+	[SerializeField]
+	private RequestableOwnershipGuard _requestableOwnershipGuard;
+
 	private void Awake()
 	{
-		this._requestableOwnershipGuard.AddCallbackTarget(this);
+		_requestableOwnershipGuard.AddCallbackTarget(this);
 	}
 
 	void IRequestableOwnershipGuardCallbacks.OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
@@ -29,7 +31,4 @@ public class SafeOwnershipRequestsCallbacks : MonoBehaviour, IRequestableOwnersh
 	void IRequestableOwnershipGuardCallbacks.OnMyCreatorLeft()
 	{
 	}
-
-	[SerializeField]
-	private RequestableOwnershipGuard _requestableOwnershipGuard;
 }

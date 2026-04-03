@@ -1,61 +1,9 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 
 public class HowManyMonkeDisplay : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void OnEnable()
-	{
-		this.currValue = (this.nextValue = HowManyMonke.ThisMany);
-		this.text.text = this.currValue.ToString("N0");
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-	}
-
-	public void OnDisable()
-	{
-		HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(this.HowManyMonke_OnCheck));
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-	}
-
-	private void OnDestroy()
-	{
-		HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(this.HowManyMonke_OnCheck));
-	}
-
-	private void HowManyMonke_OnCheck(int thisMany)
-	{
-		this.currValue = this.nextValue;
-		this.nextValue = thisMany;
-		this.checkTime = Time.time;
-	}
-
-	public void SliceUpdate()
-	{
-		float time = Mathf.Lerp((float)this.currValue, (float)this.nextValue, (Time.time - this.checkTime) / HowManyMonke.RecheckDelay);
-		this.text.text = time.ToString("N0");
-		this.particleSystem.emission.rateOverTime = this.particleSystemRateToCount.Evaluate(time);
-		float sqrMagnitude = (VRRig.LocalRig.transform.position - base.transform.position).sqrMagnitude;
-		if (this.observable && sqrMagnitude > this.observableDistance)
-		{
-			this.observable = false;
-			HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(this.HowManyMonke_OnCheck));
-			if (this.observableActive)
-			{
-				this.observableActive.SetActive(this.observable);
-				return;
-			}
-		}
-		else if (!this.observable && sqrMagnitude < this.observableDistance)
-		{
-			this.observable = true;
-			HowManyMonke.OnCheck = (Action<int>)Delegate.Combine(HowManyMonke.OnCheck, new Action<int>(this.HowManyMonke_OnCheck));
-			if (this.observableActive)
-			{
-				this.observableActive.SetActive(this.observable);
-			}
-		}
-	}
-
 	[SerializeField]
 	private TMP_Text text;
 
@@ -78,4 +26,56 @@ public class HowManyMonkeDisplay : MonoBehaviour, IGorillaSliceableSimple
 	private int nextValue;
 
 	private float checkTime;
+
+	public void OnEnable()
+	{
+		currValue = (nextValue = HowManyMonke.ThisMany);
+		text.text = currValue.ToString("N0");
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	public void OnDisable()
+	{
+		HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(HowManyMonke_OnCheck));
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	private void OnDestroy()
+	{
+		HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(HowManyMonke_OnCheck));
+	}
+
+	private void HowManyMonke_OnCheck(int thisMany)
+	{
+		currValue = nextValue;
+		nextValue = thisMany;
+		checkTime = Time.time;
+	}
+
+	public void SliceUpdate()
+	{
+		float time = Mathf.Lerp(currValue, nextValue, (Time.time - checkTime) / HowManyMonke.RecheckDelay);
+		text.text = time.ToString("N0");
+		ParticleSystem.EmissionModule emission = particleSystem.emission;
+		emission.rateOverTime = particleSystemRateToCount.Evaluate(time);
+		float sqrMagnitude = (VRRig.LocalRig.transform.position - base.transform.position).sqrMagnitude;
+		if (observable && sqrMagnitude > observableDistance)
+		{
+			observable = false;
+			HowManyMonke.OnCheck = (Action<int>)Delegate.Remove(HowManyMonke.OnCheck, new Action<int>(HowManyMonke_OnCheck));
+			if ((bool)observableActive)
+			{
+				observableActive.SetActive(observable);
+			}
+		}
+		else if (!observable && sqrMagnitude < observableDistance)
+		{
+			observable = true;
+			HowManyMonke.OnCheck = (Action<int>)Delegate.Combine(HowManyMonke.OnCheck, new Action<int>(HowManyMonke_OnCheck));
+			if ((bool)observableActive)
+			{
+				observableActive.SetActive(observable);
+			}
+		}
+	}
 }

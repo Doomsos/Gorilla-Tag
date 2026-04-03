@@ -1,58 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public static class KIDTelemetry
 {
-	public static string GameVersionCustomTag
-	{
-		get
-		{
-			return "game_version_" + Application.version;
-		}
-	}
-
-	public static string Open_MetricActionCustomTag
-	{
-		get
-		{
-			return "metric_action_Open";
-		}
-	}
-
-	public static string Updated_MetricActionCustomTag
-	{
-		get
-		{
-			return "metric_action_Updated";
-		}
-	}
-
-	public static string Closed_MetricActionCustomTag
-	{
-		get
-		{
-			return "metric_action_Closed";
-		}
-	}
-
-	public static string GameEnvironment
-	{
-		get
-		{
-			return "game_environment_live";
-		}
-	}
-
-	public static string GetPermissionManagedByBodyData(string permission)
-	{
-		return "permission_managedby_" + permission.Replace('-', '_');
-	}
-
-	public static string GetPermissionEnabledBodyData(string permission)
-	{
-		return "permission_eneabled_" + permission.Replace('-', '_');
-	}
-
 	public const string SCREEN_SHOWN_EVENT_NAME = "kid_screen_shown";
 
 	public const string PHASE_TWO_IN_COHORT_EVENT_NAME = "kid_phase2_incohort";
@@ -126,4 +75,24 @@ public static class KIDTelemetry
 	private const string PERMISSION_MANAGED_BY_BODY_DATA = "permission_managedby_";
 
 	private const string PERMISSION_ENABLED_BODY_DATA = "permission_eneabled_";
+
+	public static string GameVersionCustomTag => "game_version_" + Application.version;
+
+	public static string Open_MetricActionCustomTag => "metric_action_Open";
+
+	public static string Updated_MetricActionCustomTag => "metric_action_Updated";
+
+	public static string Closed_MetricActionCustomTag => "metric_action_Closed";
+
+	public static string GameEnvironment => "game_environment_live";
+
+	public static string GetPermissionManagedByBodyData(string permission)
+	{
+		return "permission_managedby_" + permission.Replace('-', '_');
+	}
+
+	public static string GetPermissionEnabledBodyData(string permission)
+	{
+		return "permission_eneabled_" + permission.Replace('-', '_');
+	}
 }

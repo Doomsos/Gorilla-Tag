@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public static class GradientHelper
@@ -8,16 +7,15 @@ public static class GradientHelper
 		float a = color.a;
 		Color col = color;
 		col.a = 1f;
-		return new Gradient
+		Gradient gradient = new Gradient();
+		gradient.colorKeys = new GradientColorKey[1]
 		{
-			colorKeys = new GradientColorKey[]
-			{
-				new GradientColorKey(col, 1f)
-			},
-			alphaKeys = new GradientAlphaKey[]
-			{
-				new GradientAlphaKey(a, 1f)
-			}
+			new GradientColorKey(col, 1f)
 		};
+		gradient.alphaKeys = new GradientAlphaKey[1]
+		{
+			new GradientAlphaKey(a, 1f)
+		};
+		return gradient;
 	}
 }

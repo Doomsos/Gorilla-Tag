@@ -1,28 +1,9 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class KIDAgeAppeal : MonoBehaviour
 {
-	public void ShowAgeAppealScreen()
-	{
-		this._ageSlider = base.GetComponentInChildren<AgeSliderWithProgressBar>(true);
-		this._ageSlider.ControllerActive = true;
-		base.gameObject.SetActive(true);
-		this._inputsContainer.SetActive(true);
-		this._monkeLoader.SetActive(false);
-	}
-
-	public void OnNewAgeConfirmed()
-	{
-		KIDAgeAppeal.<OnNewAgeConfirmed>d__6 <OnNewAgeConfirmed>d__;
-		<OnNewAgeConfirmed>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<OnNewAgeConfirmed>d__.<>4__this = this;
-		<OnNewAgeConfirmed>d__.<>1__state = -1;
-		<OnNewAgeConfirmed>d__.<>t__builder.Start<KIDAgeAppeal.<OnNewAgeConfirmed>d__6>(ref <OnNewAgeConfirmed>d__);
-	}
-
 	[SerializeField]
 	private TMP_Text _ageText;
 
@@ -36,4 +17,51 @@ public class KIDAgeAppeal : MonoBehaviour
 	private GameObject _monkeLoader;
 
 	private AgeSliderWithProgressBar _ageSlider;
+
+	public void ShowAgeAppealScreen()
+	{
+		_ageSlider = GetComponentInChildren<AgeSliderWithProgressBar>(includeInactive: true);
+		_ageSlider.ControllerActive = true;
+		base.gameObject.SetActive(value: true);
+		_inputsContainer.SetActive(value: true);
+		_monkeLoader.SetActive(value: false);
+	}
+
+	public async void OnNewAgeConfirmed()
+	{
+		_inputsContainer.SetActive(value: false);
+		_monkeLoader.SetActive(value: true);
+		if (KIDManager.TryGetAgeStatusTypeFromAge(_ageSlider.CurrentAge, out var ageType))
+		{
+			TelemetryData telemetryData = new TelemetryData
+			{
+				EventName = "kid_age_appeal_age_gate",
+				CustomTags = new string[3]
+				{
+					"kid_age_appeal",
+					KIDTelemetry.GameVersionCustomTag,
+					KIDTelemetry.GameEnvironment
+				},
+				BodyData = new Dictionary<string, string> { 
+				{
+					"correct_age",
+					ageType.ToString()
+				} }
+			};
+			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		}
+		AttemptAgeUpdateData attemptAgeUpdateData = await KIDManager.TryAttemptAgeUpdate(_ageSlider.CurrentAge);
+		if (attemptAgeUpdateData.status == SessionStatus.PROHIBITED)
+		{
+			Debug.LogError("[KID::AGE-APPEAL] Age Appeal Status: PROHIBITED");
+			base.gameObject.SetActive(value: false);
+			KIDUI_AgeAppealController.Instance.StartTooYoungToPlayScreen();
+		}
+		else
+		{
+			_ageAppealEmailScreen.ShowAgeAppealEmailScreen(attemptAgeUpdateData.status == SessionStatus.CHALLENGE, _ageSlider.CurrentAge);
+			_ageSlider.ControllerActive = false;
+			base.gameObject.SetActive(value: false);
+		}
+	}
 }

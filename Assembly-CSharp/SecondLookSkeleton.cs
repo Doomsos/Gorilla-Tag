@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using Photon.Pun;
@@ -6,674 +5,15 @@ using UnityEngine;
 
 public class SecondLookSkeleton : MonoBehaviour
 {
-	private void Start()
+	public enum GhostState
 	{
-		this.playersSeen = new List<NetPlayer>();
-		this.synchValues = base.GetComponent<SecondLookSkeletonSynchValues>();
-		this.playerTransform = Camera.main.transform;
-		this.tapped = !this.requireTappingToActivate;
-		this.localCaught = false;
-		this.audioSource = base.GetComponentInChildren<AudioSource>();
-		this.spookyGhost.SetActive(false);
-		this.angerPointIndex = Random.Range(0, this.angerPoint.Length);
-		this.angerPointChangedTime = Time.time;
-		this.synchValues.angerPoint = this.angerPointIndex;
-		this.spookyGhost.transform.position = this.angerPoint[this.synchValues.angerPoint].position;
-		this.spookyGhost.transform.rotation = this.angerPoint[this.synchValues.angerPoint].rotation;
-		this.ChangeState(SecondLookSkeleton.GhostState.Unactivated);
-		this.rHits = new RaycastHit[20];
-		this.lookedAway = false;
-		this.firstLookActivated = false;
-		this.animator.Play("ArmsOut");
-	}
-
-	private void Update()
-	{
-		this.ProcessGhostState();
-	}
-
-	public void ChangeState(SecondLookSkeleton.GhostState newState)
-	{
-		if (newState == this.currentState)
-		{
-			return;
-		}
-		switch (newState)
-		{
-		case SecondLookSkeleton.GhostState.Unactivated:
-			this.spookyGhost.gameObject.SetActive(false);
-			this.audioSource.GTStop();
-			this.audioSource.loop = false;
-			if (this.IsMine())
-			{
-				this.synchValues.angerPoint = Random.Range(0, this.angerPoint.Length);
-				this.angerPointIndex = this.synchValues.angerPoint;
-				this.angerPointChangedTime = Time.time;
-				this.spookyGhost.transform.position = this.angerPoint[this.angerPointIndex].position;
-				this.spookyGhost.transform.rotation = this.angerPoint[this.angerPointIndex].rotation;
-			}
-			this.currentState = SecondLookSkeleton.GhostState.Unactivated;
-			return;
-		case SecondLookSkeleton.GhostState.Activated:
-			this.currentState = SecondLookSkeleton.GhostState.Activated;
-			if (this.tapped)
-			{
-				GTAudioSourceExtensions.GTPlayClipAtPoint(this.initialScream, this.audioSource.transform.position, 1f);
-				if (this.spookyText != null)
-				{
-					this.spookyText.SetActive(true);
-				}
-				this.spookyGhost.SetActive(true);
-			}
-			this.animator.Play("ArmsOut");
-			this.spookyGhost.transform.rotation = Quaternion.LookRotation(this.playerTransform.position - this.spookyGhost.transform.position, Vector3.up);
-			if (this.IsMine())
-			{
-				this.timeFirstAppeared = Time.time;
-				return;
-			}
-			break;
-		case SecondLookSkeleton.GhostState.Patrolling:
-			this.playersSeen.Clear();
-			if (this.tapped)
-			{
-				this.spookyGhost.SetActive(true);
-				this.animator.Play("CrawlPatrol");
-				this.audioSource.loop = true;
-				this.audioSource.clip = this.patrolLoop;
-				this.audioSource.GTPlay();
-			}
-			if (this.IsMine())
-			{
-				this.currentNode = this.pathPoints[Random.Range(0, this.pathPoints.Length)];
-				this.nextNode = this.currentNode.connectedNodes[Random.Range(0, this.currentNode.connectedNodes.Length)];
-				this.SyncNodes();
-				this.spookyGhost.transform.position = this.currentNode.transform.position;
-			}
-			this.currentState = SecondLookSkeleton.GhostState.Patrolling;
-			return;
-		case SecondLookSkeleton.GhostState.Chasing:
-			this.currentState = SecondLookSkeleton.GhostState.Chasing;
-			this.resetChaseHistory.Clear();
-			this.animator.Play("CrawlChase");
-			this.localThrown = false;
-			this.localCaught = false;
-			if (this.tapped)
-			{
-				this.audioSource.clip = this.chaseLoop;
-				this.audioSource.loop = true;
-				this.audioSource.GTPlay();
-				return;
-			}
-			break;
-		case SecondLookSkeleton.GhostState.CaughtPlayer:
-			this.currentState = SecondLookSkeleton.GhostState.CaughtPlayer;
-			this.heightOffset.localPosition = Vector3.zero;
-			if (this.tapped)
-			{
-				this.audioSource.GTPlayOneShot(this.grabbedSound, 1f);
-				this.audioSource.loop = true;
-				this.audioSource.clip = this.carryingLoop;
-				this.audioSource.GTPlay();
-				this.animator.Play("ArmsOut");
-			}
-			if (!this.IsMine())
-			{
-				this.SetNodes();
-				return;
-			}
-			break;
-		case SecondLookSkeleton.GhostState.PlayerThrown:
-			this.currentState = SecondLookSkeleton.GhostState.PlayerThrown;
-			this.timeThrown = Time.time;
-			this.localThrown = false;
-			break;
-		case SecondLookSkeleton.GhostState.Reset:
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void ProcessGhostState()
-	{
-		if (this.IsMine())
-		{
-			switch (this.currentState)
-			{
-			case SecondLookSkeleton.GhostState.Unactivated:
-				if (this.changeAngerPointOnTimeInterval && Time.time - this.angerPointChangedTime > this.changeAngerPointTimeMinutes * 60f)
-				{
-					this.synchValues.angerPoint = Random.Range(0, this.angerPoint.Length);
-					this.angerPointIndex = this.synchValues.angerPoint;
-					this.angerPointChangedTime = Time.time;
-				}
-				this.spookyGhost.transform.position = this.angerPoint[this.angerPointIndex].position;
-				this.spookyGhost.transform.rotation = this.angerPoint[this.angerPointIndex].rotation;
-				this.CheckActivateGhost();
-				return;
-			case SecondLookSkeleton.GhostState.Activated:
-				if (Time.time > this.timeFirstAppeared + this.timeToFirstDisappear)
-				{
-					this.ChangeState(SecondLookSkeleton.GhostState.Patrolling);
-					return;
-				}
-				break;
-			case SecondLookSkeleton.GhostState.Patrolling:
-				if (!this.CheckPlayerSeen() && this.playersSeen.Count == 0)
-				{
-					this.PatrolMove();
-					return;
-				}
-				this.StartChasing();
-				return;
-			case SecondLookSkeleton.GhostState.Chasing:
-				if (!this.CheckPlayerSeen() || !this.CanGrab())
-				{
-					this.ChaseMove();
-					return;
-				}
-				this.GrabPlayer();
-				return;
-			case SecondLookSkeleton.GhostState.CaughtPlayer:
-				this.CaughtPlayerUpdate();
-				return;
-			case SecondLookSkeleton.GhostState.PlayerThrown:
-				if (Time.time > this.timeThrown + this.timeThrownCooldown)
-				{
-					this.ChangeState(SecondLookSkeleton.GhostState.Unactivated);
-				}
-				break;
-			case SecondLookSkeleton.GhostState.Reset:
-				break;
-			default:
-				return;
-			}
-			return;
-		}
-		this.SetTappedState();
-		switch (this.currentState)
-		{
-		case SecondLookSkeleton.GhostState.Unactivated:
-			this.SetNodes();
-			this.spookyGhost.transform.position = this.angerPoint[this.angerPointIndex].position;
-			this.spookyGhost.transform.rotation = this.angerPoint[this.angerPointIndex].rotation;
-			this.CheckActivateGhost();
-			return;
-		case SecondLookSkeleton.GhostState.Activated:
-			this.FollowPosition();
-			return;
-		case SecondLookSkeleton.GhostState.Patrolling:
-			this.FollowPosition();
-			this.CheckPlayerSeen();
-			return;
-		case SecondLookSkeleton.GhostState.Chasing:
-			if (this.CheckPlayerSeen() && this.CanGrab())
-			{
-				this.GrabPlayer();
-			}
-			this.FollowPosition();
-			return;
-		case SecondLookSkeleton.GhostState.CaughtPlayer:
-		case SecondLookSkeleton.GhostState.PlayerThrown:
-			this.CaughtPlayerUpdate();
-			break;
-		case SecondLookSkeleton.GhostState.Reset:
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void CaughtPlayerUpdate()
-	{
-		if (this.localThrown)
-		{
-			return;
-		}
-		if (this.GhostAtExit())
-		{
-			if (this.localCaught)
-			{
-				this.ChuckPlayer();
-			}
-			if (this.IsMine())
-			{
-				this.DeactivateGhost();
-			}
-			return;
-		}
-		this.CaughtMove();
-		if (this.localCaught)
-		{
-			this.FloatPlayer();
-			return;
-		}
-		if (this.CheckPlayerSeen() && this.CanGrab())
-		{
-			this.localCaught = true;
-		}
-	}
-
-	private void SetTappedState()
-	{
-		if (!this.tapped)
-		{
-			return;
-		}
-		if (this.spookyText != null && !this.spookyText.activeSelf)
-		{
-			this.spookyText.SetActive(true);
-		}
-		if (this.spookyGhost.activeSelf && this.currentState != SecondLookSkeleton.GhostState.Unactivated)
-		{
-			return;
-		}
-		this.spookyGhost.SetActive(true);
-		switch (this.currentState)
-		{
-		case SecondLookSkeleton.GhostState.Unactivated:
-			this.spookyGhost.SetActive(false);
-			return;
-		case SecondLookSkeleton.GhostState.Activated:
-			this.animator.Play("ArmsOut");
-			return;
-		case SecondLookSkeleton.GhostState.Patrolling:
-			this.animator.Play("CrawlPatrol");
-			this.audioSource.loop = true;
-			this.audioSource.clip = this.patrolLoop;
-			this.audioSource.GTPlay();
-			return;
-		case SecondLookSkeleton.GhostState.Chasing:
-			this.audioSource.clip = this.chaseLoop;
-			this.audioSource.loop = true;
-			this.audioSource.GTPlay();
-			this.animator.Play("CrawlChase");
-			this.spookyGhost.SetActive(true);
-			return;
-		case SecondLookSkeleton.GhostState.CaughtPlayer:
-			this.audioSource.GTPlayOneShot(this.grabbedSound, 1f);
-			this.audioSource.loop = true;
-			this.audioSource.clip = this.carryingLoop;
-			this.audioSource.GTPlay();
-			this.animator.Play("ArmsOut");
-			break;
-		case SecondLookSkeleton.GhostState.PlayerThrown:
-			this.animator.Play("ArmsOut");
-			return;
-		case SecondLookSkeleton.GhostState.Reset:
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void FollowPosition()
-	{
-		this.spookyGhost.transform.position = Vector3.Lerp(this.spookyGhost.transform.position, this.synchValues.position, 0.66f);
-		this.spookyGhost.transform.rotation = Quaternion.Lerp(this.spookyGhost.transform.rotation, this.synchValues.rotation, 0.66f);
-		if (this.currentState == SecondLookSkeleton.GhostState.Patrolling || this.currentState == SecondLookSkeleton.GhostState.Chasing)
-		{
-			this.SetHeightOffset();
-			return;
-		}
-		this.heightOffset.localPosition = Vector3.zero;
-	}
-
-	private void CheckActivateGhost()
-	{
-		if (!this.tapped || this.currentState != SecondLookSkeleton.GhostState.Unactivated || this.playerTransform == null)
-		{
-			return;
-		}
-		this.currentlyLooking = this.IsCurrentlyLooking();
-		if (this.requireSecondLookToActivate)
-		{
-			if (!this.firstLookActivated && this.currentlyLooking)
-			{
-				this.firstLookActivated = this.currentlyLooking;
-				return;
-			}
-			if (this.firstLookActivated && !this.currentlyLooking)
-			{
-				this.lookedAway = true;
-				return;
-			}
-			if (this.firstLookActivated && this.lookedAway && this.currentlyLooking)
-			{
-				this.firstLookActivated = false;
-				this.lookedAway = false;
-				this.ActivateGhost();
-				return;
-			}
-		}
-		else if (this.currentlyLooking)
-		{
-			this.ActivateGhost();
-		}
-	}
-
-	private bool CanSeePlayer()
-	{
-		return this.CanSeePlayerWithResults(out this.closest);
-	}
-
-	private bool CanSeePlayerWithResults(out RaycastHit closest)
-	{
-		Vector3 vector = this.playerTransform.position - this.lookSource.position;
-		int num = Physics.RaycastNonAlloc(this.lookSource.position, vector.normalized, this.rHits, this.maxSeeDistance, this.mask, QueryTriggerInteraction.Ignore);
-		closest = this.rHits[0];
-		if (num == 0)
-		{
-			return false;
-		}
-		for (int i = 0; i < num; i++)
-		{
-			if (closest.distance > this.rHits[i].distance)
-			{
-				closest = this.rHits[i];
-			}
-		}
-		return (this.playerMask & 1 << closest.collider.gameObject.layer) != 0;
-	}
-
-	private void ActivateGhost()
-	{
-		if (this.IsMine())
-		{
-			this.ChangeState(SecondLookSkeleton.GhostState.Activated);
-			return;
-		}
-		this.synchValues.SendRPC("RemoteActivateGhost", RpcTarget.MasterClient, Array.Empty<object>());
-	}
-
-	private void StartChasing()
-	{
-		if (!this.IsMine())
-		{
-			return;
-		}
-		this.ChangeState(SecondLookSkeleton.GhostState.Chasing);
-	}
-
-	private bool CheckPlayerSeen()
-	{
-		if (!this.tapped)
-		{
-			return false;
-		}
-		if (this.playersSeen.Contains(NetworkSystem.Instance.LocalPlayer))
-		{
-			return true;
-		}
-		if (!this.CanSeePlayer())
-		{
-			return false;
-		}
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.synchValues.SendRPC("RemotePlayerSeen", RpcTarget.Others, Array.Empty<object>());
-		}
-		this.playersSeen.Add(NetworkSystem.Instance.LocalPlayer);
-		return true;
-	}
-
-	public void RemoteActivateGhost()
-	{
-		if (this.IsMine() && this.currentState == SecondLookSkeleton.GhostState.Unactivated)
-		{
-			this.ActivateGhost();
-		}
-	}
-
-	public void RemotePlayerSeen(NetPlayer player)
-	{
-		if (this.IsMine() && !this.playersSeen.Contains(player))
-		{
-			this.playersSeen.Add(player);
-		}
-	}
-
-	public void RemotePlayerCaught(NetPlayer player)
-	{
-		if (this.IsMine() && this.currentState == SecondLookSkeleton.GhostState.Chasing)
-		{
-			RigContainer x;
-			VRRigCache.Instance.TryGetVrrig(player, out x);
-			if (x != null && this.playersSeen.Contains(player))
-			{
-				this.ChangeState(SecondLookSkeleton.GhostState.CaughtPlayer);
-			}
-		}
-	}
-
-	private bool IsCurrentlyLooking()
-	{
-		return Vector3.Dot(this.playerTransform.forward, -this.spookyGhost.transform.forward) > 0f && (this.spookyGhost.transform.position - this.playerTransform.position).magnitude < this.ghostActivationDistance && this.CanSeePlayer();
-	}
-
-	private void PatrolMove()
-	{
-		this.GhostMove(this.nextNode.transform, this.patrolSpeed);
-		this.SetHeightOffset();
-		this.CheckReachedNextNode(false, false);
-	}
-
-	private void CheckReachedNextNode(bool forChuck, bool forChase)
-	{
-		if ((this.nextNode.transform.position - this.spookyGhost.transform.position).magnitude < this.reachNodeDist)
-		{
-			if (this.nextNode.connectedNodes.Length == 1)
-			{
-				this.currentNode = this.nextNode;
-				this.nextNode = this.nextNode.connectedNodes[0];
-				this.SyncNodes();
-				return;
-			}
-			if (forChuck)
-			{
-				float distanceToExitNode = this.nextNode.distanceToExitNode;
-				SkeletonPathingNode skeletonPathingNode = this.nextNode.connectedNodes[0];
-				for (int i = 0; i < this.nextNode.connectedNodes.Length; i++)
-				{
-					if (this.nextNode.connectedNodes[i].distanceToExitNode <= distanceToExitNode)
-					{
-						skeletonPathingNode = this.nextNode.connectedNodes[i];
-						distanceToExitNode = skeletonPathingNode.distanceToExitNode;
-					}
-				}
-				this.currentNode = this.nextNode;
-				this.nextNode = skeletonPathingNode;
-				this.SyncNodes();
-				return;
-			}
-			if (forChase)
-			{
-				float num = float.MaxValue;
-				float num2 = num;
-				RigContainer rigContainer = GorillaTagger.Instance.offlineVRRig.rigContainer;
-				RigContainer rigContainer2 = rigContainer;
-				for (int j = 0; j < this.playersSeen.Count; j++)
-				{
-					VRRigCache.Instance.TryGetVrrig(this.playersSeen[j], out rigContainer);
-					if (!(rigContainer == null))
-					{
-						num = (rigContainer.transform.position - this.nextNode.transform.position).sqrMagnitude;
-						if (num < num2)
-						{
-							rigContainer2 = rigContainer;
-							num2 = num;
-						}
-					}
-				}
-				Vector3 vector = rigContainer2.transform.position - this.nextNode.transform.position;
-				SkeletonPathingNode skeletonPathingNode2 = this.nextNode.connectedNodes[0];
-				num2 = 0f;
-				for (int k = 0; k < this.nextNode.connectedNodes.Length; k++)
-				{
-					Vector3 vector2 = this.nextNode.connectedNodes[k].transform.position - this.nextNode.transform.position;
-					num = Mathf.Sign(Vector3.Dot(vector, vector2)) * Vector3.Project(vector, vector2).sqrMagnitude;
-					if (num >= num2)
-					{
-						skeletonPathingNode2 = this.nextNode.connectedNodes[k];
-						num2 = num;
-					}
-				}
-				this.currentNode = this.nextNode;
-				this.nextNode = skeletonPathingNode2;
-				this.SyncNodes();
-				this.resetChaseHistory.Add(this.nextNode);
-				if (this.resetChaseHistory.Count > 8)
-				{
-					this.resetChaseHistory.RemoveAt(0);
-				}
-				if (this.resetChaseHistory.Count >= 8 && this.resetChaseHistory[0] == this.resetChaseHistory[2] == this.resetChaseHistory[4] == this.resetChaseHistory[6] && this.resetChaseHistory[1] == this.resetChaseHistory[3] == this.resetChaseHistory[5] == this.resetChaseHistory[7])
-				{
-					this.resetChaseHistory.Clear();
-					this.ChangeState(SecondLookSkeleton.GhostState.Patrolling);
-				}
-				return;
-			}
-			SkeletonPathingNode skeletonPathingNode3 = this.nextNode.connectedNodes[Random.Range(0, this.nextNode.connectedNodes.Length)];
-			for (int l = 0; l < 10; l++)
-			{
-				skeletonPathingNode3 = this.nextNode.connectedNodes[Random.Range(0, this.nextNode.connectedNodes.Length)];
-				if (!skeletonPathingNode3.ejectionPoint && skeletonPathingNode3 != this.currentNode)
-				{
-					break;
-				}
-			}
-			this.currentNode = this.nextNode;
-			this.nextNode = skeletonPathingNode3;
-			this.SyncNodes();
-		}
-	}
-
-	private void ChaseMove()
-	{
-		this.GhostMove(this.nextNode.transform, this.chaseSpeed);
-		this.SetHeightOffset();
-		this.CheckReachedNextNode(false, true);
-	}
-
-	private void CaughtMove()
-	{
-		this.GhostMove(this.nextNode.transform, this.caughtSpeed);
-		this.CheckReachedNextNode(true, false);
-		this.SyncNodes();
-	}
-
-	private void SyncNodes()
-	{
-		this.synchValues.currentNode = this.pathPoints.IndexOfRef(this.currentNode);
-		this.synchValues.nextNode = this.pathPoints.IndexOfRef(this.nextNode);
-		this.synchValues.angerPoint = this.angerPointIndex;
-	}
-
-	public void SetNodes()
-	{
-		if (this.synchValues.currentNode > this.pathPoints.Length || this.synchValues.currentNode < 0)
-		{
-			return;
-		}
-		this.currentNode = this.pathPoints[this.synchValues.currentNode];
-		this.nextNode = this.pathPoints[this.synchValues.nextNode];
-		this.angerPointIndex = this.synchValues.angerPoint;
-	}
-
-	private bool GhostAtExit()
-	{
-		return this.currentNode.distanceToExitNode == 0f && (this.spookyGhost.transform.position - this.currentNode.transform.position).magnitude < this.reachNodeDist;
-	}
-
-	private void GhostMove(Transform target, float speed)
-	{
-		this.spookyGhost.transform.rotation = Quaternion.RotateTowards(this.spookyGhost.transform.rotation, Quaternion.LookRotation(target.position - this.spookyGhost.transform.position, Vector3.up), this.maxRotSpeed * Time.deltaTime);
-		this.spookyGhost.transform.position += (target.position - this.spookyGhost.transform.position).normalized * speed * Time.deltaTime;
-	}
-
-	private void DeactivateGhost()
-	{
-		this.ChangeState(SecondLookSkeleton.GhostState.PlayerThrown);
-	}
-
-	private bool CanGrab()
-	{
-		return (this.spookyGhost.transform.position - this.playerTransform.position).magnitude < this.catchDistance;
-	}
-
-	private void GrabPlayer()
-	{
-		if (this.IsMine())
-		{
-			if (this.currentState == SecondLookSkeleton.GhostState.Chasing)
-			{
-				this.ChangeState(SecondLookSkeleton.GhostState.CaughtPlayer);
-			}
-			this.localCaught = true;
-		}
-		this.synchValues.SendRPC("RemotePlayerCaught", RpcTarget.MasterClient, Array.Empty<object>());
-	}
-
-	private void FloatPlayer()
-	{
-		RaycastHit raycastHit;
-		if (this.CanSeePlayerWithResults(out raycastHit))
-		{
-			GorillaTagger.Instance.rigidbody.MovePosition(Vector3.MoveTowards(GorillaTagger.Instance.rigidbody.position, this.spookyGhost.transform.position + this.spookyGhost.transform.rotation * this.offsetGrabPosition, this.caughtSpeed * 10f * Time.deltaTime));
-		}
-		else
-		{
-			Vector3 vector = raycastHit.point - this.playerTransform.position;
-			vector += GTPlayer.Instance.headCollider.radius * 1.05f * vector.normalized;
-			GorillaTagger.Instance.transform.parent.position += vector;
-			GTPlayer.Instance.InitializeValues();
-		}
-		GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
-		EquipmentInteractor.instance.ForceStopClimbing();
-		GorillaTagger.Instance.ApplyStatusEffect(GorillaTagger.StatusEffect.Frozen, 0.25f);
-		GorillaTagger.Instance.StartVibration(true, this.hapticStrength / 4f, Time.deltaTime);
-		GorillaTagger.Instance.StartVibration(false, this.hapticStrength / 4f, Time.deltaTime);
-	}
-
-	private void ChuckPlayer()
-	{
-		this.localCaught = false;
-		this.localThrown = true;
-		Vector3 vector = this.currentNode.transform.position - this.currentNode.connectedNodes[0].transform.position;
-		GorillaTagger instance = GorillaTagger.Instance;
-		Rigidbody rigidbody = (instance != null) ? instance.rigidbody : null;
-		GTAudioSourceExtensions.GTPlayClipAtPoint(this.throwSound, this.audioSource.transform.position, 0.25f);
-		this.audioSource.GTStop();
-		this.audioSource.loop = false;
-		if (rigidbody != null)
-		{
-			rigidbody.linearVelocity = vector.normalized * this.throwForce;
-		}
-	}
-
-	private void SetHeightOffset()
-	{
-		int num = Physics.RaycastNonAlloc(this.spookyGhost.transform.position + Vector3.up * this.bodyHeightOffset, Vector3.down, this.rHits, this.maxSeeDistance, this.mask, QueryTriggerInteraction.Ignore);
-		if (num == 0)
-		{
-			this.heightOffset.localPosition = Vector3.zero;
-			return;
-		}
-		RaycastHit raycastHit = this.rHits[0];
-		for (int i = 0; i < num; i++)
-		{
-			if (raycastHit.distance < this.rHits[i].distance)
-			{
-				raycastHit = this.rHits[i];
-			}
-		}
-		this.heightOffset.localPosition = new Vector3(0f, -raycastHit.distance, 0f);
-	}
-
-	private bool IsMine()
-	{
-		return !NetworkSystem.Instance.InRoom || this.synchValues.IsMine;
+		Unactivated,
+		Activated,
+		Patrolling,
+		Chasing,
+		CaughtPlayer,
+		PlayerThrown,
+		Reset
 	}
 
 	public Transform[] angerPoint;
@@ -708,7 +48,7 @@ public class SecondLookSkeleton : MonoBehaviour
 
 	public float timeToFirstDisappear;
 
-	public SecondLookSkeleton.GhostState currentState;
+	public GhostState currentState;
 
 	public GameObject spookyText;
 
@@ -788,14 +128,674 @@ public class SecondLookSkeleton : MonoBehaviour
 
 	private float angerPointChangedTime;
 
-	public enum GhostState
+	private void Start()
 	{
-		Unactivated,
-		Activated,
-		Patrolling,
-		Chasing,
-		CaughtPlayer,
-		PlayerThrown,
-		Reset
+		playersSeen = new List<NetPlayer>();
+		synchValues = GetComponent<SecondLookSkeletonSynchValues>();
+		playerTransform = Camera.main.transform;
+		tapped = !requireTappingToActivate;
+		localCaught = false;
+		audioSource = GetComponentInChildren<AudioSource>();
+		spookyGhost.SetActive(value: false);
+		angerPointIndex = Random.Range(0, angerPoint.Length);
+		angerPointChangedTime = Time.time;
+		synchValues.angerPoint = angerPointIndex;
+		spookyGhost.transform.position = angerPoint[synchValues.angerPoint].position;
+		spookyGhost.transform.rotation = angerPoint[synchValues.angerPoint].rotation;
+		ChangeState(GhostState.Unactivated);
+		rHits = new RaycastHit[20];
+		lookedAway = false;
+		firstLookActivated = false;
+		animator.Play("ArmsOut");
+	}
+
+	private void Update()
+	{
+		ProcessGhostState();
+	}
+
+	public void ChangeState(GhostState newState)
+	{
+		if (newState == currentState)
+		{
+			return;
+		}
+		switch (newState)
+		{
+		case GhostState.Unactivated:
+			spookyGhost.gameObject.SetActive(value: false);
+			audioSource.GTStop();
+			audioSource.loop = false;
+			if (IsMine())
+			{
+				synchValues.angerPoint = Random.Range(0, angerPoint.Length);
+				angerPointIndex = synchValues.angerPoint;
+				angerPointChangedTime = Time.time;
+				spookyGhost.transform.position = angerPoint[angerPointIndex].position;
+				spookyGhost.transform.rotation = angerPoint[angerPointIndex].rotation;
+			}
+			currentState = GhostState.Unactivated;
+			break;
+		case GhostState.Activated:
+			currentState = GhostState.Activated;
+			if (tapped)
+			{
+				GTAudioSourceExtensions.GTPlayClipAtPoint(initialScream, audioSource.transform.position, 1f);
+				if (spookyText != null)
+				{
+					spookyText.SetActive(value: true);
+				}
+				spookyGhost.SetActive(value: true);
+			}
+			animator.Play("ArmsOut");
+			spookyGhost.transform.rotation = Quaternion.LookRotation(playerTransform.position - spookyGhost.transform.position, Vector3.up);
+			if (IsMine())
+			{
+				timeFirstAppeared = Time.time;
+			}
+			break;
+		case GhostState.Patrolling:
+			playersSeen.Clear();
+			if (tapped)
+			{
+				spookyGhost.SetActive(value: true);
+				animator.Play("CrawlPatrol");
+				audioSource.loop = true;
+				audioSource.clip = patrolLoop;
+				audioSource.GTPlay();
+			}
+			if (IsMine())
+			{
+				currentNode = pathPoints[Random.Range(0, pathPoints.Length)];
+				nextNode = currentNode.connectedNodes[Random.Range(0, currentNode.connectedNodes.Length)];
+				SyncNodes();
+				spookyGhost.transform.position = currentNode.transform.position;
+			}
+			currentState = GhostState.Patrolling;
+			break;
+		case GhostState.Chasing:
+			currentState = GhostState.Chasing;
+			resetChaseHistory.Clear();
+			animator.Play("CrawlChase");
+			localThrown = false;
+			localCaught = false;
+			if (tapped)
+			{
+				audioSource.clip = chaseLoop;
+				audioSource.loop = true;
+				audioSource.GTPlay();
+			}
+			break;
+		case GhostState.CaughtPlayer:
+			currentState = GhostState.CaughtPlayer;
+			heightOffset.localPosition = Vector3.zero;
+			if (tapped)
+			{
+				audioSource.GTPlayOneShot(grabbedSound);
+				audioSource.loop = true;
+				audioSource.clip = carryingLoop;
+				audioSource.GTPlay();
+				animator.Play("ArmsOut");
+			}
+			if (!IsMine())
+			{
+				SetNodes();
+			}
+			break;
+		case GhostState.PlayerThrown:
+			currentState = GhostState.PlayerThrown;
+			timeThrown = Time.time;
+			localThrown = false;
+			break;
+		case GhostState.Reset:
+			break;
+		}
+	}
+
+	private void ProcessGhostState()
+	{
+		if (IsMine())
+		{
+			switch (currentState)
+			{
+			case GhostState.Unactivated:
+				if (changeAngerPointOnTimeInterval && Time.time - angerPointChangedTime > changeAngerPointTimeMinutes * 60f)
+				{
+					synchValues.angerPoint = Random.Range(0, angerPoint.Length);
+					angerPointIndex = synchValues.angerPoint;
+					angerPointChangedTime = Time.time;
+				}
+				spookyGhost.transform.position = angerPoint[angerPointIndex].position;
+				spookyGhost.transform.rotation = angerPoint[angerPointIndex].rotation;
+				CheckActivateGhost();
+				break;
+			case GhostState.Activated:
+				if (Time.time > timeFirstAppeared + timeToFirstDisappear)
+				{
+					ChangeState(GhostState.Patrolling);
+				}
+				break;
+			case GhostState.Patrolling:
+				if (!CheckPlayerSeen() && playersSeen.Count == 0)
+				{
+					PatrolMove();
+				}
+				else
+				{
+					StartChasing();
+				}
+				break;
+			case GhostState.Chasing:
+				if (!CheckPlayerSeen() || !CanGrab())
+				{
+					ChaseMove();
+				}
+				else
+				{
+					GrabPlayer();
+				}
+				break;
+			case GhostState.CaughtPlayer:
+				CaughtPlayerUpdate();
+				break;
+			case GhostState.PlayerThrown:
+				if (Time.time > timeThrown + timeThrownCooldown)
+				{
+					ChangeState(GhostState.Unactivated);
+				}
+				break;
+			case GhostState.Reset:
+				break;
+			}
+			return;
+		}
+		SetTappedState();
+		switch (currentState)
+		{
+		case GhostState.Unactivated:
+			SetNodes();
+			spookyGhost.transform.position = angerPoint[angerPointIndex].position;
+			spookyGhost.transform.rotation = angerPoint[angerPointIndex].rotation;
+			CheckActivateGhost();
+			break;
+		case GhostState.Activated:
+			FollowPosition();
+			break;
+		case GhostState.Patrolling:
+			FollowPosition();
+			CheckPlayerSeen();
+			break;
+		case GhostState.Chasing:
+			if (CheckPlayerSeen() && CanGrab())
+			{
+				GrabPlayer();
+			}
+			FollowPosition();
+			break;
+		case GhostState.CaughtPlayer:
+		case GhostState.PlayerThrown:
+			CaughtPlayerUpdate();
+			break;
+		case GhostState.Reset:
+			break;
+		}
+	}
+
+	private void CaughtPlayerUpdate()
+	{
+		if (localThrown)
+		{
+			return;
+		}
+		if (GhostAtExit())
+		{
+			if (localCaught)
+			{
+				ChuckPlayer();
+			}
+			if (IsMine())
+			{
+				DeactivateGhost();
+			}
+		}
+		else
+		{
+			CaughtMove();
+			if (localCaught)
+			{
+				FloatPlayer();
+			}
+			else if (CheckPlayerSeen() && CanGrab())
+			{
+				localCaught = true;
+			}
+		}
+	}
+
+	private void SetTappedState()
+	{
+		if (!tapped)
+		{
+			return;
+		}
+		if (spookyText != null && !spookyText.activeSelf)
+		{
+			spookyText.SetActive(value: true);
+		}
+		if (!spookyGhost.activeSelf || currentState == GhostState.Unactivated)
+		{
+			spookyGhost.SetActive(value: true);
+			switch (currentState)
+			{
+			case GhostState.Unactivated:
+				spookyGhost.SetActive(value: false);
+				break;
+			case GhostState.Activated:
+				animator.Play("ArmsOut");
+				break;
+			case GhostState.Patrolling:
+				animator.Play("CrawlPatrol");
+				audioSource.loop = true;
+				audioSource.clip = patrolLoop;
+				audioSource.GTPlay();
+				break;
+			case GhostState.Chasing:
+				audioSource.clip = chaseLoop;
+				audioSource.loop = true;
+				audioSource.GTPlay();
+				animator.Play("CrawlChase");
+				spookyGhost.SetActive(value: true);
+				break;
+			case GhostState.PlayerThrown:
+				animator.Play("ArmsOut");
+				break;
+			case GhostState.CaughtPlayer:
+				audioSource.GTPlayOneShot(grabbedSound);
+				audioSource.loop = true;
+				audioSource.clip = carryingLoop;
+				audioSource.GTPlay();
+				animator.Play("ArmsOut");
+				break;
+			case GhostState.Reset:
+				break;
+			}
+		}
+	}
+
+	private void FollowPosition()
+	{
+		spookyGhost.transform.position = Vector3.Lerp(spookyGhost.transform.position, synchValues.position, 0.66f);
+		spookyGhost.transform.rotation = Quaternion.Lerp(spookyGhost.transform.rotation, synchValues.rotation, 0.66f);
+		if (currentState == GhostState.Patrolling || currentState == GhostState.Chasing)
+		{
+			SetHeightOffset();
+		}
+		else
+		{
+			heightOffset.localPosition = Vector3.zero;
+		}
+	}
+
+	private void CheckActivateGhost()
+	{
+		if (!tapped || currentState != GhostState.Unactivated || playerTransform == null)
+		{
+			return;
+		}
+		currentlyLooking = IsCurrentlyLooking();
+		if (requireSecondLookToActivate)
+		{
+			if (!firstLookActivated && currentlyLooking)
+			{
+				firstLookActivated = currentlyLooking;
+			}
+			else if (firstLookActivated && !currentlyLooking)
+			{
+				lookedAway = true;
+			}
+			else if (firstLookActivated && lookedAway && currentlyLooking)
+			{
+				firstLookActivated = false;
+				lookedAway = false;
+				ActivateGhost();
+			}
+		}
+		else if (currentlyLooking)
+		{
+			ActivateGhost();
+		}
+	}
+
+	private bool CanSeePlayer()
+	{
+		return CanSeePlayerWithResults(out closest);
+	}
+
+	private bool CanSeePlayerWithResults(out RaycastHit closest)
+	{
+		Vector3 vector = playerTransform.position - lookSource.position;
+		int num = Physics.RaycastNonAlloc(lookSource.position, vector.normalized, rHits, maxSeeDistance, mask, QueryTriggerInteraction.Ignore);
+		closest = rHits[0];
+		if (num == 0)
+		{
+			return false;
+		}
+		for (int i = 0; i < num; i++)
+		{
+			if (closest.distance > rHits[i].distance)
+			{
+				closest = rHits[i];
+			}
+		}
+		return ((int)playerMask & (1 << closest.collider.gameObject.layer)) != 0;
+	}
+
+	private void ActivateGhost()
+	{
+		if (IsMine())
+		{
+			ChangeState(GhostState.Activated);
+		}
+		else
+		{
+			synchValues.SendRPC("RemoteActivateGhost", RpcTarget.MasterClient);
+		}
+	}
+
+	private void StartChasing()
+	{
+		if (IsMine())
+		{
+			ChangeState(GhostState.Chasing);
+		}
+	}
+
+	private bool CheckPlayerSeen()
+	{
+		if (!tapped)
+		{
+			return false;
+		}
+		if (playersSeen.Contains(NetworkSystem.Instance.LocalPlayer))
+		{
+			return true;
+		}
+		if (!CanSeePlayer())
+		{
+			return false;
+		}
+		if (NetworkSystem.Instance.InRoom)
+		{
+			synchValues.SendRPC("RemotePlayerSeen", RpcTarget.Others);
+		}
+		playersSeen.Add(NetworkSystem.Instance.LocalPlayer);
+		return true;
+	}
+
+	public void RemoteActivateGhost()
+	{
+		if (IsMine() && currentState == GhostState.Unactivated)
+		{
+			ActivateGhost();
+		}
+	}
+
+	public void RemotePlayerSeen(NetPlayer player)
+	{
+		if (IsMine() && !playersSeen.Contains(player))
+		{
+			playersSeen.Add(player);
+		}
+	}
+
+	public void RemotePlayerCaught(NetPlayer player)
+	{
+		if (IsMine() && currentState == GhostState.Chasing)
+		{
+			VRRigCache.Instance.TryGetVrrig(player, out var playerRig);
+			if (playerRig != null && playersSeen.Contains(player))
+			{
+				ChangeState(GhostState.CaughtPlayer);
+			}
+		}
+	}
+
+	private bool IsCurrentlyLooking()
+	{
+		if (Vector3.Dot(playerTransform.forward, -spookyGhost.transform.forward) > 0f && (spookyGhost.transform.position - playerTransform.position).magnitude < ghostActivationDistance)
+		{
+			return CanSeePlayer();
+		}
+		return false;
+	}
+
+	private void PatrolMove()
+	{
+		GhostMove(nextNode.transform, patrolSpeed);
+		SetHeightOffset();
+		CheckReachedNextNode(forChuck: false, forChase: false);
+	}
+
+	private void CheckReachedNextNode(bool forChuck, bool forChase)
+	{
+		if (!((nextNode.transform.position - spookyGhost.transform.position).magnitude < reachNodeDist))
+		{
+			return;
+		}
+		if (nextNode.connectedNodes.Length == 1)
+		{
+			currentNode = nextNode;
+			nextNode = nextNode.connectedNodes[0];
+			SyncNodes();
+			return;
+		}
+		if (forChuck)
+		{
+			float distanceToExitNode = nextNode.distanceToExitNode;
+			SkeletonPathingNode skeletonPathingNode = nextNode.connectedNodes[0];
+			for (int i = 0; i < nextNode.connectedNodes.Length; i++)
+			{
+				if (!(nextNode.connectedNodes[i].distanceToExitNode > distanceToExitNode))
+				{
+					skeletonPathingNode = nextNode.connectedNodes[i];
+					distanceToExitNode = skeletonPathingNode.distanceToExitNode;
+				}
+			}
+			currentNode = nextNode;
+			nextNode = skeletonPathingNode;
+			SyncNodes();
+			return;
+		}
+		if (forChase)
+		{
+			float num = float.MaxValue;
+			float num2 = num;
+			RigContainer playerRig = GorillaTagger.Instance.offlineVRRig.rigContainer;
+			RigContainer rigContainer = playerRig;
+			for (int j = 0; j < playersSeen.Count; j++)
+			{
+				VRRigCache.Instance.TryGetVrrig(playersSeen[j], out playerRig);
+				if (!(playerRig == null))
+				{
+					num = (playerRig.transform.position - nextNode.transform.position).sqrMagnitude;
+					if (num < num2)
+					{
+						rigContainer = playerRig;
+						num2 = num;
+					}
+				}
+			}
+			Vector3 vector = rigContainer.transform.position - nextNode.transform.position;
+			SkeletonPathingNode skeletonPathingNode2 = nextNode.connectedNodes[0];
+			num2 = 0f;
+			for (int k = 0; k < nextNode.connectedNodes.Length; k++)
+			{
+				Vector3 vector2 = nextNode.connectedNodes[k].transform.position - nextNode.transform.position;
+				num = Mathf.Sign(Vector3.Dot(vector, vector2)) * Vector3.Project(vector, vector2).sqrMagnitude;
+				if (!(num < num2))
+				{
+					skeletonPathingNode2 = nextNode.connectedNodes[k];
+					num2 = num;
+				}
+			}
+			currentNode = nextNode;
+			nextNode = skeletonPathingNode2;
+			SyncNodes();
+			resetChaseHistory.Add(nextNode);
+			if (resetChaseHistory.Count > 8)
+			{
+				resetChaseHistory.RemoveAt(0);
+			}
+			if (resetChaseHistory.Count >= 8 && resetChaseHistory[0] == resetChaseHistory[2] == (bool)resetChaseHistory[4] == (bool)resetChaseHistory[6] && resetChaseHistory[1] == resetChaseHistory[3] == (bool)resetChaseHistory[5] == (bool)resetChaseHistory[7])
+			{
+				resetChaseHistory.Clear();
+				ChangeState(GhostState.Patrolling);
+			}
+			return;
+		}
+		SkeletonPathingNode skeletonPathingNode3 = nextNode.connectedNodes[Random.Range(0, nextNode.connectedNodes.Length)];
+		for (int l = 0; l < 10; l++)
+		{
+			skeletonPathingNode3 = nextNode.connectedNodes[Random.Range(0, nextNode.connectedNodes.Length)];
+			if (!skeletonPathingNode3.ejectionPoint && skeletonPathingNode3 != currentNode)
+			{
+				break;
+			}
+		}
+		currentNode = nextNode;
+		nextNode = skeletonPathingNode3;
+		SyncNodes();
+	}
+
+	private void ChaseMove()
+	{
+		GhostMove(nextNode.transform, chaseSpeed);
+		SetHeightOffset();
+		CheckReachedNextNode(forChuck: false, forChase: true);
+	}
+
+	private void CaughtMove()
+	{
+		GhostMove(nextNode.transform, caughtSpeed);
+		CheckReachedNextNode(forChuck: true, forChase: false);
+		SyncNodes();
+	}
+
+	private void SyncNodes()
+	{
+		synchValues.currentNode = pathPoints.IndexOfRef(currentNode);
+		synchValues.nextNode = pathPoints.IndexOfRef(nextNode);
+		synchValues.angerPoint = angerPointIndex;
+	}
+
+	public void SetNodes()
+	{
+		if (synchValues.currentNode <= pathPoints.Length && synchValues.currentNode >= 0)
+		{
+			currentNode = pathPoints[synchValues.currentNode];
+			nextNode = pathPoints[synchValues.nextNode];
+			angerPointIndex = synchValues.angerPoint;
+		}
+	}
+
+	private bool GhostAtExit()
+	{
+		if (currentNode.distanceToExitNode == 0f)
+		{
+			return (spookyGhost.transform.position - currentNode.transform.position).magnitude < reachNodeDist;
+		}
+		return false;
+	}
+
+	private void GhostMove(Transform target, float speed)
+	{
+		spookyGhost.transform.rotation = Quaternion.RotateTowards(spookyGhost.transform.rotation, Quaternion.LookRotation(target.position - spookyGhost.transform.position, Vector3.up), maxRotSpeed * Time.deltaTime);
+		spookyGhost.transform.position += (target.position - spookyGhost.transform.position).normalized * speed * Time.deltaTime;
+	}
+
+	private void DeactivateGhost()
+	{
+		ChangeState(GhostState.PlayerThrown);
+	}
+
+	private bool CanGrab()
+	{
+		return (spookyGhost.transform.position - playerTransform.position).magnitude < catchDistance;
+	}
+
+	private void GrabPlayer()
+	{
+		if (IsMine())
+		{
+			if (currentState == GhostState.Chasing)
+			{
+				ChangeState(GhostState.CaughtPlayer);
+			}
+			localCaught = true;
+		}
+		synchValues.SendRPC("RemotePlayerCaught", RpcTarget.MasterClient);
+	}
+
+	private void FloatPlayer()
+	{
+		if (CanSeePlayerWithResults(out var raycastHit))
+		{
+			GorillaTagger.Instance.rigidbody.MovePosition(Vector3.MoveTowards(GorillaTagger.Instance.rigidbody.position, spookyGhost.transform.position + spookyGhost.transform.rotation * offsetGrabPosition, caughtSpeed * 10f * Time.deltaTime));
+		}
+		else
+		{
+			Vector3 vector = raycastHit.point - playerTransform.position;
+			vector += GTPlayer.Instance.headCollider.radius * 1.05f * vector.normalized;
+			GorillaTagger.Instance.transform.parent.position += vector;
+			GTPlayer.Instance.InitializeValues();
+		}
+		GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+		EquipmentInteractor.instance.ForceStopClimbing();
+		GorillaTagger.Instance.ApplyStatusEffect(GorillaTagger.StatusEffect.Frozen, 0.25f);
+		GorillaTagger.Instance.StartVibration(forLeftController: true, hapticStrength / 4f, Time.deltaTime);
+		GorillaTagger.Instance.StartVibration(forLeftController: false, hapticStrength / 4f, Time.deltaTime);
+	}
+
+	private void ChuckPlayer()
+	{
+		localCaught = false;
+		localThrown = true;
+		Vector3 vector = currentNode.transform.position - currentNode.connectedNodes[0].transform.position;
+		Rigidbody rigidbody = GorillaTagger.Instance?.rigidbody;
+		GTAudioSourceExtensions.GTPlayClipAtPoint(throwSound, audioSource.transform.position, 0.25f);
+		audioSource.GTStop();
+		audioSource.loop = false;
+		if (rigidbody != null)
+		{
+			rigidbody.linearVelocity = vector.normalized * throwForce;
+		}
+	}
+
+	private void SetHeightOffset()
+	{
+		int num = Physics.RaycastNonAlloc(spookyGhost.transform.position + Vector3.up * bodyHeightOffset, Vector3.down, rHits, maxSeeDistance, mask, QueryTriggerInteraction.Ignore);
+		if (num == 0)
+		{
+			heightOffset.localPosition = Vector3.zero;
+			return;
+		}
+		RaycastHit raycastHit = rHits[0];
+		for (int i = 0; i < num; i++)
+		{
+			if (raycastHit.distance < rHits[i].distance)
+			{
+				raycastHit = rHits[i];
+			}
+		}
+		heightOffset.localPosition = new Vector3(0f, 0f - raycastHit.distance, 0f);
+	}
+
+	private bool IsMine()
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			return synchValues.IsMine;
+		}
+		return true;
 	}
 }

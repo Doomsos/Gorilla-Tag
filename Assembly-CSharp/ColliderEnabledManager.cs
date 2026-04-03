@@ -1,65 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class ColliderEnabledManager : MonoBehaviour
 {
-	private void Start()
-	{
-		this.floorEnabled = true;
-		this.floorCollidersEnabled = true;
-		ColliderEnabledManager.instance = this;
-	}
-
-	private void OnDestroy()
-	{
-		ColliderEnabledManager.instance = null;
-	}
-
-	public void DisableFloorForFrame()
-	{
-		this.floorEnabled = false;
-	}
-
-	private void LateUpdate()
-	{
-		if (!this.floorEnabled && this.floorCollidersEnabled)
-		{
-			this.DisableFloor();
-		}
-		if (!this.floorCollidersEnabled && Time.time > this.timeDisabled + this.disableLength)
-		{
-			this.floorCollidersEnabled = true;
-		}
-		Collider[] array = this.floorCollider;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = this.floorCollidersEnabled;
-		}
-		if (this.floorCollidersEnabled)
-		{
-			GorillaSurfaceOverride[] array2 = this.walls;
-			for (int i = 0; i < array2.Length; i++)
-			{
-				array2[i].overrideIndex = this.wallsBeforeMaterial;
-			}
-		}
-		else
-		{
-			GorillaSurfaceOverride[] array2 = this.walls;
-			for (int i = 0; i < array2.Length; i++)
-			{
-				array2[i].overrideIndex = this.wallsAfterMaterial;
-			}
-		}
-		this.floorEnabled = true;
-	}
-
-	private void DisableFloor()
-	{
-		this.floorCollidersEnabled = false;
-		this.timeDisabled = Time.time;
-	}
-
 	public static ColliderEnabledManager instance;
 
 	public Collider[] floorCollider;
@@ -81,4 +23,61 @@ public class ColliderEnabledManager : MonoBehaviour
 	public float timeDisabled;
 
 	public float disableLength;
+
+	private void Start()
+	{
+		floorEnabled = true;
+		floorCollidersEnabled = true;
+		instance = this;
+	}
+
+	private void OnDestroy()
+	{
+		instance = null;
+	}
+
+	public void DisableFloorForFrame()
+	{
+		floorEnabled = false;
+	}
+
+	private void LateUpdate()
+	{
+		if (!floorEnabled && floorCollidersEnabled)
+		{
+			DisableFloor();
+		}
+		if (!floorCollidersEnabled && Time.time > timeDisabled + disableLength)
+		{
+			floorCollidersEnabled = true;
+		}
+		Collider[] array = floorCollider;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].enabled = floorCollidersEnabled;
+		}
+		if (floorCollidersEnabled)
+		{
+			GorillaSurfaceOverride[] array2 = walls;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].overrideIndex = wallsBeforeMaterial;
+			}
+		}
+		else
+		{
+			GorillaSurfaceOverride[] array2 = walls;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].overrideIndex = wallsAfterMaterial;
+			}
+		}
+		floorEnabled = true;
+	}
+
+	private void DisableFloor()
+	{
+		floorCollidersEnabled = false;
+		timeDisabled = Time.time;
+	}
 }

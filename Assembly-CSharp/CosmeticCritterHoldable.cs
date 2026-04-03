@@ -1,60 +1,52 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public abstract class CosmeticCritterHoldable : MonoBehaviour
 {
+	protected TransferrableObject transferrableObject;
+
+	protected CallLimiter callLimiter;
+
 	public int OwnerID { get; private set; }
 
-	public bool IsLocal
-	{
-		get
-		{
-			return this.transferrableObject.IsLocalObject();
-		}
-	}
+	public bool IsLocal => transferrableObject.IsLocalObject();
 
 	public bool OwningPlayerMatches(PhotonMessageInfoWrapped info)
 	{
-		return this.transferrableObject.targetRig.creator == info.Sender;
+		return transferrableObject.targetRig.creator == info.Sender;
 	}
 
 	protected virtual CallLimiter CreateCallLimiter()
 	{
-		return new CallLimiter(10, 2f, 0.5f);
+		return new CallLimiter(10, 2f);
 	}
 
 	public void ResetCallLimiter()
 	{
-		this.callLimiter.Reset();
+		callLimiter.Reset();
 	}
 
 	private void TrySetID()
 	{
-		if (this.IsLocal)
+		if (IsLocal)
 		{
 			PlayFabAuthenticator instance = PlayFabAuthenticator.instance;
 			if (instance != null)
 			{
-				string playFabPlayerId = instance.GetPlayFabPlayerId();
-				Type type = base.GetType();
-				this.OwnerID = (playFabPlayerId + ((type != null) ? type.ToString() : null)).GetStaticHash();
-				return;
+				OwnerID = (instance.GetPlayFabPlayerId() + GetType()).GetStaticHash();
 			}
 		}
-		else if (this.transferrableObject.targetRig != null && this.transferrableObject.targetRig.creator != null)
+		else if (transferrableObject.targetRig != null && transferrableObject.targetRig.creator != null)
 		{
-			string userId = this.transferrableObject.targetRig.creator.UserId;
-			Type type2 = base.GetType();
-			this.OwnerID = (userId + ((type2 != null) ? type2.ToString() : null)).GetStaticHash();
+			OwnerID = (transferrableObject.targetRig.creator.UserId + GetType()).GetStaticHash();
 		}
 	}
 
 	protected virtual void Awake()
 	{
-		this.transferrableObject = base.GetComponentInParent<TransferrableObject>();
-		this.callLimiter = this.CreateCallLimiter();
-		if (this.IsLocal)
+		transferrableObject = GetComponentInParent<TransferrableObject>();
+		callLimiter = CreateCallLimiter();
+		if (IsLocal)
 		{
 			CosmeticCritterManager.Instance.RegisterLocalHoldable(this);
 		}
@@ -62,14 +54,10 @@ public abstract class CosmeticCritterHoldable : MonoBehaviour
 
 	protected virtual void OnEnable()
 	{
-		this.TrySetID();
+		TrySetID();
 	}
 
 	protected virtual void OnDisable()
 	{
 	}
-
-	protected TransferrableObject transferrableObject;
-
-	protected CallLimiter callLimiter;
 }

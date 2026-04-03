@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Photon.Pun;
@@ -8,539 +7,25 @@ using UnityEngine.AI;
 
 public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameAgentComponent, IGameEntityDebugComponent
 {
-	private void Awake()
+	public enum Behavior
 	{
-		this.rigidBody = base.GetComponent<Rigidbody>();
-		this.colliders = new List<Collider>(4);
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		if (this.armor != null)
-		{
-			this.armor.SetHp(0);
-		}
-		this.navAgent.updateRotation = false;
-		this.behaviorStartTime = -1.0;
-		this.agent.onBodyStateChanged += this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-		this.senseNearby.Setup(this.headTransform, this.entity);
+		Mine,
+		Idle,
+		Alert,
+		Return,
+		Rage,
+		Chase,
+		Attack,
+		Investigate,
+		Jump,
+		Count
 	}
 
-	public void OnEntityInit()
+	public enum BodyState
 	{
-		this.abilityMine.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityIdle.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityRage.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityAlert.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityChase.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityReturn.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityAttack.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityInvestigate.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		int num = (int)this.entity.createData;
-		this.Setup((long)num);
-		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
-		{
-			foreach (GRBonusEntry entry in this.entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
-			{
-				this.attributes.AddBonus(entry);
-			}
-		}
-		this.navAgent.speed = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
-		this.agent.navAgent.autoTraverseOffMeshLink = false;
-		this.agent.onJumpRequested += this.OnAgentJumpRequested;
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnDestroy()
-	{
-		this.agent.onBodyStateChanged -= this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
-	}
-
-	private void Setup(long createData)
-	{
-		this.SetPatrolPath(createData);
-		if (this.patrolPath != null && this.patrolPath.patrolNodes.Count > 0)
-		{
-			this.nextPatrolNode = 0;
-			this.target = this.patrolPath.patrolNodes[0];
-			this.idleLocation = this.target;
-			this.SetBehavior(GREnemyPhantom.Behavior.Return, true);
-		}
-		else
-		{
-			this.SetBehavior(GREnemyPhantom.Behavior.Mine, true);
-		}
-		this.SetBodyState(GREnemyPhantom.BodyState.Bones, true);
-		if (this.attackLight != null)
-		{
-			this.attackLight.gameObject.SetActive(false);
-		}
-		if (this.negativeLight != null)
-		{
-			this.negativeLight.gameObject.SetActive(false);
-		}
-		GREnemy.HideRenderers(this.bones, false);
-		GREnemy.HideRenderers(this.always, false);
-	}
-
-	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
-	{
-		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
-		this.SetBehavior(GREnemyPhantom.Behavior.Jump, false);
-	}
-
-	public void OnNetworkBehaviorStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 9)
-		{
-			return;
-		}
-		this.SetBehavior((GREnemyPhantom.Behavior)newState, false);
-	}
-
-	public void OnNetworkBodyStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 2)
-		{
-			return;
-		}
-		this.SetBodyState((GREnemyPhantom.BodyState)newState, false);
-	}
-
-	public void SetPatrolPath(long createData)
-	{
-		GRPatrolPath grpatrolPath = GhostReactorManager.Get(this.entity).reactor.GetPatrolPath(createData);
-		this.patrolPath = grpatrolPath;
-	}
-
-	public void SetNextPatrolNode(int nextPatrolNode)
-	{
-		this.nextPatrolNode = nextPatrolNode;
-	}
-
-	public void SetHP(int hp)
-	{
-		this.hp = hp;
-	}
-
-	public void SetBehavior(GREnemyPhantom.Behavior newBehavior, bool force = false)
-	{
-		if (this.currBehavior == newBehavior && !force)
-		{
-			return;
-		}
-		this.lastStateChange = PhotonNetwork.Time;
-		switch (this.currBehavior)
-		{
-		case GREnemyPhantom.Behavior.Mine:
-			this.abilityMine.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Idle:
-			this.abilityIdle.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Alert:
-			this.abilityAlert.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Rage:
-			this.abilityRage.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Chase:
-			this.abilityChase.Stop();
-			if (this.negativeLight != null)
-			{
-				this.negativeLight.gameObject.SetActive(false);
-			}
-			break;
-		case GREnemyPhantom.Behavior.Attack:
-			this.abilityAttack.Stop();
-			if (this.attackLight != null)
-			{
-				this.attackLight.gameObject.SetActive(false);
-			}
-			break;
-		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.Stop();
-			break;
-		case GREnemyPhantom.Behavior.Jump:
-			this.abilityJump.Stop();
-			break;
-		}
-		this.currBehavior = newBehavior;
-		this.behaviorStartTime = Time.timeAsDouble;
-		switch (this.currBehavior)
-		{
-		case GREnemyPhantom.Behavior.Mine:
-			this.abilityMine.Start();
-			break;
-		case GREnemyPhantom.Behavior.Idle:
-			this.abilityIdle.Start();
-			break;
-		case GREnemyPhantom.Behavior.Alert:
-			this.abilityAlert.Start();
-			this.soundAlert.Play(this.audioSource);
-			break;
-		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.Start();
-			this.soundReturn.Play(this.audioSource);
-			this.abilityReturn.SetTarget(this.idleLocation);
-			break;
-		case GREnemyPhantom.Behavior.Rage:
-			this.abilityRage.Start();
-			this.soundRage.Play(this.audioSource);
-			break;
-		case GREnemyPhantom.Behavior.Chase:
-			this.abilityChase.Start();
-			this.soundChase.Play(this.audioSource);
-			this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
-			this.investigateLocation = null;
-			if (this.negativeLight != null)
-			{
-				this.negativeLight.gameObject.SetActive(true);
-			}
-			break;
-		case GREnemyPhantom.Behavior.Attack:
-			this.abilityAttack.Start();
-			this.abilityAttack.SetTargetPlayer(this.agent.targetPlayer);
-			this.investigateLocation = null;
-			this.soundAttack.Play(this.audioSource);
-			if (this.attackLight != null)
-			{
-				this.attackLight.gameObject.SetActive(true);
-			}
-			break;
-		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.Start();
-			break;
-		case GREnemyPhantom.Behavior.Jump:
-			this.abilityJump.Start();
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestBehaviorChange((byte)this.currBehavior);
-		}
-	}
-
-	public void SetBodyState(GREnemyPhantom.BodyState newBodyState, bool force = false)
-	{
-		if (this.currBodyState == newBodyState && !force)
-		{
-			return;
-		}
-		if (this.currBodyState == GREnemyPhantom.BodyState.Bones)
-		{
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-		}
-		this.currBodyState = newBodyState;
-		if (this.currBodyState == GREnemyPhantom.BodyState.Bones)
-		{
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestStateChange((byte)newBodyState);
-		}
-	}
-
-	private void RefreshBody()
-	{
-		GREnemyPhantom.BodyState bodyState = this.currBodyState;
-		if (bodyState == GREnemyPhantom.BodyState.Destroyed)
-		{
-			this.armor.SetHp(0);
-			return;
-		}
-		if (bodyState != GREnemyPhantom.BodyState.Bones)
-		{
-			return;
-		}
-		this.armor.SetHp(0);
-	}
-
-	private void Update()
-	{
-		this.OnUpdate(Time.deltaTime);
-	}
-
-	private void ChooseNewBehavior()
-	{
-		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
-		{
-			this.investigateLocation = null;
-			this.SetBehavior(GREnemyPhantom.Behavior.Alert, false);
-			return;
-		}
-		this.investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, this.hearingRadius, this.investigateLocation);
-		if (this.investigateLocation != null)
-		{
-			this.abilityInvestigate.SetTargetPos(this.investigateLocation.Value);
-			this.SetBehavior(GREnemyPhantom.Behavior.Investigate, false);
-			return;
-		}
-		if (this.currBehavior == GREnemyPhantom.Behavior.Investigate)
-		{
-			if (this.idleLocation != null)
-			{
-				this.SetBehavior(GREnemyPhantom.Behavior.Return, false);
-				return;
-			}
-			this.SetBehavior(GREnemyPhantom.Behavior.Idle, false);
-		}
-	}
-
-	public void OnEntityThink(float dt)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		GREnemyPhantom.tempRigs.Clear();
-		GREnemyPhantom.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GREnemyPhantom.tempRigs);
-		this.senseNearby.UpdateNearby(GREnemyPhantom.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		this.agent.RequestTarget((vrrig == null) ? null : vrrig.OwningNetPlayer);
-		switch (this.currBehavior)
-		{
-		case GREnemyPhantom.Behavior.Mine:
-			this.ChooseNewBehavior();
-			return;
-		case GREnemyPhantom.Behavior.Idle:
-			this.ChooseNewBehavior();
-			return;
-		case GREnemyPhantom.Behavior.Alert:
-		case GREnemyPhantom.Behavior.Rage:
-		case GREnemyPhantom.Behavior.Attack:
-			break;
-		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.SetTarget(this.idleLocation);
-			this.abilityReturn.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		case GREnemyPhantom.Behavior.Chase:
-			if (this.agent.targetPlayer != null)
-			{
-				this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
-			}
-			this.abilityChase.Think(dt);
-			return;
-		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.Think(dt);
-			this.ChooseNewBehavior();
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnUpdate(float dt)
-	{
-		if (this.entity.IsAuthority())
-		{
-			this.OnUpdateAuthority(dt);
-			return;
-		}
-		this.OnUpdateRemote(dt);
-	}
-
-	public void OnUpdateAuthority(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyPhantom.Behavior.Mine:
-			this.abilityMine.UpdateAuthority(dt);
-			if (this.idleLocation != null)
-			{
-				GameAgent.UpdateFacingDir(base.transform, this.agent.navAgent, this.idleLocation.forward, 180f);
-				return;
-			}
-			break;
-		case GREnemyPhantom.Behavior.Idle:
-			this.abilityIdle.UpdateAuthority(dt);
-			return;
-		case GREnemyPhantom.Behavior.Alert:
-			this.UpdateAlert(dt);
-			return;
-		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.UpdateAuthority(dt);
-			if (this.abilityReturn.IsDone())
-			{
-				this.SetBehavior(GREnemyPhantom.Behavior.Mine, false);
-				return;
-			}
-			break;
-		case GREnemyPhantom.Behavior.Rage:
-			this.abilityRage.UpdateAuthority(dt);
-			if (this.abilityRage.IsDone())
-			{
-				this.SetBehavior(GREnemyPhantom.Behavior.Chase, false);
-				return;
-			}
-			break;
-		case GREnemyPhantom.Behavior.Chase:
-		{
-			this.abilityChase.UpdateAuthority(dt);
-			if (this.abilityChase.IsDone())
-			{
-				this.SetBehavior(GREnemyPhantom.Behavior.Return, false);
-				return;
-			}
-			GRPlayer grplayer = GRPlayer.Get(this.agent.targetPlayer);
-			if (grplayer != null)
-			{
-				float num = this.attackRange * this.attackRange;
-				if ((grplayer.transform.position - base.transform.position).sqrMagnitude < num)
-				{
-					this.SetBehavior(GREnemyPhantom.Behavior.Attack, false);
-					return;
-				}
-			}
-			break;
-		}
-		case GREnemyPhantom.Behavior.Attack:
-			this.abilityAttack.UpdateAuthority(dt);
-			if (this.abilityAttack.IsDone())
-			{
-				this.SetBehavior(GREnemyPhantom.Behavior.Chase, false);
-				return;
-			}
-			break;
-		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.UpdateAuthority(dt);
-			return;
-		case GREnemyPhantom.Behavior.Jump:
-			this.abilityJump.UpdateAuthority(dt);
-			if (this.abilityJump.IsDone())
-			{
-				this.ChooseNewBehavior();
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnUpdateRemote(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.UpdateRemote(dt);
-			return;
-		case GREnemyPhantom.Behavior.Rage:
-			break;
-		case GREnemyPhantom.Behavior.Chase:
-			this.abilityChase.UpdateRemote(dt);
-			return;
-		case GREnemyPhantom.Behavior.Attack:
-			this.abilityAttack.UpdateRemote(dt);
-			return;
-		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.UpdateRemote(dt);
-			return;
-		case GREnemyPhantom.Behavior.Jump:
-			this.abilityJump.UpdateRemote(dt);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void UpdateAlert(float dt)
-	{
-		this.abilityAlert.SetTargetPlayer(this.agent.targetPlayer);
-		this.abilityAlert.UpdateAuthority(dt);
-		double timeAsDouble = Time.timeAsDouble;
-		if (!this.senseNearby.IsAnyoneNearby())
-		{
-			this.SetBehavior(GREnemyPhantom.Behavior.Return, false);
-			return;
-		}
-		float num;
-		if (this.abilityAlert.IsDone() && this.senseNearby.PickClosest(out num) != null)
-		{
-			this.SetBehavior(GREnemyPhantom.Behavior.Rage, false);
-		}
-	}
-
-	private void OnTriggerEnter(Collider collider)
-	{
-		if (this.currBodyState == GREnemyPhantom.BodyState.Destroyed)
-		{
-			return;
-		}
-		if (this.currBehavior != GREnemyPhantom.Behavior.Attack)
-		{
-			return;
-		}
-		Rigidbody attachedRigidbody = collider.attachedRigidbody;
-		if (attachedRigidbody != null)
-		{
-			GRPlayer component = attachedRigidbody.GetComponent<GRPlayer>();
-			if (component != null && component.gamePlayer.IsLocal())
-			{
-				GhostReactorManager.Get(this.entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Phantom, this.entity.id, component, base.transform.position);
-			}
-			GRBreakable component2 = attachedRigidbody.GetComponent<GRBreakable>();
-			GameHittable component3 = attachedRigidbody.GetComponent<GameHittable>();
-			if (component2 != null && component3 != null)
-			{
-				GameHitData hitData = new GameHitData
-				{
-					hitTypeId = 0,
-					hitEntityId = component3.gameEntity.id,
-					hitByEntityId = this.entity.id,
-					hitEntityPosition = component2.transform.position,
-					hitImpulse = Vector3.zero,
-					hitPosition = component2.transform.position,
-					hittablePoint = component3.FindHittablePoint(collider)
-				};
-				component3.RequestHit(hitData);
-			}
-		}
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("State: <color=\"yellow\">{0}<color=\"white\"> HP: <color=\"yellow\">{1}<color=\"white\">", this.currBehavior.ToString(), this.hp));
-	}
-
-	public void OnGameEntitySerialize(BinaryWriter writer)
-	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		byte value3 = (byte)this.nextPatrolNode;
-		writer.Write(value);
-		writer.Write(value2);
-		writer.Write(this.hp);
-		writer.Write(value3);
-	}
-
-	public void OnGameEntityDeserialize(BinaryReader reader)
-	{
-		GREnemyPhantom.Behavior newBehavior = (GREnemyPhantom.Behavior)reader.ReadByte();
-		GREnemyPhantom.BodyState newBodyState = (GREnemyPhantom.BodyState)reader.ReadByte();
-		int num = reader.ReadInt32();
-		byte b = reader.ReadByte();
-		this.SetPatrolPath(this.entity.createData);
-		this.SetNextPatrolNode((int)b);
-		this.SetHP(num);
-		this.SetBehavior(newBehavior, true);
-		this.SetBodyState(newBodyState, true);
+		Destroyed,
+		Bones,
+		Count
 	}
 
 	public GameEntity entity;
@@ -627,13 +112,13 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 	public int hp;
 
 	[ReadOnly]
-	public GREnemyPhantom.Behavior currBehavior;
+	public Behavior currBehavior;
 
 	[ReadOnly]
 	public double behaviorEndTime;
 
 	[ReadOnly]
-	public GREnemyPhantom.BodyState currBodyState;
+	public BodyState currBodyState;
 
 	[ReadOnly]
 	public int nextPatrolNode;
@@ -650,24 +135,520 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 
 	private static List<VRRig> tempRigs = new List<VRRig>(16);
 
-	public enum Behavior
+	private void Awake()
 	{
-		Mine,
-		Idle,
-		Alert,
-		Return,
-		Rage,
-		Chase,
-		Attack,
-		Investigate,
-		Jump,
-		Count
+		rigidBody = GetComponent<Rigidbody>();
+		colliders = new List<Collider>(4);
+		GetComponentsInChildren(colliders);
+		if (armor != null)
+		{
+			armor.SetHp(0);
+		}
+		navAgent.updateRotation = false;
+		behaviorStartTime = -1.0;
+		agent.onBodyStateChanged += OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged += OnNetworkBehaviorStateChange;
+		senseNearby.Setup(headTransform, entity);
 	}
 
-	public enum BodyState
+	public void OnEntityInit()
 	{
-		Destroyed,
-		Bones,
-		Count
+		abilityMine.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityIdle.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityRage.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityAlert.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityChase.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityReturn.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityAttack.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityInvestigate.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityJump.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		int num = (int)entity.createData;
+		Setup(num);
+		if ((bool)entity && (bool)entity.manager && (bool)entity.manager.ghostReactorManager && (bool)entity.manager.ghostReactorManager.reactor)
+		{
+			foreach (GRBonusEntry enemyGlobalBonuse in entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
+			{
+				attributes.AddBonus(enemyGlobalBonuse);
+			}
+		}
+		navAgent.speed = attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
+		agent.navAgent.autoTraverseOffMeshLink = false;
+		agent.onJumpRequested += OnAgentJumpRequested;
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnDestroy()
+	{
+		agent.onBodyStateChanged -= OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged -= OnNetworkBehaviorStateChange;
+	}
+
+	private void Setup(long createData)
+	{
+		SetPatrolPath(createData);
+		if (patrolPath != null && patrolPath.patrolNodes.Count > 0)
+		{
+			nextPatrolNode = 0;
+			target = patrolPath.patrolNodes[0];
+			idleLocation = target;
+			SetBehavior(Behavior.Return, force: true);
+		}
+		else
+		{
+			SetBehavior(Behavior.Mine, force: true);
+		}
+		SetBodyState(BodyState.Bones, force: true);
+		if (attackLight != null)
+		{
+			attackLight.gameObject.SetActive(value: false);
+		}
+		if (negativeLight != null)
+		{
+			negativeLight.gameObject.SetActive(value: false);
+		}
+		GREnemy.HideRenderers(bones, hide: false);
+		GREnemy.HideRenderers(always, hide: false);
+	}
+
+	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
+	{
+		abilityJump.SetupJump(start, end, heightScale, speedScale);
+		SetBehavior(Behavior.Jump);
+	}
+
+	public void OnNetworkBehaviorStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 9)
+		{
+			SetBehavior((Behavior)newState);
+		}
+	}
+
+	public void OnNetworkBodyStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 2)
+		{
+			SetBodyState((BodyState)newState);
+		}
+	}
+
+	public void SetPatrolPath(long createData)
+	{
+		GRPatrolPath gRPatrolPath = GhostReactorManager.Get(entity).reactor.GetPatrolPath(createData);
+		patrolPath = gRPatrolPath;
+	}
+
+	public void SetNextPatrolNode(int nextPatrolNode)
+	{
+		this.nextPatrolNode = nextPatrolNode;
+	}
+
+	public void SetHP(int hp)
+	{
+		this.hp = hp;
+	}
+
+	public void SetBehavior(Behavior newBehavior, bool force = false)
+	{
+		if (currBehavior == newBehavior && !force)
+		{
+			return;
+		}
+		lastStateChange = PhotonNetwork.Time;
+		switch (currBehavior)
+		{
+		case Behavior.Chase:
+			abilityChase.Stop();
+			if (negativeLight != null)
+			{
+				negativeLight.gameObject.SetActive(value: false);
+			}
+			break;
+		case Behavior.Return:
+			abilityReturn.Stop();
+			break;
+		case Behavior.Mine:
+			abilityMine.Stop();
+			break;
+		case Behavior.Idle:
+			abilityIdle.Stop();
+			break;
+		case Behavior.Rage:
+			abilityRage.Stop();
+			break;
+		case Behavior.Alert:
+			abilityAlert.Stop();
+			break;
+		case Behavior.Attack:
+			abilityAttack.Stop();
+			if (attackLight != null)
+			{
+				attackLight.gameObject.SetActive(value: false);
+			}
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Stop();
+			break;
+		case Behavior.Jump:
+			abilityJump.Stop();
+			break;
+		}
+		currBehavior = newBehavior;
+		behaviorStartTime = Time.timeAsDouble;
+		switch (currBehavior)
+		{
+		case Behavior.Return:
+			abilityReturn.Start();
+			soundReturn.Play(audioSource);
+			abilityReturn.SetTarget(idleLocation);
+			break;
+		case Behavior.Chase:
+			abilityChase.Start();
+			soundChase.Play(audioSource);
+			abilityChase.SetTargetPlayer(agent.targetPlayer);
+			investigateLocation = null;
+			if (negativeLight != null)
+			{
+				negativeLight.gameObject.SetActive(value: true);
+			}
+			break;
+		case Behavior.Attack:
+			abilityAttack.Start();
+			abilityAttack.SetTargetPlayer(agent.targetPlayer);
+			investigateLocation = null;
+			soundAttack.Play(audioSource);
+			if (attackLight != null)
+			{
+				attackLight.gameObject.SetActive(value: true);
+			}
+			break;
+		case Behavior.Idle:
+			abilityIdle.Start();
+			break;
+		case Behavior.Mine:
+			abilityMine.Start();
+			break;
+		case Behavior.Rage:
+			abilityRage.Start();
+			soundRage.Play(audioSource);
+			break;
+		case Behavior.Alert:
+			abilityAlert.Start();
+			soundAlert.Play(audioSource);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Start();
+			break;
+		case Behavior.Jump:
+			abilityJump.Start();
+			break;
+		}
+		RefreshBody();
+		if (entity.IsAuthority())
+		{
+			agent.RequestBehaviorChange((byte)currBehavior);
+		}
+	}
+
+	public void SetBodyState(BodyState newBodyState, bool force = false)
+	{
+		if (currBodyState != newBodyState || force)
+		{
+			if (currBodyState == BodyState.Bones)
+			{
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+			}
+			currBodyState = newBodyState;
+			if (currBodyState == BodyState.Bones)
+			{
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+			}
+			RefreshBody();
+			if (entity.IsAuthority())
+			{
+				agent.RequestStateChange((byte)newBodyState);
+			}
+		}
+	}
+
+	private void RefreshBody()
+	{
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			armor.SetHp(0);
+			break;
+		case BodyState.Bones:
+			armor.SetHp(0);
+			break;
+		}
+	}
+
+	private void Update()
+	{
+		OnUpdate(Time.deltaTime);
+	}
+
+	private void ChooseNewBehavior()
+	{
+		if (!GhostReactorManager.AggroDisabled && senseNearby.IsAnyoneNearby())
+		{
+			investigateLocation = null;
+			SetBehavior(Behavior.Alert);
+			return;
+		}
+		investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, hearingRadius, investigateLocation);
+		if (investigateLocation.HasValue)
+		{
+			abilityInvestigate.SetTargetPos(investigateLocation.Value);
+			SetBehavior(Behavior.Investigate);
+		}
+		else if (currBehavior == Behavior.Investigate)
+		{
+			if (idleLocation != null)
+			{
+				SetBehavior(Behavior.Return);
+			}
+			else
+			{
+				SetBehavior(Behavior.Idle);
+			}
+		}
+	}
+
+	public void OnEntityThink(float dt)
+	{
+		if (!entity.IsAuthority())
+		{
+			return;
+		}
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+		float outDistanceSq;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		agent.RequestTarget((vRRig == null) ? null : vRRig.OwningNetPlayer);
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			ChooseNewBehavior();
+			break;
+		case Behavior.Mine:
+			ChooseNewBehavior();
+			break;
+		case Behavior.Return:
+			abilityReturn.SetTarget(idleLocation);
+			abilityReturn.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Chase:
+			if (agent.targetPlayer != null)
+			{
+				abilityChase.SetTargetPlayer(agent.targetPlayer);
+			}
+			abilityChase.Think(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Alert:
+		case Behavior.Rage:
+		case Behavior.Attack:
+			break;
+		}
+	}
+
+	public void OnUpdate(float dt)
+	{
+		if (entity.IsAuthority())
+		{
+			OnUpdateAuthority(dt);
+		}
+		else
+		{
+			OnUpdateRemote(dt);
+		}
+	}
+
+	public void OnUpdateAuthority(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			abilityIdle.UpdateAuthority(dt);
+			break;
+		case Behavior.Mine:
+			abilityMine.UpdateAuthority(dt);
+			if (idleLocation != null)
+			{
+				GameAgent.UpdateFacingDir(base.transform, agent.navAgent, idleLocation.forward, 180f);
+			}
+			break;
+		case Behavior.Rage:
+			abilityRage.UpdateAuthority(dt);
+			if (abilityRage.IsDone())
+			{
+				SetBehavior(Behavior.Chase);
+			}
+			break;
+		case Behavior.Alert:
+			UpdateAlert(dt);
+			break;
+		case Behavior.Return:
+			abilityReturn.UpdateAuthority(dt);
+			if (abilityReturn.IsDone())
+			{
+				SetBehavior(Behavior.Mine);
+			}
+			break;
+		case Behavior.Chase:
+		{
+			abilityChase.UpdateAuthority(dt);
+			if (abilityChase.IsDone())
+			{
+				SetBehavior(Behavior.Return);
+				break;
+			}
+			GRPlayer gRPlayer = GRPlayer.Get(agent.targetPlayer);
+			if (gRPlayer != null)
+			{
+				float num = attackRange * attackRange;
+				if ((gRPlayer.transform.position - base.transform.position).sqrMagnitude < num)
+				{
+					SetBehavior(Behavior.Attack);
+				}
+			}
+			break;
+		}
+		case Behavior.Attack:
+			abilityAttack.UpdateAuthority(dt);
+			if (abilityAttack.IsDone())
+			{
+				SetBehavior(Behavior.Chase);
+			}
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateAuthority(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateAuthority(dt);
+			if (abilityJump.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		}
+	}
+
+	public void OnUpdateRemote(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Attack:
+			abilityAttack.UpdateRemote(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateRemote(dt);
+			break;
+		case Behavior.Chase:
+			abilityChase.UpdateRemote(dt);
+			break;
+		case Behavior.Return:
+			abilityReturn.UpdateRemote(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateRemote(dt);
+			break;
+		case Behavior.Rage:
+			break;
+		}
+	}
+
+	public void UpdateAlert(float dt)
+	{
+		abilityAlert.SetTargetPlayer(agent.targetPlayer);
+		abilityAlert.UpdateAuthority(dt);
+		_ = Time.timeAsDouble;
+		float outDistanceSq;
+		if (!senseNearby.IsAnyoneNearby())
+		{
+			SetBehavior(Behavior.Return);
+		}
+		else if (abilityAlert.IsDone() && senseNearby.PickClosest(out outDistanceSq) != null)
+		{
+			SetBehavior(Behavior.Rage);
+		}
+	}
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		if (currBodyState == BodyState.Destroyed || currBehavior != Behavior.Attack)
+		{
+			return;
+		}
+		Rigidbody attachedRigidbody = collider.attachedRigidbody;
+		if (attachedRigidbody != null)
+		{
+			GRPlayer component = attachedRigidbody.GetComponent<GRPlayer>();
+			if (component != null && component.gamePlayer.IsLocal())
+			{
+				GhostReactorManager.Get(entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Phantom, entity.id, component, base.transform.position);
+			}
+			GRBreakable component2 = attachedRigidbody.GetComponent<GRBreakable>();
+			GameHittable component3 = attachedRigidbody.GetComponent<GameHittable>();
+			if (component2 != null && component3 != null)
+			{
+				GameHitData hitData = new GameHitData
+				{
+					hitTypeId = 0,
+					hitEntityId = component3.gameEntity.id,
+					hitByEntityId = entity.id,
+					hitEntityPosition = component2.transform.position,
+					hitImpulse = Vector3.zero,
+					hitPosition = component2.transform.position,
+					hittablePoint = component3.FindHittablePoint(collider)
+				};
+				component3.RequestHit(hitData);
+			}
+		}
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"State: <color=\"yellow\">{currBehavior.ToString()}<color=\"white\"> HP: <color=\"yellow\">{hp}<color=\"white\">");
+	}
+
+	public void OnGameEntitySerialize(BinaryWriter writer)
+	{
+		byte value = (byte)currBehavior;
+		byte value2 = (byte)currBodyState;
+		byte value3 = (byte)nextPatrolNode;
+		writer.Write(value);
+		writer.Write(value2);
+		writer.Write(hp);
+		writer.Write(value3);
+	}
+
+	public void OnGameEntityDeserialize(BinaryReader reader)
+	{
+		Behavior newBehavior = (Behavior)reader.ReadByte();
+		BodyState newBodyState = (BodyState)reader.ReadByte();
+		int hP = reader.ReadInt32();
+		byte b = reader.ReadByte();
+		SetPatrolPath(entity.createData);
+		SetNextPatrolNode(b);
+		SetHP(hP);
+		SetBehavior(newBehavior, force: true);
+		SetBodyState(newBodyState, force: true);
 	}
 }

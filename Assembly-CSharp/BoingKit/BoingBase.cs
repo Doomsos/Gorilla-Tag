@@ -1,52 +1,32 @@
-﻿using System;
 using UnityEngine;
 
-namespace BoingKit
+namespace BoingKit;
+
+public class BoingBase : MonoBehaviour
 {
-	public class BoingBase : MonoBehaviour
+	[SerializeField]
+	private Version m_currentVersion;
+
+	[SerializeField]
+	private Version m_previousVersion;
+
+	[SerializeField]
+	private Version m_initialVersion = BoingKit.Version;
+
+	public Version CurrentVersion => m_currentVersion;
+
+	public Version PreviousVersion => m_previousVersion;
+
+	public Version InitialVersion => m_initialVersion;
+
+	protected virtual void OnUpgrade(Version oldVersion, Version newVersion)
 	{
-		public Version CurrentVersion
+		m_previousVersion = m_currentVersion;
+		if (m_currentVersion.Revision < 33)
 		{
-			get
-			{
-				return this.m_currentVersion;
-			}
+			m_initialVersion = Version.Invalid;
+			m_previousVersion = Version.Invalid;
 		}
-
-		public Version PreviousVersion
-		{
-			get
-			{
-				return this.m_previousVersion;
-			}
-		}
-
-		public Version InitialVersion
-		{
-			get
-			{
-				return this.m_initialVersion;
-			}
-		}
-
-		protected virtual void OnUpgrade(Version oldVersion, Version newVersion)
-		{
-			this.m_previousVersion = this.m_currentVersion;
-			if (this.m_currentVersion.Revision < 33)
-			{
-				this.m_initialVersion = Version.Invalid;
-				this.m_previousVersion = Version.Invalid;
-			}
-			this.m_currentVersion = newVersion;
-		}
-
-		[SerializeField]
-		private Version m_currentVersion;
-
-		[SerializeField]
-		private Version m_previousVersion;
-
-		[SerializeField]
-		private Version m_initialVersion = BoingKit.Version;
+		m_currentVersion = newVersion;
 	}
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 

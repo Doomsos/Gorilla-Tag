@@ -1,6 +1,4 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
@@ -8,208 +6,6 @@ using UnityEngine;
 
 public class KIDAgeGate : MonoBehaviour
 {
-	public static int UserAge
-	{
-		get
-		{
-			return KIDAgeGate._ageValue;
-		}
-	}
-
-	public static bool DisplayedScreen { get; private set; }
-
-	private void Awake()
-	{
-		if (KIDAgeGate._activeReference != null)
-		{
-			Debug.LogError("[KID::Age_Gate] Age Gate already exists, this is a duplicate, deleting the new one");
-			Object.DestroyImmediate(base.gameObject);
-			return;
-		}
-		KIDAgeGate._activeReference = this;
-	}
-
-	private void Start()
-	{
-		KIDAgeGate.<Start>d__29 <Start>d__;
-		<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Start>d__.<>1__state = -1;
-		<Start>d__.<>t__builder.Start<KIDAgeGate.<Start>d__29>(ref <Start>d__);
-	}
-
-	private void OnDestroy()
-	{
-		this.requestCancellationSource.Cancel();
-	}
-
-	public static Task BeginAgeGate()
-	{
-		KIDAgeGate.<BeginAgeGate>d__31 <BeginAgeGate>d__;
-		<BeginAgeGate>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<BeginAgeGate>d__.<>1__state = -1;
-		<BeginAgeGate>d__.<>t__builder.Start<KIDAgeGate.<BeginAgeGate>d__31>(ref <BeginAgeGate>d__);
-		return <BeginAgeGate>d__.<>t__builder.Task;
-	}
-
-	private Task StartAgeGate()
-	{
-		KIDAgeGate.<StartAgeGate>d__32 <StartAgeGate>d__;
-		<StartAgeGate>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<StartAgeGate>d__.<>4__this = this;
-		<StartAgeGate>d__.<>1__state = -1;
-		<StartAgeGate>d__.<>t__builder.Start<KIDAgeGate.<StartAgeGate>d__32>(ref <StartAgeGate>d__);
-		return <StartAgeGate>d__.<>t__builder.Task;
-	}
-
-	private Task InitialiseAgeGate()
-	{
-		KIDAgeGate.<InitialiseAgeGate>d__33 <InitialiseAgeGate>d__;
-		<InitialiseAgeGate>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<InitialiseAgeGate>d__.<>4__this = this;
-		<InitialiseAgeGate>d__.<>1__state = -1;
-		<InitialiseAgeGate>d__.<>t__builder.Start<KIDAgeGate.<InitialiseAgeGate>d__33>(ref <InitialiseAgeGate>d__);
-		return <InitialiseAgeGate>d__.<>t__builder.Task;
-	}
-
-	private Task ProcessAgeGate()
-	{
-		KIDAgeGate.<ProcessAgeGate>d__34 <ProcessAgeGate>d__;
-		<ProcessAgeGate>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<ProcessAgeGate>d__.<>4__this = this;
-		<ProcessAgeGate>d__.<>1__state = -1;
-		<ProcessAgeGate>d__.<>t__builder.Start<KIDAgeGate.<ProcessAgeGate>d__34>(ref <ProcessAgeGate>d__);
-		return <ProcessAgeGate>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> ProcessAgeGateConfirmation()
-	{
-		KIDAgeGate.<ProcessAgeGateConfirmation>d__35 <ProcessAgeGateConfirmation>d__;
-		<ProcessAgeGateConfirmation>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<ProcessAgeGateConfirmation>d__.<>4__this = this;
-		<ProcessAgeGateConfirmation>d__.<>1__state = -1;
-		<ProcessAgeGateConfirmation>d__.<>t__builder.Start<KIDAgeGate.<ProcessAgeGateConfirmation>d__35>(ref <ProcessAgeGateConfirmation>d__);
-		return <ProcessAgeGateConfirmation>d__.<>t__builder.Task;
-	}
-
-	private Task WaitForAgeChoice()
-	{
-		KIDAgeGate.<WaitForAgeChoice>d__36 <WaitForAgeChoice>d__;
-		<WaitForAgeChoice>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForAgeChoice>d__.<>4__this = this;
-		<WaitForAgeChoice>d__.<>1__state = -1;
-		<WaitForAgeChoice>d__.<>t__builder.Start<KIDAgeGate.<WaitForAgeChoice>d__36>(ref <WaitForAgeChoice>d__);
-		return <WaitForAgeChoice>d__.<>t__builder.Task;
-	}
-
-	public static void OnConfirmAgePressed(int currentAge)
-	{
-		KIDAgeGate._hasChosenAge = true;
-	}
-
-	private void OnAgeGateCompleted()
-	{
-		this.FinaliseAgeGateAndContinue();
-	}
-
-	private void FinaliseAgeGateAndContinue()
-	{
-		if (this.requestCancellationSource.IsCancellationRequested)
-		{
-			return;
-		}
-		Debug.Log("[KID::AGE_GATE] Age gate completed");
-		Object.Destroy(base.gameObject);
-	}
-
-	private void QuitGame()
-	{
-		Debug.Log("[KID] QUIT PRESSED");
-		Application.Quit();
-	}
-
-	private void AppealAge()
-	{
-		KIDAgeGate.<AppealAge>d__41 <AppealAge>d__;
-		<AppealAge>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<AppealAge>d__.<>4__this = this;
-		<AppealAge>d__.<>1__state = -1;
-		<AppealAge>d__.<>t__builder.Start<KIDAgeGate.<AppealAge>d__41>(ref <AppealAge>d__);
-	}
-
-	private void AppealRejected()
-	{
-		Debug.Log("[KID] APPEAL REJECTED");
-		string messageTitle = "UNDER AGE";
-		string messageBody = "Your VR platform requires a certain minimum age to play Gorilla Tag. Unfortunately, due to those age requirements, we cannot allow you to play Gorilla Tag at this time.\n\nIf you incorrectly submitted your age, please appeal.";
-		string messageConfirmation = "Hold any face button to appeal";
-		this._pregameMessageReference.ShowMessage(messageTitle, messageBody, messageConfirmation, new Action(this.AppealAge), 0.25f, 0f);
-	}
-
-	private void RefreshChallengeStatus()
-	{
-	}
-
-	public static void SetAgeGateConfig(GetRequirementsData response)
-	{
-		KIDAgeGate._ageGateConfig = response;
-	}
-
-	public void OnWhyAgeGateButtonPressed()
-	{
-		TelemetryData telemetryData = new TelemetryData
-		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_age_gate",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"why_age_gate"
-				}
-			}
-		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
-		this._uiParent.SetActive(false);
-		PrivateUIRoom.AddUI(this._whyAgeGateScreen.transform);
-		this._whyAgeGateScreen.SetActive(true);
-	}
-
-	public void OnWhyAgeGateButtonBackPressed()
-	{
-		this._uiParent.SetActive(true);
-		PrivateUIRoom.RemoveUI(this._whyAgeGateScreen.transform);
-		this._whyAgeGateScreen.SetActive(false);
-	}
-
-	public void OnLearnMoreAboutKIDPressed()
-	{
-		this._metrics_LearnMorePressed = true;
-		TelemetryData telemetryData = new TelemetryData
-		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_age_gate",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"learn_more_url"
-				}
-			}
-		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
-		Application.OpenURL("https://whyagegate.com/");
-	}
-
 	private const string LEARN_MORE_URL = "https://whyagegate.com/";
 
 	private const string DEFAULT_AGE_VALUE_STRING = "SET AGE";
@@ -264,4 +60,273 @@ public class KIDAgeGate : MonoBehaviour
 	private static bool _hasChosenAge;
 
 	private bool _metrics_LearnMorePressed;
+
+	public static int UserAge => _ageValue;
+
+	public static bool DisplayedScreen { get; private set; }
+
+	private void Awake()
+	{
+		if (_activeReference != null)
+		{
+			Debug.LogError("[KID::Age_Gate] Age Gate already exists, this is a duplicate, deleting the new one");
+			Object.DestroyImmediate(base.gameObject);
+		}
+		else
+		{
+			_activeReference = this;
+		}
+	}
+
+	private async void Start()
+	{
+	}
+
+	private void OnDestroy()
+	{
+		requestCancellationSource.Cancel();
+	}
+
+	public static async Task BeginAgeGate()
+	{
+		if (_activeReference == null)
+		{
+			Debug.LogError("[KID::Age_Gate] Unable to start Age Gate. No active reference assigned. Has it initialised yet?");
+			do
+			{
+				await Task.Yield();
+			}
+			while (_activeReference == null);
+		}
+		await _activeReference.StartAgeGate();
+	}
+
+	private async Task StartAgeGate()
+	{
+		await InitialiseAgeGate();
+	}
+
+	private async Task InitialiseAgeGate()
+	{
+		Debug.Log("[KID] Initialising Age-Gate");
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_screen_shown",
+			CustomTags = new string[4]
+			{
+				KIDTelemetry.Open_MetricActionCustomTag,
+				"kid_age_gate",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string> { { "screen", "age_gate" } }
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		bool flag;
+		do
+		{
+			DisplayedScreen = true;
+			_ageSlider.ControllerActive = true;
+			PrivateUIRoom.AddUI(_uiParent.transform);
+			HandRayController.Instance.EnableHandRays();
+			await ProcessAgeGate();
+			_ageSlider.ControllerActive = false;
+			KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+			PrivateUIRoom.RemoveUI(_uiParent.transform);
+			if (requestCancellationSource.IsCancellationRequested)
+			{
+				return;
+			}
+			if (KIDManager.TryGetAgeStatusTypeFromAge(UserAge, out var ageType))
+			{
+				telemetryData = new TelemetryData
+				{
+					EventName = "kid_age_gate",
+					CustomTags = new string[4]
+					{
+						KIDTelemetry.Closed_MetricActionCustomTag,
+						"kid_age_gate",
+						KIDTelemetry.GameVersionCustomTag,
+						KIDTelemetry.GameEnvironment
+					},
+					BodyData = new Dictionary<string, string> { 
+					{
+						"age_declared",
+						ageType.ToString()
+					} }
+				};
+				GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+			}
+			_confirmationUIManager.Reset(_ageValue);
+			PrivateUIRoom.AddUI(_confirmationUI.transform);
+			flag = await ProcessAgeGateConfirmation();
+			telemetryData = new TelemetryData
+			{
+				EventName = "kid_age_gate_confirm",
+				CustomTags = new string[3]
+				{
+					"kid_age_gate",
+					KIDTelemetry.GameVersionCustomTag,
+					KIDTelemetry.GameEnvironment
+				},
+				BodyData = new Dictionary<string, string> { 
+				{
+					"button_pressed",
+					flag ? "confirm" : "go_back"
+				} }
+			};
+			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+			KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+			PrivateUIRoom.RemoveUI(_confirmationUI.transform);
+			HandRayController.Instance.DisableHandRays();
+		}
+		while (!flag);
+		OnAgeGateCompleted();
+		Debug.Log("[KID] Age Gate Complete");
+	}
+
+	private async Task ProcessAgeGate()
+	{
+		Debug.Log("[KID] Waiting for Age Confirmation");
+		await WaitForAgeChoice();
+	}
+
+	private async Task<bool> ProcessAgeGateConfirmation()
+	{
+		while (_confirmationUIManager.Result == KidAgeConfirmationResult.None)
+		{
+			if (requestCancellationSource.IsCancellationRequested)
+			{
+				return false;
+			}
+			await Task.Yield();
+		}
+		return _confirmationUIManager.Result == KidAgeConfirmationResult.Confirm;
+	}
+
+	private async Task WaitForAgeChoice()
+	{
+		_hasChosenAge = false;
+		do
+		{
+			if (requestCancellationSource.IsCancellationRequested)
+			{
+				return;
+			}
+			await Task.Yield();
+		}
+		while (!_hasChosenAge);
+		_ageValue = _ageSlider.CurrentAge;
+		string ageString = _ageSlider.GetAgeString();
+		_confirmationAgeText.text = "You entered " + ageString + "\n\nPlease be sure to enter your real age so we can customize your experience!";
+	}
+
+	public static void OnConfirmAgePressed(int currentAge)
+	{
+		_hasChosenAge = true;
+	}
+
+	private void OnAgeGateCompleted()
+	{
+		FinaliseAgeGateAndContinue();
+	}
+
+	private void FinaliseAgeGateAndContinue()
+	{
+		if (!requestCancellationSource.IsCancellationRequested)
+		{
+			Debug.Log("[KID::AGE_GATE] Age gate completed");
+			Object.Destroy(base.gameObject);
+		}
+	}
+
+	private void QuitGame()
+	{
+		Debug.Log("[KID] QUIT PRESSED");
+		Application.Quit();
+	}
+
+	private async void AppealAge()
+	{
+		Debug.Log("[KID] APPEAL PRESSED");
+		if (!KIDManager.InitialisationComplete)
+		{
+			Debug.LogError("[KID] [KIDManager] has not been Initialised yet. Unable to start appeals flow. Will wait until ready");
+			do
+			{
+				await Task.Yield();
+			}
+			while (!KIDManager.InitialisationComplete);
+		}
+		if (KIDManager.InitialisationSuccessful)
+		{
+			string messageTitle = "VERIFY AGE";
+			string messageBody = "GETTING ONE TIME PASSCODE. PLEASE WAIT.\n\nGIVE IT TO A PARENT/GUARDIAN TO ENTER IT AT: k-id.com/code";
+			string empty = string.Empty;
+			_pregameMessageReference.ShowMessage(messageTitle, messageBody, empty, RefreshChallengeStatus, 0.25f);
+		}
+		Debug.LogError("[KID::AGE_GATE] TODO: Refactor Age-Appeal flow");
+	}
+
+	private void AppealRejected()
+	{
+		Debug.Log("[KID] APPEAL REJECTED");
+		string messageTitle = "UNDER AGE";
+		string messageBody = "Your VR platform requires a certain minimum age to play Gorilla Tag. Unfortunately, due to those age requirements, we cannot allow you to play Gorilla Tag at this time.\n\nIf you incorrectly submitted your age, please appeal.";
+		string messageConfirmation = "Hold any face button to appeal";
+		_pregameMessageReference.ShowMessage(messageTitle, messageBody, messageConfirmation, AppealAge, 0.25f);
+	}
+
+	private void RefreshChallengeStatus()
+	{
+	}
+
+	public static void SetAgeGateConfig(GetRequirementsData response)
+	{
+		_ageGateConfig = response;
+	}
+
+	public void OnWhyAgeGateButtonPressed()
+	{
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_screen_shown",
+			CustomTags = new string[3]
+			{
+				"kid_age_gate",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string> { { "screen", "why_age_gate" } }
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		_uiParent.SetActive(value: false);
+		PrivateUIRoom.AddUI(_whyAgeGateScreen.transform);
+		_whyAgeGateScreen.SetActive(value: true);
+	}
+
+	public void OnWhyAgeGateButtonBackPressed()
+	{
+		_uiParent.SetActive(value: true);
+		PrivateUIRoom.RemoveUI(_whyAgeGateScreen.transform);
+		_whyAgeGateScreen.SetActive(value: false);
+	}
+
+	public void OnLearnMoreAboutKIDPressed()
+	{
+		_metrics_LearnMorePressed = true;
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_screen_shown",
+			CustomTags = new string[3]
+			{
+				"kid_age_gate",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string> { { "screen", "learn_more_url" } }
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Application.OpenURL("https://whyagegate.com/");
+	}
 }

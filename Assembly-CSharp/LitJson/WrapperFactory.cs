@@ -1,6 +1,3 @@
-﻿using System;
+namespace LitJson;
 
-namespace LitJson
-{
-	public delegate IJsonWrapper WrapperFactory();
-}
+public delegate IJsonWrapper WrapperFactory();

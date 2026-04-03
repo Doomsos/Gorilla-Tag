@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaLocomotion;
 using UnityEngine;
@@ -9,345 +9,18 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(GameButtonActivatable))]
 public class SIGadgetWristJet : SIGadget, I_SIDisruptable, IEnergyGadget
 {
-	private bool CanRecharge
+	private enum State
 	{
-		get
-		{
-			return (!this.rechargeRequiresFloorTouch || this._floorTouched) && this.state == SIGadgetWristJet.State.Unactive;
-		}
+		Unactive,
+		Active,
+		OutOfFuel
 	}
 
-	private void Awake()
+	public enum WristJetType
 	{
-		this._maxSqrHorizontalSpeed = this.maxHorizontalSpeed * this.maxHorizontalSpeed;
-		this._hasThrustLoopAudioSource = (this.m_thrustLoopAudioSource != null);
-		this.m_warnFuelLowThreshold = ((this.m_warnFuelLowSound != null) ? this.m_warnFuelLowThreshold : -1f);
-		this._hasInactiveStateVisual = (this.inactiveStateVisual != null);
-		this._hasActiveStateVisual = (this.activeStateVisual != null);
-		this._gaugeMatPropBlock = new MaterialPropertyBlock();
-		this._baseFuelSpendRate = this.fuelSpendRate;
-		this._baseJetForce = this.jetForce;
-		this._baseMaxVerticalSpeed = this.maxVerticalSpeed;
-		this._baseMaxHorizontalSpeed = this.maxHorizontalSpeed;
-		if (this.m_gaugeMatSlots == null)
-		{
-			this.m_gaugeMatSlots = Array.Empty<GTRendererMatSlot>();
-		}
-		int num = 0;
-		for (int i = 0; i < this.m_gaugeMatSlots.Length; i++)
-		{
-			if (this.m_gaugeMatSlots[i].TryInitialize())
-			{
-				this.m_gaugeMatSlots[num] = this.m_gaugeMatSlots[i];
-				num++;
-			}
-		}
-		if (num != this.m_gaugeMatSlots.Length)
-		{
-			Array.Resize<GTRendererMatSlot>(ref this.m_gaugeMatSlots, num);
-		}
-		this.throttleFlapInitialRots = ((this.m_throttleFlapXforms != null) ? new Quaternion[this.m_throttleFlapXforms.Length] : Array.Empty<Quaternion>());
-		for (int j = 0; j < this.throttleFlapInitialRots.Length; j++)
-		{
-			if (this.m_throttleFlapXforms[j] == null)
-			{
-				this.throttleFlapInitialRots = Array.Empty<Quaternion>();
-				Debug.LogError("[SIGadgetWristJet]  ERROR!!!  Awake: Throttle indicator flaps will not animate because entry is null in " + string.Format("array at `{0}[{1}]`. Path={2}", "m_throttleFlapXforms", j, base.transform.GetPathQ()), this);
-				return;
-			}
-			this.throttleFlapInitialRots[j] = this.m_throttleFlapXforms[j].localRotation;
-		}
-	}
-
-	private void Start()
-	{
-		this.gtPlayer = GTPlayer.Instance;
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnReleased = (Action)Delegate.Combine(gameEntity.OnReleased, new Action(this.HandleStopInteraction));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnUnsnapped = (Action)Delegate.Combine(gameEntity2.OnUnsnapped, new Action(this.HandleStopInteraction));
-	}
-
-	protected override void OnEnable()
-	{
-		base.OnEnable();
-		if (this.m_warnFuelLowThreshold > 0f)
-		{
-			this.m_warnFuelLowSound.LoadAudioData();
-		}
-	}
-
-	protected override void OnDisable()
-	{
-		if (this.m_warnFuelLowThreshold > 0f && this.m_warnFuelLowSound.loadState != AudioDataLoadState.Unloaded)
-		{
-			this.m_warnFuelLowSound.UnloadAudioData();
-		}
-	}
-
-	protected override void Update()
-	{
-		base.Update();
-		if (this._hasThrustLoopAudioSource)
-		{
-			float target = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopSoundVolume : 0f;
-			float num = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopAudioFadeInTime : this.m_thrustLoopAudioFadeOutTime;
-			this.m_thrustLoopAudioSource.volume = Mathf.MoveTowards(this.m_thrustLoopAudioSource.volume, target, 1f / num * Time.unscaledDeltaTime);
-		}
-	}
-
-	private void FixedUpdate()
-	{
-		if (!this.IsEquippedLocal() && !this.activatedLocally)
-		{
-			return;
-		}
-		if (this.state == SIGadgetWristJet.State.Active && this.currentFuel > 0f && this.buttonActivatable.CheckInput(0.25f) && !base.IsBlocked(SIExclusionType.AffectsLocalMovement))
-		{
-			this.gtPlayer.AddForce(-Physics.gravity * (this.gtPlayer.scale * this.gravityNegationPercent), ForceMode.Acceleration);
-			this._ApplyClampedThrust();
-		}
-	}
-
-	private void HandleStopInteraction()
-	{
-		if (!this.gameEntity.IsAuthority())
-		{
-			return;
-		}
-		this.SetStateAuthority(SIGadgetWristJet.State.Unactive);
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		base.OnUpdateAuthority(dt);
-		bool flag = this.buttonActivatable.CheckInput(0.25f);
-		if (!this._floorTouched)
-		{
-			this._floorTouched = (this.gtPlayer.IsGroundedButt || this.gtPlayer.IsGroundedHand);
-		}
-		if (this._throttleControl)
-		{
-			Vector2 joystickInput = base.GetJoystickInput();
-			if (Mathf.Abs(joystickInput.y) > 0.75f && Mathf.Abs(joystickInput.x) < 0.5f)
-			{
-				this._throttle = Mathf.Clamp01(this._throttle + joystickInput.y * this.throttleChangeSpeed * Time.deltaTime);
-				this._currentBurnRate = Mathf.Lerp(this.minimumBurnRate, 1f, this._throttle);
-				this.UpdateThrottleIndicator();
-			}
-		}
-		switch (this.state)
-		{
-		case SIGadgetWristJet.State.Unactive:
-			if (flag && !base.IsBlocked(SIExclusionType.AffectsLocalMovement))
-			{
-				this.SetStateAuthority(SIGadgetWristJet.State.Active);
-			}
-			break;
-		case SIGadgetWristJet.State.Active:
-			this.currentFuel = Mathf.Clamp(this.currentFuel - dt * this.fuelSpendRate * this._currentBurnRate, 0f, this.fuelSize);
-			this._floorTouched = false;
-			this.gtPlayer.ThrusterActiveAtFrame = Time.frameCount;
-			if (flag && this.m_warnFuelLowThreshold > 0f)
-			{
-				float num = this.currentFuel / this.fuelSize;
-				if (this._warnFuelLowSoundWasPlayed && num > this.m_warnFuelLowThreshold)
-				{
-					this._warnFuelLowSoundWasPlayed = false;
-				}
-				else if (!this._warnFuelLowSoundWasPlayed && num <= this.m_warnFuelLowThreshold)
-				{
-					this._warnFuelLowSoundWasPlayed = true;
-					this.gameEntity.audioSource.GTPlayOneShot(this.m_warnFuelLowSound, this.m_warnFuelLowSoundVolume);
-				}
-			}
-			if (!flag || this.currentFuel <= 0f)
-			{
-				this.SetStateAuthority(SIGadgetWristJet.State.OutOfFuel);
-			}
-			break;
-		case SIGadgetWristJet.State.OutOfFuel:
-			if (!flag)
-			{
-				this.emptiedCooldownResetProgress += dt;
-			}
-			else if (this.currentFuel > 0f)
-			{
-				this.SetStateAuthority(SIGadgetWristJet.State.Active);
-			}
-			if (this.emptiedCooldownResetProgress > this.emptiedCooldown)
-			{
-				this.emptiedCooldownResetProgress = 0f;
-				this.SetStateAuthority(SIGadgetWristJet.State.Unactive);
-			}
-			break;
-		}
-		float value = this.currentFuel / this.fuelSize;
-		for (int i = 0; i < this.m_gaugeMatSlots.Length; i++)
-		{
-			this._gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, value);
-			this.m_gaugeMatSlots[i].renderer.SetPropertyBlock(this._gaugeMatPropBlock, this.m_gaugeMatSlots[i].slot);
-		}
-	}
-
-	private void UpdateThrottleIndicator()
-	{
-		for (int i = 0; i < this.throttleFlapInitialRots.Length; i++)
-		{
-			Quaternion b = this.throttleFlapInitialRots[i] * this.m_throttleFlapMaxRotOffset;
-			this.m_throttleFlapXforms[i].localRotation = Quaternion.Lerp(this.throttleFlapInitialRots[i], b, this._throttle);
-		}
-	}
-
-	private void _ApplyClampedThrust()
-	{
-		Vector3 rigidbodyVelocity = this.gtPlayer.RigidbodyVelocity;
-		float num = this.jetForce * this._currentBurnRate;
-		Vector3 vector = rigidbodyVelocity + base.transform.forward * (num * Time.fixedDeltaTime);
-		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
-		if (vector2.sqrMagnitude > this._maxSqrHorizontalSpeed)
-		{
-			float magnitude = new Vector3(rigidbodyVelocity.x, 0f, rigidbodyVelocity.z).magnitude;
-			vector2 = Vector3.ClampMagnitude(vector2, Mathf.Max(this.maxHorizontalSpeed, magnitude));
-		}
-		Vector3 a = vector2;
-		a.y = ((vector.y > this.maxVerticalSpeed) ? Mathf.Max(this.maxVerticalSpeed, rigidbodyVelocity.y) : vector.y);
-		this.gtPlayer.AddForce(a - rigidbodyVelocity, ForceMode.VelocityChange);
-	}
-
-	private void OnEntityStateChanged(long oldState, long newState)
-	{
-		SIGadgetWristJet.State state = (SIGadgetWristJet.State)oldState;
-		SIGadgetWristJet.State state2 = (SIGadgetWristJet.State)newState;
-		if (state != state2)
-		{
-			this.SetState(state2);
-		}
-	}
-
-	private void SetStateAuthority(SIGadgetWristJet.State newState)
-	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void SetState(SIGadgetWristJet.State newState)
-	{
-		if (this.state == newState)
-		{
-			return;
-		}
-		this.state = newState;
-		switch (this.state)
-		{
-		case SIGadgetWristJet.State.Unactive:
-			if (this._hasInactiveStateVisual)
-			{
-				this.inactiveStateVisual.SetActive(true);
-			}
-			if (this._hasActiveStateVisual)
-			{
-				this.activeStateVisual.SetActive(false);
-				return;
-			}
-			break;
-		case SIGadgetWristJet.State.Active:
-			if (this._hasInactiveStateVisual)
-			{
-				this.inactiveStateVisual.SetActive(false);
-			}
-			if (this._hasActiveStateVisual)
-			{
-				this.activeStateVisual.SetActive(true);
-				return;
-			}
-			break;
-		case SIGadgetWristJet.State.OutOfFuel:
-			if (this._hasInactiveStateVisual)
-			{
-				this.inactiveStateVisual.SetActive(true);
-			}
-			if (this._hasActiveStateVisual)
-			{
-				this.activeStateVisual.SetActive(false);
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this._throttleControl = withUpgrades.Contains(SIUpgradeType.Thruster_Throttle_Control);
-		if (this._throttleControl)
-		{
-			this.UpdateThrottleIndicator();
-		}
-		switch (this.jetType)
-		{
-		case SIGadgetWristJet.WristJetType.Jet:
-			this.fuelSpendRate = this._baseFuelSpendRate * (withUpgrades.Contains(SIUpgradeType.Thruster_Jet_Duration) ? 0.8f : 1f);
-			this.jetForce = this._baseJetForce * (withUpgrades.Contains(SIUpgradeType.Thruster_Jet_Accel) ? 1.2f : 1f);
-			break;
-		case SIGadgetWristJet.WristJetType.Propellor:
-			this.fuelSpendRate = this._baseFuelSpendRate * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Duration) ? 0.8f : 1f);
-			this.maxVerticalSpeed = this._baseMaxVerticalSpeed * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Speed) ? 1.2f : 1f);
-			this.maxHorizontalSpeed = this._baseMaxHorizontalSpeed * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Speed) ? 1.2f : 1f);
-			break;
-		}
-		AudioClip clip;
-		if (this._hasThrustLoopAudioSource && this.m_thrustLoopSoundByUpgrade.TryGetActiveValue(withUpgrades, out clip))
-		{
-			this.m_thrustLoopAudioSource.clip = clip;
-			this.m_thrustLoopAudioSource.Play();
-		}
-	}
-
-	public void Disrupt(float disruptTime)
-	{
-		this.emptiedCooldownResetProgress = -disruptTime;
-		this.SetState(SIGadgetWristJet.State.OutOfFuel);
-	}
-
-	public override void OnEntityInit()
-	{
-		this.emptiedCooldownResetProgress = 0f;
-		if (this._hasInactiveStateVisual)
-		{
-			this.inactiveStateVisual.SetActive(true);
-		}
-		if (this._hasActiveStateVisual)
-		{
-			this.activeStateVisual.SetActive(false);
-		}
-		this.currentFuel = (this.fuelSize = 10f);
-		this._throttle = (this._currentBurnRate = 1f);
-	}
-
-	public bool UsesEnergy
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	public bool IsFull
-	{
-		get
-		{
-			return this.currentFuel >= this.fuelSize;
-		}
-	}
-
-	public void UpdateRecharge(float dt)
-	{
-		if (this.CanRecharge)
-		{
-			this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.fuelGainRate, 0f, this.fuelSize);
-		}
+		Basic,
+		Jet,
+		Propellor
 	}
 
 	private const string preLog = "[SIGadgetWristJet]  ";
@@ -388,7 +61,7 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable, IEnergyGadget
 	[SerializeField]
 	private GTRendererMatSlot[] m_gaugeMatSlots;
 
-	public SIGadgetWristJet.WristJetType jetType;
+	public WristJetType jetType;
 
 	public GameButtonActivatable buttonActivatable;
 
@@ -438,7 +111,7 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable, IEnergyGadget
 
 	private float currentFuel;
 
-	private SIGadgetWristJet.State state;
+	private State state;
 
 	private GTPlayer gtPlayer;
 
@@ -466,17 +139,326 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable, IEnergyGadget
 
 	private float _baseMaxHorizontalSpeed;
 
-	private enum State
+	private bool CanRecharge
 	{
-		Unactive,
-		Active,
-		OutOfFuel
+		get
+		{
+			if (!rechargeRequiresFloorTouch || _floorTouched)
+			{
+				return state == State.Unactive;
+			}
+			return false;
+		}
 	}
 
-	public enum WristJetType
+	public bool UsesEnergy => true;
+
+	public bool IsFull => currentFuel >= fuelSize;
+
+	private void Awake()
 	{
-		Basic,
-		Jet,
-		Propellor
+		_maxSqrHorizontalSpeed = maxHorizontalSpeed * maxHorizontalSpeed;
+		_hasThrustLoopAudioSource = m_thrustLoopAudioSource != null;
+		m_warnFuelLowThreshold = ((m_warnFuelLowSound != null) ? m_warnFuelLowThreshold : (-1f));
+		_hasInactiveStateVisual = inactiveStateVisual != null;
+		_hasActiveStateVisual = activeStateVisual != null;
+		_gaugeMatPropBlock = new MaterialPropertyBlock();
+		_baseFuelSpendRate = fuelSpendRate;
+		_baseJetForce = jetForce;
+		_baseMaxVerticalSpeed = maxVerticalSpeed;
+		_baseMaxHorizontalSpeed = maxHorizontalSpeed;
+		if (m_gaugeMatSlots == null)
+		{
+			m_gaugeMatSlots = Array.Empty<GTRendererMatSlot>();
+		}
+		int num = 0;
+		for (int i = 0; i < m_gaugeMatSlots.Length; i++)
+		{
+			if (m_gaugeMatSlots[i].TryInitialize())
+			{
+				m_gaugeMatSlots[num] = m_gaugeMatSlots[i];
+				num++;
+			}
+		}
+		if (num != m_gaugeMatSlots.Length)
+		{
+			Array.Resize(ref m_gaugeMatSlots, num);
+		}
+		throttleFlapInitialRots = ((m_throttleFlapXforms != null) ? new Quaternion[m_throttleFlapXforms.Length] : Array.Empty<Quaternion>());
+		for (int j = 0; j < throttleFlapInitialRots.Length; j++)
+		{
+			if (m_throttleFlapXforms[j] == null)
+			{
+				throttleFlapInitialRots = Array.Empty<Quaternion>();
+				Debug.LogError("[SIGadgetWristJet]  ERROR!!!  Awake: Throttle indicator flaps will not animate because entry is null in " + string.Format("array at `{0}[{1}]`. Path={2}", "m_throttleFlapXforms", j, base.transform.GetPathQ()), this);
+				break;
+			}
+			throttleFlapInitialRots[j] = m_throttleFlapXforms[j].localRotation;
+		}
+	}
+
+	private void Start()
+	{
+		gtPlayer = GTPlayer.Instance;
+		gameEntity.OnStateChanged += OnEntityStateChanged;
+		GameEntity obj = gameEntity;
+		obj.OnReleased = (Action)Delegate.Combine(obj.OnReleased, new Action(HandleStopInteraction));
+		GameEntity obj2 = gameEntity;
+		obj2.OnUnsnapped = (Action)Delegate.Combine(obj2.OnUnsnapped, new Action(HandleStopInteraction));
+	}
+
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		if (m_warnFuelLowThreshold > 0f)
+		{
+			m_warnFuelLowSound.LoadAudioData();
+		}
+	}
+
+	protected override void OnDisable()
+	{
+		if (m_warnFuelLowThreshold > 0f && m_warnFuelLowSound.loadState != AudioDataLoadState.Unloaded)
+		{
+			m_warnFuelLowSound.UnloadAudioData();
+		}
+	}
+
+	protected override void Update()
+	{
+		base.Update();
+		if (_hasThrustLoopAudioSource)
+		{
+			float target = ((state == State.Active) ? m_thrustLoopSoundVolume : 0f);
+			float num = ((state == State.Active) ? m_thrustLoopAudioFadeInTime : m_thrustLoopAudioFadeOutTime);
+			m_thrustLoopAudioSource.volume = Mathf.MoveTowards(m_thrustLoopAudioSource.volume, target, 1f / num * Time.unscaledDeltaTime);
+		}
+	}
+
+	private void FixedUpdate()
+	{
+		if ((IsEquippedLocal() || activatedLocally) && state == State.Active && currentFuel > 0f && buttonActivatable.CheckInput() && !IsBlocked(SIExclusionType.AffectsLocalMovement))
+		{
+			gtPlayer.AddForce(-Physics.gravity * (gtPlayer.scale * gravityNegationPercent), ForceMode.Acceleration);
+			_ApplyClampedThrust();
+		}
+	}
+
+	private void HandleStopInteraction()
+	{
+		if (gameEntity.IsAuthority())
+		{
+			SetStateAuthority(State.Unactive);
+		}
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		base.OnUpdateAuthority(dt);
+		bool flag = buttonActivatable.CheckInput();
+		if (!_floorTouched)
+		{
+			_floorTouched = gtPlayer.IsGroundedButt || gtPlayer.IsGroundedHand;
+		}
+		if (_throttleControl)
+		{
+			Vector2 joystickInput = GetJoystickInput();
+			if (Mathf.Abs(joystickInput.y) > 0.75f && Mathf.Abs(joystickInput.x) < 0.5f)
+			{
+				_throttle = Mathf.Clamp01(_throttle + joystickInput.y * throttleChangeSpeed * Time.deltaTime);
+				_currentBurnRate = Mathf.Lerp(minimumBurnRate, 1f, _throttle);
+				UpdateThrottleIndicator();
+			}
+		}
+		switch (state)
+		{
+		case State.Unactive:
+			if (flag && !IsBlocked(SIExclusionType.AffectsLocalMovement))
+			{
+				SetStateAuthority(State.Active);
+			}
+			break;
+		case State.Active:
+			currentFuel = Mathf.Clamp(currentFuel - dt * fuelSpendRate * _currentBurnRate, 0f, fuelSize);
+			_floorTouched = false;
+			gtPlayer.ThrusterActiveAtFrame = Time.frameCount;
+			if (flag && m_warnFuelLowThreshold > 0f)
+			{
+				float num = currentFuel / fuelSize;
+				if (_warnFuelLowSoundWasPlayed && num > m_warnFuelLowThreshold)
+				{
+					_warnFuelLowSoundWasPlayed = false;
+				}
+				else if (!_warnFuelLowSoundWasPlayed && num <= m_warnFuelLowThreshold)
+				{
+					_warnFuelLowSoundWasPlayed = true;
+					gameEntity.audioSource.GTPlayOneShot(m_warnFuelLowSound, m_warnFuelLowSoundVolume);
+				}
+			}
+			if (!flag || currentFuel <= 0f)
+			{
+				SetStateAuthority(State.OutOfFuel);
+			}
+			break;
+		case State.OutOfFuel:
+			if (!flag)
+			{
+				emptiedCooldownResetProgress += dt;
+			}
+			else if (currentFuel > 0f)
+			{
+				SetStateAuthority(State.Active);
+			}
+			if (emptiedCooldownResetProgress > emptiedCooldown)
+			{
+				emptiedCooldownResetProgress = 0f;
+				SetStateAuthority(State.Unactive);
+			}
+			break;
+		}
+		float value = currentFuel / fuelSize;
+		for (int i = 0; i < m_gaugeMatSlots.Length; i++)
+		{
+			_gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, value);
+			m_gaugeMatSlots[i].renderer.SetPropertyBlock(_gaugeMatPropBlock, m_gaugeMatSlots[i].slot);
+		}
+	}
+
+	private void UpdateThrottleIndicator()
+	{
+		for (int i = 0; i < throttleFlapInitialRots.Length; i++)
+		{
+			Quaternion b = throttleFlapInitialRots[i] * m_throttleFlapMaxRotOffset;
+			m_throttleFlapXforms[i].localRotation = Quaternion.Lerp(throttleFlapInitialRots[i], b, _throttle);
+		}
+	}
+
+	private void _ApplyClampedThrust()
+	{
+		Vector3 rigidbodyVelocity = gtPlayer.RigidbodyVelocity;
+		float num = jetForce * _currentBurnRate;
+		Vector3 vector = rigidbodyVelocity + base.transform.forward * (num * Time.fixedDeltaTime);
+		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
+		if (vector2.sqrMagnitude > _maxSqrHorizontalSpeed)
+		{
+			float magnitude = new Vector3(rigidbodyVelocity.x, 0f, rigidbodyVelocity.z).magnitude;
+			vector2 = Vector3.ClampMagnitude(vector2, Mathf.Max(maxHorizontalSpeed, magnitude));
+		}
+		Vector3 vector3 = vector2;
+		vector3.y = ((vector.y > maxVerticalSpeed) ? Mathf.Max(maxVerticalSpeed, rigidbodyVelocity.y) : vector.y);
+		gtPlayer.AddForce(vector3 - rigidbodyVelocity, ForceMode.VelocityChange);
+	}
+
+	private void OnEntityStateChanged(long oldState, long newState)
+	{
+		int num = (int)oldState;
+		State state = (State)newState;
+		if (num != (int)state)
+		{
+			SetState(state);
+		}
+	}
+
+	private void SetStateAuthority(State newState)
+	{
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void SetState(State newState)
+	{
+		if (state == newState)
+		{
+			return;
+		}
+		state = newState;
+		switch (state)
+		{
+		case State.Unactive:
+			if (_hasInactiveStateVisual)
+			{
+				inactiveStateVisual.SetActive(value: true);
+			}
+			if (_hasActiveStateVisual)
+			{
+				activeStateVisual.SetActive(value: false);
+			}
+			break;
+		case State.Active:
+			if (_hasInactiveStateVisual)
+			{
+				inactiveStateVisual.SetActive(value: false);
+			}
+			if (_hasActiveStateVisual)
+			{
+				activeStateVisual.SetActive(value: true);
+			}
+			break;
+		case State.OutOfFuel:
+			if (_hasInactiveStateVisual)
+			{
+				inactiveStateVisual.SetActive(value: true);
+			}
+			if (_hasActiveStateVisual)
+			{
+				activeStateVisual.SetActive(value: false);
+			}
+			break;
+		}
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		_throttleControl = withUpgrades.Contains(SIUpgradeType.Thruster_Throttle_Control);
+		if (_throttleControl)
+		{
+			UpdateThrottleIndicator();
+		}
+		switch (jetType)
+		{
+		case WristJetType.Jet:
+			fuelSpendRate = _baseFuelSpendRate * (withUpgrades.Contains(SIUpgradeType.Thruster_Jet_Duration) ? 0.8f : 1f);
+			jetForce = _baseJetForce * (withUpgrades.Contains(SIUpgradeType.Thruster_Jet_Accel) ? 1.2f : 1f);
+			break;
+		case WristJetType.Propellor:
+			fuelSpendRate = _baseFuelSpendRate * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Duration) ? 0.8f : 1f);
+			maxVerticalSpeed = _baseMaxVerticalSpeed * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Speed) ? 1.2f : 1f);
+			maxHorizontalSpeed = _baseMaxHorizontalSpeed * (withUpgrades.Contains(SIUpgradeType.Thruster_Prop_Speed) ? 1.2f : 1f);
+			break;
+		}
+		if (_hasThrustLoopAudioSource && m_thrustLoopSoundByUpgrade.TryGetActiveValue(withUpgrades, out var out_value))
+		{
+			m_thrustLoopAudioSource.clip = out_value;
+			m_thrustLoopAudioSource.Play();
+		}
+	}
+
+	public void Disrupt(float disruptTime)
+	{
+		emptiedCooldownResetProgress = 0f - disruptTime;
+		SetState(State.OutOfFuel);
+	}
+
+	public override void OnEntityInit()
+	{
+		emptiedCooldownResetProgress = 0f;
+		if (_hasInactiveStateVisual)
+		{
+			inactiveStateVisual.SetActive(value: true);
+		}
+		if (_hasActiveStateVisual)
+		{
+			activeStateVisual.SetActive(value: false);
+		}
+		currentFuel = (fuelSize = 10f);
+		_throttle = (_currentBurnRate = 1f);
+	}
+
+	public void UpdateRecharge(float dt)
+	{
+		if (CanRecharge)
+		{
+			currentFuel = Mathf.Clamp(currentFuel + dt * fuelGainRate, 0f, fuelSize);
+		}
 	}
 }

@@ -1,30 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class KIDHandReference : MonoBehaviour
 {
-	public static GameObject LeftHand
-	{
-		get
-		{
-			return KIDHandReference._leftHandRef;
-		}
-	}
-
-	public static GameObject RightHand
-	{
-		get
-		{
-			return KIDHandReference._rightHandRef;
-		}
-	}
-
-	private void Awake()
-	{
-		KIDHandReference._leftHandRef = this._leftHand;
-		KIDHandReference._rightHandRef = this._rightHand;
-	}
-
 	[SerializeField]
 	private GameObject _leftHand;
 
@@ -34,4 +11,14 @@ public class KIDHandReference : MonoBehaviour
 	private static GameObject _leftHandRef;
 
 	private static GameObject _rightHandRef;
+
+	public static GameObject LeftHand => _leftHandRef;
+
+	public static GameObject RightHand => _rightHandRef;
+
+	private void Awake()
+	{
+		_leftHandRef = _leftHand;
+		_rightHandRef = _rightHand;
+	}
 }

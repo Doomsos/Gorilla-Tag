@@ -1,72 +1,102 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class BezierSpline : MonoBehaviour
 {
+	[SerializeField]
+	private Vector3[] points;
+
+	[SerializeField]
+	private BezierControlPointMode[] modes;
+
+	[SerializeField]
+	private bool loop;
+
+	private float _totalArcLength;
+
+	private float[] _timesTable;
+
+	private float[] _lengthsTable;
+
+	public bool Loop
+	{
+		get
+		{
+			return loop;
+		}
+		set
+		{
+			loop = value;
+			if (value)
+			{
+				modes[modes.Length - 1] = modes[0];
+				SetControlPoint(0, points[0]);
+			}
+		}
+	}
+
+	public int ControlPointCount => points.Length;
+
+	public int CurveCount => (points.Length - 1) / 3;
+
 	private void Awake()
 	{
 		float num = 0f;
-		for (int i = 1; i < this.points.Length; i++)
+		for (int i = 1; i < points.Length; i++)
 		{
-			num += (this.points[i] - this.points[i - 1]).magnitude;
+			num += (points[i] - points[i - 1]).magnitude;
 		}
 		int subdivisions = Mathf.RoundToInt(num / 0.1f);
-		this.buildTimesLenghtsTables(subdivisions);
+		buildTimesLenghtsTables(subdivisions);
 	}
 
 	private void buildTimesLenghtsTables(int subdivisions)
 	{
-		this._totalArcLength = 0f;
+		_totalArcLength = 0f;
 		float num = 1f / (float)subdivisions;
-		this._timesTable = new float[subdivisions];
-		this._lengthsTable = new float[subdivisions];
-		Vector3 b = this.GetPoint(0f);
+		_timesTable = new float[subdivisions];
+		_lengthsTable = new float[subdivisions];
+		Vector3 b = GetPoint(0f);
 		for (int i = 1; i <= subdivisions; i++)
 		{
 			float num2 = num * (float)i;
-			Vector3 point = this.GetPoint(num2);
-			this._totalArcLength += Vector3.Distance(point, b);
+			Vector3 point = GetPoint(num2);
+			_totalArcLength += Vector3.Distance(point, b);
 			b = point;
-			this._timesTable[i - 1] = num2;
-			this._lengthsTable[i - 1] = this._totalArcLength;
+			_timesTable[i - 1] = num2;
+			_lengthsTable[i - 1] = _totalArcLength;
 		}
 	}
 
 	private float getPathFromTime(float t)
 	{
-		if (float.IsNaN(this._totalArcLength) || this._totalArcLength == 0f)
+		if (float.IsNaN(_totalArcLength) || _totalArcLength == 0f)
 		{
 			return t;
 		}
 		if (t > 0f && t < 1f)
 		{
-			float num = this._totalArcLength * t;
+			float num = _totalArcLength * t;
 			float num2 = 0f;
 			float num3 = 0f;
 			float num4 = 0f;
 			float num5 = 0f;
-			int num6 = this._lengthsTable.Length;
-			int i = 0;
-			while (i < num6)
+			int num6 = _lengthsTable.Length;
+			for (int i = 0; i < num6; i++)
 			{
-				if (this._lengthsTable[i] > num)
+				if (_lengthsTable[i] > num)
 				{
-					num4 = this._timesTable[i];
-					num5 = this._lengthsTable[i];
+					num4 = _timesTable[i];
+					num5 = _lengthsTable[i];
 					if (i > 0)
 					{
-						num3 = this._lengthsTable[i - 1];
-						break;
+						num3 = _lengthsTable[i - 1];
 					}
 					break;
 				}
-				else
-				{
-					num2 = this._timesTable[i];
-					i++;
-				}
+				num2 = _timesTable[i];
 			}
 			t = num2 + (num - num3) / (num5 - num3) * (num4 - num2);
 		}
@@ -83,117 +113,92 @@ public class BezierSpline : MonoBehaviour
 
 	public void BuildSplineFromPoints(Vector3[] newPoints, BezierControlPointMode[] newModes, bool isLoop)
 	{
-		this.points = newPoints;
-		this.modes = newModes;
-		this.loop = isLoop;
+		points = newPoints;
+		modes = newModes;
+		loop = isLoop;
 		float num = 0f;
-		for (int i = 1; i < this.points.Length; i++)
+		for (int i = 1; i < points.Length; i++)
 		{
-			num += (this.points[i] - this.points[i - 1]).magnitude;
+			num += (points[i] - points[i - 1]).magnitude;
 		}
 		int subdivisions = Mathf.RoundToInt(num / 0.1f);
-		this.buildTimesLenghtsTables(subdivisions);
-	}
-
-	public bool Loop
-	{
-		get
-		{
-			return this.loop;
-		}
-		set
-		{
-			this.loop = value;
-			if (value)
-			{
-				this.modes[this.modes.Length - 1] = this.modes[0];
-				this.SetControlPoint(0, this.points[0]);
-			}
-		}
-	}
-
-	public int ControlPointCount
-	{
-		get
-		{
-			return this.points.Length;
-		}
+		buildTimesLenghtsTables(subdivisions);
 	}
 
 	public Vector3 GetControlPoint(int index)
 	{
-		return this.points[index];
+		return points[index];
 	}
 
 	public void SetControlPoint(int index, Vector3 point)
 	{
 		if (index % 3 == 0)
 		{
-			Vector3 b = point - this.points[index];
-			if (this.loop)
+			Vector3 vector = point - points[index];
+			if (loop)
 			{
 				if (index == 0)
 				{
-					this.points[1] += b;
-					this.points[this.points.Length - 2] += b;
-					this.points[this.points.Length - 1] = point;
+					points[1] += vector;
+					points[points.Length - 2] += vector;
+					points[points.Length - 1] = point;
 				}
-				else if (index == this.points.Length - 1)
+				else if (index == points.Length - 1)
 				{
-					this.points[0] = point;
-					this.points[1] += b;
-					this.points[index - 1] += b;
+					points[0] = point;
+					points[1] += vector;
+					points[index - 1] += vector;
 				}
 				else
 				{
-					this.points[index - 1] += b;
-					this.points[index + 1] += b;
+					points[index - 1] += vector;
+					points[index + 1] += vector;
 				}
 			}
 			else
 			{
 				if (index > 0)
 				{
-					this.points[index - 1] += b;
+					points[index - 1] += vector;
 				}
-				if (index + 1 < this.points.Length)
+				if (index + 1 < points.Length)
 				{
-					this.points[index + 1] += b;
+					points[index + 1] += vector;
 				}
 			}
 		}
-		this.points[index] = point;
-		this.EnforceMode(index);
+		points[index] = point;
+		EnforceMode(index);
 	}
 
 	public BezierControlPointMode GetControlPointMode(int index)
 	{
-		return this.modes[(index + 1) / 3];
+		return modes[(index + 1) / 3];
 	}
 
 	public void SetControlPointMode(int index, BezierControlPointMode mode)
 	{
 		int num = (index + 1) / 3;
-		this.modes[num] = mode;
-		if (this.loop)
+		modes[num] = mode;
+		if (loop)
 		{
 			if (num == 0)
 			{
-				this.modes[this.modes.Length - 1] = mode;
+				modes[modes.Length - 1] = mode;
 			}
-			else if (num == this.modes.Length - 1)
+			else if (num == modes.Length - 1)
 			{
-				this.modes[0] = mode;
+				modes[0] = mode;
 			}
 		}
-		this.EnforceMode(index);
+		EnforceMode(index);
 	}
 
 	private void EnforceMode(int index)
 	{
 		int num = (index + 1) / 3;
-		BezierControlPointMode bezierControlPointMode = this.modes[num];
-		if (bezierControlPointMode == BezierControlPointMode.Free || (!this.loop && (num == 0 || num == this.modes.Length - 1)))
+		BezierControlPointMode bezierControlPointMode = modes[num];
+		if (bezierControlPointMode == BezierControlPointMode.Free || (!loop && (num == 0 || num == modes.Length - 1)))
 		{
 			return;
 		}
@@ -205,10 +210,10 @@ public class BezierSpline : MonoBehaviour
 			num3 = num2 - 1;
 			if (num3 < 0)
 			{
-				num3 = this.points.Length - 2;
+				num3 = points.Length - 2;
 			}
 			num4 = num2 + 1;
-			if (num4 >= this.points.Length)
+			if (num4 >= points.Length)
 			{
 				num4 = 1;
 			}
@@ -216,40 +221,32 @@ public class BezierSpline : MonoBehaviour
 		else
 		{
 			num3 = num2 + 1;
-			if (num3 >= this.points.Length)
+			if (num3 >= points.Length)
 			{
 				num3 = 1;
 			}
 			num4 = num2 - 1;
 			if (num4 < 0)
 			{
-				num4 = this.points.Length - 2;
+				num4 = points.Length - 2;
 			}
 		}
-		Vector3 a = this.points[num2];
-		Vector3 b = a - this.points[num3];
+		Vector3 vector = points[num2];
+		Vector3 vector2 = vector - points[num3];
 		if (bezierControlPointMode == BezierControlPointMode.Aligned)
 		{
-			b = b.normalized * Vector3.Distance(a, this.points[num4]);
+			vector2 = vector2.normalized * Vector3.Distance(vector, points[num4]);
 		}
-		this.points[num4] = a + b;
-	}
-
-	public int CurveCount
-	{
-		get
-		{
-			return (this.points.Length - 1) / 3;
-		}
+		points[num4] = vector + vector2;
 	}
 
 	public Vector3 GetPoint(float t, bool ConstantVelocity)
 	{
 		if (ConstantVelocity)
 		{
-			return this.GetPoint(this.getPathFromTime(t));
+			return GetPoint(getPathFromTime(t));
 		}
-		return this.GetPoint(t);
+		return GetPoint(t);
 	}
 
 	public Vector3 GetPoint(float t)
@@ -258,16 +255,16 @@ public class BezierSpline : MonoBehaviour
 		if (t >= 1f)
 		{
 			t = 1f;
-			num = this.points.Length - 4;
+			num = points.Length - 4;
 		}
 		else
 		{
-			t = Mathf.Clamp01(t) * (float)this.CurveCount;
+			t = Mathf.Clamp01(t) * (float)CurveCount;
 			num = (int)t;
 			t -= (float)num;
 			num *= 3;
 		}
-		return base.transform.TransformPoint(Bezier.GetPoint(this.points[num], this.points[num + 1], this.points[num + 2], this.points[num + 3], t));
+		return base.transform.TransformPoint(Bezier.GetPoint(points[num], points[num + 1], points[num + 2], points[num + 3], t));
 	}
 
 	public Vector3 GetPointLocal(float t)
@@ -276,16 +273,16 @@ public class BezierSpline : MonoBehaviour
 		if (t >= 1f)
 		{
 			t = 1f;
-			num = this.points.Length - 4;
+			num = points.Length - 4;
 		}
 		else
 		{
-			t = Mathf.Clamp01(t) * (float)this.CurveCount;
+			t = Mathf.Clamp01(t) * (float)CurveCount;
 			num = (int)t;
 			t -= (float)num;
 			num *= 3;
 		}
-		return Bezier.GetPoint(this.points[num], this.points[num + 1], this.points[num + 2], this.points[num + 3], t);
+		return Bezier.GetPoint(points[num], points[num + 1], points[num + 2], points[num + 3], t);
 	}
 
 	public Vector3 GetVelocity(float t)
@@ -294,110 +291,92 @@ public class BezierSpline : MonoBehaviour
 		if (t >= 1f)
 		{
 			t = 1f;
-			num = this.points.Length - 4;
+			num = points.Length - 4;
 		}
 		else
 		{
-			t = Mathf.Clamp01(t) * (float)this.CurveCount;
+			t = Mathf.Clamp01(t) * (float)CurveCount;
 			num = (int)t;
 			t -= (float)num;
 			num *= 3;
 		}
-		return base.transform.TransformPoint(Bezier.GetFirstDerivative(this.points[num], this.points[num + 1], this.points[num + 2], this.points[num + 3], t)) - base.transform.position;
+		return base.transform.TransformPoint(Bezier.GetFirstDerivative(points[num], points[num + 1], points[num + 2], points[num + 3], t)) - base.transform.position;
 	}
 
 	public Vector3 GetDirection(float t, bool ConstantVelocity)
 	{
 		if (ConstantVelocity)
 		{
-			return this.GetDirection(this.getPathFromTime(t));
+			return GetDirection(getPathFromTime(t));
 		}
-		return this.GetDirection(t);
+		return GetDirection(t);
 	}
 
 	public Vector3 GetDirection(float t)
 	{
-		return this.GetVelocity(t).normalized;
+		return GetVelocity(t).normalized;
 	}
 
 	public void AddCurve()
 	{
-		Vector3 vector = this.points[this.points.Length - 1];
-		Array.Resize<Vector3>(ref this.points, this.points.Length + 3);
+		Vector3 vector = points[points.Length - 1];
+		Array.Resize(ref points, points.Length + 3);
 		vector.x += 1f;
-		this.points[this.points.Length - 3] = vector;
+		points[points.Length - 3] = vector;
 		vector.x += 1f;
-		this.points[this.points.Length - 2] = vector;
+		points[points.Length - 2] = vector;
 		vector.x += 1f;
-		this.points[this.points.Length - 1] = vector;
-		Array.Resize<BezierControlPointMode>(ref this.modes, this.modes.Length + 1);
-		this.modes[this.modes.Length - 1] = this.modes[this.modes.Length - 2];
-		this.EnforceMode(this.points.Length - 4);
-		if (this.loop)
+		points[points.Length - 1] = vector;
+		Array.Resize(ref modes, modes.Length + 1);
+		modes[modes.Length - 1] = modes[modes.Length - 2];
+		EnforceMode(points.Length - 4);
+		if (loop)
 		{
-			this.points[this.points.Length - 1] = this.points[0];
-			this.modes[this.modes.Length - 1] = this.modes[0];
-			this.EnforceMode(0);
+			points[points.Length - 1] = points[0];
+			modes[modes.Length - 1] = modes[0];
+			EnforceMode(0);
 		}
 	}
 
 	public void RemoveLastCurve()
 	{
-		if (this.points.Length <= 4)
+		if (points.Length > 4)
 		{
-			return;
+			Array.Resize(ref points, points.Length - 3);
+			Array.Resize(ref modes, modes.Length - 1);
 		}
-		Array.Resize<Vector3>(ref this.points, this.points.Length - 3);
-		Array.Resize<BezierControlPointMode>(ref this.modes, this.modes.Length - 1);
 	}
 
 	public void RemoveCurve(int index)
 	{
-		if (this.points.Length <= 4)
+		if (points.Length > 4)
 		{
-			return;
+			List<Vector3> list = points.ToList();
+			int i;
+			for (i = 4; i < points.Length && index - 3 > i; i += 3)
+			{
+			}
+			for (int j = 0; j < 3; j++)
+			{
+				list.RemoveAt(i);
+			}
+			points = list.ToArray();
+			int index2 = (i - 4) / 3;
+			List<BezierControlPointMode> list2 = modes.ToList();
+			list2.RemoveAt(index2);
+			modes = list2.ToArray();
 		}
-		List<Vector3> list = this.points.ToList<Vector3>();
-		int num = 4;
-		while (num < this.points.Length && index - 3 > num)
-		{
-			num += 3;
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			list.RemoveAt(num);
-		}
-		this.points = list.ToArray();
-		int index2 = (num - 4) / 3;
-		List<BezierControlPointMode> list2 = this.modes.ToList<BezierControlPointMode>();
-		list2.RemoveAt(index2);
-		this.modes = list2.ToArray();
 	}
 
 	public void Reset()
 	{
-		this.points = new Vector3[]
+		points = new Vector3[4]
 		{
 			new Vector3(0f, -1f, 0f),
 			new Vector3(0f, -1f, 2f),
 			new Vector3(0f, -1f, 4f),
 			new Vector3(0f, -1f, 6f)
 		};
-		this.modes = new BezierControlPointMode[2];
+		modes = new BezierControlPointMode[2];
 	}
-
-	[SerializeField]
-	private Vector3[] points;
-
-	[SerializeField]
-	private BezierControlPointMode[] modes;
-
-	[SerializeField]
-	private bool loop;
-
-	private float _totalArcLength;
-
-	private float[] _timesTable;
-
-	private float[] _lengthsTable;
 }

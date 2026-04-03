@@ -1,267 +1,264 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[NetworkBehaviourWeaved(13)]
+public class FlowersManager : NetworkComponent
 {
-	[NetworkBehaviourWeaved(13)]
-	public class FlowersManager : NetworkComponent
+	[Serializable]
+	public class FlowersInZone
 	{
-		public static FlowersManager Instance { get; private set; }
+		public GTZone zone;
 
-		protected override void Awake()
+		public List<GameObject> sections;
+	}
+
+	public List<FlowersInZone> sections;
+
+	public int flowersToCheck = 1;
+
+	public int flowerCheckIndex;
+
+	private readonly List<Flower> allFlowers = new List<Flower>();
+
+	private SlingshotProjectileHitNotifier[] hitNotifiers;
+
+	private readonly Dictionary<GameObject, List<Flower>> sectionToFlowersDict = new Dictionary<GameObject, List<Flower>>();
+
+	private readonly Dictionary<GameObject, GTZone> sectionToZonesDict = new Dictionary<GameObject, GTZone>();
+
+	private bool hasBeenSerialized;
+
+	[WeaverGenerated]
+	[DefaultForProperty("Data", 0, 13)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private FlowersDataStruct _Data;
+
+	public static FlowersManager Instance { get; private set; }
+
+	[Networked]
+	[NetworkedWeaved(0, 13)]
+	private unsafe FlowersDataStruct Data
+	{
+		get
 		{
-			base.Awake();
-			FlowersManager.Instance = this;
-			this.hitNotifiers = base.GetComponentsInChildren<SlingshotProjectileHitNotifier>();
-			foreach (SlingshotProjectileHitNotifier slingshotProjectileHitNotifier in this.hitNotifiers)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
-				if (slingshotProjectileHitNotifier != null)
-				{
-					slingshotProjectileHitNotifier.OnProjectileTriggerEnter += this.ProjectileHitReceiver;
-				}
-				else
-				{
-					Debug.LogError("Needs SlingshotProjectileHitNotifier added to this GameObject children");
-				}
+				throw new InvalidOperationException("Error when accessing FlowersManager.Data. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			foreach (FlowersManager.FlowersInZone flowersInZone in this.sections)
+			return *(FlowersDataStruct*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
-				foreach (GameObject gameObject in flowersInZone.sections)
-				{
-					this.sectionToZonesDict[gameObject] = flowersInZone.zone;
-					Flower[] componentsInChildren = gameObject.GetComponentsInChildren<Flower>();
-					this.allFlowers.AddRange(componentsInChildren);
-					this.sectionToFlowersDict[gameObject] = componentsInChildren.ToList<Flower>();
-				}
+				throw new InvalidOperationException("Error when accessing FlowersManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(FlowersDataStruct*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		Instance = this;
+		hitNotifiers = GetComponentsInChildren<SlingshotProjectileHitNotifier>();
+		SlingshotProjectileHitNotifier[] array = hitNotifiers;
+		foreach (SlingshotProjectileHitNotifier slingshotProjectileHitNotifier in array)
+		{
+			if (slingshotProjectileHitNotifier != null)
+			{
+				slingshotProjectileHitNotifier.OnProjectileTriggerEnter += ProjectileHitReceiver;
+			}
+			else
+			{
+				Debug.LogError("Needs SlingshotProjectileHitNotifier added to this GameObject children");
 			}
 		}
-
-		private new void Start()
+		foreach (FlowersInZone section in sections)
 		{
-			NetworkSystem.Instance.RegisterSceneNetworkItem(base.gameObject);
-			ZoneManagement instance = ZoneManagement.instance;
-			instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.HandleOnZoneChanged));
-			if (base.IsMine)
+			foreach (GameObject section2 in section.sections)
 			{
-				foreach (Flower flower in this.allFlowers)
+				sectionToZonesDict[section2] = section.zone;
+				Flower[] componentsInChildren = section2.GetComponentsInChildren<Flower>();
+				allFlowers.AddRange(componentsInChildren);
+				sectionToFlowersDict[section2] = componentsInChildren.ToList();
+			}
+		}
+	}
+
+	private new void Start()
+	{
+		NetworkSystem.Instance.RegisterSceneNetworkItem(base.gameObject);
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(HandleOnZoneChanged));
+		if (!base.IsMine)
+		{
+			return;
+		}
+		foreach (Flower allFlower in allFlowers)
+		{
+			allFlower.UpdateFlowerState(Flower.FlowerState.Healthy, isWatered: false, updateVisual: false);
+		}
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		SlingshotProjectileHitNotifier[] array = hitNotifiers;
+		foreach (SlingshotProjectileHitNotifier slingshotProjectileHitNotifier in array)
+		{
+			if (slingshotProjectileHitNotifier != null)
+			{
+				slingshotProjectileHitNotifier.OnProjectileTriggerEnter -= ProjectileHitReceiver;
+			}
+		}
+		Instance = null;
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(HandleOnZoneChanged));
+	}
+
+	private void ProjectileHitReceiver(SlingshotProjectile projectile, Collider collider)
+	{
+		if (projectile.CompareTag("WaterBalloonProjectile"))
+		{
+			WaterFlowers(collider);
+		}
+	}
+
+	private void WaterFlowers(Collider collider)
+	{
+		if (!base.IsMine)
+		{
+			return;
+		}
+		GameObject gameObject = collider.gameObject;
+		if (gameObject == null)
+		{
+			Debug.LogError("Could not find any flowers section");
+			return;
+		}
+		foreach (Flower item in sectionToFlowersDict[gameObject])
+		{
+			item.WaterFlower(isWatered: true);
+		}
+	}
+
+	private void HandleOnZoneChanged()
+	{
+		foreach (KeyValuePair<GameObject, GTZone> item in sectionToZonesDict)
+		{
+			bool enable = ZoneManagement.instance.IsZoneActive(item.Value);
+			foreach (Flower item2 in sectionToFlowersDict[item.Key])
+			{
+				item2.UpdateVisuals(enable);
+			}
+		}
+	}
+
+	public int GetHealthyFlowersInZoneCount(GTZone zone)
+	{
+		int num = 0;
+		foreach (KeyValuePair<GameObject, GTZone> item in sectionToZonesDict)
+		{
+			if (item.Value != zone)
+			{
+				continue;
+			}
+			foreach (Flower item2 in sectionToFlowersDict[item.Key])
+			{
+				if (item2.GetCurrentState() == Flower.FlowerState.Healthy)
 				{
-					flower.UpdateFlowerState(Flower.FlowerState.Healthy, false, false);
-				}
-			}
-		}
-
-		private void OnDestroy()
-		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			foreach (SlingshotProjectileHitNotifier slingshotProjectileHitNotifier in this.hitNotifiers)
-			{
-				if (slingshotProjectileHitNotifier != null)
-				{
-					slingshotProjectileHitNotifier.OnProjectileTriggerEnter -= this.ProjectileHitReceiver;
-				}
-			}
-			FlowersManager.Instance = null;
-			ZoneManagement instance = ZoneManagement.instance;
-			instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.HandleOnZoneChanged));
-		}
-
-		private void ProjectileHitReceiver(SlingshotProjectile projectile, Collider collider)
-		{
-			if (!projectile.CompareTag("WaterBalloonProjectile"))
-			{
-				return;
-			}
-			this.WaterFlowers(collider);
-		}
-
-		private void WaterFlowers(Collider collider)
-		{
-			if (!base.IsMine)
-			{
-				return;
-			}
-			GameObject gameObject = collider.gameObject;
-			if (gameObject == null)
-			{
-				Debug.LogError("Could not find any flowers section");
-				return;
-			}
-			foreach (Flower flower in this.sectionToFlowersDict[gameObject])
-			{
-				flower.WaterFlower(true);
-			}
-		}
-
-		private void HandleOnZoneChanged()
-		{
-			foreach (KeyValuePair<GameObject, GTZone> keyValuePair in this.sectionToZonesDict)
-			{
-				bool enable = ZoneManagement.instance.IsZoneActive(keyValuePair.Value);
-				foreach (Flower flower in this.sectionToFlowersDict[keyValuePair.Key])
-				{
-					flower.UpdateVisuals(enable);
-				}
-			}
-		}
-
-		public int GetHealthyFlowersInZoneCount(GTZone zone)
-		{
-			int num = 0;
-			foreach (KeyValuePair<GameObject, GTZone> keyValuePair in this.sectionToZonesDict)
-			{
-				if (keyValuePair.Value == zone)
-				{
-					using (List<Flower>.Enumerator enumerator2 = this.sectionToFlowersDict[keyValuePair.Key].GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							if (enumerator2.Current.GetCurrentState() == Flower.FlowerState.Healthy)
-							{
-								num++;
-							}
-						}
-					}
-				}
-			}
-			return num;
-		}
-
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			if (info.Sender != PhotonNetwork.MasterClient)
-			{
-				return;
-			}
-			stream.SendNext(this.allFlowers.Count);
-			for (int i = 0; i < this.allFlowers.Count; i++)
-			{
-				stream.SendNext(this.allFlowers[i].IsWatered);
-				stream.SendNext(this.allFlowers[i].GetCurrentState());
-			}
-		}
-
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			if (info.Sender != PhotonNetwork.MasterClient)
-			{
-				return;
-			}
-			int num = (int)stream.ReceiveNext();
-			for (int i = 0; i < num; i++)
-			{
-				bool isWatered = (bool)stream.ReceiveNext();
-				Flower.FlowerState currentState = this.allFlowers[i].GetCurrentState();
-				Flower.FlowerState flowerState = (Flower.FlowerState)stream.ReceiveNext();
-				if (currentState != flowerState)
-				{
-					this.allFlowers[i].UpdateFlowerState(flowerState, isWatered, true);
-				}
-			}
-		}
-
-		[Networked]
-		[NetworkedWeaved(0, 13)]
-		private unsafe FlowersDataStruct Data
-		{
-			get
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing FlowersManager.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				return *(FlowersDataStruct*)(this.Ptr + 0);
-			}
-			set
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing FlowersManager.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				*(FlowersDataStruct*)(this.Ptr + 0) = value;
-			}
-		}
-
-		public override void WriteDataFusion()
-		{
-			if (base.HasStateAuthority)
-			{
-				this.Data = new FlowersDataStruct(this.allFlowers);
-			}
-		}
-
-		public override void ReadDataFusion()
-		{
-			if (this.Data.FlowerCount > 0)
-			{
-				for (int i = 0; i < this.Data.FlowerCount; i++)
-				{
-					bool isWatered = this.Data.FlowerWateredData[i] == 1;
-					Flower.FlowerState currentState = this.allFlowers[i].GetCurrentState();
-					Flower.FlowerState flowerState = (Flower.FlowerState)this.Data.FlowerStateData[i];
-					if (currentState != flowerState)
-					{
-						this.allFlowers[i].UpdateFlowerState(flowerState, isWatered, true);
-					}
+					num++;
 				}
 			}
 		}
+		return num;
+	}
 
-		private void Update()
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
 		{
-			int num = this.flowerCheckIndex + 1;
-			while (num < this.allFlowers.Count && num < this.flowerCheckIndex + this.flowersToCheck)
+			stream.SendNext(allFlowers.Count);
+			for (int i = 0; i < allFlowers.Count; i++)
 			{
-				this.allFlowers[num].AnimCatch();
-				num++;
+				stream.SendNext(allFlowers[i].IsWatered);
+				stream.SendNext(allFlowers[i].GetCurrentState());
 			}
-			this.flowerCheckIndex = ((this.flowerCheckIndex + this.flowersToCheck >= this.allFlowers.Count) ? 0 : (this.flowerCheckIndex + this.flowersToCheck));
 		}
+	}
 
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender != PhotonNetwork.MasterClient)
 		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
+			return;
 		}
-
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
+		int num = (int)stream.ReceiveNext();
+		for (int i = 0; i < num; i++)
 		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
+			bool isWatered = (bool)stream.ReceiveNext();
+			Flower.FlowerState currentState = allFlowers[i].GetCurrentState();
+			Flower.FlowerState flowerState = (Flower.FlowerState)stream.ReceiveNext();
+			if (currentState != flowerState)
+			{
+				allFlowers[i].UpdateFlowerState(flowerState, isWatered);
+			}
 		}
+	}
 
-		public List<FlowersManager.FlowersInZone> sections;
-
-		public int flowersToCheck = 1;
-
-		public int flowerCheckIndex;
-
-		private readonly List<Flower> allFlowers = new List<Flower>();
-
-		private SlingshotProjectileHitNotifier[] hitNotifiers;
-
-		private readonly Dictionary<GameObject, List<Flower>> sectionToFlowersDict = new Dictionary<GameObject, List<Flower>>();
-
-		private readonly Dictionary<GameObject, GTZone> sectionToZonesDict = new Dictionary<GameObject, GTZone>();
-
-		private bool hasBeenSerialized;
-
-		[WeaverGenerated]
-		[DefaultForProperty("Data", 0, 13)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private FlowersDataStruct _Data;
-
-		[Serializable]
-		public class FlowersInZone
+	public override void WriteDataFusion()
+	{
+		if (base.HasStateAuthority)
 		{
-			public GTZone zone;
-
-			public List<GameObject> sections;
+			Data = new FlowersDataStruct(allFlowers);
 		}
+	}
+
+	public override void ReadDataFusion()
+	{
+		if (Data.FlowerCount <= 0)
+		{
+			return;
+		}
+		for (int i = 0; i < Data.FlowerCount; i++)
+		{
+			bool isWatered = Data.FlowerWateredData[i] == 1;
+			Flower.FlowerState currentState = allFlowers[i].GetCurrentState();
+			Flower.FlowerState flowerState = (Flower.FlowerState)Data.FlowerStateData[i];
+			if (currentState != flowerState)
+			{
+				allFlowers[i].UpdateFlowerState(flowerState, isWatered);
+			}
+		}
+	}
+
+	private void Update()
+	{
+		for (int i = flowerCheckIndex + 1; i < allFlowers.Count && i < flowerCheckIndex + flowersToCheck; i++)
+		{
+			allFlowers[i].AnimCatch();
+		}
+		flowerCheckIndex = ((flowerCheckIndex + flowersToCheck < allFlowers.Count) ? (flowerCheckIndex + flowersToCheck) : 0);
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

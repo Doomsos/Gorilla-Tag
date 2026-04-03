@@ -1,58 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class CosmeticFan : MonoBehaviour
 {
-	private void Start()
-	{
-		this.spinUpRate = this.maxSpeed / this.spinUpDuration;
-		this.spinDownRate = this.maxSpeed / this.spinDownDuration;
-	}
-
-	public void Run()
-	{
-		this.targetSpeed = this.maxSpeed;
-		if (this.spinUpDuration > 0f)
-		{
-			base.enabled = true;
-			this.currentAccelRate = this.spinUpRate;
-		}
-		else
-		{
-			this.currentSpeed = this.maxSpeed;
-		}
-		base.enabled = true;
-	}
-
-	public void Stop()
-	{
-		this.targetSpeed = 0f;
-		if (this.spinDownDuration > 0f)
-		{
-			base.enabled = true;
-			this.currentAccelRate = this.spinDownRate;
-			return;
-		}
-		this.currentSpeed = 0f;
-	}
-
-	public void InstantStop()
-	{
-		this.targetSpeed = 0f;
-		this.currentSpeed = 0f;
-		base.enabled = false;
-	}
-
-	private void Update()
-	{
-		this.currentSpeed = Mathf.MoveTowards(this.currentSpeed, this.targetSpeed, this.currentAccelRate * Time.deltaTime);
-		base.transform.localRotation = base.transform.localRotation * Quaternion.AngleAxis(this.currentSpeed * Time.deltaTime, this.axis);
-		if (this.currentSpeed == 0f && this.targetSpeed == 0f)
-		{
-			base.enabled = false;
-		}
-	}
-
 	[SerializeField]
 	private Vector3 axis;
 
@@ -74,4 +23,56 @@ public class CosmeticFan : MonoBehaviour
 	private float spinUpRate;
 
 	private float spinDownRate;
+
+	private void Start()
+	{
+		spinUpRate = maxSpeed / spinUpDuration;
+		spinDownRate = maxSpeed / spinDownDuration;
+	}
+
+	public void Run()
+	{
+		targetSpeed = maxSpeed;
+		if (spinUpDuration > 0f)
+		{
+			base.enabled = true;
+			currentAccelRate = spinUpRate;
+		}
+		else
+		{
+			currentSpeed = maxSpeed;
+		}
+		base.enabled = true;
+	}
+
+	public void Stop()
+	{
+		targetSpeed = 0f;
+		if (spinDownDuration > 0f)
+		{
+			base.enabled = true;
+			currentAccelRate = spinDownRate;
+		}
+		else
+		{
+			currentSpeed = 0f;
+		}
+	}
+
+	public void InstantStop()
+	{
+		targetSpeed = 0f;
+		currentSpeed = 0f;
+		base.enabled = false;
+	}
+
+	private void Update()
+	{
+		currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, currentAccelRate * Time.deltaTime);
+		base.transform.localRotation = base.transform.localRotation * Quaternion.AngleAxis(currentSpeed * Time.deltaTime, axis);
+		if (currentSpeed == 0f && targetSpeed == 0f)
+		{
+			base.enabled = false;
+		}
+	}
 }

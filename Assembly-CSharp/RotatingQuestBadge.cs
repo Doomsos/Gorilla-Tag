@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
@@ -7,99 +7,12 @@ using UnityEngine;
 
 public class RotatingQuestBadge : MonoBehaviour, ISpawnable
 {
-	public bool IsSpawned { get; set; }
-
-	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
-
-	public void OnSpawn(VRRig rig)
+	[Serializable]
+	public struct BadgeLevel
 	{
-		if (this.forWardrobe && !this.myRig)
-		{
-			this.TryGetRig();
-			return;
-		}
-		this.myRig = rig;
-		this.myRig.OnQuestScoreChanged += this.OnProgressScoreChanged;
-		this.OnProgressScoreChanged(this.myRig.GetCurrentQuestScore());
-	}
+		public GameObject badge;
 
-	public void OnDespawn()
-	{
-	}
-
-	private void OnEnable()
-	{
-		if (this.forWardrobe)
-		{
-			this.SetBadgeLevel(-1);
-			if (!this.TryGetRig())
-			{
-				base.StartCoroutine(this.DoFindRig());
-			}
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.forWardrobe && this.myRig)
-		{
-			this.myRig.OnQuestScoreChanged -= this.OnProgressScoreChanged;
-			this.myRig = null;
-		}
-	}
-
-	private IEnumerator DoFindRig()
-	{
-		WaitForSeconds intervalWait = new WaitForSeconds(0.1f);
-		while (!this.TryGetRig())
-		{
-			yield return intervalWait;
-		}
-		yield break;
-	}
-
-	private bool TryGetRig()
-	{
-		GorillaTagger instance = GorillaTagger.Instance;
-		this.myRig = ((instance != null) ? instance.offlineVRRig : null);
-		if (this.myRig)
-		{
-			this.myRig.OnQuestScoreChanged += this.OnProgressScoreChanged;
-			this.OnProgressScoreChanged(this.myRig.GetCurrentQuestScore());
-			return true;
-		}
-		return false;
-	}
-
-	private void OnProgressScoreChanged(int score)
-	{
-		score = Mathf.Clamp(score, 0, 99999);
-		this.displayField.text = score.ToString();
-		this.UpdateBadge(score);
-	}
-
-	private void UpdateBadge(int score)
-	{
-		int num = -1;
-		int badgeLevel = -1;
-		for (int i = 0; i < this.badgeLevels.Length; i++)
-		{
-			if (this.badgeLevels[i].requiredPoints <= score && this.badgeLevels[i].requiredPoints > num)
-			{
-				num = this.badgeLevels[i].requiredPoints;
-				badgeLevel = i;
-			}
-		}
-		this.SetBadgeLevel(badgeLevel);
-	}
-
-	private void SetBadgeLevel(int level)
-	{
-		level = Mathf.Clamp(level, 0, this.badgeLevels.Length - 1);
-		for (int i = 0; i < this.badgeLevels.Length; i++)
-		{
-			this.badgeLevels[i].badge.SetActive(i == level);
-		}
+		public int requiredPoints;
 	}
 
 	[SerializeField]
@@ -112,13 +25,98 @@ public class RotatingQuestBadge : MonoBehaviour, ISpawnable
 	private VRRig myRig;
 
 	[SerializeField]
-	private RotatingQuestBadge.BadgeLevel[] badgeLevels;
+	private BadgeLevel[] badgeLevels;
 
-	[Serializable]
-	public struct BadgeLevel
+	public bool IsSpawned { get; set; }
+
+	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
+
+	public void OnSpawn(VRRig rig)
 	{
-		public GameObject badge;
+		if (forWardrobe && !myRig)
+		{
+			TryGetRig();
+			return;
+		}
+		myRig = rig;
+		myRig.OnQuestScoreChanged += OnProgressScoreChanged;
+		OnProgressScoreChanged(myRig.GetCurrentQuestScore());
+	}
 
-		public int requiredPoints;
+	public void OnDespawn()
+	{
+	}
+
+	private void OnEnable()
+	{
+		if (forWardrobe)
+		{
+			SetBadgeLevel(-1);
+			if (!TryGetRig())
+			{
+				StartCoroutine(DoFindRig());
+			}
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (forWardrobe && (bool)myRig)
+		{
+			myRig.OnQuestScoreChanged -= OnProgressScoreChanged;
+			myRig = null;
+		}
+	}
+
+	private IEnumerator DoFindRig()
+	{
+		WaitForSeconds intervalWait = new WaitForSeconds(0.1f);
+		while (!TryGetRig())
+		{
+			yield return intervalWait;
+		}
+	}
+
+	private bool TryGetRig()
+	{
+		myRig = GorillaTagger.Instance?.offlineVRRig;
+		if ((bool)myRig)
+		{
+			myRig.OnQuestScoreChanged += OnProgressScoreChanged;
+			OnProgressScoreChanged(myRig.GetCurrentQuestScore());
+			return true;
+		}
+		return false;
+	}
+
+	private void OnProgressScoreChanged(int score)
+	{
+		score = Mathf.Clamp(score, 0, 99999);
+		displayField.text = score.ToString();
+		UpdateBadge(score);
+	}
+
+	private void UpdateBadge(int score)
+	{
+		int num = -1;
+		int badgeLevel = -1;
+		for (int i = 0; i < badgeLevels.Length; i++)
+		{
+			if (badgeLevels[i].requiredPoints <= score && badgeLevels[i].requiredPoints > num)
+			{
+				num = badgeLevels[i].requiredPoints;
+				badgeLevel = i;
+			}
+		}
+		SetBadgeLevel(badgeLevel);
+	}
+
+	private void SetBadgeLevel(int level)
+	{
+		level = Mathf.Clamp(level, 0, badgeLevels.Length - 1);
+		for (int i = 0; i < badgeLevels.Length; i++)
+		{
+			badgeLevels[i].badge.SetActive(i == level);
+		}
 	}
 }

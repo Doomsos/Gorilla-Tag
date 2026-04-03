@@ -1,15 +1,12 @@
-﻿using System;
+namespace LitJson;
 
-namespace LitJson
+internal class FsmContext
 {
-	internal class FsmContext
-	{
-		public bool Return;
+	public bool Return;
 
-		public int NextState;
+	public int NextState;
 
-		public Lexer L;
+	public Lexer L;
 
-		public int StateStack;
-	}
+	public int StateStack;
 }

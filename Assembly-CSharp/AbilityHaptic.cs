@@ -1,8 +1,12 @@
-﻿using System;
+using System;
 
 [Serializable]
 public class AbilityHaptic
 {
+	public float strength = 0.2f;
+
+	public float duration = 0.1f;
+
 	public void PlayIfHeldLocal(GameEntity gameEntity)
 	{
 		if (gameEntity == null || !gameEntity.IsHeldByLocalPlayer())
@@ -10,16 +14,14 @@ public class AbilityHaptic
 			return;
 		}
 		GamePlayer gamePlayer = GamePlayer.GetGamePlayer(gameEntity.heldByActorNumber);
-		if (gamePlayer == null)
+		if (!(gamePlayer == null))
 		{
-			return;
+			int num = gamePlayer.FindHandIndex(gameEntity.id);
+			if (num != -1)
+			{
+				GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
+			}
 		}
-		int num = gamePlayer.FindHandIndex(gameEntity.id);
-		if (num == -1)
-		{
-			return;
-		}
-		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), this.strength, this.duration);
 	}
 
 	public void PlayIfSnappedLocal(GameEntity gameEntity)
@@ -35,26 +37,20 @@ public class AbilityHaptic
 		}
 		if (component.IsSnappedToLeftArm())
 		{
-			GorillaTagger.Instance.StartVibration(true, this.strength, this.duration);
+			GorillaTagger.Instance.StartVibration(forLeftController: true, strength, duration);
 		}
 		if (component.IsSnappedToRightArm())
 		{
-			GorillaTagger.Instance.StartVibration(false, this.strength, this.duration);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, strength, duration);
 		}
 		GamePlayer gamePlayer = GamePlayer.GetGamePlayer(gameEntity.heldByActorNumber);
-		if (gamePlayer == null)
+		if (!(gamePlayer == null))
 		{
-			return;
+			int num = gamePlayer.FindHandIndex(gameEntity.id);
+			if (num != -1)
+			{
+				GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
+			}
 		}
-		int num = gamePlayer.FindHandIndex(gameEntity.id);
-		if (num == -1)
-		{
-			return;
-		}
-		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), this.strength, this.duration);
 	}
-
-	public float strength = 0.2f;
-
-	public float duration = 0.1f;
 }

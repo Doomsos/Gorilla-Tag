@@ -1,4 +1,3 @@
-﻿using System;
 using Drawing;
 using Unity.Mathematics;
 using UnityEngine;
@@ -6,44 +5,6 @@ using UnityEngine;
 [ExecuteAlways]
 public class Xform : MonoBehaviour
 {
-	public float3 localExtents
-	{
-		get
-		{
-			return this.localScale * 0.5f;
-		}
-	}
-
-	public Matrix4x4 LocalTRS()
-	{
-		return Matrix4x4.TRS(this.localPosition, this.localRotation, this.localScale);
-	}
-
-	public Matrix4x4 TRS()
-	{
-		if (this.parent.AsNull<Transform>() == null)
-		{
-			return this.LocalTRS();
-		}
-		return this.parent.localToWorldMatrix * this.LocalTRS();
-	}
-
-	private unsafe void Update()
-	{
-		Matrix4x4 matrix = this.TRS();
-		CommandBuilder commandBuilder = *Draw.ingame;
-		using (commandBuilder.WithMatrix(matrix))
-		{
-			using (commandBuilder.WithLineWidth(2f, true))
-			{
-				commandBuilder.PlaneWithNormal(Xform.AXIS_XR_RT * 0.5f, Xform.AXIS_XR_RT, Xform.F2_ONE, Xform.CR);
-				commandBuilder.PlaneWithNormal(Xform.AXIS_YG_UP * 0.5f, Xform.AXIS_YG_UP, Xform.F2_ONE, Xform.CG);
-				commandBuilder.PlaneWithNormal(Xform.AXIS_ZB_FW * 0.5f, Xform.AXIS_ZB_FW, Xform.F2_ONE, Xform.CB);
-				commandBuilder.WireBox(float3.zero, quaternion.identity, 1f, this.displayColor);
-			}
-		}
-	}
-
 	public Transform parent;
 
 	[Space]
@@ -71,4 +32,36 @@ public class Xform : MonoBehaviour
 	private static readonly Color CG = new Color(0f, 1f, 0f, 0.24f);
 
 	private static readonly Color CB = new Color(0f, 0f, 1f, 0.24f);
+
+	public float3 localExtents => localScale * 0.5f;
+
+	public Matrix4x4 LocalTRS()
+	{
+		return Matrix4x4.TRS(localPosition, localRotation, localScale);
+	}
+
+	public Matrix4x4 TRS()
+	{
+		if (parent.AsNull() == null)
+		{
+			return LocalTRS();
+		}
+		return parent.localToWorldMatrix * LocalTRS();
+	}
+
+	private void Update()
+	{
+		Matrix4x4 matrix = TRS();
+		CommandBuilder ingame = Draw.ingame;
+		using (ingame.WithMatrix(matrix))
+		{
+			using (ingame.WithLineWidth(2f))
+			{
+				ingame.PlaneWithNormal(AXIS_XR_RT * 0.5f, AXIS_XR_RT, F2_ONE, CR);
+				ingame.PlaneWithNormal(AXIS_YG_UP * 0.5f, AXIS_YG_UP, F2_ONE, CG);
+				ingame.PlaneWithNormal(AXIS_ZB_FW * 0.5f, AXIS_ZB_FW, F2_ONE, CB);
+				ingame.WireBox(float3.zero, quaternion.identity, 1f, displayColor);
+			}
+		}
+	}
 }

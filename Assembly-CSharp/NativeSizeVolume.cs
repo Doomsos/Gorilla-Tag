@@ -1,49 +1,15 @@
-﻿using System;
+using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class NativeSizeVolume : MonoBehaviour
 {
-	private void OnTriggerEnter(Collider other)
+	[Serializable]
+	private enum NativeSizeVolumeAction
 	{
-		GTPlayer componentInParent = other.GetComponentInParent<GTPlayer>();
-		if (componentInParent == null)
-		{
-			return;
-		}
-		NativeSizeVolume.NativeSizeVolumeAction onEnterAction = this.OnEnterAction;
-		if (onEnterAction == NativeSizeVolume.NativeSizeVolumeAction.ApplySettings)
-		{
-			this.settings.WorldPosition = base.transform.position;
-			componentInParent.SetNativeScale(this.settings);
-			return;
-		}
-		if (onEnterAction != NativeSizeVolume.NativeSizeVolumeAction.ResetSize)
-		{
-			return;
-		}
-		componentInParent.SetNativeScale(null);
-	}
-
-	private void OnTriggerExit(Collider other)
-	{
-		GTPlayer componentInParent = other.GetComponentInParent<GTPlayer>();
-		if (componentInParent == null)
-		{
-			return;
-		}
-		NativeSizeVolume.NativeSizeVolumeAction onExitAction = this.OnExitAction;
-		if (onExitAction == NativeSizeVolume.NativeSizeVolumeAction.ApplySettings)
-		{
-			this.settings.WorldPosition = base.transform.position;
-			componentInParent.SetNativeScale(this.settings);
-			return;
-		}
-		if (onExitAction != NativeSizeVolume.NativeSizeVolumeAction.ResetSize)
-		{
-			return;
-		}
-		componentInParent.SetNativeScale(null);
+		None,
+		ApplySettings,
+		ResetSize
 	}
 
 	[SerializeField]
@@ -53,16 +19,44 @@ public class NativeSizeVolume : MonoBehaviour
 	private NativeSizeChangerSettings settings;
 
 	[SerializeField]
-	private NativeSizeVolume.NativeSizeVolumeAction OnEnterAction;
+	private NativeSizeVolumeAction OnEnterAction;
 
 	[SerializeField]
-	private NativeSizeVolume.NativeSizeVolumeAction OnExitAction;
+	private NativeSizeVolumeAction OnExitAction;
 
-	[Serializable]
-	private enum NativeSizeVolumeAction
+	private void OnTriggerEnter(Collider other)
 	{
-		None,
-		ApplySettings,
-		ResetSize
+		GTPlayer componentInParent = other.GetComponentInParent<GTPlayer>();
+		if (!(componentInParent == null))
+		{
+			switch (OnEnterAction)
+			{
+			case NativeSizeVolumeAction.ApplySettings:
+				settings.WorldPosition = base.transform.position;
+				componentInParent.SetNativeScale(settings);
+				break;
+			case NativeSizeVolumeAction.ResetSize:
+				componentInParent.SetNativeScale(null);
+				break;
+			}
+		}
+	}
+
+	private void OnTriggerExit(Collider other)
+	{
+		GTPlayer componentInParent = other.GetComponentInParent<GTPlayer>();
+		if (!(componentInParent == null))
+		{
+			switch (OnExitAction)
+			{
+			case NativeSizeVolumeAction.ApplySettings:
+				settings.WorldPosition = base.transform.position;
+				componentInParent.SetNativeScale(settings);
+				break;
+			case NativeSizeVolumeAction.ResetSize:
+				componentInParent.SetNativeScale(null);
+				break;
+			}
+		}
 	}
 }

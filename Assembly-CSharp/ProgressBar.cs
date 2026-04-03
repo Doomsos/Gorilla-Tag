@@ -1,30 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ProgressBar : MonoBehaviour
 {
-	public void UpdateProgress(float newFill)
-	{
-		bool flag = newFill > 1f;
-		this._fillAmount = Mathf.Clamp(newFill, 0f, 1f);
-		this.fillImage.fillAmount = this._fillAmount;
-		if (this.useColors)
-		{
-			if (flag)
-			{
-				this.fillImage.color = this.overCapacity;
-				return;
-			}
-			if (Mathf.Approximately(this._fillAmount, 1f))
-			{
-				this.fillImage.color = this.atCapacity;
-				return;
-			}
-			this.fillImage.color = this.underCapacity;
-		}
-	}
-
 	[SerializeField]
 	private Image fillImage;
 
@@ -41,4 +19,26 @@ public class ProgressBar : MonoBehaviour
 	private Color atCapacity = Color.yellow;
 
 	private float _fillAmount;
+
+	public void UpdateProgress(float newFill)
+	{
+		bool flag = newFill > 1f;
+		_fillAmount = Mathf.Clamp(newFill, 0f, 1f);
+		fillImage.fillAmount = _fillAmount;
+		if (useColors)
+		{
+			if (flag)
+			{
+				fillImage.color = overCapacity;
+			}
+			else if (Mathf.Approximately(_fillAmount, 1f))
+			{
+				fillImage.color = atCapacity;
+			}
+			else
+			{
+				fillImage.color = underCapacity;
+			}
+		}
+	}
 }

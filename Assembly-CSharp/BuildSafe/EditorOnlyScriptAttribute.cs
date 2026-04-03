@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+[Conditional("UNITY_EDITOR")]
+[AttributeUsage(AttributeTargets.Class)]
+public class EditorOnlyScriptAttribute : Attribute
 {
-	[Conditional("UNITY_EDITOR")]
-	[AttributeUsage(AttributeTargets.Class)]
-	public class EditorOnlyScriptAttribute : Attribute
-	{
-	}
 }

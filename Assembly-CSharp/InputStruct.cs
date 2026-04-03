@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using UnityEngine;
 
-[NetworkStructWeaved(42)]
 [Serializable]
 [StructLayout(LayoutKind.Explicit, Size = 168)]
+[NetworkStructWeaved(42)]
 public struct InputStruct : INetworkStruct
 {
 	[FieldOffset(0)]

@@ -1,19 +1,16 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class GorillaNetworkRankedJoinTrigger : GorillaNetworkJoinTrigger
 {
-	public class GorillaNetworkRankedJoinTrigger : GorillaNetworkJoinTrigger
+	public override string GetFullDesiredGameModeString()
 	{
-		public override string GetFullDesiredGameModeString()
-		{
-			return this.networkZone + base.GetDesiredGameType();
-		}
+		return networkZone + GetDesiredGameType();
+	}
 
-		public override void OnBoxTriggered()
-		{
-			GorillaComputer.instance.allowedMapsToJoin = this.myCollider.myAllowedMapsToJoin;
-			PhotonNetworkController.Instance.ClearDeferredJoin();
-			PhotonNetworkController.Instance.AttemptToJoinRankedPublicRoom(this, JoinType.Solo);
-		}
+	public override void OnBoxTriggered()
+	{
+		GorillaComputer.instance.allowedMapsToJoin = myCollider.myAllowedMapsToJoin;
+		PhotonNetworkController.Instance.ClearDeferredJoin();
+		PhotonNetworkController.Instance.AttemptToJoinRankedPublicRoom(this);
 	}
 }

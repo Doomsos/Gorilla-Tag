@@ -1,446 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class CritterTemplate : ScriptableObject
 {
-	private string HapticsBlurb
-	{
-		get
-		{
-			float num = this.grabbedStruggleHaptics.GetPeakMagnitude() * this.grabbedStruggleHapticsStrength;
-			float num2 = this.grabbedStruggleHaptics.GetRMSMagnitude() * this.grabbedStruggleHapticsStrength;
-			return string.Format("Peak Strength: {0:0.##} Mean Strength: {1:0.##}", num, num2);
-		}
-	}
-
-	private void SetMaxStrength(float maxStrength = 1f)
-	{
-		float peakMagnitude = this.grabbedStruggleHaptics.GetPeakMagnitude();
-		Debug.Log(string.Format("Clip {0} max strength: {1}", this.grabbedStruggleHaptics, peakMagnitude));
-		if (peakMagnitude > 0f)
-		{
-			this.grabbedStruggleHapticsStrength = maxStrength / peakMagnitude;
-		}
-	}
-
-	private void SetMeanStrength(float meanStrength = 1f)
-	{
-		float rmsmagnitude = this.grabbedStruggleHaptics.GetRMSMagnitude();
-		Debug.Log(string.Format("Clip {0} mean strength: {1}", this.grabbedStruggleHaptics, rmsmagnitude));
-		if (meanStrength > 0f)
-		{
-			this.grabbedStruggleHapticsStrength = meanStrength / rmsmagnitude;
-		}
-	}
-
-	private void OnValidate()
-	{
-		this.modifiedValues.Clear();
-		this.RegisterModifiedBehaviour();
-		this.RegisterModifiedVisual();
-	}
-
-	private void OnEnable()
-	{
-		this.OnValidate();
-	}
-
-	private void RegisterModifiedBehaviour()
-	{
-		if (this.maxJumpVel != 0f)
-		{
-			this.modifiedValues.Add("maxJumpVel", this.maxJumpVel);
-		}
-		if (this.jumpCooldown != 0f)
-		{
-			this.modifiedValues.Add("jumpCooldown", this.jumpCooldown);
-		}
-		if (this.scaredJumpCooldown != 0f)
-		{
-			this.modifiedValues.Add("scaredJumpCooldown", this.scaredJumpCooldown);
-		}
-		if (this.jumpVariabilityTime != 0f)
-		{
-			this.modifiedValues.Add("jumpVariabilityTime", this.jumpVariabilityTime);
-		}
-		if (this.visionConeAngle != 0f)
-		{
-			this.modifiedValues.Add("visionConeAngle", this.visionConeAngle);
-		}
-		if (this.sensoryRange != 0f)
-		{
-			this.modifiedValues.Add("sensoryRange", this.sensoryRange);
-		}
-		if (this.maxHunger != 0f)
-		{
-			this.modifiedValues.Add("maxHunger", this.maxHunger);
-		}
-		if (this.hungryThreshold != 0f)
-		{
-			this.modifiedValues.Add("hungryThreshold", this.hungryThreshold);
-		}
-		if (this.satiatedThreshold != 0f)
-		{
-			this.modifiedValues.Add("satiatedThreshold", this.satiatedThreshold);
-		}
-		if (this.hungerLostPerSecond != 0f)
-		{
-			this.modifiedValues.Add("hungerLostPerSecond", this.hungerLostPerSecond);
-		}
-		if (this.hungerGainedPerSecond != 0f)
-		{
-			this.modifiedValues.Add("hungerGainedPerSecond", this.hungerGainedPerSecond);
-		}
-		if (this.maxFear != 0f)
-		{
-			this.modifiedValues.Add("maxFear", this.maxFear);
-		}
-		if (this.scaredThreshold != 0f)
-		{
-			this.modifiedValues.Add("scaredThreshold", this.scaredThreshold);
-		}
-		if (this.calmThreshold != 0f)
-		{
-			this.modifiedValues.Add("calmThreshold", this.calmThreshold);
-		}
-		if (this.fearLostPerSecond != 0f)
-		{
-			this.modifiedValues.Add("fearLostPerSecond", this.fearLostPerSecond);
-		}
-		if (this.maxAttraction != 0f)
-		{
-			this.modifiedValues.Add("maxAttraction", this.maxAttraction);
-		}
-		if (this.attractedThreshold != 0f)
-		{
-			this.modifiedValues.Add("attractedThreshold", this.attractedThreshold);
-		}
-		if (this.unattractedThreshold != 0f)
-		{
-			this.modifiedValues.Add("unattractedThreshold", this.unattractedThreshold);
-		}
-		if (this.attractionLostPerSecond != 0f)
-		{
-			this.modifiedValues.Add("attractionLostPerSecond", this.attractionLostPerSecond);
-		}
-		if (this.maxSleepiness != 0f)
-		{
-			this.modifiedValues.Add("maxSleepiness", this.maxSleepiness);
-		}
-		if (this.tiredThreshold != 0f)
-		{
-			this.modifiedValues.Add("tiredThreshold", this.tiredThreshold);
-		}
-		if (this.awakeThreshold != 0f)
-		{
-			this.modifiedValues.Add("awakeThreshold", this.awakeThreshold);
-		}
-		if (this.sleepinessGainedPerSecond != 0f)
-		{
-			this.modifiedValues.Add("sleepinessGainedPerSecond", this.sleepinessGainedPerSecond);
-		}
-		if (this.sleepinessLostPerSecond != 0f)
-		{
-			this.modifiedValues.Add("sleepinessLostPerSecond", this.sleepinessLostPerSecond);
-		}
-		if (this.maxStruggle != 0f)
-		{
-			this.modifiedValues.Add("maxStruggle", this.maxStruggle);
-		}
-		if (this.escapeThreshold != 0f)
-		{
-			this.modifiedValues.Add("escapeThreshold", this.escapeThreshold);
-		}
-		if (this.catchableThreshold != 0f)
-		{
-			this.modifiedValues.Add("catchableThreshold", this.catchableThreshold);
-		}
-		if (this.struggleGainedPerSecond != 0f)
-		{
-			this.modifiedValues.Add("struggleGainedPerSecond", this.struggleGainedPerSecond);
-		}
-		if (this.struggleLostPerSecond != 0f)
-		{
-			this.modifiedValues.Add("struggleLostPerSecond", this.struggleLostPerSecond);
-		}
-		if (this.afraidOfList != null)
-		{
-			this.modifiedValues.Add("afraidOfList", this.afraidOfList);
-		}
-		if (this.attractedToList != null)
-		{
-			this.modifiedValues.Add("attractedToList", this.attractedToList);
-		}
-		if (this.lifeTime != 0f)
-		{
-			this.modifiedValues.Add("lifeTime", this.lifeTime);
-		}
-	}
-
-	private void RegisterModifiedVisual()
-	{
-		if (this.hatChance != 0f)
-		{
-			this.modifiedValues.Add("hatChance", this.hatChance);
-		}
-		if (this.hats != null && this.hats.Length != 0)
-		{
-			this.modifiedValues.Add("hats", this.hats);
-		}
-		if (this.minSize != 0f)
-		{
-			this.modifiedValues.Add("minSize", this.minSize);
-		}
-		if (this.maxSize != 0f)
-		{
-			this.modifiedValues.Add("maxSize", this.maxSize);
-		}
-		if (this.eatingStartFX != null)
-		{
-			this.modifiedValues.Add("eatingStartFX", this.eatingStartFX);
-		}
-		if (this.eatingOngoingFX != null)
-		{
-			this.modifiedValues.Add("eatingOngoingFX", this.eatingOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.eatingAnim))
-		{
-			this.modifiedValues.Add("eatingAnim", this.eatingAnim);
-		}
-		if (this.fearStartFX != null)
-		{
-			this.modifiedValues.Add("fearStartFX", this.fearStartFX);
-		}
-		if (this.fearOngoingFX != null)
-		{
-			this.modifiedValues.Add("fearOngoingFX", this.fearOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.fearAnim))
-		{
-			this.modifiedValues.Add("fearAnim", this.fearAnim);
-		}
-		if (this.attractionStartFX != null)
-		{
-			this.modifiedValues.Add("attractionStartFX", this.attractionStartFX);
-		}
-		if (this.attractionOngoingFX != null)
-		{
-			this.modifiedValues.Add("attractionOngoingFX", this.attractionOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.attractionAnim))
-		{
-			this.modifiedValues.Add("attractionAnim", this.attractionAnim);
-		}
-		if (this.sleepStartFX != null)
-		{
-			this.modifiedValues.Add("sleepStartFX", this.sleepStartFX);
-		}
-		if (this.sleepOngoingFX != null)
-		{
-			this.modifiedValues.Add("sleepOngoingFX", this.sleepOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.sleepAnim))
-		{
-			this.modifiedValues.Add("sleepAnim", this.sleepAnim);
-		}
-		if (this.grabbedStartFX != null)
-		{
-			this.modifiedValues.Add("grabbedStartFX", this.grabbedStartFX);
-		}
-		if (this.grabbedOngoingFX != null)
-		{
-			this.modifiedValues.Add("grabbedOngoingFX", this.grabbedOngoingFX);
-		}
-		if (this.grabbedStopFX != null)
-		{
-			this.modifiedValues.Add("grabbedStopFX", this.grabbedStopFX);
-		}
-		if (CrittersAnim.IsModified(this.grabbedAnim))
-		{
-			this.modifiedValues.Add("grabbedAnim", this.grabbedAnim);
-		}
-		if (this.hungryStartFX != null)
-		{
-			this.modifiedValues.Add("hungryStartFX", this.hungryStartFX);
-		}
-		if (this.hungryOngoingFX != null)
-		{
-			this.modifiedValues.Add("hungryOngoingFX", this.hungryOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.hungryAnim))
-		{
-			this.modifiedValues.Add("hungryAnim", this.hungryAnim);
-		}
-		if (this.despawningStartFX != null)
-		{
-			this.modifiedValues.Add("despawningStartFX", this.despawningStartFX);
-		}
-		if (this.despawningOngoingFX != null)
-		{
-			this.modifiedValues.Add("despawningOngoingFX", this.despawningOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.despawningAnim))
-		{
-			this.modifiedValues.Add("despawningAnim", this.despawningAnim);
-		}
-		if (this.spawningStartFX != null)
-		{
-			this.modifiedValues.Add("spawningStartFX", this.spawningStartFX);
-		}
-		if (this.spawningOngoingFX != null)
-		{
-			this.modifiedValues.Add("spawningOngoingFX", this.spawningOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.spawningAnim))
-		{
-			this.modifiedValues.Add("spawningAnim", this.spawningAnim);
-		}
-		if (this.capturedStartFX != null)
-		{
-			this.modifiedValues.Add("capturedStartFX", this.capturedStartFX);
-		}
-		if (this.capturedOngoingFX != null)
-		{
-			this.modifiedValues.Add("capturedOngoingFX", this.capturedOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.capturedAnim))
-		{
-			this.modifiedValues.Add("capturedAnim", this.capturedAnim);
-		}
-		if (this.stunnedStartFX != null)
-		{
-			this.modifiedValues.Add("stunnedStartFX", this.stunnedStartFX);
-		}
-		if (this.stunnedOngoingFX != null)
-		{
-			this.modifiedValues.Add("stunnedOngoingFX", this.stunnedOngoingFX);
-		}
-		if (CrittersAnim.IsModified(this.stunnedAnim))
-		{
-			this.modifiedValues.Add("stunnedAnim", this.stunnedAnim);
-		}
-		if (this.grabbedStruggleHaptics != null)
-		{
-			this.modifiedValues.Add("grabbedStruggleHaptics", this.grabbedStruggleHaptics);
-		}
-		if (this.grabbedStruggleHapticsStrength != 0f)
-		{
-			this.modifiedValues.Add("grabbedStruggleHapticsStrength", this.grabbedStruggleHapticsStrength);
-		}
-	}
-
-	public bool IsValueModified(string valueName)
-	{
-		return this.modifiedValues.ContainsKey(valueName);
-	}
-
-	public T GetParentValue<T>(string valueName)
-	{
-		if (this.parent != null)
-		{
-			return this.parent.GetTemplateValue<T>(valueName);
-		}
-		return default(T);
-	}
-
-	public T GetTemplateValue<T>(string valueName)
-	{
-		object obj;
-		if (this.modifiedValues.TryGetValue(valueName, out obj))
-		{
-			return (T)((object)obj);
-		}
-		if (this.parent != null)
-		{
-			return this.parent.GetTemplateValue<T>(valueName);
-		}
-		return default(T);
-	}
-
-	public void ApplyToCritter(CrittersPawn critter)
-	{
-		this.ApplyBehaviour(critter);
-		this.ApplyBehaviourFX(critter);
-	}
-
-	private void ApplyBehaviour(CrittersPawn critter)
-	{
-		critter.maxJumpVel = this.GetTemplateValue<float>("maxJumpVel");
-		critter.jumpCooldown = this.GetTemplateValue<float>("jumpCooldown");
-		critter.scaredJumpCooldown = this.GetTemplateValue<float>("scaredJumpCooldown");
-		critter.jumpVariabilityTime = this.GetTemplateValue<float>("jumpVariabilityTime");
-		critter.visionConeAngle = this.GetTemplateValue<float>("visionConeAngle");
-		critter.sensoryRange = this.GetTemplateValue<float>("sensoryRange");
-		critter.maxHunger = this.GetTemplateValue<float>("maxHunger");
-		critter.hungryThreshold = this.GetTemplateValue<float>("hungryThreshold");
-		critter.satiatedThreshold = this.GetTemplateValue<float>("satiatedThreshold");
-		critter.hungerLostPerSecond = this.GetTemplateValue<float>("hungerLostPerSecond");
-		critter.hungerGainedPerSecond = this.GetTemplateValue<float>("hungerGainedPerSecond");
-		critter.maxFear = this.GetTemplateValue<float>("maxFear");
-		critter.scaredThreshold = this.GetTemplateValue<float>("scaredThreshold");
-		critter.calmThreshold = this.GetTemplateValue<float>("calmThreshold");
-		critter.fearLostPerSecond = this.GetTemplateValue<float>("fearLostPerSecond");
-		critter.maxAttraction = this.GetTemplateValue<float>("maxAttraction");
-		critter.attractedThreshold = this.GetTemplateValue<float>("attractedThreshold");
-		critter.unattractedThreshold = this.GetTemplateValue<float>("unattractedThreshold");
-		critter.attractionLostPerSecond = this.GetTemplateValue<float>("attractionLostPerSecond");
-		critter.maxSleepiness = this.GetTemplateValue<float>("maxSleepiness");
-		critter.tiredThreshold = this.GetTemplateValue<float>("tiredThreshold");
-		critter.awakeThreshold = this.GetTemplateValue<float>("awakeThreshold");
-		critter.sleepinessGainedPerSecond = this.GetTemplateValue<float>("sleepinessGainedPerSecond");
-		critter.sleepinessLostPerSecond = this.GetTemplateValue<float>("sleepinessLostPerSecond");
-		critter.maxStruggle = this.GetTemplateValue<float>("maxStruggle");
-		critter.escapeThreshold = this.GetTemplateValue<float>("escapeThreshold");
-		critter.catchableThreshold = this.GetTemplateValue<float>("catchableThreshold");
-		critter.struggleGainedPerSecond = this.GetTemplateValue<float>("struggleGainedPerSecond");
-		critter.struggleLostPerSecond = this.GetTemplateValue<float>("struggleLostPerSecond");
-		critter.lifeTime = (double)this.GetTemplateValue<float>("lifeTime");
-		critter.attractedToList = this.GetTemplateValue<List<crittersAttractorStruct>>("attractedToList");
-		critter.afraidOfList = this.GetTemplateValue<List<crittersAttractorStruct>>("afraidOfList");
-	}
-
-	private void ApplyBehaviourFX(CrittersPawn critter)
-	{
-		critter.StartStateFX.Clear();
-		critter.OngoingStateFX.Clear();
-		critter.stateAnim.Clear();
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Eating, this.GetTemplateValue<GameObject>("eatingStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Eating, this.GetTemplateValue<GameObject>("eatingOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Eating, this.GetTemplateValue<CrittersAnim>("eatingAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Running, this.GetTemplateValue<GameObject>("fearStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Running, this.GetTemplateValue<GameObject>("fearOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Running, this.GetTemplateValue<CrittersAnim>("fearAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.AttractedTo, this.GetTemplateValue<GameObject>("attractionStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.AttractedTo, this.GetTemplateValue<GameObject>("attractionOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.AttractedTo, this.GetTemplateValue<CrittersAnim>("attractionAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Sleeping, this.GetTemplateValue<GameObject>("sleepStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Sleeping, this.GetTemplateValue<GameObject>("sleepOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Sleeping, this.GetTemplateValue<CrittersAnim>("sleepAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Grabbed, this.GetTemplateValue<GameObject>("grabbedStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Grabbed, this.GetTemplateValue<GameObject>("grabbedOngoingFX"));
-		critter.OnReleasedFX = this.GetTemplateValue<GameObject>("grabbedStopFX");
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Grabbed, this.GetTemplateValue<CrittersAnim>("grabbedAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.SeekingFood, this.GetTemplateValue<GameObject>("hungryStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.SeekingFood, this.GetTemplateValue<GameObject>("hungryOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.SeekingFood, this.GetTemplateValue<CrittersAnim>("hungryAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Despawning, this.GetTemplateValue<GameObject>("despawningStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Despawning, this.GetTemplateValue<GameObject>("despawningOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Despawning, this.GetTemplateValue<CrittersAnim>("despawningAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Spawning, this.GetTemplateValue<GameObject>("spawningStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Spawning, this.GetTemplateValue<GameObject>("spawningOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Spawning, this.GetTemplateValue<CrittersAnim>("spawningAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Captured, this.GetTemplateValue<GameObject>("capturedStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Captured, this.GetTemplateValue<GameObject>("capturedOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Captured, this.GetTemplateValue<CrittersAnim>("capturedAnim"));
-		critter.StartStateFX.Add(CrittersPawn.CreatureState.Stunned, this.GetTemplateValue<GameObject>("stunnedStartFX"));
-		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Stunned, this.GetTemplateValue<GameObject>("stunnedOngoingFX"));
-		critter.stateAnim.Add(CrittersPawn.CreatureState.Stunned, this.GetTemplateValue<CrittersAnim>("stunnedAnim"));
-		critter.grabbedHaptics = this.GetTemplateValue<AudioClip>("grabbedStruggleHaptics");
-		critter.grabbedHapticsStrength = this.GetTemplateValue<float>("grabbedStruggleHapticsStrength");
-	}
-
 	public CritterTemplate parent;
 
 	[Space]
@@ -634,4 +197,439 @@ public class CritterTemplate : ScriptableObject
 	public float grabbedStruggleHapticsStrength;
 
 	private Dictionary<string, object> modifiedValues = new Dictionary<string, object>();
+
+	private string HapticsBlurb
+	{
+		get
+		{
+			float num = grabbedStruggleHaptics.GetPeakMagnitude() * grabbedStruggleHapticsStrength;
+			float num2 = grabbedStruggleHaptics.GetRMSMagnitude() * grabbedStruggleHapticsStrength;
+			return $"Peak Strength: {num:0.##} Mean Strength: {num2:0.##}";
+		}
+	}
+
+	private void SetMaxStrength(float maxStrength = 1f)
+	{
+		float peakMagnitude = grabbedStruggleHaptics.GetPeakMagnitude();
+		Debug.Log($"Clip {grabbedStruggleHaptics} max strength: {peakMagnitude}");
+		if (peakMagnitude > 0f)
+		{
+			grabbedStruggleHapticsStrength = maxStrength / peakMagnitude;
+		}
+	}
+
+	private void SetMeanStrength(float meanStrength = 1f)
+	{
+		float rMSMagnitude = grabbedStruggleHaptics.GetRMSMagnitude();
+		Debug.Log($"Clip {grabbedStruggleHaptics} mean strength: {rMSMagnitude}");
+		if (meanStrength > 0f)
+		{
+			grabbedStruggleHapticsStrength = meanStrength / rMSMagnitude;
+		}
+	}
+
+	private void OnValidate()
+	{
+		modifiedValues.Clear();
+		RegisterModifiedBehaviour();
+		RegisterModifiedVisual();
+	}
+
+	private void OnEnable()
+	{
+		OnValidate();
+	}
+
+	private void RegisterModifiedBehaviour()
+	{
+		if (maxJumpVel != 0f)
+		{
+			modifiedValues.Add("maxJumpVel", maxJumpVel);
+		}
+		if (jumpCooldown != 0f)
+		{
+			modifiedValues.Add("jumpCooldown", jumpCooldown);
+		}
+		if (scaredJumpCooldown != 0f)
+		{
+			modifiedValues.Add("scaredJumpCooldown", scaredJumpCooldown);
+		}
+		if (jumpVariabilityTime != 0f)
+		{
+			modifiedValues.Add("jumpVariabilityTime", jumpVariabilityTime);
+		}
+		if (visionConeAngle != 0f)
+		{
+			modifiedValues.Add("visionConeAngle", visionConeAngle);
+		}
+		if (sensoryRange != 0f)
+		{
+			modifiedValues.Add("sensoryRange", sensoryRange);
+		}
+		if (maxHunger != 0f)
+		{
+			modifiedValues.Add("maxHunger", maxHunger);
+		}
+		if (hungryThreshold != 0f)
+		{
+			modifiedValues.Add("hungryThreshold", hungryThreshold);
+		}
+		if (satiatedThreshold != 0f)
+		{
+			modifiedValues.Add("satiatedThreshold", satiatedThreshold);
+		}
+		if (hungerLostPerSecond != 0f)
+		{
+			modifiedValues.Add("hungerLostPerSecond", hungerLostPerSecond);
+		}
+		if (hungerGainedPerSecond != 0f)
+		{
+			modifiedValues.Add("hungerGainedPerSecond", hungerGainedPerSecond);
+		}
+		if (maxFear != 0f)
+		{
+			modifiedValues.Add("maxFear", maxFear);
+		}
+		if (scaredThreshold != 0f)
+		{
+			modifiedValues.Add("scaredThreshold", scaredThreshold);
+		}
+		if (calmThreshold != 0f)
+		{
+			modifiedValues.Add("calmThreshold", calmThreshold);
+		}
+		if (fearLostPerSecond != 0f)
+		{
+			modifiedValues.Add("fearLostPerSecond", fearLostPerSecond);
+		}
+		if (maxAttraction != 0f)
+		{
+			modifiedValues.Add("maxAttraction", maxAttraction);
+		}
+		if (attractedThreshold != 0f)
+		{
+			modifiedValues.Add("attractedThreshold", attractedThreshold);
+		}
+		if (unattractedThreshold != 0f)
+		{
+			modifiedValues.Add("unattractedThreshold", unattractedThreshold);
+		}
+		if (attractionLostPerSecond != 0f)
+		{
+			modifiedValues.Add("attractionLostPerSecond", attractionLostPerSecond);
+		}
+		if (maxSleepiness != 0f)
+		{
+			modifiedValues.Add("maxSleepiness", maxSleepiness);
+		}
+		if (tiredThreshold != 0f)
+		{
+			modifiedValues.Add("tiredThreshold", tiredThreshold);
+		}
+		if (awakeThreshold != 0f)
+		{
+			modifiedValues.Add("awakeThreshold", awakeThreshold);
+		}
+		if (sleepinessGainedPerSecond != 0f)
+		{
+			modifiedValues.Add("sleepinessGainedPerSecond", sleepinessGainedPerSecond);
+		}
+		if (sleepinessLostPerSecond != 0f)
+		{
+			modifiedValues.Add("sleepinessLostPerSecond", sleepinessLostPerSecond);
+		}
+		if (maxStruggle != 0f)
+		{
+			modifiedValues.Add("maxStruggle", maxStruggle);
+		}
+		if (escapeThreshold != 0f)
+		{
+			modifiedValues.Add("escapeThreshold", escapeThreshold);
+		}
+		if (catchableThreshold != 0f)
+		{
+			modifiedValues.Add("catchableThreshold", catchableThreshold);
+		}
+		if (struggleGainedPerSecond != 0f)
+		{
+			modifiedValues.Add("struggleGainedPerSecond", struggleGainedPerSecond);
+		}
+		if (struggleLostPerSecond != 0f)
+		{
+			modifiedValues.Add("struggleLostPerSecond", struggleLostPerSecond);
+		}
+		if (afraidOfList != null)
+		{
+			modifiedValues.Add("afraidOfList", afraidOfList);
+		}
+		if (attractedToList != null)
+		{
+			modifiedValues.Add("attractedToList", attractedToList);
+		}
+		if (lifeTime != 0f)
+		{
+			modifiedValues.Add("lifeTime", lifeTime);
+		}
+	}
+
+	private void RegisterModifiedVisual()
+	{
+		if (hatChance != 0f)
+		{
+			modifiedValues.Add("hatChance", hatChance);
+		}
+		if (hats != null && hats.Length != 0)
+		{
+			modifiedValues.Add("hats", hats);
+		}
+		if (minSize != 0f)
+		{
+			modifiedValues.Add("minSize", minSize);
+		}
+		if (maxSize != 0f)
+		{
+			modifiedValues.Add("maxSize", maxSize);
+		}
+		if (eatingStartFX != null)
+		{
+			modifiedValues.Add("eatingStartFX", eatingStartFX);
+		}
+		if (eatingOngoingFX != null)
+		{
+			modifiedValues.Add("eatingOngoingFX", eatingOngoingFX);
+		}
+		if (CrittersAnim.IsModified(eatingAnim))
+		{
+			modifiedValues.Add("eatingAnim", eatingAnim);
+		}
+		if (fearStartFX != null)
+		{
+			modifiedValues.Add("fearStartFX", fearStartFX);
+		}
+		if (fearOngoingFX != null)
+		{
+			modifiedValues.Add("fearOngoingFX", fearOngoingFX);
+		}
+		if (CrittersAnim.IsModified(fearAnim))
+		{
+			modifiedValues.Add("fearAnim", fearAnim);
+		}
+		if (attractionStartFX != null)
+		{
+			modifiedValues.Add("attractionStartFX", attractionStartFX);
+		}
+		if (attractionOngoingFX != null)
+		{
+			modifiedValues.Add("attractionOngoingFX", attractionOngoingFX);
+		}
+		if (CrittersAnim.IsModified(attractionAnim))
+		{
+			modifiedValues.Add("attractionAnim", attractionAnim);
+		}
+		if (sleepStartFX != null)
+		{
+			modifiedValues.Add("sleepStartFX", sleepStartFX);
+		}
+		if (sleepOngoingFX != null)
+		{
+			modifiedValues.Add("sleepOngoingFX", sleepOngoingFX);
+		}
+		if (CrittersAnim.IsModified(sleepAnim))
+		{
+			modifiedValues.Add("sleepAnim", sleepAnim);
+		}
+		if (grabbedStartFX != null)
+		{
+			modifiedValues.Add("grabbedStartFX", grabbedStartFX);
+		}
+		if (grabbedOngoingFX != null)
+		{
+			modifiedValues.Add("grabbedOngoingFX", grabbedOngoingFX);
+		}
+		if (grabbedStopFX != null)
+		{
+			modifiedValues.Add("grabbedStopFX", grabbedStopFX);
+		}
+		if (CrittersAnim.IsModified(grabbedAnim))
+		{
+			modifiedValues.Add("grabbedAnim", grabbedAnim);
+		}
+		if (hungryStartFX != null)
+		{
+			modifiedValues.Add("hungryStartFX", hungryStartFX);
+		}
+		if (hungryOngoingFX != null)
+		{
+			modifiedValues.Add("hungryOngoingFX", hungryOngoingFX);
+		}
+		if (CrittersAnim.IsModified(hungryAnim))
+		{
+			modifiedValues.Add("hungryAnim", hungryAnim);
+		}
+		if (despawningStartFX != null)
+		{
+			modifiedValues.Add("despawningStartFX", despawningStartFX);
+		}
+		if (despawningOngoingFX != null)
+		{
+			modifiedValues.Add("despawningOngoingFX", despawningOngoingFX);
+		}
+		if (CrittersAnim.IsModified(despawningAnim))
+		{
+			modifiedValues.Add("despawningAnim", despawningAnim);
+		}
+		if (spawningStartFX != null)
+		{
+			modifiedValues.Add("spawningStartFX", spawningStartFX);
+		}
+		if (spawningOngoingFX != null)
+		{
+			modifiedValues.Add("spawningOngoingFX", spawningOngoingFX);
+		}
+		if (CrittersAnim.IsModified(spawningAnim))
+		{
+			modifiedValues.Add("spawningAnim", spawningAnim);
+		}
+		if (capturedStartFX != null)
+		{
+			modifiedValues.Add("capturedStartFX", capturedStartFX);
+		}
+		if (capturedOngoingFX != null)
+		{
+			modifiedValues.Add("capturedOngoingFX", capturedOngoingFX);
+		}
+		if (CrittersAnim.IsModified(capturedAnim))
+		{
+			modifiedValues.Add("capturedAnim", capturedAnim);
+		}
+		if (stunnedStartFX != null)
+		{
+			modifiedValues.Add("stunnedStartFX", stunnedStartFX);
+		}
+		if (stunnedOngoingFX != null)
+		{
+			modifiedValues.Add("stunnedOngoingFX", stunnedOngoingFX);
+		}
+		if (CrittersAnim.IsModified(stunnedAnim))
+		{
+			modifiedValues.Add("stunnedAnim", stunnedAnim);
+		}
+		if (grabbedStruggleHaptics != null)
+		{
+			modifiedValues.Add("grabbedStruggleHaptics", grabbedStruggleHaptics);
+		}
+		if (grabbedStruggleHapticsStrength != 0f)
+		{
+			modifiedValues.Add("grabbedStruggleHapticsStrength", grabbedStruggleHapticsStrength);
+		}
+	}
+
+	public bool IsValueModified(string valueName)
+	{
+		return modifiedValues.ContainsKey(valueName);
+	}
+
+	public T GetParentValue<T>(string valueName)
+	{
+		if (parent != null)
+		{
+			return parent.GetTemplateValue<T>(valueName);
+		}
+		return default(T);
+	}
+
+	public T GetTemplateValue<T>(string valueName)
+	{
+		if (modifiedValues.TryGetValue(valueName, out var value))
+		{
+			return (T)value;
+		}
+		if (parent != null)
+		{
+			return parent.GetTemplateValue<T>(valueName);
+		}
+		return default(T);
+	}
+
+	public void ApplyToCritter(CrittersPawn critter)
+	{
+		ApplyBehaviour(critter);
+		ApplyBehaviourFX(critter);
+	}
+
+	private void ApplyBehaviour(CrittersPawn critter)
+	{
+		critter.maxJumpVel = GetTemplateValue<float>("maxJumpVel");
+		critter.jumpCooldown = GetTemplateValue<float>("jumpCooldown");
+		critter.scaredJumpCooldown = GetTemplateValue<float>("scaredJumpCooldown");
+		critter.jumpVariabilityTime = GetTemplateValue<float>("jumpVariabilityTime");
+		critter.visionConeAngle = GetTemplateValue<float>("visionConeAngle");
+		critter.sensoryRange = GetTemplateValue<float>("sensoryRange");
+		critter.maxHunger = GetTemplateValue<float>("maxHunger");
+		critter.hungryThreshold = GetTemplateValue<float>("hungryThreshold");
+		critter.satiatedThreshold = GetTemplateValue<float>("satiatedThreshold");
+		critter.hungerLostPerSecond = GetTemplateValue<float>("hungerLostPerSecond");
+		critter.hungerGainedPerSecond = GetTemplateValue<float>("hungerGainedPerSecond");
+		critter.maxFear = GetTemplateValue<float>("maxFear");
+		critter.scaredThreshold = GetTemplateValue<float>("scaredThreshold");
+		critter.calmThreshold = GetTemplateValue<float>("calmThreshold");
+		critter.fearLostPerSecond = GetTemplateValue<float>("fearLostPerSecond");
+		critter.maxAttraction = GetTemplateValue<float>("maxAttraction");
+		critter.attractedThreshold = GetTemplateValue<float>("attractedThreshold");
+		critter.unattractedThreshold = GetTemplateValue<float>("unattractedThreshold");
+		critter.attractionLostPerSecond = GetTemplateValue<float>("attractionLostPerSecond");
+		critter.maxSleepiness = GetTemplateValue<float>("maxSleepiness");
+		critter.tiredThreshold = GetTemplateValue<float>("tiredThreshold");
+		critter.awakeThreshold = GetTemplateValue<float>("awakeThreshold");
+		critter.sleepinessGainedPerSecond = GetTemplateValue<float>("sleepinessGainedPerSecond");
+		critter.sleepinessLostPerSecond = GetTemplateValue<float>("sleepinessLostPerSecond");
+		critter.maxStruggle = GetTemplateValue<float>("maxStruggle");
+		critter.escapeThreshold = GetTemplateValue<float>("escapeThreshold");
+		critter.catchableThreshold = GetTemplateValue<float>("catchableThreshold");
+		critter.struggleGainedPerSecond = GetTemplateValue<float>("struggleGainedPerSecond");
+		critter.struggleLostPerSecond = GetTemplateValue<float>("struggleLostPerSecond");
+		critter.lifeTime = GetTemplateValue<float>("lifeTime");
+		critter.attractedToList = GetTemplateValue<List<crittersAttractorStruct>>("attractedToList");
+		critter.afraidOfList = GetTemplateValue<List<crittersAttractorStruct>>("afraidOfList");
+	}
+
+	private void ApplyBehaviourFX(CrittersPawn critter)
+	{
+		critter.StartStateFX.Clear();
+		critter.OngoingStateFX.Clear();
+		critter.stateAnim.Clear();
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Eating, GetTemplateValue<GameObject>("eatingStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Eating, GetTemplateValue<GameObject>("eatingOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Eating, GetTemplateValue<CrittersAnim>("eatingAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Running, GetTemplateValue<GameObject>("fearStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Running, GetTemplateValue<GameObject>("fearOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Running, GetTemplateValue<CrittersAnim>("fearAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.AttractedTo, GetTemplateValue<GameObject>("attractionStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.AttractedTo, GetTemplateValue<GameObject>("attractionOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.AttractedTo, GetTemplateValue<CrittersAnim>("attractionAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Sleeping, GetTemplateValue<GameObject>("sleepStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Sleeping, GetTemplateValue<GameObject>("sleepOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Sleeping, GetTemplateValue<CrittersAnim>("sleepAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Grabbed, GetTemplateValue<GameObject>("grabbedStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Grabbed, GetTemplateValue<GameObject>("grabbedOngoingFX"));
+		critter.OnReleasedFX = GetTemplateValue<GameObject>("grabbedStopFX");
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Grabbed, GetTemplateValue<CrittersAnim>("grabbedAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.SeekingFood, GetTemplateValue<GameObject>("hungryStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.SeekingFood, GetTemplateValue<GameObject>("hungryOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.SeekingFood, GetTemplateValue<CrittersAnim>("hungryAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Despawning, GetTemplateValue<GameObject>("despawningStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Despawning, GetTemplateValue<GameObject>("despawningOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Despawning, GetTemplateValue<CrittersAnim>("despawningAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Spawning, GetTemplateValue<GameObject>("spawningStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Spawning, GetTemplateValue<GameObject>("spawningOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Spawning, GetTemplateValue<CrittersAnim>("spawningAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Captured, GetTemplateValue<GameObject>("capturedStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Captured, GetTemplateValue<GameObject>("capturedOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Captured, GetTemplateValue<CrittersAnim>("capturedAnim"));
+		critter.StartStateFX.Add(CrittersPawn.CreatureState.Stunned, GetTemplateValue<GameObject>("stunnedStartFX"));
+		critter.OngoingStateFX.Add(CrittersPawn.CreatureState.Stunned, GetTemplateValue<GameObject>("stunnedOngoingFX"));
+		critter.stateAnim.Add(CrittersPawn.CreatureState.Stunned, GetTemplateValue<CrittersAnim>("stunnedAnim"));
+		critter.grabbedHaptics = GetTemplateValue<AudioClip>("grabbedStruggleHaptics");
+		critter.grabbedHapticsStrength = GetTemplateValue<float>("grabbedStruggleHapticsStrength");
+	}
 }

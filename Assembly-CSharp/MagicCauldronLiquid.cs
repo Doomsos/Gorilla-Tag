@@ -1,83 +1,18 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class MagicCauldronLiquid : MonoBehaviour
 {
-	private void Test()
+	[Serializable]
+	public struct WaveParams
 	{
-		this._animProgress = 0f;
-		this._animating = true;
-		base.enabled = true;
-	}
+		public float amplitude;
 
-	public void AnimateColorFromTo(Color a, Color b, float length = 1f)
-	{
-		this._colorStart = a;
-		this._colorEnd = b;
-		this._animProgress = 0f;
-		this._animating = true;
-		this.animLength = length;
-		base.enabled = true;
-	}
+		public float frequency;
 
-	private void ApplyColor(Color color)
-	{
-		if (!this._applyMaterial)
-		{
-			return;
-		}
-		this._applyMaterial.SetColor(ShaderProps._BaseColor, color);
-		this._applyMaterial.Apply();
-	}
+		public float scale;
 
-	private void ApplyWaveParams(float amplitude, float frequency, float scale, float rotation)
-	{
-		if (!this._applyMaterial)
-		{
-			return;
-		}
-		this._applyMaterial.SetFloat(ShaderProps._WaveAmplitude, amplitude);
-		this._applyMaterial.SetFloat(ShaderProps._WaveFrequency, frequency);
-		this._applyMaterial.SetFloat(ShaderProps._WaveScale, scale);
-		this._applyMaterial.Apply();
-	}
-
-	private void OnEnable()
-	{
-		if (this._applyMaterial)
-		{
-			this._applyMaterial.mode = ApplyMaterialProperty.ApplyMode.MaterialPropertyBlock;
-		}
-	}
-
-	private void OnDisable()
-	{
-		this._animating = false;
-		this._animProgress = 0f;
-	}
-
-	private void Update()
-	{
-		if (!this._animating)
-		{
-			return;
-		}
-		float num = this._animationCurve.Evaluate(this._animProgress / this.animLength);
-		float t = this._waveCurve.Evaluate(this._animProgress / this.animLength);
-		if (num >= 1f)
-		{
-			this.ApplyColor(this._colorEnd);
-			this._animating = false;
-			base.enabled = false;
-			return;
-		}
-		Color color = Color.Lerp(this._colorStart, this._colorEnd, num);
-		Mathf.Lerp(this.waveNormal.frequency, this.waveAnimating.frequency, t);
-		Mathf.Lerp(this.waveNormal.amplitude, this.waveAnimating.amplitude, t);
-		Mathf.Lerp(this.waveNormal.scale, this.waveAnimating.scale, t);
-		Mathf.Lerp(this.waveNormal.rotation, this.waveAnimating.rotation, t);
-		this.ApplyColor(color);
-		this._animProgress += Time.deltaTime;
+		public float rotation;
 	}
 
 	[SerializeField]
@@ -103,19 +38,81 @@ public class MagicCauldronLiquid : MonoBehaviour
 
 	public float animLength = 1f;
 
-	public MagicCauldronLiquid.WaveParams waveNormal;
+	public WaveParams waveNormal;
 
-	public MagicCauldronLiquid.WaveParams waveAnimating;
+	public WaveParams waveAnimating;
 
-	[Serializable]
-	public struct WaveParams
+	private void Test()
 	{
-		public float amplitude;
+		_animProgress = 0f;
+		_animating = true;
+		base.enabled = true;
+	}
 
-		public float frequency;
+	public void AnimateColorFromTo(Color a, Color b, float length = 1f)
+	{
+		_colorStart = a;
+		_colorEnd = b;
+		_animProgress = 0f;
+		_animating = true;
+		animLength = length;
+		base.enabled = true;
+	}
 
-		public float scale;
+	private void ApplyColor(Color color)
+	{
+		if ((bool)_applyMaterial)
+		{
+			_applyMaterial.SetColor(ShaderProps._BaseColor, color);
+			_applyMaterial.Apply();
+		}
+	}
 
-		public float rotation;
+	private void ApplyWaveParams(float amplitude, float frequency, float scale, float rotation)
+	{
+		if ((bool)_applyMaterial)
+		{
+			_applyMaterial.SetFloat(ShaderProps._WaveAmplitude, amplitude);
+			_applyMaterial.SetFloat(ShaderProps._WaveFrequency, frequency);
+			_applyMaterial.SetFloat(ShaderProps._WaveScale, scale);
+			_applyMaterial.Apply();
+		}
+	}
+
+	private void OnEnable()
+	{
+		if ((bool)_applyMaterial)
+		{
+			_applyMaterial.mode = ApplyMaterialProperty.ApplyMode.MaterialPropertyBlock;
+		}
+	}
+
+	private void OnDisable()
+	{
+		_animating = false;
+		_animProgress = 0f;
+	}
+
+	private void Update()
+	{
+		if (_animating)
+		{
+			float num = _animationCurve.Evaluate(_animProgress / animLength);
+			float t = _waveCurve.Evaluate(_animProgress / animLength);
+			if (num >= 1f)
+			{
+				ApplyColor(_colorEnd);
+				_animating = false;
+				base.enabled = false;
+				return;
+			}
+			Color color = Color.Lerp(_colorStart, _colorEnd, num);
+			Mathf.Lerp(waveNormal.frequency, waveAnimating.frequency, t);
+			Mathf.Lerp(waveNormal.amplitude, waveAnimating.amplitude, t);
+			Mathf.Lerp(waveNormal.scale, waveAnimating.scale, t);
+			Mathf.Lerp(waveNormal.rotation, waveAnimating.rotation, t);
+			ApplyColor(color);
+			_animProgress += Time.deltaTime;
+		}
 	}
 }

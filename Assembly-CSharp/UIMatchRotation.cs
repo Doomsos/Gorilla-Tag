@@ -1,43 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class UIMatchRotation : MonoBehaviour
 {
-	private void Start()
+	private enum State
 	{
-		this.referenceTransform = Camera.main.transform;
-		base.transform.forward = this.x0z(this.referenceTransform.forward);
-	}
-
-	private void Update()
-	{
-		Vector3 lhs = this.x0z(base.transform.forward);
-		Vector3 vector = this.x0z(this.referenceTransform.forward);
-		float num = Vector3.Dot(lhs, vector);
-		UIMatchRotation.State state = this.state;
-		if (state != UIMatchRotation.State.Ready)
-		{
-			if (state != UIMatchRotation.State.Rotating)
-			{
-				return;
-			}
-			base.transform.forward = Vector3.Lerp(base.transform.forward, vector, Time.deltaTime * this.lerpSpeed);
-			if (Vector3.Dot(base.transform.forward, vector) > 0.995f)
-			{
-				this.state = UIMatchRotation.State.Ready;
-			}
-		}
-		else if (num < 1f - this.threshold)
-		{
-			this.state = UIMatchRotation.State.Rotating;
-			return;
-		}
-	}
-
-	private Vector3 x0z(Vector3 vector)
-	{
-		vector.y = 0f;
-		return vector.normalized;
+		Ready,
+		Rotating
 	}
 
 	[SerializeField]
@@ -49,11 +17,40 @@ public class UIMatchRotation : MonoBehaviour
 	[SerializeField]
 	private float lerpSpeed = 5f;
 
-	private UIMatchRotation.State state;
+	private State state;
 
-	private enum State
+	private void Start()
 	{
-		Ready,
-		Rotating
+		referenceTransform = Camera.main.transform;
+		base.transform.forward = x0z(referenceTransform.forward);
+	}
+
+	private void Update()
+	{
+		Vector3 lhs = x0z(base.transform.forward);
+		Vector3 vector = x0z(referenceTransform.forward);
+		float num = Vector3.Dot(lhs, vector);
+		switch (state)
+		{
+		case State.Ready:
+			if (num < 1f - threshold)
+			{
+				state = State.Rotating;
+			}
+			break;
+		case State.Rotating:
+			base.transform.forward = Vector3.Lerp(base.transform.forward, vector, Time.deltaTime * lerpSpeed);
+			if (Vector3.Dot(base.transform.forward, vector) > 0.995f)
+			{
+				state = State.Ready;
+			}
+			break;
+		}
+	}
+
+	private Vector3 x0z(Vector3 vector)
+	{
+		vector.y = 0f;
+		return vector.normalized;
 	}
 }

@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using Sirenix.OdinInspector;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[IncludeMyAttributes]
+public class DebugOptionAttribute : Attribute
 {
-	[IncludeMyAttributes]
-	public class DebugOptionAttribute : Attribute
-	{
-	}
 }

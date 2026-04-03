@@ -1,49 +1,47 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class GorillaNetworkDisconnectTrigger : GorillaTriggerBox
 {
-	public class GorillaNetworkDisconnectTrigger : GorillaTriggerBox
+	public PhotonNetworkController photonNetworkController;
+
+	public GameObject offlineVRRig;
+
+	public GameObject makeSureThisIsEnabled;
+
+	public GameObject[] makeSureTheseAreEnabled;
+
+	public string componentTypeToRemove;
+
+	public GameObject componentTarget;
+
+	public override void OnBoxTriggered()
 	{
-		public override void OnBoxTriggered()
+		base.OnBoxTriggered();
+		if (makeSureThisIsEnabled != null)
 		{
-			base.OnBoxTriggered();
-			if (this.makeSureThisIsEnabled != null)
-			{
-				this.makeSureThisIsEnabled.SetActive(true);
-			}
-			GameObject[] array = this.makeSureTheseAreEnabled;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].SetActive(true);
-			}
-			if (PhotonNetwork.InRoom)
-			{
-				if (this.componentTypeToRemove != "" && this.componentTarget.GetComponent(this.componentTypeToRemove) != null)
-				{
-					Object.Destroy(this.componentTarget.GetComponent(this.componentTypeToRemove));
-				}
-				PhotonNetwork.Disconnect();
-				SkinnedMeshRenderer[] array2 = this.photonNetworkController.offlineVRRig;
-				for (int i = 0; i < array2.Length; i++)
-				{
-					array2[i].enabled = true;
-				}
-				PhotonNetwork.ConnectUsingSettings();
-			}
+			makeSureThisIsEnabled.SetActive(value: true);
 		}
-
-		public PhotonNetworkController photonNetworkController;
-
-		public GameObject offlineVRRig;
-
-		public GameObject makeSureThisIsEnabled;
-
-		public GameObject[] makeSureTheseAreEnabled;
-
-		public string componentTypeToRemove;
-
-		public GameObject componentTarget;
+		GameObject[] array = makeSureTheseAreEnabled;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: true);
+		}
+		if (PhotonNetwork.InRoom)
+		{
+			if (componentTypeToRemove != "" && componentTarget.GetComponent(componentTypeToRemove) != null)
+			{
+				Object.Destroy(componentTarget.GetComponent(componentTypeToRemove));
+			}
+			PhotonNetwork.Disconnect();
+			SkinnedMeshRenderer[] array2 = photonNetworkController.offlineVRRig;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].enabled = true;
+			}
+			PhotonNetwork.ConnectUsingSettings();
+		}
 	}
 }

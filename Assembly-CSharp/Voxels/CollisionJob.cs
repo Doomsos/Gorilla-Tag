@@ -1,20 +1,18 @@
-﻿using System;
 using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace Voxels
+namespace Voxels;
+
+[BurstCompile]
+public struct CollisionJob : IJob
 {
-	[BurstCompile]
-	public struct CollisionJob : IJob
+	public const MeshColliderCookingOptions CookingOptions = MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase;
+
+	public EntityId MeshId;
+
+	public void Execute()
 	{
-		public void Execute()
-		{
-			Physics.BakeMesh(this.MeshId, false, MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase);
-		}
-
-		public const MeshColliderCookingOptions CookingOptions = MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase;
-
-		public EntityId MeshId;
+		Physics.BakeMesh(MeshId, convex: false, MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase);
 	}
 }

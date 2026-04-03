@@ -1,55 +1,48 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaNetworking;
 using UnityEngine;
 
 public class ServerTimeEvent : TimeEvent
 {
-	private void Awake()
+	[Serializable]
+	public struct EventTime(int h, int m)
 	{
-		this.eventTimes = new HashSet<ServerTimeEvent.EventTime>(this.times);
-	}
+		public int hour = h;
 
-	private void Update()
-	{
-		if (GorillaComputer.instance == null || Time.time - this.lastQueryTime < this.queryTime)
-		{
-			return;
-		}
-		ServerTimeEvent.EventTime item = new ServerTimeEvent.EventTime(GorillaComputer.instance.GetServerTime().Hour, GorillaComputer.instance.GetServerTime().Minute);
-		bool flag = this.eventTimes.Contains(item);
-		if (!this._ongoing && flag)
-		{
-			base.StartEvent();
-		}
-		if (this._ongoing && !flag)
-		{
-			base.StopEvent();
-		}
-		this.lastQueryTime = Time.time;
+		public int minute = m;
 	}
 
 	[SerializeField]
-	private ServerTimeEvent.EventTime[] times;
+	private EventTime[] times;
 
 	[SerializeField]
 	private float queryTime = 60f;
 
 	private float lastQueryTime;
 
-	private HashSet<ServerTimeEvent.EventTime> eventTimes;
+	private HashSet<EventTime> eventTimes;
 
-	[Serializable]
-	public struct EventTime
+	private void Awake()
 	{
-		public EventTime(int h, int m)
+		eventTimes = new HashSet<EventTime>(times);
+	}
+
+	private void Update()
+	{
+		if (!(GorillaComputer.instance == null) && !(Time.time - lastQueryTime < queryTime))
 		{
-			this.hour = h;
-			this.minute = m;
+			EventTime item = new EventTime(GorillaComputer.instance.GetServerTime().Hour, GorillaComputer.instance.GetServerTime().Minute);
+			bool flag = eventTimes.Contains(item);
+			if (!_ongoing && flag)
+			{
+				StartEvent();
+			}
+			if (_ongoing && !flag)
+			{
+				StopEvent();
+			}
+			lastQueryTime = Time.time;
 		}
-
-		public int hour;
-
-		public int minute;
 	}
 }

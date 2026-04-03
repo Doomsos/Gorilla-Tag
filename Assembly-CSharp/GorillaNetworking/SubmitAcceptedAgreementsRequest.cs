@@ -1,10 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class SubmitAcceptedAgreementsRequest
 {
-	public class SubmitAcceptedAgreementsRequest
-	{
-		public Dictionary<string, string> Agreements;
-	}
+	public Dictionary<string, string> Agreements;
 }

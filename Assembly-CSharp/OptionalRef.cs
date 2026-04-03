@@ -1,18 +1,24 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
-public class OptionalRef<T> where T : Object
+public class OptionalRef<T> where T : UnityEngine.Object
 {
+	[SerializeField]
+	private bool _enabled;
+
+	[SerializeField]
+	private T _target;
+
 	public bool enabled
 	{
 		get
 		{
-			return this._enabled;
+			return _enabled;
 		}
 		set
 		{
-			this._enabled = value;
+			_enabled = value;
 		}
 	}
 
@@ -20,15 +26,15 @@ public class OptionalRef<T> where T : Object
 	{
 		get
 		{
-			if (this)
+			if ((bool)this)
 			{
-				return this._target;
+				return _target;
 			}
-			return default(T);
+			return null;
 		}
 		set
 		{
-			this._target = (value ? value : default(T));
+			_target = (value ? value : null);
 		}
 	}
 
@@ -42,33 +48,37 @@ public class OptionalRef<T> where T : Object
 		{
 			return false;
 		}
-		Object @object = r._target;
-		return @object != null && @object;
+		UnityEngine.Object target = r._target;
+		if ((object)target == null)
+		{
+			return false;
+		}
+		return target;
 	}
 
 	public static implicit operator T(OptionalRef<T> r)
 	{
 		if (r == null)
 		{
-			return default(T);
+			return null;
 		}
 		if (!r._enabled)
 		{
-			return default(T);
+			return null;
 		}
-		Object @object = r._target;
-		if (@object == null)
+		UnityEngine.Object target = r._target;
+		if ((object)target == null)
 		{
-			return default(T);
+			return null;
 		}
-		if (!@object)
+		if (!target)
 		{
-			return default(T);
+			return null;
 		}
-		return @object as T;
+		return target as T;
 	}
 
-	public static implicit operator Object(OptionalRef<T> r)
+	public static implicit operator UnityEngine.Object(OptionalRef<T> r)
 	{
 		if (r == null)
 		{
@@ -78,21 +88,15 @@ public class OptionalRef<T> where T : Object
 		{
 			return null;
 		}
-		Object @object = r._target;
-		if (@object == null)
+		UnityEngine.Object target = r._target;
+		if ((object)target == null)
 		{
 			return null;
 		}
-		if (!@object)
+		if (!target)
 		{
 			return null;
 		}
-		return @object;
+		return target;
 	}
-
-	[SerializeField]
-	private bool _enabled;
-
-	[SerializeField]
-	private T _target;
 }

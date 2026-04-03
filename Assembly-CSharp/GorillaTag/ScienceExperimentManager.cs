@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using CjLib;
 using Fusion;
@@ -15,1914 +14,1867 @@ using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[NetworkBehaviourWeaved(76)]
+public class ScienceExperimentManager : NetworkComponent, ITickSystemTick
 {
-	[NetworkBehaviourWeaved(76)]
-	public class ScienceExperimentManager : NetworkComponent, ITickSystemTick
+	public enum RisingLiquidState
 	{
-		private bool RefreshWaterAvailable
-		{
-			get
-			{
-				return this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Drained || this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Erupting || (this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Rising && this.riseProgress < this.lavaProgressToDisableRefreshWater) || (this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Draining && this.riseProgress < this.lavaProgressToEnableRefreshWater);
-			}
-		}
+		Drained,
+		Erupting,
+		Rising,
+		Full,
+		PreDrainDelay,
+		Draining
+	}
 
-		public ScienceExperimentManager.RisingLiquidState GameState
-		{
-			get
-			{
-				return this.reliableState.state;
-			}
-		}
+	private enum RiseSpeed
+	{
+		Fast,
+		Medium,
+		Slow,
+		ExtraSlow
+	}
 
-		public float RiseProgress
-		{
-			get
-			{
-				return this.riseProgress;
-			}
-		}
+	private enum TagBehavior
+	{
+		None,
+		Infect,
+		Revive
+	}
 
-		public float RiseProgressLinear
-		{
-			get
-			{
-				return this.riseProgressLinear;
-			}
-		}
+	[Serializable]
+	public struct PlayerGameState
+	{
+		public int playerId;
 
-		private int PlayerCount
-		{
-			get
-			{
-				int result = 1;
-				GorillaGameManager gorillaGameManager = GorillaGameManager.instance;
-				if (gorillaGameManager != null && gorillaGameManager.currentNetPlayerArray != null)
-				{
-					result = gorillaGameManager.currentNetPlayerArray.Length;
-				}
-				return result;
-			}
-		}
+		public bool touchedLiquid;
 
-		protected override void Awake()
-		{
-			base.Awake();
-			if (ScienceExperimentManager.instance == null)
-			{
-				ScienceExperimentManager.instance = this;
-				NetworkSystem.Instance.RegisterSceneNetworkItem(base.gameObject);
-				this.riseTimeLookup = new float[]
-				{
-					this.riseTimeFast,
-					this.riseTimeMedium,
-					this.riseTimeSlow,
-					this.riseTimeExtraSlow
-				};
-				this.riseTime = this.riseTimeLookup[(int)this.nextRoundRiseSpeed];
-				this.allPlayersInRoom = RoomSystem.PlayersInRoom.ToArray();
-				GorillaGameManager.OnTouch += this.OnPlayerTagged;
-				RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(this.OnPlayerLeftRoom);
-				RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
-				this.rotatingRings = new ScienceExperimentManager.RotatingRingState[this.ringParent.childCount];
-				for (int i = 0; i < this.rotatingRings.Length; i++)
-				{
-					this.rotatingRings[i].ringTransform = this.ringParent.GetChild(i);
-					this.rotatingRings[i].initialAngle = 0f;
-					this.rotatingRings[i].resultingAngle = 0f;
-				}
-				this.gameAreaTriggerNotifier.CompositeTriggerEnter += this.OnColliderEnteredVolume;
-				this.gameAreaTriggerNotifier.CompositeTriggerExit += this.OnColliderExitedVolume;
-				this.liquidVolume.ColliderEnteredWater += this.OnColliderEnteredSoda;
-				this.liquidVolume.ColliderExitedWater += this.OnColliderExitedSoda;
-				this.entryLiquidVolume.ColliderEnteredWater += this.OnColliderEnteredSoda;
-				this.entryLiquidVolume.ColliderExitedWater += this.OnColliderExitedSoda;
-				if (this.bottleLiquidVolume != null)
-				{
-					this.bottleLiquidVolume.ColliderEnteredWater += this.OnColliderEnteredSoda;
-					this.bottleLiquidVolume.ColliderExitedWater += this.OnColliderExitedSoda;
-				}
-				if (this.refreshWaterVolume != null)
-				{
-					this.refreshWaterVolume.ColliderEnteredWater += this.OnColliderEnteredRefreshWater;
-					this.refreshWaterVolume.ColliderExitedWater += this.OnColliderExitedRefreshWater;
-				}
-				if (this.sodaWaterProjectileTriggerNotifier != null)
-				{
-					this.sodaWaterProjectileTriggerNotifier.OnProjectileTriggerEnter += this.OnProjectileEnteredSodaWater;
-				}
-				float num = Vector3.Distance(this.drainBlockerClosedPosition.position, this.drainBlockerOpenPosition.position);
-				this.drainBlockerSlideSpeed = num / this.drainBlockerSlideTime;
-				return;
-			}
-			UnityEngine.Object.Destroy(this);
-		}
+		public float touchedLiquidAtProgress;
+	}
 
-		internal override void OnEnable()
-		{
-			NetworkBehaviourUtils.InternalOnEnable(this);
-			base.OnEnable();
-			TickSystem<object>.AddTickCallback(this);
-		}
+	private struct SyncData
+	{
+		public RisingLiquidState state;
 
-		internal override void OnDisable()
-		{
-			NetworkBehaviourUtils.InternalOnDisable(this);
-			base.OnDisable();
-			TickSystem<object>.RemoveTickCallback(this);
-		}
+		public double stateStartTime;
 
-		private void OnDestroy()
-		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			GorillaGameManager.OnTouch -= this.OnPlayerTagged;
-			if (this.gameAreaTriggerNotifier != null)
-			{
-				this.gameAreaTriggerNotifier.CompositeTriggerEnter -= this.OnColliderEnteredVolume;
-				this.gameAreaTriggerNotifier.CompositeTriggerExit -= this.OnColliderExitedVolume;
-			}
-			if (this.liquidVolume != null)
-			{
-				this.liquidVolume.ColliderEnteredWater -= this.OnColliderEnteredSoda;
-				this.liquidVolume.ColliderExitedWater -= this.OnColliderExitedSoda;
-			}
-			if (this.entryLiquidVolume != null)
-			{
-				this.entryLiquidVolume.ColliderEnteredWater -= this.OnColliderEnteredSoda;
-				this.entryLiquidVolume.ColliderExitedWater -= this.OnColliderExitedSoda;
-			}
-			if (this.bottleLiquidVolume != null)
-			{
-				this.bottleLiquidVolume.ColliderEnteredWater -= this.OnColliderEnteredSoda;
-				this.bottleLiquidVolume.ColliderExitedWater -= this.OnColliderExitedSoda;
-			}
-			if (this.refreshWaterVolume != null)
-			{
-				this.refreshWaterVolume.ColliderEnteredWater -= this.OnColliderEnteredRefreshWater;
-				this.refreshWaterVolume.ColliderExitedWater -= this.OnColliderExitedRefreshWater;
-			}
-			if (this.sodaWaterProjectileTriggerNotifier != null)
-			{
-				this.sodaWaterProjectileTriggerNotifier.OnProjectileTriggerEnter -= this.OnProjectileEnteredSodaWater;
-			}
-		}
+		public float stateStartLiquidProgressLinear;
 
-		public void InitElements(ScienceExperimentSceneElements elements)
-		{
-			this.elements = elements;
-			this.fizzParticleEmission = elements.sodaFizzParticles.emission;
-			elements.sodaFizzParticles.gameObject.SetActive(false);
-			elements.sodaEruptionParticles.gameObject.SetActive(false);
-			RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
-		}
+		public double activationProgress;
+	}
 
-		public void DeInitElements()
-		{
-			this.elements = null;
-		}
+	private struct RotatingRingState
+	{
+		public Transform ringTransform;
 
-		public Transform GetElement(ScienceExperimentElementID elementID)
-		{
-			switch (elementID)
-			{
-			case ScienceExperimentElementID.Platform1:
-				return this.rotatingRings[0].ringTransform;
-			case ScienceExperimentElementID.Platform2:
-				return this.rotatingRings[1].ringTransform;
-			case ScienceExperimentElementID.Platform3:
-				return this.rotatingRings[2].ringTransform;
-			case ScienceExperimentElementID.Platform4:
-				return this.rotatingRings[3].ringTransform;
-			case ScienceExperimentElementID.Platform5:
-				return this.rotatingRings[4].ringTransform;
-			case ScienceExperimentElementID.LiquidMesh:
-				return this.liquidMeshTransform;
-			case ScienceExperimentElementID.EntryChamberLiquidMesh:
-				return this.entryWayLiquidMeshTransform;
-			case ScienceExperimentElementID.EntryChamberBridgeQuad:
-				return this.entryWayBridgeQuadTransform;
-			case ScienceExperimentElementID.DrainBlocker:
-				return this.drainBlocker;
-			default:
-				Debug.LogError(string.Format("Unhandled ScienceExperiment element ID! {0}", elementID));
-				return null;
-			}
-		}
+		public float initialAngle;
 
-		bool ITickSystemTick.TickRunning { get; set; }
+		public float resultingAngle;
+	}
 
-		void ITickSystemTick.Tick()
-		{
-			this.prevTime = this.currentTime;
-			this.currentTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : Time.unscaledTimeAsDouble);
-			this.lastInfrequentUpdateTime = ((this.lastInfrequentUpdateTime > this.currentTime) ? this.currentTime : this.lastInfrequentUpdateTime);
-			if (this.currentTime > this.lastInfrequentUpdateTime + (double)this.infrequentUpdatePeriod)
-			{
-				this.InfrequentUpdate();
-				this.lastInfrequentUpdateTime = (double)((float)this.currentTime);
-			}
-			if (base.IsMine)
-			{
-				this.UpdateReliableState(this.currentTime, ref this.reliableState);
-			}
-			this.UpdateLocalState(this.currentTime, this.reliableState);
-			this.localLagRiseProgressOffset = Mathf.MoveTowards(this.localLagRiseProgressOffset, 0f, this.lagResolutionLavaProgressPerSecond * Time.deltaTime);
-			this.UpdateLiquid(this.riseProgress + this.localLagRiseProgressOffset);
-			this.UpdateRotatingRings(this.ringRotationProgress);
-			this.UpdateRefreshWater();
-			this.UpdateDrainBlocker(this.currentTime);
-			this.DisableObjectsInContactWithLava(this.liquidMeshTransform.localScale.z);
-			this.UpdateEffects();
-			if (this.debugDrawPlayerGameState)
-			{
-				for (int i = 0; i < this.inGamePlayerCount; i++)
-				{
-					NetPlayer netPlayer = null;
-					if (NetworkSystem.Instance.InRoom)
-					{
-						netPlayer = NetworkSystem.Instance.GetPlayer(this.inGamePlayerStates[i].playerId);
-					}
-					else if (this.inGamePlayerStates[i].playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-					{
-						netPlayer = NetworkSystem.Instance.LocalPlayer;
-					}
-					RigContainer rigContainer;
-					if (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out rigContainer) && rigContainer.Rig != null)
-					{
-						float num = 0.03f;
-						DebugUtil.DrawSphere(rigContainer.Rig.transform.position + Vector3.up * 0.5f * num, 0.16f * num, 12, 12, this.inGamePlayerStates[i].touchedLiquid ? Color.red : Color.green, true, DebugUtil.Style.SolidColor);
-					}
-				}
-			}
-		}
+	[Serializable]
+	private struct DisableByLiquidData
+	{
+		public Transform target;
 
-		private void InfrequentUpdate()
-		{
-			this.allPlayersInRoom = RoomSystem.PlayersInRoom.ToArray();
-			if (base.IsMine)
-			{
-				for (int i = this.inGamePlayerCount - 1; i >= 0; i--)
-				{
-					int playerId = this.inGamePlayerStates[i].playerId;
-					bool flag = false;
-					for (int j = 0; j < this.allPlayersInRoom.Length; j++)
-					{
-						if (this.allPlayersInRoom[j].ActorNumber == playerId)
-						{
-							flag = true;
-						}
-					}
-					if (!flag)
-					{
-						if (i < this.inGamePlayerCount - 1)
-						{
-							this.inGamePlayerStates[i] = this.inGamePlayerStates[this.inGamePlayerCount - 1];
-						}
-						this.inGamePlayerStates[this.inGamePlayerCount - 1] = default(ScienceExperimentManager.PlayerGameState);
-						this.inGamePlayerCount--;
-					}
-				}
-			}
-			if (this.optPlayersOutOfRoomGameMode)
-			{
-				for (int k = 0; k < this.allPlayersInRoom.Length; k++)
-				{
-					bool flag2 = false;
-					for (int l = 0; l < this.inGamePlayerCount; l++)
-					{
-						if (this.allPlayersInRoom[k].ActorNumber == this.inGamePlayerStates[l].playerId)
-						{
-							flag2 = true;
-						}
-					}
-					if (flag2)
-					{
-						GorillaGameModes.GameMode.OptOut(this.allPlayersInRoom[k]);
-					}
-					else
-					{
-						GorillaGameModes.GameMode.OptIn(this.allPlayersInRoom[k]);
-					}
-				}
-			}
-		}
+		public float heightOffset;
+	}
 
-		private bool PlayerInGame(Player player)
-		{
-			for (int i = 0; i < this.inGamePlayerCount; i++)
-			{
-				if (this.inGamePlayerStates[i].playerId == player.ActorNumber)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
+	[StructLayout(LayoutKind.Explicit, Size = 304)]
+	[NetworkStructWeaved(76)]
+	private struct ScienceManagerData : INetworkStruct
+	{
+		[FieldOffset(0)]
+		public int reliableState;
 
-		private void UpdateReliableState(double currentTime, ref ScienceExperimentManager.SyncData syncData)
-		{
-			if (currentTime < syncData.stateStartTime)
-			{
-				syncData.stateStartTime = currentTime;
-			}
-			switch (syncData.state)
-			{
-			default:
-			{
-				if (this.<UpdateReliableState>g__GetAlivePlayerCount|105_0() > 0 && syncData.activationProgress > 1.0)
-				{
-					syncData.state = ScienceExperimentManager.RisingLiquidState.Erupting;
-					syncData.stateStartTime = currentTime;
-					syncData.stateStartLiquidProgressLinear = 0f;
-					syncData.activationProgress = 1.0;
-					return;
-				}
-				float num = Mathf.Clamp((float)(currentTime - this.prevTime), 0f, 0.1f);
-				syncData.activationProgress = (double)Mathf.MoveTowards((float)syncData.activationProgress, 0f, this.lavaActivationDrainRateVsPlayerCount.Evaluate((float)this.PlayerCount) * num);
-				return;
-			}
-			case ScienceExperimentManager.RisingLiquidState.Erupting:
-				if (currentTime > syncData.stateStartTime + (double)this.fullyDrainedWaitTime)
-				{
-					this.riseTime = this.riseTimeLookup[(int)this.nextRoundRiseSpeed];
-					syncData.stateStartLiquidProgressLinear = 0f;
-					syncData.state = ScienceExperimentManager.RisingLiquidState.Rising;
-					syncData.stateStartTime = currentTime;
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Rising:
-				if (this.<UpdateReliableState>g__GetAlivePlayerCount|105_0() <= 0)
-				{
-					this.UpdateWinner();
-					syncData.stateStartLiquidProgressLinear = Mathf.Clamp01((float)((currentTime - syncData.stateStartTime) / (double)this.riseTime));
-					syncData.state = ScienceExperimentManager.RisingLiquidState.PreDrainDelay;
-					syncData.stateStartTime = currentTime;
-					return;
-				}
-				if (currentTime > syncData.stateStartTime + (double)this.riseTime)
-				{
-					syncData.stateStartLiquidProgressLinear = 1f;
-					syncData.state = ScienceExperimentManager.RisingLiquidState.Full;
-					syncData.stateStartTime = currentTime;
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Full:
-				if (this.<UpdateReliableState>g__GetAlivePlayerCount|105_0() <= 0 || currentTime > syncData.stateStartTime + (double)this.maxFullTime)
-				{
-					this.UpdateWinner();
-					syncData.stateStartLiquidProgressLinear = 1f;
-					syncData.state = ScienceExperimentManager.RisingLiquidState.PreDrainDelay;
-					syncData.stateStartTime = currentTime;
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.PreDrainDelay:
-				if (currentTime > syncData.stateStartTime + (double)this.preDrainWaitTime)
-				{
-					syncData.state = ScienceExperimentManager.RisingLiquidState.Draining;
-					syncData.stateStartTime = currentTime;
-					syncData.activationProgress = 0.0;
-					for (int i = 0; i < this.rotatingRings.Length; i++)
-					{
-						float num2 = Mathf.Repeat(this.rotatingRings[i].resultingAngle, 360f);
-						float num3 = Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
-						float num4 = (Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
-						this.rotatingRings[i].initialAngle = num2;
-						this.rotatingRings[i].resultingAngle = num2 + num4 * num3;
-					}
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Draining:
-			{
-				double num5 = (1.0 - (double)syncData.stateStartLiquidProgressLinear) * (double)this.drainTime;
-				if (currentTime + num5 > syncData.stateStartTime + (double)this.drainTime)
-				{
-					syncData.stateStartLiquidProgressLinear = 0f;
-					syncData.state = ScienceExperimentManager.RisingLiquidState.Drained;
-					syncData.stateStartTime = currentTime;
-					syncData.activationProgress = 0.0;
-				}
-				break;
-			}
-			}
-		}
+		[FieldOffset(4)]
+		public double stateStartTime;
 
-		private void UpdateLocalState(double currentTime, ScienceExperimentManager.SyncData syncData)
-		{
-			switch (syncData.state)
-			{
-			default:
-				this.riseProgressLinear = 0f;
-				this.riseProgress = 0f;
-				if (!this.debugRandomizingRings)
-				{
-					this.ringRotationProgress = 1f;
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Rising:
-			{
-				double num = (currentTime - syncData.stateStartTime) / (double)this.riseTime;
-				this.riseProgressLinear = Mathf.Clamp01((float)num);
-				this.riseProgress = this.animationCurve.Evaluate(this.riseProgressLinear);
-				this.ringRotationProgress = 1f;
-				return;
-			}
-			case ScienceExperimentManager.RisingLiquidState.Full:
-				this.riseProgressLinear = 1f;
-				this.riseProgress = 1f;
-				this.ringRotationProgress = 1f;
-				return;
-			case ScienceExperimentManager.RisingLiquidState.PreDrainDelay:
-				this.riseProgressLinear = syncData.stateStartLiquidProgressLinear;
-				this.riseProgress = this.animationCurve.Evaluate(this.riseProgressLinear);
-				this.ringRotationProgress = 1f;
-				return;
-			case ScienceExperimentManager.RisingLiquidState.Draining:
-			{
-				double num2 = (1.0 - (double)syncData.stateStartLiquidProgressLinear) * (double)this.drainTime;
-				double num3 = (currentTime + num2 - syncData.stateStartTime) / (double)this.drainTime;
-				this.riseProgressLinear = Mathf.Clamp01((float)(1.0 - num3));
-				this.riseProgress = this.animationCurve.Evaluate(this.riseProgressLinear);
-				this.ringRotationProgress = (float)(currentTime - syncData.stateStartTime) / (this.drainTime * syncData.stateStartLiquidProgressLinear);
-				break;
-			}
-			}
-		}
+		[FieldOffset(12)]
+		public float stateStartLiquidProgressLinear;
 
-		private void UpdateLiquid(float fillProgress)
-		{
-			float num = Mathf.Lerp(this.minScale, this.maxScale, fillProgress);
-			this.liquidMeshTransform.localScale = new Vector3(1f, 1f, num);
-			bool active = this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Rising || this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Full || this.reliableState.state == ScienceExperimentManager.RisingLiquidState.PreDrainDelay || this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Draining;
-			this.liquidMeshTransform.gameObject.SetActive(active);
-			if (this.entryWayLiquidMeshTransform != null)
-			{
-				float y = 0f;
-				float z;
-				float z2;
-				if (num < this.entryLiquidScaleSyncOpeningBottom.y)
-				{
-					z = this.entryLiquidScaleSyncOpeningBottom.x;
-					z2 = this.entryBridgeQuadMinMaxZHeight.x;
-				}
-				else if (num < this.entryLiquidScaleSyncOpeningTop.y)
-				{
-					float num2 = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningBottom.y, this.entryLiquidScaleSyncOpeningTop.y, num);
-					z = Mathf.Lerp(this.entryLiquidScaleSyncOpeningBottom.x, this.entryLiquidScaleSyncOpeningTop.x, num2);
-					z2 = Mathf.Lerp(this.entryBridgeQuadMinMaxZHeight.x, this.entryBridgeQuadMinMaxZHeight.y, num2);
-					y = this.entryBridgeQuadMaxScaleY * Mathf.Sin(num2 * 3.1415927f);
-				}
-				else
-				{
-					float t = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningTop.y, 0.6f * this.maxScale, num);
-					z = Mathf.Lerp(this.entryLiquidScaleSyncOpeningTop.x, this.entryLiquidMaxScale, t);
-					z2 = this.entryBridgeQuadMinMaxZHeight.y;
-				}
-				this.entryWayLiquidMeshTransform.localScale = new Vector3(this.entryWayLiquidMeshTransform.localScale.x, this.entryWayLiquidMeshTransform.localScale.y, z);
-				this.entryWayBridgeQuadTransform.localScale = new Vector3(this.entryWayBridgeQuadTransform.localScale.x, y, this.entryWayBridgeQuadTransform.localScale.z);
-				this.entryWayBridgeQuadTransform.localPosition = new Vector3(this.entryWayBridgeQuadTransform.localPosition.x, this.entryWayBridgeQuadTransform.localPosition.y, z2);
-			}
-		}
+		[FieldOffset(16)]
+		public double activationProgress;
 
-		private void UpdateRotatingRings(float rotationProgress)
-		{
-			for (int i = 0; i < this.rotatingRings.Length; i++)
-			{
-				float angle = Mathf.Lerp(this.rotatingRings[i].initialAngle, this.rotatingRings[i].resultingAngle, rotationProgress);
-				this.rotatingRings[i].ringTransform.rotation = Quaternion.AngleAxis(angle, Vector3.up);
-			}
-		}
+		[FieldOffset(24)]
+		public int nextRoundRiseSpeed;
 
-		private void UpdateDrainBlocker(double currentTime)
-		{
-			if (this.reliableState.state != ScienceExperimentManager.RisingLiquidState.Draining)
-			{
-				this.drainBlocker.position = this.drainBlockerClosedPosition.position;
-				return;
-			}
-			float num = (float)(currentTime - this.reliableState.stateStartTime);
-			float num2 = (1f - this.reliableState.stateStartLiquidProgressLinear) * this.drainTime;
-			if (this.drainTime - (num + num2) < this.drainBlockerSlideTime)
-			{
-				this.drainBlocker.position = Vector3.MoveTowards(this.drainBlocker.position, this.drainBlockerClosedPosition.position, this.drainBlockerSlideSpeed * Time.deltaTime);
-				return;
-			}
-			this.drainBlocker.position = Vector3.MoveTowards(this.drainBlocker.position, this.drainBlockerOpenPosition.position, this.drainBlockerSlideSpeed * Time.deltaTime);
-		}
+		[FieldOffset(28)]
+		public float riseTime;
 
-		private void UpdateEffects()
-		{
-			switch (this.reliableState.state)
-			{
-			case ScienceExperimentManager.RisingLiquidState.Drained:
-				this.hasPlayedEruptionEffects = false;
-				this.hasPlayedDrainEffects = false;
-				this.eruptionAudioSource.GTStop();
-				this.drainAudioSource.GTStop();
-				this.rotatingRingsAudioSource.GTStop();
-				if (this.elements != null)
-				{
-					this.elements.sodaEruptionParticles.gameObject.SetActive(false);
-					this.elements.sodaFizzParticles.gameObject.SetActive(true);
-					if (this.reliableState.activationProgress > 0.0010000000474974513)
-					{
-						this.fizzParticleEmission.rateOverTimeMultiplier = Mathf.Lerp(this.sodaFizzParticleEmissionMinMax.x, this.sodaFizzParticleEmissionMinMax.y, (float)this.reliableState.activationProgress);
-						return;
-					}
-					this.fizzParticleEmission.rateOverTimeMultiplier = 0f;
-					return;
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Erupting:
-				if (!this.hasPlayedEruptionEffects)
-				{
-					this.eruptionAudioSource.loop = true;
-					this.eruptionAudioSource.GTPlay();
-					this.hasPlayedEruptionEffects = true;
-					if (this.elements != null)
-					{
-						this.elements.sodaEruptionParticles.gameObject.SetActive(true);
-						this.fizzParticleEmission.rateOverTimeMultiplier = this.sodaFizzParticleEmissionMinMax.y;
-						return;
-					}
-				}
-				break;
-			case ScienceExperimentManager.RisingLiquidState.Rising:
-				if (this.elements != null)
-				{
-					this.fizzParticleEmission.rateOverTimeMultiplier = 0f;
-					return;
-				}
-				break;
-			default:
-				if (this.elements != null)
-				{
-					this.elements.sodaFizzParticles.gameObject.SetActive(false);
-					this.elements.sodaEruptionParticles.gameObject.SetActive(false);
-					this.fizzParticleEmission.rateOverTimeMultiplier = 0f;
-				}
-				this.hasPlayedEruptionEffects = false;
-				this.hasPlayedDrainEffects = false;
-				this.eruptionAudioSource.GTStop();
-				this.drainAudioSource.GTStop();
-				this.rotatingRingsAudioSource.GTStop();
-				return;
-			case ScienceExperimentManager.RisingLiquidState.Draining:
-				this.hasPlayedEruptionEffects = false;
-				this.eruptionAudioSource.GTStop();
-				if (this.elements != null)
-				{
-					this.elements.sodaFizzParticles.gameObject.SetActive(false);
-					this.elements.sodaEruptionParticles.gameObject.SetActive(false);
-					this.fizzParticleEmission.rateOverTimeMultiplier = 0f;
-				}
-				if (!this.hasPlayedDrainEffects)
-				{
-					this.drainAudioSource.loop = true;
-					this.drainAudioSource.GTPlay();
-					this.rotatingRingsAudioSource.loop = true;
-					this.rotatingRingsAudioSource.GTPlay();
-					this.hasPlayedDrainEffects = true;
-				}
-				break;
-			}
-		}
+		[FieldOffset(32)]
+		public int lastWinnerId;
 
-		private void DisableObjectsInContactWithLava(float lavaScale)
-		{
-			if (this.elements == null)
-			{
-				return;
-			}
-			Plane plane = new Plane(this.liquidSurfacePlane.up, this.liquidSurfacePlane.position);
-			if (this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Rising)
-			{
-				for (int i = 0; i < this.elements.disableByLiquidList.Count; i++)
-				{
-					if (!plane.GetSide(this.elements.disableByLiquidList[i].target.position + this.elements.disableByLiquidList[i].heightOffset * Vector3.up))
-					{
-						this.elements.disableByLiquidList[i].target.gameObject.SetActive(false);
-					}
-				}
-				return;
-			}
-			if (this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Draining)
-			{
-				for (int j = 0; j < this.elements.disableByLiquidList.Count; j++)
-				{
-					if (plane.GetSide(this.elements.disableByLiquidList[j].target.position + this.elements.disableByLiquidList[j].heightOffset * Vector3.up))
-					{
-						this.elements.disableByLiquidList[j].target.gameObject.SetActive(true);
-					}
-				}
-			}
-		}
+		[FieldOffset(36)]
+		public int inGamePlayerCount;
 
-		private void UpdateWinner()
-		{
-			float num = -1f;
-			for (int i = 0; i < this.inGamePlayerCount; i++)
-			{
-				if (!this.inGamePlayerStates[i].touchedLiquid)
-				{
-					this.lastWinnerId = this.inGamePlayerStates[i].playerId;
-					break;
-				}
-				if (this.inGamePlayerStates[i].touchedLiquidAtProgress > num)
-				{
-					num = this.inGamePlayerStates[i].touchedLiquidAtProgress;
-					this.lastWinnerId = this.inGamePlayerStates[i].playerId;
-				}
-			}
-			this.RefreshWinnerName();
-		}
+		[FieldOffset(40)]
+		[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate_0040ElementReaderWriterInt32), 10, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004010 _playerIdArray;
 
-		private void RefreshWinnerName()
-		{
-			NetPlayer playerFromId = this.GetPlayerFromId(this.lastWinnerId);
-			if (playerFromId != null)
-			{
-				this.lastWinnerName = playerFromId.NickName;
-				return;
-			}
-			this.lastWinnerName = "None";
-		}
+		[FieldOffset(80)]
+		[FixedBufferProperty(typeof(NetworkArray<bool>), typeof(UnityArraySurrogate_0040ElementReaderWriterBoolean), 10, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004010 _touchedLiquidArray;
 
-		private NetPlayer GetPlayerFromId(int id)
-		{
-			if (NetworkSystem.Instance.InRoom)
-			{
-				return NetworkSystem.Instance.GetPlayer(id);
-			}
-			if (id == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				return NetworkSystem.Instance.LocalPlayer;
-			}
-			return null;
-		}
+		[FieldOffset(120)]
+		[FixedBufferProperty(typeof(NetworkArray<float>), typeof(UnityArraySurrogate_0040ElementReaderWriterSingle), 10, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004010 _touchedLiquidAtProgressArray;
 
-		private void UpdateRefreshWater()
-		{
-			if (this.refreshWaterVolume != null)
-			{
-				if (this.RefreshWaterAvailable && !this.refreshWaterVolume.gameObject.activeSelf)
-				{
-					this.refreshWaterVolume.gameObject.SetActive(true);
-					return;
-				}
-				if (!this.RefreshWaterAvailable && this.refreshWaterVolume.gameObject.activeSelf)
-				{
-					this.refreshWaterVolume.gameObject.SetActive(false);
-				}
-			}
-		}
+		[FieldOffset(160)]
+		[FixedBufferProperty(typeof(NetworkLinkedList<float>), typeof(UnityLinkedListSurrogate_0040ElementReaderWriterSingle), 5, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004018 _initialAngleArray;
 
-		private void ResetGame()
-		{
-			for (int i = 0; i < this.inGamePlayerCount; i++)
-			{
-				ScienceExperimentManager.PlayerGameState playerGameState = this.inGamePlayerStates[i];
-				playerGameState.touchedLiquid = false;
-				playerGameState.touchedLiquidAtProgress = -1f;
-				this.inGamePlayerStates[i] = playerGameState;
-			}
-		}
-
-		public void RestartGame()
-		{
-			if (base.IsMine)
-			{
-				this.riseTime = this.riseTimeLookup[(int)this.nextRoundRiseSpeed];
-				this.reliableState.state = ScienceExperimentManager.RisingLiquidState.Erupting;
-				this.reliableState.stateStartTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : ((double)Time.time));
-				this.reliableState.stateStartLiquidProgressLinear = 0f;
-				this.reliableState.activationProgress = 1.0;
-				this.ResetGame();
-			}
-		}
-
-		public void DebugErupt()
-		{
-			if (base.IsMine)
-			{
-				this.riseTime = this.riseTimeLookup[(int)this.nextRoundRiseSpeed];
-				this.reliableState.state = ScienceExperimentManager.RisingLiquidState.Erupting;
-				this.reliableState.stateStartTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : ((double)Time.time));
-				this.reliableState.stateStartLiquidProgressLinear = 0f;
-				this.reliableState.activationProgress = 1.0;
-			}
-		}
-
-		public void RandomizeRings()
-		{
-			for (int i = 0; i < this.rotatingRings.Length; i++)
-			{
-				float num = Mathf.Repeat(this.rotatingRings[i].resultingAngle, 360f);
-				float num2 = Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
-				float num3 = (Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
-				this.rotatingRings[i].initialAngle = num;
-				float num4 = num + num3 * num2;
-				if (this.rotatingRingQuantizeAngles)
-				{
-					num4 = Mathf.Round(num4 / this.rotatingRingAngleSnapDegrees) * this.rotatingRingAngleSnapDegrees;
-				}
-				this.rotatingRings[i].resultingAngle = num4;
-			}
-			if (this.rotateRingsCoroutine != null)
-			{
-				base.StopCoroutine(this.rotateRingsCoroutine);
-			}
-			this.rotateRingsCoroutine = base.StartCoroutine(this.RotateRingsCoroutine());
-		}
-
-		private IEnumerator RotateRingsCoroutine()
-		{
-			if (this.debugRotateRingsTime > 0.01f)
-			{
-				float routineStartTime = Time.time;
-				this.ringRotationProgress = 0f;
-				this.debugRandomizingRings = true;
-				while (this.ringRotationProgress < 1f)
-				{
-					this.ringRotationProgress = (Time.time - routineStartTime) / this.debugRotateRingsTime;
-					yield return null;
-				}
-			}
-			this.debugRandomizingRings = false;
-			this.ringRotationProgress = 1f;
-			yield break;
-		}
-
-		public bool GetMaterialIfPlayerInGame(int playerActorNumber, out int materialIndex)
-		{
-			int i = 0;
-			while (i < this.inGamePlayerCount)
-			{
-				if (this.inGamePlayerStates[i].playerId == playerActorNumber)
-				{
-					if (this.inGamePlayerStates[i].touchedLiquid)
-					{
-						materialIndex = 12;
-						return true;
-					}
-					materialIndex = 0;
-					return true;
-				}
-				else
-				{
-					i++;
-				}
-			}
-			materialIndex = 0;
-			return false;
-		}
-
-		private void OnPlayerTagged(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
-		{
-			if (base.IsMine)
-			{
-				int num = -1;
-				int num2 = -1;
-				for (int i = 0; i < this.inGamePlayerCount; i++)
-				{
-					if (this.inGamePlayerStates[i].playerId == taggedPlayer.ActorNumber)
-					{
-						num = i;
-					}
-					else if (this.inGamePlayerStates[i].playerId == taggingPlayer.ActorNumber)
-					{
-						num2 = i;
-					}
-					if (num != -1 && num2 != -1)
-					{
-						break;
-					}
-				}
-				if (num == -1 || num2 == -1)
-				{
-					return;
-				}
-				switch (this.tagBehavior)
-				{
-				case ScienceExperimentManager.TagBehavior.None:
-					break;
-				case ScienceExperimentManager.TagBehavior.Infect:
-					if (this.inGamePlayerStates[num2].touchedLiquid && !this.inGamePlayerStates[num].touchedLiquid)
-					{
-						ScienceExperimentManager.PlayerGameState playerGameState = this.inGamePlayerStates[num];
-						playerGameState.touchedLiquid = true;
-						playerGameState.touchedLiquidAtProgress = this.riseProgressLinear;
-						this.inGamePlayerStates[num] = playerGameState;
-						return;
-					}
-					break;
-				case ScienceExperimentManager.TagBehavior.Revive:
-					if (!this.inGamePlayerStates[num2].touchedLiquid && this.inGamePlayerStates[num].touchedLiquid)
-					{
-						ScienceExperimentManager.PlayerGameState playerGameState2 = this.inGamePlayerStates[num];
-						playerGameState2.touchedLiquid = false;
-						playerGameState2.touchedLiquidAtProgress = -1f;
-						this.inGamePlayerStates[num] = playerGameState2;
-					}
-					break;
-				default:
-					return;
-				}
-			}
-		}
-
-		private void OnColliderEnteredVolume(Collider collider)
-		{
-			VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
-			if (component != null && component.creator != null)
-			{
-				this.PlayerEnteredGameArea(component.creator.ActorNumber);
-			}
-		}
-
-		private void OnColliderExitedVolume(Collider collider)
-		{
-			VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
-			if (component != null && component.creator != null)
-			{
-				this.PlayerExitedGameArea(component.creator.ActorNumber);
-			}
-		}
-
-		private void OnColliderEnteredSoda(WaterVolume volume, Collider collider)
-		{
-			if (collider == GTPlayer.Instance.bodyCollider)
-			{
-				if (base.IsMine)
-				{
-					this.PlayerTouchedLava(NetworkSystem.Instance.LocalPlayer.ActorNumber);
-					return;
-				}
-				base.GetView.RPC("PlayerTouchedLavaRPC", RpcTarget.MasterClient, Array.Empty<object>());
-			}
-		}
-
-		private void OnColliderExitedSoda(WaterVolume volume, Collider collider)
-		{
-		}
-
-		private void OnColliderEnteredRefreshWater(WaterVolume volume, Collider collider)
-		{
-			if (collider == GTPlayer.Instance.bodyCollider)
-			{
-				if (base.IsMine)
-				{
-					this.PlayerTouchedRefreshWater(NetworkSystem.Instance.LocalPlayer.ActorNumber);
-					return;
-				}
-				base.GetView.RPC("PlayerTouchedRefreshWaterRPC", RpcTarget.MasterClient, Array.Empty<object>());
-			}
-		}
-
-		private void OnColliderExitedRefreshWater(WaterVolume volume, Collider collider)
-		{
-		}
-
-		private void OnProjectileEnteredSodaWater(SlingshotProjectile projectile, Collider collider)
-		{
-			if (projectile.gameObject.CompareTag(this.mentoProjectileTag))
-			{
-				this.AddLavaRock(projectile.projectileOwner.ActorNumber);
-			}
-		}
-
-		private void AddLavaRock(int playerId)
-		{
-			if (base.IsMine && this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Drained)
-			{
-				bool flag = false;
-				for (int i = 0; i < this.inGamePlayerCount; i++)
-				{
-					if (!this.inGamePlayerStates[i].touchedLiquid)
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (flag)
-				{
-					float num = this.lavaActivationRockProgressVsPlayerCount.Evaluate((float)this.PlayerCount);
-					this.reliableState.activationProgress = this.reliableState.activationProgress + (double)num;
-				}
-			}
-		}
-
-		public void OnWaterBalloonHitPlayer(NetPlayer hitPlayer)
-		{
-			bool flag = false;
-			for (int i = 0; i < this.inGamePlayerCount; i++)
-			{
-				if (this.inGamePlayerStates[i].playerId == hitPlayer.ActorNumber)
-				{
-					flag = true;
-				}
-			}
-			if (flag)
-			{
-				if (hitPlayer == NetworkSystem.Instance.LocalPlayer)
-				{
-					this.ValidateLocalPlayerWaterBalloonHit(hitPlayer.ActorNumber);
-					return;
-				}
-				base.GetView.RPC("ValidateLocalPlayerWaterBalloonHitRPC", RpcTarget.Others, new object[]
-				{
-					hitPlayer.ActorNumber
-				});
-			}
-		}
+		[FieldOffset(232)]
+		[FixedBufferProperty(typeof(NetworkLinkedList<float>), typeof(UnityLinkedListSurrogate_0040ElementReaderWriterSingle), 5, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004018 _resultingAngleArray;
 
 		[Networked]
-		[NetworkedWeaved(0, 76)]
-		private unsafe ScienceExperimentManager.ScienceManagerData Data
+		[Capacity(10)]
+		[NetworkedWeavedArray(10, 1, typeof(Fusion.ElementReaderWriterInt32))]
+		[NetworkedWeaved(10, 10)]
+		public unsafe NetworkArray<int> playerIdArray => new NetworkArray<int>(Native.ReferenceToPointer(ref _playerIdArray), 10, Fusion.ElementReaderWriterInt32.GetInstance());
+
+		[Networked]
+		[Capacity(10)]
+		[NetworkedWeavedArray(10, 1, typeof(global::ElementReaderWriterBoolean))]
+		[NetworkedWeaved(20, 10)]
+		public unsafe NetworkArray<bool> touchedLiquidArray => new NetworkArray<bool>(Native.ReferenceToPointer(ref _touchedLiquidArray), 10, global::ElementReaderWriterBoolean.GetInstance());
+
+		[Networked]
+		[Capacity(10)]
+		[NetworkedWeavedArray(10, 1, typeof(Fusion.ElementReaderWriterSingle))]
+		[NetworkedWeaved(30, 10)]
+		public unsafe NetworkArray<float> touchedLiquidAtProgressArray => new NetworkArray<float>(Native.ReferenceToPointer(ref _touchedLiquidAtProgressArray), 10, Fusion.ElementReaderWriterSingle.GetInstance());
+
+		[Networked]
+		[Capacity(5)]
+		[NetworkedWeavedLinkedList(5, 1, typeof(Fusion.ElementReaderWriterSingle))]
+		[NetworkedWeaved(40, 18)]
+		public unsafe NetworkLinkedList<float> initialAngleArray => new NetworkLinkedList<float>(Native.ReferenceToPointer(ref _initialAngleArray), 5, Fusion.ElementReaderWriterSingle.GetInstance());
+
+		[Networked]
+		[Capacity(5)]
+		[NetworkedWeavedLinkedList(5, 1, typeof(Fusion.ElementReaderWriterSingle))]
+		[NetworkedWeaved(58, 18)]
+		public unsafe NetworkLinkedList<float> resultingAngleArray => new NetworkLinkedList<float>(Native.ReferenceToPointer(ref _resultingAngleArray), 5, Fusion.ElementReaderWriterSingle.GetInstance());
+
+		public ScienceManagerData(int reliableState, double stateStartTime, float stateStartLiquidProgressLinear, double activationProgress, int nextRoundRiseSpeed, float riseTime, int lastWinnerId, int inGamePlayerCount, PlayerGameState[] playerStates, RotatingRingState[] rings)
 		{
-			get
+			this.reliableState = reliableState;
+			this.stateStartTime = stateStartTime;
+			this.stateStartLiquidProgressLinear = stateStartLiquidProgressLinear;
+			this.activationProgress = activationProgress;
+			this.nextRoundRiseSpeed = nextRoundRiseSpeed;
+			this.riseTime = riseTime;
+			this.lastWinnerId = lastWinnerId;
+			this.inGamePlayerCount = inGamePlayerCount;
+			for (int i = 0; i < rings.Length; i++)
 			{
-				if (this.Ptr == null)
+				RotatingRingState rotatingRingState = rings[i];
+				initialAngleArray.Add(rotatingRingState.initialAngle);
+				resultingAngleArray.Add(rotatingRingState.resultingAngle);
+			}
+			int[] array = new int[10];
+			bool[] array2 = new bool[10];
+			float[] array3 = new float[10];
+			for (int j = 0; j < 10; j++)
+			{
+				array[j] = playerStates[j].playerId;
+				array2[j] = playerStates[j].touchedLiquid;
+				array3[j] = playerStates[j].touchedLiquidAtProgress;
+			}
+			playerIdArray.CopyFrom(array, 0, array.Length);
+			touchedLiquidArray.CopyFrom(array2, 0, array2.Length);
+			touchedLiquidAtProgressArray.CopyFrom(array3, 0, array3.Length);
+		}
+	}
+
+	public static volatile ScienceExperimentManager instance;
+
+	[SerializeField]
+	private TagBehavior tagBehavior = TagBehavior.Infect;
+
+	[SerializeField]
+	private float minScale = 1f;
+
+	[SerializeField]
+	private float maxScale = 10f;
+
+	[SerializeField]
+	private float riseTimeFast = 30f;
+
+	[SerializeField]
+	private float riseTimeMedium = 60f;
+
+	[SerializeField]
+	private float riseTimeSlow = 120f;
+
+	[SerializeField]
+	private float riseTimeExtraSlow = 240f;
+
+	[SerializeField]
+	private float preDrainWaitTime = 3f;
+
+	[SerializeField]
+	private float maxFullTime = 5f;
+
+	[SerializeField]
+	private float drainTime = 10f;
+
+	[SerializeField]
+	private float fullyDrainedWaitTime = 3f;
+
+	[SerializeField]
+	private float lagResolutionLavaProgressPerSecond = 0.2f;
+
+	[SerializeField]
+	private AnimationCurve animationCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+	[SerializeField]
+	private float lavaProgressToDisableRefreshWater = 0.18f;
+
+	[SerializeField]
+	private float lavaProgressToEnableRefreshWater = 0.08f;
+
+	[SerializeField]
+	private float entryLiquidMaxScale = 5f;
+
+	[SerializeField]
+	private Vector2 entryLiquidScaleSyncOpeningTop = Vector2.zero;
+
+	[SerializeField]
+	private Vector2 entryLiquidScaleSyncOpeningBottom = Vector2.zero;
+
+	[SerializeField]
+	private float entryBridgeQuadMaxScaleY = 0.0915f;
+
+	[SerializeField]
+	private Vector2 entryBridgeQuadMinMaxZHeight = new Vector2(0.245f, 0.337f);
+
+	[SerializeField]
+	private AnimationCurve lavaActivationRockProgressVsPlayerCount = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+	[SerializeField]
+	private AnimationCurve lavaActivationDrainRateVsPlayerCount = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+	[SerializeField]
+	public GameObject waterBalloonPrefab;
+
+	[SerializeField]
+	private Vector2 rotatingRingRandomAngleRange = Vector2.zero;
+
+	[SerializeField]
+	private bool rotatingRingQuantizeAngles;
+
+	[SerializeField]
+	private float rotatingRingAngleSnapDegrees = 9f;
+
+	[SerializeField]
+	private float drainBlockerSlideTime = 4f;
+
+	[SerializeField]
+	private Vector2 sodaFizzParticleEmissionMinMax = new Vector2(30f, 100f);
+
+	[SerializeField]
+	private float infrequentUpdatePeriod = 3f;
+
+	[SerializeField]
+	private bool optPlayersOutOfRoomGameMode;
+
+	[SerializeField]
+	private bool debugDrawPlayerGameState;
+
+	private ScienceExperimentSceneElements elements;
+
+	private NetPlayer[] allPlayersInRoom;
+
+	private RotatingRingState[] rotatingRings = new RotatingRingState[0];
+
+	private const int maxPlayerCount = 10;
+
+	private PlayerGameState[] inGamePlayerStates = new PlayerGameState[10];
+
+	private int inGamePlayerCount;
+
+	private int lastWinnerId = -1;
+
+	private string lastWinnerName = "None";
+
+	private List<PlayerGameState> sortedPlayerStates = new List<PlayerGameState>();
+
+	private SyncData reliableState;
+
+	private RiseSpeed nextRoundRiseSpeed = RiseSpeed.Slow;
+
+	private float riseTime = 120f;
+
+	private float riseProgress;
+
+	private float riseProgressLinear;
+
+	private float localLagRiseProgressOffset;
+
+	private double lastInfrequentUpdateTime = -10.0;
+
+	private string mentoProjectileTag = "ScienceCandyProjectile";
+
+	private double currentTime;
+
+	private double prevTime;
+
+	private float ringRotationProgress = 1f;
+
+	private float drainBlockerSlideSpeed;
+
+	private float[] riseTimeLookup;
+
+	[Header("Scene References")]
+	public Transform ringParent;
+
+	public Transform liquidMeshTransform;
+
+	public Transform liquidSurfacePlane;
+
+	public Transform entryWayLiquidMeshTransform;
+
+	public Transform entryWayBridgeQuadTransform;
+
+	public Transform drainBlocker;
+
+	public Transform drainBlockerClosedPosition;
+
+	public Transform drainBlockerOpenPosition;
+
+	public WaterVolume liquidVolume;
+
+	public WaterVolume entryLiquidVolume;
+
+	public WaterVolume bottleLiquidVolume;
+
+	public WaterVolume refreshWaterVolume;
+
+	public CompositeTriggerEvents gameAreaTriggerNotifier;
+
+	public SlingshotProjectileHitNotifier sodaWaterProjectileTriggerNotifier;
+
+	public AudioSource eruptionAudioSource;
+
+	public AudioSource drainAudioSource;
+
+	public AudioSource rotatingRingsAudioSource;
+
+	private ParticleSystem.EmissionModule fizzParticleEmission;
+
+	private bool hasPlayedEruptionEffects;
+
+	private bool hasPlayedDrainEffects;
+
+	[SerializeField]
+	private float debugRotateRingsTime = 10f;
+
+	private Coroutine rotateRingsCoroutine;
+
+	private bool debugRandomizingRings;
+
+	[WeaverGenerated]
+	[DefaultForProperty("Data", 0, 76)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private ScienceManagerData _Data;
+
+	private bool RefreshWaterAvailable
+	{
+		get
+		{
+			if (reliableState.state != RisingLiquidState.Drained && reliableState.state != RisingLiquidState.Erupting && (reliableState.state != RisingLiquidState.Rising || !(riseProgress < lavaProgressToDisableRefreshWater)))
+			{
+				if (reliableState.state == RisingLiquidState.Draining)
 				{
-					throw new InvalidOperationException("Error when accessing ScienceExperimentManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+					return riseProgress < lavaProgressToEnableRefreshWater;
 				}
-				return *(ScienceExperimentManager.ScienceManagerData*)(this.Ptr + 0);
+				return false;
 			}
-			set
+			return true;
+		}
+	}
+
+	public RisingLiquidState GameState => reliableState.state;
+
+	public float RiseProgress => riseProgress;
+
+	public float RiseProgressLinear => riseProgressLinear;
+
+	private int PlayerCount
+	{
+		get
+		{
+			int result = 1;
+			GorillaGameManager gorillaGameManager = GorillaGameManager.instance;
+			if (gorillaGameManager != null && gorillaGameManager.currentNetPlayerArray != null)
 			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing ScienceExperimentManager.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				*(ScienceExperimentManager.ScienceManagerData*)(this.Ptr + 0) = value;
+				result = gorillaGameManager.currentNetPlayerArray.Length;
+			}
+			return result;
+		}
+	}
+
+	bool ITickSystemTick.TickRunning { get; set; }
+
+	[Networked]
+	[NetworkedWeaved(0, 76)]
+	private unsafe ScienceManagerData Data
+	{
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing ScienceExperimentManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(ScienceManagerData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing ScienceExperimentManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(ScienceManagerData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		if (instance == null)
+		{
+			instance = this;
+			NetworkSystem.Instance.RegisterSceneNetworkItem(base.gameObject);
+			riseTimeLookup = new float[4] { riseTimeFast, riseTimeMedium, riseTimeSlow, riseTimeExtraSlow };
+			riseTime = riseTimeLookup[(int)nextRoundRiseSpeed];
+			allPlayersInRoom = RoomSystem.PlayersInRoom.ToArray();
+			GorillaGameManager.OnTouch += OnPlayerTagged;
+			RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(OnPlayerLeftRoom);
+			RoomSystem.LeftRoomEvent += new Action(OnLeftRoom);
+			rotatingRings = new RotatingRingState[ringParent.childCount];
+			for (int i = 0; i < rotatingRings.Length; i++)
+			{
+				rotatingRings[i].ringTransform = ringParent.GetChild(i);
+				rotatingRings[i].initialAngle = 0f;
+				rotatingRings[i].resultingAngle = 0f;
+			}
+			gameAreaTriggerNotifier.CompositeTriggerEnter += OnColliderEnteredVolume;
+			gameAreaTriggerNotifier.CompositeTriggerExit += OnColliderExitedVolume;
+			liquidVolume.ColliderEnteredWater += OnColliderEnteredSoda;
+			liquidVolume.ColliderExitedWater += OnColliderExitedSoda;
+			entryLiquidVolume.ColliderEnteredWater += OnColliderEnteredSoda;
+			entryLiquidVolume.ColliderExitedWater += OnColliderExitedSoda;
+			if (bottleLiquidVolume != null)
+			{
+				bottleLiquidVolume.ColliderEnteredWater += OnColliderEnteredSoda;
+				bottleLiquidVolume.ColliderExitedWater += OnColliderExitedSoda;
+			}
+			if (refreshWaterVolume != null)
+			{
+				refreshWaterVolume.ColliderEnteredWater += OnColliderEnteredRefreshWater;
+				refreshWaterVolume.ColliderExitedWater += OnColliderExitedRefreshWater;
+			}
+			if (sodaWaterProjectileTriggerNotifier != null)
+			{
+				sodaWaterProjectileTriggerNotifier.OnProjectileTriggerEnter += OnProjectileEnteredSodaWater;
+			}
+			float num = Vector3.Distance(drainBlockerClosedPosition.position, drainBlockerOpenPosition.position);
+			drainBlockerSlideSpeed = num / drainBlockerSlideTime;
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(this);
+		}
+	}
+
+	internal override void OnEnable()
+	{
+		NetworkBehaviourUtils.InternalOnEnable(this);
+		base.OnEnable();
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	internal override void OnDisable()
+	{
+		NetworkBehaviourUtils.InternalOnDisable(this);
+		base.OnDisable();
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		GorillaGameManager.OnTouch -= OnPlayerTagged;
+		if (gameAreaTriggerNotifier != null)
+		{
+			gameAreaTriggerNotifier.CompositeTriggerEnter -= OnColliderEnteredVolume;
+			gameAreaTriggerNotifier.CompositeTriggerExit -= OnColliderExitedVolume;
+		}
+		if (liquidVolume != null)
+		{
+			liquidVolume.ColliderEnteredWater -= OnColliderEnteredSoda;
+			liquidVolume.ColliderExitedWater -= OnColliderExitedSoda;
+		}
+		if (entryLiquidVolume != null)
+		{
+			entryLiquidVolume.ColliderEnteredWater -= OnColliderEnteredSoda;
+			entryLiquidVolume.ColliderExitedWater -= OnColliderExitedSoda;
+		}
+		if (bottleLiquidVolume != null)
+		{
+			bottleLiquidVolume.ColliderEnteredWater -= OnColliderEnteredSoda;
+			bottleLiquidVolume.ColliderExitedWater -= OnColliderExitedSoda;
+		}
+		if (refreshWaterVolume != null)
+		{
+			refreshWaterVolume.ColliderEnteredWater -= OnColliderEnteredRefreshWater;
+			refreshWaterVolume.ColliderExitedWater -= OnColliderExitedRefreshWater;
+		}
+		if (sodaWaterProjectileTriggerNotifier != null)
+		{
+			sodaWaterProjectileTriggerNotifier.OnProjectileTriggerEnter -= OnProjectileEnteredSodaWater;
+		}
+	}
+
+	public void InitElements(ScienceExperimentSceneElements elements)
+	{
+		this.elements = elements;
+		fizzParticleEmission = elements.sodaFizzParticles.emission;
+		elements.sodaFizzParticles.gameObject.SetActive(value: false);
+		elements.sodaEruptionParticles.gameObject.SetActive(value: false);
+		RoomSystem.LeftRoomEvent += new Action(OnLeftRoom);
+	}
+
+	public void DeInitElements()
+	{
+		elements = null;
+	}
+
+	public Transform GetElement(ScienceExperimentElementID elementID)
+	{
+		switch (elementID)
+		{
+		case ScienceExperimentElementID.Platform1:
+			return rotatingRings[0].ringTransform;
+		case ScienceExperimentElementID.Platform2:
+			return rotatingRings[1].ringTransform;
+		case ScienceExperimentElementID.Platform3:
+			return rotatingRings[2].ringTransform;
+		case ScienceExperimentElementID.Platform4:
+			return rotatingRings[3].ringTransform;
+		case ScienceExperimentElementID.Platform5:
+			return rotatingRings[4].ringTransform;
+		case ScienceExperimentElementID.LiquidMesh:
+			return liquidMeshTransform;
+		case ScienceExperimentElementID.EntryChamberLiquidMesh:
+			return entryWayLiquidMeshTransform;
+		case ScienceExperimentElementID.EntryChamberBridgeQuad:
+			return entryWayBridgeQuadTransform;
+		case ScienceExperimentElementID.DrainBlocker:
+			return drainBlocker;
+		default:
+			Debug.LogError($"Unhandled ScienceExperiment element ID! {elementID}");
+			return null;
+		}
+	}
+
+	void ITickSystemTick.Tick()
+	{
+		prevTime = currentTime;
+		currentTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : Time.unscaledTimeAsDouble);
+		lastInfrequentUpdateTime = ((lastInfrequentUpdateTime > currentTime) ? currentTime : lastInfrequentUpdateTime);
+		if (currentTime > lastInfrequentUpdateTime + (double)infrequentUpdatePeriod)
+		{
+			InfrequentUpdate();
+			lastInfrequentUpdateTime = (float)currentTime;
+		}
+		if (base.IsMine)
+		{
+			UpdateReliableState(currentTime, ref reliableState);
+		}
+		UpdateLocalState(currentTime, reliableState);
+		localLagRiseProgressOffset = Mathf.MoveTowards(localLagRiseProgressOffset, 0f, lagResolutionLavaProgressPerSecond * Time.deltaTime);
+		UpdateLiquid(riseProgress + localLagRiseProgressOffset);
+		UpdateRotatingRings(ringRotationProgress);
+		UpdateRefreshWater();
+		UpdateDrainBlocker(currentTime);
+		DisableObjectsInContactWithLava(liquidMeshTransform.localScale.z);
+		UpdateEffects();
+		if (!debugDrawPlayerGameState)
+		{
+			return;
+		}
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			NetPlayer netPlayer = null;
+			if (NetworkSystem.Instance.InRoom)
+			{
+				netPlayer = NetworkSystem.Instance.GetPlayer(inGamePlayerStates[i].playerId);
+			}
+			else if (inGamePlayerStates[i].playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				netPlayer = NetworkSystem.Instance.LocalPlayer;
+			}
+			if (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out var playerRig) && playerRig.Rig != null)
+			{
+				float num = 0.03f;
+				DebugUtil.DrawSphere(playerRig.Rig.transform.position + Vector3.up * 0.5f * num, 0.16f * num, 12, 12, inGamePlayerStates[i].touchedLiquid ? Color.red : Color.green, depthTest: true, DebugUtil.Style.SolidColor);
 			}
 		}
+	}
 
-		public override void WriteDataFusion()
+	private void InfrequentUpdate()
+	{
+		allPlayersInRoom = RoomSystem.PlayersInRoom.ToArray();
+		if (base.IsMine)
 		{
-			ScienceExperimentManager.ScienceManagerData data = new ScienceExperimentManager.ScienceManagerData((int)this.reliableState.state, this.reliableState.stateStartTime, this.reliableState.stateStartLiquidProgressLinear, this.reliableState.activationProgress, (int)this.nextRoundRiseSpeed, this.riseTime, this.lastWinnerId, this.inGamePlayerCount, this.inGamePlayerStates, this.rotatingRings);
-			this.Data = data;
-		}
-
-		public override void ReadDataFusion()
-		{
-			int num = this.lastWinnerId;
-			ScienceExperimentManager.RiseSpeed riseSpeed = this.nextRoundRiseSpeed;
-			this.reliableState.state = (ScienceExperimentManager.RisingLiquidState)this.Data.reliableState;
-			this.reliableState.stateStartTime = this.Data.stateStartTime;
-			this.reliableState.stateStartLiquidProgressLinear = this.Data.stateStartLiquidProgressLinear.ClampSafe(0f, 1f);
-			this.reliableState.activationProgress = this.Data.activationProgress.GetFinite();
-			this.nextRoundRiseSpeed = (ScienceExperimentManager.RiseSpeed)this.Data.nextRoundRiseSpeed;
-			this.riseTime = this.Data.riseTime.GetFinite();
-			this.lastWinnerId = this.Data.lastWinnerId;
-			this.inGamePlayerCount = Mathf.Clamp(this.Data.inGamePlayerCount, 0, 10);
-			for (int i = 0; i < 10; i++)
+			for (int num = inGamePlayerCount - 1; num >= 0; num--)
 			{
-				this.inGamePlayerStates[i].playerId = this.Data.playerIdArray[i];
-				this.inGamePlayerStates[i].touchedLiquid = this.Data.touchedLiquidArray[i];
-				this.inGamePlayerStates[i].touchedLiquidAtProgress = this.Data.touchedLiquidAtProgressArray[i].ClampSafe(0f, 1f);
-			}
-			for (int j = 0; j < this.rotatingRings.Length; j++)
-			{
-				this.rotatingRings[j].initialAngle = this.Data.initialAngleArray[j].GetFinite();
-				this.rotatingRings[j].resultingAngle = this.Data.resultingAngleArray[j].GetFinite();
-			}
-			float num2 = this.riseProgress;
-			this.UpdateLocalState(NetworkSystem.Instance.SimTime, this.reliableState);
-			this.localLagRiseProgressOffset = num2 - this.riseProgress;
-			if (num != this.lastWinnerId)
-			{
-				this.RefreshWinnerName();
-			}
-		}
-
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			stream.SendNext((int)this.reliableState.state);
-			stream.SendNext(this.reliableState.stateStartTime);
-			stream.SendNext(this.reliableState.stateStartLiquidProgressLinear);
-			stream.SendNext(this.reliableState.activationProgress);
-			stream.SendNext((int)this.nextRoundRiseSpeed);
-			stream.SendNext(this.riseTime);
-			stream.SendNext(this.lastWinnerId);
-			stream.SendNext(this.inGamePlayerCount);
-			for (int i = 0; i < 10; i++)
-			{
-				stream.SendNext(this.inGamePlayerStates[i].playerId);
-				stream.SendNext(this.inGamePlayerStates[i].touchedLiquid);
-				stream.SendNext(this.inGamePlayerStates[i].touchedLiquidAtProgress);
-			}
-			for (int j = 0; j < this.rotatingRings.Length; j++)
-			{
-				stream.SendNext(this.rotatingRings[j].initialAngle);
-				stream.SendNext(this.rotatingRings[j].resultingAngle);
-			}
-		}
-
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			int num = this.lastWinnerId;
-			ScienceExperimentManager.RiseSpeed riseSpeed = this.nextRoundRiseSpeed;
-			this.reliableState.state = (ScienceExperimentManager.RisingLiquidState)((int)stream.ReceiveNext());
-			this.reliableState.stateStartTime = ((double)stream.ReceiveNext()).GetFinite();
-			this.reliableState.stateStartLiquidProgressLinear = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
-			this.reliableState.activationProgress = ((double)stream.ReceiveNext()).GetFinite();
-			this.nextRoundRiseSpeed = (ScienceExperimentManager.RiseSpeed)((int)stream.ReceiveNext());
-			this.riseTime = ((float)stream.ReceiveNext()).GetFinite();
-			this.lastWinnerId = (int)stream.ReceiveNext();
-			this.inGamePlayerCount = (int)stream.ReceiveNext();
-			this.inGamePlayerCount = Mathf.Clamp(this.inGamePlayerCount, 0, 10);
-			for (int i = 0; i < 10; i++)
-			{
-				this.inGamePlayerStates[i].playerId = (int)stream.ReceiveNext();
-				this.inGamePlayerStates[i].touchedLiquid = (bool)stream.ReceiveNext();
-				this.inGamePlayerStates[i].touchedLiquidAtProgress = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
-			}
-			for (int j = 0; j < this.rotatingRings.Length; j++)
-			{
-				this.rotatingRings[j].initialAngle = ((float)stream.ReceiveNext()).GetFinite();
-				this.rotatingRings[j].resultingAngle = ((float)stream.ReceiveNext()).GetFinite();
-			}
-			float num2 = this.riseProgress;
-			this.UpdateLocalState(NetworkSystem.Instance.SimTime, this.reliableState);
-			this.localLagRiseProgressOffset = num2 - this.riseProgress;
-			if (num != this.lastWinnerId)
-			{
-				this.RefreshWinnerName();
-			}
-		}
-
-		private void PlayerEnteredGameArea(int pId)
-		{
-			if (base.IsMine)
-			{
+				int playerId = inGamePlayerStates[num].playerId;
 				bool flag = false;
-				for (int i = 0; i < this.inGamePlayerCount; i++)
+				for (int i = 0; i < allPlayersInRoom.Length; i++)
 				{
-					if (this.inGamePlayerStates[i].playerId == pId)
+					if (allPlayersInRoom[i].ActorNumber == playerId)
 					{
 						flag = true;
-						break;
 					}
 				}
-				if (!flag && this.inGamePlayerCount < 10)
+				if (!flag)
 				{
-					bool touchedLiquid = false;
-					this.inGamePlayerStates[this.inGamePlayerCount] = new ScienceExperimentManager.PlayerGameState
+					if (num < inGamePlayerCount - 1)
 					{
-						playerId = pId,
-						touchedLiquid = touchedLiquid,
-						touchedLiquidAtProgress = -1f
-					};
-					this.inGamePlayerCount++;
-					if (this.optPlayersOutOfRoomGameMode)
-					{
-						GorillaGameModes.GameMode.OptOut(pId);
+						inGamePlayerStates[num] = inGamePlayerStates[inGamePlayerCount - 1];
 					}
+					inGamePlayerStates[inGamePlayerCount - 1] = default(PlayerGameState);
+					inGamePlayerCount--;
 				}
 			}
 		}
-
-		private void PlayerExitedGameArea(int playerId)
+		if (!optPlayersOutOfRoomGameMode)
 		{
-			if (base.IsMine)
+			return;
+		}
+		for (int j = 0; j < allPlayersInRoom.Length; j++)
+		{
+			bool flag2 = false;
+			for (int k = 0; k < inGamePlayerCount; k++)
 			{
-				int i = 0;
-				while (i < this.inGamePlayerCount)
+				if (allPlayersInRoom[j].ActorNumber == inGamePlayerStates[k].playerId)
 				{
-					if (this.inGamePlayerStates[i].playerId == playerId)
-					{
-						this.inGamePlayerStates[i] = this.inGamePlayerStates[this.inGamePlayerCount - 1];
-						this.inGamePlayerCount--;
-						if (this.optPlayersOutOfRoomGameMode)
-						{
-							GorillaGameModes.GameMode.OptIn(playerId);
-							return;
-						}
-						break;
-					}
-					else
-					{
-						i++;
-					}
+					flag2 = true;
 				}
 			}
-		}
-
-		[PunRPC]
-		public void PlayerTouchedLavaRPC(PhotonMessageInfo info)
-		{
-			MonkeAgent.IncrementRPCCall(info, "PlayerTouchedLavaRPC");
-			this.PlayerTouchedLava(info.Sender.ActorNumber);
-		}
-
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-		public unsafe void RPC_PlayerTouchedLava(RpcInfo info = default(RpcInfo))
-		{
-			if (!this.InvokeRpc)
+			if (flag2)
 			{
-				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
-				{
-					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-					if ((localAuthorityMask & 7) != 0)
-					{
-						if ((localAuthorityMask & 1) != 1)
-						{
-							int num = 8;
-							if (!SimulationMessage.CanAllocateUserPayload(num))
-							{
-								NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedLava(Fusion.RpcInfo)", num);
-								return;
-							}
-							if (base.Runner.HasAnyActiveConnections())
-							{
-								SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
-								int num2 = 8;
-								ptr->Offset = num2 * 8;
-								base.Runner.SendRpc(ptr);
-							}
-							if ((localAuthorityMask & 1) == 0)
-							{
-								return;
-							}
-						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-						goto IL_12;
-					}
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedLava(Fusion.RpcInfo)", base.Object, 7);
-				}
-				return;
+				GorillaGameModes.GameMode.OptOut(allPlayersInRoom[j]);
 			}
-			this.InvokeRpc = false;
-			IL_12:
-			PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
-			MonkeAgent.IncrementRPCCall(photonMessageInfoWrapped, "PlayerTouchedLavaRPC");
-			this.PlayerTouchedLava(photonMessageInfoWrapped.Sender.ActorNumber);
-		}
-
-		private void PlayerTouchedLava(int playerId)
-		{
-			if (base.IsMine)
+			else
 			{
-				for (int i = 0; i < this.inGamePlayerCount; i++)
-				{
-					if (this.inGamePlayerStates[i].playerId == playerId)
-					{
-						ScienceExperimentManager.PlayerGameState playerGameState = this.inGamePlayerStates[i];
-						if (!playerGameState.touchedLiquid)
-						{
-							playerGameState.touchedLiquidAtProgress = this.riseProgressLinear;
-						}
-						playerGameState.touchedLiquid = true;
-						this.inGamePlayerStates[i] = playerGameState;
-						return;
-					}
-				}
+				GorillaGameModes.GameMode.OptIn(allPlayersInRoom[j]);
 			}
 		}
+	}
 
-		[PunRPC]
-		private void PlayerTouchedRefreshWaterRPC(PhotonMessageInfo info)
+	private bool PlayerInGame(Player player)
+	{
+		for (int i = 0; i < inGamePlayerCount; i++)
 		{
-			MonkeAgent.IncrementRPCCall(info, "PlayerTouchedRefreshWaterRPC");
-			this.PlayerTouchedRefreshWater(info.Sender.ActorNumber);
-		}
-
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-		private unsafe void RPC_PlayerTouchedRefreshWater(RpcInfo info = default(RpcInfo))
-		{
-			if (!this.InvokeRpc)
+			if (inGamePlayerStates[i].playerId == player.ActorNumber)
 			{
-				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
-				{
-					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-					if ((localAuthorityMask & 7) != 0)
-					{
-						if ((localAuthorityMask & 1) != 1)
-						{
-							int num = 8;
-							if (!SimulationMessage.CanAllocateUserPayload(num))
-							{
-								NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedRefreshWater(Fusion.RpcInfo)", num);
-								return;
-							}
-							if (base.Runner.HasAnyActiveConnections())
-							{
-								SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 2);
-								int num2 = 8;
-								ptr->Offset = num2 * 8;
-								base.Runner.SendRpc(ptr);
-							}
-							if ((localAuthorityMask & 1) == 0)
-							{
-								return;
-							}
-						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-						goto IL_12;
-					}
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedRefreshWater(Fusion.RpcInfo)", base.Object, 7);
-				}
-				return;
+				return true;
 			}
-			this.InvokeRpc = false;
-			IL_12:
-			PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
-			MonkeAgent.IncrementRPCCall(photonMessageInfoWrapped, "PlayerTouchedRefreshWaterRPC");
-			this.PlayerTouchedRefreshWater(photonMessageInfoWrapped.Sender.ActorNumber);
 		}
+		return false;
+	}
 
-		private void PlayerTouchedRefreshWater(int playerId)
+	private void UpdateReliableState(double currentTime, ref SyncData syncData)
+	{
+		if (currentTime < syncData.stateStartTime)
 		{
-			if (base.IsMine && this.RefreshWaterAvailable)
+			syncData.stateStartTime = currentTime;
+		}
+		switch (syncData.state)
+		{
+		default:
+			if (GetAlivePlayerCount() > 0 && syncData.activationProgress > 1.0)
 			{
-				for (int i = 0; i < this.inGamePlayerCount; i++)
+				syncData.state = RisingLiquidState.Erupting;
+				syncData.stateStartTime = currentTime;
+				syncData.stateStartLiquidProgressLinear = 0f;
+				syncData.activationProgress = 1.0;
+			}
+			else
+			{
+				float num5 = Mathf.Clamp((float)(currentTime - prevTime), 0f, 0.1f);
+				syncData.activationProgress = Mathf.MoveTowards((float)syncData.activationProgress, 0f, lavaActivationDrainRateVsPlayerCount.Evaluate(PlayerCount) * num5);
+			}
+			break;
+		case RisingLiquidState.Erupting:
+			if (currentTime > syncData.stateStartTime + (double)fullyDrainedWaitTime)
+			{
+				riseTime = riseTimeLookup[(int)nextRoundRiseSpeed];
+				syncData.stateStartLiquidProgressLinear = 0f;
+				syncData.state = RisingLiquidState.Rising;
+				syncData.stateStartTime = currentTime;
+			}
+			break;
+		case RisingLiquidState.Rising:
+			if (GetAlivePlayerCount() <= 0)
+			{
+				UpdateWinner();
+				syncData.stateStartLiquidProgressLinear = Mathf.Clamp01((float)((currentTime - syncData.stateStartTime) / (double)riseTime));
+				syncData.state = RisingLiquidState.PreDrainDelay;
+				syncData.stateStartTime = currentTime;
+			}
+			else if (currentTime > syncData.stateStartTime + (double)riseTime)
+			{
+				syncData.stateStartLiquidProgressLinear = 1f;
+				syncData.state = RisingLiquidState.Full;
+				syncData.stateStartTime = currentTime;
+			}
+			break;
+		case RisingLiquidState.Full:
+			if (GetAlivePlayerCount() <= 0 || currentTime > syncData.stateStartTime + (double)maxFullTime)
+			{
+				UpdateWinner();
+				syncData.stateStartLiquidProgressLinear = 1f;
+				syncData.state = RisingLiquidState.PreDrainDelay;
+				syncData.stateStartTime = currentTime;
+			}
+			break;
+		case RisingLiquidState.PreDrainDelay:
+			if (currentTime > syncData.stateStartTime + (double)preDrainWaitTime)
+			{
+				syncData.state = RisingLiquidState.Draining;
+				syncData.stateStartTime = currentTime;
+				syncData.activationProgress = 0.0;
+				for (int i = 0; i < rotatingRings.Length; i++)
 				{
-					if (this.inGamePlayerStates[i].playerId == playerId)
-					{
-						ScienceExperimentManager.PlayerGameState playerGameState = this.inGamePlayerStates[i];
-						playerGameState.touchedLiquid = false;
-						playerGameState.touchedLiquidAtProgress = -1f;
-						this.inGamePlayerStates[i] = playerGameState;
-						return;
-					}
+					float num2 = Mathf.Repeat(rotatingRings[i].resultingAngle, 360f);
+					float num3 = UnityEngine.Random.Range(rotatingRingRandomAngleRange.x, rotatingRingRandomAngleRange.y);
+					float num4 = ((UnityEngine.Random.Range(0f, 1f) > 0.5f) ? 1f : (-1f));
+					rotatingRings[i].initialAngle = num2;
+					rotatingRings[i].resultingAngle = num2 + num4 * num3;
 				}
 			}
-		}
-
-		[PunRPC]
-		private void ValidateLocalPlayerWaterBalloonHitRPC(int playerId, PhotonMessageInfo info)
+			break;
+		case RisingLiquidState.Draining:
 		{
-			MonkeAgent.IncrementRPCCall(info, "ValidateLocalPlayerWaterBalloonHitRPC");
-			if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			double num = (1.0 - (double)syncData.stateStartLiquidProgressLinear) * (double)drainTime;
+			if (currentTime + num > syncData.stateStartTime + (double)drainTime)
 			{
-				this.ValidateLocalPlayerWaterBalloonHit(playerId);
+				syncData.stateStartLiquidProgressLinear = 0f;
+				syncData.state = RisingLiquidState.Drained;
+				syncData.stateStartTime = currentTime;
+				syncData.activationProgress = 0.0;
 			}
+			break;
 		}
-
-		[Rpc(InvokeLocal = false)]
-		private unsafe void RPC_ValidateLocalPlayerWaterBalloonHit(int playerId, RpcInfo info = default(RpcInfo))
+		}
+		int GetAlivePlayerCount()
 		{
-			if (this.InvokeRpc)
+			int num6 = 0;
+			for (int j = 0; j < inGamePlayerCount; j++)
 			{
-				this.InvokeRpc = false;
-				MonkeAgent.IncrementRPCCall(new PhotonMessageInfoWrapped(info), "ValidateLocalPlayerWaterBalloonHitRPC");
-				if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+				if (!inGamePlayerStates[j].touchedLiquid)
 				{
-					this.ValidateLocalPlayerWaterBalloonHit(playerId);
+					num6++;
 				}
-				return;
 			}
-			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			return num6;
+		}
+	}
+
+	private void UpdateLocalState(double currentTime, SyncData syncData)
+	{
+		switch (syncData.state)
+		{
+		default:
+			riseProgressLinear = 0f;
+			riseProgress = 0f;
+			if (!debugRandomizingRings)
 			{
-				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-				if ((localAuthorityMask & 7) == 0)
+				ringRotationProgress = 1f;
+			}
+			break;
+		case RisingLiquidState.Rising:
+		{
+			double num3 = (currentTime - syncData.stateStartTime) / (double)riseTime;
+			riseProgressLinear = Mathf.Clamp01((float)num3);
+			riseProgress = animationCurve.Evaluate(riseProgressLinear);
+			ringRotationProgress = 1f;
+			break;
+		}
+		case RisingLiquidState.Full:
+			riseProgressLinear = 1f;
+			riseProgress = 1f;
+			ringRotationProgress = 1f;
+			break;
+		case RisingLiquidState.PreDrainDelay:
+			riseProgressLinear = syncData.stateStartLiquidProgressLinear;
+			riseProgress = animationCurve.Evaluate(riseProgressLinear);
+			ringRotationProgress = 1f;
+			break;
+		case RisingLiquidState.Draining:
+		{
+			double num = (1.0 - (double)syncData.stateStartLiquidProgressLinear) * (double)drainTime;
+			double num2 = (currentTime + num - syncData.stateStartTime) / (double)drainTime;
+			riseProgressLinear = Mathf.Clamp01((float)(1.0 - num2));
+			riseProgress = animationCurve.Evaluate(riseProgressLinear);
+			ringRotationProgress = (float)(currentTime - syncData.stateStartTime) / (drainTime * syncData.stateStartLiquidProgressLinear);
+			break;
+		}
+		}
+	}
+
+	private void UpdateLiquid(float fillProgress)
+	{
+		float num = Mathf.Lerp(minScale, maxScale, fillProgress);
+		liquidMeshTransform.localScale = new Vector3(1f, 1f, num);
+		bool active = reliableState.state == RisingLiquidState.Rising || reliableState.state == RisingLiquidState.Full || reliableState.state == RisingLiquidState.PreDrainDelay || reliableState.state == RisingLiquidState.Draining;
+		liquidMeshTransform.gameObject.SetActive(active);
+		if (entryWayLiquidMeshTransform != null)
+		{
+			float y = 0f;
+			float z;
+			float z2;
+			if (num < entryLiquidScaleSyncOpeningBottom.y)
+			{
+				z = entryLiquidScaleSyncOpeningBottom.x;
+				z2 = entryBridgeQuadMinMaxZHeight.x;
+			}
+			else if (num < entryLiquidScaleSyncOpeningTop.y)
+			{
+				float num2 = Mathf.InverseLerp(entryLiquidScaleSyncOpeningBottom.y, entryLiquidScaleSyncOpeningTop.y, num);
+				z = Mathf.Lerp(entryLiquidScaleSyncOpeningBottom.x, entryLiquidScaleSyncOpeningTop.x, num2);
+				z2 = Mathf.Lerp(entryBridgeQuadMinMaxZHeight.x, entryBridgeQuadMinMaxZHeight.y, num2);
+				y = entryBridgeQuadMaxScaleY * Mathf.Sin(num2 * MathF.PI);
+			}
+			else
+			{
+				float t = Mathf.InverseLerp(entryLiquidScaleSyncOpeningTop.y, 0.6f * maxScale, num);
+				z = Mathf.Lerp(entryLiquidScaleSyncOpeningTop.x, entryLiquidMaxScale, t);
+				z2 = entryBridgeQuadMinMaxZHeight.y;
+			}
+			entryWayLiquidMeshTransform.localScale = new Vector3(entryWayLiquidMeshTransform.localScale.x, entryWayLiquidMeshTransform.localScale.y, z);
+			entryWayBridgeQuadTransform.localScale = new Vector3(entryWayBridgeQuadTransform.localScale.x, y, entryWayBridgeQuadTransform.localScale.z);
+			entryWayBridgeQuadTransform.localPosition = new Vector3(entryWayBridgeQuadTransform.localPosition.x, entryWayBridgeQuadTransform.localPosition.y, z2);
+		}
+	}
+
+	private void UpdateRotatingRings(float rotationProgress)
+	{
+		for (int i = 0; i < rotatingRings.Length; i++)
+		{
+			float angle = Mathf.Lerp(rotatingRings[i].initialAngle, rotatingRings[i].resultingAngle, rotationProgress);
+			rotatingRings[i].ringTransform.rotation = Quaternion.AngleAxis(angle, Vector3.up);
+		}
+	}
+
+	private void UpdateDrainBlocker(double currentTime)
+	{
+		if (reliableState.state == RisingLiquidState.Draining)
+		{
+			float num = (float)(currentTime - reliableState.stateStartTime);
+			float num2 = (1f - reliableState.stateStartLiquidProgressLinear) * drainTime;
+			if (drainTime - (num + num2) < drainBlockerSlideTime)
+			{
+				drainBlocker.position = Vector3.MoveTowards(drainBlocker.position, drainBlockerClosedPosition.position, drainBlockerSlideSpeed * Time.deltaTime);
+			}
+			else
+			{
+				drainBlocker.position = Vector3.MoveTowards(drainBlocker.position, drainBlockerOpenPosition.position, drainBlockerSlideSpeed * Time.deltaTime);
+			}
+		}
+		else
+		{
+			drainBlocker.position = drainBlockerClosedPosition.position;
+		}
+	}
+
+	private void UpdateEffects()
+	{
+		switch (reliableState.state)
+		{
+		default:
+			if (elements != null)
+			{
+				elements.sodaFizzParticles.gameObject.SetActive(value: false);
+				elements.sodaEruptionParticles.gameObject.SetActive(value: false);
+				fizzParticleEmission.rateOverTimeMultiplier = 0f;
+			}
+			hasPlayedEruptionEffects = false;
+			hasPlayedDrainEffects = false;
+			eruptionAudioSource.GTStop();
+			drainAudioSource.GTStop();
+			rotatingRingsAudioSource.GTStop();
+			break;
+		case RisingLiquidState.Drained:
+			hasPlayedEruptionEffects = false;
+			hasPlayedDrainEffects = false;
+			eruptionAudioSource.GTStop();
+			drainAudioSource.GTStop();
+			rotatingRingsAudioSource.GTStop();
+			if (elements != null)
+			{
+				elements.sodaEruptionParticles.gameObject.SetActive(value: false);
+				elements.sodaFizzParticles.gameObject.SetActive(value: true);
+				if (reliableState.activationProgress > 0.0010000000474974513)
 				{
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_ValidateLocalPlayerWaterBalloonHit(System.Int32,Fusion.RpcInfo)", base.Object, 7);
+					fizzParticleEmission.rateOverTimeMultiplier = Mathf.Lerp(sodaFizzParticleEmissionMinMax.x, sodaFizzParticleEmissionMinMax.y, (float)reliableState.activationProgress);
 				}
 				else
 				{
-					int num = 8;
-					num += 4;
-					if (!SimulationMessage.CanAllocateUserPayload(num))
-					{
-						NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_ValidateLocalPlayerWaterBalloonHit(System.Int32,Fusion.RpcInfo)", num);
-					}
-					else if (base.Runner.HasAnyActiveConnections())
-					{
-						SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-						byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-						*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 3);
-						int num2 = 8;
-						*(int*)(ptr2 + num2) = playerId;
-						num2 += 4;
-						ptr->Offset = num2 * 8;
-						base.Runner.SendRpc(ptr);
-					}
+					fizzParticleEmission.rateOverTimeMultiplier = 0f;
+				}
+			}
+			break;
+		case RisingLiquidState.Erupting:
+			if (!hasPlayedEruptionEffects)
+			{
+				eruptionAudioSource.loop = true;
+				eruptionAudioSource.GTPlay();
+				hasPlayedEruptionEffects = true;
+				if (elements != null)
+				{
+					elements.sodaEruptionParticles.gameObject.SetActive(value: true);
+					fizzParticleEmission.rateOverTimeMultiplier = sodaFizzParticleEmissionMinMax.y;
+				}
+			}
+			break;
+		case RisingLiquidState.Rising:
+			if (elements != null)
+			{
+				fizzParticleEmission.rateOverTimeMultiplier = 0f;
+			}
+			break;
+		case RisingLiquidState.Draining:
+			hasPlayedEruptionEffects = false;
+			eruptionAudioSource.GTStop();
+			if (elements != null)
+			{
+				elements.sodaFizzParticles.gameObject.SetActive(value: false);
+				elements.sodaEruptionParticles.gameObject.SetActive(value: false);
+				fizzParticleEmission.rateOverTimeMultiplier = 0f;
+			}
+			if (!hasPlayedDrainEffects)
+			{
+				drainAudioSource.loop = true;
+				drainAudioSource.GTPlay();
+				rotatingRingsAudioSource.loop = true;
+				rotatingRingsAudioSource.GTPlay();
+				hasPlayedDrainEffects = true;
+			}
+			break;
+		}
+	}
+
+	private void DisableObjectsInContactWithLava(float lavaScale)
+	{
+		if (elements == null)
+		{
+			return;
+		}
+		Plane plane = new Plane(liquidSurfacePlane.up, liquidSurfacePlane.position);
+		if (reliableState.state == RisingLiquidState.Rising)
+		{
+			for (int i = 0; i < elements.disableByLiquidList.Count; i++)
+			{
+				if (!plane.GetSide(elements.disableByLiquidList[i].target.position + elements.disableByLiquidList[i].heightOffset * Vector3.up))
+				{
+					elements.disableByLiquidList[i].target.gameObject.SetActive(value: false);
 				}
 			}
 		}
-
-		private void ValidateLocalPlayerWaterBalloonHit(int playerId)
+		else
 		{
-			if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber && !GTPlayer.Instance.InWater)
+			if (reliableState.state != RisingLiquidState.Draining)
 			{
-				if (base.IsMine)
-				{
-					this.PlayerHitByWaterBalloon(NetworkSystem.Instance.LocalPlayer.ActorNumber);
-					return;
-				}
-				base.GetView.RPC("PlayerHitByWaterBalloonRPC", RpcTarget.MasterClient, new object[]
-				{
-					PhotonNetwork.LocalPlayer.ActorNumber
-				});
-			}
-		}
-
-		[PunRPC]
-		private void PlayerHitByWaterBalloonRPC(int playerId, PhotonMessageInfo info)
-		{
-			MonkeAgent.IncrementRPCCall(info, "PlayerHitByWaterBalloonRPC");
-			this.PlayerHitByWaterBalloon(playerId);
-		}
-
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-		private unsafe void RPC_PlayerHitByWaterBalloon(int playerId, RpcInfo info = default(RpcInfo))
-		{
-			if (!this.InvokeRpc)
-			{
-				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
-				{
-					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-					if ((localAuthorityMask & 7) != 0)
-					{
-						if ((localAuthorityMask & 1) != 1)
-						{
-							int num = 8;
-							num += 4;
-							if (!SimulationMessage.CanAllocateUserPayload(num))
-							{
-								NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerHitByWaterBalloon(System.Int32,Fusion.RpcInfo)", num);
-								return;
-							}
-							if (base.Runner.HasAnyActiveConnections())
-							{
-								SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 4);
-								int num2 = 8;
-								*(int*)(ptr2 + num2) = playerId;
-								num2 += 4;
-								ptr->Offset = num2 * 8;
-								base.Runner.SendRpc(ptr);
-							}
-							if ((localAuthorityMask & 1) == 0)
-							{
-								return;
-							}
-						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-						goto IL_12;
-					}
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerHitByWaterBalloon(System.Int32,Fusion.RpcInfo)", base.Object, 7);
-				}
 				return;
 			}
-			this.InvokeRpc = false;
-			IL_12:
-			MonkeAgent.IncrementRPCCall(new PhotonMessageInfoWrapped(info), "PlayerHitByWaterBalloonRPC");
-			this.PlayerHitByWaterBalloon(playerId);
+			for (int j = 0; j < elements.disableByLiquidList.Count; j++)
+			{
+				if (plane.GetSide(elements.disableByLiquidList[j].target.position + elements.disableByLiquidList[j].heightOffset * Vector3.up))
+				{
+					elements.disableByLiquidList[j].target.gameObject.SetActive(value: true);
+				}
+			}
 		}
+	}
 
-		private void PlayerHitByWaterBalloon(int playerId)
+	private void UpdateWinner()
+	{
+		float num = -1f;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (!inGamePlayerStates[i].touchedLiquid)
+			{
+				lastWinnerId = inGamePlayerStates[i].playerId;
+				break;
+			}
+			if (inGamePlayerStates[i].touchedLiquidAtProgress > num)
+			{
+				num = inGamePlayerStates[i].touchedLiquidAtProgress;
+				lastWinnerId = inGamePlayerStates[i].playerId;
+			}
+		}
+		RefreshWinnerName();
+	}
+
+	private void RefreshWinnerName()
+	{
+		NetPlayer playerFromId = GetPlayerFromId(lastWinnerId);
+		if (playerFromId != null)
+		{
+			lastWinnerName = playerFromId.NickName;
+		}
+		else
+		{
+			lastWinnerName = "None";
+		}
+	}
+
+	private NetPlayer GetPlayerFromId(int id)
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			return NetworkSystem.Instance.GetPlayer(id);
+		}
+		if (id == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			return NetworkSystem.Instance.LocalPlayer;
+		}
+		return null;
+	}
+
+	private void UpdateRefreshWater()
+	{
+		if (refreshWaterVolume != null)
+		{
+			if (RefreshWaterAvailable && !refreshWaterVolume.gameObject.activeSelf)
+			{
+				refreshWaterVolume.gameObject.SetActive(value: true);
+			}
+			else if (!RefreshWaterAvailable && refreshWaterVolume.gameObject.activeSelf)
+			{
+				refreshWaterVolume.gameObject.SetActive(value: false);
+			}
+		}
+	}
+
+	private void ResetGame()
+	{
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			PlayerGameState playerGameState = inGamePlayerStates[i];
+			playerGameState.touchedLiquid = false;
+			playerGameState.touchedLiquidAtProgress = -1f;
+			inGamePlayerStates[i] = playerGameState;
+		}
+	}
+
+	public void RestartGame()
+	{
+		if (base.IsMine)
+		{
+			riseTime = riseTimeLookup[(int)nextRoundRiseSpeed];
+			reliableState.state = RisingLiquidState.Erupting;
+			reliableState.stateStartTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : ((double)Time.time));
+			reliableState.stateStartLiquidProgressLinear = 0f;
+			reliableState.activationProgress = 1.0;
+			ResetGame();
+		}
+	}
+
+	public void DebugErupt()
+	{
+		if (base.IsMine)
+		{
+			riseTime = riseTimeLookup[(int)nextRoundRiseSpeed];
+			reliableState.state = RisingLiquidState.Erupting;
+			reliableState.stateStartTime = (NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.SimTime : ((double)Time.time));
+			reliableState.stateStartLiquidProgressLinear = 0f;
+			reliableState.activationProgress = 1.0;
+		}
+	}
+
+	public void RandomizeRings()
+	{
+		for (int i = 0; i < rotatingRings.Length; i++)
+		{
+			float num = Mathf.Repeat(rotatingRings[i].resultingAngle, 360f);
+			float num2 = UnityEngine.Random.Range(rotatingRingRandomAngleRange.x, rotatingRingRandomAngleRange.y);
+			float num3 = ((UnityEngine.Random.Range(0f, 1f) > 0.5f) ? 1f : (-1f));
+			rotatingRings[i].initialAngle = num;
+			float num4 = num + num3 * num2;
+			if (rotatingRingQuantizeAngles)
+			{
+				num4 = Mathf.Round(num4 / rotatingRingAngleSnapDegrees) * rotatingRingAngleSnapDegrees;
+			}
+			rotatingRings[i].resultingAngle = num4;
+		}
+		if (rotateRingsCoroutine != null)
+		{
+			StopCoroutine(rotateRingsCoroutine);
+		}
+		rotateRingsCoroutine = StartCoroutine(RotateRingsCoroutine());
+	}
+
+	private IEnumerator RotateRingsCoroutine()
+	{
+		if (debugRotateRingsTime > 0.01f)
+		{
+			float routineStartTime = Time.time;
+			ringRotationProgress = 0f;
+			debugRandomizingRings = true;
+			while (ringRotationProgress < 1f)
+			{
+				ringRotationProgress = (Time.time - routineStartTime) / debugRotateRingsTime;
+				yield return null;
+			}
+		}
+		debugRandomizingRings = false;
+		ringRotationProgress = 1f;
+	}
+
+	public bool GetMaterialIfPlayerInGame(int playerActorNumber, out int materialIndex)
+	{
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == playerActorNumber)
+			{
+				if (inGamePlayerStates[i].touchedLiquid)
+				{
+					materialIndex = 12;
+					return true;
+				}
+				materialIndex = 0;
+				return true;
+			}
+		}
+		materialIndex = 0;
+		return false;
+	}
+
+	private void OnPlayerTagged(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
+	{
+		if (!base.IsMine)
+		{
+			return;
+		}
+		int num = -1;
+		int num2 = -1;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == taggedPlayer.ActorNumber)
+			{
+				num = i;
+			}
+			else if (inGamePlayerStates[i].playerId == taggingPlayer.ActorNumber)
+			{
+				num2 = i;
+			}
+			if (num != -1 && num2 != -1)
+			{
+				break;
+			}
+		}
+		if (num == -1 || num2 == -1)
+		{
+			return;
+		}
+		switch (tagBehavior)
+		{
+		case TagBehavior.Infect:
+			if (inGamePlayerStates[num2].touchedLiquid && !inGamePlayerStates[num].touchedLiquid)
+			{
+				PlayerGameState playerGameState2 = inGamePlayerStates[num];
+				playerGameState2.touchedLiquid = true;
+				playerGameState2.touchedLiquidAtProgress = riseProgressLinear;
+				inGamePlayerStates[num] = playerGameState2;
+			}
+			break;
+		case TagBehavior.Revive:
+			if (!inGamePlayerStates[num2].touchedLiquid && inGamePlayerStates[num].touchedLiquid)
+			{
+				PlayerGameState playerGameState = inGamePlayerStates[num];
+				playerGameState.touchedLiquid = false;
+				playerGameState.touchedLiquidAtProgress = -1f;
+				inGamePlayerStates[num] = playerGameState;
+			}
+			break;
+		case TagBehavior.None:
+			break;
+		}
+	}
+
+	private void OnColliderEnteredVolume(Collider collider)
+	{
+		VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
+		if (component != null && component.creator != null)
+		{
+			PlayerEnteredGameArea(component.creator.ActorNumber);
+		}
+	}
+
+	private void OnColliderExitedVolume(Collider collider)
+	{
+		VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
+		if (component != null && component.creator != null)
+		{
+			PlayerExitedGameArea(component.creator.ActorNumber);
+		}
+	}
+
+	private void OnColliderEnteredSoda(WaterVolume volume, Collider collider)
+	{
+		if (collider == GTPlayer.Instance.bodyCollider)
 		{
 			if (base.IsMine)
 			{
-				for (int i = 0; i < this.inGamePlayerCount; i++)
-				{
-					if (this.inGamePlayerStates[i].playerId == playerId)
-					{
-						ScienceExperimentManager.PlayerGameState playerGameState = this.inGamePlayerStates[i];
-						playerGameState.touchedLiquid = false;
-						playerGameState.touchedLiquidAtProgress = -1f;
-						this.inGamePlayerStates[i] = playerGameState;
-						return;
-					}
-				}
+				PlayerTouchedLava(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 			}
-		}
-
-		public void OnPlayerLeftRoom(NetPlayer otherPlayer)
-		{
-			this.PlayerExitedGameArea(otherPlayer.ActorNumber);
-		}
-
-		public void OnLeftRoom()
-		{
-			this.inGamePlayerCount = 0;
-			for (int i = 0; i < this.inGamePlayerCount; i++)
+			else
 			{
-				if (this.inGamePlayerStates[i].playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-				{
-					this.inGamePlayerStates[0] = this.inGamePlayerStates[i];
-					this.inGamePlayerCount = 1;
-					return;
-				}
+				base.GetView.RPC("PlayerTouchedLavaRPC", RpcTarget.MasterClient);
 			}
 		}
+	}
 
-		protected override void OnOwnerSwitched(NetPlayer newOwningPlayer)
+	private void OnColliderExitedSoda(WaterVolume volume, Collider collider)
+	{
+	}
+
+	private void OnColliderEnteredRefreshWater(WaterVolume volume, Collider collider)
+	{
+		if (collider == GTPlayer.Instance.bodyCollider)
 		{
-			base.OnOwnerSwitched(newOwningPlayer);
-			if (!NetworkSystem.Instance.IsMasterClient)
+			if (base.IsMine)
+			{
+				PlayerTouchedRefreshWater(NetworkSystem.Instance.LocalPlayer.ActorNumber);
+			}
+			else
+			{
+				base.GetView.RPC("PlayerTouchedRefreshWaterRPC", RpcTarget.MasterClient);
+			}
+		}
+	}
+
+	private void OnColliderExitedRefreshWater(WaterVolume volume, Collider collider)
+	{
+	}
+
+	private void OnProjectileEnteredSodaWater(SlingshotProjectile projectile, Collider collider)
+	{
+		if (projectile.gameObject.CompareTag(mentoProjectileTag))
+		{
+			AddLavaRock(projectile.projectileOwner.ActorNumber);
+		}
+	}
+
+	private void AddLavaRock(int playerId)
+	{
+		if (!base.IsMine || reliableState.state != RisingLiquidState.Drained)
+		{
+			return;
+		}
+		bool flag = false;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (!inGamePlayerStates[i].touchedLiquid)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (flag)
+		{
+			float num = lavaActivationRockProgressVsPlayerCount.Evaluate(PlayerCount);
+			reliableState.activationProgress += num;
+		}
+	}
+
+	public void OnWaterBalloonHitPlayer(NetPlayer hitPlayer)
+	{
+		bool flag = false;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == hitPlayer.ActorNumber)
+			{
+				flag = true;
+			}
+		}
+		if (flag)
+		{
+			if (hitPlayer == NetworkSystem.Instance.LocalPlayer)
+			{
+				ValidateLocalPlayerWaterBalloonHit(hitPlayer.ActorNumber);
+				return;
+			}
+			base.GetView.RPC("ValidateLocalPlayerWaterBalloonHitRPC", RpcTarget.Others, hitPlayer.ActorNumber);
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		ScienceManagerData data = new ScienceManagerData((int)reliableState.state, reliableState.stateStartTime, reliableState.stateStartLiquidProgressLinear, reliableState.activationProgress, (int)nextRoundRiseSpeed, riseTime, lastWinnerId, inGamePlayerCount, inGamePlayerStates, rotatingRings);
+		Data = data;
+	}
+
+	public override void ReadDataFusion()
+	{
+		int num = lastWinnerId;
+		_ = nextRoundRiseSpeed;
+		reliableState.state = (RisingLiquidState)Data.reliableState;
+		reliableState.stateStartTime = Data.stateStartTime;
+		reliableState.stateStartLiquidProgressLinear = Data.stateStartLiquidProgressLinear.ClampSafe(0f, 1f);
+		reliableState.activationProgress = Data.activationProgress.GetFinite();
+		nextRoundRiseSpeed = (RiseSpeed)Data.nextRoundRiseSpeed;
+		riseTime = Data.riseTime.GetFinite();
+		lastWinnerId = Data.lastWinnerId;
+		inGamePlayerCount = Mathf.Clamp(Data.inGamePlayerCount, 0, 10);
+		for (int i = 0; i < 10; i++)
+		{
+			inGamePlayerStates[i].playerId = Data.playerIdArray[i];
+			inGamePlayerStates[i].touchedLiquid = Data.touchedLiquidArray[i];
+			inGamePlayerStates[i].touchedLiquidAtProgress = Data.touchedLiquidAtProgressArray[i].ClampSafe(0f, 1f);
+		}
+		for (int j = 0; j < rotatingRings.Length; j++)
+		{
+			rotatingRings[j].initialAngle = Data.initialAngleArray[j].GetFinite();
+			rotatingRings[j].resultingAngle = Data.resultingAngleArray[j].GetFinite();
+		}
+		float num2 = riseProgress;
+		UpdateLocalState(NetworkSystem.Instance.SimTime, reliableState);
+		localLagRiseProgressOffset = num2 - riseProgress;
+		if (num != lastWinnerId)
+		{
+			RefreshWinnerName();
+		}
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		stream.SendNext((int)reliableState.state);
+		stream.SendNext(reliableState.stateStartTime);
+		stream.SendNext(reliableState.stateStartLiquidProgressLinear);
+		stream.SendNext(reliableState.activationProgress);
+		stream.SendNext((int)nextRoundRiseSpeed);
+		stream.SendNext(riseTime);
+		stream.SendNext(lastWinnerId);
+		stream.SendNext(inGamePlayerCount);
+		for (int i = 0; i < 10; i++)
+		{
+			stream.SendNext(inGamePlayerStates[i].playerId);
+			stream.SendNext(inGamePlayerStates[i].touchedLiquid);
+			stream.SendNext(inGamePlayerStates[i].touchedLiquidAtProgress);
+		}
+		for (int j = 0; j < rotatingRings.Length; j++)
+		{
+			stream.SendNext(rotatingRings[j].initialAngle);
+			stream.SendNext(rotatingRings[j].resultingAngle);
+		}
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		int num = lastWinnerId;
+		_ = nextRoundRiseSpeed;
+		reliableState.state = (RisingLiquidState)(int)stream.ReceiveNext();
+		reliableState.stateStartTime = ((double)stream.ReceiveNext()).GetFinite();
+		reliableState.stateStartLiquidProgressLinear = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
+		reliableState.activationProgress = ((double)stream.ReceiveNext()).GetFinite();
+		nextRoundRiseSpeed = (RiseSpeed)(int)stream.ReceiveNext();
+		riseTime = ((float)stream.ReceiveNext()).GetFinite();
+		lastWinnerId = (int)stream.ReceiveNext();
+		inGamePlayerCount = (int)stream.ReceiveNext();
+		inGamePlayerCount = Mathf.Clamp(inGamePlayerCount, 0, 10);
+		for (int i = 0; i < 10; i++)
+		{
+			inGamePlayerStates[i].playerId = (int)stream.ReceiveNext();
+			inGamePlayerStates[i].touchedLiquid = (bool)stream.ReceiveNext();
+			inGamePlayerStates[i].touchedLiquidAtProgress = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
+		}
+		for (int j = 0; j < rotatingRings.Length; j++)
+		{
+			rotatingRings[j].initialAngle = ((float)stream.ReceiveNext()).GetFinite();
+			rotatingRings[j].resultingAngle = ((float)stream.ReceiveNext()).GetFinite();
+		}
+		float num2 = riseProgress;
+		UpdateLocalState(NetworkSystem.Instance.SimTime, reliableState);
+		localLagRiseProgressOffset = num2 - riseProgress;
+		if (num != lastWinnerId)
+		{
+			RefreshWinnerName();
+		}
+	}
+
+	private void PlayerEnteredGameArea(int pId)
+	{
+		if (!base.IsMine)
+		{
+			return;
+		}
+		bool flag = false;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == pId)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (!flag && inGamePlayerCount < 10)
+		{
+			bool touchedLiquid = false;
+			inGamePlayerStates[inGamePlayerCount] = new PlayerGameState
+			{
+				playerId = pId,
+				touchedLiquid = touchedLiquid,
+				touchedLiquidAtProgress = -1f
+			};
+			inGamePlayerCount++;
+			if (optPlayersOutOfRoomGameMode)
+			{
+				GorillaGameModes.GameMode.OptOut(pId);
+			}
+		}
+	}
+
+	private void PlayerExitedGameArea(int playerId)
+	{
+		if (!base.IsMine)
+		{
+			return;
+		}
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == playerId)
+			{
+				inGamePlayerStates[i] = inGamePlayerStates[inGamePlayerCount - 1];
+				inGamePlayerCount--;
+				if (optPlayersOutOfRoomGameMode)
+				{
+					GorillaGameModes.GameMode.OptIn(playerId);
+				}
+				break;
+			}
+		}
+	}
+
+	[PunRPC]
+	public void PlayerTouchedLavaRPC(PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PlayerTouchedLavaRPC");
+		PlayerTouchedLava(info.Sender.ActorNumber);
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public unsafe void RPC_PlayerTouchedLava(RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
+		{
+			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+			if (base.Runner.Stage == SimulationStages.Resimulate)
 			{
 				return;
 			}
-			for (int i = 0; i < this.inGamePlayerCount; i++)
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
 			{
-				if (!Utils.PlayerInRoom(this.inGamePlayerStates[i].playerId))
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedLava(Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			if ((localAuthorityMask & 1) != 1)
+			{
+				int num = 8;
+				if (!SimulationMessage.CanAllocateUserPayload(num))
 				{
-					this.inGamePlayerStates[i] = this.inGamePlayerStates[this.inGamePlayerCount - 1];
-					this.inGamePlayerCount--;
-					i--;
+					NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedLava(Fusion.RpcInfo)", num);
+					return;
+				}
+				if (base.Runner.HasAnyActiveConnections())
+				{
+					SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+					byte* ptr2 = (byte*)ptr + 28;
+					*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 1);
+					int num2 = 8;
+					ptr->Offset = num2 * 8;
+					base.Runner.SendRpc(ptr);
+				}
+				if ((localAuthorityMask & 1) == 0)
+				{
+					return;
 				}
 			}
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
+		PhotonMessageInfoWrapped infoWrapped = new PhotonMessageInfoWrapped(info);
+		MonkeAgent.IncrementRPCCall(infoWrapped, "PlayerTouchedLavaRPC");
+		PlayerTouchedLava(infoWrapped.Sender.ActorNumber);
+	}
 
-		[CompilerGenerated]
-		private int <UpdateReliableState>g__GetAlivePlayerCount|105_0()
+	private void PlayerTouchedLava(int playerId)
+	{
+		if (!base.IsMine)
 		{
-			int num = 0;
-			for (int i = 0; i < this.inGamePlayerCount; i++)
+			return;
+		}
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == playerId)
 			{
-				if (!this.inGamePlayerStates[i].touchedLiquid)
+				PlayerGameState playerGameState = inGamePlayerStates[i];
+				if (!playerGameState.touchedLiquid)
 				{
-					num++;
+					playerGameState.touchedLiquidAtProgress = riseProgressLinear;
+				}
+				playerGameState.touchedLiquid = true;
+				inGamePlayerStates[i] = playerGameState;
+				break;
+			}
+		}
+	}
+
+	[PunRPC]
+	private void PlayerTouchedRefreshWaterRPC(PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PlayerTouchedRefreshWaterRPC");
+		PlayerTouchedRefreshWater(info.Sender.ActorNumber);
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	private unsafe void RPC_PlayerTouchedRefreshWater(RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
+		{
+			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+			if (base.Runner.Stage == SimulationStages.Resimulate)
+			{
+				return;
+			}
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
+			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedRefreshWater(Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			if ((localAuthorityMask & 1) != 1)
+			{
+				int num = 8;
+				if (!SimulationMessage.CanAllocateUserPayload(num))
+				{
+					NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedRefreshWater(Fusion.RpcInfo)", num);
+					return;
+				}
+				if (base.Runner.HasAnyActiveConnections())
+				{
+					SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+					byte* ptr2 = (byte*)ptr + 28;
+					*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 2);
+					int num2 = 8;
+					ptr->Offset = num2 * 8;
+					base.Runner.SendRpc(ptr);
+				}
+				if ((localAuthorityMask & 1) == 0)
+				{
+					return;
 				}
 			}
-			return num;
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
+		PhotonMessageInfoWrapped infoWrapped = new PhotonMessageInfoWrapped(info);
+		MonkeAgent.IncrementRPCCall(infoWrapped, "PlayerTouchedRefreshWaterRPC");
+		PlayerTouchedRefreshWater(infoWrapped.Sender.ActorNumber);
+	}
 
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
+	private void PlayerTouchedRefreshWater(int playerId)
+	{
+		if (!base.IsMine || !RefreshWaterAvailable)
 		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
+			return;
 		}
-
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
+		for (int i = 0; i < inGamePlayerCount; i++)
 		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
-		}
-
-		[NetworkRpcWeavedInvoker(1, 7, 1)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_PlayerTouchedLava@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedLava(info);
-		}
-
-		[NetworkRpcWeavedInvoker(2, 7, 1)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_PlayerTouchedRefreshWater@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedRefreshWater(info);
-		}
-
-		[NetworkRpcWeavedInvoker(3, 7, 7)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_ValidateLocalPlayerWaterBalloonHit@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			int num = 8;
-			int num2 = *(int*)(ptr + num);
-			num += 4;
-			int playerId = num2;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((ScienceExperimentManager)behaviour).RPC_ValidateLocalPlayerWaterBalloonHit(playerId, info);
-		}
-
-		[NetworkRpcWeavedInvoker(4, 7, 1)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_PlayerHitByWaterBalloon@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			int num = 8;
-			int num2 = *(int*)(ptr + num);
-			num += 4;
-			int playerId = num2;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((ScienceExperimentManager)behaviour).RPC_PlayerHitByWaterBalloon(playerId, info);
-		}
-
-		public static volatile ScienceExperimentManager instance;
-
-		[SerializeField]
-		private ScienceExperimentManager.TagBehavior tagBehavior = ScienceExperimentManager.TagBehavior.Infect;
-
-		[SerializeField]
-		private float minScale = 1f;
-
-		[SerializeField]
-		private float maxScale = 10f;
-
-		[SerializeField]
-		private float riseTimeFast = 30f;
-
-		[SerializeField]
-		private float riseTimeMedium = 60f;
-
-		[SerializeField]
-		private float riseTimeSlow = 120f;
-
-		[SerializeField]
-		private float riseTimeExtraSlow = 240f;
-
-		[SerializeField]
-		private float preDrainWaitTime = 3f;
-
-		[SerializeField]
-		private float maxFullTime = 5f;
-
-		[SerializeField]
-		private float drainTime = 10f;
-
-		[SerializeField]
-		private float fullyDrainedWaitTime = 3f;
-
-		[SerializeField]
-		private float lagResolutionLavaProgressPerSecond = 0.2f;
-
-		[SerializeField]
-		private AnimationCurve animationCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-
-		[SerializeField]
-		private float lavaProgressToDisableRefreshWater = 0.18f;
-
-		[SerializeField]
-		private float lavaProgressToEnableRefreshWater = 0.08f;
-
-		[SerializeField]
-		private float entryLiquidMaxScale = 5f;
-
-		[SerializeField]
-		private Vector2 entryLiquidScaleSyncOpeningTop = Vector2.zero;
-
-		[SerializeField]
-		private Vector2 entryLiquidScaleSyncOpeningBottom = Vector2.zero;
-
-		[SerializeField]
-		private float entryBridgeQuadMaxScaleY = 0.0915f;
-
-		[SerializeField]
-		private Vector2 entryBridgeQuadMinMaxZHeight = new Vector2(0.245f, 0.337f);
-
-		[SerializeField]
-		private AnimationCurve lavaActivationRockProgressVsPlayerCount = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-
-		[SerializeField]
-		private AnimationCurve lavaActivationDrainRateVsPlayerCount = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-
-		[SerializeField]
-		public GameObject waterBalloonPrefab;
-
-		[SerializeField]
-		private Vector2 rotatingRingRandomAngleRange = Vector2.zero;
-
-		[SerializeField]
-		private bool rotatingRingQuantizeAngles;
-
-		[SerializeField]
-		private float rotatingRingAngleSnapDegrees = 9f;
-
-		[SerializeField]
-		private float drainBlockerSlideTime = 4f;
-
-		[SerializeField]
-		private Vector2 sodaFizzParticleEmissionMinMax = new Vector2(30f, 100f);
-
-		[SerializeField]
-		private float infrequentUpdatePeriod = 3f;
-
-		[SerializeField]
-		private bool optPlayersOutOfRoomGameMode;
-
-		[SerializeField]
-		private bool debugDrawPlayerGameState;
-
-		private ScienceExperimentSceneElements elements;
-
-		private NetPlayer[] allPlayersInRoom;
-
-		private ScienceExperimentManager.RotatingRingState[] rotatingRings = new ScienceExperimentManager.RotatingRingState[0];
-
-		private const int maxPlayerCount = 10;
-
-		private ScienceExperimentManager.PlayerGameState[] inGamePlayerStates = new ScienceExperimentManager.PlayerGameState[10];
-
-		private int inGamePlayerCount;
-
-		private int lastWinnerId = -1;
-
-		private string lastWinnerName = "None";
-
-		private List<ScienceExperimentManager.PlayerGameState> sortedPlayerStates = new List<ScienceExperimentManager.PlayerGameState>();
-
-		private ScienceExperimentManager.SyncData reliableState;
-
-		private ScienceExperimentManager.RiseSpeed nextRoundRiseSpeed = ScienceExperimentManager.RiseSpeed.Slow;
-
-		private float riseTime = 120f;
-
-		private float riseProgress;
-
-		private float riseProgressLinear;
-
-		private float localLagRiseProgressOffset;
-
-		private double lastInfrequentUpdateTime = -10.0;
-
-		private string mentoProjectileTag = "ScienceCandyProjectile";
-
-		private double currentTime;
-
-		private double prevTime;
-
-		private float ringRotationProgress = 1f;
-
-		private float drainBlockerSlideSpeed;
-
-		private float[] riseTimeLookup;
-
-		[Header("Scene References")]
-		public Transform ringParent;
-
-		public Transform liquidMeshTransform;
-
-		public Transform liquidSurfacePlane;
-
-		public Transform entryWayLiquidMeshTransform;
-
-		public Transform entryWayBridgeQuadTransform;
-
-		public Transform drainBlocker;
-
-		public Transform drainBlockerClosedPosition;
-
-		public Transform drainBlockerOpenPosition;
-
-		public WaterVolume liquidVolume;
-
-		public WaterVolume entryLiquidVolume;
-
-		public WaterVolume bottleLiquidVolume;
-
-		public WaterVolume refreshWaterVolume;
-
-		public CompositeTriggerEvents gameAreaTriggerNotifier;
-
-		public SlingshotProjectileHitNotifier sodaWaterProjectileTriggerNotifier;
-
-		public AudioSource eruptionAudioSource;
-
-		public AudioSource drainAudioSource;
-
-		public AudioSource rotatingRingsAudioSource;
-
-		private ParticleSystem.EmissionModule fizzParticleEmission;
-
-		private bool hasPlayedEruptionEffects;
-
-		private bool hasPlayedDrainEffects;
-
-		[SerializeField]
-		private float debugRotateRingsTime = 10f;
-
-		private Coroutine rotateRingsCoroutine;
-
-		private bool debugRandomizingRings;
-
-		[WeaverGenerated]
-		[DefaultForProperty("Data", 0, 76)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private ScienceExperimentManager.ScienceManagerData _Data;
-
-		public enum RisingLiquidState
-		{
-			Drained,
-			Erupting,
-			Rising,
-			Full,
-			PreDrainDelay,
-			Draining
-		}
-
-		private enum RiseSpeed
-		{
-			Fast,
-			Medium,
-			Slow,
-			ExtraSlow
-		}
-
-		private enum TagBehavior
-		{
-			None,
-			Infect,
-			Revive
-		}
-
-		[Serializable]
-		public struct PlayerGameState
-		{
-			public int playerId;
-
-			public bool touchedLiquid;
-
-			public float touchedLiquidAtProgress;
-		}
-
-		private struct SyncData
-		{
-			public ScienceExperimentManager.RisingLiquidState state;
-
-			public double stateStartTime;
-
-			public float stateStartLiquidProgressLinear;
-
-			public double activationProgress;
-		}
-
-		private struct RotatingRingState
-		{
-			public Transform ringTransform;
-
-			public float initialAngle;
-
-			public float resultingAngle;
-		}
-
-		[Serializable]
-		private struct DisableByLiquidData
-		{
-			public Transform target;
-
-			public float heightOffset;
-		}
-
-		[NetworkStructWeaved(76)]
-		[StructLayout(LayoutKind.Explicit, Size = 304)]
-		private struct ScienceManagerData : INetworkStruct
-		{
-			[Networked]
-			[Capacity(10)]
-			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]
-			[NetworkedWeaved(10, 10)]
-			public NetworkArray<int> playerIdArray
+			if (inGamePlayerStates[i].playerId == playerId)
 			{
-				get
+				PlayerGameState playerGameState = inGamePlayerStates[i];
+				playerGameState.touchedLiquid = false;
+				playerGameState.touchedLiquidAtProgress = -1f;
+				inGamePlayerStates[i] = playerGameState;
+				break;
+			}
+		}
+	}
+
+	[PunRPC]
+	private void ValidateLocalPlayerWaterBalloonHitRPC(int playerId, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "ValidateLocalPlayerWaterBalloonHitRPC");
+		if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			ValidateLocalPlayerWaterBalloonHit(playerId);
+		}
+	}
+
+	[Rpc(InvokeLocal = false)]
+	private unsafe void RPC_ValidateLocalPlayerWaterBalloonHit(int playerId, RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+			MonkeAgent.IncrementRPCCall(new PhotonMessageInfoWrapped(info), "ValidateLocalPlayerWaterBalloonHitRPC");
+			if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				ValidateLocalPlayerWaterBalloonHit(playerId);
+			}
+			return;
+		}
+		NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+		if (base.Runner.Stage == SimulationStages.Resimulate)
+		{
+			return;
+		}
+		int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+		if ((localAuthorityMask & 7) == 0)
+		{
+			NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_ValidateLocalPlayerWaterBalloonHit(System.Int32,Fusion.RpcInfo)", base.Object, 7);
+			return;
+		}
+		int num = 8;
+		num += 4;
+		if (!SimulationMessage.CanAllocateUserPayload(num))
+		{
+			NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_ValidateLocalPlayerWaterBalloonHit(System.Int32,Fusion.RpcInfo)", num);
+		}
+		else if (base.Runner.HasAnyActiveConnections())
+		{
+			SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+			byte* ptr2 = (byte*)ptr + 28;
+			*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 3);
+			int num2 = 8;
+			*(int*)(ptr2 + num2) = playerId;
+			num2 += 4;
+			ptr->Offset = num2 * 8;
+			base.Runner.SendRpc(ptr);
+		}
+	}
+
+	private void ValidateLocalPlayerWaterBalloonHit(int playerId)
+	{
+		if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber && !GTPlayer.Instance.InWater)
+		{
+			if (base.IsMine)
+			{
+				PlayerHitByWaterBalloon(NetworkSystem.Instance.LocalPlayer.ActorNumber);
+				return;
+			}
+			base.GetView.RPC("PlayerHitByWaterBalloonRPC", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
+		}
+	}
+
+	[PunRPC]
+	private void PlayerHitByWaterBalloonRPC(int playerId, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PlayerHitByWaterBalloonRPC");
+		PlayerHitByWaterBalloon(playerId);
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	private unsafe void RPC_PlayerHitByWaterBalloon(int playerId, RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
+		{
+			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+			if (base.Runner.Stage == SimulationStages.Resimulate)
+			{
+				return;
+			}
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
+			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerHitByWaterBalloon(System.Int32,Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			if ((localAuthorityMask & 1) != 1)
+			{
+				int num = 8;
+				num += 4;
+				if (!SimulationMessage.CanAllocateUserPayload(num))
 				{
-					return new NetworkArray<int>(Native.ReferenceToPointer<FixedStorage@10>(ref this._playerIdArray), 10, ElementReaderWriterInt32.GetInstance());
+					NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerHitByWaterBalloon(System.Int32,Fusion.RpcInfo)", num);
+					return;
+				}
+				if (base.Runner.HasAnyActiveConnections())
+				{
+					SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+					byte* ptr2 = (byte*)ptr + 28;
+					*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 4);
+					int num2 = 8;
+					*(int*)(ptr2 + num2) = playerId;
+					num2 += 4;
+					ptr->Offset = num2 * 8;
+					base.Runner.SendRpc(ptr);
+				}
+				if ((localAuthorityMask & 1) == 0)
+				{
+					return;
 				}
 			}
-
-			[Networked]
-			[Capacity(10)]
-			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterBoolean))]
-			[NetworkedWeaved(20, 10)]
-			public NetworkArray<bool> touchedLiquidArray
-			{
-				get
-				{
-					return new NetworkArray<bool>(Native.ReferenceToPointer<FixedStorage@10>(ref this._touchedLiquidArray), 10, ElementReaderWriterBoolean.GetInstance());
-				}
-			}
-
-			[Networked]
-			[Capacity(10)]
-			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterSingle))]
-			[NetworkedWeaved(30, 10)]
-			public NetworkArray<float> touchedLiquidAtProgressArray
-			{
-				get
-				{
-					return new NetworkArray<float>(Native.ReferenceToPointer<FixedStorage@10>(ref this._touchedLiquidAtProgressArray), 10, ElementReaderWriterSingle.GetInstance());
-				}
-			}
-
-			[Networked]
-			[Capacity(5)]
-			[NetworkedWeavedLinkedList(5, 1, typeof(ElementReaderWriterSingle))]
-			[NetworkedWeaved(40, 18)]
-			public NetworkLinkedList<float> initialAngleArray
-			{
-				get
-				{
-					return new NetworkLinkedList<float>(Native.ReferenceToPointer<FixedStorage@18>(ref this._initialAngleArray), 5, ElementReaderWriterSingle.GetInstance());
-				}
-			}
-
-			[Networked]
-			[Capacity(5)]
-			[NetworkedWeavedLinkedList(5, 1, typeof(ElementReaderWriterSingle))]
-			[NetworkedWeaved(58, 18)]
-			public NetworkLinkedList<float> resultingAngleArray
-			{
-				get
-				{
-					return new NetworkLinkedList<float>(Native.ReferenceToPointer<FixedStorage@18>(ref this._resultingAngleArray), 5, ElementReaderWriterSingle.GetInstance());
-				}
-			}
-
-			public ScienceManagerData(int reliableState, double stateStartTime, float stateStartLiquidProgressLinear, double activationProgress, int nextRoundRiseSpeed, float riseTime, int lastWinnerId, int inGamePlayerCount, ScienceExperimentManager.PlayerGameState[] playerStates, ScienceExperimentManager.RotatingRingState[] rings)
-			{
-				this.reliableState = reliableState;
-				this.stateStartTime = stateStartTime;
-				this.stateStartLiquidProgressLinear = stateStartLiquidProgressLinear;
-				this.activationProgress = activationProgress;
-				this.nextRoundRiseSpeed = nextRoundRiseSpeed;
-				this.riseTime = riseTime;
-				this.lastWinnerId = lastWinnerId;
-				this.inGamePlayerCount = inGamePlayerCount;
-				foreach (ScienceExperimentManager.RotatingRingState rotatingRingState in rings)
-				{
-					this.initialAngleArray.Add(rotatingRingState.initialAngle);
-					this.resultingAngleArray.Add(rotatingRingState.resultingAngle);
-				}
-				int[] array = new int[10];
-				bool[] array2 = new bool[10];
-				float[] array3 = new float[10];
-				for (int j = 0; j < 10; j++)
-				{
-					array[j] = playerStates[j].playerId;
-					array2[j] = playerStates[j].touchedLiquid;
-					array3[j] = playerStates[j].touchedLiquidAtProgress;
-				}
-				this.playerIdArray.CopyFrom(array, 0, array.Length);
-				this.touchedLiquidArray.CopyFrom(array2, 0, array2.Length);
-				this.touchedLiquidAtProgressArray.CopyFrom(array3, 0, array3.Length);
-			}
-
-			[FieldOffset(0)]
-			public int reliableState;
-
-			[FieldOffset(4)]
-			public double stateStartTime;
-
-			[FieldOffset(12)]
-			public float stateStartLiquidProgressLinear;
-
-			[FieldOffset(16)]
-			public double activationProgress;
-
-			[FieldOffset(24)]
-			public int nextRoundRiseSpeed;
-
-			[FieldOffset(28)]
-			public float riseTime;
-
-			[FieldOffset(32)]
-			public int lastWinnerId;
-
-			[FieldOffset(36)]
-			public int inGamePlayerCount;
-
-			[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate@ElementReaderWriterInt32), 10, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(40)]
-			private FixedStorage@10 _playerIdArray;
-
-			[FixedBufferProperty(typeof(NetworkArray<bool>), typeof(UnityArraySurrogate@ElementReaderWriterBoolean), 10, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(80)]
-			private FixedStorage@10 _touchedLiquidArray;
-
-			[FixedBufferProperty(typeof(NetworkArray<float>), typeof(UnityArraySurrogate@ElementReaderWriterSingle), 10, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(120)]
-			private FixedStorage@10 _touchedLiquidAtProgressArray;
-
-			[FixedBufferProperty(typeof(NetworkLinkedList<float>), typeof(UnityLinkedListSurrogate@ElementReaderWriterSingle), 5, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(160)]
-			private FixedStorage@18 _initialAngleArray;
-
-			[FixedBufferProperty(typeof(NetworkLinkedList<float>), typeof(UnityLinkedListSurrogate@ElementReaderWriterSingle), 5, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(232)]
-			private FixedStorage@18 _resultingAngleArray;
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
+		MonkeAgent.IncrementRPCCall(new PhotonMessageInfoWrapped(info), "PlayerHitByWaterBalloonRPC");
+		PlayerHitByWaterBalloon(playerId);
+	}
+
+	private void PlayerHitByWaterBalloon(int playerId)
+	{
+		if (!base.IsMine)
+		{
+			return;
+		}
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == playerId)
+			{
+				PlayerGameState playerGameState = inGamePlayerStates[i];
+				playerGameState.touchedLiquid = false;
+				playerGameState.touchedLiquidAtProgress = -1f;
+				inGamePlayerStates[i] = playerGameState;
+				break;
+			}
+		}
+	}
+
+	public void OnPlayerLeftRoom(NetPlayer otherPlayer)
+	{
+		PlayerExitedGameArea(otherPlayer.ActorNumber);
+	}
+
+	public void OnLeftRoom()
+	{
+		inGamePlayerCount = 0;
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (inGamePlayerStates[i].playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				inGamePlayerStates[0] = inGamePlayerStates[i];
+				inGamePlayerCount = 1;
+				break;
+			}
+		}
+	}
+
+	protected override void OnOwnerSwitched(NetPlayer newOwningPlayer)
+	{
+		base.OnOwnerSwitched(newOwningPlayer);
+		if (!NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		for (int i = 0; i < inGamePlayerCount; i++)
+		{
+			if (!Utils.PlayerInRoom(inGamePlayerStates[i].playerId))
+			{
+				inGamePlayerStates[i] = inGamePlayerStates[inGamePlayerCount - 1];
+				inGamePlayerCount--;
+				i--;
+			}
+		}
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
+	}
+
+	[NetworkRpcWeavedInvoker(1, 7, 1)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_PlayerTouchedLava_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((ScienceExperimentManager)behaviour).RPC_PlayerTouchedLava(info);
+	}
+
+	[NetworkRpcWeavedInvoker(2, 7, 1)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_PlayerTouchedRefreshWater_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((ScienceExperimentManager)behaviour).RPC_PlayerTouchedRefreshWater(info);
+	}
+
+	[NetworkRpcWeavedInvoker(3, 7, 7)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_ValidateLocalPlayerWaterBalloonHit_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		int num2 = *(int*)(ptr + num);
+		num += 4;
+		int playerId = num2;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((ScienceExperimentManager)behaviour).RPC_ValidateLocalPlayerWaterBalloonHit(playerId, info);
+	}
+
+	[NetworkRpcWeavedInvoker(4, 7, 1)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_PlayerHitByWaterBalloon_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		int num2 = *(int*)(ptr + num);
+		num += 4;
+		int playerId = num2;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((ScienceExperimentManager)behaviour).RPC_PlayerHitByWaterBalloon(playerId, info);
 	}
 }

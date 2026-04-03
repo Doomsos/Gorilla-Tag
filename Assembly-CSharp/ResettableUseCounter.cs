@@ -1,67 +1,43 @@
-﻿using System;
+using System;
 
-public struct ResettableUseCounter
+public struct ResettableUseCounter(int maxRegularUses, int maxSuperchargeUses, Action<bool> onReadyChanged = null)
 {
-	public ResettableUseCounter(int maxRegularUses, int maxSuperchargeUses, Action<bool> onReadyChanged = null)
-	{
-		this.maxRegularUses = maxRegularUses;
-		this.maxSuperchargeUses = maxSuperchargeUses;
-		this.usesRemaining = maxRegularUses;
-		this.onReadyChanged = onReadyChanged;
-	}
+	private int usesRemaining = maxRegularUses;
 
-	public bool IsReady
-	{
-		get
-		{
-			return this.usesRemaining > 0;
-		}
-	}
+	private int maxRegularUses = maxRegularUses;
+
+	private int maxSuperchargeUses = maxSuperchargeUses;
+
+	private Action<bool> onReadyChanged = onReadyChanged;
+
+	public bool IsReady => usesRemaining > 0;
 
 	public bool TryUse()
 	{
-		if (!this.IsReady)
+		if (!IsReady)
 		{
 			return false;
 		}
-		SuperInfectionManager activeSuperInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
-		bool flag = activeSuperInfectionManager != null && activeSuperInfectionManager.IsSupercharged;
-		if (this.usesRemaining > this.maxRegularUses && !flag)
+		bool flag = SuperInfectionManager.activeSuperInfectionManager?.IsSupercharged ?? false;
+		if (usesRemaining > maxRegularUses && !flag)
 		{
-			this.usesRemaining = this.maxRegularUses;
+			usesRemaining = maxRegularUses;
 		}
-		this.usesRemaining--;
-		if (!this.IsReady)
+		usesRemaining--;
+		if (!IsReady)
 		{
-			Action<bool> action = this.onReadyChanged;
-			if (action != null)
-			{
-				action(false);
-			}
+			onReadyChanged?.Invoke(obj: false);
 		}
 		return true;
 	}
 
 	public void Reset()
 	{
-		bool isReady = this.IsReady;
-		this.usesRemaining = this.maxSuperchargeUses;
+		bool isReady = IsReady;
+		usesRemaining = maxSuperchargeUses;
 		if (!isReady)
 		{
-			Action<bool> action = this.onReadyChanged;
-			if (action == null)
-			{
-				return;
-			}
-			action(true);
+			onReadyChanged?.Invoke(obj: true);
 		}
 	}
-
-	private int usesRemaining;
-
-	private int maxRegularUses;
-
-	private int maxSuperchargeUses;
-
-	private Action<bool> onReadyChanged;
 }

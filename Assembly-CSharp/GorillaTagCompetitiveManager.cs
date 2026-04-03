@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using GorillaGameModes;
@@ -8,22 +8,44 @@ using UnityEngine;
 
 public class GorillaTagCompetitiveManager : GorillaTagManager
 {
-	public float GetRoundDuration()
+	public enum GameState
 	{
-		return this.roundDuration;
+		None,
+		WaitingForPlayers,
+		StartingCountdown,
+		Playing,
+		PostRound
 	}
 
-	public GorillaTagCompetitiveManager.GameState GetCurrentGameState()
-	{
-		return this.gameState;
-	}
+	[SerializeField]
+	private float startCountdownDuration = 3f;
 
-	public bool IsMatchActive()
-	{
-		return this.gameState == GorillaTagCompetitiveManager.GameState.Playing;
-	}
+	[SerializeField]
+	private float roundDuration = 300f;
 
-	public static event Action<GorillaTagCompetitiveManager.GameState> onStateChanged;
+	[SerializeField]
+	private float postRoundDuration = 15f;
+
+	[SerializeField]
+	private float waitingForPlayerPingRoomDuration = 60f;
+
+	private GameState gameState;
+
+	private float stateRemainingTime;
+
+	private float lastActiveTime;
+
+	private float lastWaitingForPlayerPingRoomTime;
+
+	private RankedMultiplayerScore scoring;
+
+	private List<GorillaTagCompetitiveForcedLeaveRoomVolume> forceLeaveRoomVolumes = new List<GorillaTagCompetitiveForcedLeaveRoomVolume>();
+
+	private static List<GorillaTagCompetitiveScoreboard> scoreboards = new List<GorillaTagCompetitiveScoreboard>();
+
+	public bool ShowDebugPing { get; set; }
+
+	public static event Action<GameState> onStateChanged;
 
 	public static event Action<float> onUpdateRemainingTime;
 
@@ -37,31 +59,45 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	public static event Action<NetPlayer, NetPlayer> onTagOccurred;
 
+	public float GetRoundDuration()
+	{
+		return roundDuration;
+	}
+
+	public GameState GetCurrentGameState()
+	{
+		return gameState;
+	}
+
+	public bool IsMatchActive()
+	{
+		return gameState == GameState.Playing;
+	}
+
 	public static void RegisterScoreboard(GorillaTagCompetitiveScoreboard scoreboard)
 	{
-		GorillaTagCompetitiveManager.scoreboards.Add(scoreboard);
+		scoreboards.Add(scoreboard);
 	}
 
 	public static void DeregisterScoreboard(GorillaTagCompetitiveScoreboard scoreboard)
 	{
-		GorillaTagCompetitiveManager.scoreboards.Remove(scoreboard);
+		scoreboards.Remove(scoreboard);
 	}
 
 	public override void StartPlaying()
 	{
 		base.StartPlaying();
-		this.scoring = base.GetComponentInChildren<RankedMultiplayerScore>();
-		if (this.scoring != null)
+		scoring = GetComponentInChildren<RankedMultiplayerScore>();
+		if (scoring != null)
 		{
-			this.scoring.Initialize();
+			scoring.Initialize();
 		}
-		VRRig.LocalRig.EnableRankedTimerWatch(true);
-		for (int i = 0; i < this.currentNetPlayerArray.Length; i++)
+		VRRig.LocalRig.EnableRankedTimerWatch(on: true);
+		for (int i = 0; i < currentNetPlayerArray.Length; i++)
 		{
-			RigContainer rigContainer;
-			if (VRRigCache.Instance.TryGetVrrig(this.currentNetPlayerArray[i], out rigContainer))
+			if (VRRigCache.Instance.TryGetVrrig(currentNetPlayerArray[i], out var playerRig))
 			{
-				rigContainer.Rig.EnableRankedTimerWatch(true);
+				playerRig.Rig.EnableRankedTimerWatch(on: true);
 			}
 		}
 	}
@@ -69,22 +105,22 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	public override void StopPlaying()
 	{
 		base.StopPlaying();
-		VRRig.LocalRig.EnableRankedTimerWatch(false);
-		if (this.scoring != null)
+		VRRig.LocalRig.EnableRankedTimerWatch(on: false);
+		if (scoring != null)
 		{
-			this.scoring.ResetMatch();
-			this.scoring.Unsubscribe();
+			scoring.ResetMatch();
+			scoring.Unsubscribe();
 		}
-		for (int i = 0; i < GorillaTagCompetitiveManager.scoreboards.Count; i++)
+		for (int i = 0; i < scoreboards.Count; i++)
 		{
-			GorillaTagCompetitiveManager.scoreboards[i].UpdateScores(this.gameState, this.lastActiveTime, null, this.scoring.PlayerRankedTiers, this.scoring.ProjectedEloDeltas, this.currentInfected, this.scoring.Progression);
+			scoreboards[i].UpdateScores(gameState, lastActiveTime, null, scoring.PlayerRankedTiers, scoring.ProjectedEloDeltas, currentInfected, scoring.Progression);
 		}
 	}
 
 	public override void ResetGame()
 	{
 		base.ResetGame();
-		this.gameState = GorillaTagCompetitiveManager.GameState.None;
+		gameState = GameState.None;
 	}
 
 	internal override void NetworkLinkSetup(GameModeSerializer netSerializer)
@@ -95,33 +131,29 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	public override void Tick()
 	{
-		if (this.stateRemainingTime > 0f)
+		if (stateRemainingTime > 0f)
 		{
-			this.stateRemainingTime -= Time.deltaTime;
-			if (this.stateRemainingTime <= 0f)
+			stateRemainingTime -= Time.deltaTime;
+			if (stateRemainingTime <= 0f)
 			{
-				this.UpdateState();
+				UpdateState();
 			}
-			Action<float> action = GorillaTagCompetitiveManager.onUpdateRemainingTime;
-			if (action != null)
-			{
-				action(this.stateRemainingTime);
-			}
+			GorillaTagCompetitiveManager.onUpdateRemainingTime?.Invoke(stateRemainingTime);
 		}
 		base.Tick();
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			if (Time.time - this.lastWaitingForPlayerPingRoomTime > this.waitingForPlayerPingRoomDuration)
+			if (Time.time - lastWaitingForPlayerPingRoomTime > waitingForPlayerPingRoomDuration)
 			{
-				this.PingRoom();
-				this.lastWaitingForPlayerPingRoomTime = Time.time;
+				PingRoom();
+				lastWaitingForPlayerPingRoomTime = Time.time;
 			}
-			if (Time.time - this.lastWaitingForPlayerPingRoomTime > 3f)
+			if (Time.time - lastWaitingForPlayerPingRoomTime > 3f)
 			{
-				this.ShowDebugPing = false;
+				ShowDebugPing = false;
 			}
 		}
-		this.UpdateScoreboards();
+		UpdateScoreboards();
 	}
 
 	public override void OnMasterClientSwitched(Player newMasterClient)
@@ -129,8 +161,8 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		base.OnMasterClientSwitched(newMasterClient);
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			this.PingRoom();
-			this.lastWaitingForPlayerPingRoomTime = Time.time;
+			PingRoom();
+			lastWaitingForPlayerPingRoomTime = Time.time;
 		}
 	}
 
@@ -139,30 +171,26 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		base.OnPlayerEnteredRoom(newPlayer);
 		if (newPlayer == NetworkSystem.Instance.LocalPlayer)
 		{
-			using (List<GorillaTagCompetitiveForcedLeaveRoomVolume>.Enumerator enumerator = this.forceLeaveRoomVolumes.GetEnumerator())
+			foreach (GorillaTagCompetitiveForcedLeaveRoomVolume forceLeaveRoomVolume in forceLeaveRoomVolumes)
 			{
-				while (enumerator.MoveNext())
+				if (forceLeaveRoomVolume.ContainsPoint(VRRig.LocalRig.transform.position))
 				{
-					if (enumerator.Current.ContainsPoint(VRRig.LocalRig.transform.position))
-					{
-						NetworkSystem.Instance.ReturnToSinglePlayer();
-						return;
-					}
+					NetworkSystem.Instance.ReturnToSinglePlayer();
+					return;
 				}
 			}
-			object obj;
+			object value;
 			if (NetworkSystem.Instance.IsMasterClient)
 			{
 				GorillaTagCompetitiveServerApi.Instance.RequestCreateMatchId(delegate(string id)
 				{
-					Hashtable hashtable = new Hashtable();
-					hashtable.Add("matchId", id);
-					PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable, null, null);
+					Hashtable propertiesToSet = new Hashtable { { "matchId", id } };
+					PhotonNetwork.CurrentRoom.SetCustomProperties(propertiesToSet);
 				});
 			}
-			else if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
+			else if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out value))
 			{
-				GorillaTagCompetitiveServerApi.Instance.RequestValidateMatchJoin((string)obj, delegate(bool valid)
+				GorillaTagCompetitiveServerApi.Instance.RequestValidateMatchJoin((string)value, delegate(bool valid)
 				{
 					if (!valid)
 					{
@@ -172,46 +200,44 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 				});
 			}
 		}
-		Action<NetPlayer> action = GorillaTagCompetitiveManager.onPlayerJoined;
-		if (action != null)
+		GorillaTagCompetitiveManager.onPlayerJoined?.Invoke(newPlayer);
+		if (VRRigCache.Instance.TryGetVrrig(newPlayer, out var playerRig))
 		{
-			action(newPlayer);
-		}
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(newPlayer, out rigContainer))
-		{
-			rigContainer.Rig.EnableRankedTimerWatch(true);
+			playerRig.Rig.EnableRankedTimerWatch(on: true);
 		}
 	}
 
 	public override void OnPlayerLeftRoom(NetPlayer otherPlayer)
 	{
 		base.OnPlayerLeftRoom(otherPlayer);
-		Action<NetPlayer> action = GorillaTagCompetitiveManager.onPlayerLeft;
-		if (action != null)
+		GorillaTagCompetitiveManager.onPlayerLeft?.Invoke(otherPlayer);
+		if (VRRigCache.Instance.TryGetVrrig(otherPlayer, out var playerRig))
 		{
-			action(otherPlayer);
-		}
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(otherPlayer, out rigContainer))
-		{
-			rigContainer.Rig.EnableRankedTimerWatch(false);
+			playerRig.Rig.EnableRankedTimerWatch(on: false);
 		}
 	}
 
 	public RankedMultiplayerScore GetScoring()
 	{
-		return this.scoring;
+		return scoring;
 	}
 
 	public override bool LocalCanTag(NetPlayer myPlayer, NetPlayer otherPlayer)
 	{
-		return base.LocalCanTag(myPlayer, otherPlayer) && this.gameState != GorillaTagCompetitiveManager.GameState.StartingCountdown && this.gameState != GorillaTagCompetitiveManager.GameState.PostRound;
+		if (base.LocalCanTag(myPlayer, otherPlayer) && gameState != GameState.StartingCountdown)
+		{
+			return gameState != GameState.PostRound;
+		}
+		return false;
 	}
 
 	public override bool LocalIsTagged(NetPlayer player)
 	{
-		return this.gameState != GorillaTagCompetitiveManager.GameState.StartingCountdown && this.gameState != GorillaTagCompetitiveManager.GameState.PostRound && base.LocalIsTagged(player);
+		if (gameState == GameState.StartingCountdown || gameState == GameState.PostRound)
+		{
+			return false;
+		}
+		return base.LocalIsTagged(player);
 	}
 
 	public override void ReportTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
@@ -231,8 +257,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	public override string GameModeNameRoomLabel()
 	{
-		string result;
-		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_COMP_INF_ROOM_LABEL", out result, "(COMP-INFECT GAME)"))
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_COMP_INF_ROOM_LABEL", out var result, "(COMP-INFECT GAME)"))
 		{
 			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_COMP_INF_ROOM_LABEL]");
 		}
@@ -246,94 +271,63 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	public override void UpdateInfectionState()
 	{
-		if (!NetworkSystem.Instance.IsMasterClient)
+		if (NetworkSystem.Instance.IsMasterClient && gameState == GameState.Playing && IsEveryoneTagged())
 		{
-			return;
-		}
-		if (this.gameState == GorillaTagCompetitiveManager.GameState.Playing && this.IsEveryoneTagged())
-		{
-			this.HandleInfectionRoundComplete();
+			HandleInfectionRoundComplete();
 		}
 	}
 
 	public override void HandleTagBroadcast(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
 	{
-		if (!this.currentInfected.Contains(taggingPlayer))
+		if (!currentInfected.Contains(taggingPlayer) || !VRRigCache.Instance.TryGetVrrig(taggedPlayer, out var playerRig) || !VRRigCache.Instance.TryGetVrrig(taggingPlayer, out var playerRig2))
 		{
 			return;
 		}
-		RigContainer rigContainer;
-		RigContainer rigContainer2;
-		if (VRRigCache.Instance.TryGetVrrig(taggedPlayer, out rigContainer) && VRRigCache.Instance.TryGetVrrig(taggingPlayer, out rigContainer2))
+		VRRig rig = playerRig2.Rig;
+		VRRig rig2 = playerRig.Rig;
+		if (rig.IsPositionInRange(rig2.transform.position, 6f) || rig.CheckTagDistanceRollback(rig2, 6f, 0.2f))
 		{
-			VRRig rig = rigContainer2.Rig;
-			VRRig rig2 = rigContainer.Rig;
-			if (!rig.IsPositionInRange(rig2.transform.position, 6f) && !rig.CheckTagDistanceRollback(rig2, 6f, 0.2f))
+			if (!NetworkSystem.Instance.IsMasterClient && gameState == GameState.Playing && !currentInfected.Contains(taggedPlayer))
 			{
-				return;
+				AddLastTagged(taggedPlayer, taggingPlayer);
+				currentInfected.Add(taggedPlayer);
 			}
-			if (!NetworkSystem.Instance.IsMasterClient && this.gameState == GorillaTagCompetitiveManager.GameState.Playing && !this.currentInfected.Contains(taggedPlayer))
-			{
-				base.AddLastTagged(taggedPlayer, taggingPlayer);
-				this.currentInfected.Add(taggedPlayer);
-			}
-			Action<NetPlayer, NetPlayer> action = GorillaTagCompetitiveManager.onTagOccurred;
-			if (action == null)
-			{
-				return;
-			}
-			action(taggedPlayer, taggingPlayer);
+			GorillaTagCompetitiveManager.onTagOccurred?.Invoke(taggedPlayer, taggingPlayer);
 		}
 	}
 
-	private void SetState(GorillaTagCompetitiveManager.GameState newState)
+	private void SetState(GameState newState)
 	{
 		if (newState != this.gameState)
 		{
-			GorillaTagCompetitiveManager.GameState gameState = this.gameState;
+			GameState gameState = this.gameState;
 			this.gameState = newState;
 			switch (this.gameState)
 			{
-			case GorillaTagCompetitiveManager.GameState.WaitingForPlayers:
-				this.EnterStateWaitingForPlayers();
+			case GameState.WaitingForPlayers:
+				EnterStateWaitingForPlayers();
 				break;
-			case GorillaTagCompetitiveManager.GameState.StartingCountdown:
-				this.EnterStateStartingCountdown();
+			case GameState.StartingCountdown:
+				EnterStateStartingCountdown();
 				break;
-			case GorillaTagCompetitiveManager.GameState.Playing:
-				this.EnterStatePlaying();
+			case GameState.Playing:
+				EnterStatePlaying();
 				break;
-			case GorillaTagCompetitiveManager.GameState.PostRound:
-				this.EnterStatePostRound();
+			case GameState.PostRound:
+				EnterStatePostRound();
 				break;
 			}
-			Action<GorillaTagCompetitiveManager.GameState> action = GorillaTagCompetitiveManager.onStateChanged;
-			if (action != null)
+			GorillaTagCompetitiveManager.onStateChanged?.Invoke(this.gameState);
+			GorillaTagCompetitiveManager.onUpdateRemainingTime?.Invoke(stateRemainingTime);
+			if (this.gameState == GameState.Playing)
 			{
-				action(this.gameState);
+				GorillaTagCompetitiveManager.onRoundStart?.Invoke();
 			}
-			Action<float> action2 = GorillaTagCompetitiveManager.onUpdateRemainingTime;
-			if (action2 != null)
+			else if (gameState == GameState.Playing)
 			{
-				action2(this.stateRemainingTime);
+				GorillaTagCompetitiveManager.onRoundEnd?.Invoke();
 			}
-			if (this.gameState == GorillaTagCompetitiveManager.GameState.Playing)
-			{
-				Action action3 = GorillaTagCompetitiveManager.onRoundStart;
-				if (action3 != null)
-				{
-					action3();
-				}
-			}
-			else if (gameState == GorillaTagCompetitiveManager.GameState.Playing)
-			{
-				Action action4 = GorillaTagCompetitiveManager.onRoundEnd;
-				if (action4 != null)
-				{
-					action4();
-				}
-			}
-			GTDev.Log<string>(string.Format("!! Competitive SetState: {0} at: {1}", this.gameState, Time.time), null);
+			GTDev.Log($"!! Competitive SetState: {this.gameState} at: {Time.time}");
 		}
 	}
 
@@ -341,8 +335,8 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			base.SetisCurrentlyTag(true);
-			base.ClearInfectionState();
+			SetisCurrentlyTag(newTagSetting: true);
+			ClearInfectionState();
 		}
 	}
 
@@ -350,15 +344,15 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			if (this.isCurrentlyTag)
+			if (isCurrentlyTag)
 			{
-				base.SetisCurrentlyTag(false);
+				SetisCurrentlyTag(newTagSetting: false);
 			}
-			this.currentIt = null;
-			base.ClearInfectionState();
+			currentIt = null;
+			ClearInfectionState();
 			GameMode.RefreshPlayers();
-			this.CheckForInfected();
-			this.stateRemainingTime = this.startCountdownDuration;
+			CheckForInfected();
+			stateRemainingTime = startCountdownDuration;
 		}
 	}
 
@@ -366,147 +360,144 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			if (this.isCurrentlyTag)
+			if (isCurrentlyTag)
 			{
-				base.SetisCurrentlyTag(false);
+				SetisCurrentlyTag(newTagSetting: false);
 			}
-			this.currentIt = null;
-			this.stateRemainingTime = this.roundDuration;
-			this.PingRoom();
+			currentIt = null;
+			stateRemainingTime = roundDuration;
+			PingRoom();
 		}
-		this.DisplayScoreboardPredictedResults(false);
+		DisplayScoreboardPredictedResults(bShow: false);
 	}
 
 	private void EnterStatePostRound()
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			if (this.isCurrentlyTag)
+			if (isCurrentlyTag)
 			{
-				base.SetisCurrentlyTag(false);
+				SetisCurrentlyTag(newTagSetting: false);
 			}
-			this.currentIt = null;
-			this.stateRemainingTime = this.postRoundDuration;
+			currentIt = null;
+			stateRemainingTime = postRoundDuration;
 		}
-		this.DisplayScoreboardPredictedResults(true);
+		DisplayScoreboardPredictedResults(bShow: true);
 	}
 
 	public override void UpdateState()
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			switch (this.gameState)
+			switch (gameState)
 			{
-			case GorillaTagCompetitiveManager.GameState.None:
-				this.SetState(GorillaTagCompetitiveManager.GameState.WaitingForPlayers);
-				return;
-			case GorillaTagCompetitiveManager.GameState.WaitingForPlayers:
-				this.UpdateStateWaitingForPlayers();
-				return;
-			case GorillaTagCompetitiveManager.GameState.StartingCountdown:
-				this.UpdateStateStartingCountdown();
-				return;
-			case GorillaTagCompetitiveManager.GameState.Playing:
-				this.UpdateStatePlaying();
-				return;
-			case GorillaTagCompetitiveManager.GameState.PostRound:
-				this.UpdateStatePostRound();
+			case GameState.None:
+				SetState(GameState.WaitingForPlayers);
 				break;
-			default:
-				return;
+			case GameState.WaitingForPlayers:
+				UpdateStateWaitingForPlayers();
+				break;
+			case GameState.StartingCountdown:
+				UpdateStateStartingCountdown();
+				break;
+			case GameState.Playing:
+				UpdateStatePlaying();
+				break;
+			case GameState.PostRound:
+				UpdateStatePostRound();
+				break;
 			}
 		}
 	}
 
 	private void UpdateStateWaitingForPlayers()
 	{
-		if (this.IsInfectionPossible())
+		if (IsInfectionPossible())
 		{
-			this.SetState(GorillaTagCompetitiveManager.GameState.StartingCountdown);
-			return;
+			SetState(GameState.StartingCountdown);
 		}
-		if (this.isCurrentlyTag && this.currentIt == null)
+		else if (isCurrentlyTag && currentIt == null)
 		{
-			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-			this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
+			int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			ChangeCurrentIt(GameMode.ParticipatingPlayers[index], withTagFreeze: false);
 		}
 	}
 
 	private void UpdateStateStartingCountdown()
 	{
-		if (!this.IsInfectionPossible())
+		if (!IsInfectionPossible())
 		{
-			this.SetState(GorillaTagCompetitiveManager.GameState.WaitingForPlayers);
-			return;
+			SetState(GameState.WaitingForPlayers);
 		}
-		if (this.stateRemainingTime < 0f)
+		else if (stateRemainingTime < 0f)
 		{
-			this.SetState(GorillaTagCompetitiveManager.GameState.Playing);
-			return;
+			SetState(GameState.Playing);
 		}
-		this.CheckForInfected();
+		else
+		{
+			CheckForInfected();
+		}
 	}
 
 	private void UpdateStatePlaying()
 	{
-		if (this.IsGameInvalid())
+		if (IsGameInvalid())
 		{
-			this.SetState(GorillaTagCompetitiveManager.GameState.WaitingForPlayers);
-			return;
+			SetState(GameState.WaitingForPlayers);
 		}
-		if (this.stateRemainingTime < 0f)
+		else if (stateRemainingTime < 0f)
 		{
-			this.HandleInfectionRoundComplete();
-			return;
+			HandleInfectionRoundComplete();
 		}
-		if (this.IsEveryoneTagged())
+		else if (IsEveryoneTagged())
 		{
-			this.HandleInfectionRoundComplete();
-			return;
+			HandleInfectionRoundComplete();
 		}
-		this.CheckForInfected();
+		else
+		{
+			CheckForInfected();
+		}
 	}
 
 	private void HandleInfectionRoundComplete()
 	{
-		foreach (NetPlayer player in GameMode.ParticipatingPlayers)
+		foreach (NetPlayer participatingPlayer in GameMode.ParticipatingPlayers)
 		{
-			RoomSystem.SendSoundEffectToPlayer(2, 0.25f, player, true);
+			RoomSystem.SendSoundEffectToPlayer(2, 0.25f, participatingPlayer, stopCurrentAudio: true);
 		}
 		PlayerGameEvents.GameModeCompleteRound();
 		GameMode.BroadcastRoundComplete();
-		this.lastTaggedActorNr.Clear();
-		this.waitingToStartNextInfectionGame = true;
-		this.timeInfectedGameEnded = (double)Time.time;
-		this.SetState(GorillaTagCompetitiveManager.GameState.PostRound);
+		lastTaggedActorNr.Clear();
+		waitingToStartNextInfectionGame = true;
+		timeInfectedGameEnded = Time.time;
+		SetState(GameState.PostRound);
 	}
 
 	private void UpdateStatePostRound()
 	{
-		if (this.stateRemainingTime < 0f)
+		if (stateRemainingTime < 0f)
 		{
-			if (this.IsInfectionPossible())
+			if (IsInfectionPossible())
 			{
-				this.SetState(GorillaTagCompetitiveManager.GameState.StartingCountdown);
-				return;
+				SetState(GameState.StartingCountdown);
 			}
-			this.SetState(GorillaTagCompetitiveManager.GameState.WaitingForPlayers);
+			else
+			{
+				SetState(GameState.WaitingForPlayers);
+			}
 		}
 	}
 
 	private void PingRoom()
 	{
-		object obj;
-		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
+		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out var value))
 		{
-			GorillaTagCompetitiveServerApi.Instance.RequestPingRoom((string)obj, delegate
+			GorillaTagCompetitiveServerApi.Instance.RequestPingRoom((string)value, delegate
 			{
-				this.ShowDebugPing = true;
+				ShowDebugPing = true;
 			});
 		}
 	}
-
-	public bool ShowDebugPing { get; set; }
 
 	private bool IsGameInvalid()
 	{
@@ -515,15 +506,15 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	private bool IsInfectionPossible()
 	{
-		return GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold;
+		return GameMode.ParticipatingPlayers.Count >= infectedModeThreshold;
 	}
 
 	private bool IsEveryoneTagged()
 	{
 		bool result = true;
-		foreach (NetPlayer item in GameMode.ParticipatingPlayers)
+		foreach (NetPlayer participatingPlayer in GameMode.ParticipatingPlayers)
 		{
-			if (!this.currentInfected.Contains(item))
+			if (!currentInfected.Contains(participatingPlayer))
 			{
 				result = false;
 				break;
@@ -534,95 +525,60 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 
 	private void CheckForInfected()
 	{
-		if (this.currentInfected.Count == 0)
+		if (currentInfected.Count == 0)
 		{
-			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-			this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index], true);
+			int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			AddInfectedPlayer(GameMode.ParticipatingPlayers[index]);
 		}
 	}
 
 	public override void OnSerializeWrite(PhotonStream stream, PhotonMessageInfo info)
 	{
 		base.OnSerializeWrite(stream, info);
-		stream.SendNext(this.gameState);
-		stream.SendNext(this.stateRemainingTime);
+		stream.SendNext(gameState);
+		stream.SendNext(stateRemainingTime);
 	}
 
 	public override void OnSerializeRead(PhotonStream stream, PhotonMessageInfo info)
 	{
 		NetworkSystem.Instance.GetPlayer(info.Sender);
 		base.OnSerializeRead(stream, info);
-		GorillaTagCompetitiveManager.GameState state = (GorillaTagCompetitiveManager.GameState)stream.ReceiveNext();
-		this.stateRemainingTime = (float)stream.ReceiveNext();
-		this.SetState(state);
+		GameState state = (GameState)stream.ReceiveNext();
+		stateRemainingTime = (float)stream.ReceiveNext();
+		SetState(state);
 	}
 
 	public void UpdateScoreboards()
 	{
-		List<RankedMultiplayerScore.PlayerScoreInRound> sortedScores = this.scoring.GetSortedScores();
-		if (this.gameState == GorillaTagCompetitiveManager.GameState.Playing)
+		List<RankedMultiplayerScore.PlayerScoreInRound> sortedScores = scoring.GetSortedScores();
+		if (gameState == GameState.Playing)
 		{
-			this.lastActiveTime = Time.time;
+			lastActiveTime = Time.time;
 		}
-		for (int i = 0; i < GorillaTagCompetitiveManager.scoreboards.Count; i++)
+		for (int i = 0; i < scoreboards.Count; i++)
 		{
-			GorillaTagCompetitiveManager.scoreboards[i].UpdateScores(this.gameState, this.lastActiveTime, sortedScores, this.scoring.PlayerRankedTiers, this.scoring.ProjectedEloDeltas, this.currentInfected, this.scoring.Progression);
+			scoreboards[i].UpdateScores(gameState, lastActiveTime, sortedScores, scoring.PlayerRankedTiers, scoring.ProjectedEloDeltas, currentInfected, scoring.Progression);
 		}
 	}
 
 	public void DisplayScoreboardPredictedResults(bool bShow)
 	{
-		for (int i = 0; i < GorillaTagCompetitiveManager.scoreboards.Count; i++)
+		for (int i = 0; i < scoreboards.Count; i++)
 		{
-			GorillaTagCompetitiveManager.scoreboards[i].DisplayPredictedResults(bShow);
+			scoreboards[i].DisplayPredictedResults(bShow);
 		}
 	}
 
 	public void RegisterForcedLeaveVolume(GorillaTagCompetitiveForcedLeaveRoomVolume volume)
 	{
-		if (!this.forceLeaveRoomVolumes.Contains(volume))
+		if (!forceLeaveRoomVolumes.Contains(volume))
 		{
-			this.forceLeaveRoomVolumes.Add(volume);
+			forceLeaveRoomVolumes.Add(volume);
 		}
 	}
 
 	public void UnregisterForcedLeaveVolume(GorillaTagCompetitiveForcedLeaveRoomVolume volume)
 	{
-		this.forceLeaveRoomVolumes.Remove(volume);
-	}
-
-	[SerializeField]
-	private float startCountdownDuration = 3f;
-
-	[SerializeField]
-	private float roundDuration = 300f;
-
-	[SerializeField]
-	private float postRoundDuration = 15f;
-
-	[SerializeField]
-	private float waitingForPlayerPingRoomDuration = 60f;
-
-	private GorillaTagCompetitiveManager.GameState gameState;
-
-	private float stateRemainingTime;
-
-	private float lastActiveTime;
-
-	private float lastWaitingForPlayerPingRoomTime;
-
-	private RankedMultiplayerScore scoring;
-
-	private List<GorillaTagCompetitiveForcedLeaveRoomVolume> forceLeaveRoomVolumes = new List<GorillaTagCompetitiveForcedLeaveRoomVolume>();
-
-	private static List<GorillaTagCompetitiveScoreboard> scoreboards = new List<GorillaTagCompetitiveScoreboard>();
-
-	public enum GameState
-	{
-		None,
-		WaitingForPlayers,
-		StartingCountdown,
-		Playing,
-		PostRound
+		forceLeaveRoomVolumes.Remove(volume);
 	}
 }

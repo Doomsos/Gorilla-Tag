@@ -1,103 +1,102 @@
-﻿using System;
+using System;
 using DefaultNamespace;
 using GorillaNetworking;
 using GorillaNetworking.Store;
 using UnityEngine;
 
-namespace CosmeticRoom
+namespace CosmeticRoom;
+
+public class EvolvingCosmeticKioskButtonSet : MonoBehaviour
 {
-	public class EvolvingCosmeticKioskButtonSet : MonoBehaviour
+	[SerializeField]
+	private DynamicCosmeticStand _cosmeticStand;
+
+	[SerializeField]
+	private GorillaPressableButton _plusButton;
+
+	[SerializeField]
+	private GorillaPressableButton _minusButton;
+
+	private EvolvingCosmeticKiosk _kiosk;
+
+	private EvolvingCosmetic _cosmetic;
+
+	private string _playfabId;
+
+	public void RegisterKiosk(EvolvingCosmeticKiosk kiosk)
 	{
-		public void RegisterKiosk(EvolvingCosmeticKiosk kiosk)
+		if (_kiosk != null)
 		{
-			if (this._kiosk != null)
+			throw new Exception("Attempted to double-register EvolvingCosmeticKiosk to a button.");
+		}
+		_kiosk = kiosk;
+	}
+
+	public void Reset()
+	{
+		_cosmeticStand.ClearCosmetics();
+		_playfabId = null;
+		_cosmetic = null;
+	}
+
+	public void SetCosmetic(string playfabId, EvolvingCosmetic evolvingCosmetic)
+	{
+		_cosmeticStand.SpawnItemOntoStand(playfabId);
+		_playfabId = playfabId;
+		_cosmetic = evolvingCosmetic;
+	}
+
+	public void GoForward()
+	{
+		if (!(_cosmetic == null) && _cosmetic.CanGoForward())
+		{
+			_cosmetic.GoForward();
+			RefreshOnPlayer();
+		}
+	}
+
+	public void GoBackward()
+	{
+		if (!(_cosmetic == null) && _cosmetic.CanGoBack())
+		{
+			_cosmetic.GoBack();
+			RefreshOnPlayer();
+		}
+	}
+
+	private void RefreshOnPlayer()
+	{
+		if (_kiosk == null || _playfabId == null || _cosmetic == null)
+		{
+			return;
+		}
+		bool flag = false;
+		CosmeticsController.CosmeticItem[] items = CosmeticsController.instance.currentWornSet.items;
+		for (int i = 0; i < items.Length; i++)
+		{
+			if (items[i].itemName != _playfabId)
 			{
-				throw new Exception("Attempted to double-register EvolvingCosmeticKiosk to a button.");
+				continue;
 			}
-			this._kiosk = kiosk;
-		}
-
-		public void Reset()
-		{
-			this._cosmeticStand.ClearCosmetics();
-			this._playfabId = null;
-			this._cosmetic = null;
-		}
-
-		public void SetCosmetic(string playfabId, EvolvingCosmetic evolvingCosmetic)
-		{
-			this._cosmeticStand.SpawnItemOntoStand(playfabId);
-			this._playfabId = playfabId;
-			this._cosmetic = evolvingCosmetic;
-		}
-
-		public void GoForward()
-		{
-			if (this._cosmetic == null || !this._cosmetic.CanGoForward())
+			CosmeticItemInstance cosmeticItemInstance = _kiosk.VRRig.cosmeticsObjectRegistry.Cosmetic(_playfabId);
+			if (cosmeticItemInstance == null)
 			{
-				return;
+				continue;
 			}
-			this._cosmetic.GoForward();
-			this.RefreshOnPlayer();
-		}
-
-		public void GoBackward()
-		{
-			if (this._cosmetic == null || !this._cosmetic.CanGoBack())
+			foreach (GameObject @object in cosmeticItemInstance.objects)
 			{
-				return;
-			}
-			this._cosmetic.GoBack();
-			this.RefreshOnPlayer();
-		}
-
-		private void RefreshOnPlayer()
-		{
-			if (this._kiosk == null || this._playfabId == null || this._cosmetic == null)
-			{
-				return;
-			}
-			bool flag = false;
-			CosmeticsController.CosmeticItem[] items = CosmeticsController.instance.currentWornSet.items;
-			for (int i = 0; i < items.Length; i++)
-			{
-				if (!(items[i].itemName != this._playfabId))
+				EvolvingCosmetic component = @object.GetComponent<EvolvingCosmetic>();
+				if ((object)component != null)
 				{
-					CosmeticItemInstance cosmeticItemInstance = this._kiosk.VRRig.cosmeticsObjectRegistry.Cosmetic(this._playfabId);
-					if (cosmeticItemInstance != null)
-					{
-						foreach (GameObject gameObject in cosmeticItemInstance.objects)
-						{
-							EvolvingCosmetic component = gameObject.GetComponent<EvolvingCosmetic>();
-							if (component != null)
-							{
-								component.MatchStage(this._cosmetic);
-								EvolvingCosmeticSaveData.Instance.SelectedIndices[component.PlayfabId] = component.SelectedObjectIndex;
-								flag = true;
-							}
-						}
-					}
+					component.MatchStage(_cosmetic);
+					EvolvingCosmeticSaveData.Instance.SelectedIndices[component.PlayfabId] = component.SelectedObjectIndex;
+					flag = true;
 				}
 			}
-			if (flag)
-			{
-				PlayerPrefs.SetString("EvolvingCosmeticSaveData", EvolvingCosmeticSaveData.Instance.Write());
-			}
 		}
-
-		[SerializeField]
-		private DynamicCosmeticStand _cosmeticStand;
-
-		[SerializeField]
-		private GorillaPressableButton _plusButton;
-
-		[SerializeField]
-		private GorillaPressableButton _minusButton;
-
-		private EvolvingCosmeticKiosk _kiosk;
-
-		private EvolvingCosmetic _cosmetic;
-
-		private string _playfabId;
+		if (flag)
+		{
+			PlayerPrefs.SetString("EvolvingCosmeticSaveData", EvolvingCosmeticSaveData.Instance.Write());
+		}
 	}
 }

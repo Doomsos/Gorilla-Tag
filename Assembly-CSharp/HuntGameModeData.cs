@@ -1,18 +1,23 @@
-﻿using System;
+using System;
 using Fusion;
 
 [NetworkBehaviourWeaved(43)]
 public class HuntGameModeData : FusionGameModeData
 {
+	[WeaverGenerated]
+	[DefaultForProperty("huntdata", 0, 43)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private HuntData _huntdata;
+
 	public override object Data
 	{
 		get
 		{
-			return this.huntdata;
+			return huntdata;
 		}
 		set
 		{
-			this.huntdata = (HuntData)value;
+			huntdata = (HuntData)value;
 		}
 	}
 
@@ -22,38 +27,33 @@ public class HuntGameModeData : FusionGameModeData
 	{
 		get
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing HuntGameModeData.huntdata. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			return *(HuntData*)(this.Ptr + 0);
+			return *(HuntData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
 		set
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing HuntGameModeData.huntdata. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			*(HuntData*)(this.Ptr + 0) = value;
+			*(HuntData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
 		}
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
-		this.huntdata = this._huntdata;
+		base.CopyBackingFieldsToState(P_0);
+		huntdata = _huntdata;
 	}
 
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
 		base.CopyStateToBackingFields();
-		this._huntdata = this.huntdata;
+		_huntdata = huntdata;
 	}
-
-	[WeaverGenerated]
-	[DefaultForProperty("huntdata", 0, 43)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private HuntData _huntdata;
 }

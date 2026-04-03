@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using GorillaNetworking;
 using Oculus.Platform;
@@ -8,180 +8,6 @@ using UnityEngine.Networking;
 
 public class DeepLinkHandler : MonoBehaviour
 {
-	public void Awake()
-	{
-		if (DeepLinkHandler.instance == null)
-		{
-			DeepLinkHandler.instance = this;
-			return;
-		}
-		if (DeepLinkHandler.instance != this)
-		{
-			Object.Destroy(this);
-		}
-	}
-
-	public static void Initialize(GameObject parent)
-	{
-		if (DeepLinkHandler.instance == null && parent != null)
-		{
-			parent.AddComponent<DeepLinkHandler>();
-		}
-		if (DeepLinkHandler.instance == null)
-		{
-			return;
-		}
-		DeepLinkHandler.instance.RefreshLaunchDetails();
-		if (DeepLinkHandler.instance.cachedLaunchDetails != null && DeepLinkHandler.instance.cachedLaunchDetails.LaunchType == LaunchType.Deeplink)
-		{
-			DeepLinkHandler.instance.HandleDeepLink();
-			return;
-		}
-		Object.Destroy(DeepLinkHandler.instance);
-	}
-
-	private void RefreshLaunchDetails()
-	{
-		if (UnityEngine.Application.platform != RuntimePlatform.Android)
-		{
-			GTDev.Log<string>("[DeepLinkHandler::RefreshLaunchDetails] Not on Android Platform!", null);
-			return;
-		}
-		this.cachedLaunchDetails = ApplicationLifecycle.GetLaunchDetails();
-		GTDev.Log<string>(string.Concat(new string[]
-		{
-			"[DeepLinkHandler::RefreshLaunchDetails] LaunchType: ",
-			this.cachedLaunchDetails.LaunchType.ToString(),
-			"\n[DeepLinkHandler::RefreshLaunchDetails] LaunchSource: ",
-			this.cachedLaunchDetails.LaunchSource,
-			"\n[DeepLinkHandler::RefreshLaunchDetails] DeepLinkMessage: ",
-			this.cachedLaunchDetails.DeeplinkMessage
-		}), null);
-	}
-
-	private static IEnumerator ProcessWebRequest(string url, string data, string contentType, Action<UnityWebRequest> callback)
-	{
-		UnityWebRequest request = UnityWebRequest.Post(url, data, contentType);
-		yield return request.SendWebRequest();
-		callback(request);
-		yield break;
-	}
-
-	private void HandleDeepLink()
-	{
-		GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] Handling deep link...", null);
-		if (this.cachedLaunchDetails.LaunchSource.Contains("7221491444554579"))
-		{
-			GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] DeepLink received from Witchblood, processing...", null);
-			string text = JsonUtility.ToJson(new DeepLinkHandler.CollabRequest
-			{
-				itemGUID = this.cachedLaunchDetails.DeeplinkMessage,
-				launchSource = this.cachedLaunchDetails.LaunchSource,
-				oculusUserID = PlayFabAuthenticator.instance.userID,
-				playFabID = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
-				playFabSessionTicket = PlayFabAuthenticator.instance.GetPlayFabSessionTicket(),
-				mothershipId = MothershipClientContext.MothershipId,
-				mothershipToken = MothershipClientContext.Token,
-				mothershipEnvId = MothershipClientApiUnity.EnvironmentId
-			});
-			GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] Web Request body: \n" + text, null);
-			base.StartCoroutine(DeepLinkHandler.ProcessWebRequest(PlayFabAuthenticatorSettings.HpPromoApiBaseUrl + "/api/ConsumeItem", text, "application/json", new Action<UnityWebRequest>(this.OnWitchbloodCollabResponse)));
-			return;
-		}
-		if (this.cachedLaunchDetails.LaunchSource.Contains("1903584373052985"))
-		{
-			GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] DeepLink received from Racoon Lagoon, processing...", null);
-			string text2 = JsonUtility.ToJson(new DeepLinkHandler.CollabRequest
-			{
-				itemGUID = this.cachedLaunchDetails.DeeplinkMessage,
-				launchSource = this.cachedLaunchDetails.LaunchSource,
-				oculusUserID = PlayFabAuthenticator.instance.userID,
-				playFabID = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
-				playFabSessionTicket = PlayFabAuthenticator.instance.GetPlayFabSessionTicket(),
-				mothershipId = MothershipClientContext.MothershipId,
-				mothershipToken = MothershipClientContext.Token,
-				mothershipEnvId = MothershipClientApiUnity.EnvironmentId
-			});
-			GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] Web Request body: \n" + text2, null);
-			base.StartCoroutine(DeepLinkHandler.ProcessWebRequest(PlayFabAuthenticatorSettings.HpPromoApiBaseUrl + "/api/ConsumeItem", text2, "application/json", new Action<UnityWebRequest>(this.OnRaccoonLagoonCollabResponse)));
-			return;
-		}
-		GTDev.LogError<string>("[DeepLinkHandler::HandleDeepLink] App launched via DeepLink, but from an unknown app. App ID: " + this.cachedLaunchDetails.LaunchSource, null);
-		Object.Destroy(this);
-	}
-
-	private void OnWitchbloodCollabResponse(UnityWebRequest completedRequest)
-	{
-		if (completedRequest.result != UnityWebRequest.Result.Success)
-		{
-			GTDev.LogError<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
-			Object.Destroy(this);
-			return;
-		}
-		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
-		{
-			GTDev.Log<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Item has already been redeemed!", null);
-			Object.Destroy(this);
-			return;
-		}
-		GTDev.Log<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Item successfully granted, processing external unlock...", null);
-		base.StartCoroutine(this.CheckProcessExternalUnlock(this.WitchbloodCollabCosmeticID, true, true, true));
-	}
-
-	private void OnRaccoonLagoonCollabResponse(UnityWebRequest completedRequest)
-	{
-		if (completedRequest.result != UnityWebRequest.Result.Success)
-		{
-			GTDev.LogError<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
-			Object.Destroy(this);
-			return;
-		}
-		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
-		{
-			GTDev.Log<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item has already been redeemed!", null);
-			Object.Destroy(this);
-			return;
-		}
-		GTDev.Log<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item successfully granted, processing external unlock...", null);
-		base.StartCoroutine(this.CheckProcessExternalUnlock(this.RaccoonLagoonCosmeticIDs, true, true, true));
-	}
-
-	private IEnumerator CheckProcessExternalUnlock(string[] itemIDs, bool autoEquip, bool isLeftHand, bool destroyOnFinish)
-	{
-		GTDev.Log<string>("[DeepLinkHandler::CheckProcessExternalUnlock] Cosmetics initialized, proceeding to process external unlock...", null);
-		foreach (string itemID in itemIDs)
-		{
-			CosmeticsController.instance.ProcessExternalUnlock(itemID, autoEquip, isLeftHand);
-		}
-		if (destroyOnFinish)
-		{
-			Object.Destroy(this);
-		}
-		yield return null;
-		yield break;
-	}
-
-	public static volatile DeepLinkHandler instance;
-
-	private LaunchDetails cachedLaunchDetails;
-
-	private const string WitchbloodAppID = "7221491444554579";
-
-	private readonly string[] WitchbloodCollabCosmeticID = new string[]
-	{
-		"LMAKT."
-	};
-
-	private const string RaccoonLagoonAppID = "1903584373052985";
-
-	private readonly string[] RaccoonLagoonCosmeticIDs = new string[]
-	{
-		"LMALI.",
-		"LHAGS."
-	};
-
-	private const string HiddenPathCollabEndpoint = "/api/ConsumeItem";
-
 	[Serializable]
 	private class CollabRequest
 	{
@@ -200,5 +26,165 @@ public class DeepLinkHandler : MonoBehaviour
 		public string mothershipToken;
 
 		public string mothershipEnvId;
+	}
+
+	public static volatile DeepLinkHandler instance;
+
+	private LaunchDetails cachedLaunchDetails;
+
+	private const string WitchbloodAppID = "7221491444554579";
+
+	private readonly string[] WitchbloodCollabCosmeticID = new string[1] { "LMAKT." };
+
+	private const string RaccoonLagoonAppID = "1903584373052985";
+
+	private readonly string[] RaccoonLagoonCosmeticIDs = new string[2] { "LMALI.", "LHAGS." };
+
+	private const string HiddenPathCollabEndpoint = "/api/ConsumeItem";
+
+	public void Awake()
+	{
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else if (instance != this)
+		{
+			UnityEngine.Object.Destroy(this);
+		}
+	}
+
+	public static void Initialize(GameObject parent)
+	{
+		if (instance == null && parent != null)
+		{
+			parent.AddComponent<DeepLinkHandler>();
+		}
+		if (!(instance == null))
+		{
+			instance.RefreshLaunchDetails();
+			if (instance.cachedLaunchDetails != null && instance.cachedLaunchDetails.LaunchType == LaunchType.Deeplink)
+			{
+				instance.HandleDeepLink();
+			}
+			else
+			{
+				UnityEngine.Object.Destroy(instance);
+			}
+		}
+	}
+
+	private void RefreshLaunchDetails()
+	{
+		if (UnityEngine.Application.platform != RuntimePlatform.Android)
+		{
+			GTDev.Log("[DeepLinkHandler::RefreshLaunchDetails] Not on Android Platform!");
+			return;
+		}
+		cachedLaunchDetails = ApplicationLifecycle.GetLaunchDetails();
+		GTDev.Log("[DeepLinkHandler::RefreshLaunchDetails] LaunchType: " + cachedLaunchDetails.LaunchType.ToString() + "\n[DeepLinkHandler::RefreshLaunchDetails] LaunchSource: " + cachedLaunchDetails.LaunchSource + "\n[DeepLinkHandler::RefreshLaunchDetails] DeepLinkMessage: " + cachedLaunchDetails.DeeplinkMessage);
+	}
+
+	private static IEnumerator ProcessWebRequest(string url, string data, string contentType, Action<UnityWebRequest> callback)
+	{
+		UnityWebRequest request = UnityWebRequest.Post(url, data, contentType);
+		yield return request.SendWebRequest();
+		callback(request);
+	}
+
+	private void HandleDeepLink()
+	{
+		GTDev.Log("[DeepLinkHandler::HandleDeepLink] Handling deep link...");
+		if (cachedLaunchDetails.LaunchSource.Contains("7221491444554579"))
+		{
+			GTDev.Log("[DeepLinkHandler::HandleDeepLink] DeepLink received from Witchblood, processing...");
+			string text = JsonUtility.ToJson(new CollabRequest
+			{
+				itemGUID = cachedLaunchDetails.DeeplinkMessage,
+				launchSource = cachedLaunchDetails.LaunchSource,
+				oculusUserID = PlayFabAuthenticator.instance.userID,
+				playFabID = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
+				playFabSessionTicket = PlayFabAuthenticator.instance.GetPlayFabSessionTicket(),
+				mothershipId = MothershipClientContext.MothershipId,
+				mothershipToken = MothershipClientContext.Token,
+				mothershipEnvId = MothershipClientApiUnity.EnvironmentId
+			});
+			GTDev.Log("[DeepLinkHandler::HandleDeepLink] Web Request body: \n" + text);
+			StartCoroutine(ProcessWebRequest(PlayFabAuthenticatorSettings.HpPromoApiBaseUrl + "/api/ConsumeItem", text, "application/json", OnWitchbloodCollabResponse));
+		}
+		else if (cachedLaunchDetails.LaunchSource.Contains("1903584373052985"))
+		{
+			GTDev.Log("[DeepLinkHandler::HandleDeepLink] DeepLink received from Racoon Lagoon, processing...");
+			string text2 = JsonUtility.ToJson(new CollabRequest
+			{
+				itemGUID = cachedLaunchDetails.DeeplinkMessage,
+				launchSource = cachedLaunchDetails.LaunchSource,
+				oculusUserID = PlayFabAuthenticator.instance.userID,
+				playFabID = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
+				playFabSessionTicket = PlayFabAuthenticator.instance.GetPlayFabSessionTicket(),
+				mothershipId = MothershipClientContext.MothershipId,
+				mothershipToken = MothershipClientContext.Token,
+				mothershipEnvId = MothershipClientApiUnity.EnvironmentId
+			});
+			GTDev.Log("[DeepLinkHandler::HandleDeepLink] Web Request body: \n" + text2);
+			StartCoroutine(ProcessWebRequest(PlayFabAuthenticatorSettings.HpPromoApiBaseUrl + "/api/ConsumeItem", text2, "application/json", OnRaccoonLagoonCollabResponse));
+		}
+		else
+		{
+			GTDev.LogError("[DeepLinkHandler::HandleDeepLink] App launched via DeepLink, but from an unknown app. App ID: " + cachedLaunchDetails.LaunchSource);
+			UnityEngine.Object.Destroy(this);
+		}
+	}
+
+	private void OnWitchbloodCollabResponse(UnityWebRequest completedRequest)
+	{
+		if (completedRequest.result != UnityWebRequest.Result.Success)
+		{
+			GTDev.LogError("[DeepLinkHandler::OnWitchbloodCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text);
+			UnityEngine.Object.Destroy(this);
+		}
+		else if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
+		{
+			GTDev.Log("[DeepLinkHandler::OnWitchbloodCollabResponse] Item has already been redeemed!");
+			UnityEngine.Object.Destroy(this);
+		}
+		else
+		{
+			GTDev.Log("[DeepLinkHandler::OnWitchbloodCollabResponse] Item successfully granted, processing external unlock...");
+			StartCoroutine(CheckProcessExternalUnlock(WitchbloodCollabCosmeticID, autoEquip: true, isLeftHand: true, destroyOnFinish: true));
+		}
+	}
+
+	private void OnRaccoonLagoonCollabResponse(UnityWebRequest completedRequest)
+	{
+		if (completedRequest.result != UnityWebRequest.Result.Success)
+		{
+			GTDev.LogError("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text);
+			UnityEngine.Object.Destroy(this);
+		}
+		else if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
+		{
+			GTDev.Log("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item has already been redeemed!");
+			UnityEngine.Object.Destroy(this);
+		}
+		else
+		{
+			GTDev.Log("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item successfully granted, processing external unlock...");
+			StartCoroutine(CheckProcessExternalUnlock(RaccoonLagoonCosmeticIDs, autoEquip: true, isLeftHand: true, destroyOnFinish: true));
+		}
+	}
+
+	private IEnumerator CheckProcessExternalUnlock(string[] itemIDs, bool autoEquip, bool isLeftHand, bool destroyOnFinish)
+	{
+		GTDev.Log("[DeepLinkHandler::CheckProcessExternalUnlock] Cosmetics initialized, proceeding to process external unlock...");
+		foreach (string itemID in itemIDs)
+		{
+			CosmeticsController.instance.ProcessExternalUnlock(itemID, autoEquip, isLeftHand);
+		}
+		if (destroyOnFinish)
+		{
+			UnityEngine.Object.Destroy(this);
+		}
+		yield return null;
 	}
 }

@@ -1,75 +1,21 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class PartyInABox : MonoBehaviour
 {
-	private void Awake()
+	[Serializable]
+	private struct ForceTransform
 	{
-		this.Reset();
-	}
+		public Transform transform;
 
-	private void OnEnable()
-	{
-		this.Reset();
-	}
+		public Vector3 localPosition;
 
-	public void Cranked_ReleaseParty()
-	{
-		if (!this.parentHoldable.IsLocalObject())
-		{
-			return;
-		}
-		this.ReleaseParty();
-	}
+		public Quaternion localRotation;
 
-	public void ReleaseParty()
-	{
-		if (this.isReleased)
+		public void Apply()
 		{
-			return;
-		}
-		if (this.parentHoldable.IsLocalObject())
-		{
-			this.parentHoldable.itemState |= TransferrableObject.ItemStates.State0;
-			GorillaTagger.Instance.StartVibration(true, this.partyHapticStrength, this.partyHapticDuration);
-			GorillaTagger.Instance.StartVibration(false, this.partyHapticStrength, this.partyHapticDuration);
-		}
-		this.isReleased = true;
-		this.spring.enabled = true;
-		this.anim.Play();
-		this.particles.Play();
-		this.partyAudio.Play();
-	}
-
-	private void Update()
-	{
-		if (this.parentHoldable.IsLocalObject())
-		{
-			return;
-		}
-		if (this.parentHoldable.itemState.HasFlag(TransferrableObject.ItemStates.State0))
-		{
-			if (!this.isReleased)
-			{
-				this.ReleaseParty();
-				return;
-			}
-		}
-		else if (this.isReleased)
-		{
-			this.Reset();
-		}
-	}
-
-	public void Reset()
-	{
-		this.isReleased = false;
-		this.parentHoldable.itemState &= (TransferrableObject.ItemStates)(-2);
-		this.spring.enabled = false;
-		this.anim.Stop();
-		foreach (PartyInABox.ForceTransform forceTransform in this.forceTransforms)
-		{
-			forceTransform.Apply();
+			transform.localPosition = localPosition;
+			transform.localRotation = localRotation;
 		}
 	}
 
@@ -97,21 +43,73 @@ public class PartyInABox : MonoBehaviour
 	private bool isReleased;
 
 	[SerializeField]
-	private PartyInABox.ForceTransform[] forceTransforms;
+	private ForceTransform[] forceTransforms;
 
-	[Serializable]
-	private struct ForceTransform
+	private void Awake()
 	{
-		public void Apply()
+		Reset();
+	}
+
+	private void OnEnable()
+	{
+		Reset();
+	}
+
+	public void Cranked_ReleaseParty()
+	{
+		if (parentHoldable.IsLocalObject())
 		{
-			this.transform.localPosition = this.localPosition;
-			this.transform.localRotation = this.localRotation;
+			ReleaseParty();
 		}
+	}
 
-		public Transform transform;
+	public void ReleaseParty()
+	{
+		if (!isReleased)
+		{
+			if (parentHoldable.IsLocalObject())
+			{
+				parentHoldable.itemState |= TransferrableObject.ItemStates.State0;
+				GorillaTagger.Instance.StartVibration(forLeftController: true, partyHapticStrength, partyHapticDuration);
+				GorillaTagger.Instance.StartVibration(forLeftController: false, partyHapticStrength, partyHapticDuration);
+			}
+			isReleased = true;
+			spring.enabled = true;
+			anim.Play();
+			particles.Play();
+			partyAudio.Play();
+		}
+	}
 
-		public Vector3 localPosition;
+	private void Update()
+	{
+		if (parentHoldable.IsLocalObject())
+		{
+			return;
+		}
+		if (parentHoldable.itemState.HasFlag(TransferrableObject.ItemStates.State0))
+		{
+			if (!isReleased)
+			{
+				ReleaseParty();
+			}
+		}
+		else if (isReleased)
+		{
+			Reset();
+		}
+	}
 
-		public Quaternion localRotation;
+	public void Reset()
+	{
+		isReleased = false;
+		parentHoldable.itemState &= (TransferrableObject.ItemStates)(-2);
+		spring.enabled = false;
+		anim.Stop();
+		ForceTransform[] array = forceTransforms;
+		foreach (ForceTransform forceTransform in array)
+		{
+			forceTransform.Apply();
+		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTagScripts;
 using Photon.Pun;
@@ -7,1434 +7,18 @@ using UnityEngine.Serialization;
 
 public class BuilderPiece : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this.fXInfo == null)
-		{
-			Debug.LogErrorFormat("BuilderPiece {0} is missing Effect Info", new object[]
-			{
-				base.gameObject.name
-			});
-		}
-		this.materialType = -1;
-		this.pieceType = -1;
-		this.pieceId = -1;
-		this.pieceDataIndex = -1;
-		this.state = BuilderPiece.State.None;
-		this.isStatic = true;
-		this.parentPiece = null;
-		this.firstChildPiece = null;
-		this.nextSiblingPiece = null;
-		this.attachIndex = -1;
-		this.parentAttachIndex = -1;
-		this.parentHeld = null;
-		this.heldByPlayerActorNumber = -1;
-		this.placedOnlyColliders = new List<Collider>(4);
-		List<Collider> list = new List<Collider>(4);
-		foreach (GameObject gameObject in this.onlyWhenPlaced)
-		{
-			list.Clear();
-			gameObject.GetComponentsInChildren<Collider>(list);
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (!list[i].isTrigger)
-				{
-					BuilderPieceCollider builderPieceCollider = list[i].GetComponent<BuilderPieceCollider>();
-					if (builderPieceCollider == null)
-					{
-						builderPieceCollider = list[i].AddComponent<BuilderPieceCollider>();
-					}
-					builderPieceCollider.piece = this;
-					this.placedOnlyColliders.Add(list[i]);
-				}
-			}
-		}
-		this.SetActive(this.onlyWhenPlaced, false);
-		this.SetActive(this.onlyWhenNotPlaced, true);
-		this.colliders = new List<Collider>(4);
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		for (int j = this.colliders.Count - 1; j >= 0; j--)
-		{
-			if (this.colliders[j].isTrigger)
-			{
-				this.colliders.RemoveAt(j);
-			}
-			else
-			{
-				BuilderPieceCollider builderPieceCollider2 = this.colliders[j].GetComponent<BuilderPieceCollider>();
-				if (builderPieceCollider2 == null)
-				{
-					builderPieceCollider2 = this.colliders[j].AddComponent<BuilderPieceCollider>();
-				}
-				builderPieceCollider2.piece = this;
-			}
-		}
-		this.gridPlanes = new List<BuilderAttachGridPlane>(8);
-		base.GetComponentsInChildren<BuilderAttachGridPlane>(this.gridPlanes);
-		this.pieceComponents = new List<IBuilderPieceComponent>(1);
-		base.GetComponentsInChildren<IBuilderPieceComponent>(true, this.pieceComponents);
-		this.pieceComponentsActive = false;
-		this.functionalPieceComponent = base.GetComponentInChildren<IBuilderPieceFunctional>(true);
-		this.SetCollidersEnabled<Collider>(this.colliders, false);
-		this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-		this.preventSnapUntilMoved = 0;
-		this.preventSnapUntilMovedFromPos = Vector3.zero;
-		this.renderingIndirect = new List<MeshRenderer>(4);
-		this.renderingDirect = new List<MeshRenderer>(4);
-		this.FindActiveRenderers();
-		this.paintingCount = 0;
-		this.potentialGrabCount = 0;
-		this.potentialGrabChildCount = 0;
-		this.isPrivatePlot = (this.plotComponent != null);
-		this.privatePlotIndex = -1;
-		this.ClearCollisionHistory();
-	}
-
-	public void SetTable(BuilderTable table)
-	{
-		this.tableOwner = table;
-	}
-
-	public BuilderTable GetTable()
-	{
-		return this.tableOwner;
-	}
-
-	public void OnReturnToPool()
-	{
-		this.tableOwner.builderRenderer.RemovePiece(this);
-		for (int i = 0; i < this.pieceComponents.Count; i++)
-		{
-			this.pieceComponents[i].OnPieceDestroy();
-		}
-		this.functionalPieceState = 0;
-		this.state = BuilderPiece.State.None;
-		this.isStatic = true;
-		this.materialType = -1;
-		this.pieceType = -1;
-		this.pieceId = -1;
-		this.pieceDataIndex = -1;
-		this.parentPiece = null;
-		this.firstChildPiece = null;
-		this.nextSiblingPiece = null;
-		this.attachIndex = -1;
-		this.parentAttachIndex = -1;
-		this.overrideSavedPiece = false;
-		this.savedMaterialType = -1;
-		this.savedPieceType = -1;
-		this.shelfOwner = -1;
-		this.parentHeld = null;
-		this.heldByPlayerActorNumber = -1;
-		this.activatedTimeStamp = 0;
-		this.forcedFrozen = false;
-		this.SetActive(this.onlyWhenPlaced, false);
-		this.SetActive(this.onlyWhenNotPlaced, true);
-		this.SetCollidersEnabled<Collider>(this.colliders, false);
-		this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-		this.preventSnapUntilMoved = 0;
-		this.preventSnapUntilMovedFromPos = Vector3.zero;
-		base.transform.localScale = Vector3.one;
-		if (this.isArmShelf)
-		{
-			if (this.armShelf != null)
-			{
-				this.armShelf.piece = null;
-			}
-			this.armShelf = null;
-		}
-		for (int j = 0; j < this.gridPlanes.Count; j++)
-		{
-			this.gridPlanes[j].OnReturnToPool(this.tableOwner.builderPool);
-		}
-	}
-
-	public void OnCreatedByPool()
-	{
-		this.materialSwapTargets = new List<MeshRenderer>(4);
-		base.GetComponentsInChildren<MeshRenderer>(this.areMeshesToggledOnPlace, this.materialSwapTargets);
-		this.surfaceOverrides = new List<GorillaSurfaceOverride>(4);
-		base.GetComponentsInChildren<GorillaSurfaceOverride>(this.areMeshesToggledOnPlace, this.surfaceOverrides);
-	}
-
-	public void SetupPiece(float gridSize)
-	{
-		for (int i = 0; i < this.gridPlanes.Count; i++)
-		{
-			this.gridPlanes[i].Setup(this, i, gridSize);
-		}
-	}
-
-	public void SetMaterial(int inMaterialType, bool force = false)
-	{
-		if (this.materialOptions == null || this.materialSwapTargets == null || this.materialSwapTargets.Count < 1)
-		{
-			return;
-		}
-		if (this.materialType == inMaterialType && !force)
-		{
-			return;
-		}
-		this.materialType = inMaterialType;
-		Material material = null;
-		int num = -1;
-		if (inMaterialType == -1)
-		{
-			this.materialOptions.GetDefaultMaterial(out this.materialType, out material, out num);
-		}
-		else
-		{
-			this.materialOptions.GetMaterialFromType(this.materialType, out material, out num);
-			if (material == null)
-			{
-				this.materialOptions.GetDefaultMaterial(out this.materialType, out material, out num);
-			}
-		}
-		if (material == null)
-		{
-			Debug.LogErrorFormat("Piece {0} has no material matching Type {1}", new object[]
-			{
-				this.GetPieceId(),
-				inMaterialType
-			});
-			return;
-		}
-		foreach (MeshRenderer meshRenderer in this.materialSwapTargets)
-		{
-			if (!(meshRenderer == null) && meshRenderer.enabled)
-			{
-				meshRenderer.material = material;
-			}
-		}
-		if (this.surfaceOverrides != null && num != -1)
-		{
-			foreach (GorillaSurfaceOverride gorillaSurfaceOverride in this.surfaceOverrides)
-			{
-				gorillaSurfaceOverride.overrideIndex = num;
-			}
-		}
-		if (this.renderingIndirect.Count > 0)
-		{
-			this.tableOwner.builderRenderer.ChangePieceIndirectMaterial(this, this.materialSwapTargets, material);
-		}
-	}
-
-	public int GetPieceId()
-	{
-		return this.pieceId;
-	}
-
-	public int GetParentPieceId()
-	{
-		if (!(this.parentPiece == null))
-		{
-			return this.parentPiece.pieceId;
-		}
-		return -1;
-	}
-
-	public int GetAttachIndex()
-	{
-		return this.attachIndex;
-	}
-
-	public int GetParentAttachIndex()
-	{
-		return this.parentAttachIndex;
-	}
-
-	private void SetPieceActive(List<IBuilderPieceComponent> components, bool active)
-	{
-		if (components == null || active == this.pieceComponentsActive)
-		{
-			return;
-		}
-		this.pieceComponentsActive = active;
-		for (int i = 0; i < components.Count; i++)
-		{
-			if (components[i] != null)
-			{
-				if (active)
-				{
-					components[i].OnPieceActivate();
-				}
-				else
-				{
-					components[i].OnPieceDeactivate();
-				}
-			}
-		}
-	}
-
-	private void SetBehavioursEnabled<T>(List<T> components, bool enabled) where T : Behaviour
-	{
-		if (components == null)
-		{
-			return;
-		}
-		for (int i = 0; i < components.Count; i++)
-		{
-			if (components[i] != null)
-			{
-				components[i].enabled = enabled;
-			}
-		}
-	}
-
-	public void UpdateCollidersEnabled(bool _enabled)
-	{
-		this.SetCollidersEnabled<Collider>(this.colliders, _enabled);
-	}
-
-	private void SetCollidersEnabled<T>(List<T> components, bool enabled) where T : Collider
-	{
-		if (components == null)
-		{
-			return;
-		}
-		for (int i = 0; i < components.Count; i++)
-		{
-			if (components[i] != null)
-			{
-				components[i].enabled = enabled;
-			}
-		}
-	}
-
-	public void SetColliderLayers<T>(List<T> components, int layer) where T : Collider
-	{
-		this.currentColliderLayer = layer;
-		if (components == null)
-		{
-			return;
-		}
-		for (int i = 0; i < components.Count; i++)
-		{
-			if (components[i] != null)
-			{
-				components[i].gameObject.layer = layer;
-			}
-		}
-	}
-
-	private void SetActive(List<GameObject> gameObjects, bool active)
-	{
-		if (gameObjects == null)
-		{
-			return;
-		}
-		for (int i = 0; i < gameObjects.Count; i++)
-		{
-			if (gameObjects[i] != null)
-			{
-				gameObjects[i].SetActive(active);
-			}
-		}
-	}
-
-	public void SetFunctionalPieceState(byte fState, NetPlayer instigator, int timeStamp)
-	{
-		if (this.functionalPieceComponent == null || !this.functionalPieceComponent.IsStateValid(fState))
-		{
-			fState = 0;
-		}
-		this.functionalPieceState = fState;
-		IBuilderPieceFunctional builderPieceFunctional = this.functionalPieceComponent;
-		if (builderPieceFunctional == null)
-		{
-			return;
-		}
-		builderPieceFunctional.OnStateChanged(fState, instigator, timeStamp);
-	}
-
-	public void SetScale(float scale)
-	{
-		if (this.scaleRoot != null)
-		{
-			this.scaleRoot.localScale = Vector3.one * scale;
-		}
-		this.pieceScale = scale;
-	}
-
-	public float GetScale()
-	{
-		return this.pieceScale;
-	}
-
-	public void PaintingTint(bool enable)
-	{
-		if (enable)
-		{
-			this.paintingCount++;
-			if (this.paintingCount == 1)
-			{
-				this.RefreshTint();
-				return;
-			}
-		}
-		else
-		{
-			this.paintingCount--;
-			if (this.paintingCount == 0)
-			{
-				this.RefreshTint();
-			}
-		}
-	}
-
-	public void PotentialGrab(bool enable)
-	{
-		if (enable)
-		{
-			this.potentialGrabCount++;
-			if (this.potentialGrabCount == 1 && this.potentialGrabChildCount == 0)
-			{
-				this.RefreshTint();
-				return;
-			}
-		}
-		else
-		{
-			this.potentialGrabCount--;
-			if (this.potentialGrabCount == 0 && this.potentialGrabChildCount == 0)
-			{
-				this.RefreshTint();
-			}
-		}
-	}
-
-	public static void PotentialGrabChildren(BuilderPiece piece, bool enable)
-	{
-		BuilderPiece builderPiece = piece.firstChildPiece;
-		while (builderPiece != null)
-		{
-			if (enable)
-			{
-				builderPiece.potentialGrabChildCount++;
-				if (builderPiece.potentialGrabChildCount == 1 && builderPiece.potentialGrabCount == 0)
-				{
-					builderPiece.RefreshTint();
-				}
-			}
-			else
-			{
-				builderPiece.potentialGrabChildCount--;
-				if (builderPiece.potentialGrabChildCount == 0 && builderPiece.potentialGrabCount == 0)
-				{
-					builderPiece.RefreshTint();
-				}
-			}
-			BuilderPiece.PotentialGrabChildren(builderPiece, enable);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	private void RefreshTint()
-	{
-		if (this.potentialGrabCount > 0 || this.potentialGrabChildCount > 0)
-		{
-			this.SetTint(this.tableOwner.potentialGrabTint);
-			return;
-		}
-		if (this.paintingCount > 0)
-		{
-			this.SetTint(this.tableOwner.paintingTint);
-			return;
-		}
-		switch (this.state)
-		{
-		case BuilderPiece.State.AttachedToDropped:
-		case BuilderPiece.State.Dropped:
-			this.SetTint(this.tableOwner.droppedTint);
-			return;
-		case BuilderPiece.State.Grabbed:
-		case BuilderPiece.State.GrabbedLocal:
-		case BuilderPiece.State.AttachedToArm:
-			this.SetTint(this.tableOwner.grabbedTint);
-			return;
-		case BuilderPiece.State.OnShelf:
-		case BuilderPiece.State.OnConveyor:
-			this.SetTint(this.tableOwner.shelfTint);
-			return;
-		}
-		this.SetTint(this.tableOwner.defaultTint);
-	}
-
-	private void SetTint(float tint)
-	{
-		if (tint == this.tint)
-		{
-			return;
-		}
-		this.tint = tint;
-		this.tableOwner.builderRenderer.SetPieceTint(this, tint);
-	}
-
-	public void SetParentPiece(int newAttachIndex, BuilderPiece newParentPiece, int newParentAttachIndex)
-	{
-		if (this.parentHeld != null)
-		{
-			Debug.LogErrorFormat(newParentPiece.gameObject, "Cannot attach to piece {0} while already held", new object[]
-			{
-				(newParentPiece == null) ? null : newParentPiece.gameObject.name
-			});
-			return;
-		}
-		BuilderPiece.RemovePieceFromParent(this);
-		this.attachIndex = newAttachIndex;
-		this.parentPiece = newParentPiece;
-		this.parentAttachIndex = newParentAttachIndex;
-		this.AddPieceToParent(this);
-		Transform parent = null;
-		if (newParentPiece != null)
-		{
-			if (newParentAttachIndex >= 0)
-			{
-				parent = newParentPiece.gridPlanes[newParentAttachIndex].transform;
-			}
-			else
-			{
-				parent = newParentPiece.transform;
-			}
-		}
-		base.transform.SetParent(parent, true);
-		this.requestedParentPiece = null;
-		this.tableOwner.UpdatePieceData(this);
-	}
-
-	public void ClearParentPiece(bool ignoreSnaps = false)
-	{
-		if (this.parentPiece == null)
-		{
-			if (!ignoreSnaps)
-			{
-				BuilderPiece.RemoveOverlapsWithDifferentPieceRoot(this, this, this.tableOwner.builderPool);
-			}
-			return;
-		}
-		BuilderPiece builderPiece = this.parentPiece;
-		BuilderPiece.RemovePieceFromParent(this);
-		this.attachIndex = -1;
-		this.parentPiece = null;
-		this.parentAttachIndex = -1;
-		base.transform.SetParent(null, true);
-		this.requestedParentPiece = null;
-		this.tableOwner.UpdatePieceData(this);
-		if (!ignoreSnaps)
-		{
-			BuilderPiece.RemoveOverlapsWithDifferentPieceRoot(this, this.GetRootPiece(), this.tableOwner.builderPool);
-		}
-	}
-
-	public static void RemoveOverlapsWithDifferentPieceRoot(BuilderPiece piece, BuilderPiece root, BuilderPool pool)
-	{
-		for (int i = 0; i < piece.gridPlanes.Count; i++)
-		{
-			piece.gridPlanes[i].RemoveSnapsWithDifferentRoot(root, pool);
-		}
-		BuilderPiece builderPiece = piece.firstChildPiece;
-		while (builderPiece != null)
-		{
-			BuilderPiece.RemoveOverlapsWithDifferentPieceRoot(builderPiece, root, pool);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	private void AddPieceToParent(BuilderPiece piece)
-	{
-		BuilderPiece builderPiece = piece.parentPiece;
-		if (builderPiece == null)
-		{
-			return;
-		}
-		this.nextSiblingPiece = builderPiece.firstChildPiece;
-		builderPiece.firstChildPiece = piece;
-		if (piece.parentAttachIndex >= 0 && piece.parentAttachIndex < builderPiece.gridPlanes.Count)
-		{
-			builderPiece.gridPlanes[piece.parentAttachIndex].ChangeChildPieceCount(1 + piece.GetChildCount());
-		}
-	}
-
-	private static void RemovePieceFromParent(BuilderPiece piece)
-	{
-		BuilderPiece builderPiece = piece.parentPiece;
-		if (builderPiece == null)
-		{
-			return;
-		}
-		BuilderPiece builderPiece2 = builderPiece.firstChildPiece;
-		if (builderPiece2 == null)
-		{
-			Debug.LogErrorFormat("Parent {0} of piece {1} doesn't have any children", new object[]
-			{
-				builderPiece.name,
-				piece.name
-			});
-		}
-		bool flag = false;
-		if (builderPiece2 == piece)
-		{
-			builderPiece.firstChildPiece = builderPiece2.nextSiblingPiece;
-			flag = true;
-		}
-		else
-		{
-			while (builderPiece2 != null)
-			{
-				if (builderPiece2.nextSiblingPiece == piece)
-				{
-					builderPiece2.nextSiblingPiece = piece.nextSiblingPiece;
-					piece.nextSiblingPiece = null;
-					flag = true;
-					break;
-				}
-				builderPiece2 = builderPiece2.nextSiblingPiece;
-			}
-		}
-		if (!flag)
-		{
-			Debug.LogErrorFormat("Parent {0} of piece {1} doesn't have the piece a child", new object[]
-			{
-				builderPiece.name,
-				piece.name
-			});
-			return;
-		}
-		if (piece.parentAttachIndex >= 0 && piece.parentAttachIndex < builderPiece.gridPlanes.Count)
-		{
-			builderPiece.gridPlanes[piece.parentAttachIndex].ChangeChildPieceCount(-1 * (1 + piece.GetChildCount()));
-		}
-	}
-
-	public void SetParentHeld(Transform parentHeld, int heldByPlayerActorNumber, bool heldInLeftHand)
-	{
-		if (this.parentPiece != null)
-		{
-			Debug.LogErrorFormat(this.parentPiece.gameObject, "Cannot hold while already attached to piece {0}", new object[]
-			{
-				this.parentPiece.gameObject.name
-			});
-			return;
-		}
-		this.heldByPlayerActorNumber = heldByPlayerActorNumber;
-		this.parentHeld = parentHeld;
-		this.heldInLeftHand = heldInLeftHand;
-		base.transform.SetParent(parentHeld);
-		this.tableOwner.UpdatePieceData(this);
-		if (heldByPlayerActorNumber != -1)
-		{
-			this.OnGrabbedAsRoot();
-			return;
-		}
-		this.OnReleasedAsRoot();
-	}
-
-	public void ClearParentHeld()
-	{
-		if (this.parentHeld == null)
-		{
-			return;
-		}
-		if (this.isArmShelf && this.armShelf != null)
-		{
-			this.armShelf.piece = null;
-			this.armShelf = null;
-		}
-		this.heldByPlayerActorNumber = -1;
-		this.parentHeld = null;
-		this.heldInLeftHand = false;
-		base.transform.SetParent(this.parentHeld);
-		this.tableOwner.UpdatePieceData(this);
-		this.OnReleasedAsRoot();
-	}
-
-	public bool IsHeldLocal()
-	{
-		return this.heldByPlayerActorNumber != -1 && this.heldByPlayerActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
-	}
-
-	public bool IsHeldBy(int actorNumber)
-	{
-		return actorNumber != -1 && this.heldByPlayerActorNumber == actorNumber;
-	}
-
-	public bool IsHeldInLeftHand()
-	{
-		return this.heldInLeftHand;
-	}
-
-	public static bool IsDroppedState(BuilderPiece.State state)
-	{
-		return state == BuilderPiece.State.Dropped || state == BuilderPiece.State.AttachedToDropped || state == BuilderPiece.State.OnShelf || state == BuilderPiece.State.OnConveyor;
-	}
-
-	public void SetActivateTimeStamp(int timeStamp)
-	{
-		this.activatedTimeStamp = timeStamp;
-		BuilderPiece builderPiece = this.firstChildPiece;
-		while (builderPiece != null)
-		{
-			builderPiece.SetActivateTimeStamp(timeStamp);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	public void SetState(BuilderPiece.State newState, bool force = false)
-	{
-		if (newState == this.state && !force)
-		{
-			if (newState == BuilderPiece.State.Grabbed)
-			{
-				int expectedGrabCollisionLayer = this.GetExpectedGrabCollisionLayer();
-				if (this.currentColliderLayer != expectedGrabCollisionLayer)
-				{
-					this.SetColliderLayers<Collider>(this.colliders, expectedGrabCollisionLayer);
-					this.SetChildrenCollisionLayer(expectedGrabCollisionLayer);
-				}
-			}
-			return;
-		}
-		if (newState == BuilderPiece.State.Dropped && this.state != BuilderPiece.State.Dropped)
-		{
-			this.tableOwner.AddPieceToDropList(this);
-		}
-		else if (this.state == BuilderPiece.State.Dropped && newState != BuilderPiece.State.Dropped)
-		{
-			this.tableOwner.RemovePieceFromDropList(this);
-		}
-		BuilderPiece.State state = this.state;
-		this.state = newState;
-		if (this.pieceDataIndex >= 0)
-		{
-			this.tableOwner.UpdatePieceData(this);
-		}
-		switch (this.state)
-		{
-		case BuilderPiece.State.None:
-			this.SetCollidersEnabled<Collider>(this.colliders, false);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, false);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.droppedLayer);
-			this.SetChildrenState(BuilderPiece.State.None, force);
-			this.tableOwner.builderRenderer.RemovePiece(this);
-			this.isStatic = true;
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.AttachedAndPlaced:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, true);
-			this.SetActive(this.onlyWhenPlaced, true);
-			this.SetActive(this.onlyWhenNotPlaced, false);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.placedLayer);
-			this.SetChildrenState(BuilderPiece.State.AttachedAndPlaced, force);
-			this.SetStatic(false, force || this.areMeshesToggledOnPlace);
-			this.SetPieceActive(this.pieceComponents, true);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.AttachedToDropped:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.droppedLayer);
-			this.SetChildrenState(BuilderPiece.State.AttachedToDropped, force);
-			this.SetStatic(false, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.Grabbed:
-		{
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			int expectedGrabCollisionLayer2 = this.GetExpectedGrabCollisionLayer();
-			this.SetColliderLayers<Collider>(this.colliders, expectedGrabCollisionLayer2);
-			this.SetChildrenState(BuilderPiece.State.Grabbed, force);
-			this.SetStatic(false, force || (this.areMeshesToggledOnPlace && state == BuilderPiece.State.AttachedAndPlaced));
-			this.SetPieceActive(this.pieceComponents, false);
-			this.SetActivateTimeStamp(0);
-			this.RefreshTint();
-			this.forcedFrozen = false;
-			return;
-		}
-		case BuilderPiece.State.Dropped:
-			this.ClearCollisionHistory();
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(false, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.droppedLayer);
-			this.SetChildrenState(BuilderPiece.State.AttachedToDropped, force);
-			this.SetStatic(false, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.OnShelf:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.droppedLayer);
-			this.SetChildrenState(BuilderPiece.State.OnShelf, force);
-			this.SetStatic(true, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.Displayed:
-			this.SetCollidersEnabled<Collider>(this.colliders, false);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetChildrenState(BuilderPiece.State.Displayed, force);
-			this.SetStatic(false, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.GrabbedLocal:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.heldLayerLocal);
-			this.SetChildrenState(BuilderPiece.State.GrabbedLocal, force);
-			this.SetStatic(false, force || (this.areMeshesToggledOnPlace && state == BuilderPiece.State.AttachedAndPlaced));
-			this.SetPieceActive(this.pieceComponents, false);
-			this.SetActivateTimeStamp(0);
-			this.RefreshTint();
-			this.forcedFrozen = false;
-			return;
-		case BuilderPiece.State.OnConveyor:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.droppedLayer);
-			this.SetChildrenState(BuilderPiece.State.OnConveyor, force);
-			this.SetStatic(false, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		case BuilderPiece.State.AttachedToArm:
-			this.SetCollidersEnabled<Collider>(this.colliders, true);
-			this.SetBehavioursEnabled<Behaviour>(this.onlyWhenPlacedBehaviours, false);
-			this.SetActive(this.onlyWhenPlaced, false);
-			this.SetActive(this.onlyWhenNotPlaced, true);
-			this.SetKinematic(true, true);
-			this.SetColliderLayers<Collider>(this.colliders, BuilderTable.heldLayerLocal);
-			this.SetChildrenState(BuilderPiece.State.AttachedToArm, force);
-			this.SetStatic(false, force);
-			this.SetPieceActive(this.pieceComponents, false);
-			this.RefreshTint();
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void OnGrabbedAsRoot()
-	{
-		if (this.isArmShelf)
-		{
-			return;
-		}
-		if (this.heldByPlayerActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber && !this.listeningToHandLinks)
-		{
-			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Combine(TakeMyHand_HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
-			this.listeningToHandLinks = true;
-		}
-	}
-
-	public void OnReleasedAsRoot()
-	{
-		if (this.isArmShelf)
-		{
-			return;
-		}
-		if (this.listeningToHandLinks)
-		{
-			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Remove(TakeMyHand_HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
-			this.listeningToHandLinks = false;
-		}
-	}
-
-	public void SetKinematic(bool kinematic, bool destroyImmediate = true)
-	{
-		if (kinematic && this.rigidBody != null)
-		{
-			if (destroyImmediate)
-			{
-				Object.DestroyImmediate(this.rigidBody);
-				this.rigidBody = null;
-			}
-			else
-			{
-				Object.Destroy(this.rigidBody);
-				this.rigidBody = null;
-			}
-		}
-		else if (!kinematic && this.rigidBody == null)
-		{
-			this.rigidBody = base.gameObject.GetComponent<Rigidbody>();
-			if (this.rigidBody != null)
-			{
-				Debug.LogErrorFormat("We should never already have a rigid body here {0} {1}", new object[]
-				{
-					this.pieceId,
-					this.pieceType
-				});
-			}
-			if (this.rigidBody == null)
-			{
-				this.rigidBody = base.gameObject.AddComponent<Rigidbody>();
-			}
-			if (this.rigidBody != null)
-			{
-				this.rigidBody.isKinematic = kinematic;
-			}
-		}
-		if (this.rigidBody != null)
-		{
-			this.rigidBody.mass = 1f;
-		}
-	}
-
-	public void ClearCollisionHistory()
-	{
-		if (this.collisionEnterHistory == null)
-		{
-			this.collisionEnterHistory = new float[this.collisionEnterLimit];
-		}
-		for (int i = 0; i < this.collisionEnterLimit; i++)
-		{
-			this.collisionEnterHistory[i] = float.MinValue;
-		}
-		this.collidersEntered.Clear();
-		this.oldCollisionTimeIndex = 0;
-		this.forcedFrozen = false;
-	}
-
-	private void OnCollisionEnter(Collision other)
-	{
-		if (this.state != BuilderPiece.State.Dropped || this.forcedFrozen)
-		{
-			return;
-		}
-		BuilderPieceCollider component = other.collider.GetComponent<BuilderPieceCollider>();
-		if (component != null)
-		{
-			BuilderPiece piece = component.piece;
-			if ((piece.state == BuilderPiece.State.AttachedAndPlaced || piece.forcedFrozen) && !this.collidersEntered.Add(other.collider.GetInstanceID()))
-			{
-				if (this.collisionEnterHistory[this.oldCollisionTimeIndex] > Time.time)
-				{
-					this.tableOwner.FreezeDroppedPiece(this);
-					return;
-				}
-				this.collisionEnterHistory[this.oldCollisionTimeIndex] = Time.time + this.collisionEnterCooldown;
-				int num = this.oldCollisionTimeIndex + 1;
-				this.oldCollisionTimeIndex = num;
-				this.oldCollisionTimeIndex = num % this.collisionEnterLimit;
-			}
-		}
-	}
-
-	public int GetExpectedGrabCollisionLayer()
-	{
-		if (this.heldByPlayerActorNumber != -1)
-		{
-			if (!GorillaTagger.Instance.offlineVRRig.IsInHandHoldChainWithOtherPlayer(this.heldByPlayerActorNumber))
-			{
-				return BuilderTable.heldLayer;
-			}
-			return BuilderTable.heldLayerLocal;
-		}
-		else
-		{
-			if (this.parentPiece != null)
-			{
-				return this.parentPiece.currentColliderLayer;
-			}
-			return BuilderTable.heldLayer;
-		}
-	}
-
-	public void UpdateGrabbedPieceCollisionLayer()
-	{
-		int expectedGrabCollisionLayer = this.GetExpectedGrabCollisionLayer();
-		if (this.currentColliderLayer != expectedGrabCollisionLayer)
-		{
-			this.SetColliderLayers<Collider>(this.colliders, expectedGrabCollisionLayer);
-			this.SetChildrenCollisionLayer(expectedGrabCollisionLayer);
-		}
-	}
-
-	private void SetChildrenCollisionLayer(int layer)
-	{
-		BuilderPiece builderPiece = this.firstChildPiece;
-		while (builderPiece != null)
-		{
-			builderPiece.SetColliderLayers<Collider>(builderPiece.colliders, layer);
-			builderPiece.SetChildrenCollisionLayer(layer);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	public void SetStatic(bool isStatic, bool force = false)
-	{
-		isStatic = true;
-		if (this.isStatic == isStatic && !force)
-		{
-			return;
-		}
-		this.SetDirectRenderersVisible(true);
-		this.tableOwner.builderRenderer.RemovePiece(this);
-		this.isStatic = isStatic;
-		if (this.areMeshesToggledOnPlace)
-		{
-			this.FindActiveRenderers();
-		}
-		this.tableOwner.builderRenderer.AddPiece(this);
-		this.SetDirectRenderersVisible(this.tableOwner.IsInBuilderZone());
-	}
-
-	private void FindActiveRenderers()
-	{
-		if (this.renderingDirect.Count > 0)
-		{
-			foreach (MeshRenderer meshRenderer in this.renderingDirect)
-			{
-				meshRenderer.enabled = true;
-			}
-		}
-		this.renderingDirect.Clear();
-		BuilderPiece.tempRenderers.Clear();
-		base.GetComponentsInChildren<MeshRenderer>(false, BuilderPiece.tempRenderers);
-		foreach (MeshRenderer meshRenderer2 in BuilderPiece.tempRenderers)
-		{
-			if (meshRenderer2.enabled)
-			{
-				this.renderingDirect.Add(meshRenderer2);
-			}
-		}
-	}
-
-	public void SetDirectRenderersVisible(bool visible)
-	{
-		if (this.renderingDirect != null && this.renderingDirect.Count > 0)
-		{
-			foreach (MeshRenderer meshRenderer in this.renderingDirect)
-			{
-				meshRenderer.enabled = visible;
-			}
-		}
-	}
-
-	private void SetChildrenState(BuilderPiece.State newState, bool force)
-	{
-		BuilderPiece builderPiece = this.firstChildPiece;
-		while (builderPiece != null)
-		{
-			builderPiece.SetState(newState, force);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	public void OnCreate()
-	{
-		for (int i = 0; i < this.pieceComponents.Count; i++)
-		{
-			this.pieceComponents[i].OnPieceCreate(this.pieceType, this.pieceId);
-		}
-	}
-
-	public void OnPlacementDeserialized()
-	{
-		for (int i = 0; i < this.pieceComponents.Count; i++)
-		{
-			this.pieceComponents[i].OnPiecePlacementDeserialized();
-		}
-	}
-
-	public void PlayPlacementFx()
-	{
-		this.PlayFX(this.fXInfo.placeVFX);
-	}
-
-	public void PlayDisconnectFx()
-	{
-		this.PlayFX(this.fXInfo.disconnectVFX);
-	}
-
-	public void PlayGrabbedFx()
-	{
-		this.PlayFX(this.fXInfo.grabbedVFX);
-	}
-
-	public void PlayTooHeavyFx()
-	{
-		this.PlayFX(this.fXInfo.tooHeavyVFX);
-	}
-
-	public void PlayLocationLockFx()
-	{
-		this.PlayFX(this.fXInfo.locationLockVFX);
-	}
-
-	public void PlayRecycleFx()
-	{
-		this.PlayFX(this.fXInfo.recycleVFX);
-	}
-
-	private void PlayFX(GameObject fx)
-	{
-		ObjectPools.instance.Instantiate(fx, base.transform.position, true);
-	}
-
-	public static BuilderPiece GetBuilderPieceFromCollider(Collider collider)
-	{
-		if (collider == null)
-		{
-			return null;
-		}
-		BuilderPieceCollider component = collider.GetComponent<BuilderPieceCollider>();
-		if (!(component == null))
-		{
-			return component.piece;
-		}
-		return null;
-	}
-
-	public static BuilderPiece GetBuilderPieceFromTransform(Transform transform)
-	{
-		while (transform != null)
-		{
-			BuilderPiece component = transform.GetComponent<BuilderPiece>();
-			if (component != null)
-			{
-				return component;
-			}
-			transform = transform.parent;
-		}
-		return null;
-	}
-
-	public static void MakePieceRoot(BuilderPiece piece)
-	{
-		if (piece == null)
-		{
-			return;
-		}
-		if (piece.parentPiece == null || piece.parentPiece.isBuiltIntoTable)
-		{
-			return;
-		}
-		BuilderPiece.MakePieceRoot(piece.parentPiece);
-		int newAttachIndex = piece.parentAttachIndex;
-		int newParentAttachIndex = piece.attachIndex;
-		BuilderPiece builderPiece = piece.parentPiece;
-		bool ignoreSnaps = true;
-		piece.ClearParentPiece(ignoreSnaps);
-		builderPiece.SetParentPiece(newAttachIndex, piece, newParentAttachIndex);
-	}
-
-	public BuilderPiece GetRootPiece()
-	{
-		BuilderPiece builderPiece = this;
-		while (builderPiece.parentPiece != null && !builderPiece.parentPiece.isBuiltIntoTable)
-		{
-			builderPiece = builderPiece.parentPiece;
-		}
-		return builderPiece;
-	}
-
-	public bool IsPrivatePlot()
-	{
-		return this.isPrivatePlot;
-	}
-
-	public bool TryGetPlotComponent(out BuilderPiecePrivatePlot plot)
-	{
-		plot = this.plotComponent;
-		return this.isPrivatePlot;
-	}
-
-	public static bool CanPlayerAttachPieceToPiece(int playerActorNumber, BuilderPiece attachingPiece, BuilderPiece attachToPiece)
-	{
-		if (attachToPiece.state != BuilderPiece.State.AttachedAndPlaced && !attachToPiece.IsPrivatePlot() && attachToPiece.state != BuilderPiece.State.AttachedToArm)
-		{
-			return true;
-		}
-		BuilderPiece attachedBuiltInPiece = attachToPiece.GetAttachedBuiltInPiece();
-		if (attachedBuiltInPiece == null || (!attachedBuiltInPiece.isPrivatePlot && !attachedBuiltInPiece.isArmShelf))
-		{
-			return true;
-		}
-		if (attachedBuiltInPiece.isArmShelf)
-		{
-			return attachedBuiltInPiece.heldByPlayerActorNumber == playerActorNumber && attachedBuiltInPiece.armShelf != null && attachedBuiltInPiece.armShelf.CanAttachToArmPiece();
-		}
-		BuilderPiecePrivatePlot builderPiecePrivatePlot;
-		return !attachedBuiltInPiece.TryGetPlotComponent(out builderPiecePrivatePlot) || (builderPiecePrivatePlot.CanPlayerAttachToPlot(playerActorNumber) && builderPiecePrivatePlot.IsChainUnderCapacity(attachingPiece));
-	}
-
-	public bool CanPlayerGrabPiece(int actorNumber, Vector3 worldPosition)
-	{
-		if (this.state != BuilderPiece.State.AttachedAndPlaced && !this.isPrivatePlot)
-		{
-			return true;
-		}
-		BuilderPiece attachedBuiltInPiece = this.GetAttachedBuiltInPiece();
-		BuilderPiecePrivatePlot builderPiecePrivatePlot;
-		return attachedBuiltInPiece == null || !attachedBuiltInPiece.isPrivatePlot || !attachedBuiltInPiece.TryGetPlotComponent(out builderPiecePrivatePlot) || builderPiecePrivatePlot.CanPlayerGrabFromPlot(actorNumber, worldPosition) || this.tableOwner.IsLocationWithinSharedBuildArea(worldPosition);
-	}
-
-	public bool IsPieceMoving()
-	{
-		if (this.state != BuilderPiece.State.AttachedAndPlaced)
-		{
-			return false;
-		}
-		if (this.attachPlayerToPiece)
-		{
-			return true;
-		}
-		if (this.attachIndex < 0 || this.attachIndex >= this.gridPlanes.Count)
-		{
-			return false;
-		}
-		if (this.gridPlanes[this.attachIndex].IsAttachedToMovingGrid())
-		{
-			return true;
-		}
-		using (List<BuilderAttachGridPlane>.Enumerator enumerator = this.gridPlanes.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current.isMoving)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public BuilderPiece GetAttachedBuiltInPiece()
-	{
-		if (this.isBuiltIntoTable)
-		{
-			return this;
-		}
-		if (this.state != BuilderPiece.State.AttachedAndPlaced)
-		{
-			return null;
-		}
-		BuilderPiece rootPiece = this.GetRootPiece();
-		if (rootPiece.parentPiece != null)
-		{
-			rootPiece = rootPiece.parentPiece;
-		}
-		if (rootPiece.isBuiltIntoTable)
-		{
-			return rootPiece;
-		}
-		return null;
-	}
-
-	public int GetChainCostAndCount(int[] costArray)
-	{
-		for (int i = 0; i < costArray.Length; i++)
-		{
-			costArray[i] = 0;
-		}
-		foreach (BuilderResourceQuantity builderResourceQuantity in this.cost.quantities)
-		{
-			if (builderResourceQuantity.type >= BuilderResourceType.Basic && builderResourceQuantity.type < BuilderResourceType.Count)
-			{
-				costArray[(int)builderResourceQuantity.type] += builderResourceQuantity.count;
-			}
-		}
-		return 1 + this.GetChildCountAndCost(costArray);
-	}
-
-	public int GetChildCountAndCost(int[] costArray)
-	{
-		int num = 0;
-		BuilderPiece builderPiece = this.firstChildPiece;
-		while (builderPiece != null)
-		{
-			num++;
-			foreach (BuilderResourceQuantity builderResourceQuantity in builderPiece.cost.quantities)
-			{
-				if (builderResourceQuantity.type >= BuilderResourceType.Basic && builderResourceQuantity.type < BuilderResourceType.Count)
-				{
-					costArray[(int)builderResourceQuantity.type] += builderResourceQuantity.count;
-				}
-			}
-			num += builderPiece.GetChildCountAndCost(costArray);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-		return num;
-	}
-
-	public int GetChildCount()
-	{
-		int num = 0;
-		foreach (BuilderAttachGridPlane builderAttachGridPlane in this.gridPlanes)
-		{
-			num += builderAttachGridPlane.GetChildCount();
-		}
-		return num;
-	}
-
-	public void GetChainCost(int[] costArray)
-	{
-		for (int i = 0; i < costArray.Length; i++)
-		{
-			costArray[i] = 0;
-		}
-		foreach (BuilderResourceQuantity builderResourceQuantity in this.cost.quantities)
-		{
-			if (builderResourceQuantity.type >= BuilderResourceType.Basic && builderResourceQuantity.type < BuilderResourceType.Count)
-			{
-				costArray[(int)builderResourceQuantity.type] += builderResourceQuantity.count;
-			}
-		}
-		this.AddChildCost(costArray);
-	}
-
-	public void AddChildCost(int[] costArray)
-	{
-		int num = 0;
-		BuilderPiece builderPiece = this.firstChildPiece;
-		while (builderPiece != null)
-		{
-			num++;
-			foreach (BuilderResourceQuantity builderResourceQuantity in builderPiece.cost.quantities)
-			{
-				if (builderResourceQuantity.type >= BuilderResourceType.Basic && builderResourceQuantity.type < BuilderResourceType.Count)
-				{
-					costArray[(int)builderResourceQuantity.type] += builderResourceQuantity.count;
-				}
-			}
-			builderPiece.AddChildCost(costArray);
-			builderPiece = builderPiece.nextSiblingPiece;
-		}
-	}
-
-	public void BumpTwistToPositionRotation(byte twist, sbyte xOffset, sbyte zOffset, int potentialAttachIndex, BuilderAttachGridPlane potentialParentGridPlane, out Vector3 localPosition, out Quaternion localRotation, out Vector3 worldPosition, out Quaternion worldRotation)
-	{
-		float gridSize = this.tableOwner.gridSize;
-		BuilderAttachGridPlane builderAttachGridPlane = this.gridPlanes[potentialAttachIndex];
-		bool flag = (long)(twist % 2) == 1L;
-		Transform center = potentialParentGridPlane.center;
-		Vector3 position = center.position;
-		Quaternion rotation = center.rotation;
-		float num = flag ? builderAttachGridPlane.lengthOffset : builderAttachGridPlane.widthOffset;
-		float num2 = flag ? builderAttachGridPlane.widthOffset : builderAttachGridPlane.lengthOffset;
-		float num3 = num - potentialParentGridPlane.widthOffset;
-		float num4 = num2 - potentialParentGridPlane.lengthOffset;
-		Quaternion quaternion = Quaternion.Euler(0f, (float)twist * 90f, 0f);
-		Quaternion lhs = rotation * quaternion;
-		float x = (float)xOffset * gridSize + num3;
-		float z = (float)zOffset * gridSize + num4;
-		Vector3 point = new Vector3(x, 0f, z);
-		Vector3 a = position + rotation * point;
-		Transform center2 = builderAttachGridPlane.center;
-		Quaternion quaternion2 = lhs * Quaternion.Inverse(center2.localRotation);
-		Vector3 point2 = base.transform.InverseTransformPoint(center2.position);
-		Vector3 vector = a - quaternion2 * point2;
-		localPosition = potentialParentGridPlane.transform.InverseTransformPoint(vector);
-		localRotation = quaternion * Quaternion.Inverse(center2.localRotation);
-		worldPosition = vector;
-		worldRotation = quaternion2;
-	}
-
-	public Quaternion TwistToLocalRotation(byte twist, int potentialAttachIndex)
-	{
-		float y = 90f * (float)twist;
-		Quaternion quaternion = Quaternion.Euler(0f, y, 0f);
-		if (potentialAttachIndex < 0 || potentialAttachIndex >= this.gridPlanes.Count)
-		{
-			return quaternion;
-		}
-		BuilderAttachGridPlane builderAttachGridPlane = this.gridPlanes[potentialAttachIndex];
-		Transform transform = (builderAttachGridPlane.center != null) ? builderAttachGridPlane.center : builderAttachGridPlane.transform;
-		return quaternion * Quaternion.Inverse(transform.localRotation);
-	}
-
-	public int GetPiecePlacement()
-	{
-		byte pieceTwist = this.GetPieceTwist();
-		sbyte xOffset;
-		sbyte zOffset;
-		this.GetPieceBumpOffset(pieceTwist, out xOffset, out zOffset);
-		return BuilderTable.PackPiecePlacement(pieceTwist, xOffset, zOffset);
-	}
-
-	public byte GetPieceTwist()
-	{
-		if (this.attachIndex == -1)
-		{
-			return 0;
-		}
-		Quaternion localRotation = base.transform.localRotation;
-		BuilderAttachGridPlane builderAttachGridPlane = this.gridPlanes[this.attachIndex];
-		Quaternion rotation = localRotation * builderAttachGridPlane.transform.localRotation;
-		float num = 0.866f;
-		Vector3 lhs = rotation * Vector3.forward;
-		float num2 = Vector3.Dot(lhs, Vector3.forward);
-		float num3 = Vector3.Dot(lhs, Vector3.right);
-		bool flag = Mathf.Abs(num2) > num;
-		bool flag2 = Mathf.Abs(num3) > num;
-		if (!flag && !flag2)
-		{
-			return 0;
-		}
-		uint num4;
-		if (flag)
-		{
-			num4 = ((num2 > 0f) ? 0U : 2U);
-		}
-		else
-		{
-			num4 = ((num3 > 0f) ? 1U : 3U);
-		}
-		return (byte)num4;
-	}
-
-	public void GetPieceBumpOffset(byte twist, out sbyte xOffset, out sbyte zOffset)
-	{
-		if (this.attachIndex == -1 || this.parentPiece == null)
-		{
-			xOffset = 0;
-			zOffset = 0;
-			return;
-		}
-		float gridSize = this.tableOwner.gridSize;
-		BuilderAttachGridPlane builderAttachGridPlane = this.gridPlanes[this.attachIndex];
-		BuilderAttachGridPlane builderAttachGridPlane2 = this.parentPiece.gridPlanes[this.parentAttachIndex];
-		bool flag = (long)(twist % 2) == 1L;
-		float num = flag ? builderAttachGridPlane.lengthOffset : builderAttachGridPlane.widthOffset;
-		float num2 = flag ? builderAttachGridPlane.widthOffset : builderAttachGridPlane.lengthOffset;
-		float num3 = num - builderAttachGridPlane2.widthOffset;
-		float num4 = num2 - builderAttachGridPlane2.lengthOffset;
-		Vector3 position = builderAttachGridPlane.center.position;
-		Vector3 position2 = builderAttachGridPlane2.center.position;
-		Vector3 vector = Quaternion.Inverse(builderAttachGridPlane2.center.rotation) * (position - position2);
-		xOffset = (sbyte)Mathf.RoundToInt((vector.x - num3) / gridSize);
-		zOffset = (sbyte)Mathf.RoundToInt((vector.z - num4) / gridSize);
+	public enum State
+	{
+		None = -1,
+		AttachedAndPlaced,
+		AttachedToDropped,
+		Grabbed,
+		Dropped,
+		OnShelf,
+		Displayed,
+		GrabbedLocal,
+		OnConveyor,
+		AttachedToArm
 	}
 
 	public const int INVALID = -1;
@@ -1595,7 +179,7 @@ public class BuilderPiece : MonoBehaviour
 	private int oldCollisionTimeIndex;
 
 	[HideInInspector]
-	public BuilderPiece.State state;
+	public State state;
 
 	[HideInInspector]
 	public bool isStatic;
@@ -1627,17 +211,1397 @@ public class BuilderPiece : MonoBehaviour
 
 	private static List<MeshRenderer> tempRenderers = new List<MeshRenderer>(48);
 
-	public enum State
+	private void Awake()
 	{
-		None = -1,
-		AttachedAndPlaced,
-		AttachedToDropped,
-		Grabbed,
-		Dropped,
-		OnShelf,
-		Displayed,
-		GrabbedLocal,
-		OnConveyor,
-		AttachedToArm
+		if (fXInfo == null)
+		{
+			Debug.LogErrorFormat("BuilderPiece {0} is missing Effect Info", base.gameObject.name);
+		}
+		materialType = -1;
+		pieceType = -1;
+		pieceId = -1;
+		pieceDataIndex = -1;
+		state = State.None;
+		isStatic = true;
+		parentPiece = null;
+		firstChildPiece = null;
+		nextSiblingPiece = null;
+		attachIndex = -1;
+		parentAttachIndex = -1;
+		parentHeld = null;
+		heldByPlayerActorNumber = -1;
+		placedOnlyColliders = new List<Collider>(4);
+		List<Collider> list = new List<Collider>(4);
+		foreach (GameObject item in onlyWhenPlaced)
+		{
+			list.Clear();
+			item.GetComponentsInChildren(list);
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (!list[i].isTrigger)
+				{
+					BuilderPieceCollider builderPieceCollider = list[i].GetComponent<BuilderPieceCollider>();
+					if (builderPieceCollider == null)
+					{
+						builderPieceCollider = list[i].AddComponent<BuilderPieceCollider>();
+					}
+					builderPieceCollider.piece = this;
+					placedOnlyColliders.Add(list[i]);
+				}
+			}
+		}
+		SetActive(onlyWhenPlaced, active: false);
+		SetActive(onlyWhenNotPlaced, active: true);
+		colliders = new List<Collider>(4);
+		GetComponentsInChildren(colliders);
+		for (int num = colliders.Count - 1; num >= 0; num--)
+		{
+			if (colliders[num].isTrigger)
+			{
+				colliders.RemoveAt(num);
+			}
+			else
+			{
+				BuilderPieceCollider builderPieceCollider2 = colliders[num].GetComponent<BuilderPieceCollider>();
+				if (builderPieceCollider2 == null)
+				{
+					builderPieceCollider2 = colliders[num].AddComponent<BuilderPieceCollider>();
+				}
+				builderPieceCollider2.piece = this;
+			}
+		}
+		gridPlanes = new List<BuilderAttachGridPlane>(8);
+		GetComponentsInChildren(gridPlanes);
+		pieceComponents = new List<IBuilderPieceComponent>(1);
+		GetComponentsInChildren(includeInactive: true, pieceComponents);
+		pieceComponentsActive = false;
+		functionalPieceComponent = GetComponentInChildren<IBuilderPieceFunctional>(includeInactive: true);
+		SetCollidersEnabled(colliders, enabled: false);
+		SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+		preventSnapUntilMoved = 0;
+		preventSnapUntilMovedFromPos = Vector3.zero;
+		renderingIndirect = new List<MeshRenderer>(4);
+		renderingDirect = new List<MeshRenderer>(4);
+		FindActiveRenderers();
+		paintingCount = 0;
+		potentialGrabCount = 0;
+		potentialGrabChildCount = 0;
+		isPrivatePlot = plotComponent != null;
+		privatePlotIndex = -1;
+		ClearCollisionHistory();
+	}
+
+	public void SetTable(BuilderTable table)
+	{
+		tableOwner = table;
+	}
+
+	public BuilderTable GetTable()
+	{
+		return tableOwner;
+	}
+
+	public void OnReturnToPool()
+	{
+		tableOwner.builderRenderer.RemovePiece(this);
+		for (int i = 0; i < pieceComponents.Count; i++)
+		{
+			pieceComponents[i].OnPieceDestroy();
+		}
+		functionalPieceState = 0;
+		state = State.None;
+		isStatic = true;
+		materialType = -1;
+		pieceType = -1;
+		pieceId = -1;
+		pieceDataIndex = -1;
+		parentPiece = null;
+		firstChildPiece = null;
+		nextSiblingPiece = null;
+		attachIndex = -1;
+		parentAttachIndex = -1;
+		overrideSavedPiece = false;
+		savedMaterialType = -1;
+		savedPieceType = -1;
+		shelfOwner = -1;
+		parentHeld = null;
+		heldByPlayerActorNumber = -1;
+		activatedTimeStamp = 0;
+		forcedFrozen = false;
+		SetActive(onlyWhenPlaced, active: false);
+		SetActive(onlyWhenNotPlaced, active: true);
+		SetCollidersEnabled(colliders, enabled: false);
+		SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+		preventSnapUntilMoved = 0;
+		preventSnapUntilMovedFromPos = Vector3.zero;
+		base.transform.localScale = Vector3.one;
+		if (isArmShelf)
+		{
+			if (armShelf != null)
+			{
+				armShelf.piece = null;
+			}
+			armShelf = null;
+		}
+		for (int j = 0; j < gridPlanes.Count; j++)
+		{
+			gridPlanes[j].OnReturnToPool(tableOwner.builderPool);
+		}
+	}
+
+	public void OnCreatedByPool()
+	{
+		materialSwapTargets = new List<MeshRenderer>(4);
+		GetComponentsInChildren(areMeshesToggledOnPlace, materialSwapTargets);
+		surfaceOverrides = new List<GorillaSurfaceOverride>(4);
+		GetComponentsInChildren(areMeshesToggledOnPlace, surfaceOverrides);
+	}
+
+	public void SetupPiece(float gridSize)
+	{
+		for (int i = 0; i < gridPlanes.Count; i++)
+		{
+			gridPlanes[i].Setup(this, i, gridSize);
+		}
+	}
+
+	public void SetMaterial(int inMaterialType, bool force = false)
+	{
+		if (materialOptions == null || materialSwapTargets == null || materialSwapTargets.Count < 1 || (materialType == inMaterialType && !force))
+		{
+			return;
+		}
+		materialType = inMaterialType;
+		Material material = null;
+		int soundIndex = -1;
+		if (inMaterialType == -1)
+		{
+			materialOptions.GetDefaultMaterial(out materialType, out material, out soundIndex);
+		}
+		else
+		{
+			materialOptions.GetMaterialFromType(materialType, out material, out soundIndex);
+			if (material == null)
+			{
+				materialOptions.GetDefaultMaterial(out materialType, out material, out soundIndex);
+			}
+		}
+		if (material == null)
+		{
+			Debug.LogErrorFormat("Piece {0} has no material matching Type {1}", GetPieceId(), inMaterialType);
+			return;
+		}
+		foreach (MeshRenderer materialSwapTarget in materialSwapTargets)
+		{
+			if (!(materialSwapTarget == null) && materialSwapTarget.enabled)
+			{
+				materialSwapTarget.material = material;
+			}
+		}
+		if (surfaceOverrides != null && soundIndex != -1)
+		{
+			foreach (GorillaSurfaceOverride surfaceOverride in surfaceOverrides)
+			{
+				surfaceOverride.overrideIndex = soundIndex;
+			}
+		}
+		if (renderingIndirect.Count > 0)
+		{
+			tableOwner.builderRenderer.ChangePieceIndirectMaterial(this, materialSwapTargets, material);
+		}
+	}
+
+	public int GetPieceId()
+	{
+		return pieceId;
+	}
+
+	public int GetParentPieceId()
+	{
+		if (!(parentPiece == null))
+		{
+			return parentPiece.pieceId;
+		}
+		return -1;
+	}
+
+	public int GetAttachIndex()
+	{
+		return attachIndex;
+	}
+
+	public int GetParentAttachIndex()
+	{
+		return parentAttachIndex;
+	}
+
+	private void SetPieceActive(List<IBuilderPieceComponent> components, bool active)
+	{
+		if (components == null || active == pieceComponentsActive)
+		{
+			return;
+		}
+		pieceComponentsActive = active;
+		for (int i = 0; i < components.Count; i++)
+		{
+			if (components[i] != null)
+			{
+				if (active)
+				{
+					components[i].OnPieceActivate();
+				}
+				else
+				{
+					components[i].OnPieceDeactivate();
+				}
+			}
+		}
+	}
+
+	private void SetBehavioursEnabled<T>(List<T> components, bool enabled) where T : Behaviour
+	{
+		if (components == null)
+		{
+			return;
+		}
+		for (int i = 0; i < components.Count; i++)
+		{
+			if (components[i] != null)
+			{
+				components[i].enabled = enabled;
+			}
+		}
+	}
+
+	public void UpdateCollidersEnabled(bool _enabled)
+	{
+		SetCollidersEnabled(colliders, _enabled);
+	}
+
+	private void SetCollidersEnabled<T>(List<T> components, bool enabled) where T : Collider
+	{
+		if (components == null)
+		{
+			return;
+		}
+		for (int i = 0; i < components.Count; i++)
+		{
+			if (components[i] != null)
+			{
+				components[i].enabled = enabled;
+			}
+		}
+	}
+
+	public void SetColliderLayers<T>(List<T> components, int layer) where T : Collider
+	{
+		currentColliderLayer = layer;
+		if (components == null)
+		{
+			return;
+		}
+		for (int i = 0; i < components.Count; i++)
+		{
+			if (components[i] != null)
+			{
+				components[i].gameObject.layer = layer;
+			}
+		}
+	}
+
+	private void SetActive(List<GameObject> gameObjects, bool active)
+	{
+		if (gameObjects == null)
+		{
+			return;
+		}
+		for (int i = 0; i < gameObjects.Count; i++)
+		{
+			if (gameObjects[i] != null)
+			{
+				gameObjects[i].SetActive(active);
+			}
+		}
+	}
+
+	public void SetFunctionalPieceState(byte fState, NetPlayer instigator, int timeStamp)
+	{
+		if (functionalPieceComponent == null || !functionalPieceComponent.IsStateValid(fState))
+		{
+			fState = 0;
+		}
+		functionalPieceState = fState;
+		functionalPieceComponent?.OnStateChanged(fState, instigator, timeStamp);
+	}
+
+	public void SetScale(float scale)
+	{
+		if (scaleRoot != null)
+		{
+			scaleRoot.localScale = Vector3.one * scale;
+		}
+		pieceScale = scale;
+	}
+
+	public float GetScale()
+	{
+		return pieceScale;
+	}
+
+	public void PaintingTint(bool enable)
+	{
+		if (enable)
+		{
+			paintingCount++;
+			if (paintingCount == 1)
+			{
+				RefreshTint();
+			}
+		}
+		else
+		{
+			paintingCount--;
+			if (paintingCount == 0)
+			{
+				RefreshTint();
+			}
+		}
+	}
+
+	public void PotentialGrab(bool enable)
+	{
+		if (enable)
+		{
+			potentialGrabCount++;
+			if (potentialGrabCount == 1 && potentialGrabChildCount == 0)
+			{
+				RefreshTint();
+			}
+		}
+		else
+		{
+			potentialGrabCount--;
+			if (potentialGrabCount == 0 && potentialGrabChildCount == 0)
+			{
+				RefreshTint();
+			}
+		}
+	}
+
+	public static void PotentialGrabChildren(BuilderPiece piece, bool enable)
+	{
+		BuilderPiece builderPiece = piece.firstChildPiece;
+		while (builderPiece != null)
+		{
+			if (enable)
+			{
+				builderPiece.potentialGrabChildCount++;
+				if (builderPiece.potentialGrabChildCount == 1 && builderPiece.potentialGrabCount == 0)
+				{
+					builderPiece.RefreshTint();
+				}
+			}
+			else
+			{
+				builderPiece.potentialGrabChildCount--;
+				if (builderPiece.potentialGrabChildCount == 0 && builderPiece.potentialGrabCount == 0)
+				{
+					builderPiece.RefreshTint();
+				}
+			}
+			PotentialGrabChildren(builderPiece, enable);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	private void RefreshTint()
+	{
+		if (potentialGrabCount > 0 || potentialGrabChildCount > 0)
+		{
+			SetTint(tableOwner.potentialGrabTint);
+			return;
+		}
+		if (paintingCount > 0)
+		{
+			SetTint(tableOwner.paintingTint);
+			return;
+		}
+		switch (state)
+		{
+		case State.OnShelf:
+		case State.OnConveyor:
+			SetTint(tableOwner.shelfTint);
+			break;
+		case State.Grabbed:
+		case State.GrabbedLocal:
+		case State.AttachedToArm:
+			SetTint(tableOwner.grabbedTint);
+			break;
+		case State.AttachedToDropped:
+		case State.Dropped:
+			SetTint(tableOwner.droppedTint);
+			break;
+		default:
+			SetTint(tableOwner.defaultTint);
+			break;
+		}
+	}
+
+	private void SetTint(float tint)
+	{
+		if (tint != this.tint)
+		{
+			this.tint = tint;
+			tableOwner.builderRenderer.SetPieceTint(this, tint);
+		}
+	}
+
+	public void SetParentPiece(int newAttachIndex, BuilderPiece newParentPiece, int newParentAttachIndex)
+	{
+		if (parentHeld != null)
+		{
+			Debug.LogErrorFormat(newParentPiece.gameObject, "Cannot attach to piece {0} while already held", (newParentPiece == null) ? null : newParentPiece.gameObject.name);
+			return;
+		}
+		RemovePieceFromParent(this);
+		attachIndex = newAttachIndex;
+		parentPiece = newParentPiece;
+		parentAttachIndex = newParentAttachIndex;
+		AddPieceToParent(this);
+		Transform parent = null;
+		if (newParentPiece != null)
+		{
+			parent = ((newParentAttachIndex < 0) ? newParentPiece.transform : newParentPiece.gridPlanes[newParentAttachIndex].transform);
+		}
+		base.transform.SetParent(parent, worldPositionStays: true);
+		requestedParentPiece = null;
+		tableOwner.UpdatePieceData(this);
+	}
+
+	public void ClearParentPiece(bool ignoreSnaps = false)
+	{
+		if (parentPiece == null)
+		{
+			if (!ignoreSnaps)
+			{
+				RemoveOverlapsWithDifferentPieceRoot(this, this, tableOwner.builderPool);
+			}
+			return;
+		}
+		_ = parentPiece;
+		RemovePieceFromParent(this);
+		attachIndex = -1;
+		parentPiece = null;
+		parentAttachIndex = -1;
+		base.transform.SetParent(null, worldPositionStays: true);
+		requestedParentPiece = null;
+		tableOwner.UpdatePieceData(this);
+		if (!ignoreSnaps)
+		{
+			RemoveOverlapsWithDifferentPieceRoot(this, GetRootPiece(), tableOwner.builderPool);
+		}
+	}
+
+	public static void RemoveOverlapsWithDifferentPieceRoot(BuilderPiece piece, BuilderPiece root, BuilderPool pool)
+	{
+		for (int i = 0; i < piece.gridPlanes.Count; i++)
+		{
+			piece.gridPlanes[i].RemoveSnapsWithDifferentRoot(root, pool);
+		}
+		BuilderPiece builderPiece = piece.firstChildPiece;
+		while (builderPiece != null)
+		{
+			RemoveOverlapsWithDifferentPieceRoot(builderPiece, root, pool);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	private void AddPieceToParent(BuilderPiece piece)
+	{
+		BuilderPiece builderPiece = piece.parentPiece;
+		if (!(builderPiece == null))
+		{
+			nextSiblingPiece = builderPiece.firstChildPiece;
+			builderPiece.firstChildPiece = piece;
+			if (piece.parentAttachIndex >= 0 && piece.parentAttachIndex < builderPiece.gridPlanes.Count)
+			{
+				builderPiece.gridPlanes[piece.parentAttachIndex].ChangeChildPieceCount(1 + piece.GetChildCount());
+			}
+		}
+	}
+
+	private static void RemovePieceFromParent(BuilderPiece piece)
+	{
+		BuilderPiece builderPiece = piece.parentPiece;
+		if (builderPiece == null)
+		{
+			return;
+		}
+		BuilderPiece builderPiece2 = builderPiece.firstChildPiece;
+		if (builderPiece2 == null)
+		{
+			Debug.LogErrorFormat("Parent {0} of piece {1} doesn't have any children", builderPiece.name, piece.name);
+		}
+		bool flag = false;
+		if (builderPiece2 == piece)
+		{
+			builderPiece.firstChildPiece = builderPiece2.nextSiblingPiece;
+			flag = true;
+		}
+		else
+		{
+			while (builderPiece2 != null)
+			{
+				if (builderPiece2.nextSiblingPiece == piece)
+				{
+					builderPiece2.nextSiblingPiece = piece.nextSiblingPiece;
+					piece.nextSiblingPiece = null;
+					flag = true;
+					break;
+				}
+				builderPiece2 = builderPiece2.nextSiblingPiece;
+			}
+		}
+		if (!flag)
+		{
+			Debug.LogErrorFormat("Parent {0} of piece {1} doesn't have the piece a child", builderPiece.name, piece.name);
+		}
+		else if (piece.parentAttachIndex >= 0 && piece.parentAttachIndex < builderPiece.gridPlanes.Count)
+		{
+			builderPiece.gridPlanes[piece.parentAttachIndex].ChangeChildPieceCount(-1 * (1 + piece.GetChildCount()));
+		}
+	}
+
+	public void SetParentHeld(Transform parentHeld, int heldByPlayerActorNumber, bool heldInLeftHand)
+	{
+		if (parentPiece != null)
+		{
+			Debug.LogErrorFormat(parentPiece.gameObject, "Cannot hold while already attached to piece {0}", parentPiece.gameObject.name);
+			return;
+		}
+		this.heldByPlayerActorNumber = heldByPlayerActorNumber;
+		this.parentHeld = parentHeld;
+		this.heldInLeftHand = heldInLeftHand;
+		base.transform.SetParent(parentHeld);
+		tableOwner.UpdatePieceData(this);
+		if (heldByPlayerActorNumber != -1)
+		{
+			OnGrabbedAsRoot();
+		}
+		else
+		{
+			OnReleasedAsRoot();
+		}
+	}
+
+	public void ClearParentHeld()
+	{
+		if (!(parentHeld == null))
+		{
+			if (isArmShelf && armShelf != null)
+			{
+				armShelf.piece = null;
+				armShelf = null;
+			}
+			heldByPlayerActorNumber = -1;
+			parentHeld = null;
+			heldInLeftHand = false;
+			base.transform.SetParent(parentHeld);
+			tableOwner.UpdatePieceData(this);
+			OnReleasedAsRoot();
+		}
+	}
+
+	public bool IsHeldLocal()
+	{
+		if (heldByPlayerActorNumber != -1)
+		{
+			return heldByPlayerActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+		}
+		return false;
+	}
+
+	public bool IsHeldBy(int actorNumber)
+	{
+		if (actorNumber != -1)
+		{
+			return heldByPlayerActorNumber == actorNumber;
+		}
+		return false;
+	}
+
+	public bool IsHeldInLeftHand()
+	{
+		return heldInLeftHand;
+	}
+
+	public static bool IsDroppedState(State state)
+	{
+		if (state != State.Dropped && state != State.AttachedToDropped && state != State.OnShelf)
+		{
+			return state == State.OnConveyor;
+		}
+		return true;
+	}
+
+	public void SetActivateTimeStamp(int timeStamp)
+	{
+		activatedTimeStamp = timeStamp;
+		BuilderPiece builderPiece = firstChildPiece;
+		while (builderPiece != null)
+		{
+			builderPiece.SetActivateTimeStamp(timeStamp);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	public void SetState(State newState, bool force = false)
+	{
+		if (newState == this.state && !force)
+		{
+			if (newState == State.Grabbed)
+			{
+				int expectedGrabCollisionLayer = GetExpectedGrabCollisionLayer();
+				if (currentColliderLayer != expectedGrabCollisionLayer)
+				{
+					SetColliderLayers(colliders, expectedGrabCollisionLayer);
+					SetChildrenCollisionLayer(expectedGrabCollisionLayer);
+				}
+			}
+			return;
+		}
+		if (newState == State.Dropped && this.state != State.Dropped)
+		{
+			tableOwner.AddPieceToDropList(this);
+		}
+		else if (this.state == State.Dropped && newState != State.Dropped)
+		{
+			tableOwner.RemovePieceFromDropList(this);
+		}
+		State state = this.state;
+		this.state = newState;
+		if (pieceDataIndex >= 0)
+		{
+			tableOwner.UpdatePieceData(this);
+		}
+		switch (this.state)
+		{
+		case State.AttachedAndPlaced:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: true);
+			SetActive(onlyWhenPlaced, active: true);
+			SetActive(onlyWhenNotPlaced, active: false);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.placedLayer);
+			SetChildrenState(State.AttachedAndPlaced, force);
+			SetStatic(isStatic: false, force || areMeshesToggledOnPlace);
+			SetPieceActive(pieceComponents, active: true);
+			RefreshTint();
+			break;
+		case State.AttachedToDropped:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.droppedLayer);
+			SetChildrenState(State.AttachedToDropped, force);
+			SetStatic(isStatic: false, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.Grabbed:
+		{
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			int expectedGrabCollisionLayer2 = GetExpectedGrabCollisionLayer();
+			SetColliderLayers(colliders, expectedGrabCollisionLayer2);
+			SetChildrenState(State.Grabbed, force);
+			SetStatic(isStatic: false, force || (areMeshesToggledOnPlace && state == State.AttachedAndPlaced));
+			SetPieceActive(pieceComponents, active: false);
+			SetActivateTimeStamp(0);
+			RefreshTint();
+			forcedFrozen = false;
+			break;
+		}
+		case State.GrabbedLocal:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.heldLayerLocal);
+			SetChildrenState(State.GrabbedLocal, force);
+			SetStatic(isStatic: false, force || (areMeshesToggledOnPlace && state == State.AttachedAndPlaced));
+			SetPieceActive(pieceComponents, active: false);
+			SetActivateTimeStamp(0);
+			RefreshTint();
+			forcedFrozen = false;
+			break;
+		case State.Dropped:
+			ClearCollisionHistory();
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: false);
+			SetColliderLayers(colliders, BuilderTable.droppedLayer);
+			SetChildrenState(State.AttachedToDropped, force);
+			SetStatic(isStatic: false, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.OnShelf:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.droppedLayer);
+			SetChildrenState(State.OnShelf, force);
+			SetStatic(isStatic: true, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.Displayed:
+			SetCollidersEnabled(colliders, enabled: false);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetChildrenState(State.Displayed, force);
+			SetStatic(isStatic: false, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.OnConveyor:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.droppedLayer);
+			SetChildrenState(State.OnConveyor, force);
+			SetStatic(isStatic: false, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.AttachedToArm:
+			SetCollidersEnabled(colliders, enabled: true);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true);
+			SetColliderLayers(colliders, BuilderTable.heldLayerLocal);
+			SetChildrenState(State.AttachedToArm, force);
+			SetStatic(isStatic: false, force);
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		case State.None:
+			SetCollidersEnabled(colliders, enabled: false);
+			SetBehavioursEnabled(onlyWhenPlacedBehaviours, enabled: false);
+			SetActive(onlyWhenPlaced, active: false);
+			SetActive(onlyWhenNotPlaced, active: true);
+			SetKinematic(kinematic: true, destroyImmediate: false);
+			SetColliderLayers(colliders, BuilderTable.droppedLayer);
+			SetChildrenState(State.None, force);
+			tableOwner.builderRenderer.RemovePiece(this);
+			isStatic = true;
+			SetPieceActive(pieceComponents, active: false);
+			RefreshTint();
+			break;
+		}
+	}
+
+	public void OnGrabbedAsRoot()
+	{
+		if (!isArmShelf && heldByPlayerActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber && !listeningToHandLinks)
+		{
+			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Combine(TakeMyHand_HandLink.OnHandLinkChanged, new Action(UpdateGrabbedPieceCollisionLayer));
+			listeningToHandLinks = true;
+		}
+	}
+
+	public void OnReleasedAsRoot()
+	{
+		if (!isArmShelf && listeningToHandLinks)
+		{
+			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Remove(TakeMyHand_HandLink.OnHandLinkChanged, new Action(UpdateGrabbedPieceCollisionLayer));
+			listeningToHandLinks = false;
+		}
+	}
+
+	public void SetKinematic(bool kinematic, bool destroyImmediate = true)
+	{
+		if (kinematic && rigidBody != null)
+		{
+			if (destroyImmediate)
+			{
+				UnityEngine.Object.DestroyImmediate(rigidBody);
+				rigidBody = null;
+			}
+			else
+			{
+				UnityEngine.Object.Destroy(rigidBody);
+				rigidBody = null;
+			}
+		}
+		else if (!kinematic && rigidBody == null)
+		{
+			rigidBody = base.gameObject.GetComponent<Rigidbody>();
+			if (rigidBody != null)
+			{
+				Debug.LogErrorFormat("We should never already have a rigid body here {0} {1}", pieceId, pieceType);
+			}
+			if (rigidBody == null)
+			{
+				rigidBody = base.gameObject.AddComponent<Rigidbody>();
+			}
+			if (rigidBody != null)
+			{
+				rigidBody.isKinematic = kinematic;
+			}
+		}
+		if (rigidBody != null)
+		{
+			rigidBody.mass = 1f;
+		}
+	}
+
+	public void ClearCollisionHistory()
+	{
+		if (collisionEnterHistory == null)
+		{
+			collisionEnterHistory = new float[collisionEnterLimit];
+		}
+		for (int i = 0; i < collisionEnterLimit; i++)
+		{
+			collisionEnterHistory[i] = float.MinValue;
+		}
+		collidersEntered.Clear();
+		oldCollisionTimeIndex = 0;
+		forcedFrozen = false;
+	}
+
+	private void OnCollisionEnter(Collision other)
+	{
+		if (state != State.Dropped || forcedFrozen)
+		{
+			return;
+		}
+		BuilderPieceCollider component = other.collider.GetComponent<BuilderPieceCollider>();
+		if (!(component != null))
+		{
+			return;
+		}
+		BuilderPiece piece = component.piece;
+		if ((piece.state == State.AttachedAndPlaced || piece.forcedFrozen) && !collidersEntered.Add(other.collider.GetInstanceID()))
+		{
+			if (collisionEnterHistory[oldCollisionTimeIndex] > Time.time)
+			{
+				tableOwner.FreezeDroppedPiece(this);
+				return;
+			}
+			collisionEnterHistory[oldCollisionTimeIndex] = Time.time + collisionEnterCooldown;
+			oldCollisionTimeIndex = ++oldCollisionTimeIndex % collisionEnterLimit;
+		}
+	}
+
+	public int GetExpectedGrabCollisionLayer()
+	{
+		if (heldByPlayerActorNumber != -1)
+		{
+			if (!GorillaTagger.Instance.offlineVRRig.IsInHandHoldChainWithOtherPlayer(heldByPlayerActorNumber))
+			{
+				return BuilderTable.heldLayer;
+			}
+			return BuilderTable.heldLayerLocal;
+		}
+		if (parentPiece != null)
+		{
+			return parentPiece.currentColliderLayer;
+		}
+		return BuilderTable.heldLayer;
+	}
+
+	public void UpdateGrabbedPieceCollisionLayer()
+	{
+		int expectedGrabCollisionLayer = GetExpectedGrabCollisionLayer();
+		if (currentColliderLayer != expectedGrabCollisionLayer)
+		{
+			SetColliderLayers(colliders, expectedGrabCollisionLayer);
+			SetChildrenCollisionLayer(expectedGrabCollisionLayer);
+		}
+	}
+
+	private void SetChildrenCollisionLayer(int layer)
+	{
+		BuilderPiece builderPiece = firstChildPiece;
+		while (builderPiece != null)
+		{
+			builderPiece.SetColliderLayers(builderPiece.colliders, layer);
+			builderPiece.SetChildrenCollisionLayer(layer);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	public void SetStatic(bool isStatic, bool force = false)
+	{
+		isStatic = true;
+		if (this.isStatic != isStatic || force)
+		{
+			SetDirectRenderersVisible(visible: true);
+			tableOwner.builderRenderer.RemovePiece(this);
+			this.isStatic = isStatic;
+			if (areMeshesToggledOnPlace)
+			{
+				FindActiveRenderers();
+			}
+			tableOwner.builderRenderer.AddPiece(this);
+			SetDirectRenderersVisible(tableOwner.IsInBuilderZone());
+		}
+	}
+
+	private void FindActiveRenderers()
+	{
+		if (renderingDirect.Count > 0)
+		{
+			foreach (MeshRenderer item in renderingDirect)
+			{
+				item.enabled = true;
+			}
+		}
+		renderingDirect.Clear();
+		tempRenderers.Clear();
+		GetComponentsInChildren(includeInactive: false, tempRenderers);
+		foreach (MeshRenderer tempRenderer in tempRenderers)
+		{
+			if (tempRenderer.enabled)
+			{
+				renderingDirect.Add(tempRenderer);
+			}
+		}
+	}
+
+	public void SetDirectRenderersVisible(bool visible)
+	{
+		if (renderingDirect == null || renderingDirect.Count <= 0)
+		{
+			return;
+		}
+		foreach (MeshRenderer item in renderingDirect)
+		{
+			item.enabled = visible;
+		}
+	}
+
+	private void SetChildrenState(State newState, bool force)
+	{
+		BuilderPiece builderPiece = firstChildPiece;
+		while (builderPiece != null)
+		{
+			builderPiece.SetState(newState, force);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	public void OnCreate()
+	{
+		for (int i = 0; i < pieceComponents.Count; i++)
+		{
+			pieceComponents[i].OnPieceCreate(pieceType, pieceId);
+		}
+	}
+
+	public void OnPlacementDeserialized()
+	{
+		for (int i = 0; i < pieceComponents.Count; i++)
+		{
+			pieceComponents[i].OnPiecePlacementDeserialized();
+		}
+	}
+
+	public void PlayPlacementFx()
+	{
+		PlayFX(fXInfo.placeVFX);
+	}
+
+	public void PlayDisconnectFx()
+	{
+		PlayFX(fXInfo.disconnectVFX);
+	}
+
+	public void PlayGrabbedFx()
+	{
+		PlayFX(fXInfo.grabbedVFX);
+	}
+
+	public void PlayTooHeavyFx()
+	{
+		PlayFX(fXInfo.tooHeavyVFX);
+	}
+
+	public void PlayLocationLockFx()
+	{
+		PlayFX(fXInfo.locationLockVFX);
+	}
+
+	public void PlayRecycleFx()
+	{
+		PlayFX(fXInfo.recycleVFX);
+	}
+
+	private void PlayFX(GameObject fx)
+	{
+		ObjectPools.instance.Instantiate(fx, base.transform.position);
+	}
+
+	public static BuilderPiece GetBuilderPieceFromCollider(Collider collider)
+	{
+		if (collider == null)
+		{
+			return null;
+		}
+		BuilderPieceCollider component = collider.GetComponent<BuilderPieceCollider>();
+		if (!(component == null))
+		{
+			return component.piece;
+		}
+		return null;
+	}
+
+	public static BuilderPiece GetBuilderPieceFromTransform(Transform transform)
+	{
+		while (transform != null)
+		{
+			BuilderPiece component = transform.GetComponent<BuilderPiece>();
+			if (component != null)
+			{
+				return component;
+			}
+			transform = transform.parent;
+		}
+		return null;
+	}
+
+	public static void MakePieceRoot(BuilderPiece piece)
+	{
+		if (!(piece == null) && !(piece.parentPiece == null) && !piece.parentPiece.isBuiltIntoTable)
+		{
+			MakePieceRoot(piece.parentPiece);
+			int newAttachIndex = piece.parentAttachIndex;
+			int newParentAttachIndex = piece.attachIndex;
+			BuilderPiece builderPiece = piece.parentPiece;
+			bool ignoreSnaps = true;
+			piece.ClearParentPiece(ignoreSnaps);
+			builderPiece.SetParentPiece(newAttachIndex, piece, newParentAttachIndex);
+		}
+	}
+
+	public BuilderPiece GetRootPiece()
+	{
+		BuilderPiece builderPiece = this;
+		while (builderPiece.parentPiece != null && !builderPiece.parentPiece.isBuiltIntoTable)
+		{
+			builderPiece = builderPiece.parentPiece;
+		}
+		return builderPiece;
+	}
+
+	public bool IsPrivatePlot()
+	{
+		return isPrivatePlot;
+	}
+
+	public bool TryGetPlotComponent(out BuilderPiecePrivatePlot plot)
+	{
+		plot = plotComponent;
+		if (!isPrivatePlot)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool CanPlayerAttachPieceToPiece(int playerActorNumber, BuilderPiece attachingPiece, BuilderPiece attachToPiece)
+	{
+		if (attachToPiece.state != State.AttachedAndPlaced && !attachToPiece.IsPrivatePlot() && attachToPiece.state != State.AttachedToArm)
+		{
+			return true;
+		}
+		BuilderPiece attachedBuiltInPiece = attachToPiece.GetAttachedBuiltInPiece();
+		if (attachedBuiltInPiece == null || (!attachedBuiltInPiece.isPrivatePlot && !attachedBuiltInPiece.isArmShelf))
+		{
+			return true;
+		}
+		if (attachedBuiltInPiece.isArmShelf)
+		{
+			if (attachedBuiltInPiece.heldByPlayerActorNumber == playerActorNumber && attachedBuiltInPiece.armShelf != null)
+			{
+				return attachedBuiltInPiece.armShelf.CanAttachToArmPiece();
+			}
+			return false;
+		}
+		if (attachedBuiltInPiece.TryGetPlotComponent(out var plot))
+		{
+			if (plot.CanPlayerAttachToPlot(playerActorNumber))
+			{
+				return plot.IsChainUnderCapacity(attachingPiece);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public bool CanPlayerGrabPiece(int actorNumber, Vector3 worldPosition)
+	{
+		if (state != State.AttachedAndPlaced && !isPrivatePlot)
+		{
+			return true;
+		}
+		BuilderPiece attachedBuiltInPiece = GetAttachedBuiltInPiece();
+		if (attachedBuiltInPiece == null || !attachedBuiltInPiece.isPrivatePlot)
+		{
+			return true;
+		}
+		if (attachedBuiltInPiece.TryGetPlotComponent(out var plot))
+		{
+			if (plot.CanPlayerGrabFromPlot(actorNumber, worldPosition))
+			{
+				return true;
+			}
+			return tableOwner.IsLocationWithinSharedBuildArea(worldPosition);
+		}
+		return true;
+	}
+
+	public bool IsPieceMoving()
+	{
+		if (state != State.AttachedAndPlaced)
+		{
+			return false;
+		}
+		if (attachPlayerToPiece)
+		{
+			return true;
+		}
+		if (attachIndex < 0 || attachIndex >= gridPlanes.Count)
+		{
+			return false;
+		}
+		if (gridPlanes[attachIndex].IsAttachedToMovingGrid())
+		{
+			return true;
+		}
+		foreach (BuilderAttachGridPlane gridPlane in gridPlanes)
+		{
+			if (gridPlane.isMoving)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public BuilderPiece GetAttachedBuiltInPiece()
+	{
+		if (isBuiltIntoTable)
+		{
+			return this;
+		}
+		if (state != State.AttachedAndPlaced)
+		{
+			return null;
+		}
+		BuilderPiece rootPiece = GetRootPiece();
+		if (rootPiece.parentPiece != null)
+		{
+			rootPiece = rootPiece.parentPiece;
+		}
+		if (rootPiece.isBuiltIntoTable)
+		{
+			return rootPiece;
+		}
+		return null;
+	}
+
+	public int GetChainCostAndCount(int[] costArray)
+	{
+		for (int i = 0; i < costArray.Length; i++)
+		{
+			costArray[i] = 0;
+		}
+		foreach (BuilderResourceQuantity quantity in cost.quantities)
+		{
+			if (quantity.type >= BuilderResourceType.Basic && quantity.type < BuilderResourceType.Count)
+			{
+				costArray[(int)quantity.type] += quantity.count;
+			}
+		}
+		return 1 + GetChildCountAndCost(costArray);
+	}
+
+	public int GetChildCountAndCost(int[] costArray)
+	{
+		int num = 0;
+		BuilderPiece builderPiece = firstChildPiece;
+		while (builderPiece != null)
+		{
+			num++;
+			foreach (BuilderResourceQuantity quantity in builderPiece.cost.quantities)
+			{
+				if (quantity.type >= BuilderResourceType.Basic && quantity.type < BuilderResourceType.Count)
+				{
+					costArray[(int)quantity.type] += quantity.count;
+				}
+			}
+			num += builderPiece.GetChildCountAndCost(costArray);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+		return num;
+	}
+
+	public int GetChildCount()
+	{
+		int num = 0;
+		foreach (BuilderAttachGridPlane gridPlane in gridPlanes)
+		{
+			num += gridPlane.GetChildCount();
+		}
+		return num;
+	}
+
+	public void GetChainCost(int[] costArray)
+	{
+		for (int i = 0; i < costArray.Length; i++)
+		{
+			costArray[i] = 0;
+		}
+		foreach (BuilderResourceQuantity quantity in cost.quantities)
+		{
+			if (quantity.type >= BuilderResourceType.Basic && quantity.type < BuilderResourceType.Count)
+			{
+				costArray[(int)quantity.type] += quantity.count;
+			}
+		}
+		AddChildCost(costArray);
+	}
+
+	public void AddChildCost(int[] costArray)
+	{
+		int num = 0;
+		BuilderPiece builderPiece = firstChildPiece;
+		while (builderPiece != null)
+		{
+			num++;
+			foreach (BuilderResourceQuantity quantity in builderPiece.cost.quantities)
+			{
+				if (quantity.type >= BuilderResourceType.Basic && quantity.type < BuilderResourceType.Count)
+				{
+					costArray[(int)quantity.type] += quantity.count;
+				}
+			}
+			builderPiece.AddChildCost(costArray);
+			builderPiece = builderPiece.nextSiblingPiece;
+		}
+	}
+
+	public void BumpTwistToPositionRotation(byte twist, sbyte xOffset, sbyte zOffset, int potentialAttachIndex, BuilderAttachGridPlane potentialParentGridPlane, out Vector3 localPosition, out Quaternion localRotation, out Vector3 worldPosition, out Quaternion worldRotation)
+	{
+		float gridSize = tableOwner.gridSize;
+		BuilderAttachGridPlane builderAttachGridPlane = gridPlanes[potentialAttachIndex];
+		bool num = (long)(twist % 2) == 1;
+		Transform center = potentialParentGridPlane.center;
+		Vector3 position = center.position;
+		Quaternion rotation = center.rotation;
+		float num2 = (num ? builderAttachGridPlane.lengthOffset : builderAttachGridPlane.widthOffset);
+		float num3 = (num ? builderAttachGridPlane.widthOffset : builderAttachGridPlane.lengthOffset);
+		float num4 = num2 - potentialParentGridPlane.widthOffset;
+		float num5 = num3 - potentialParentGridPlane.lengthOffset;
+		Quaternion quaternion = Quaternion.Euler(0f, (float)(int)twist * 90f, 0f);
+		Quaternion quaternion2 = rotation * quaternion;
+		float x = (float)xOffset * gridSize + num4;
+		float z = (float)zOffset * gridSize + num5;
+		Vector3 vector = new Vector3(x, 0f, z);
+		Vector3 vector2 = position + rotation * vector;
+		Transform center2 = builderAttachGridPlane.center;
+		Quaternion quaternion3 = quaternion2 * Quaternion.Inverse(center2.localRotation);
+		Vector3 vector3 = base.transform.InverseTransformPoint(center2.position);
+		Vector3 vector4 = vector2 - quaternion3 * vector3;
+		localPosition = potentialParentGridPlane.transform.InverseTransformPoint(vector4);
+		localRotation = quaternion * Quaternion.Inverse(center2.localRotation);
+		worldPosition = vector4;
+		worldRotation = quaternion3;
+	}
+
+	public Quaternion TwistToLocalRotation(byte twist, int potentialAttachIndex)
+	{
+		float y = 90f * (float)(int)twist;
+		Quaternion quaternion = Quaternion.Euler(0f, y, 0f);
+		if (potentialAttachIndex < 0 || potentialAttachIndex >= gridPlanes.Count)
+		{
+			return quaternion;
+		}
+		BuilderAttachGridPlane builderAttachGridPlane = gridPlanes[potentialAttachIndex];
+		Transform transform = ((builderAttachGridPlane.center != null) ? builderAttachGridPlane.center : builderAttachGridPlane.transform);
+		return quaternion * Quaternion.Inverse(transform.localRotation);
+	}
+
+	public int GetPiecePlacement()
+	{
+		byte pieceTwist = GetPieceTwist();
+		GetPieceBumpOffset(pieceTwist, out var xOffset, out var zOffset);
+		return BuilderTable.PackPiecePlacement(pieceTwist, xOffset, zOffset);
+	}
+
+	public byte GetPieceTwist()
+	{
+		if (attachIndex == -1)
+		{
+			return 0;
+		}
+		Quaternion localRotation = base.transform.localRotation;
+		BuilderAttachGridPlane builderAttachGridPlane = gridPlanes[attachIndex];
+		Quaternion quaternion = localRotation * builderAttachGridPlane.transform.localRotation;
+		float num = 0.866f;
+		Vector3 lhs = quaternion * Vector3.forward;
+		float num2 = Vector3.Dot(lhs, Vector3.forward);
+		float num3 = Vector3.Dot(lhs, Vector3.right);
+		bool flag = Mathf.Abs(num2) > num;
+		bool flag2 = Mathf.Abs(num3) > num;
+		if (!(flag || flag2))
+		{
+			return 0;
+		}
+		uint num4 = 0u;
+		num4 = ((!flag) ? ((num3 > 0f) ? 1u : 3u) : ((!(num2 > 0f)) ? 2u : 0u));
+		return (byte)num4;
+	}
+
+	public void GetPieceBumpOffset(byte twist, out sbyte xOffset, out sbyte zOffset)
+	{
+		if (attachIndex == -1 || parentPiece == null)
+		{
+			xOffset = 0;
+			zOffset = 0;
+			return;
+		}
+		float gridSize = tableOwner.gridSize;
+		BuilderAttachGridPlane builderAttachGridPlane = gridPlanes[attachIndex];
+		BuilderAttachGridPlane builderAttachGridPlane2 = parentPiece.gridPlanes[parentAttachIndex];
+		bool num = (long)(twist % 2) == 1;
+		float num2 = (num ? builderAttachGridPlane.lengthOffset : builderAttachGridPlane.widthOffset);
+		float num3 = (num ? builderAttachGridPlane.widthOffset : builderAttachGridPlane.lengthOffset);
+		float num4 = num2 - builderAttachGridPlane2.widthOffset;
+		float num5 = num3 - builderAttachGridPlane2.lengthOffset;
+		Vector3 position = builderAttachGridPlane.center.position;
+		Vector3 position2 = builderAttachGridPlane2.center.position;
+		Vector3 vector = Quaternion.Inverse(builderAttachGridPlane2.center.rotation) * (position - position2);
+		xOffset = (sbyte)Mathf.RoundToInt((vector.x - num4) / gridSize);
+		zOffset = (sbyte)Mathf.RoundToInt((vector.z - num5) / gridSize);
 	}
 }

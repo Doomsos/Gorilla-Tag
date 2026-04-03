@@ -1,14 +1,12 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class DeactivateOnAwake : MonoBehaviour
 {
-	public class DeactivateOnAwake : MonoBehaviour
+	private void Awake()
 	{
-		private void Awake()
-		{
-			base.gameObject.SetActive(false);
-			Object.Destroy(this);
-		}
+		base.gameObject.SetActive(value: false);
+		Object.Destroy(this);
 	}
 }

@@ -1,40 +1,39 @@
-﻿using System;
 using GorillaNetworking;
 
 public class UnlockCompButton : GorillaPressableButton
 {
+	public string gameMode;
+
+	private bool initialized;
+
 	public override void Start()
 	{
-		this.initialized = false;
+		initialized = false;
 	}
 
 	public void Update()
 	{
-		if (this.testPress)
+		if (testPress)
 		{
-			this.testPress = false;
-			this.ButtonActivation();
+			testPress = false;
+			ButtonActivation();
 		}
-		if (!this.initialized && GorillaComputer.instance != null)
+		if (!initialized && GorillaComputer.instance != null)
 		{
-			this.isOn = GorillaComputer.instance.allowedInCompetitive;
-			this.UpdateColor();
-			this.initialized = true;
+			isOn = GorillaComputer.instance.allowedInCompetitive;
+			UpdateColor();
+			initialized = true;
 		}
 	}
 
 	public override void ButtonActivation()
 	{
-		if (!this.isOn)
+		if (!isOn)
 		{
 			base.ButtonActivation();
 			GorillaComputer.instance.CompQueueUnlockButtonPress();
-			this.isOn = true;
-			this.UpdateColor();
+			isOn = true;
+			UpdateColor();
 		}
 	}
-
-	public string gameMode;
-
-	private bool initialized;
 }

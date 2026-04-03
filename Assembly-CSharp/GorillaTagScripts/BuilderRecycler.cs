@@ -1,245 +1,236 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderRecycler : MonoBehaviour
 {
-	public class BuilderRecycler : MonoBehaviour
+	public float recycleEffectDuration = 0.25f;
+
+	private double timeToStopBlades = double.MinValue;
+
+	private bool playingBladeEffect;
+
+	private bool playingPipeEffect;
+
+	private double timeToCheckPipes = double.MinValue;
+
+	public List<MonoBehaviour> effectBehaviors;
+
+	public GameObject recycleParticles;
+
+	public SoundBankPlayer bladeSoundPlayer;
+
+	public List<MeshRenderer> outputPipes;
+
+	public BuilderResourceColors builderResourceColors;
+
+	private bool hasFans;
+
+	private bool hasPipes;
+
+	private MaterialPropertyBlock props;
+
+	private int[] totalRecycledCost;
+
+	private int[] currentChainCost;
+
+	private int numPipes;
+
+	internal int recyclerID = -1;
+
+	internal BuilderTable table;
+
+	private List<Renderer> zoneRenderers = new List<Renderer>(10);
+
+	private bool inBuilderZone;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-			this.hasFans = (this.effectBehaviors.Count > 0 && this.bladeSoundPlayer != null && this.recycleParticles != null);
-			this.hasPipes = (this.outputPipes.Count > 0);
-		}
+		hasFans = effectBehaviors.Count > 0 && bladeSoundPlayer != null && recycleParticles != null;
+		hasPipes = outputPipes.Count > 0;
+	}
 
-		private void Start()
+	private void Start()
+	{
+		if (hasPipes)
 		{
-			if (this.hasPipes)
+			numPipes = Mathf.Min(outputPipes.Count, 3);
+			props = new MaterialPropertyBlock();
+			ResetOutputPipes();
+			totalRecycledCost = new int[3];
+			currentChainCost = new int[3];
+			for (int i = 0; i < totalRecycledCost.Length; i++)
 			{
-				this.numPipes = Mathf.Min(this.outputPipes.Count, 3);
-				this.props = new MaterialPropertyBlock();
-				this.ResetOutputPipes();
-				this.totalRecycledCost = new int[3];
-				this.currentChainCost = new int[3];
-				for (int i = 0; i < this.totalRecycledCost.Length; i++)
+				totalRecycledCost[i] = 0;
+				currentChainCost[i] = 0;
+			}
+		}
+		zoneRenderers.Clear();
+		if (hasPipes)
+		{
+			zoneRenderers.AddRange(outputPipes);
+		}
+		if (hasFans)
+		{
+			foreach (MonoBehaviour effectBehavior in effectBehaviors)
+			{
+				Renderer component = effectBehavior.GetComponent<Renderer>();
+				if (component != null)
 				{
-					this.totalRecycledCost[i] = 0;
-					this.currentChainCost[i] = 0;
+					zoneRenderers.Add(component);
 				}
 			}
-			this.zoneRenderers.Clear();
-			if (this.hasPipes)
-			{
-				this.zoneRenderers.AddRange(this.outputPipes);
-			}
-			if (this.hasFans)
-			{
-				foreach (MonoBehaviour monoBehaviour in this.effectBehaviors)
-				{
-					Renderer component = monoBehaviour.GetComponent<Renderer>();
-					if (component != null)
-					{
-						this.zoneRenderers.Add(component);
-					}
-				}
-			}
-			this.inBuilderZone = true;
+		}
+		inBuilderZone = true;
+		ZoneManagement instance = ZoneManagement.instance;
+		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(OnZoneChanged));
+		OnZoneChanged();
+	}
+
+	private void OnDestroy()
+	{
+		if (ZoneManagement.instance != null)
+		{
 			ZoneManagement instance = ZoneManagement.instance;
-			instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
-			this.OnZoneChanged();
+			instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(OnZoneChanged));
 		}
+	}
 
-		private void OnDestroy()
+	private void OnZoneChanged()
+	{
+		bool flag = ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks);
+		if (flag && !inBuilderZone)
 		{
-			if (ZoneManagement.instance != null)
+			foreach (Renderer zoneRenderer in zoneRenderers)
 			{
-				ZoneManagement instance = ZoneManagement.instance;
-				instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.OnZoneChanged));
+				zoneRenderer.enabled = true;
 			}
 		}
-
-		private void OnZoneChanged()
+		else if (!flag && inBuilderZone)
 		{
-			bool flag = ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks);
-			if (flag && !this.inBuilderZone)
+			foreach (Renderer zoneRenderer2 in zoneRenderers)
 			{
-				using (List<Renderer>.Enumerator enumerator = this.zoneRenderers.GetEnumerator())
+				zoneRenderer2.enabled = false;
+			}
+		}
+		inBuilderZone = flag;
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(other);
+		if (!(builderPieceFromCollider == null) && !builderPieceFromCollider.isBuiltIntoTable && !builderPieceFromCollider.isArmShelf)
+		{
+			table.RequestRecyclePiece(builderPieceFromCollider, playFX: true, recyclerID);
+		}
+	}
+
+	public void OnRecycleRequestedAtRecycler(BuilderPiece piece)
+	{
+		if (hasPipes)
+		{
+			AddPieceCost(piece.cost);
+		}
+		if (!hasFans)
+		{
+			return;
+		}
+		foreach (MonoBehaviour effectBehavior in effectBehaviors)
+		{
+			effectBehavior.enabled = true;
+		}
+		recycleParticles.SetActive(value: true);
+		bladeSoundPlayer.Play();
+		timeToStopBlades = Time.time + recycleEffectDuration;
+		playingBladeEffect = true;
+	}
+
+	private void AddPieceCost(BuilderResources cost)
+	{
+		foreach (BuilderResourceQuantity quantity in cost.quantities)
+		{
+			if (quantity.type >= BuilderResourceType.Basic && quantity.type < BuilderResourceType.Count)
+			{
+				totalRecycledCost[(int)quantity.type] += quantity.count;
+			}
+		}
+		if (!playingPipeEffect)
+		{
+			UpdatePipeLoop();
+		}
+	}
+
+	private Vector2 GetUVShiftOffset()
+	{
+		float y = Shader.GetGlobalVector(ShaderProps._Time).y;
+		Vector4 vector = new Vector4(500f, 0f, 0f, 0f);
+		return new Vector2(-1f * (Mathf.Floor(y * (vector / recycleEffectDuration).x) * 1f / vector.x % 1f) * vector.x - vector.x + 165f, 0f);
+	}
+
+	private void UpdatePipeLoop()
+	{
+		bool flag = false;
+		for (int i = 0; i < numPipes; i++)
+		{
+			if (totalRecycledCost[i] > 0)
+			{
+				flag = true;
+				outputPipes[i].GetPropertyBlock(props, 1);
+				Vector4 value = new Vector4(500f, 0f, 0f, 0f) / recycleEffectDuration;
+				Vector2 uVShiftOffset = GetUVShiftOffset();
+				props.SetColor(ShaderProps._BaseColor, builderResourceColors.colors[i].color);
+				props.SetVector(ShaderProps._UvShiftRate, value);
+				props.SetVector(ShaderProps._UvShiftOffset, uVShiftOffset);
+				outputPipes[i].SetPropertyBlock(props, 1);
+				totalRecycledCost[i] = Mathf.Max(totalRecycledCost[i] - 1, 0);
+			}
+			else
+			{
+				outputPipes[i].GetPropertyBlock(props, 1);
+				props.SetColor(ShaderProps._BaseColor, Color.black);
+				outputPipes[i].SetPropertyBlock(props, 1);
+			}
+		}
+		if (flag)
+		{
+			playingPipeEffect = true;
+			timeToCheckPipes = Time.time + recycleEffectDuration;
+		}
+		else
+		{
+			playingPipeEffect = false;
+		}
+	}
+
+	private void ResetOutputPipes()
+	{
+		foreach (MeshRenderer outputPipe in outputPipes)
+		{
+			outputPipe.GetPropertyBlock(props, 1);
+			props.SetColor(ShaderProps._BaseColor, Color.black);
+			outputPipe.SetPropertyBlock(props, 1);
+		}
+	}
+
+	public void UpdateRecycler()
+	{
+		if (playingBladeEffect && (double)Time.time > timeToStopBlades)
+		{
+			if (hasFans)
+			{
+				foreach (MonoBehaviour effectBehavior in effectBehaviors)
 				{
-					while (enumerator.MoveNext())
-					{
-						Renderer renderer = enumerator.Current;
-						renderer.enabled = true;
-					}
-					goto IL_8B;
+					effectBehavior.enabled = false;
 				}
+				recycleParticles.SetActive(value: false);
 			}
-			if (!flag && this.inBuilderZone)
-			{
-				foreach (Renderer renderer2 in this.zoneRenderers)
-				{
-					renderer2.enabled = false;
-				}
-			}
-			IL_8B:
-			this.inBuilderZone = flag;
+			playingBladeEffect = false;
 		}
-
-		private void OnTriggerEnter(Collider other)
+		if (playingPipeEffect && (double)Time.time > timeToCheckPipes)
 		{
-			BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(other);
-			if (builderPieceFromCollider == null)
-			{
-				return;
-			}
-			if (!builderPieceFromCollider.isBuiltIntoTable && !builderPieceFromCollider.isArmShelf)
-			{
-				this.table.RequestRecyclePiece(builderPieceFromCollider, true, this.recyclerID);
-			}
+			UpdatePipeLoop();
 		}
-
-		public void OnRecycleRequestedAtRecycler(BuilderPiece piece)
-		{
-			if (this.hasPipes)
-			{
-				this.AddPieceCost(piece.cost);
-			}
-			if (this.hasFans)
-			{
-				foreach (MonoBehaviour monoBehaviour in this.effectBehaviors)
-				{
-					monoBehaviour.enabled = true;
-				}
-				this.recycleParticles.SetActive(true);
-				this.bladeSoundPlayer.Play();
-				this.timeToStopBlades = (double)(Time.time + this.recycleEffectDuration);
-				this.playingBladeEffect = true;
-			}
-		}
-
-		private void AddPieceCost(BuilderResources cost)
-		{
-			foreach (BuilderResourceQuantity builderResourceQuantity in cost.quantities)
-			{
-				if (builderResourceQuantity.type >= BuilderResourceType.Basic && builderResourceQuantity.type < BuilderResourceType.Count)
-				{
-					this.totalRecycledCost[(int)builderResourceQuantity.type] += builderResourceQuantity.count;
-				}
-			}
-			if (!this.playingPipeEffect)
-			{
-				this.UpdatePipeLoop();
-			}
-		}
-
-		private Vector2 GetUVShiftOffset()
-		{
-			float y = Shader.GetGlobalVector(ShaderProps._Time).y;
-			Vector4 vector = new Vector4(500f, 0f, 0f, 0f);
-			Vector4 vector2 = vector / this.recycleEffectDuration;
-			return new Vector2(-1f * (Mathf.Floor(y * vector2.x) * 1f / vector.x % 1f) * vector.x - vector.x + 165f, 0f);
-		}
-
-		private void UpdatePipeLoop()
-		{
-			bool flag = false;
-			for (int i = 0; i < this.numPipes; i++)
-			{
-				if (this.totalRecycledCost[i] > 0)
-				{
-					flag = true;
-					this.outputPipes[i].GetPropertyBlock(this.props, 1);
-					Vector4 value = new Vector4(500f, 0f, 0f, 0f) / this.recycleEffectDuration;
-					Vector2 uvshiftOffset = this.GetUVShiftOffset();
-					this.props.SetColor(ShaderProps._BaseColor, this.builderResourceColors.colors[i].color);
-					this.props.SetVector(ShaderProps._UvShiftRate, value);
-					this.props.SetVector(ShaderProps._UvShiftOffset, uvshiftOffset);
-					this.outputPipes[i].SetPropertyBlock(this.props, 1);
-					this.totalRecycledCost[i] = Mathf.Max(this.totalRecycledCost[i] - 1, 0);
-				}
-				else
-				{
-					this.outputPipes[i].GetPropertyBlock(this.props, 1);
-					this.props.SetColor(ShaderProps._BaseColor, Color.black);
-					this.outputPipes[i].SetPropertyBlock(this.props, 1);
-				}
-			}
-			if (flag)
-			{
-				this.playingPipeEffect = true;
-				this.timeToCheckPipes = (double)(Time.time + this.recycleEffectDuration);
-				return;
-			}
-			this.playingPipeEffect = false;
-		}
-
-		private void ResetOutputPipes()
-		{
-			foreach (MeshRenderer meshRenderer in this.outputPipes)
-			{
-				meshRenderer.GetPropertyBlock(this.props, 1);
-				this.props.SetColor(ShaderProps._BaseColor, Color.black);
-				meshRenderer.SetPropertyBlock(this.props, 1);
-			}
-		}
-
-		public void UpdateRecycler()
-		{
-			if (this.playingBladeEffect && (double)Time.time > this.timeToStopBlades)
-			{
-				if (this.hasFans)
-				{
-					foreach (MonoBehaviour monoBehaviour in this.effectBehaviors)
-					{
-						monoBehaviour.enabled = false;
-					}
-					this.recycleParticles.SetActive(false);
-				}
-				this.playingBladeEffect = false;
-			}
-			if (this.playingPipeEffect && (double)Time.time > this.timeToCheckPipes)
-			{
-				this.UpdatePipeLoop();
-			}
-		}
-
-		public float recycleEffectDuration = 0.25f;
-
-		private double timeToStopBlades = double.MinValue;
-
-		private bool playingBladeEffect;
-
-		private bool playingPipeEffect;
-
-		private double timeToCheckPipes = double.MinValue;
-
-		public List<MonoBehaviour> effectBehaviors;
-
-		public GameObject recycleParticles;
-
-		public SoundBankPlayer bladeSoundPlayer;
-
-		public List<MeshRenderer> outputPipes;
-
-		public BuilderResourceColors builderResourceColors;
-
-		private bool hasFans;
-
-		private bool hasPipes;
-
-		private MaterialPropertyBlock props;
-
-		private int[] totalRecycledCost;
-
-		private int[] currentChainCost;
-
-		private int numPipes;
-
-		internal int recyclerID = -1;
-
-		internal BuilderTable table;
-
-		private List<Renderer> zoneRenderers = new List<Renderer>(10);
-
-		private bool inBuilderZone;
 	}
 }

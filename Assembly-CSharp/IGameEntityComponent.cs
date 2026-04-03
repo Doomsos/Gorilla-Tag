@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface IGameEntityComponent
 {
 	void OnEntityInit();

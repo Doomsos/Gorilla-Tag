@@ -1,190 +1,179 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+public class CosmeticItemInstance
 {
-	public class CosmeticItemInstance
+	public List<GameObject> leftObjects = new List<GameObject>();
+
+	public List<GameObject> rightObjects = new List<GameObject>();
+
+	public List<GameObject> objects = new List<GameObject>();
+
+	public List<GameObject> holdableObjects = new List<GameObject>();
+
+	public List<Renderer> allRenderers = new List<Renderer>();
+
+	public List<ParticleSystem> allParticles = new List<ParticleSystem>();
+
+	public CosmeticAnchorAntiIntersectOffsets clippingOffsets;
+
+	public bool isHoldableItem;
+
+	public string dbgname;
+
+	private BodyDockPositions _bodyDockPositions;
+
+	private VRRigAnchorOverrides _anchorOverrides;
+
+	private CosmeticsController.CosmeticSlots _activeSlot;
+
+	public CosmeticsController.CosmeticSlots ActiveSlot => _activeSlot;
+
+	private void EnableItem(GameObject obj, bool enable)
 	{
-		public CosmeticsController.CosmeticSlots ActiveSlot
+		try
 		{
-			get
+			obj.SetActive(enable);
+		}
+		catch (Exception arg)
+		{
+			Debug.LogError($"Exception while enabling cosmetic: {arg}");
+		}
+	}
+
+	private void ApplyClippingOffsets(bool itemEnabled)
+	{
+		if (!(_bodyDockPositions == null) && _anchorOverrides != null)
+		{
+			if (clippingOffsets.nameTag.enabled)
 			{
-				return this._activeSlot;
+				_anchorOverrides.UpdateNameTagOffset(itemEnabled ? clippingOffsets.nameTag.offset : XformOffset.Identity, itemEnabled, _activeSlot);
+			}
+			if (clippingOffsets.leftArm.enabled)
+			{
+				_anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnLeftArm, clippingOffsets.leftArm.offset, itemEnabled, _bodyDockPositions.leftArmTransform);
+			}
+			if (clippingOffsets.rightArm.enabled)
+			{
+				_anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnRightArm, clippingOffsets.rightArm.offset, itemEnabled, _bodyDockPositions.rightArmTransform);
+			}
+			if (clippingOffsets.chest.enabled)
+			{
+				_anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnChest, clippingOffsets.chest.offset, itemEnabled, _anchorOverrides.chestDefaultTransform);
+			}
+			if (clippingOffsets.huntComputer.enabled)
+			{
+				_anchorOverrides.UpdateHuntWatchOffset(clippingOffsets.huntComputer.offset, itemEnabled);
+			}
+			if (clippingOffsets.badge.enabled)
+			{
+				_anchorOverrides.UpdateBadgeOffset(itemEnabled ? clippingOffsets.badge.offset : XformOffset.Identity, itemEnabled, _activeSlot);
+			}
+			if (clippingOffsets.builderWatch.enabled)
+			{
+				_anchorOverrides.UpdateBuilderWatchOffset(clippingOffsets.builderWatch.offset, itemEnabled);
+			}
+			if (clippingOffsets.friendshipBraceletLeft.enabled)
+			{
+				_anchorOverrides.UpdateFriendshipBraceletOffset(clippingOffsets.friendshipBraceletLeft.offset, left: true, itemEnabled);
+			}
+			if (clippingOffsets.friendshipBraceletRight.enabled)
+			{
+				_anchorOverrides.UpdateFriendshipBraceletOffset(clippingOffsets.friendshipBraceletRight.offset, left: false, itemEnabled);
 			}
 		}
+	}
 
-		private void EnableItem(GameObject obj, bool enable)
+	public void DisableItem(CosmeticsController.CosmeticSlots cosmeticSlot)
+	{
+		bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);
+		bool flag2 = CosmeticsController.CosmeticSet.IsSlotRightHanded(cosmeticSlot);
+		foreach (GameObject @object in objects)
 		{
-			try
+			EnableItem(@object, enable: false);
+		}
+		if (flag)
+		{
+			foreach (GameObject leftObject in leftObjects)
 			{
-				obj.SetActive(enable);
-			}
-			catch (Exception arg)
-			{
-				Debug.LogError(string.Format("Exception while enabling cosmetic: {0}", arg));
+				EnableItem(leftObject, enable: false);
 			}
 		}
-
-		private void ApplyClippingOffsets(bool itemEnabled)
+		if (flag2)
 		{
-			if (this._bodyDockPositions == null)
+			foreach (GameObject rightObject in rightObjects)
 			{
-				return;
-			}
-			if (this._anchorOverrides != null)
-			{
-				if (this.clippingOffsets.nameTag.enabled)
-				{
-					this._anchorOverrides.UpdateNameTagOffset(itemEnabled ? this.clippingOffsets.nameTag.offset : XformOffset.Identity, itemEnabled, this._activeSlot);
-				}
-				if (this.clippingOffsets.leftArm.enabled)
-				{
-					this._anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnLeftArm, this.clippingOffsets.leftArm.offset, itemEnabled, this._bodyDockPositions.leftArmTransform);
-				}
-				if (this.clippingOffsets.rightArm.enabled)
-				{
-					this._anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnRightArm, this.clippingOffsets.rightArm.offset, itemEnabled, this._bodyDockPositions.rightArmTransform);
-				}
-				if (this.clippingOffsets.chest.enabled)
-				{
-					this._anchorOverrides.ApplyAntiClippingOffsets(TransferrableObject.PositionState.OnChest, this.clippingOffsets.chest.offset, itemEnabled, this._anchorOverrides.chestDefaultTransform);
-				}
-				if (this.clippingOffsets.huntComputer.enabled)
-				{
-					this._anchorOverrides.UpdateHuntWatchOffset(this.clippingOffsets.huntComputer.offset, itemEnabled);
-				}
-				if (this.clippingOffsets.badge.enabled)
-				{
-					this._anchorOverrides.UpdateBadgeOffset(itemEnabled ? this.clippingOffsets.badge.offset : XformOffset.Identity, itemEnabled, this._activeSlot);
-				}
-				if (this.clippingOffsets.builderWatch.enabled)
-				{
-					this._anchorOverrides.UpdateBuilderWatchOffset(this.clippingOffsets.builderWatch.offset, itemEnabled);
-				}
-				if (this.clippingOffsets.friendshipBraceletLeft.enabled)
-				{
-					this._anchorOverrides.UpdateFriendshipBraceletOffset(this.clippingOffsets.friendshipBraceletLeft.offset, true, itemEnabled);
-				}
-				if (this.clippingOffsets.friendshipBraceletRight.enabled)
-				{
-					this._anchorOverrides.UpdateFriendshipBraceletOffset(this.clippingOffsets.friendshipBraceletRight.offset, false, itemEnabled);
-				}
+				EnableItem(rightObject, enable: false);
 			}
 		}
+		ApplyClippingOffsets(itemEnabled: false);
+	}
 
-		public void DisableItem(CosmeticsController.CosmeticSlots cosmeticSlot)
+	public void EnableItem(CosmeticsController.CosmeticSlots cosmeticSlot, VRRig rig)
+	{
+		bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);
+		bool flag2 = CosmeticsController.CosmeticSet.IsSlotRightHanded(cosmeticSlot);
+		_activeSlot = cosmeticSlot;
+		if (rig != null && _anchorOverrides == null)
 		{
-			bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);
-			bool flag2 = CosmeticsController.CosmeticSet.IsSlotRightHanded(cosmeticSlot);
-			foreach (GameObject obj in this.objects)
-			{
-				this.EnableItem(obj, false);
-			}
-			if (flag)
-			{
-				foreach (GameObject obj2 in this.leftObjects)
-				{
-					this.EnableItem(obj2, false);
-				}
-			}
-			if (flag2)
-			{
-				foreach (GameObject obj3 in this.rightObjects)
-				{
-					this.EnableItem(obj3, false);
-				}
-			}
-			this.ApplyClippingOffsets(false);
+			_anchorOverrides = rig.gameObject.GetComponent<VRRigAnchorOverrides>();
+			_bodyDockPositions = rig.GetComponent<BodyDockPositions>();
 		}
-
-		public void EnableItem(CosmeticsController.CosmeticSlots cosmeticSlot, VRRig rig)
+		foreach (GameObject @object in objects)
 		{
-			bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);
-			bool flag2 = CosmeticsController.CosmeticSet.IsSlotRightHanded(cosmeticSlot);
-			this._activeSlot = cosmeticSlot;
-			if (rig != null && this._anchorOverrides == null)
+			EnableItem(@object, enable: true);
+			if (cosmeticSlot != CosmeticsController.CosmeticSlots.Badge)
 			{
-				this._anchorOverrides = rig.gameObject.GetComponent<VRRigAnchorOverrides>();
-				this._bodyDockPositions = rig.GetComponent<BodyDockPositions>();
+				continue;
 			}
-			foreach (GameObject gameObject in this.objects)
+			if (objects.Count > 1)
 			{
-				this.EnableItem(gameObject, true);
-				if (cosmeticSlot == CosmeticsController.CosmeticSlots.Badge)
+				if (GTHardCodedBones.TryGetFirstBoneInParents(@object.transform, out var eBone, out var _) && eBone == GTHardCodedBones.EBone.body)
 				{
-					if (this.objects.Count > 1)
-					{
-						GTHardCodedBones.EBone ebone;
-						Transform transform;
-						if (GTHardCodedBones.TryGetFirstBoneInParents(gameObject.transform, out ebone, out transform) && ebone == GTHardCodedBones.EBone.body)
-						{
-							this._anchorOverrides.CurrentBadgeTransform = gameObject.transform;
-						}
-					}
-					else
-					{
-						this._anchorOverrides.CurrentBadgeTransform = gameObject.transform;
-					}
+					_anchorOverrides.CurrentBadgeTransform = @object.transform;
 				}
 			}
-			if (flag)
+			else
 			{
-				foreach (GameObject obj in this.leftObjects)
-				{
-					this.EnableItem(obj, true);
-				}
-			}
-			if (flag2)
-			{
-				foreach (GameObject obj2 in this.rightObjects)
-				{
-					this.EnableItem(obj2, true);
-				}
-			}
-			this.ApplyClippingOffsets(true);
-		}
-
-		public void ToggleRenderers(bool enabled)
-		{
-			for (int i = 0; i < this.allRenderers.Count; i++)
-			{
-				this.allRenderers[i].enabled = enabled;
+				_anchorOverrides.CurrentBadgeTransform = @object.transform;
 			}
 		}
-
-		public void ToggleParticles(bool enabled)
+		if (flag)
 		{
-			for (int i = 0; i < this.allParticles.Count; i++)
+			foreach (GameObject leftObject in leftObjects)
 			{
-				this.allParticles[i].emission.enabled = enabled;
+				EnableItem(leftObject, enable: true);
 			}
 		}
+		if (flag2)
+		{
+			foreach (GameObject rightObject in rightObjects)
+			{
+				EnableItem(rightObject, enable: true);
+			}
+		}
+		ApplyClippingOffsets(itemEnabled: true);
+	}
 
-		public List<GameObject> leftObjects = new List<GameObject>();
+	public void ToggleRenderers(bool enabled)
+	{
+		for (int i = 0; i < allRenderers.Count; i++)
+		{
+			allRenderers[i].enabled = enabled;
+		}
+	}
 
-		public List<GameObject> rightObjects = new List<GameObject>();
-
-		public List<GameObject> objects = new List<GameObject>();
-
-		public List<GameObject> holdableObjects = new List<GameObject>();
-
-		public List<Renderer> allRenderers = new List<Renderer>();
-
-		public List<ParticleSystem> allParticles = new List<ParticleSystem>();
-
-		public CosmeticAnchorAntiIntersectOffsets clippingOffsets;
-
-		public bool isHoldableItem;
-
-		public string dbgname;
-
-		private BodyDockPositions _bodyDockPositions;
-
-		private VRRigAnchorOverrides _anchorOverrides;
-
-		private CosmeticsController.CosmeticSlots _activeSlot;
+	public void ToggleParticles(bool enabled)
+	{
+		for (int i = 0; i < allParticles.Count; i++)
+		{
+			ParticleSystem.EmissionModule emission = allParticles[i].emission;
+			emission.enabled = enabled;
+		}
 	}
 }

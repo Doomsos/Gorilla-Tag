@@ -1,14 +1,8 @@
-﻿using System;
 using GorillaTag.Sports;
 using UnityEngine;
 
 public class SportScoreboardVisuals : MonoBehaviour
 {
-	private void Awake()
-	{
-		SportScoreboard.Instance.RegisterTeamVisual(this.TeamIndex, this);
-	}
-
 	[SerializeField]
 	public MaterialUVOffsetListSetter score1s;
 
@@ -17,4 +11,9 @@ public class SportScoreboardVisuals : MonoBehaviour
 
 	[SerializeField]
 	private int TeamIndex;
+
+	private void Awake()
+	{
+		SportScoreboard.Instance.RegisterTeamVisual(TeamIndex, this);
+	}
 }

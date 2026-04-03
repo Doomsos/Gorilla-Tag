@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -13,12 +12,12 @@ public static class GTVector3Extensions
 
 	public static Vector3 Sum(this IList<Vector3> vecs)
 	{
-		Vector3 vector = Vector3.zero;
+		Vector3 zero = Vector3.zero;
 		for (int i = 0; i < vecs.Count; i++)
 		{
-			vector += vecs[i];
+			zero += vecs[i];
 		}
-		return vector;
+		return zero;
 	}
 
 	public static Vector3 Average(this IList<Vector3> vecs)
@@ -28,37 +27,37 @@ public static class GTVector3Extensions
 		{
 			return Vector3.zero;
 		}
-		Vector3 a = Vector3.zero;
+		Vector3 zero = Vector3.zero;
 		for (int i = 0; i < count; i++)
 		{
-			a += vecs[i];
+			zero += vecs[i];
 		}
-		return a / (float)count;
+		return zero / count;
 	}
 
 	public static Vector3 Sum(this IEnumerable<Vector3> vecs)
 	{
-		Vector3 vector = Vector3.zero;
-		foreach (Vector3 b in vecs)
+		Vector3 zero = Vector3.zero;
+		foreach (Vector3 vec in vecs)
 		{
-			vector += b;
+			zero += vec;
 		}
-		return vector;
+		return zero;
 	}
 
 	public static Vector3 Average(this IEnumerable<Vector3> vecs)
 	{
-		Vector3 a = Vector3.zero;
+		Vector3 zero = Vector3.zero;
 		int num = 0;
-		foreach (Vector3 b in vecs)
+		foreach (Vector3 vec in vecs)
 		{
-			a += b;
+			zero += vec;
 			num++;
 		}
 		if (num == 0)
 		{
 			return Vector3.zero;
 		}
-		return a / (float)num;
+		return zero / num;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using TMPro;
@@ -6,113 +6,6 @@ using UnityEngine;
 
 public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 {
-	public bool TickRunning { get; set; }
-
-	public void Start()
-	{
-		this.targetPage = 0;
-	}
-
-	private void OnEnable()
-	{
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private void OnDisable()
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public void ShowText(bool showText)
-	{
-		foreach (TMP_Text tmp_Text in this.shelfNames)
-		{
-			tmp_Text.enabled = showText;
-		}
-	}
-
-	public void InitFromNameList(List<string> shelves)
-	{
-		this.shelfNames.Clear();
-		for (int i = 0; i < shelves.Count; i++)
-		{
-			TMP_Text tmp_Text = Object.Instantiate<TMP_Text>(this.templateText);
-			tmp_Text.text = shelves[i];
-			this.shelfNames.Add(tmp_Text);
-			tmp_Text.transform.SetParent(base.transform, false);
-		}
-		this.UpdateVisuals();
-	}
-
-	public void Tick()
-	{
-		if (!this.isBeingDrivenRemotely)
-		{
-			float num = this.deltaAngle * (float)this.shelfNames.Count;
-			float num2 = this.currentAngle / this.deltaAngle;
-			int num3 = (int)(num2 + 0.5f);
-			if (this.rotSpeedMult == 0f)
-			{
-				float num4 = ((float)num3 - num2) * this.deltaAngle;
-				this.currentAngle += num4 * (1f - Mathf.Exp(-20f * Time.deltaTime));
-				this.targetPage = num3;
-			}
-			else
-			{
-				this.currentAngle += this.rotSpeedMult * Time.deltaTime * this.rotSpeed;
-				this.currentAngle = Mathf.Clamp(this.currentAngle, -this.deltaAngle * 0.4f, num - this.deltaAngle + this.deltaAngle * 0.4f);
-			}
-		}
-		int num5 = (int)(this.currentAngle / this.deltaAngle + 0.5f);
-		if (this.lastPlayedAudioTickPage != num5)
-		{
-			this.lastPlayedAudioTickPage = num5;
-			this.audioSource.GTPlay();
-		}
-		float num6 = 0.005f;
-		if (Math.Abs(this.lastAngle - this.currentAngle) > num6)
-		{
-			this.UpdateVisuals();
-		}
-		this.lastAngle = this.currentAngle;
-	}
-
-	public void SetRotationSpeed(float speed)
-	{
-		this.rotSpeedMult = Mathf.Sign(speed) * Mathf.Pow(Mathf.Abs(speed), 2f);
-	}
-
-	public void SetTargetShelf(int shelf)
-	{
-		this.currentAngle += (float)(shelf - this.targetPage) * this.deltaAngle;
-		this.targetPage = shelf;
-	}
-
-	public void SetTargetAngle(float angle)
-	{
-		this.currentAngle = angle;
-	}
-
-	public void UpdateVisuals()
-	{
-		this.rotationWheel.localRotation = Quaternion.Euler(-this.currentAngle + 7.5f, 0f, 0f);
-		float num = this.deltaAngle;
-		int count = this.shelfNames.Count;
-		float num2 = this.currentAngle / this.deltaAngle;
-		for (int i = 0; i < this.shelfNames.Count; i++)
-		{
-			float num3 = ((float)i - num2) * this.deltaAngle + this.pointerOffsetAngle;
-			float f = num3 * 3.1415927f / 180f;
-			float num4 = Mathf.Cos(f);
-			float num5 = Mathf.Sin(f);
-			Quaternion localRotation = Quaternion.Euler(90f - num3, 180f, 0f);
-			Vector3 position = new Vector3(this.textHorizOffset, num4 * this.wheelTextRadius, num5 * this.wheelTextRadius);
-			this.shelfNames[i].transform.rotation = base.transform.TransformRotation(localRotation);
-			this.shelfNames[i].transform.position = base.transform.TransformPoint(position);
-			this.shelfNames[i].color = ((Math.Abs(num2 - (float)i) < 0.5f) ? Color.green : Color.white);
-		}
-	}
-
 	private List<TMP_Text> shelfNames = new List<TMP_Text>();
 
 	public TMP_Text templateText;
@@ -146,4 +39,111 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 	public float currentAngle;
 
 	private float rotSpeedMult;
+
+	public bool TickRunning { get; set; }
+
+	public void Start()
+	{
+		targetPage = 0;
+	}
+
+	private void OnEnable()
+	{
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void ShowText(bool showText)
+	{
+		foreach (TMP_Text shelfName in shelfNames)
+		{
+			shelfName.enabled = showText;
+		}
+	}
+
+	public void InitFromNameList(List<string> shelves)
+	{
+		shelfNames.Clear();
+		for (int i = 0; i < shelves.Count; i++)
+		{
+			TMP_Text tMP_Text = UnityEngine.Object.Instantiate(templateText);
+			tMP_Text.text = shelves[i];
+			shelfNames.Add(tMP_Text);
+			tMP_Text.transform.SetParent(base.transform, worldPositionStays: false);
+		}
+		UpdateVisuals();
+	}
+
+	public void Tick()
+	{
+		if (!isBeingDrivenRemotely)
+		{
+			float num = deltaAngle * (float)shelfNames.Count;
+			float num2 = currentAngle / deltaAngle;
+			int num3 = (int)(num2 + 0.5f);
+			if (rotSpeedMult == 0f)
+			{
+				float num4 = ((float)num3 - num2) * deltaAngle;
+				currentAngle += num4 * (1f - Mathf.Exp(-20f * Time.deltaTime));
+				targetPage = num3;
+			}
+			else
+			{
+				currentAngle += rotSpeedMult * Time.deltaTime * rotSpeed;
+				currentAngle = Mathf.Clamp(currentAngle, (0f - deltaAngle) * 0.4f, num - deltaAngle + deltaAngle * 0.4f);
+			}
+		}
+		int num5 = (int)(currentAngle / deltaAngle + 0.5f);
+		if (lastPlayedAudioTickPage != num5)
+		{
+			lastPlayedAudioTickPage = num5;
+			audioSource.GTPlay();
+		}
+		float num6 = 0.005f;
+		if (Math.Abs(lastAngle - currentAngle) > num6)
+		{
+			UpdateVisuals();
+		}
+		lastAngle = currentAngle;
+	}
+
+	public void SetRotationSpeed(float speed)
+	{
+		rotSpeedMult = Mathf.Sign(speed) * Mathf.Pow(Mathf.Abs(speed), 2f);
+	}
+
+	public void SetTargetShelf(int shelf)
+	{
+		currentAngle += (float)(shelf - targetPage) * deltaAngle;
+		targetPage = shelf;
+	}
+
+	public void SetTargetAngle(float angle)
+	{
+		currentAngle = angle;
+	}
+
+	public void UpdateVisuals()
+	{
+		rotationWheel.localRotation = Quaternion.Euler(0f - currentAngle + 7.5f, 0f, 0f);
+		_ = deltaAngle;
+		_ = shelfNames.Count;
+		float num = currentAngle / deltaAngle;
+		for (int i = 0; i < shelfNames.Count; i++)
+		{
+			float num2 = ((float)i - num) * deltaAngle + pointerOffsetAngle;
+			float f = num2 * MathF.PI / 180f;
+			float num3 = Mathf.Cos(f);
+			float num4 = Mathf.Sin(f);
+			Quaternion localRotation = Quaternion.Euler(90f - num2, 180f, 0f);
+			Vector3 position = new Vector3(textHorizOffset, num3 * wheelTextRadius, num4 * wheelTextRadius);
+			shelfNames[i].transform.rotation = base.transform.TransformRotation(localRotation);
+			shelfNames[i].transform.position = base.transform.TransformPoint(position);
+			shelfNames[i].color = ((Math.Abs(num - (float)i) < 0.5f) ? Color.green : Color.white);
+		}
+	}
 }

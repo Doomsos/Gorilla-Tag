@@ -1,20 +1,18 @@
-﻿using System;
 using UnityEngine;
 
-namespace TagEffects
+namespace TagEffects;
+
+public class GameObjectOnDisableDispatcher : MonoBehaviour
 {
-	public class GameObjectOnDisableDispatcher : MonoBehaviour
+	public delegate void OnDisabledEvent(GameObjectOnDisableDispatcher me);
+
+	public event OnDisabledEvent OnDisabled;
+
+	private void OnDisable()
 	{
-		public event GameObjectOnDisableDispatcher.OnDisabledEvent OnDisabled;
-
-		private void OnDisable()
+		if (this.OnDisabled != null)
 		{
-			if (this.OnDisabled != null)
-			{
-				this.OnDisabled(this);
-			}
+			this.OnDisabled(this);
 		}
-
-		public delegate void OnDisabledEvent(GameObjectOnDisableDispatcher me);
 	}
 }

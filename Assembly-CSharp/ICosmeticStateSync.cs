@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface ICosmeticStateSync
 {
 	int StateValue { get; }

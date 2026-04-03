@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,183 +6,16 @@ using UnityEngine.Audio;
 [DefaultExecutionOrder(0)]
 public class KIDAudioManager : MonoBehaviour
 {
-	public static KIDAudioManager Instance
+	public enum KIDSoundType
 	{
-		get
-		{
-			if (!KIDAudioManager._instance)
-			{
-				if (!ApplicationQuittingState.IsQuitting)
-				{
-					Debug.LogError("No KIDAudioManager instance found in scene!");
-				}
-				return null;
-			}
-			return KIDAudioManager._instance;
-		}
-	}
-
-	private void Awake()
-	{
-		if (KIDAudioManager._instance == null)
-		{
-			KIDAudioManager._instance = this;
-			base.transform.parent = null;
-			Object.DontDestroyOnLoad(base.gameObject);
-			this.ConfigureAudioSource();
-			this.InitializeSoundClips();
-			this.mainMixer.GetFloat("Game_Volume", out this.cachedGameVolume);
-			return;
-		}
-		if (KIDAudioManager._instance != this)
-		{
-			Object.Destroy(base.gameObject);
-		}
-	}
-
-	private void ConfigureAudioSource()
-	{
-		if (this.audioSource != null)
-		{
-			this.audioSource.outputAudioMixerGroup = this.kidUIGroup;
-			this.audioSource.playOnAwake = false;
-			this.audioSource.spatialBlend = 0f;
-			this.audioSource.volume = 1f;
-			this.audioSource.enabled = true;
-		}
-		if (this.loopingAudioSource != null)
-		{
-			this.loopingAudioSource.outputAudioMixerGroup = this.kidUIGroup;
-			this.loopingAudioSource.playOnAwake = false;
-			this.loopingAudioSource.spatialBlend = 0f;
-			this.loopingAudioSource.volume = 1f;
-			this.loopingAudioSource.loop = true;
-			this.loopingAudioSource.enabled = true;
-		}
-	}
-
-	private void InitializeSoundClips()
-	{
-		this.soundClips = new Dictionary<KIDAudioManager.KIDSoundType, AudioClip>
-		{
-			{
-				KIDAudioManager.KIDSoundType.ButtonClick,
-				this.buttonClickSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.Denied,
-				this.deniedSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.Success,
-				this.successSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.Hover,
-				this.buttonHoverSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.ButtonHeld,
-				this.buttonHeldSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.PageTransition,
-				this.pageTransitionSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.InputBack,
-				this.inputBackSound
-			},
-			{
-				KIDAudioManager.KIDSoundType.TurnOffPermission,
-				this.turnOffPermissionSound
-			}
-		};
-	}
-
-	public void SetKIDUIAudioActive(bool active)
-	{
-		if (!this.IsInstanceValid() || this.isKIDUIActive == active)
-		{
-			return;
-		}
-		this.isKIDUIActive = active;
-		if (!active)
-		{
-			this.StopButtonHeldSound();
-		}
-		if (active)
-		{
-			this.KIDSnapshot.TransitionTo(0f);
-			return;
-		}
-		this.normalSnapshot.TransitionTo(0f);
-	}
-
-	public void PlaySound(KIDAudioManager.KIDSoundType soundType)
-	{
-		if (!this.IsInstanceValid())
-		{
-			return;
-		}
-		if (soundType == KIDAudioManager.KIDSoundType.ButtonHeld)
-		{
-			Debug.LogWarning("[KIDAudioManager] Button held sound is already playing, skipping delayed sound.");
-			return;
-		}
-		AudioClip audioClip;
-		if (this.soundClips.TryGetValue(soundType, out audioClip) && audioClip != null)
-		{
-			this.audioSource.PlayOneShot(audioClip);
-			return;
-		}
-		Debug.LogWarning(string.Format("[KIDAudioManager] Sound clip for {0} is null or not found!", soundType));
-	}
-
-	public void StartButtonHeldSound()
-	{
-		if (!this.IsInstanceValid() || this.buttonHeldSound == null || this.isHoldSoundPlaying)
-		{
-			return;
-		}
-		this.loopingAudioSource.clip = this.buttonHeldSound;
-		this.loopingAudioSource.Play();
-		this.isHoldSoundPlaying = true;
-	}
-
-	public void StopButtonHeldSound()
-	{
-		if (!this.IsInstanceValid() || !this.isHoldSoundPlaying)
-		{
-			return;
-		}
-		if (this.loopingAudioSource.clip == this.buttonHeldSound)
-		{
-			this.loopingAudioSource.Stop();
-		}
-		this.isHoldSoundPlaying = false;
-	}
-
-	private bool IsInstanceValid()
-	{
-		return !(KIDAudioManager._instance == null) && !(KIDAudioManager._instance != this) && !(this.audioSource == null) && !(this.loopingAudioSource == null);
-	}
-
-	public bool IsKIDUIActive()
-	{
-		return this.isKIDUIActive;
-	}
-
-	public void PlaySoundWithDelay(KIDAudioManager.KIDSoundType soundType)
-	{
-		base.StartCoroutine(this.PlayDelayedSound(soundType, 0.05f));
-	}
-
-	private IEnumerator PlayDelayedSound(KIDAudioManager.KIDSoundType soundType, float delay)
-	{
-		yield return new WaitForSeconds(delay);
-		this.PlaySound(soundType);
-		yield break;
+		ButtonClick,
+		Hover,
+		Success,
+		Denied,
+		InputBack,
+		TurnOffPermission,
+		PageTransition,
+		ButtonHeld
 	}
 
 	private static KIDAudioManager _instance;
@@ -244,17 +76,185 @@ public class KIDAudioManager : MonoBehaviour
 
 	private bool isHoldSoundPlaying;
 
-	private Dictionary<KIDAudioManager.KIDSoundType, AudioClip> soundClips;
+	private Dictionary<KIDSoundType, AudioClip> soundClips;
 
-	public enum KIDSoundType
+	public static KIDAudioManager Instance
 	{
-		ButtonClick,
-		Hover,
-		Success,
-		Denied,
-		InputBack,
-		TurnOffPermission,
-		PageTransition,
-		ButtonHeld
+		get
+		{
+			if (!_instance)
+			{
+				if (!ApplicationQuittingState.IsQuitting)
+				{
+					Debug.LogError("No KIDAudioManager instance found in scene!");
+				}
+				return null;
+			}
+			return _instance;
+		}
+	}
+
+	private void Awake()
+	{
+		if (_instance == null)
+		{
+			_instance = this;
+			base.transform.parent = null;
+			Object.DontDestroyOnLoad(base.gameObject);
+			ConfigureAudioSource();
+			InitializeSoundClips();
+			mainMixer.GetFloat("Game_Volume", out cachedGameVolume);
+		}
+		else if (_instance != this)
+		{
+			Object.Destroy(base.gameObject);
+		}
+	}
+
+	private void ConfigureAudioSource()
+	{
+		if (audioSource != null)
+		{
+			audioSource.outputAudioMixerGroup = kidUIGroup;
+			audioSource.playOnAwake = false;
+			audioSource.spatialBlend = 0f;
+			audioSource.volume = 1f;
+			audioSource.enabled = true;
+		}
+		if (loopingAudioSource != null)
+		{
+			loopingAudioSource.outputAudioMixerGroup = kidUIGroup;
+			loopingAudioSource.playOnAwake = false;
+			loopingAudioSource.spatialBlend = 0f;
+			loopingAudioSource.volume = 1f;
+			loopingAudioSource.loop = true;
+			loopingAudioSource.enabled = true;
+		}
+	}
+
+	private void InitializeSoundClips()
+	{
+		soundClips = new Dictionary<KIDSoundType, AudioClip>
+		{
+			{
+				KIDSoundType.ButtonClick,
+				buttonClickSound
+			},
+			{
+				KIDSoundType.Denied,
+				deniedSound
+			},
+			{
+				KIDSoundType.Success,
+				successSound
+			},
+			{
+				KIDSoundType.Hover,
+				buttonHoverSound
+			},
+			{
+				KIDSoundType.ButtonHeld,
+				buttonHeldSound
+			},
+			{
+				KIDSoundType.PageTransition,
+				pageTransitionSound
+			},
+			{
+				KIDSoundType.InputBack,
+				inputBackSound
+			},
+			{
+				KIDSoundType.TurnOffPermission,
+				turnOffPermissionSound
+			}
+		};
+	}
+
+	public void SetKIDUIAudioActive(bool active)
+	{
+		if (IsInstanceValid() && isKIDUIActive != active)
+		{
+			isKIDUIActive = active;
+			if (!active)
+			{
+				StopButtonHeldSound();
+			}
+			if (active)
+			{
+				KIDSnapshot.TransitionTo(0f);
+			}
+			else
+			{
+				normalSnapshot.TransitionTo(0f);
+			}
+		}
+	}
+
+	public void PlaySound(KIDSoundType soundType)
+	{
+		if (IsInstanceValid())
+		{
+			AudioClip value;
+			if (soundType == KIDSoundType.ButtonHeld)
+			{
+				Debug.LogWarning("[KIDAudioManager] Button held sound is already playing, skipping delayed sound.");
+			}
+			else if (soundClips.TryGetValue(soundType, out value) && value != null)
+			{
+				audioSource.PlayOneShot(value);
+			}
+			else
+			{
+				Debug.LogWarning($"[KIDAudioManager] Sound clip for {soundType} is null or not found!");
+			}
+		}
+	}
+
+	public void StartButtonHeldSound()
+	{
+		if (IsInstanceValid() && !(buttonHeldSound == null) && !isHoldSoundPlaying)
+		{
+			loopingAudioSource.clip = buttonHeldSound;
+			loopingAudioSource.Play();
+			isHoldSoundPlaying = true;
+		}
+	}
+
+	public void StopButtonHeldSound()
+	{
+		if (IsInstanceValid() && isHoldSoundPlaying)
+		{
+			if (loopingAudioSource.clip == buttonHeldSound)
+			{
+				loopingAudioSource.Stop();
+			}
+			isHoldSoundPlaying = false;
+		}
+	}
+
+	private bool IsInstanceValid()
+	{
+		if (_instance == null || _instance != this || audioSource == null || loopingAudioSource == null)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public bool IsKIDUIActive()
+	{
+		return isKIDUIActive;
+	}
+
+	public void PlaySoundWithDelay(KIDSoundType soundType)
+	{
+		StartCoroutine(PlayDelayedSound(soundType, 0.05f));
+	}
+
+	private IEnumerator PlayDelayedSound(KIDSoundType soundType, float delay)
+	{
+		yield return new WaitForSeconds(delay);
+		PlaySound(soundType);
 	}
 }

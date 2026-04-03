@@ -1,53 +1,46 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SIScreenRegion : MonoBehaviour
 {
-	public bool HasPressedButton
-	{
-		get
-		{
-			return this._hasPressedButton;
-		}
-	}
+	private HashSet<GorillaTriggerColliderHandIndicator> handIndicators = new HashSet<GorillaTriggerColliderHandIndicator>();
+
+	private bool _hasPressedButton;
+
+	public bool HasPressedButton => _hasPressedButton;
 
 	private void OnTriggerEnter(Collider other)
 	{
 		GorillaTriggerColliderHandIndicator componentInParent = other.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
-		if (componentInParent != null)
+		if ((object)componentInParent != null)
 		{
-			this.handIndicators.Add(componentInParent);
+			handIndicators.Add(componentInParent);
 		}
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
 		GorillaTriggerColliderHandIndicator componentInParent = other.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
-		if (componentInParent != null)
+		if ((object)componentInParent != null)
 		{
-			this.handIndicators.Remove(componentInParent);
-			if (this.handIndicators.Count == 0)
+			handIndicators.Remove(componentInParent);
+			if (handIndicators.Count == 0)
 			{
-				this.ClearPressedIndicator();
+				ClearPressedIndicator();
 			}
 		}
 	}
 
 	public void RegisterButtonPress()
 	{
-		if (this.handIndicators.Count > 0)
+		if (handIndicators.Count > 0)
 		{
-			this._hasPressedButton = true;
+			_hasPressedButton = true;
 		}
 	}
 
 	private void ClearPressedIndicator()
 	{
-		this._hasPressedButton = false;
+		_hasPressedButton = false;
 	}
-
-	private HashSet<GorillaTriggerColliderHandIndicator> handIndicators = new HashSet<GorillaTriggerColliderHandIndicator>();
-
-	private bool _hasPressedButton;
 }

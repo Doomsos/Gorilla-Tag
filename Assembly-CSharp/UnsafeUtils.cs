@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -6,26 +6,8 @@ using System.Runtime.InteropServices;
 
 public static class UnsafeUtils
 {
-	public unsafe static ref readonly T[] GetInternalArray<T>(this List<T> list)
-	{
-		if (list == null)
-		{
-			return Unsafe.NullRef<T[]>();
-		}
-		return ref Unsafe.As<List<T>, StrongBox<T[]>>(ref list)->Value;
-	}
-
-	public unsafe static ref readonly T[] GetInvocationListUnsafe<T>(this T @delegate) where T : MulticastDelegate
-	{
-		if (@delegate == null)
-		{
-			return Unsafe.NullRef<T[]>();
-		}
-		return Unsafe.As<Delegate[], T[]>(ref Unsafe.As<T, UnsafeUtils._MultiDelegateFields>(ref @delegate)->delegates);
-	}
-
 	[StructLayout(LayoutKind.Sequential)]
-	private class _MultiDelegateFields : UnsafeUtils._DelegateFields
+	private class _MultiDelegateFields : _DelegateFields
 	{
 		public Delegate[] delegates;
 	}
@@ -55,7 +37,7 @@ public static class UnsafeUtils
 
 		public MethodInfo original_method_info;
 
-		public UnsafeUtils._DelegateData data;
+		public _DelegateData data;
 
 		public bool method_is_virtual;
 	}
@@ -68,5 +50,23 @@ public static class UnsafeUtils
 		public string method_name;
 
 		public bool curried_first_arg;
+	}
+
+	public static ref readonly T[] GetInternalArray<T>(this List<T> list)
+	{
+		if (list == null)
+		{
+			return ref Unsafe.NullRef<T[]>();
+		}
+		return ref Unsafe.As<List<T>, StrongBox<T[]>>(ref list).Value;
+	}
+
+	public static ref readonly T[] GetInvocationListUnsafe<T>(this T @delegate) where T : MulticastDelegate
+	{
+		if (@delegate == null)
+		{
+			return ref Unsafe.NullRef<T[]>();
+		}
+		return ref Unsafe.As<Delegate[], T[]>(ref Unsafe.As<T, _MultiDelegateFields>(ref @delegate).delegates);
 	}
 }

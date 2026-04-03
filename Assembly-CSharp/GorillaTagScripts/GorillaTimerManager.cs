@@ -1,72 +1,72 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class GorillaTimerManager : MonoBehaviour
 {
-	public class GorillaTimerManager : MonoBehaviour
+	public static GorillaTimerManager instance;
+
+	public static bool hasInstance = false;
+
+	public static List<GorillaTimer> allTimers = new List<GorillaTimer>();
+
+	protected void Awake()
 	{
-		protected void Awake()
+		if (hasInstance && instance != null && instance != this)
 		{
-			if (GorillaTimerManager.hasInstance && GorillaTimerManager.instance != null && GorillaTimerManager.instance != this)
-			{
-				Object.Destroy(this);
-				return;
-			}
-			GorillaTimerManager.SetInstance(this);
+			Object.Destroy(this);
 		}
-
-		public static void CreateManager()
+		else
 		{
-			GorillaTimerManager.SetInstance(new GameObject("GorillaTimerManager").AddComponent<GorillaTimerManager>());
+			SetInstance(this);
 		}
+	}
 
-		private static void SetInstance(GorillaTimerManager manager)
+	public static void CreateManager()
+	{
+		SetInstance(new GameObject("GorillaTimerManager").AddComponent<GorillaTimerManager>());
+	}
+
+	private static void SetInstance(GorillaTimerManager manager)
+	{
+		instance = manager;
+		hasInstance = true;
+		if (Application.isPlaying)
 		{
-			GorillaTimerManager.instance = manager;
-			GorillaTimerManager.hasInstance = true;
-			if (Application.isPlaying)
-			{
-				Object.DontDestroyOnLoad(manager);
-			}
+			Object.DontDestroyOnLoad(manager);
 		}
+	}
 
-		public static void RegisterGorillaTimer(GorillaTimer gTimer)
+	public static void RegisterGorillaTimer(GorillaTimer gTimer)
+	{
+		if (!hasInstance)
 		{
-			if (!GorillaTimerManager.hasInstance)
-			{
-				GorillaTimerManager.CreateManager();
-			}
-			if (!GorillaTimerManager.allTimers.Contains(gTimer))
-			{
-				GorillaTimerManager.allTimers.Add(gTimer);
-			}
+			CreateManager();
 		}
-
-		public static void UnregisterGorillaTimer(GorillaTimer gTimer)
+		if (!allTimers.Contains(gTimer))
 		{
-			if (!GorillaTimerManager.hasInstance)
-			{
-				GorillaTimerManager.CreateManager();
-			}
-			if (GorillaTimerManager.allTimers.Contains(gTimer))
-			{
-				GorillaTimerManager.allTimers.Remove(gTimer);
-			}
+			allTimers.Add(gTimer);
 		}
+	}
 
-		public void Update()
+	public static void UnregisterGorillaTimer(GorillaTimer gTimer)
+	{
+		if (!hasInstance)
 		{
-			for (int i = 0; i < GorillaTimerManager.allTimers.Count; i++)
-			{
-				GorillaTimerManager.allTimers[i].InvokeUpdate();
-			}
+			CreateManager();
 		}
+		if (allTimers.Contains(gTimer))
+		{
+			allTimers.Remove(gTimer);
+		}
+	}
 
-		public static GorillaTimerManager instance;
-
-		public static bool hasInstance = false;
-
-		public static List<GorillaTimer> allTimers = new List<GorillaTimer>();
+	public void Update()
+	{
+		for (int i = 0; i < allTimers.Count; i++)
+		{
+			allTimers[i].InvokeUpdate();
+		}
 	}
 }

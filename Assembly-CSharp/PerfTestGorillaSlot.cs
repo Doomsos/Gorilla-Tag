@@ -1,22 +1,21 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 
 [GTStripGameObjectFromBuild("!GT_AUTOMATED_PERF_TEST && !BETA")]
 public class PerfTestGorillaSlot : MonoBehaviour
 {
-	private void Start()
-	{
-		this.localStartPosition = base.transform.localPosition;
-	}
-
-	public PerfTestGorillaSlot.SlotType slotType;
-
-	public Vector3 localStartPosition;
-
 	public enum SlotType
 	{
 		VR_PLAYER,
 		DUMMY
+	}
+
+	public SlotType slotType;
+
+	public Vector3 localStartPosition;
+
+	private void Start()
+	{
+		localStartPosition = base.transform.localPosition;
 	}
 }

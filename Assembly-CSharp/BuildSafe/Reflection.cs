@@ -1,89 +1,109 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public static class Reflection<T>
 {
-	public static class Reflection<T>
+	private static Type gCachedType;
+
+	private static MethodInfo[] gMethodsCache;
+
+	private static FieldInfo[] gFieldsCache;
+
+	private static PropertyInfo[] gPropertiesCache;
+
+	private static EventInfo[] gEventsCache;
+
+	public static Type Type { get; } = typeof(T);
+
+	public static EventInfo[] Events => PreFetchEvents();
+
+	public static MethodInfo[] Methods => PreFetchMethods();
+
+	public static FieldInfo[] Fields => PreFetchFields();
+
+	public static PropertyInfo[] Properties => PreFetchProperties();
+
+	private static EventInfo[] PreFetchEvents()
 	{
-		public static Type Type { get; } = typeof(T);
-
-		public static EventInfo[] Events
+		if (gEventsCache != null)
 		{
-			get
-			{
-				return Reflection<T>.PreFetchEvents();
-			}
+			return gEventsCache;
 		}
+		return gEventsCache = Type.GetRuntimeEvents().ToArray();
+	}
 
-		public static MethodInfo[] Methods
+	private static PropertyInfo[] PreFetchProperties()
+	{
+		if (gPropertiesCache != null)
 		{
-			get
-			{
-				return Reflection<T>.PreFetchMethods();
-			}
+			return gPropertiesCache;
 		}
+		return gPropertiesCache = Type.GetRuntimeProperties().ToArray();
+	}
 
-		public static FieldInfo[] Fields
+	private static MethodInfo[] PreFetchMethods()
+	{
+		if (gMethodsCache != null)
 		{
-			get
-			{
-				return Reflection<T>.PreFetchFields();
-			}
+			return gMethodsCache;
 		}
+		return gMethodsCache = Type.GetRuntimeMethods().ToArray();
+	}
 
-		public static PropertyInfo[] Properties
+	private static FieldInfo[] PreFetchFields()
+	{
+		if (gFieldsCache != null)
 		{
-			get
-			{
-				return Reflection<T>.PreFetchProperties();
-			}
+			return gFieldsCache;
 		}
+		return gFieldsCache = Type.GetRuntimeFields().ToArray();
+	}
+}
+public static class Reflection
+{
+	private static Assembly[] gAssemblyCache;
 
-		private static EventInfo[] PreFetchEvents()
+	private static Type[] gTypeCache;
+
+	public static Assembly[] AllAssemblies => PreFetchAllAssemblies();
+
+	public static Type[] AllTypes => PreFetchAllTypes();
+
+	static Reflection()
+	{
+		PreFetchAllAssemblies();
+		PreFetchAllTypes();
+	}
+
+	private static Assembly[] PreFetchAllAssemblies()
+	{
+		if (gAssemblyCache != null)
 		{
-			if (Reflection<T>.gEventsCache != null)
-			{
-				return Reflection<T>.gEventsCache;
-			}
-			return Reflection<T>.gEventsCache = Reflection<T>.Type.GetRuntimeEvents().ToArray<EventInfo>();
+			return gAssemblyCache;
 		}
+		return gAssemblyCache = (from a in AppDomain.CurrentDomain.GetAssemblies()
+			where a != null
+			select a).ToArray();
+	}
 
-		private static PropertyInfo[] PreFetchProperties()
+	private static Type[] PreFetchAllTypes()
+	{
+		if (gTypeCache != null)
 		{
-			if (Reflection<T>.gPropertiesCache != null)
-			{
-				return Reflection<T>.gPropertiesCache;
-			}
-			return Reflection<T>.gPropertiesCache = Reflection<T>.Type.GetRuntimeProperties().ToArray<PropertyInfo>();
+			return gTypeCache;
 		}
+		return gTypeCache = (from t in PreFetchAllAssemblies().SelectMany((Assembly a) => a.GetTypes())
+			where t != null
+			select t).ToArray();
+	}
 
-		private static MethodInfo[] PreFetchMethods()
-		{
-			if (Reflection<T>.gMethodsCache != null)
-			{
-				return Reflection<T>.gMethodsCache;
-			}
-			return Reflection<T>.gMethodsCache = Reflection<T>.Type.GetRuntimeMethods().ToArray<MethodInfo>();
-		}
-
-		private static FieldInfo[] PreFetchFields()
-		{
-			if (Reflection<T>.gFieldsCache != null)
-			{
-				return Reflection<T>.gFieldsCache;
-			}
-			return Reflection<T>.gFieldsCache = Reflection<T>.Type.GetRuntimeFields().ToArray<FieldInfo>();
-		}
-
-		private static Type gCachedType;
-
-		private static MethodInfo[] gMethodsCache;
-
-		private static FieldInfo[] gFieldsCache;
-
-		private static PropertyInfo[] gPropertiesCache;
-
-		private static EventInfo[] gEventsCache;
+	public static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
+	{
+		return (from m in AllTypes.SelectMany((Type t) => t.GetRuntimeMethods())
+			where m.GetCustomAttributes(typeof(T), inherit: false).Length != 0
+			select m).ToArray();
 	}
 }

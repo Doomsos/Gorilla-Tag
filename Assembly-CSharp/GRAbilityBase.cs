@@ -1,10 +1,37 @@
-﻿using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class GRAbilityBase
 {
+	protected GameAgent agent;
+
+	protected GameEntity entity;
+
+	protected Animation anim;
+
+	protected Animator animator;
+
+	protected Transform root;
+
+	protected Transform head;
+
+	protected AudioSource audioSource;
+
+	protected GRSenseLineOfSight lineOfSight;
+
+	protected Rigidbody rb;
+
+	protected GRAttributes attributes;
+
+	[ReadOnly]
+	public double startTime;
+
+	[ReadOnly]
+	public double stopTime;
+
+	protected int walkableArea = -1;
+
 	protected virtual void OnStart()
 	{
 	}
@@ -40,33 +67,33 @@ public class GRAbilityBase
 		this.anim = anim;
 		if (anim == null)
 		{
-			this.animator = null;
+			animator = null;
 		}
 		this.agent = agent;
 		this.head = head;
 		this.audioSource = audioSource;
 		this.lineOfSight = lineOfSight;
-		this.rb = agent.GetComponent<Rigidbody>();
-		this.entity = agent.GetComponent<GameEntity>();
-		this.attributes = agent.GetComponent<GRAttributes>();
-		this.walkableArea = NavMesh.GetAreaFromName("walkable");
+		rb = agent.GetComponent<Rigidbody>();
+		entity = agent.GetComponent<GameEntity>();
+		attributes = agent.GetComponent<GRAttributes>();
+		walkableArea = NavMesh.GetAreaFromName("walkable");
 	}
 
 	public void Start()
 	{
-		this.startTime = Time.timeAsDouble;
-		this.OnStart();
+		startTime = Time.timeAsDouble;
+		OnStart();
 	}
 
 	public void Stop()
 	{
-		this.stopTime = Time.timeAsDouble;
-		this.OnStop();
+		stopTime = Time.timeAsDouble;
+		OnStop();
 	}
 
 	public float GetAbilityTime(double currTime)
 	{
-		return (float)(currTime - this.startTime);
+		return (float)(currTime - startTime);
 	}
 
 	public virtual bool IsDone()
@@ -76,74 +103,44 @@ public class GRAbilityBase
 
 	public void Think(float dt)
 	{
-		this.OnThink(dt);
+		OnThink(dt);
 	}
 
 	public void UpdateAuthority(float dt)
 	{
-		this.OnUpdateShared(dt);
-		this.OnUpdateAuthority(dt);
+		OnUpdateShared(dt);
+		OnUpdateAuthority(dt);
 	}
 
 	public void UpdateRemote(float dt)
 	{
-		this.OnUpdateShared(dt);
-		this.OnUpdateRemote(dt);
+		OnUpdateShared(dt);
+		OnUpdateRemote(dt);
 	}
 
 	protected virtual void PlayAnim(string animName, float blendTime, float speed)
 	{
-		if (this.anim != null && !string.IsNullOrEmpty(animName))
+		if (anim != null && !string.IsNullOrEmpty(animName))
 		{
-			if (this.anim.GetClip(animName) == null)
+			if (anim.GetClip(animName) == null)
 			{
-				Debug.LogErrorFormat("Anim Clip {0} does not exist in (1)", new object[]
-				{
-					animName,
-					this.anim
-				});
-				return;
+				Debug.LogErrorFormat("Anim Clip {0} does not exist in (1)", animName, anim);
 			}
-			this.anim[animName].speed = speed;
-			this.anim.CrossFade(animName, blendTime);
+			else
+			{
+				anim[animName].speed = speed;
+				anim.CrossFade(animName, blendTime);
+			}
 		}
 	}
 
 	public bool IsCoolDownOver(float coolDown)
 	{
-		return (float)(Time.timeAsDouble - this.stopTime) > coolDown;
+		return (float)(Time.timeAsDouble - stopTime) > coolDown;
 	}
 
 	public virtual float GetRange()
 	{
 		return 0f;
 	}
-
-	protected GameAgent agent;
-
-	protected GameEntity entity;
-
-	protected Animation anim;
-
-	protected Animator animator;
-
-	protected Transform root;
-
-	protected Transform head;
-
-	protected AudioSource audioSource;
-
-	protected GRSenseLineOfSight lineOfSight;
-
-	protected Rigidbody rb;
-
-	protected GRAttributes attributes;
-
-	[ReadOnly]
-	public double startTime;
-
-	[ReadOnly]
-	public double stopTime;
-
-	protected int walkableArea = -1;
 }

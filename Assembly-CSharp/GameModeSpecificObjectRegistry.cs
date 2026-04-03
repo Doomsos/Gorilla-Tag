@@ -1,77 +1,78 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaGameModes;
 using UnityEngine;
 
 public class GameModeSpecificObjectRegistry : MonoBehaviour
 {
+	private Dictionary<GameModeType, List<GameModeSpecificObject>> gameModeSpecificObjects = new Dictionary<GameModeType, List<GameModeSpecificObject>>();
+
+	private GameModeType currentGameType = GameModeType.Count;
+
 	private void OnEnable()
 	{
-		GameModeSpecificObject.OnAwake += this.GameModeSpecificObject_OnAwake;
-		GameModeSpecificObject.OnDestroyed += this.GameModeSpecificObject_OnDestroyed;
-		GameMode.OnStartGameMode += this.GameMode_OnStartGameMode;
+		GameModeSpecificObject.OnAwake += GameModeSpecificObject_OnAwake;
+		GameModeSpecificObject.OnDestroyed += GameModeSpecificObject_OnDestroyed;
+		GameMode.OnStartGameMode += GameMode_OnStartGameMode;
 	}
 
 	private void OnDisable()
 	{
-		GameModeSpecificObject.OnAwake -= this.GameModeSpecificObject_OnAwake;
-		GameModeSpecificObject.OnDestroyed -= this.GameModeSpecificObject_OnDestroyed;
-		GameMode.OnStartGameMode -= this.GameMode_OnStartGameMode;
+		GameModeSpecificObject.OnAwake -= GameModeSpecificObject_OnAwake;
+		GameModeSpecificObject.OnDestroyed -= GameModeSpecificObject_OnDestroyed;
+		GameMode.OnStartGameMode -= GameMode_OnStartGameMode;
 	}
 
 	private void GameModeSpecificObject_OnAwake(GameModeSpecificObject obj)
 	{
-		foreach (GameModeType key in obj.GameModes)
+		foreach (GameModeType gameMode in obj.GameModes)
 		{
-			if (!this.gameModeSpecificObjects.ContainsKey(key))
+			if (!gameModeSpecificObjects.ContainsKey(gameMode))
 			{
-				this.gameModeSpecificObjects.Add(key, new List<GameModeSpecificObject>());
+				gameModeSpecificObjects.Add(gameMode, new List<GameModeSpecificObject>());
 			}
-			this.gameModeSpecificObjects[key].Add(obj);
+			gameModeSpecificObjects[gameMode].Add(obj);
 		}
 		if (GameMode.ActiveGameMode == null)
 		{
 			obj.gameObject.SetActive(obj.Validation == GameModeSpecificObject.ValidationMethod.Exclusion);
-			return;
 		}
-		obj.gameObject.SetActive(obj.CheckValid(GameMode.ActiveGameMode.GameType()));
+		else
+		{
+			obj.gameObject.SetActive(obj.CheckValid(GameMode.ActiveGameMode.GameType()));
+		}
 	}
 
 	private void GameModeSpecificObject_OnDestroyed(GameModeSpecificObject obj)
 	{
-		foreach (GameModeType key in obj.GameModes)
+		foreach (GameModeType gameMode in obj.GameModes)
 		{
-			if (this.gameModeSpecificObjects.ContainsKey(key))
+			if (gameModeSpecificObjects.ContainsKey(gameMode))
 			{
-				this.gameModeSpecificObjects[key].Remove(obj);
+				gameModeSpecificObjects[gameMode].Remove(obj);
 			}
 		}
 	}
 
 	private void GameMode_OnStartGameMode(GameModeType newGameModeType)
 	{
-		if (this.currentGameType == newGameModeType)
+		if (currentGameType == newGameModeType)
 		{
 			return;
 		}
-		if (this.gameModeSpecificObjects.ContainsKey(this.currentGameType))
+		if (gameModeSpecificObjects.ContainsKey(currentGameType))
 		{
-			foreach (GameModeSpecificObject gameModeSpecificObject in this.gameModeSpecificObjects[this.currentGameType])
+			foreach (GameModeSpecificObject item in gameModeSpecificObjects[currentGameType])
 			{
-				gameModeSpecificObject.gameObject.SetActive(gameModeSpecificObject.CheckValid(newGameModeType));
+				item.gameObject.SetActive(item.CheckValid(newGameModeType));
 			}
 		}
-		if (this.gameModeSpecificObjects.ContainsKey(newGameModeType))
+		if (gameModeSpecificObjects.ContainsKey(newGameModeType))
 		{
-			foreach (GameModeSpecificObject gameModeSpecificObject2 in this.gameModeSpecificObjects[newGameModeType])
+			foreach (GameModeSpecificObject item2 in gameModeSpecificObjects[newGameModeType])
 			{
-				gameModeSpecificObject2.gameObject.SetActive(gameModeSpecificObject2.CheckValid(newGameModeType));
+				item2.gameObject.SetActive(item2.CheckValid(newGameModeType));
 			}
 		}
-		this.currentGameType = newGameModeType;
+		currentGameType = newGameModeType;
 	}
-
-	private Dictionary<GameModeType, List<GameModeSpecificObject>> gameModeSpecificObjects = new Dictionary<GameModeType, List<GameModeSpecificObject>>();
-
-	private GameModeType currentGameType = GameModeType.Count;
 }

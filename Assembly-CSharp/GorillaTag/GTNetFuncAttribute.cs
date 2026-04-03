@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Conditional("UNITY_EDITOR")]
+public class GTNetFuncAttribute : Attribute
 {
-	[Conditional("UNITY_EDITOR")]
-	public class GTNetFuncAttribute : Attribute
-	{
-	}
 }

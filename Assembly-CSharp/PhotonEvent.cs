@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExitGames.Client.Photon;
@@ -10,373 +10,11 @@ using UnityEngine;
 [Serializable]
 public class PhotonEvent : IEquatable<PhotonEvent>
 {
-	public bool reliable
+	public enum RaiseMode
 	{
-		get
-		{
-			return this._reliable;
-		}
-		set
-		{
-			this._reliable = value;
-		}
-	}
-
-	public bool failSilent
-	{
-		get
-		{
-			return this._failSilent;
-		}
-		set
-		{
-			this._failSilent = value;
-		}
-	}
-
-	private PhotonEvent()
-	{
-	}
-
-	public PhotonEvent(int eventId)
-	{
-		if (eventId == -1)
-		{
-			throw new Exception(string.Format("<{0}> cannot be {1}.", "eventId", -1));
-		}
-		this._eventId = eventId;
-		this.Enable();
-	}
-
-	public PhotonEvent(string eventId) : this(StaticHash.Compute(eventId))
-	{
-	}
-
-	public PhotonEvent(int eventId, Action<int, int, object[], PhotonMessageInfoWrapped> callback) : this(eventId)
-	{
-		this.AddCallback(callback);
-	}
-
-	public PhotonEvent(string eventId, Action<int, int, object[], PhotonMessageInfoWrapped> callback) : this(eventId)
-	{
-		this.AddCallback(callback);
-	}
-
-	~PhotonEvent()
-	{
-		this.Dispose();
-	}
-
-	public void AddCallback(Action<int, int, object[], PhotonMessageInfoWrapped> callback)
-	{
-		if (this._disposed)
-		{
-			return;
-		}
-		if (callback == null)
-		{
-			throw new ArgumentNullException("callback");
-		}
-		if (this._delegate != null)
-		{
-			foreach (Delegate @delegate in this._delegate.GetInvocationList())
-			{
-				if (@delegate != null && @delegate.Equals(callback))
-				{
-					return;
-				}
-			}
-		}
-		this._delegate = (Action<int, int, object[], PhotonMessageInfoWrapped>)Delegate.Combine(this._delegate, callback);
-	}
-
-	public void RemoveCallback(Action<int, int, object[], PhotonMessageInfoWrapped> callback)
-	{
-		if (this._disposed)
-		{
-			return;
-		}
-		if (callback != null)
-		{
-			this._delegate = (Action<int, int, object[], PhotonMessageInfoWrapped>)Delegate.Remove(this._delegate, callback);
-		}
-	}
-
-	public void Enable()
-	{
-		if (this._disposed)
-		{
-			return;
-		}
-		if (this._enabled)
-		{
-			return;
-		}
-		if (Application.isPlaying)
-		{
-			PhotonEvent.AddPhotonEvent(this);
-		}
-		this._enabled = true;
-	}
-
-	public void Disable()
-	{
-		if (this._disposed)
-		{
-			return;
-		}
-		if (!this._enabled)
-		{
-			return;
-		}
-		if (Application.isPlaying)
-		{
-			PhotonEvent.RemovePhotonEvent(this);
-		}
-		this._enabled = false;
-	}
-
-	public void Dispose()
-	{
-		this._delegate = null;
-		if (this._enabled)
-		{
-			this._enabled = false;
-			if (Application.isPlaying)
-			{
-				PhotonEvent.RemovePhotonEvent(this);
-			}
-		}
-		this._eventId = -1;
-		this._disposed = true;
-	}
-
-	public static event Action<EventData, Exception> OnError;
-
-	private void InvokeDelegate(int sender, object[] args, PhotonMessageInfoWrapped info)
-	{
-		Action<int, int, object[], PhotonMessageInfoWrapped> @delegate = this._delegate;
-		if (@delegate == null)
-		{
-			return;
-		}
-		@delegate(sender, this._eventId, args, info);
-	}
-
-	public void RaiseLocal(params object[] args)
-	{
-		this.Raise(PhotonEvent.RaiseMode.Local, args);
-	}
-
-	public void RaiseOthers(params object[] args)
-	{
-		this.Raise(PhotonEvent.RaiseMode.RemoteOthers, args);
-	}
-
-	public void RaiseAll(params object[] args)
-	{
-		this.Raise(PhotonEvent.RaiseMode.RemoteAll, args);
-	}
-
-	private void Raise(PhotonEvent.RaiseMode mode, params object[] args)
-	{
-		if (this._disposed)
-		{
-			return;
-		}
-		if (!Application.isPlaying)
-		{
-			return;
-		}
-		if (!this._enabled)
-		{
-			return;
-		}
-		if (args != null && args.Length > 20)
-		{
-			Debug.LogError(string.Format("{0}: too many event args, max is {1}, trying to send {2}. Stopping!", "PhotonEvent", 20, args.Length));
-			return;
-		}
-		SendOptions sendOptions = this._reliable ? PhotonEvent.gSendReliable : PhotonEvent.gSendUnreliable;
-		switch (mode)
-		{
-		case PhotonEvent.RaiseMode.Local:
-			this.InvokeDelegate(this._eventId, args, new PhotonMessageInfoWrapped(PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.ServerTimestamp));
-			return;
-		case PhotonEvent.RaiseMode.RemoteOthers:
-		{
-			object[] eventContent = args.Prepend(this._eventId).ToArray<object>();
-			PhotonNetwork.RaiseEvent(176, eventContent, PhotonEvent.gReceiversOthers, sendOptions);
-			return;
-		}
-		case PhotonEvent.RaiseMode.RemoteAll:
-		{
-			object[] eventContent2 = args.Prepend(this._eventId).ToArray<object>();
-			PhotonNetwork.RaiseEvent(176, eventContent2, PhotonEvent.gReceiversAll, sendOptions);
-			return;
-		}
-		default:
-			return;
-		}
-	}
-
-	public bool Equals(PhotonEvent other)
-	{
-		return !(other == null) && (this._eventId == other._eventId && this._enabled == other._enabled && this._reliable == other._reliable && this._failSilent == other._failSilent) && this._disposed == other._disposed;
-	}
-
-	public override bool Equals(object obj)
-	{
-		PhotonEvent photonEvent = obj as PhotonEvent;
-		return photonEvent != null && this.Equals(photonEvent);
-	}
-
-	public override int GetHashCode()
-	{
-		int staticHash = this._eventId.GetStaticHash();
-		int i = StaticHash.Compute(this._enabled, this._reliable, this._failSilent, this._disposed);
-		return StaticHash.Compute(staticHash, i);
-	}
-
-	static PhotonEvent()
-	{
-		PhotonEvent.gReceiversAll = new RaiseEventOptions
-		{
-			Receivers = ReceiverGroup.All
-		};
-		PhotonEvent.gReceiversOthers = new RaiseEventOptions
-		{
-			Receivers = ReceiverGroup.Others
-		};
-		PhotonEvent.gSendUnreliable = SendOptions.SendUnreliable;
-		PhotonEvent.gSendUnreliable.Encrypt = true;
-		PhotonEvent.gSendReliable = SendOptions.SendReliable;
-		PhotonEvent.gSendReliable.Encrypt = true;
-	}
-
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
-	private static void StaticLoadAfterPhotonNetwork()
-	{
-		PhotonNetwork.NetworkingClient.EventReceived += PhotonEvent.StaticOnEvent;
-	}
-
-	public static bool operator ==(PhotonEvent x, PhotonEvent y)
-	{
-		return EqualityComparer<PhotonEvent>.Default.Equals(x, y);
-	}
-
-	public static bool operator !=(PhotonEvent x, PhotonEvent y)
-	{
-		return !EqualityComparer<PhotonEvent>.Default.Equals(x, y);
-	}
-
-	private static void StaticOnEvent(EventData evData)
-	{
-		if (evData.Code != 176)
-		{
-			return;
-		}
-		try
-		{
-			object[] array = evData.CustomData as object[];
-			if (array != null && array.Length != 0 && array.Length <= 21)
-			{
-				object obj = array[0];
-				if (obj is int)
-				{
-					int sender = (int)obj;
-					if (sender != -1)
-					{
-						ListProcessor<PhotonEvent> listProcessor;
-						if (PhotonEvent._photonEvents.TryGetValue(sender, out listProcessor))
-						{
-							object[] args;
-							if (array.Length > 1)
-							{
-								args = new object[array.Length - 1];
-								Array.Copy(array, 1, args, 0, args.Length);
-							}
-							else
-							{
-								args = Array.Empty<object>();
-							}
-							PhotonMessageInfoWrapped info = new PhotonMessageInfoWrapped(evData.Sender, PhotonNetwork.ServerTimestamp);
-							listProcessor.ItemProcessor = delegate(in PhotonEvent pEv)
-							{
-								if (pEv._eventId == -1 || pEv._disposed || !pEv._enabled)
-								{
-									return;
-								}
-								pEv.InvokeDelegate(sender, args, info);
-							};
-							listProcessor.ProcessList();
-						}
-					}
-				}
-			}
-		}
-		catch (Exception arg)
-		{
-			Action<EventData, Exception> onError = PhotonEvent.OnError;
-			if (onError != null)
-			{
-				onError(evData, arg);
-			}
-		}
-	}
-
-	private static void AddPhotonEvent(PhotonEvent photonEvent)
-	{
-		int eventId = photonEvent._eventId;
-		if (eventId == -1)
-		{
-			return;
-		}
-		ListProcessor<PhotonEvent> listProcessor;
-		if (!PhotonEvent._photonEvents.TryGetValue(eventId, out listProcessor))
-		{
-			listProcessor = new ListProcessor<PhotonEvent>(10, null);
-			PhotonEvent._photonEvents.Add(eventId, listProcessor);
-		}
-		if (listProcessor.Contains(photonEvent))
-		{
-			return;
-		}
-		listProcessor.Add(photonEvent);
-	}
-
-	private static void RemovePhotonEvent(PhotonEvent photonEvent)
-	{
-		ListProcessor<PhotonEvent> listProcessor;
-		if (!PhotonEvent._photonEvents.TryGetValue(photonEvent._eventId, out listProcessor))
-		{
-			return;
-		}
-		listProcessor.Remove(photonEvent);
-		if (listProcessor.Count == 0)
-		{
-			PhotonEvent._photonEvents.Remove(photonEvent._eventId);
-		}
-	}
-
-	public static PhotonEvent operator +(PhotonEvent photonEvent, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
-	{
-		if (photonEvent == null)
-		{
-			throw new ArgumentNullException("photonEvent");
-		}
-		photonEvent.AddCallback(callback);
-		return photonEvent;
-	}
-
-	public static PhotonEvent operator -(PhotonEvent photonEvent, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
-	{
-		if (photonEvent == null)
-		{
-			throw new ArgumentNullException("photonEvent");
-		}
-		photonEvent.RemoveCallback(callback);
-		return photonEvent;
+		Local,
+		RemoteOthers,
+		RemoteAll
 	}
 
 	private const int MAX_EVENT_ARGS = 20;
@@ -410,12 +48,349 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 
 	private static readonly SendOptions gSendUnreliable;
 
-	private static readonly Dictionary<int, ListProcessor<PhotonEvent>> _photonEvents = new Dictionary<int, ListProcessor<PhotonEvent>>(20);
+	private static readonly Dictionary<int, ListProcessor<PhotonEvent>> _photonEvents;
 
-	public enum RaiseMode
+	public bool reliable
 	{
-		Local,
-		RemoteOthers,
-		RemoteAll
+		get
+		{
+			return _reliable;
+		}
+		set
+		{
+			_reliable = value;
+		}
+	}
+
+	public bool failSilent
+	{
+		get
+		{
+			return _failSilent;
+		}
+		set
+		{
+			_failSilent = value;
+		}
+	}
+
+	public static event Action<EventData, Exception> OnError;
+
+	private PhotonEvent()
+	{
+	}
+
+	public PhotonEvent(int eventId)
+	{
+		if (eventId == -1)
+		{
+			throw new Exception(string.Format("<{0}> cannot be {1}.", "eventId", -1));
+		}
+		_eventId = eventId;
+		Enable();
+	}
+
+	public PhotonEvent(string eventId)
+		: this(StaticHash.Compute(eventId))
+	{
+	}
+
+	public PhotonEvent(int eventId, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+		: this(eventId)
+	{
+		AddCallback(callback);
+	}
+
+	public PhotonEvent(string eventId, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+		: this(eventId)
+	{
+		AddCallback(callback);
+	}
+
+	~PhotonEvent()
+	{
+		Dispose();
+	}
+
+	public void AddCallback(Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+	{
+		if (_disposed)
+		{
+			return;
+		}
+		if (callback == null)
+		{
+			throw new ArgumentNullException("callback");
+		}
+		if (_delegate != null)
+		{
+			Delegate[] invocationList = _delegate.GetInvocationList();
+			foreach (Delegate obj in invocationList)
+			{
+				if ((object)obj != null && obj.Equals(callback))
+				{
+					return;
+				}
+			}
+		}
+		_delegate = (Action<int, int, object[], PhotonMessageInfoWrapped>)Delegate.Combine(_delegate, callback);
+	}
+
+	public void RemoveCallback(Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+	{
+		if (!_disposed && callback != null)
+		{
+			_delegate = (Action<int, int, object[], PhotonMessageInfoWrapped>)Delegate.Remove(_delegate, callback);
+		}
+	}
+
+	public void Enable()
+	{
+		if (!_disposed && !_enabled)
+		{
+			if (Application.isPlaying)
+			{
+				AddPhotonEvent(this);
+			}
+			_enabled = true;
+		}
+	}
+
+	public void Disable()
+	{
+		if (!_disposed && _enabled)
+		{
+			if (Application.isPlaying)
+			{
+				RemovePhotonEvent(this);
+			}
+			_enabled = false;
+		}
+	}
+
+	public void Dispose()
+	{
+		_delegate = null;
+		if (_enabled)
+		{
+			_enabled = false;
+			if (Application.isPlaying)
+			{
+				RemovePhotonEvent(this);
+			}
+		}
+		_eventId = -1;
+		_disposed = true;
+	}
+
+	private void InvokeDelegate(int sender, object[] args, PhotonMessageInfoWrapped info)
+	{
+		_delegate?.Invoke(sender, _eventId, args, info);
+	}
+
+	public void RaiseLocal(params object[] args)
+	{
+		Raise(RaiseMode.Local, args);
+	}
+
+	public void RaiseOthers(params object[] args)
+	{
+		Raise(RaiseMode.RemoteOthers, args);
+	}
+
+	public void RaiseAll(params object[] args)
+	{
+		Raise(RaiseMode.RemoteAll, args);
+	}
+
+	private void Raise(RaiseMode mode, params object[] args)
+	{
+		if (_disposed || !Application.isPlaying || !_enabled)
+		{
+			return;
+		}
+		if (args != null && args.Length > 20)
+		{
+			Debug.LogError(string.Format("{0}: too many event args, max is {1}, trying to send {2}. Stopping!", "PhotonEvent", 20, args.Length));
+			return;
+		}
+		SendOptions sendOptions = (_reliable ? gSendReliable : gSendUnreliable);
+		switch (mode)
+		{
+		case RaiseMode.Local:
+			InvokeDelegate(_eventId, args, new PhotonMessageInfoWrapped(PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.ServerTimestamp));
+			break;
+		case RaiseMode.RemoteOthers:
+		{
+			object[] eventContent2 = args.Prepend(_eventId).ToArray();
+			PhotonNetwork.RaiseEvent(176, eventContent2, gReceiversOthers, sendOptions);
+			break;
+		}
+		case RaiseMode.RemoteAll:
+		{
+			object[] eventContent = args.Prepend(_eventId).ToArray();
+			PhotonNetwork.RaiseEvent(176, eventContent, gReceiversAll, sendOptions);
+			break;
+		}
+		}
+	}
+
+	public bool Equals(PhotonEvent other)
+	{
+		if (other == null)
+		{
+			return false;
+		}
+		if (_eventId == other._eventId && _enabled == other._enabled && _reliable == other._reliable && _failSilent == other._failSilent)
+		{
+			return _disposed == other._disposed;
+		}
+		return false;
+	}
+
+	public override bool Equals(object obj)
+	{
+		if (obj is PhotonEvent other)
+		{
+			return Equals(other);
+		}
+		return false;
+	}
+
+	public override int GetHashCode()
+	{
+		int staticHash = _eventId.GetStaticHash();
+		int i = StaticHash.Compute(_enabled, _reliable, _failSilent, _disposed);
+		return StaticHash.Compute(staticHash, i);
+	}
+
+	static PhotonEvent()
+	{
+		_photonEvents = new Dictionary<int, ListProcessor<PhotonEvent>>(20);
+		gReceiversAll = new RaiseEventOptions
+		{
+			Receivers = ReceiverGroup.All
+		};
+		gReceiversOthers = new RaiseEventOptions
+		{
+			Receivers = ReceiverGroup.Others
+		};
+		gSendUnreliable = SendOptions.SendUnreliable;
+		gSendUnreliable.Encrypt = true;
+		gSendReliable = SendOptions.SendReliable;
+		gSendReliable.Encrypt = true;
+	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+	private static void StaticLoadAfterPhotonNetwork()
+	{
+		PhotonNetwork.NetworkingClient.EventReceived += StaticOnEvent;
+	}
+
+	public static bool operator ==(PhotonEvent x, PhotonEvent y)
+	{
+		return EqualityComparer<PhotonEvent>.Default.Equals(x, y);
+	}
+
+	public static bool operator !=(PhotonEvent x, PhotonEvent y)
+	{
+		return !EqualityComparer<PhotonEvent>.Default.Equals(x, y);
+	}
+
+	private static void StaticOnEvent(EventData evData)
+	{
+		if (evData.Code != 176)
+		{
+			return;
+		}
+		try
+		{
+			if (!(evData.CustomData is object[] array) || array.Length == 0 || array.Length > 21)
+			{
+				return;
+			}
+			object obj = array[0];
+			if (!(obj is int))
+			{
+				return;
+			}
+			int sender = (int)obj;
+			if (sender == -1 || !_photonEvents.TryGetValue(sender, out var value))
+			{
+				return;
+			}
+			object[] args;
+			if (array.Length > 1)
+			{
+				args = new object[array.Length - 1];
+				Array.Copy(array, 1, args, 0, args.Length);
+			}
+			else
+			{
+				args = Array.Empty<object>();
+			}
+			PhotonMessageInfoWrapped info = new PhotonMessageInfoWrapped(evData.Sender, PhotonNetwork.ServerTimestamp);
+			value.ItemProcessor = delegate(in PhotonEvent pEv)
+			{
+				if (pEv._eventId != -1 && !pEv._disposed && pEv._enabled)
+				{
+					pEv.InvokeDelegate(sender, args, info);
+				}
+			};
+			value.ProcessList();
+		}
+		catch (Exception arg)
+		{
+			PhotonEvent.OnError?.Invoke(evData, arg);
+		}
+	}
+
+	private static void AddPhotonEvent(PhotonEvent photonEvent)
+	{
+		int eventId = photonEvent._eventId;
+		if (eventId != -1)
+		{
+			if (!_photonEvents.TryGetValue(eventId, out var value))
+			{
+				value = new ListProcessor<PhotonEvent>(10);
+				_photonEvents.Add(eventId, value);
+			}
+			if (!value.Contains(in photonEvent))
+			{
+				value.Add(in photonEvent);
+			}
+		}
+	}
+
+	private static void RemovePhotonEvent(PhotonEvent photonEvent)
+	{
+		if (_photonEvents.TryGetValue(photonEvent._eventId, out var value))
+		{
+			value.Remove(in photonEvent);
+			if (value.Count == 0)
+			{
+				_photonEvents.Remove(photonEvent._eventId);
+			}
+		}
+	}
+
+	public static PhotonEvent operator +(PhotonEvent photonEvent, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+	{
+		if (photonEvent == null)
+		{
+			throw new ArgumentNullException("photonEvent");
+		}
+		photonEvent.AddCallback(callback);
+		return photonEvent;
+	}
+
+	public static PhotonEvent operator -(PhotonEvent photonEvent, Action<int, int, object[], PhotonMessageInfoWrapped> callback)
+	{
+		if (photonEvent == null)
+		{
+			throw new ArgumentNullException("photonEvent");
+		}
+		photonEvent.RemoveCallback(callback);
+		return photonEvent;
 	}
 }

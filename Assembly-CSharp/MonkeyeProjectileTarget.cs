@@ -1,43 +1,42 @@
-﻿using System;
 using UnityEngine;
 
 public class MonkeyeProjectileTarget : MonoBehaviour
 {
+	private MonkeyeAI monkeyeAI;
+
+	private SlingshotProjectileHitNotifier notifier;
+
 	private void Awake()
 	{
-		this.monkeyeAI = base.GetComponent<MonkeyeAI>();
-		this.notifier = base.GetComponentInChildren<SlingshotProjectileHitNotifier>();
+		monkeyeAI = GetComponent<MonkeyeAI>();
+		notifier = GetComponentInChildren<SlingshotProjectileHitNotifier>();
 	}
 
 	private void OnEnable()
 	{
-		if (this.notifier != null)
+		if (notifier != null)
 		{
-			this.notifier.OnProjectileHit += this.Notifier_OnProjectileHit;
-			this.notifier.OnPaperPlaneHit += this.Notifier_OnPaperPlaneHit;
+			notifier.OnProjectileHit += Notifier_OnProjectileHit;
+			notifier.OnPaperPlaneHit += Notifier_OnPaperPlaneHit;
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (this.notifier != null)
+		if (notifier != null)
 		{
-			this.notifier.OnProjectileHit -= this.Notifier_OnProjectileHit;
-			this.notifier.OnPaperPlaneHit -= this.Notifier_OnPaperPlaneHit;
+			notifier.OnProjectileHit -= Notifier_OnProjectileHit;
+			notifier.OnPaperPlaneHit -= Notifier_OnPaperPlaneHit;
 		}
 	}
 
 	private void Notifier_OnProjectileHit(SlingshotProjectile projectile, Collision collision)
 	{
-		this.monkeyeAI.SetSleep();
+		monkeyeAI.SetSleep();
 	}
 
 	private void Notifier_OnPaperPlaneHit(PaperPlaneProjectile projectile, Collider collider)
 	{
-		this.monkeyeAI.SetSleep();
+		monkeyeAI.SetSleep();
 	}
-
-	private MonkeyeAI monkeyeAI;
-
-	private SlingshotProjectileHitNotifier notifier;
 }

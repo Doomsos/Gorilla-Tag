@@ -1,275 +1,10 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTagScripts;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BuilderDispenserShelf : MonoBehaviour
 {
-	private void BuildDispenserPool()
-	{
-		this.dispenserPool = new List<BuilderDispenser>(12);
-		this.activeDispensers = new List<BuilderDispenser>(6);
-		this.AddToDispenserPool(6);
-	}
-
-	private void AddToDispenserPool(int count)
-	{
-		if (this.dispenserPrefab == null)
-		{
-			return;
-		}
-		for (int i = 0; i < count; i++)
-		{
-			BuilderDispenser builderDispenser = Object.Instantiate<BuilderDispenser>(this.dispenserPrefab, this.shelfCenter);
-			builderDispenser.gameObject.SetActive(false);
-			builderDispenser.table = this.table;
-			builderDispenser.shelfID = this.shelfID;
-			this.dispenserPool.Add(builderDispenser);
-		}
-	}
-
-	private void ActivateDispensers()
-	{
-		this.piecesInSet.Clear();
-		foreach (BuilderPieceSet.BuilderPieceSubset builderPieceSubset in this.currentGroup.pieceSubsets)
-		{
-			if (this._includedCategories.Contains(builderPieceSubset.pieceCategory))
-			{
-				this.piecesInSet.AddRange(builderPieceSubset.pieceInfos);
-			}
-		}
-		if (this.piecesInSet.Count <= 0)
-		{
-			return;
-		}
-		int count = this.piecesInSet.Count;
-		if (this.dispenserPool.Count < count)
-		{
-			this.AddToDispenserPool(count - this.dispenserPool.Count);
-		}
-		this.activeDispensers.Clear();
-		for (int i = 0; i < this.dispenserPool.Count; i++)
-		{
-			if (i < count)
-			{
-				BuilderDispenser builderDispenser = this.dispenserPool[i];
-				builderDispenser.gameObject.SetActive(true);
-				float x = this.shelfWidth / -2f + this.shelfWidth / (float)(count * 2) + this.shelfWidth / (float)count * (float)i;
-				builderDispenser.transform.localPosition = new Vector3(x, 0f, 0f);
-				builderDispenser.AssignPieceType(this.piecesInSet[i], this.currentGroup.defaultMaterial.GetHashCode());
-				this.activeDispensers.Add(builderDispenser);
-			}
-			else
-			{
-				this.dispenserPool[i].ClearDispenser();
-				this.dispenserPool[i].gameObject.SetActive(false);
-			}
-		}
-		this.dispenserToUpdate = 0;
-	}
-
-	public void Setup()
-	{
-		this.InitIfNeeded();
-		foreach (BuilderDispenser builderDispenser in this.dispenserPool)
-		{
-			builderDispenser.table = this.table;
-			builderDispenser.shelfID = this.shelfID;
-		}
-	}
-
-	private void InitIfNeeded()
-	{
-		if (this.initialized)
-		{
-			return;
-		}
-		this.setSelector.Setup(this._includedCategories);
-		this.currentGroup = this.setSelector.GetSelectedGroup();
-		this.setSelector.OnSelectedGroup.AddListener(new UnityAction<int>(this.OnSelectedSetChange));
-		this.BuildDispenserPool();
-		this.ActivateDispensers();
-		this.initialized = true;
-	}
-
-	private void OnDestroy()
-	{
-		if (this.setSelector != null)
-		{
-			this.setSelector.OnSelectedGroup.RemoveListener(new UnityAction<int>(this.OnSelectedSetChange));
-		}
-	}
-
-	public void OnSelectedSetChange(int displayGroupID)
-	{
-		if (this.table.GetTableState() != BuilderTable.TableState.Ready)
-		{
-			return;
-		}
-		this.table.RequestShelfSelection(this.shelfID, displayGroupID, false);
-	}
-
-	public void SetSelection(int displayGroupID)
-	{
-		this.setSelector.SetSelection(displayGroupID);
-		BuilderPieceSet.BuilderDisplayGroup selectedGroup = this.setSelector.GetSelectedGroup();
-		if ((this.initialized && this.currentGroup == null) || selectedGroup.displayName != this.currentGroup.displayName)
-		{
-			this.currentGroup = selectedGroup;
-			if (this.table.GetTableState() == BuilderTable.TableState.Ready)
-			{
-				if (!this.animatingShelf)
-				{
-					this.StartShelfSwap();
-					return;
-				}
-			}
-			else
-			{
-				this.animatingShelf = false;
-				this.ImmediateShelfSwap();
-			}
-		}
-	}
-
-	public int GetSelectedDisplayGroupID()
-	{
-		return this.setSelector.GetSelectedGroup().GetDisplayGroupIdentifier();
-	}
-
-	private void ImmediateShelfSwap()
-	{
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.ClearDispenser();
-		}
-		this.ActivateDispensers();
-	}
-
-	private void StartShelfSwap()
-	{
-		this.dispenserToClear = 0;
-		this.timeToClearShelf = (double)(Time.time + 0.15f);
-		this.resetAnimation.Rewind();
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.ParentPieceToShelf(this.resetAnimation.transform);
-		}
-		this.resetAnimation.Play();
-		this.animatingShelf = true;
-	}
-
-	public void UpdateShelf()
-	{
-		if (this.animatingShelf && (double)Time.time > this.timeToClearShelf)
-		{
-			if (this.dispenserToClear < this.activeDispensers.Count)
-			{
-				if (this.dispenserToClear == 0)
-				{
-					this.resetSoundBank.Play();
-				}
-				this.activeDispensers[this.dispenserToClear].ClearDispenser();
-				this.dispenserToClear++;
-				return;
-			}
-			if (!this.resetAnimation.isPlaying)
-			{
-				this.playSpawnSetSound = true;
-				this.ActivateDispensers();
-				this.animatingShelf = false;
-			}
-		}
-	}
-
-	public void UpdateShelfSliced()
-	{
-		if (!PhotonNetwork.LocalPlayer.IsMasterClient)
-		{
-			return;
-		}
-		if (!this.initialized)
-		{
-			return;
-		}
-		if (this.animatingShelf)
-		{
-			return;
-		}
-		if (this.shouldVerifySetSelection)
-		{
-			BuilderPieceSet.BuilderDisplayGroup selectedGroup = this.setSelector.GetSelectedGroup();
-			if (selectedGroup == null || !BuilderSetManager.instance.DoesAnyPlayerInRoomOwnPieceSet(selectedGroup.setID))
-			{
-				int defaultGroupID = this.setSelector.GetDefaultGroupID();
-				if (defaultGroupID != -1)
-				{
-					this.OnSelectedSetChange(defaultGroupID);
-				}
-			}
-			this.shouldVerifySetSelection = false;
-		}
-		if (this.activeDispensers.Count > 0)
-		{
-			this.activeDispensers[this.dispenserToUpdate].UpdateDispenser();
-			this.dispenserToUpdate = (this.dispenserToUpdate + 1) % this.activeDispensers.Count;
-		}
-	}
-
-	public void VerifySetSelection()
-	{
-		this.shouldVerifySetSelection = true;
-	}
-
-	public void OnShelfPieceCreated(BuilderPiece piece, bool playfx)
-	{
-		if (this.playSpawnSetSound && playfx)
-		{
-			this.audioSource.GTPlayOneShot(this.spawnNewSetSound, 1f);
-			this.playSpawnSetSound = false;
-		}
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.ShelfPieceCreated(piece, playfx);
-		}
-	}
-
-	public void OnShelfPieceRecycled(BuilderPiece piece)
-	{
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.ShelfPieceRecycled(piece);
-		}
-	}
-
-	public void OnClearTable()
-	{
-		if (!this.initialized)
-		{
-			return;
-		}
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.OnClearTable();
-		}
-		base.StopAllCoroutines();
-		if (this.animatingShelf)
-		{
-			this.resetAnimation.Rewind();
-			this.animatingShelf = false;
-		}
-	}
-
-	public void ClearShelf()
-	{
-		foreach (BuilderDispenser builderDispenser in this.activeDispensers)
-		{
-			builderDispenser.ClearDispenser();
-		}
-	}
-
 	[Header("Set Selection")]
 	[SerializeField]
 	private BuilderSetSelector setSelector;
@@ -320,4 +55,256 @@ public class BuilderDispenserShelf : MonoBehaviour
 	private int dispenserToUpdate;
 
 	private bool shouldVerifySetSelection;
+
+	private void BuildDispenserPool()
+	{
+		dispenserPool = new List<BuilderDispenser>(12);
+		activeDispensers = new List<BuilderDispenser>(6);
+		AddToDispenserPool(6);
+	}
+
+	private void AddToDispenserPool(int count)
+	{
+		if (!(dispenserPrefab == null))
+		{
+			for (int i = 0; i < count; i++)
+			{
+				BuilderDispenser builderDispenser = Object.Instantiate(dispenserPrefab, shelfCenter);
+				builderDispenser.gameObject.SetActive(value: false);
+				builderDispenser.table = table;
+				builderDispenser.shelfID = shelfID;
+				dispenserPool.Add(builderDispenser);
+			}
+		}
+	}
+
+	private void ActivateDispensers()
+	{
+		piecesInSet.Clear();
+		foreach (BuilderPieceSet.BuilderPieceSubset pieceSubset in currentGroup.pieceSubsets)
+		{
+			if (_includedCategories.Contains(pieceSubset.pieceCategory))
+			{
+				piecesInSet.AddRange(pieceSubset.pieceInfos);
+			}
+		}
+		if (piecesInSet.Count <= 0)
+		{
+			return;
+		}
+		int count = piecesInSet.Count;
+		if (dispenserPool.Count < count)
+		{
+			AddToDispenserPool(count - dispenserPool.Count);
+		}
+		activeDispensers.Clear();
+		for (int i = 0; i < dispenserPool.Count; i++)
+		{
+			if (i < count)
+			{
+				BuilderDispenser builderDispenser = dispenserPool[i];
+				builderDispenser.gameObject.SetActive(value: true);
+				float x = shelfWidth / -2f + shelfWidth / (float)(count * 2) + shelfWidth / (float)count * (float)i;
+				builderDispenser.transform.localPosition = new Vector3(x, 0f, 0f);
+				builderDispenser.AssignPieceType(piecesInSet[i], currentGroup.defaultMaterial.GetHashCode());
+				activeDispensers.Add(builderDispenser);
+			}
+			else
+			{
+				dispenserPool[i].ClearDispenser();
+				dispenserPool[i].gameObject.SetActive(value: false);
+			}
+		}
+		dispenserToUpdate = 0;
+	}
+
+	public void Setup()
+	{
+		InitIfNeeded();
+		foreach (BuilderDispenser item in dispenserPool)
+		{
+			item.table = table;
+			item.shelfID = shelfID;
+		}
+	}
+
+	private void InitIfNeeded()
+	{
+		if (!initialized)
+		{
+			setSelector.Setup(_includedCategories);
+			currentGroup = setSelector.GetSelectedGroup();
+			setSelector.OnSelectedGroup.AddListener(OnSelectedSetChange);
+			BuildDispenserPool();
+			ActivateDispensers();
+			initialized = true;
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (setSelector != null)
+		{
+			setSelector.OnSelectedGroup.RemoveListener(OnSelectedSetChange);
+		}
+	}
+
+	public void OnSelectedSetChange(int displayGroupID)
+	{
+		if (table.GetTableState() == BuilderTable.TableState.Ready)
+		{
+			table.RequestShelfSelection(shelfID, displayGroupID, isConveyor: false);
+		}
+	}
+
+	public void SetSelection(int displayGroupID)
+	{
+		setSelector.SetSelection(displayGroupID);
+		BuilderPieceSet.BuilderDisplayGroup selectedGroup = setSelector.GetSelectedGroup();
+		if ((!initialized || currentGroup != null) && !(selectedGroup.displayName != currentGroup.displayName))
+		{
+			return;
+		}
+		currentGroup = selectedGroup;
+		if (table.GetTableState() == BuilderTable.TableState.Ready)
+		{
+			if (!animatingShelf)
+			{
+				StartShelfSwap();
+			}
+		}
+		else
+		{
+			animatingShelf = false;
+			ImmediateShelfSwap();
+		}
+	}
+
+	public int GetSelectedDisplayGroupID()
+	{
+		return setSelector.GetSelectedGroup().GetDisplayGroupIdentifier();
+	}
+
+	private void ImmediateShelfSwap()
+	{
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.ClearDispenser();
+		}
+		ActivateDispensers();
+	}
+
+	private void StartShelfSwap()
+	{
+		dispenserToClear = 0;
+		timeToClearShelf = Time.time + 0.15f;
+		resetAnimation.Rewind();
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.ParentPieceToShelf(resetAnimation.transform);
+		}
+		resetAnimation.Play();
+		animatingShelf = true;
+	}
+
+	public void UpdateShelf()
+	{
+		if (!animatingShelf || !((double)Time.time > timeToClearShelf))
+		{
+			return;
+		}
+		if (dispenserToClear < activeDispensers.Count)
+		{
+			if (dispenserToClear == 0)
+			{
+				resetSoundBank.Play();
+			}
+			activeDispensers[dispenserToClear].ClearDispenser();
+			dispenserToClear++;
+		}
+		else if (!resetAnimation.isPlaying)
+		{
+			playSpawnSetSound = true;
+			ActivateDispensers();
+			animatingShelf = false;
+		}
+	}
+
+	public void UpdateShelfSliced()
+	{
+		if (!PhotonNetwork.LocalPlayer.IsMasterClient || !initialized || animatingShelf)
+		{
+			return;
+		}
+		if (shouldVerifySetSelection)
+		{
+			BuilderPieceSet.BuilderDisplayGroup selectedGroup = setSelector.GetSelectedGroup();
+			if (selectedGroup == null || !BuilderSetManager.instance.DoesAnyPlayerInRoomOwnPieceSet(selectedGroup.setID))
+			{
+				int defaultGroupID = setSelector.GetDefaultGroupID();
+				if (defaultGroupID != -1)
+				{
+					OnSelectedSetChange(defaultGroupID);
+				}
+			}
+			shouldVerifySetSelection = false;
+		}
+		if (activeDispensers.Count > 0)
+		{
+			activeDispensers[dispenserToUpdate].UpdateDispenser();
+			dispenserToUpdate = (dispenserToUpdate + 1) % activeDispensers.Count;
+		}
+	}
+
+	public void VerifySetSelection()
+	{
+		shouldVerifySetSelection = true;
+	}
+
+	public void OnShelfPieceCreated(BuilderPiece piece, bool playfx)
+	{
+		if (playSpawnSetSound && playfx)
+		{
+			audioSource.GTPlayOneShot(spawnNewSetSound);
+			playSpawnSetSound = false;
+		}
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.ShelfPieceCreated(piece, playfx);
+		}
+	}
+
+	public void OnShelfPieceRecycled(BuilderPiece piece)
+	{
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.ShelfPieceRecycled(piece);
+		}
+	}
+
+	public void OnClearTable()
+	{
+		if (!initialized)
+		{
+			return;
+		}
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.OnClearTable();
+		}
+		StopAllCoroutines();
+		if (animatingShelf)
+		{
+			resetAnimation.Rewind();
+			animatingShelf = false;
+		}
+	}
+
+	public void ClearShelf()
+	{
+		foreach (BuilderDispenser activeDispenser in activeDispensers)
+		{
+			activeDispenser.ClearDispenser();
+		}
+	}
 }

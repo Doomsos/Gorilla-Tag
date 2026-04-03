@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using GorillaExtensions;
@@ -8,265 +8,24 @@ using UnityEngine;
 [NetworkBehaviourWeaved(15)]
 internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 {
-	public bool RespectOwnership
+	[StructLayout(LayoutKind.Explicit, Size = 60)]
+	[NetworkStructWeaved(15)]
+	private struct NetTransformData : INetworkStruct
 	{
-		get
-		{
-			return this.respectOwnership;
-		}
-	}
+		[FieldOffset(0)]
+		public Vector3 position;
 
-	public bool TickRunning { get; set; }
+		[FieldOffset(12)]
+		public Vector3 velocity;
 
-	[Networked]
-	[NetworkedWeaved(0, 15)]
-	private unsafe GorillaNetworkTransform.NetTransformData data
-	{
-		get
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GorillaNetworkTransform.data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			return *(GorillaNetworkTransform.NetTransformData*)(this.Ptr + 0);
-		}
-		set
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GorillaNetworkTransform.data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			*(GorillaNetworkTransform.NetTransformData*)(this.Ptr + 0) = value;
-		}
-	}
+		[FieldOffset(24)]
+		public Quaternion rotation;
 
-	public new void Awake()
-	{
-		this.m_StoredPosition = base.transform.localPosition;
-		this.m_NetworkPosition = Vector3.zero;
-		this.m_NetworkScale = Vector3.zero;
-		this.m_NetworkRotation = Quaternion.identity;
-		this.maxDistanceSquare = this.maxDistance * this.maxDistance;
-	}
+		[FieldOffset(40)]
+		public Vector3 scale;
 
-	private new void OnEnable()
-	{
-		NetworkBehaviourUtils.InternalOnEnable(this);
-		this.m_firstTake = true;
-		if (this.clampToSpawn)
-		{
-			this.clampOriginPoint = (this.m_UseLocal ? base.transform.localPosition : base.transform.position);
-		}
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private new void OnDisable()
-	{
-		NetworkBehaviourUtils.InternalOnDisable(this);
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public void Tick()
-	{
-		if (!base.IsLocallyOwned)
-		{
-			if (this.m_UseLocal)
-			{
-				base.transform.SetLocalPositionAndRotation(Vector3.MoveTowards(base.transform.localPosition, this.m_NetworkPosition, this.m_Distance * Time.deltaTime * (float)NetworkSystem.Instance.TickRate), Quaternion.RotateTowards(base.transform.localRotation, this.m_NetworkRotation, this.m_Angle * Time.deltaTime * (float)NetworkSystem.Instance.TickRate));
-				return;
-			}
-			base.transform.SetPositionAndRotation(Vector3.MoveTowards(base.transform.position, this.m_NetworkPosition, this.m_Distance * Time.deltaTime * (float)NetworkSystem.Instance.TickRate), Quaternion.RotateTowards(base.transform.rotation, this.m_NetworkRotation, this.m_Angle * Time.deltaTime * (float)NetworkSystem.Instance.TickRate));
-		}
-	}
-
-	public override void WriteDataFusion()
-	{
-		GorillaNetworkTransform.NetTransformData data = this.SharedWrite();
-		double sentTime = NetworkSystem.Instance.SimTick / 1000.0;
-		data.SentTime = sentTime;
-		this.data = data;
-	}
-
-	public override void ReadDataFusion()
-	{
-		this.SharedRead(this.data);
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
-		if (this.respectOwnership && player != base.Owner)
-		{
-			return;
-		}
-		GorillaNetworkTransform.NetTransformData netTransformData = this.SharedWrite();
-		if (this.m_SynchronizePosition)
-		{
-			stream.SendNext(netTransformData.position);
-			stream.SendNext(netTransformData.velocity);
-		}
-		if (this.m_SynchronizeRotation)
-		{
-			stream.SendNext(netTransformData.rotation);
-		}
-		if (this.m_SynchronizeScale)
-		{
-			stream.SendNext(netTransformData.scale);
-		}
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
-		if (this.respectOwnership && player != base.Owner)
-		{
-			return;
-		}
-		GorillaNetworkTransform.NetTransformData data = default(GorillaNetworkTransform.NetTransformData);
-		if (this.m_SynchronizePosition)
-		{
-			data.position = (Vector3)stream.ReceiveNext();
-			data.velocity = (Vector3)stream.ReceiveNext();
-		}
-		if (this.m_SynchronizeRotation)
-		{
-			data.rotation = (Quaternion)stream.ReceiveNext();
-		}
-		if (this.m_SynchronizeScale)
-		{
-			data.scale = (Vector3)stream.ReceiveNext();
-		}
-		data.SentTime = (double)((float)info.SentServerTime);
-		this.SharedRead(data);
-	}
-
-	private void SharedRead(GorillaNetworkTransform.NetTransformData data)
-	{
-		if (this.m_SynchronizePosition)
-		{
-			ref this.m_NetworkPosition.SetValueSafe(data.position);
-			ref this.m_Velocity.SetValueSafe(data.velocity);
-			if (this.clampDistanceFromSpawn && Vector3.SqrMagnitude(this.clampOriginPoint - this.m_NetworkPosition) > this.maxDistanceSquare)
-			{
-				this.m_NetworkPosition = this.clampOriginPoint + this.m_Velocity.normalized * this.maxDistance;
-				this.m_Velocity = Vector3.zero;
-			}
-			if (this.m_firstTake)
-			{
-				if (this.m_UseLocal)
-				{
-					base.transform.localPosition = this.m_NetworkPosition;
-				}
-				else
-				{
-					base.transform.position = this.m_NetworkPosition;
-				}
-				this.m_Distance = 0f;
-			}
-			else
-			{
-				float d = Mathf.Abs((float)(NetworkSystem.Instance.SimTime - data.SentTime));
-				this.m_NetworkPosition += this.m_Velocity * d;
-				if (this.m_UseLocal)
-				{
-					this.m_Distance = Vector3.Distance(base.transform.localPosition, this.m_NetworkPosition);
-				}
-				else
-				{
-					this.m_Distance = Vector3.Distance(base.transform.position, this.m_NetworkPosition);
-				}
-			}
-		}
-		if (this.m_SynchronizeRotation)
-		{
-			ref this.m_NetworkRotation.SetValueSafe(data.rotation);
-			if (this.m_firstTake)
-			{
-				this.m_Angle = 0f;
-				if (this.m_UseLocal)
-				{
-					base.transform.localRotation = this.m_NetworkRotation;
-				}
-				else
-				{
-					base.transform.rotation = this.m_NetworkRotation;
-				}
-			}
-			else if (this.m_UseLocal)
-			{
-				this.m_Angle = Quaternion.Angle(base.transform.localRotation, this.m_NetworkRotation);
-			}
-			else
-			{
-				this.m_Angle = Quaternion.Angle(base.transform.rotation, this.m_NetworkRotation);
-			}
-		}
-		if (this.m_SynchronizeScale)
-		{
-			ref this.m_NetworkScale.SetValueSafe(data.scale);
-			base.transform.localScale = this.m_NetworkScale;
-		}
-		if (this.m_firstTake)
-		{
-			this.m_firstTake = false;
-		}
-	}
-
-	private GorillaNetworkTransform.NetTransformData SharedWrite()
-	{
-		GorillaNetworkTransform.NetTransformData result = default(GorillaNetworkTransform.NetTransformData);
-		if (this.m_SynchronizePosition)
-		{
-			if (this.m_UseLocal)
-			{
-				this.m_Velocity = base.transform.localPosition - this.m_StoredPosition;
-				this.m_StoredPosition = base.transform.localPosition;
-				result.position = base.transform.localPosition;
-				result.velocity = this.m_Velocity;
-			}
-			else
-			{
-				this.m_Velocity = base.transform.position - this.m_StoredPosition;
-				this.m_StoredPosition = base.transform.position;
-				result.position = base.transform.position;
-				result.velocity = this.m_Velocity;
-			}
-		}
-		if (this.m_SynchronizeRotation)
-		{
-			if (this.m_UseLocal)
-			{
-				result.rotation = base.transform.localRotation;
-			}
-			else
-			{
-				result.rotation = base.transform.rotation;
-			}
-		}
-		if (this.m_SynchronizeScale)
-		{
-			result.scale = base.transform.localScale;
-		}
-		return result;
-	}
-
-	public void GTAddition_DoTeleport()
-	{
-		this.m_firstTake = true;
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.data = this._data;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._data = this.data;
+		[FieldOffset(52)]
+		public double SentTime;
 	}
 
 	[Tooltip("Indicates if localPosition and localRotation should be used. Scale ignores this setting, and always uses localScale to avoid issues with lossyScale.")]
@@ -315,25 +74,260 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 	[WeaverGenerated]
 	[DefaultForProperty("data", 0, 15)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private GorillaNetworkTransform.NetTransformData _data;
+	private NetTransformData _data;
 
-	[NetworkStructWeaved(15)]
-	[StructLayout(LayoutKind.Explicit, Size = 60)]
-	private struct NetTransformData : INetworkStruct
+	public bool RespectOwnership => respectOwnership;
+
+	public bool TickRunning { get; set; }
+
+	[Networked]
+	[NetworkedWeaved(0, 15)]
+	private unsafe NetTransformData data
 	{
-		[FieldOffset(0)]
-		public Vector3 position;
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GorillaNetworkTransform.data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(NetTransformData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GorillaNetworkTransform.data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(NetTransformData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
 
-		[FieldOffset(12)]
-		public Vector3 velocity;
+	public new void Awake()
+	{
+		m_StoredPosition = base.transform.localPosition;
+		m_NetworkPosition = Vector3.zero;
+		m_NetworkScale = Vector3.zero;
+		m_NetworkRotation = Quaternion.identity;
+		maxDistanceSquare = maxDistance * maxDistance;
+	}
 
-		[FieldOffset(24)]
-		public Quaternion rotation;
+	private new void OnEnable()
+	{
+		NetworkBehaviourUtils.InternalOnEnable(this);
+		m_firstTake = true;
+		if (clampToSpawn)
+		{
+			clampOriginPoint = (m_UseLocal ? base.transform.localPosition : base.transform.position);
+		}
+		TickSystem<object>.AddTickCallback(this);
+	}
 
-		[FieldOffset(40)]
-		public Vector3 scale;
+	private new void OnDisable()
+	{
+		NetworkBehaviourUtils.InternalOnDisable(this);
+		TickSystem<object>.RemoveTickCallback(this);
+	}
 
-		[FieldOffset(52)]
-		public double SentTime;
+	public void Tick()
+	{
+		if (!base.IsLocallyOwned)
+		{
+			if (m_UseLocal)
+			{
+				base.transform.SetLocalPositionAndRotation(Vector3.MoveTowards(base.transform.localPosition, m_NetworkPosition, m_Distance * Time.deltaTime * (float)NetworkSystem.Instance.TickRate), Quaternion.RotateTowards(base.transform.localRotation, m_NetworkRotation, m_Angle * Time.deltaTime * (float)NetworkSystem.Instance.TickRate));
+			}
+			else
+			{
+				base.transform.SetPositionAndRotation(Vector3.MoveTowards(base.transform.position, m_NetworkPosition, m_Distance * Time.deltaTime * (float)NetworkSystem.Instance.TickRate), Quaternion.RotateTowards(base.transform.rotation, m_NetworkRotation, m_Angle * Time.deltaTime * (float)NetworkSystem.Instance.TickRate));
+			}
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		NetTransformData netTransformData = SharedWrite();
+		double sentTime = (double)(uint)NetworkSystem.Instance.SimTick / 1000.0;
+		netTransformData.SentTime = sentTime;
+		data = netTransformData;
+	}
+
+	public override void ReadDataFusion()
+	{
+		SharedRead(data);
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
+		if (!respectOwnership || player == base.Owner)
+		{
+			NetTransformData netTransformData = SharedWrite();
+			if (m_SynchronizePosition)
+			{
+				stream.SendNext(netTransformData.position);
+				stream.SendNext(netTransformData.velocity);
+			}
+			if (m_SynchronizeRotation)
+			{
+				stream.SendNext(netTransformData.rotation);
+			}
+			if (m_SynchronizeScale)
+			{
+				stream.SendNext(netTransformData.scale);
+			}
+		}
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
+		if (!respectOwnership || player == base.Owner)
+		{
+			NetTransformData netTransformData = default(NetTransformData);
+			if (m_SynchronizePosition)
+			{
+				netTransformData.position = (Vector3)stream.ReceiveNext();
+				netTransformData.velocity = (Vector3)stream.ReceiveNext();
+			}
+			if (m_SynchronizeRotation)
+			{
+				netTransformData.rotation = (Quaternion)stream.ReceiveNext();
+			}
+			if (m_SynchronizeScale)
+			{
+				netTransformData.scale = (Vector3)stream.ReceiveNext();
+			}
+			netTransformData.SentTime = (float)info.SentServerTime;
+			SharedRead(netTransformData);
+		}
+	}
+
+	private void SharedRead(NetTransformData data)
+	{
+		if (m_SynchronizePosition)
+		{
+			m_NetworkPosition.SetValueSafe(in data.position);
+			m_Velocity.SetValueSafe(in data.velocity);
+			if (clampDistanceFromSpawn && Vector3.SqrMagnitude(clampOriginPoint - m_NetworkPosition) > maxDistanceSquare)
+			{
+				m_NetworkPosition = clampOriginPoint + m_Velocity.normalized * maxDistance;
+				m_Velocity = Vector3.zero;
+			}
+			if (m_firstTake)
+			{
+				if (m_UseLocal)
+				{
+					base.transform.localPosition = m_NetworkPosition;
+				}
+				else
+				{
+					base.transform.position = m_NetworkPosition;
+				}
+				m_Distance = 0f;
+			}
+			else
+			{
+				float num = Mathf.Abs((float)(NetworkSystem.Instance.SimTime - data.SentTime));
+				m_NetworkPosition += m_Velocity * num;
+				if (m_UseLocal)
+				{
+					m_Distance = Vector3.Distance(base.transform.localPosition, m_NetworkPosition);
+				}
+				else
+				{
+					m_Distance = Vector3.Distance(base.transform.position, m_NetworkPosition);
+				}
+			}
+		}
+		if (m_SynchronizeRotation)
+		{
+			m_NetworkRotation.SetValueSafe(in data.rotation);
+			if (m_firstTake)
+			{
+				m_Angle = 0f;
+				if (m_UseLocal)
+				{
+					base.transform.localRotation = m_NetworkRotation;
+				}
+				else
+				{
+					base.transform.rotation = m_NetworkRotation;
+				}
+			}
+			else if (m_UseLocal)
+			{
+				m_Angle = Quaternion.Angle(base.transform.localRotation, m_NetworkRotation);
+			}
+			else
+			{
+				m_Angle = Quaternion.Angle(base.transform.rotation, m_NetworkRotation);
+			}
+		}
+		if (m_SynchronizeScale)
+		{
+			m_NetworkScale.SetValueSafe(in data.scale);
+			base.transform.localScale = m_NetworkScale;
+		}
+		if (m_firstTake)
+		{
+			m_firstTake = false;
+		}
+	}
+
+	private NetTransformData SharedWrite()
+	{
+		NetTransformData result = default(NetTransformData);
+		if (m_SynchronizePosition)
+		{
+			if (m_UseLocal)
+			{
+				m_Velocity = base.transform.localPosition - m_StoredPosition;
+				m_StoredPosition = base.transform.localPosition;
+				result.position = base.transform.localPosition;
+				result.velocity = m_Velocity;
+			}
+			else
+			{
+				m_Velocity = base.transform.position - m_StoredPosition;
+				m_StoredPosition = base.transform.position;
+				result.position = base.transform.position;
+				result.velocity = m_Velocity;
+			}
+		}
+		if (m_SynchronizeRotation)
+		{
+			if (m_UseLocal)
+			{
+				result.rotation = base.transform.localRotation;
+			}
+			else
+			{
+				result.rotation = base.transform.rotation;
+			}
+		}
+		if (m_SynchronizeScale)
+		{
+			result.scale = base.transform.localScale;
+		}
+		return result;
+	}
+
+	public void GTAddition_DoTeleport()
+	{
+		m_firstTake = true;
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		data = _data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_data = data;
 	}
 }

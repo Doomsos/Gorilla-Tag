@@ -1,306 +1,304 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderItem : TransferrableObject
 {
-	public class BuilderItem : TransferrableObject
+	private enum BuilderItemState
 	{
-		public override bool ShouldBeKinematic()
-		{
-			return this.itemState == TransferrableObject.ItemStates.State2 || this.itemState == TransferrableObject.ItemStates.State4 || base.ShouldBeKinematic();
-		}
+		isHeld = 1,
+		dropped = 2,
+		placed = 4,
+		unused0 = 8,
+		none = 0x10
+	}
 
-		protected override void Awake()
-		{
-			base.Awake();
-			this.parent = base.transform.parent;
-			this.currTable = null;
-			this.initialPosition = base.transform.position;
-			this.initialRotation = base.transform.rotation;
-			this.initialGrabInteractorScale = this.gripInteractor.transform.localScale;
-		}
+	public BuilderItemReliableState reliableState;
 
-		internal override void OnEnable()
-		{
-			base.OnEnable();
-		}
+	public string builtItemPath;
 
-		internal override void OnDisable()
-		{
-			base.OnDisable();
-		}
+	public GameObject itemRoot;
 
-		protected override void Start()
-		{
-			base.Start();
-			this.itemState = TransferrableObject.ItemStates.State4;
-			this.currentState = TransferrableObject.PositionState.Dropped;
-		}
+	private bool enableCollidersWhenReady;
 
-		public void AttachPiece(BuilderPiece piece)
-		{
-			base.transform.SetPositionAndRotation(piece.transform.position, piece.transform.rotation);
-			piece.transform.localScale = Vector3.one;
-			piece.transform.SetParent(this.itemRoot.transform);
-			Debug.LogFormat(piece.gameObject, "Attach Piece {0} to container {1}", new object[]
-			{
-				piece.gameObject.GetInstanceID(),
-				base.gameObject.GetInstanceID()
-			});
-			this.attachedPiece = piece;
-		}
+	private float handsFreeOfCollidersTime;
 
-		public void DetachPiece(BuilderPiece piece)
+	[NonSerialized]
+	public BuilderPiece attachedPiece;
+
+	public List<Behaviour> onlyWhenPlacedBehaviours;
+
+	[NonSerialized]
+	public BuilderItem parentItem;
+
+	public List<BuilderAttachGridPlane> gridPlanes;
+
+	public List<BuilderAttachEdge> edges;
+
+	private List<Collider> colliders;
+
+	private Transform parent;
+
+	private Vector3 initialPosition;
+
+	private Quaternion initialRotation;
+
+	private Vector3 initialGrabInteractorScale;
+
+	private BuilderTable currTable;
+
+	[SerializeField]
+	private AudioSource audioSource;
+
+	public AudioClip snapAudio;
+
+	public AudioClip placeAudio;
+
+	public GameObject placeVFX;
+
+	private new BuilderItemState previousItemState = BuilderItemState.dropped;
+
+	public override bool ShouldBeKinematic()
+	{
+		if (itemState != ItemStates.State2 && itemState != ItemStates.State4)
 		{
-			if (piece != this.attachedPiece)
-			{
-				Debug.LogErrorFormat("Trying to detach piece {0} from a container containing {1}", new object[]
-				{
-					piece.pieceId,
-					this.attachedPiece.pieceId
-				});
-				return;
-			}
+			return base.ShouldBeKinematic();
+		}
+		return true;
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		parent = base.transform.parent;
+		currTable = null;
+		initialPosition = base.transform.position;
+		initialRotation = base.transform.rotation;
+		initialGrabInteractorScale = gripInteractor.transform.localScale;
+	}
+
+	internal override void OnEnable()
+	{
+		base.OnEnable();
+	}
+
+	internal override void OnDisable()
+	{
+		base.OnDisable();
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		itemState = ItemStates.State4;
+		currentState = PositionState.Dropped;
+	}
+
+	public void AttachPiece(BuilderPiece piece)
+	{
+		base.transform.SetPositionAndRotation(piece.transform.position, piece.transform.rotation);
+		piece.transform.localScale = Vector3.one;
+		piece.transform.SetParent(itemRoot.transform);
+		Debug.LogFormat(piece.gameObject, "Attach Piece {0} to container {1}", piece.gameObject.GetInstanceID(), base.gameObject.GetInstanceID());
+		attachedPiece = piece;
+	}
+
+	public void DetachPiece(BuilderPiece piece)
+	{
+		if (piece != attachedPiece)
+		{
+			Debug.LogErrorFormat("Trying to detach piece {0} from a container containing {1}", piece.pieceId, attachedPiece.pieceId);
+		}
+		else
+		{
 			piece.transform.SetParent(null);
-			Debug.LogFormat(this.attachedPiece.gameObject, "Detach Piece {0} from container {1}", new object[]
-			{
-				this.attachedPiece.gameObject.GetInstanceID(),
-				base.gameObject.GetInstanceID()
-			});
-			this.attachedPiece = null;
+			Debug.LogFormat(attachedPiece.gameObject, "Detach Piece {0} from container {1}", attachedPiece.gameObject.GetInstanceID(), base.gameObject.GetInstanceID());
+			attachedPiece = null;
 		}
+	}
 
-		private new void OnStateChanged()
+	private new void OnStateChanged()
+	{
+		if (itemState == ItemStates.State2)
 		{
-			if (this.itemState == TransferrableObject.ItemStates.State2)
-			{
-				this.enableCollidersWhenReady = true;
-				this.gripInteractor.transform.localScale = this.initialGrabInteractorScale * 2f;
-				this.handsFreeOfCollidersTime = 0f;
-				return;
-			}
-			this.enableCollidersWhenReady = false;
-			this.gripInteractor.transform.localScale = this.initialGrabInteractorScale;
-			this.handsFreeOfCollidersTime = 0f;
+			enableCollidersWhenReady = true;
+			gripInteractor.transform.localScale = initialGrabInteractorScale * 2f;
+			handsFreeOfCollidersTime = 0f;
 		}
-
-		public override Matrix4x4 GetDefaultTransformationMatrix()
+		else
 		{
-			if (this.reliableState.dirty)
-			{
-				base.SetupHandMatrix(this.reliableState.leftHandAttachPos, this.reliableState.leftHandAttachRot, this.reliableState.rightHandAttachPos, this.reliableState.rightHandAttachRot);
-				this.reliableState.dirty = false;
-			}
-			return base.GetDefaultTransformationMatrix();
+			enableCollidersWhenReady = false;
+			gripInteractor.transform.localScale = initialGrabInteractorScale;
+			handsFreeOfCollidersTime = 0f;
 		}
+	}
 
-		protected override void LateUpdateShared()
+	public override Matrix4x4 GetDefaultTransformationMatrix()
+	{
+		if (reliableState.dirty)
 		{
-			base.LateUpdateShared();
-			if (base.InHand())
+			SetupHandMatrix(reliableState.leftHandAttachPos, reliableState.leftHandAttachRot, reliableState.rightHandAttachPos, reliableState.rightHandAttachRot);
+			reliableState.dirty = false;
+		}
+		return base.GetDefaultTransformationMatrix();
+	}
+
+	protected override void LateUpdateShared()
+	{
+		base.LateUpdateShared();
+		if (InHand())
+		{
+			itemState = ItemStates.State0;
+		}
+		BuilderItemState builderItemState = (BuilderItemState)itemState;
+		if (builderItemState != previousItemState)
+		{
+			OnStateChanged();
+		}
+		previousItemState = builderItemState;
+		if (enableCollidersWhenReady)
+		{
+			bool flag = IsOverlapping(EquipmentInteractor.instance.overlapInteractionPointsRight) || IsOverlapping(EquipmentInteractor.instance.overlapInteractionPointsLeft);
+			handsFreeOfCollidersTime += (flag ? 0f : Time.deltaTime);
+			if (handsFreeOfCollidersTime > 0.1f)
 			{
-				this.itemState = TransferrableObject.ItemStates.State0;
-			}
-			BuilderItem.BuilderItemState itemState = (BuilderItem.BuilderItemState)this.itemState;
-			if (itemState != this.previousItemState)
-			{
-				this.OnStateChanged();
-			}
-			this.previousItemState = itemState;
-			if (this.enableCollidersWhenReady)
-			{
-				bool flag = this.IsOverlapping(EquipmentInteractor.instance.overlapInteractionPointsRight) || this.IsOverlapping(EquipmentInteractor.instance.overlapInteractionPointsLeft);
-				this.handsFreeOfCollidersTime += (flag ? 0f : Time.deltaTime);
-				if (this.handsFreeOfCollidersTime > 0.1f)
-				{
-					this.gripInteractor.transform.localScale = this.initialGrabInteractorScale;
-					this.enableCollidersWhenReady = false;
-				}
+				gripInteractor.transform.localScale = initialGrabInteractorScale;
+				enableCollidersWhenReady = false;
 			}
 		}
+	}
 
-		private bool IsOverlapping(List<InteractionPoint> interactionPoints)
+	private bool IsOverlapping(List<InteractionPoint> interactionPoints)
+	{
+		if (interactionPoints == null)
 		{
-			if (interactionPoints == null)
-			{
-				return false;
-			}
-			for (int i = 0; i < interactionPoints.Count; i++)
-			{
-				if (interactionPoints[i] == this.gripInteractor)
-				{
-					return true;
-				}
-			}
 			return false;
 		}
-
-		protected override void LateUpdateLocal()
+		for (int i = 0; i < interactionPoints.Count; i++)
 		{
-			base.LateUpdateLocal();
-		}
-
-		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-		{
-			if (GorillaTagger.Instance.offlineVRRig.scaleFactor < 1f)
+			if (interactionPoints[i] == gripInteractor)
 			{
-				return;
-			}
-			base.OnGrab(pointGrabbed, grabbingHand);
-			this.itemState = TransferrableObject.ItemStates.State0;
-		}
-
-		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-		{
-			if (!base.OnRelease(zoneReleased, releasingHand))
-			{
-				return false;
-			}
-			this.itemState = TransferrableObject.ItemStates.State1;
-			this.Reparent(null);
-			this.parentItem = null;
-			this.gripInteractor.transform.localScale = this.initialGrabInteractorScale;
-			return true;
-		}
-
-		public void OnHoverOverTableStart(BuilderTable table)
-		{
-			this.currTable = table;
-		}
-
-		public void OnHoverOverTableEnd(BuilderTable table)
-		{
-			this.currTable = null;
-		}
-
-		public override void OnJoinedRoom()
-		{
-			base.OnJoinedRoom();
-		}
-
-		public override void OnLeftRoom()
-		{
-			base.OnLeftRoom();
-			base.transform.position = this.initialPosition;
-			base.transform.rotation = this.initialRotation;
-			if (this.worldShareableInstance != null)
-			{
-				this.worldShareableInstance.transform.position = this.initialPosition;
-				this.worldShareableInstance.transform.rotation = this.initialRotation;
-			}
-			this.itemState = TransferrableObject.ItemStates.State4;
-			this.currentState = TransferrableObject.PositionState.Dropped;
-		}
-
-		private void PlayVFX(GameObject vfx)
-		{
-			ObjectPools.instance.Instantiate(vfx, base.transform.position, true);
-		}
-
-		private bool Reparent(Transform _transform)
-		{
-			if (!this.allowReparenting)
-			{
-				return false;
-			}
-			if (this.parent)
-			{
-				this.parent.SetParent(_transform);
-				base.transform.SetParent(this.parent);
 				return true;
 			}
+		}
+		return false;
+	}
+
+	protected override void LateUpdateLocal()
+	{
+		base.LateUpdateLocal();
+	}
+
+	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		if (!(GorillaTagger.Instance.offlineVRRig.scaleFactor < 1f))
+		{
+			base.OnGrab(pointGrabbed, grabbingHand);
+			itemState = ItemStates.State0;
+		}
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
 			return false;
 		}
+		itemState = ItemStates.State1;
+		Reparent(null);
+		parentItem = null;
+		gripInteractor.transform.localScale = initialGrabInteractorScale;
+		return true;
+	}
 
-		private bool ShouldPlayFX()
+	public void OnHoverOverTableStart(BuilderTable table)
+	{
+		currTable = table;
+	}
+
+	public void OnHoverOverTableEnd(BuilderTable table)
+	{
+		currTable = null;
+	}
+
+	public override void OnJoinedRoom()
+	{
+		base.OnJoinedRoom();
+	}
+
+	public override void OnLeftRoom()
+	{
+		base.OnLeftRoom();
+		base.transform.position = initialPosition;
+		base.transform.rotation = initialRotation;
+		if (worldShareableInstance != null)
 		{
-			return this.previousItemState == BuilderItem.BuilderItemState.isHeld || this.previousItemState == BuilderItem.BuilderItemState.dropped;
+			worldShareableInstance.transform.position = initialPosition;
+			worldShareableInstance.transform.rotation = initialRotation;
 		}
+		itemState = ItemStates.State4;
+		currentState = PositionState.Dropped;
+	}
 
-		public static GameObject BuildEnvItem(int prefabHash, Vector3 position, Quaternion rotation)
+	private void PlayVFX(GameObject vfx)
+	{
+		ObjectPools.instance.Instantiate(vfx, base.transform.position);
+	}
+
+	private bool Reparent(Transform _transform)
+	{
+		if (!allowReparenting)
 		{
-			GameObject gameObject = ObjectPools.instance.Instantiate(prefabHash, true);
-			gameObject.transform.SetPositionAndRotation(position, rotation);
-			return gameObject;
+			return false;
 		}
-
-		protected override void OnHandMatrixUpdate(Vector3 localPosition, Quaternion localRotation, bool leftHand)
+		if ((bool)parent)
 		{
-			if (leftHand)
-			{
-				this.reliableState.leftHandAttachPos = localPosition;
-				this.reliableState.leftHandAttachRot = localRotation;
-			}
-			else
-			{
-				this.reliableState.rightHandAttachPos = localPosition;
-				this.reliableState.rightHandAttachRot = localRotation;
-			}
-			this.reliableState.dirty = true;
+			parent.SetParent(_transform);
+			base.transform.SetParent(parent);
+			return true;
 		}
+		return false;
+	}
 
-		public int GetPhotonViewId()
+	private bool ShouldPlayFX()
+	{
+		if (previousItemState == BuilderItemState.isHeld || previousItemState == BuilderItemState.dropped)
 		{
-			if (this.worldShareableInstance == null)
-			{
-				return -1;
-			}
-			return this.worldShareableInstance.ViewID;
+			return true;
 		}
+		return false;
+	}
 
-		public BuilderItemReliableState reliableState;
+	public static GameObject BuildEnvItem(int prefabHash, Vector3 position, Quaternion rotation)
+	{
+		GameObject obj = ObjectPools.instance.Instantiate(prefabHash);
+		obj.transform.SetPositionAndRotation(position, rotation);
+		return obj;
+	}
 
-		public string builtItemPath;
-
-		public GameObject itemRoot;
-
-		private bool enableCollidersWhenReady;
-
-		private float handsFreeOfCollidersTime;
-
-		[NonSerialized]
-		public BuilderPiece attachedPiece;
-
-		public List<Behaviour> onlyWhenPlacedBehaviours;
-
-		[NonSerialized]
-		public BuilderItem parentItem;
-
-		public List<BuilderAttachGridPlane> gridPlanes;
-
-		public List<BuilderAttachEdge> edges;
-
-		private List<Collider> colliders;
-
-		private Transform parent;
-
-		private Vector3 initialPosition;
-
-		private Quaternion initialRotation;
-
-		private Vector3 initialGrabInteractorScale;
-
-		private BuilderTable currTable;
-
-		[SerializeField]
-		private AudioSource audioSource;
-
-		public AudioClip snapAudio;
-
-		public AudioClip placeAudio;
-
-		public GameObject placeVFX;
-
-		private new BuilderItem.BuilderItemState previousItemState = BuilderItem.BuilderItemState.dropped;
-
-		private enum BuilderItemState
+	protected override void OnHandMatrixUpdate(Vector3 localPosition, Quaternion localRotation, bool leftHand)
+	{
+		if (leftHand)
 		{
-			isHeld = 1,
-			dropped,
-			placed = 4,
-			unused0 = 8,
-			none = 16
+			reliableState.leftHandAttachPos = localPosition;
+			reliableState.leftHandAttachRot = localRotation;
 		}
+		else
+		{
+			reliableState.rightHandAttachPos = localPosition;
+			reliableState.rightHandAttachRot = localRotation;
+		}
+		reliableState.dirty = true;
+	}
+
+	public int GetPhotonViewId()
+	{
+		if (worldShareableInstance == null)
+		{
+			return -1;
+		}
+		return worldShareableInstance.ViewID;
 	}
 }

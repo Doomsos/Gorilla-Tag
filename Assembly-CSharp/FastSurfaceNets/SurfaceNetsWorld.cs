@@ -1,54 +1,52 @@
-﻿using System;
 using Unity.Mathematics;
 using UnityEngine;
 using Voxels;
 
-namespace FastSurfaceNets
+namespace FastSurfaceNets;
+
+public class SurfaceNetsWorld : MonoBehaviour
 {
-	public class SurfaceNetsWorld : MonoBehaviour
+	public SurfaceNetsChunk chunkPrefab;
+
+	public int3 radius;
+
+	public GenerationParameters parameters;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-			this.Generate();
-		}
+		Generate();
+	}
 
-		private void Generate()
+	private void Generate()
+	{
+		DestroyChildren();
+		for (int i = -radius.x; i <= radius.x; i++)
 		{
-			this.DestroyChildren();
-			for (int i = -this.radius.x; i <= this.radius.x; i++)
+			for (int j = -radius.y; j <= radius.y; j++)
 			{
-				for (int j = -this.radius.y; j <= this.radius.y; j++)
+				for (int k = -radius.z; k <= radius.z; k++)
 				{
-					for (int k = -this.radius.z; k <= this.radius.z; k++)
-					{
-						int3 @int = new int3(i, j, k);
-						SurfaceNetsChunk surfaceNetsChunk = Object.Instantiate<SurfaceNetsChunk>(this.chunkPrefab, base.transform);
-						surfaceNetsChunk.Id = @int;
-						surfaceNetsChunk.parameters = this.parameters;
-						surfaceNetsChunk.name = string.Format("SurfaceNetsChunk_{0}_{1}_{2}", @int.x, @int.y, @int.z);
-						surfaceNetsChunk.transform.localPosition = @int.ToFloat3() * 32f;
-						surfaceNetsChunk.BuildChunk();
-					}
+					int3 int5 = new int3(i, j, k);
+					SurfaceNetsChunk surfaceNetsChunk = Object.Instantiate(chunkPrefab, base.transform);
+					surfaceNetsChunk.Id = int5;
+					surfaceNetsChunk.parameters = parameters;
+					surfaceNetsChunk.name = $"SurfaceNetsChunk_{int5.x}_{int5.y}_{int5.z}";
+					surfaceNetsChunk.transform.localPosition = int5.ToFloat3() * 32f;
+					surfaceNetsChunk.BuildChunk();
 				}
 			}
 		}
+	}
 
-		private void DestroyChildren()
+	private void DestroyChildren()
+	{
+		for (int num = base.transform.childCount - 1; num >= 0; num--)
 		{
-			for (int i = base.transform.childCount - 1; i >= 0; i--)
+			Transform child = base.transform.GetChild(num);
+			if (child != null)
 			{
-				Transform child = base.transform.GetChild(i);
-				if (child != null)
-				{
-					JamUtil.Destroy(child.gameObject);
-				}
+				JamUtil.Destroy(child.gameObject);
 			}
 		}
-
-		public SurfaceNetsChunk chunkPrefab;
-
-		public int3 radius;
-
-		public GenerationParameters parameters;
 	}
 }

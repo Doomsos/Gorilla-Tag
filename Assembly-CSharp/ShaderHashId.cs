@@ -1,40 +1,35 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 [Serializable]
 public struct ShaderHashId : IEquatable<ShaderHashId>
 {
-	public string text
-	{
-		get
-		{
-			return this._text;
-		}
-	}
+	[FormerlySerializedAs("_hashText")]
+	[SerializeField]
+	private string _text;
 
-	public int hash
-	{
-		get
-		{
-			return this._hash;
-		}
-	}
+	[NonSerialized]
+	private int _hash;
+
+	public string text => _text;
+
+	public int hash => _hash;
 
 	public ShaderHashId(string text)
 	{
-		this._text = text;
-		this._hash = Shader.PropertyToID(text);
+		_text = text;
+		_hash = Shader.PropertyToID(text);
 	}
 
 	public override string ToString()
 	{
-		return this._text;
+		return _text;
 	}
 
 	public override int GetHashCode()
 	{
-		return this._hash;
+		return _hash;
 	}
 
 	public static implicit operator int(ShaderHashId h)
@@ -49,15 +44,14 @@ public struct ShaderHashId : IEquatable<ShaderHashId>
 
 	public bool Equals(ShaderHashId other)
 	{
-		return this._hash == other._hash;
+		return _hash == other._hash;
 	}
 
 	public override bool Equals(object obj)
 	{
-		if (obj is ShaderHashId)
+		if (obj is ShaderHashId other)
 		{
-			ShaderHashId other = (ShaderHashId)obj;
-			return this.Equals(other);
+			return Equals(other);
 		}
 		return false;
 	}
@@ -71,11 +65,4 @@ public struct ShaderHashId : IEquatable<ShaderHashId>
 	{
 		return !x.Equals(y);
 	}
-
-	[FormerlySerializedAs("_hashText")]
-	[SerializeField]
-	private string _text;
-
-	[NonSerialized]
-	private int _hash;
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -8,11 +7,20 @@ using UnityEngine.PlayerLoop;
 
 public class PlayerLoopPruning : MonoBehaviour
 {
+	public List<string> removeSubsystemList;
+
+	public List<string> androidSubsystemExtras;
+
+	private bool isAndroid;
+
+	private static Stopwatch sw = new Stopwatch();
+
+	private static float slop = 0.0002f;
+
 	private void Start()
 	{
-		this.isAndroid = (Application.platform == RuntimePlatform.Android);
-		PlayerLoopSystem currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
-		PlayerLoop.SetPlayerLoop(this.RemoveSystem<PreLateUpdate>(currentPlayerLoop));
+		isAndroid = Application.platform == RuntimePlatform.Android;
+		PlayerLoop.SetPlayerLoop(RemoveSystem<PreLateUpdate>(PlayerLoop.GetCurrentPlayerLoop()));
 	}
 
 	private PlayerLoopSystem RemoveSystem<T>(in PlayerLoopSystem loopSystem) where T : struct
@@ -42,7 +50,7 @@ public class PlayerLoopPruning : MonoBehaviour
 					List<PlayerLoopSystem> list2 = new List<PlayerLoopSystem>();
 					for (int j = 0; j < playerLoopSystem.subSystemList.Length; j++)
 					{
-						if (!this.removeSubsystemList.Contains(playerLoopSystem.subSystemList[j].type.Name) && (!this.isAndroid || !this.androidSubsystemExtras.Contains(playerLoopSystem.subSystemList[j].type.Name)))
+						if (!removeSubsystemList.Contains(playerLoopSystem.subSystemList[j].type.Name) && (!isAndroid || !androidSubsystemExtras.Contains(playerLoopSystem.subSystemList[j].type.Name)))
 						{
 							list2.Add(playerLoopSystem.subSystemList[j]);
 						}
@@ -55,12 +63,12 @@ public class PlayerLoopPruning : MonoBehaviour
 		PlayerLoopSystem item2 = new PlayerLoopSystem
 		{
 			type = typeof(PlayerLoopPruning),
-			updateDelegate = new PlayerLoopSystem.UpdateFunction(PlayerLoopPruning.PhaseSyncDestroyer3000Start)
+			updateDelegate = PhaseSyncDestroyer3000Start
 		};
 		PlayerLoopSystem item3 = new PlayerLoopSystem
 		{
 			type = typeof(PlayerLoopPruning),
-			updateDelegate = new PlayerLoopSystem.UpdateFunction(PlayerLoopPruning.PhaseSyncDestroyer3000End)
+			updateDelegate = PhaseSyncDestroyer3000End
 		};
 		list.Insert(0, item2);
 		list.Add(item3);
@@ -70,36 +78,26 @@ public class PlayerLoopPruning : MonoBehaviour
 
 	private static void PhaseSyncDestroyer3000Start()
 	{
-		PlayerLoopPruning.slop = (float)PlayerLoopPruning.sw.ElapsedTicks / 10000000f * 0.1f + PlayerLoopPruning.slop * 0.9f;
-		PlayerLoopPruning.sw.Restart();
+		slop = (float)sw.ElapsedTicks / 10000000f * 0.1f + slop * 0.9f;
+		sw.Restart();
 	}
 
 	private static void PhaseSyncDestroyer3000End()
 	{
-		long elapsedTicks = PlayerLoopPruning.sw.ElapsedTicks;
-		long num = (long)((1f / (float)Application.targetFrameRate - PlayerLoopPruning.slop) * 10000000f);
+		long elapsedTicks = sw.ElapsedTicks;
+		long num = (long)((1f / (float)Application.targetFrameRate - slop) * 10000000f);
 		long num2 = num - elapsedTicks;
 		num2 -= GorillaSimpleBackgroundWorkerManager.DoWork(num2);
-		if (num2 < 0L)
+		if (num2 < 0)
 		{
-			PlayerLoopPruning.sw.Restart();
+			sw.Restart();
 			return;
 		}
-		Thread.Sleep((int)(num2 / 10000L));
-		while (PlayerLoopPruning.sw.ElapsedTicks < num)
+		Thread.Sleep((int)(num2 / 10000));
+		while (sw.ElapsedTicks < num)
 		{
 			Thread.Sleep(0);
 		}
-		PlayerLoopPruning.sw.Restart();
+		sw.Restart();
 	}
-
-	public List<string> removeSubsystemList;
-
-	public List<string> androidSubsystemExtras;
-
-	private bool isAndroid;
-
-	private static Stopwatch sw = new Stopwatch();
-
-	private static float slop = 0.0002f;
 }

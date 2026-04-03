@@ -1,120 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ProximityReactor : MonoBehaviour
 {
-	public float proximityRange
-	{
-		get
-		{
-			return this.proximityMax - this.proximityMin;
-		}
-	}
-
-	public float distance
-	{
-		get
-		{
-			return this._distance;
-		}
-	}
-
-	public float distanceLinear
-	{
-		get
-		{
-			return this._distanceLinear;
-		}
-	}
-
-	public void SetRigFrom()
-	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
-		if (componentInParent != null)
-		{
-			this.from = componentInParent.transform;
-		}
-	}
-
-	public void SetRigTo()
-	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
-		if (componentInParent != null)
-		{
-			this.to = componentInParent.transform;
-		}
-	}
-
-	public void SetTransformFrom(Transform t)
-	{
-		this.from = t;
-	}
-
-	public void SetTransformTo(Transform t)
-	{
-		this.to = t;
-	}
-
-	private void Setup()
-	{
-		this._distance = 0f;
-		this._distanceLinear = 0f;
-	}
-
-	private void OnEnable()
-	{
-		this.Setup();
-	}
-
-	private void Update()
-	{
-		if (!this.from || !this.to)
-		{
-			this._distance = 0f;
-			this._distanceLinear = 0f;
-			return;
-		}
-		Vector3 position = this.from.position;
-		float magnitude = (this.to.position - position).magnitude;
-		if (!this._distance.Approx(magnitude, 1E-06f))
-		{
-			UnityEvent<float> unityEvent = this.onProximityChanged;
-			if (unityEvent != null)
-			{
-				unityEvent.Invoke(magnitude);
-			}
-		}
-		this._distance = magnitude;
-		float num = this.proximityRange.Approx0(1E-06f) ? 0f : MathUtils.LinearUnclamped(magnitude, this.proximityMin, this.proximityMax, 0f, 1f);
-		if (!this._distanceLinear.Approx(num, 1E-06f))
-		{
-			UnityEvent<float> unityEvent2 = this.onProximityChangedLinear;
-			if (unityEvent2 != null)
-			{
-				unityEvent2.Invoke(num);
-			}
-		}
-		this._distanceLinear = num;
-		if (this._distanceLinear < 0f)
-		{
-			UnityEvent<float> unityEvent3 = this.onBelowMinProximity;
-			if (unityEvent3 != null)
-			{
-				unityEvent3.Invoke(magnitude);
-			}
-		}
-		if (this._distanceLinear > 1f)
-		{
-			UnityEvent<float> unityEvent4 = this.onAboveMaxProximity;
-			if (unityEvent4 == null)
-			{
-				return;
-			}
-			unityEvent4.Invoke(magnitude);
-		}
-	}
-
 	public Transform from;
 
 	public Transform to;
@@ -124,8 +13,8 @@ public class ProximityReactor : MonoBehaviour
 
 	public float proximityMax = 1f;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private float _distance;
 
 	[NonSerialized]
@@ -140,4 +29,80 @@ public class ProximityReactor : MonoBehaviour
 	public UnityEvent<float> onBelowMinProximity;
 
 	public UnityEvent<float> onAboveMaxProximity;
+
+	public float proximityRange => proximityMax - proximityMin;
+
+	public float distance => _distance;
+
+	public float distanceLinear => _distanceLinear;
+
+	public void SetRigFrom()
+	{
+		VRRig componentInParent = GetComponentInParent<VRRig>(includeInactive: true);
+		if (componentInParent != null)
+		{
+			from = componentInParent.transform;
+		}
+	}
+
+	public void SetRigTo()
+	{
+		VRRig componentInParent = GetComponentInParent<VRRig>(includeInactive: true);
+		if (componentInParent != null)
+		{
+			to = componentInParent.transform;
+		}
+	}
+
+	public void SetTransformFrom(Transform t)
+	{
+		from = t;
+	}
+
+	public void SetTransformTo(Transform t)
+	{
+		to = t;
+	}
+
+	private void Setup()
+	{
+		_distance = 0f;
+		_distanceLinear = 0f;
+	}
+
+	private void OnEnable()
+	{
+		Setup();
+	}
+
+	private void Update()
+	{
+		if (!from || !to)
+		{
+			_distance = 0f;
+			_distanceLinear = 0f;
+			return;
+		}
+		Vector3 position = from.position;
+		float magnitude = (to.position - position).magnitude;
+		if (!_distance.Approx(magnitude))
+		{
+			onProximityChanged?.Invoke(magnitude);
+		}
+		_distance = magnitude;
+		float num = (proximityRange.Approx0() ? 0f : MathUtils.LinearUnclamped(magnitude, proximityMin, proximityMax, 0f, 1f));
+		if (!_distanceLinear.Approx(num))
+		{
+			onProximityChangedLinear?.Invoke(num);
+		}
+		_distanceLinear = num;
+		if (_distanceLinear < 0f)
+		{
+			onBelowMinProximity?.Invoke(magnitude);
+		}
+		if (_distanceLinear > 1f)
+		{
+			onAboveMaxProximity?.Invoke(magnitude);
+		}
+	}
 }

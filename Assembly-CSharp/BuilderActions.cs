@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class BuilderActions
@@ -19,7 +18,7 @@ public class BuilderActions
 
 	public static BuilderAction CreateAttachToPlayerRollback(int cmdId, BuilderPiece piece)
 	{
-		return BuilderActions.CreateAttachToPlayer(cmdId, piece.pieceId, piece.transform.localPosition, piece.transform.localRotation, piece.heldByPlayerActorNumber, piece.heldInLeftHand);
+		return CreateAttachToPlayer(cmdId, piece.pieceId, piece.transform.localPosition, piece.transform.localRotation, piece.heldByPlayerActorNumber, piece.heldInLeftHand);
 	}
 
 	public static BuilderAction CreateDetachFromPlayer(int cmdId, int pieceId, int actorNumber)
@@ -54,10 +53,8 @@ public class BuilderActions
 	public static BuilderAction CreateAttachToPieceRollback(int cmdId, BuilderPiece piece, int actorNumber)
 	{
 		byte pieceTwist = piece.GetPieceTwist();
-		sbyte bumpOffsetX;
-		sbyte bumpOffsetZ;
-		piece.GetPieceBumpOffset(pieceTwist, out bumpOffsetX, out bumpOffsetZ);
-		return BuilderActions.CreateAttachToPiece(cmdId, piece.pieceId, piece.parentPiece.pieceId, piece.attachIndex, piece.parentAttachIndex, bumpOffsetX, bumpOffsetZ, pieceTwist, actorNumber, piece.activatedTimeStamp);
+		piece.GetPieceBumpOffset(pieceTwist, out var xOffset, out var zOffset);
+		return CreateAttachToPiece(cmdId, piece.pieceId, piece.parentPiece.pieceId, piece.attachIndex, piece.parentAttachIndex, xOffset, zOffset, pieceTwist, actorNumber, piece.activatedTimeStamp);
 	}
 
 	public static BuilderAction CreateDetachFromPiece(int cmdId, int pieceId, int actorNumber)
@@ -110,7 +107,7 @@ public class BuilderActions
 			velocity = component.linearVelocity;
 			angVelocity = component.angularVelocity;
 		}
-		return BuilderActions.CreateDropPiece(cmdId, rootPiece.pieceId, position, rotation, velocity, angVelocity, actorNumber);
+		return CreateDropPiece(cmdId, rootPiece.pieceId, position, rotation, velocity, angVelocity, actorNumber);
 	}
 
 	public static BuilderAction CreateAttachToShelfRollback(int cmdId, BuilderPiece piece, int shelfID, bool isConveyor, int timestamp = 0, float splineTime = 0f)

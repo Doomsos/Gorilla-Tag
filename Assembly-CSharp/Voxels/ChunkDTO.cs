@@ -1,36 +1,38 @@
-﻿using System;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Voxels
+namespace Voxels;
+
+public struct ChunkDTO
 {
-	public struct ChunkDTO
+	public int3 Id;
+
+	public int3 Size;
+
+	public int3 Dimensions;
+
+	public NativeArray<byte> Density;
+
+	public NativeArray<byte> Material;
+
+	public bool IsValid
 	{
-		public bool IsValid
+		get
 		{
-			get
+			if (!Size.Equals(int3.zero) && Density.IsCreated)
 			{
-				return !this.Size.Equals(int3.zero) && this.Density.IsCreated && this.Material.IsCreated;
+				return Material.IsCreated;
 			}
+			return false;
 		}
+	}
 
-		public ChunkDTO(Chunk chunk)
-		{
-			this.Id = chunk.Id;
-			this.Size = chunk.Size;
-			this.Dimensions = chunk.Dimensions;
-			this.Density = chunk.Density;
-			this.Material = chunk.Material;
-		}
-
-		public int3 Id;
-
-		public int3 Size;
-
-		public int3 Dimensions;
-
-		public NativeArray<byte> Density;
-
-		public NativeArray<byte> Material;
+	public ChunkDTO(Chunk chunk)
+	{
+		Id = chunk.Id;
+		Size = chunk.Size;
+		Dimensions = chunk.Dimensions;
+		Density = chunk.Density;
+		Material = chunk.Material;
 	}
 }

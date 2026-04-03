@@ -1,114 +1,16 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GorillaHandNode : MonoBehaviour
 {
-	public bool isGripping
-	{
-		get
-		{
-			return this.PollGrip();
-		}
-	}
-
-	public bool isLeftHand
-	{
-		get
-		{
-			return this._isLeftHand;
-		}
-	}
-
-	public bool isRightHand
-	{
-		get
-		{
-			return this._isRightHand;
-		}
-	}
-
-	private void Awake()
-	{
-		this.Setup();
-	}
-
-	private bool PollGrip()
-	{
-		if (this.rig == null)
-		{
-			return false;
-		}
-		bool flag = this.PollThumb() >= 0.25f;
-		bool flag2 = this.PollIndex() >= 0.25f;
-		bool flag3 = this.PollMiddle() >= 0.25f;
-		return flag && flag2 && flag3;
-	}
-
-	private void Setup()
-	{
-		if (this.rig == null)
-		{
-			this.rig = base.GetComponentInParent<VRRig>();
-		}
-		if (this.rigidbody == null)
-		{
-			this.rigidbody = base.GetComponent<Rigidbody>();
-		}
-		if (this.collider == null)
-		{
-			this.collider = base.GetComponent<Collider>();
-		}
-		if (this.rig)
-		{
-			this.vrIndex = (this._isLeftHand ? this.rig.leftIndex : this.rig.rightIndex);
-			this.vrThumb = (this._isLeftHand ? this.rig.leftThumb : this.rig.rightThumb);
-			this.vrMiddle = (this._isLeftHand ? this.rig.leftMiddle : this.rig.rightMiddle);
-		}
-		this._isLeftHand = base.name.Contains("left", StringComparison.OrdinalIgnoreCase);
-		this._isRightHand = base.name.Contains("right", StringComparison.OrdinalIgnoreCase);
-		int num = 0;
-		num |= 1024;
-		num |= 2097152;
-		num |= 16777216;
-		base.gameObject.SetTag(this._isLeftHand ? UnityTag.GorillaHandLeft : UnityTag.GorillaHandRight);
-		base.gameObject.SetLayer(UnityLayer.GorillaHand);
-		this.rigidbody.includeLayers = num;
-		this.rigidbody.excludeLayers = ~num;
-		this.rigidbody.isKinematic = true;
-		this.rigidbody.useGravity = false;
-		this.rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-		this.collider.isTrigger = true;
-		this.collider.includeLayers = num;
-		this.collider.excludeLayers = ~num;
-	}
-
-	private void OnTriggerStay(Collider other)
-	{
-	}
-
-	private float PollIndex()
-	{
-		return Mathf.Clamp01(this.vrIndex.calcT / 0.88f);
-	}
-
-	private float PollMiddle()
-	{
-		return this.vrIndex.calcT;
-	}
-
-	private float PollThumb()
-	{
-		return this.vrIndex.calcT;
-	}
-
 	public VRRig rig;
 
 	public Collider collider;
 
 	public Rigidbody rigidbody;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	public VRMapIndex vrIndex;
 
 	[NonSerialized]
@@ -128,4 +30,84 @@ public class GorillaHandNode : MonoBehaviour
 	private bool _isRightHand;
 
 	public bool ignoreSockets;
+
+	public bool isGripping => PollGrip();
+
+	public bool isLeftHand => _isLeftHand;
+
+	public bool isRightHand => _isRightHand;
+
+	private void Awake()
+	{
+		Setup();
+	}
+
+	private bool PollGrip()
+	{
+		if (rig == null)
+		{
+			return false;
+		}
+		bool num = PollThumb() >= 0.25f;
+		bool flag = PollIndex() >= 0.25f;
+		bool flag2 = PollMiddle() >= 0.25f;
+		return num && flag && flag2;
+	}
+
+	private void Setup()
+	{
+		if (rig == null)
+		{
+			rig = GetComponentInParent<VRRig>();
+		}
+		if (rigidbody == null)
+		{
+			rigidbody = GetComponent<Rigidbody>();
+		}
+		if (collider == null)
+		{
+			collider = GetComponent<Collider>();
+		}
+		if ((bool)rig)
+		{
+			vrIndex = (_isLeftHand ? rig.leftIndex : rig.rightIndex);
+			vrThumb = (_isLeftHand ? rig.leftThumb : rig.rightThumb);
+			vrMiddle = (_isLeftHand ? rig.leftMiddle : rig.rightMiddle);
+		}
+		_isLeftHand = base.name.Contains("left", StringComparison.OrdinalIgnoreCase);
+		_isRightHand = base.name.Contains("right", StringComparison.OrdinalIgnoreCase);
+		int num = 0;
+		num |= 0x400;
+		num |= 0x200000;
+		num |= 0x1000000;
+		base.gameObject.SetTag(_isLeftHand ? UnityTag.GorillaHandLeft : UnityTag.GorillaHandRight);
+		base.gameObject.SetLayer(UnityLayer.GorillaHand);
+		rigidbody.includeLayers = num;
+		rigidbody.excludeLayers = ~num;
+		rigidbody.isKinematic = true;
+		rigidbody.useGravity = false;
+		rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		collider.isTrigger = true;
+		collider.includeLayers = num;
+		collider.excludeLayers = ~num;
+	}
+
+	private void OnTriggerStay(Collider other)
+	{
+	}
+
+	private float PollIndex()
+	{
+		return Mathf.Clamp01(vrIndex.calcT / 0.88f);
+	}
+
+	private float PollMiddle()
+	{
+		return vrIndex.calcT;
+	}
+
+	private float PollThumb()
+	{
+		return vrIndex.calcT;
+	}
 }

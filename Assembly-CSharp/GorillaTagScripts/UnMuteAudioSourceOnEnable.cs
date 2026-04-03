@@ -1,27 +1,25 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class UnMuteAudioSourceOnEnable : MonoBehaviour
 {
-	public class UnMuteAudioSourceOnEnable : MonoBehaviour
+	public AudioSource audioSource;
+
+	public float originalVolume;
+
+	public void Awake()
 	{
-		public void Awake()
-		{
-			this.originalVolume = this.audioSource.volume;
-		}
+		originalVolume = audioSource.volume;
+	}
 
-		public void OnEnable()
-		{
-			this.audioSource.volume = this.originalVolume;
-		}
+	public void OnEnable()
+	{
+		audioSource.volume = originalVolume;
+	}
 
-		public void OnDisable()
-		{
-			this.audioSource.volume = 0f;
-		}
-
-		public AudioSource audioSource;
-
-		public float originalVolume;
+	public void OnDisable()
+	{
+		audioSource.volume = 0f;
 	}
 }

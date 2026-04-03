@@ -1,7 +1,18 @@
-﻿using System;
-
 public abstract class RankedMultiplayerStatistic
 {
+	public enum SerializationType
+	{
+		None,
+		Mothership,
+		PlayerPrefs
+	}
+
+	protected SerializationType serializationType = SerializationType.Mothership;
+
+	public string name;
+
+	public bool IsValid { get; protected set; }
+
 	public override string ToString()
 	{
 		return string.Empty;
@@ -15,65 +26,55 @@ public abstract class RankedMultiplayerStatistic
 
 	public virtual string WriteToJson()
 	{
-		return string.Format("{{{0}:\"{1}\"}}", this.name, this.ToString());
+		return $"{{{name}:\"{ToString()}\"}}";
 	}
 
-	public bool IsValid { get; protected set; }
-
-	public RankedMultiplayerStatistic(string n, RankedMultiplayerStatistic.SerializationType sType = RankedMultiplayerStatistic.SerializationType.Mothership)
+	public RankedMultiplayerStatistic(string n, SerializationType sType = SerializationType.Mothership)
 	{
-		this.serializationType = sType;
-		this.name = n;
-		this.IsValid = (this.serializationType != RankedMultiplayerStatistic.SerializationType.Mothership);
-		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
+		serializationType = sType;
+		name = n;
+		IsValid = serializationType != SerializationType.Mothership;
+		_ = serializationType;
+		_ = 1;
 	}
 
 	protected virtual void HandleUserDataSetSuccess(string keyName)
 	{
-		if (keyName == this.name)
+		if (keyName == name)
 		{
-			this.IsValid = true;
+			IsValid = true;
 		}
 	}
 
 	protected virtual void HandleUserDataGetSuccess(string keyName, string value)
 	{
-		if (keyName == this.name)
+		if (keyName == name)
 		{
-			if (this.TrySetValue(value))
+			if (TrySetValue(value))
 			{
-				this.IsValid = true;
-				return;
+				IsValid = true;
 			}
-			this.Save();
+			else
+			{
+				Save();
+			}
 		}
 	}
 
 	protected void HandleUserDataGetFailure(string keyName)
 	{
-		if (keyName == this.name)
+		if (keyName == name)
 		{
-			this.Save();
-			this.IsValid = true;
+			Save();
+			IsValid = true;
 		}
 	}
 
 	protected void HandleUserDataSetFailure(string keyName)
 	{
-		if (keyName == this.name)
+		if (keyName == name)
 		{
-			this.Save();
+			Save();
 		}
-	}
-
-	protected RankedMultiplayerStatistic.SerializationType serializationType = RankedMultiplayerStatistic.SerializationType.Mothership;
-
-	public string name;
-
-	public enum SerializationType
-	{
-		None,
-		Mothership,
-		PlayerPrefs
 	}
 }

@@ -1,25 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaPlaySpaceForces : MonoBehaviour
 {
-	private void Start()
-	{
-		this.playspaceRigidbody = base.GetComponent<Rigidbody>();
-		this.leftHandRigidbody = this.leftHand.GetComponent<Rigidbody>();
-		this.leftHandCollider = this.leftHand.GetComponent<Collider>();
-		this.rightHandRigidbody = this.rightHand.GetComponent<Rigidbody>();
-		this.rightHandCollider = this.rightHand.GetComponent<Collider>();
-	}
-
-	private void FixedUpdate()
-	{
-		if (Time.time >= 0.1f)
-		{
-			this.bodyCollider.transform.position = this.headsetTransform.position + this.bodyColliderOffset;
-		}
-	}
-
 	public GameObject rightHand;
 
 	public GameObject leftHand;
@@ -49,4 +31,21 @@ public class GorillaPlaySpaceForces : MonoBehaviour
 	private Rigidbody playspaceRigidbody;
 
 	public Transform headsetTransform;
+
+	private void Start()
+	{
+		playspaceRigidbody = GetComponent<Rigidbody>();
+		leftHandRigidbody = leftHand.GetComponent<Rigidbody>();
+		leftHandCollider = leftHand.GetComponent<Collider>();
+		rightHandRigidbody = rightHand.GetComponent<Rigidbody>();
+		rightHandCollider = rightHand.GetComponent<Collider>();
+	}
+
+	private void FixedUpdate()
+	{
+		if (!(Time.time < 0.1f))
+		{
+			bodyCollider.transform.position = headsetTransform.position + bodyColliderOffset;
+		}
+	}
 }

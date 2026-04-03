@@ -1,18 +1,16 @@
-﻿using System;
-
 public class BuilderRendererPreRender : MonoBehaviourPostTick
 {
+	public BuilderRenderer builderRenderer;
+
 	private void Awake()
 	{
 	}
 
 	public override void PostTick()
 	{
-		if (this.builderRenderer != null)
+		if (builderRenderer != null)
 		{
-			this.builderRenderer.PreRenderIndirect();
+			builderRenderer.PreRenderIndirect();
 		}
 	}
-
-	public BuilderRenderer builderRenderer;
 }

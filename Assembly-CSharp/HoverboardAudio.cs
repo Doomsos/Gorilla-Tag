@@ -1,56 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class HoverboardAudio : MonoBehaviour
 {
-	private void Start()
-	{
-		this.Stop();
-	}
-
-	public void PlayTurnSound(float angle)
-	{
-		if (Time.time > this.turnSoundCooldownUntilTimestamp && angle > this.minAngleDeltaForTurnSound)
-		{
-			this.turnSoundCooldownUntilTimestamp = Time.time + this.turnSoundCooldownDuration;
-			this.turnSounds.Play();
-		}
-	}
-
-	public void UpdateAudioLoop(float speed, float airspeed, float strainLevel, float grindLevel)
-	{
-		this.motorAnimator.UpdateValue(speed, false);
-		this.windRushAnimator.UpdateValue(airspeed, false);
-		if (grindLevel > 0f)
-		{
-			this.grindAnimator.UpdatePitchAndVolume(speed, grindLevel + 0.5f, false);
-		}
-		else
-		{
-			this.grindAnimator.UpdatePitchAndVolume(0f, 0f, false);
-		}
-		strainLevel = Mathf.Clamp01(strainLevel * 10f);
-		if (!this.didInitHum1BaseVolume)
-		{
-			this.hum1BaseVolume = this.hum1.volume;
-			this.didInitHum1BaseVolume = true;
-		}
-		this.hum1.volume = Mathf.MoveTowards(this.hum1.volume, this.hum1BaseVolume * strainLevel, this.fadeSpeed * Time.deltaTime);
-	}
-
-	public void Stop()
-	{
-		if (!this.didInitHum1BaseVolume)
-		{
-			this.hum1BaseVolume = this.hum1.volume;
-			this.didInitHum1BaseVolume = true;
-		}
-		this.hum1.volume = 0f;
-		this.windRushAnimator.UpdateValue(0f, true);
-		this.motorAnimator.UpdateValue(0f, true);
-		this.grindAnimator.UpdateValue(0f, true);
-	}
-
 	[SerializeField]
 	private AudioSource hum1;
 
@@ -80,4 +31,52 @@ public class HoverboardAudio : MonoBehaviour
 	private float minAngleDeltaForTurnSound;
 
 	private float turnSoundCooldownUntilTimestamp;
+
+	private void Start()
+	{
+		Stop();
+	}
+
+	public void PlayTurnSound(float angle)
+	{
+		if (Time.time > turnSoundCooldownUntilTimestamp && angle > minAngleDeltaForTurnSound)
+		{
+			turnSoundCooldownUntilTimestamp = Time.time + turnSoundCooldownDuration;
+			turnSounds.Play();
+		}
+	}
+
+	public void UpdateAudioLoop(float speed, float airspeed, float strainLevel, float grindLevel)
+	{
+		motorAnimator.UpdateValue(speed);
+		windRushAnimator.UpdateValue(airspeed);
+		if (grindLevel > 0f)
+		{
+			grindAnimator.UpdatePitchAndVolume(speed, grindLevel + 0.5f);
+		}
+		else
+		{
+			grindAnimator.UpdatePitchAndVolume(0f, 0f);
+		}
+		strainLevel = Mathf.Clamp01(strainLevel * 10f);
+		if (!didInitHum1BaseVolume)
+		{
+			hum1BaseVolume = hum1.volume;
+			didInitHum1BaseVolume = true;
+		}
+		hum1.volume = Mathf.MoveTowards(hum1.volume, hum1BaseVolume * strainLevel, fadeSpeed * Time.deltaTime);
+	}
+
+	public void Stop()
+	{
+		if (!didInitHum1BaseVolume)
+		{
+			hum1BaseVolume = hum1.volume;
+			didInitHum1BaseVolume = true;
+		}
+		hum1.volume = 0f;
+		windRushAnimator.UpdateValue(0f, ignoreSmoothing: true);
+		motorAnimator.UpdateValue(0f, ignoreSmoothing: true);
+		grindAnimator.UpdateValue(0f, ignoreSmoothing: true);
+	}
 }

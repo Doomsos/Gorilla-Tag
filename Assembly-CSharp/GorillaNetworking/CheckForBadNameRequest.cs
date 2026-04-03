@@ -1,13 +1,10 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class CheckForBadNameRequest
 {
-	public class CheckForBadNameRequest
-	{
-		public string name;
+	public string name;
 
-		public bool forRoom;
+	public bool forRoom;
 
-		public bool forTroop;
-	}
+	public bool forTroop;
 }

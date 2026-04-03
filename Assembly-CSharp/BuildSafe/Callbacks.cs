@@ -1,19 +1,18 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
-namespace BuildSafe
-{
-	public static class Callbacks
-	{
-		[Conditional("UNITY_EDITOR")]
-		public class DidReloadScripts : Attribute
-		{
-			public DidReloadScripts(bool activeOnly = false)
-			{
-				this.activeOnly = activeOnly;
-			}
+namespace BuildSafe;
 
-			public bool activeOnly;
+public static class Callbacks
+{
+	[Conditional("UNITY_EDITOR")]
+	public class DidReloadScripts : Attribute
+	{
+		public bool activeOnly;
+
+		public DidReloadScripts(bool activeOnly = false)
+		{
+			this.activeOnly = activeOnly;
 		}
 	}
 }

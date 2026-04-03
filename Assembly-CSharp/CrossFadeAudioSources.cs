@@ -1,62 +1,28 @@
-﻿using System;
 using UnityEngine;
 
 public class CrossFadeAudioSources : MonoBehaviour, IRangedVariable<float>, IVariable<float>, IVariable
 {
-	public void Play()
-	{
-		if (this.source1)
-		{
-			this.source1.Play();
-		}
-		if (this.source2)
-		{
-			this.source2.Play();
-		}
-	}
+	[SerializeField]
+	private float _lerp;
 
-	public void Stop()
-	{
-		if (this.source1)
-		{
-			this.source1.Stop();
-		}
-		if (this.source2)
-		{
-			this.source2.Stop();
-		}
-	}
+	[SerializeField]
+	private AnimationCurve _curve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
-	private void Update()
-	{
-		if (!this.source1 || !this.source2)
-		{
-			return;
-		}
-		float num = this._curve.Evaluate(this._lerp);
-		float num2;
-		if (this.tween)
-		{
-			num2 = MathUtils.Xlerp(this._lastT, num, Time.deltaTime, this.tweenSpeed);
-		}
-		else
-		{
-			num2 = (this.lerpByClipLength ? this._curve.Evaluate((float)this.source1.timeSamples / (float)this.source1.clip.samples) : num);
-		}
-		this._lastT = num2;
-		this.source2.volume = num2;
-		this.source1.volume = 1f - num2;
-	}
+	[Space]
+	[SerializeField]
+	private AudioSource source1;
 
-	public float Get()
-	{
-		return this._lerp;
-	}
+	[SerializeField]
+	private AudioSource source2;
 
-	public void Set(float f)
-	{
-		this._lerp = Mathf.Clamp01(f);
-	}
+	[Space]
+	public bool lerpByClipLength;
+
+	public bool tween;
+
+	public float tweenSpeed = 16f;
+
+	private float _lastT;
 
 	public float Min
 	{
@@ -80,41 +46,52 @@ public class CrossFadeAudioSources : MonoBehaviour, IRangedVariable<float>, IVar
 		}
 	}
 
-	public float Range
+	public float Range => 1f;
+
+	public AnimationCurve Curve => _curve;
+
+	public void Play()
 	{
-		get
+		if ((bool)source1)
 		{
-			return 1f;
+			source1.Play();
+		}
+		if ((bool)source2)
+		{
+			source2.Play();
 		}
 	}
 
-	public AnimationCurve Curve
+	public void Stop()
 	{
-		get
+		if ((bool)source1)
 		{
-			return this._curve;
+			source1.Stop();
+		}
+		if ((bool)source2)
+		{
+			source2.Stop();
 		}
 	}
 
-	[SerializeField]
-	private float _lerp;
+	private void Update()
+	{
+		if ((bool)source1 && (bool)source2)
+		{
+			float num = _curve.Evaluate(_lerp);
+			float num2 = (_lastT = ((!tween) ? (lerpByClipLength ? _curve.Evaluate((float)source1.timeSamples / (float)source1.clip.samples) : num) : MathUtils.Xlerp(_lastT, num, Time.deltaTime, tweenSpeed)));
+			source2.volume = num2;
+			source1.volume = 1f - num2;
+		}
+	}
 
-	[SerializeField]
-	private AnimationCurve _curve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+	public float Get()
+	{
+		return _lerp;
+	}
 
-	[Space]
-	[SerializeField]
-	private AudioSource source1;
-
-	[SerializeField]
-	private AudioSource source2;
-
-	[Space]
-	public bool lerpByClipLength;
-
-	public bool tween;
-
-	public float tweenSpeed = 16f;
-
-	private float _lastT;
+	public void Set(float f)
+	{
+		_lerp = Mathf.Clamp01(f);
+	}
 }

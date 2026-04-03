@@ -1,15 +1,16 @@
-﻿using System;
 using UnityEngine;
 
 public class GREnemyXRayVisionEffect : MonoBehaviour
 {
+	public GameObject enemyXRayEffect;
+
 	public void Awake()
 	{
 	}
 
 	private void Start()
 	{
-		base.InvokeRepeating("UpdateEffect", 0f, 0.5f);
+		InvokeRepeating("UpdateEffect", 0f, 0.5f);
 	}
 
 	private bool ShouldShowEffect()
@@ -19,8 +20,6 @@ public class GREnemyXRayVisionEffect : MonoBehaviour
 
 	private void UpdateEffect()
 	{
-		this.enemyXRayEffect.SetActive(this.ShouldShowEffect());
+		enemyXRayEffect.SetActive(ShouldShowEffect());
 	}
-
-	public GameObject enemyXRayEffect;
 }

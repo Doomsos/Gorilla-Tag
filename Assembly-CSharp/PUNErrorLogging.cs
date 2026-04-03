@@ -1,89 +1,22 @@
-﻿using System;
+using System;
 using ExitGames.Client.Photon;
 using GorillaNetworking;
 using Photon.Pun;
-using PlayFab;
 using UnityEngine;
 
 public class PUNErrorLogging : MonoBehaviour
 {
-	private void Start()
+	[Flags]
+	private enum LogFlags
 	{
-		PhotonNetwork.InternalEventError = (Action<EventData, Exception>)Delegate.Combine(PhotonNetwork.InternalEventError, new Action<EventData, Exception>(this.PUNError));
-		PlayFabTitleDataCache.Instance.GetTitleData("PUNErrorLogging", delegate(string data)
-		{
-			int num;
-			if (!int.TryParse(data, out num))
-			{
-				return;
-			}
-			PUNErrorLogging.LogFlags logFlags = (PUNErrorLogging.LogFlags)num;
-			this.m_logSerializeView = logFlags.HasFlag(PUNErrorLogging.LogFlags.SerializeView);
-			this.m_logOwnershipTransfer = logFlags.HasFlag(PUNErrorLogging.LogFlags.OwnershipTransfer);
-			this.m_logOwnershipRequest = logFlags.HasFlag(PUNErrorLogging.LogFlags.OwnershipRequest);
-			this.m_logOwnershipUpdate = logFlags.HasFlag(PUNErrorLogging.LogFlags.OwnershipUpdate);
-			this.m_logRPC = logFlags.HasFlag(PUNErrorLogging.LogFlags.RPC);
-			this.m_logInstantiate = logFlags.HasFlag(PUNErrorLogging.LogFlags.Instantiate);
-			this.m_logDestroy = logFlags.HasFlag(PUNErrorLogging.LogFlags.Destroy);
-			this.m_logDestroyPlayer = logFlags.HasFlag(PUNErrorLogging.LogFlags.DestroyPlayer);
-		}, delegate(PlayFabError error)
-		{
-		}, false);
-	}
-
-	private void PUNError(EventData data, Exception exception)
-	{
-		NetworkSystem.Instance.GetPlayer(data.Sender);
-		byte code = data.Code;
-		switch (code)
-		{
-		case 200:
-			this.PrintException(exception, this.m_logRPC);
-			return;
-		case 201:
-		case 206:
-			this.PrintException(exception, this.m_logSerializeView);
-			return;
-		case 202:
-			this.PrintException(exception, this.m_logInstantiate);
-			return;
-		case 203:
-		case 205:
-		case 208:
-		case 211:
-			break;
-		case 204:
-			this.PrintException(exception, this.m_logDestroy);
-			return;
-		case 207:
-			this.PrintException(exception, this.m_logDestroyPlayer);
-			return;
-		case 209:
-			this.PrintException(exception, this.m_logOwnershipRequest);
-			return;
-		case 210:
-			this.PrintException(exception, this.m_logOwnershipTransfer);
-			return;
-		case 212:
-			this.PrintException(exception, this.m_logOwnershipUpdate);
-			return;
-		default:
-			if (code == 254)
-			{
-				this.PrintException(exception, true);
-				return;
-			}
-			break;
-		}
-		this.PrintException(exception, true);
-	}
-
-	private void PrintException(Exception e, bool print)
-	{
-		if (print)
-		{
-			Debug.LogException(e);
-		}
+		SerializeView = 1,
+		OwnershipTransfer = 2,
+		OwnershipRequest = 4,
+		OwnershipUpdate = 8,
+		RPC = 0x10,
+		Instantiate = 0x20,
+		Destroy = 0x40,
+		DestroyPlayer = 0x80
 	}
 
 	[SerializeField]
@@ -110,16 +43,72 @@ public class PUNErrorLogging : MonoBehaviour
 	[SerializeField]
 	private bool m_logDestroyPlayer = true;
 
-	[Flags]
-	private enum LogFlags
+	private void Start()
 	{
-		SerializeView = 1,
-		OwnershipTransfer = 2,
-		OwnershipRequest = 4,
-		OwnershipUpdate = 8,
-		RPC = 16,
-		Instantiate = 32,
-		Destroy = 64,
-		DestroyPlayer = 128
+		PhotonNetwork.InternalEventError = (Action<EventData, Exception>)Delegate.Combine(PhotonNetwork.InternalEventError, new Action<EventData, Exception>(PUNError));
+		PlayFabTitleDataCache.Instance.GetTitleData("PUNErrorLogging", delegate(string data)
+		{
+			if (int.TryParse(data, out var result))
+			{
+				LogFlags logFlags = (LogFlags)result;
+				m_logSerializeView = logFlags.HasFlag(LogFlags.SerializeView);
+				m_logOwnershipTransfer = logFlags.HasFlag(LogFlags.OwnershipTransfer);
+				m_logOwnershipRequest = logFlags.HasFlag(LogFlags.OwnershipRequest);
+				m_logOwnershipUpdate = logFlags.HasFlag(LogFlags.OwnershipUpdate);
+				m_logRPC = logFlags.HasFlag(LogFlags.RPC);
+				m_logInstantiate = logFlags.HasFlag(LogFlags.Instantiate);
+				m_logDestroy = logFlags.HasFlag(LogFlags.Destroy);
+				m_logDestroyPlayer = logFlags.HasFlag(LogFlags.DestroyPlayer);
+			}
+		}, delegate
+		{
+		});
+	}
+
+	private void PUNError(EventData data, Exception exception)
+	{
+		NetworkSystem.Instance.GetPlayer(data.Sender);
+		switch (data.Code)
+		{
+		case 254:
+			PrintException(exception, print: true);
+			break;
+		case 201:
+		case 206:
+			PrintException(exception, m_logSerializeView);
+			break;
+		case 210:
+			PrintException(exception, m_logOwnershipTransfer);
+			break;
+		case 209:
+			PrintException(exception, m_logOwnershipRequest);
+			break;
+		case 212:
+			PrintException(exception, m_logOwnershipUpdate);
+			break;
+		case 200:
+			PrintException(exception, m_logRPC);
+			break;
+		case 202:
+			PrintException(exception, m_logInstantiate);
+			break;
+		case 204:
+			PrintException(exception, m_logDestroy);
+			break;
+		case 207:
+			PrintException(exception, m_logDestroyPlayer);
+			break;
+		default:
+			PrintException(exception, print: true);
+			break;
+		}
+	}
+
+	private void PrintException(Exception e, bool print)
+	{
+		if (print)
+		{
+			Debug.LogException(e);
+		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
@@ -7,6 +7,20 @@ using UnityEngine.Events;
 [ExecuteInEditMode]
 public class CosmeticsDemoRig : MonoBehaviour
 {
+	[Serializable]
+	private struct EdSpawnedCosmetic
+	{
+		public string itemName;
+
+		public CosmeticSO so;
+
+		public List<GameObject> objects;
+
+		public List<GameObject> holdableObjects;
+
+		public bool isEmpty;
+	}
+
 	[SerializeField]
 	private VRRig _vrRig;
 
@@ -29,7 +43,7 @@ public class CosmeticsDemoRig : MonoBehaviour
 
 	private bool isInitialized;
 
-	private CosmeticsDemoRig.EdSpawnedCosmetic emptyCosmetic;
+	private EdSpawnedCosmetic emptyCosmetic;
 
 	private Material defaultFaceMaterial;
 
@@ -66,19 +80,5 @@ public class CosmeticsDemoRig : MonoBehaviour
 	public UnityEvent<Color> OnColorChange;
 
 	[SerializeField]
-	private CosmeticsDemoRig.EdSpawnedCosmetic[] spawnedCosmetics = new CosmeticsDemoRig.EdSpawnedCosmetic[16];
-
-	[Serializable]
-	private struct EdSpawnedCosmetic
-	{
-		public string itemName;
-
-		public CosmeticSO so;
-
-		public List<GameObject> objects;
-
-		public List<GameObject> holdableObjects;
-
-		public bool isEmpty;
-	}
+	private EdSpawnedCosmetic[] spawnedCosmetics = new EdSpawnedCosmetic[16];
 }

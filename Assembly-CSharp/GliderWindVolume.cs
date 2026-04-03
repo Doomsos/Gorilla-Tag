@@ -1,32 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GliderWindVolume : MonoBehaviour
 {
-	public void SetProperties(float speed, float accel, AnimationCurve svaCurve, Vector3 windDirection)
-	{
-		this.maxSpeed = speed;
-		this.maxAccel = accel;
-		this.speedVsAccelCurve.CopyFrom(svaCurve);
-		this.localWindDirection = windDirection;
-	}
-
-	public Vector3 WindDirection
-	{
-		get
-		{
-			return base.transform.TransformDirection(this.localWindDirection);
-		}
-	}
-
-	public Vector3 GetAccelFromVelocity(Vector3 velocity)
-	{
-		Vector3 windDirection = this.WindDirection;
-		float time = Mathf.Clamp(Vector3.Dot(velocity, windDirection), -this.maxSpeed, this.maxSpeed) / this.maxSpeed;
-		float d = this.speedVsAccelCurve.Evaluate(time) * this.maxAccel;
-		return windDirection * d;
-	}
-
 	[SerializeField]
 	private float maxSpeed = 30f;
 
@@ -38,4 +13,22 @@ public class GliderWindVolume : MonoBehaviour
 
 	[SerializeField]
 	private Vector3 localWindDirection = Vector3.up;
+
+	public Vector3 WindDirection => base.transform.TransformDirection(localWindDirection);
+
+	public void SetProperties(float speed, float accel, AnimationCurve svaCurve, Vector3 windDirection)
+	{
+		maxSpeed = speed;
+		maxAccel = accel;
+		speedVsAccelCurve.CopyFrom(svaCurve);
+		localWindDirection = windDirection;
+	}
+
+	public Vector3 GetAccelFromVelocity(Vector3 velocity)
+	{
+		Vector3 windDirection = WindDirection;
+		float time = Mathf.Clamp(Vector3.Dot(velocity, windDirection), 0f - maxSpeed, maxSpeed) / maxSpeed;
+		float num = speedVsAccelCurve.Evaluate(time) * maxAccel;
+		return windDirection * num;
+	}
 }

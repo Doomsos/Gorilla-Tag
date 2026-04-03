@@ -1,59 +1,9 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class SpawnPooledObject : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this._pooledObject == null)
-		{
-			return;
-		}
-		this._pooledObjectHash = PoolUtils.GameObjHashCode(this._pooledObject);
-	}
-
-	public void SpawnObject()
-	{
-		if (!this.ShouldSpawn())
-		{
-			return;
-		}
-		if (this._pooledObject == null || this._spawnLocation == null)
-		{
-			return;
-		}
-		GameObject gameObject = ObjectPools.instance.Instantiate(this._pooledObjectHash, true);
-		gameObject.transform.position = this.SpawnLocation();
-		gameObject.transform.rotation = this.SpawnRotation();
-		gameObject.transform.localScale = base.transform.lossyScale;
-	}
-
-	private Vector3 SpawnLocation()
-	{
-		return this._spawnLocation.transform.position + this.offset;
-	}
-
-	private Quaternion SpawnRotation()
-	{
-		Quaternion result = this._spawnLocation.transform.rotation;
-		if (this.facePlayer)
-		{
-			result = Quaternion.LookRotation(GTPlayer.Instance.headCollider.transform.position - this._spawnLocation.transform.position);
-		}
-		if (this.upright)
-		{
-			result.eulerAngles = new Vector3(0f, result.eulerAngles.y, 0f);
-		}
-		return result;
-	}
-
-	private bool ShouldSpawn()
-	{
-		return Random.Range(0, 100) < this.chanceToSpawn;
-	}
-
 	[SerializeField]
 	private Transform _spawnLocation;
 
@@ -74,4 +24,47 @@ public class SpawnPooledObject : MonoBehaviour
 	public int chanceToSpawn = 100;
 
 	private int _pooledObjectHash;
+
+	private void Awake()
+	{
+		if (!(_pooledObject == null))
+		{
+			_pooledObjectHash = PoolUtils.GameObjHashCode(_pooledObject);
+		}
+	}
+
+	public void SpawnObject()
+	{
+		if (ShouldSpawn() && !(_pooledObject == null) && !(_spawnLocation == null))
+		{
+			GameObject obj = ObjectPools.instance.Instantiate(_pooledObjectHash);
+			obj.transform.position = SpawnLocation();
+			obj.transform.rotation = SpawnRotation();
+			obj.transform.localScale = base.transform.lossyScale;
+		}
+	}
+
+	private Vector3 SpawnLocation()
+	{
+		return _spawnLocation.transform.position + offset;
+	}
+
+	private Quaternion SpawnRotation()
+	{
+		Quaternion result = _spawnLocation.transform.rotation;
+		if (facePlayer)
+		{
+			result = Quaternion.LookRotation(GTPlayer.Instance.headCollider.transform.position - _spawnLocation.transform.position);
+		}
+		if (upright)
+		{
+			result.eulerAngles = new Vector3(0f, result.eulerAngles.y, 0f);
+		}
+		return result;
+	}
+
+	private bool ShouldSpawn()
+	{
+		return Random.Range(0, 100) < chanceToSpawn;
+	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaLocomotion;
 using Liv.Lck;
 using Liv.Lck.Cosmetics;
@@ -8,423 +8,21 @@ using UnityEngine.XR;
 
 public class LckBodyCameraSpawner : MonoBehaviourTick
 {
-	public void SetFollowTransform(Transform transform)
+	public enum CameraState
 	{
-		this._followTransform = transform;
+		CameraDisabled,
+		CameraOnNeck,
+		CameraSpawned
 	}
 
-	public TabletSpawnInstance tabletSpawnInstance
+	public enum CameraPosition
 	{
-		get
-		{
-			return this._tabletSpawnInstance;
-		}
+		CameraDefault,
+		CameraSlingshot,
+		NotVisible
 	}
 
-	public static event LckBodyCameraSpawner.CameraStateDelegate OnCameraStateChange;
-
-	public LckBodyCameraSpawner.CameraState cameraState
-	{
-		get
-		{
-			return this._cameraState;
-		}
-		set
-		{
-			switch (value)
-			{
-			case LckBodyCameraSpawner.CameraState.CameraDisabled:
-				this.cameraPosition = LckBodyCameraSpawner.CameraPosition.NotVisible;
-				this._tabletSpawnInstance.uiVisible = false;
-				this._tabletSpawnInstance.cameraActive = false;
-				this.ResetCameraModel();
-				this.cameraVisible = false;
-				this._shouldMoveCameraToNeck = false;
-				break;
-			case LckBodyCameraSpawner.CameraState.CameraOnNeck:
-				this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
-				if (this._tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.GetCurrentTriggerProcessor())
-				{
-					this._tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.GetCurrentTriggerProcessor().ResetToDefaultAndTriggerButton();
-					this._tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.ClearAllTriggers();
-				}
-				this._tabletSpawnInstance.uiVisible = false;
-				this._tabletSpawnInstance.cameraActive = true;
-				this.ResetCameraModel();
-				if (Application.platform == RuntimePlatform.Android)
-				{
-					this.SetPreviewActive(false);
-				}
-				this.cameraVisible = true;
-				this._shouldMoveCameraToNeck = false;
-				this._dummyTablet.SetDummyTabletBodyState(true);
-				break;
-			case LckBodyCameraSpawner.CameraState.CameraSpawned:
-				this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
-				this._tabletSpawnInstance.uiVisible = true;
-				this._tabletSpawnInstance.cameraActive = true;
-				if (Application.platform == RuntimePlatform.Android)
-				{
-					this.SetPreviewActive(true);
-				}
-				this.ResetCameraModel();
-				this.cameraVisible = true;
-				this._shouldMoveCameraToNeck = false;
-				this._dummyTablet.SetDummyTabletBodyState(false);
-				break;
-			}
-			this._cameraState = value;
-			LckBodyCameraSpawner.CameraStateDelegate onCameraStateChange = LckBodyCameraSpawner.OnCameraStateChange;
-			if (onCameraStateChange == null)
-			{
-				return;
-			}
-			onCameraStateChange(this._cameraState);
-		}
-	}
-
-	private void SetPreviewActive(bool isActive)
-	{
-		LckResult<LckService> service = LckService.GetService();
-		if (!service.Success)
-		{
-			Debug.LogError("LCK Could not get Service" + service.Error.ToString());
-			return;
-		}
-		LckService result = service.Result;
-		if (result == null)
-		{
-			return;
-		}
-		result.SetPreviewActive(isActive);
-	}
-
-	public LckBodyCameraSpawner.CameraPosition cameraPosition
-	{
-		get
-		{
-			return this._cameraPosition;
-		}
-		set
-		{
-			if (this._cameraModelTransform != null && this._cameraPosition != value)
-			{
-				switch (value)
-				{
-				case LckBodyCameraSpawner.CameraPosition.CameraDefault:
-					this.ChangeCameraModelParent(this._cameraPositionDefault);
-					this._cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
-					return;
-				case LckBodyCameraSpawner.CameraPosition.CameraSlingshot:
-					this.ChangeCameraModelParent(this._cameraPositionSlingshot);
-					this._cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraSlingshot;
-					break;
-				case LckBodyCameraSpawner.CameraPosition.NotVisible:
-					break;
-				default:
-					return;
-				}
-			}
-		}
-	}
-
-	private bool cameraVisible
-	{
-		get
-		{
-			return this._cameraModelTransform.gameObject.activeSelf;
-		}
-		set
-		{
-			this._cameraModelTransform.gameObject.SetActive(value);
-			this._cameraStrapRenderer.enabled = value;
-		}
-	}
-
-	private void Awake()
-	{
-		this._tabletSpawnInstance = new TabletSpawnInstance(this._cameraSpawnPrefab, this._cameraSpawnParentTransform);
-	}
-
-	private new void OnEnable()
-	{
-		base.OnEnable();
-		this.InitCameraStrap();
-		this.cameraState = LckBodyCameraSpawner.CameraState.CameraDisabled;
-		this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
-		ZoneManagement.OnZoneChange += this.OnZoneChanged;
-		if (this._swapTablet != null && this._swapEmobi != null && this._dummyTablet != null)
-		{
-			LckGameObjectSwapCosmetic swapTablet = this._swapTablet;
-			swapTablet.OnCosmeticSpawned = (Action<GameObject>)Delegate.Combine(swapTablet.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnTabletCosmeticSpawned));
-			LckGameObjectSwapCosmetic swapEmobi = this._swapEmobi;
-			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Combine(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnEmobiCosmeticSpawned));
-		}
-	}
-
-	private void Update()
-	{
-		this._tabletSpawnInstance.Update();
-	}
-
-	private new void OnDisable()
-	{
-		base.OnDisable();
-		ZoneManagement.OnZoneChange -= this.OnZoneChanged;
-		if (this._swapTablet != null && this._swapEmobi != null && this._dummyTablet != null)
-		{
-			LckGameObjectSwapCosmetic swapTablet = this._swapTablet;
-			swapTablet.OnCosmeticSpawned = (Action<GameObject>)Delegate.Remove(swapTablet.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnTabletCosmeticSpawned));
-			LckGameObjectSwapCosmetic swapEmobi = this._swapEmobi;
-			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Remove(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnEmobiCosmeticSpawned));
-		}
-	}
-
-	public override void Tick()
-	{
-		if (this._followTransform != null && base.transform.parent != null)
-		{
-			Matrix4x4 localToWorldMatrix = base.transform.parent.localToWorldMatrix;
-			Vector3 position = localToWorldMatrix.MultiplyPoint(this._followTransform.localPosition + this._followTransform.localRotation * new Vector3(0f, -0.05f, 0.1f));
-			Quaternion rotation = Quaternion.LookRotation(localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.forward), localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.up));
-			base.transform.SetPositionAndRotation(position, rotation);
-		}
-		LckBodyCameraSpawner.CameraState cameraState = this._cameraState;
-		if (cameraState != LckBodyCameraSpawner.CameraState.CameraOnNeck)
-		{
-			if (cameraState == LckBodyCameraSpawner.CameraState.CameraSpawned)
-			{
-				this.UpdateCameraStrap();
-				if (this._cameraModelGrabbable.isGrabbed)
-				{
-					GorillaGrabber grabber = this._cameraModelGrabbable.grabber;
-					Transform transform = grabber.transform;
-					if (this.ShouldSpawnCamera(transform))
-					{
-						this.SpawnCamera(grabber, transform);
-					}
-				}
-				else
-				{
-					this.ResetCameraModel();
-				}
-				if (this._tabletSpawnInstance.isSpawned)
-				{
-					Transform transform3;
-					if (this._tabletSpawnInstance.directGrabbable.isGrabbed)
-					{
-						GorillaGrabber grabber2 = this._tabletSpawnInstance.directGrabbable.grabber;
-						Transform transform2 = grabber2.transform;
-						if (!this.ShouldSpawnCamera(transform2))
-						{
-							this.cameraState = LckBodyCameraSpawner.CameraState.CameraOnNeck;
-							this._cameraModelGrabbable.target.SetPositionAndRotation(transform2.position, transform2.rotation * Quaternion.Euler(this._chestSpawnRotationOffset.x, this._chestSpawnRotationOffset.y, this._chestSpawnRotationOffset.z));
-							this._tabletSpawnInstance.directGrabbable.ForceRelease();
-							this._tabletSpawnInstance.SetParent(this._cameraModelTransform);
-							this._tabletSpawnInstance.ResetLocalPose();
-							this._cameraModelGrabbable.ForceGrab(grabber2);
-							this._cameraModelGrabbable.onReleased += this.OnCameraModelReleased;
-							if (this._tabletSpawnInstance.Controller.CurrentCameraMode == CameraMode.Selfie)
-							{
-								this._returnToCameraMode = new CameraMode?(CameraMode.Selfie);
-								this._tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
-							}
-						}
-					}
-					else if (this._shouldMoveCameraToNeck && GtTag.TryGetTransform(GtTagType.HMD, out transform3) && Vector3.SqrMagnitude(base.transform.position - this.tabletSpawnInstance.position) >= this._snapToNeckDistance * this._snapToNeckDistance)
-					{
-						this.cameraState = LckBodyCameraSpawner.CameraState.CameraOnNeck;
-						this._tabletSpawnInstance.SetParent(this._cameraModelTransform);
-						this._tabletSpawnInstance.ResetLocalPose();
-						this._shouldMoveCameraToNeck = false;
-					}
-				}
-			}
-		}
-		else
-		{
-			this.UpdateCameraStrap();
-			if (this._cameraModelGrabbable.isGrabbed)
-			{
-				GorillaGrabber grabber3 = this._cameraModelGrabbable.grabber;
-				Transform transform4 = grabber3.transform;
-				if (this.ShouldSpawnCamera(transform4))
-				{
-					this.SpawnCamera(grabber3, transform4);
-					if (this._returnToCameraMode != null)
-					{
-						TabletSpawnInstance tabletSpawnInstance = this._tabletSpawnInstance;
-						if (tabletSpawnInstance != null)
-						{
-							tabletSpawnInstance.Controller.SetCameraMode(this._returnToCameraMode.Value);
-						}
-						this._returnToCameraMode = null;
-					}
-				}
-			}
-			else
-			{
-				this.ResetCameraModel();
-			}
-		}
-		if (!this.IsSlingshotActiveInHierarchy())
-		{
-			this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
-			return;
-		}
-		this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraSlingshot;
-	}
-
-	private void OnZoneChanged(ZoneData[] zones)
-	{
-		if (!this._tabletSpawnInstance.isSpawned || this._tabletSpawnInstance.directGrabbable.isGrabbed)
-		{
-			return;
-		}
-		this._shouldMoveCameraToNeck = true;
-	}
-
-	private void OnDestroy()
-	{
-		this._tabletSpawnInstance.Dispose();
-	}
-
-	[ContextMenu("Put tablet on neck")]
-	public void ManuallySetCameraOnNeck()
-	{
-		if (this.cameraState == LckBodyCameraSpawner.CameraState.CameraOnNeck || this.cameraState == LckBodyCameraSpawner.CameraState.CameraDisabled || !this._tabletSpawnInstance.isSpawned)
-		{
-			return;
-		}
-		this.cameraState = LckBodyCameraSpawner.CameraState.CameraOnNeck;
-		this._tabletSpawnInstance.SetParent(this._cameraModelTransform);
-		this._tabletSpawnInstance.ResetLocalPose();
-		this._shouldMoveCameraToNeck = false;
-		if (this._tabletSpawnInstance.Controller.CurrentCameraMode == CameraMode.Selfie)
-		{
-			this._returnToCameraMode = new CameraMode?(CameraMode.Selfie);
-			this._tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
-		}
-	}
-
-	private void OnCameraModelReleased()
-	{
-		this._cameraModelGrabbable.onReleased -= this.OnCameraModelReleased;
-		this.ResetCameraModel();
-	}
-
-	public void SpawnCamera(GorillaGrabber overrideGorillaGrabber, Transform transform)
-	{
-		if (!this._tabletSpawnInstance.isSpawned)
-		{
-			this._tabletSpawnInstance.SpawnCamera();
-		}
-		this.cameraState = LckBodyCameraSpawner.CameraState.CameraSpawned;
-		this._cameraModelGrabbable.ForceRelease();
-		this._tabletSpawnInstance.ResetParent();
-		Vector3 vector = Vector3.zero;
-		Vector3 euler = Vector3.zero;
-		euler = this._rotationOffsetWindows;
-		XRNode xrNode = overrideGorillaGrabber.XrNode;
-		if (xrNode != XRNode.LeftHand)
-		{
-			if (xrNode == XRNode.RightHand)
-			{
-				vector = this._rightHandSpawnOffsetWindows;
-				euler.z = -12f;
-			}
-		}
-		else
-		{
-			vector = this._leftHandSpawnOffsetWindows;
-			euler.z = 12f;
-		}
-		if (!GTPlayer.Instance.IsDefaultScale)
-		{
-			vector *= 0.06f;
-		}
-		vector = transform.rotation * vector;
-		this._tabletSpawnInstance.SetPositionAndRotation(transform.position + vector, transform.rotation * Quaternion.Euler(euler));
-		this._tabletSpawnInstance.directGrabbable.ForceGrab(overrideGorillaGrabber);
-		this._tabletSpawnInstance.SetLocalScale(Vector3.one);
-	}
-
-	private bool ShouldSpawnCamera(Transform gorillaGrabberTransform)
-	{
-		Matrix4x4 worldToLocalMatrix = base.transform.worldToLocalMatrix;
-		Vector3 a = worldToLocalMatrix.MultiplyPoint(this._cameraModelOriginTransform.position);
-		Vector3 b = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
-		return Vector3.SqrMagnitude(a - b) >= this._activateDistance * this._activateDistance;
-	}
-
-	private void ChangeCameraModelParent(Transform transform)
-	{
-		if (this._cameraModelTransform != null)
-		{
-			this._cameraModelGrabbable.SetOriginalTargetParent(transform);
-			if (!this._cameraModelGrabbable.isGrabbed)
-			{
-				this._cameraModelTransform.transform.parent = transform;
-				this._cameraModelTransform.transform.localPosition = Vector3.zero;
-			}
-		}
-	}
-
-	private void InitCameraStrap()
-	{
-		this._cameraStrapRenderer.positionCount = this._cameraStrapPoints.Length;
-		this._cameraStrapPositions = new Vector3[this._cameraStrapPoints.Length];
-	}
-
-	private void UpdateCameraStrap()
-	{
-		for (int i = 0; i < this._cameraStrapPoints.Length; i++)
-		{
-			this._cameraStrapPositions[i] = this._cameraStrapPoints[i].position;
-		}
-		this._cameraStrapRenderer.SetPositions(this._cameraStrapPositions);
-		Vector3 lossyScale = base.transform.lossyScale;
-		float num = (lossyScale.x + lossyScale.y + lossyScale.z) * 0.3333333f;
-		this._cameraStrapRenderer.widthMultiplier = num * 0.02f;
-		Color color = (this.cameraState == LckBodyCameraSpawner.CameraState.CameraSpawned) ? this._ghostColor : this._normalColor;
-		this._cameraStrapRenderer.startColor = color;
-		this._cameraStrapRenderer.endColor = color;
-	}
-
-	private void ResetCameraModel()
-	{
-		this._cameraModelTransform.localPosition = Vector3.zero;
-		this._cameraModelTransform.localRotation = Quaternion.identity;
-	}
-
-	private VRRig GetLocalRig()
-	{
-		if (this._localRig == null)
-		{
-			this._localRig = VRRigCache.Instance.localRig.Rig;
-		}
-		return this._localRig;
-	}
-
-	private bool IsSlingshotHeldInHand(out bool leftHand, out bool rightHand)
-	{
-		VRRig localRig = this.GetLocalRig();
-		if (localRig == null)
-		{
-			leftHand = false;
-			rightHand = false;
-			return false;
-		}
-		leftHand = localRig.projectileWeapon.InLeftHand();
-		rightHand = localRig.projectileWeapon.InRightHand();
-		return localRig.projectileWeapon.InHand();
-	}
-
-	private bool IsSlingshotActiveInHierarchy()
-	{
-		VRRig localRig = this.GetLocalRig();
-		return !(localRig == null) && !(localRig.projectileWeapon == null) && localRig.projectileWeapon.gameObject.activeInHierarchy;
-	}
+	public delegate void CameraStateDelegate(CameraState state);
 
 	[SerializeField]
 	private GameObject _cameraSpawnPrefab;
@@ -501,23 +99,406 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 
 	private CameraMode? _returnToCameraMode;
 
-	private LckBodyCameraSpawner.CameraState _cameraState;
+	private CameraState _cameraState;
 
-	private LckBodyCameraSpawner.CameraPosition _cameraPosition;
+	private CameraPosition _cameraPosition;
 
-	public enum CameraState
+	public TabletSpawnInstance tabletSpawnInstance => _tabletSpawnInstance;
+
+	public CameraState cameraState
 	{
-		CameraDisabled,
-		CameraOnNeck,
-		CameraSpawned
+		get
+		{
+			return _cameraState;
+		}
+		set
+		{
+			switch (value)
+			{
+			case CameraState.CameraDisabled:
+				cameraPosition = CameraPosition.NotVisible;
+				_tabletSpawnInstance.uiVisible = false;
+				_tabletSpawnInstance.cameraActive = false;
+				ResetCameraModel();
+				cameraVisible = false;
+				_shouldMoveCameraToNeck = false;
+				break;
+			case CameraState.CameraOnNeck:
+				cameraPosition = CameraPosition.CameraDefault;
+				if ((bool)_tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.GetCurrentTriggerProcessor())
+				{
+					_tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.GetCurrentTriggerProcessor().ResetToDefaultAndTriggerButton();
+					_tabletSpawnInstance.Controller.GtColliderTriggerProcessorsGroup.ClearAllTriggers();
+				}
+				_tabletSpawnInstance.uiVisible = false;
+				_tabletSpawnInstance.cameraActive = true;
+				ResetCameraModel();
+				if (Application.platform == RuntimePlatform.Android)
+				{
+					SetPreviewActive(isActive: false);
+				}
+				cameraVisible = true;
+				_shouldMoveCameraToNeck = false;
+				_dummyTablet.SetDummyTabletBodyState(isActive: true);
+				break;
+			case CameraState.CameraSpawned:
+				cameraPosition = CameraPosition.CameraDefault;
+				_tabletSpawnInstance.uiVisible = true;
+				_tabletSpawnInstance.cameraActive = true;
+				if (Application.platform == RuntimePlatform.Android)
+				{
+					SetPreviewActive(isActive: true);
+				}
+				ResetCameraModel();
+				cameraVisible = true;
+				_shouldMoveCameraToNeck = false;
+				_dummyTablet.SetDummyTabletBodyState(isActive: false);
+				break;
+			}
+			_cameraState = value;
+			LckBodyCameraSpawner.OnCameraStateChange?.Invoke(_cameraState);
+		}
 	}
 
-	public enum CameraPosition
+	public CameraPosition cameraPosition
 	{
-		CameraDefault,
-		CameraSlingshot,
-		NotVisible
+		get
+		{
+			return _cameraPosition;
+		}
+		set
+		{
+			if (_cameraModelTransform != null && _cameraPosition != value)
+			{
+				switch (value)
+				{
+				case CameraPosition.CameraDefault:
+					ChangeCameraModelParent(_cameraPositionDefault);
+					_cameraPosition = CameraPosition.CameraDefault;
+					break;
+				case CameraPosition.CameraSlingshot:
+					ChangeCameraModelParent(_cameraPositionSlingshot);
+					_cameraPosition = CameraPosition.CameraSlingshot;
+					break;
+				case CameraPosition.NotVisible:
+					break;
+				}
+			}
+		}
 	}
 
-	public delegate void CameraStateDelegate(LckBodyCameraSpawner.CameraState state);
+	private bool cameraVisible
+	{
+		get
+		{
+			return _cameraModelTransform.gameObject.activeSelf;
+		}
+		set
+		{
+			_cameraModelTransform.gameObject.SetActive(value);
+			_cameraStrapRenderer.enabled = value;
+		}
+	}
+
+	public static event CameraStateDelegate OnCameraStateChange;
+
+	public void SetFollowTransform(Transform transform)
+	{
+		_followTransform = transform;
+	}
+
+	private void SetPreviewActive(bool isActive)
+	{
+		LckResult<LckService> service = LckService.GetService();
+		if (!service.Success)
+		{
+			Debug.LogError("LCK Could not get Service" + service.Error.ToString());
+		}
+		else
+		{
+			service.Result?.SetPreviewActive(isActive);
+		}
+	}
+
+	private void Awake()
+	{
+		_tabletSpawnInstance = new TabletSpawnInstance(_cameraSpawnPrefab, _cameraSpawnParentTransform);
+	}
+
+	private new void OnEnable()
+	{
+		base.OnEnable();
+		InitCameraStrap();
+		cameraState = CameraState.CameraDisabled;
+		cameraPosition = CameraPosition.CameraDefault;
+		ZoneManagement.OnZoneChange += OnZoneChanged;
+		if (_swapTablet != null && _swapEmobi != null && _dummyTablet != null)
+		{
+			LckGameObjectSwapCosmetic swapTablet = _swapTablet;
+			swapTablet.OnCosmeticSpawned = (Action<GameObject>)Delegate.Combine(swapTablet.OnCosmeticSpawned, new Action<GameObject>(_dummyTablet.OnTabletCosmeticSpawned));
+			LckGameObjectSwapCosmetic swapEmobi = _swapEmobi;
+			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Combine(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(_dummyTablet.OnEmobiCosmeticSpawned));
+		}
+	}
+
+	private void Update()
+	{
+		_tabletSpawnInstance.Update();
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		ZoneManagement.OnZoneChange -= OnZoneChanged;
+		if (_swapTablet != null && _swapEmobi != null && _dummyTablet != null)
+		{
+			LckGameObjectSwapCosmetic swapTablet = _swapTablet;
+			swapTablet.OnCosmeticSpawned = (Action<GameObject>)Delegate.Remove(swapTablet.OnCosmeticSpawned, new Action<GameObject>(_dummyTablet.OnTabletCosmeticSpawned));
+			LckGameObjectSwapCosmetic swapEmobi = _swapEmobi;
+			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Remove(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(_dummyTablet.OnEmobiCosmeticSpawned));
+		}
+	}
+
+	public override void Tick()
+	{
+		if (_followTransform != null && base.transform.parent != null)
+		{
+			Matrix4x4 localToWorldMatrix = base.transform.parent.localToWorldMatrix;
+			Vector3 position = localToWorldMatrix.MultiplyPoint(_followTransform.localPosition + _followTransform.localRotation * new Vector3(0f, -0.05f, 0.1f));
+			Quaternion rotation = Quaternion.LookRotation(localToWorldMatrix.MultiplyVector(_followTransform.localRotation * Vector3.forward), localToWorldMatrix.MultiplyVector(_followTransform.localRotation * Vector3.up));
+			base.transform.SetPositionAndRotation(position, rotation);
+		}
+		switch (_cameraState)
+		{
+		case CameraState.CameraOnNeck:
+			UpdateCameraStrap();
+			if (_cameraModelGrabbable.isGrabbed)
+			{
+				GorillaGrabber grabber3 = _cameraModelGrabbable.grabber;
+				Transform gorillaGrabberTransform2 = grabber3.transform;
+				if (ShouldSpawnCamera(gorillaGrabberTransform2))
+				{
+					SpawnCamera(grabber3, gorillaGrabberTransform2);
+					if (_returnToCameraMode.HasValue)
+					{
+						_tabletSpawnInstance?.Controller.SetCameraMode(_returnToCameraMode.Value);
+						_returnToCameraMode = null;
+					}
+				}
+			}
+			else
+			{
+				ResetCameraModel();
+			}
+			break;
+		case CameraState.CameraSpawned:
+		{
+			UpdateCameraStrap();
+			if (_cameraModelGrabbable.isGrabbed)
+			{
+				GorillaGrabber grabber = _cameraModelGrabbable.grabber;
+				Transform gorillaGrabberTransform = grabber.transform;
+				if (ShouldSpawnCamera(gorillaGrabberTransform))
+				{
+					SpawnCamera(grabber, gorillaGrabberTransform);
+				}
+			}
+			else
+			{
+				ResetCameraModel();
+			}
+			if (!_tabletSpawnInstance.isSpawned)
+			{
+				break;
+			}
+			Transform transform2;
+			if (_tabletSpawnInstance.directGrabbable.isGrabbed)
+			{
+				GorillaGrabber grabber2 = _tabletSpawnInstance.directGrabbable.grabber;
+				Transform transform = grabber2.transform;
+				if (!ShouldSpawnCamera(transform))
+				{
+					cameraState = CameraState.CameraOnNeck;
+					_cameraModelGrabbable.target.SetPositionAndRotation(transform.position, transform.rotation * Quaternion.Euler(_chestSpawnRotationOffset.x, _chestSpawnRotationOffset.y, _chestSpawnRotationOffset.z));
+					_tabletSpawnInstance.directGrabbable.ForceRelease();
+					_tabletSpawnInstance.SetParent(_cameraModelTransform);
+					_tabletSpawnInstance.ResetLocalPose();
+					_cameraModelGrabbable.ForceGrab(grabber2);
+					_cameraModelGrabbable.onReleased += OnCameraModelReleased;
+					if (_tabletSpawnInstance.Controller.CurrentCameraMode == CameraMode.Selfie)
+					{
+						_returnToCameraMode = CameraMode.Selfie;
+						_tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
+					}
+				}
+			}
+			else if (_shouldMoveCameraToNeck && GtTag.TryGetTransform(GtTagType.HMD, out transform2) && Vector3.SqrMagnitude(base.transform.position - tabletSpawnInstance.position) >= _snapToNeckDistance * _snapToNeckDistance)
+			{
+				cameraState = CameraState.CameraOnNeck;
+				_tabletSpawnInstance.SetParent(_cameraModelTransform);
+				_tabletSpawnInstance.ResetLocalPose();
+				_shouldMoveCameraToNeck = false;
+			}
+			break;
+		}
+		}
+		if (!IsSlingshotActiveInHierarchy())
+		{
+			cameraPosition = CameraPosition.CameraDefault;
+		}
+		else
+		{
+			cameraPosition = CameraPosition.CameraSlingshot;
+		}
+	}
+
+	private void OnZoneChanged(ZoneData[] zones)
+	{
+		if (_tabletSpawnInstance.isSpawned && !_tabletSpawnInstance.directGrabbable.isGrabbed)
+		{
+			_shouldMoveCameraToNeck = true;
+		}
+	}
+
+	private void OnDestroy()
+	{
+		_tabletSpawnInstance.Dispose();
+	}
+
+	[ContextMenu("Put tablet on neck")]
+	public void ManuallySetCameraOnNeck()
+	{
+		if (cameraState != CameraState.CameraOnNeck && cameraState != CameraState.CameraDisabled && _tabletSpawnInstance.isSpawned)
+		{
+			cameraState = CameraState.CameraOnNeck;
+			_tabletSpawnInstance.SetParent(_cameraModelTransform);
+			_tabletSpawnInstance.ResetLocalPose();
+			_shouldMoveCameraToNeck = false;
+			if (_tabletSpawnInstance.Controller.CurrentCameraMode == CameraMode.Selfie)
+			{
+				_returnToCameraMode = CameraMode.Selfie;
+				_tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
+			}
+		}
+	}
+
+	private void OnCameraModelReleased()
+	{
+		_cameraModelGrabbable.onReleased -= OnCameraModelReleased;
+		ResetCameraModel();
+	}
+
+	public void SpawnCamera(GorillaGrabber overrideGorillaGrabber, Transform transform)
+	{
+		if (!_tabletSpawnInstance.isSpawned)
+		{
+			_tabletSpawnInstance.SpawnCamera();
+		}
+		cameraState = CameraState.CameraSpawned;
+		_cameraModelGrabbable.ForceRelease();
+		_tabletSpawnInstance.ResetParent();
+		Vector3 vector = Vector3.zero;
+		Vector3 zero = Vector3.zero;
+		zero = _rotationOffsetWindows;
+		switch (overrideGorillaGrabber.XrNode)
+		{
+		case XRNode.LeftHand:
+			vector = _leftHandSpawnOffsetWindows;
+			zero.z = 12f;
+			break;
+		case XRNode.RightHand:
+			vector = _rightHandSpawnOffsetWindows;
+			zero.z = -12f;
+			break;
+		}
+		if (!GTPlayer.Instance.IsDefaultScale)
+		{
+			vector *= 0.06f;
+		}
+		vector = transform.rotation * vector;
+		_tabletSpawnInstance.SetPositionAndRotation(transform.position + vector, transform.rotation * Quaternion.Euler(zero));
+		_tabletSpawnInstance.directGrabbable.ForceGrab(overrideGorillaGrabber);
+		_tabletSpawnInstance.SetLocalScale(Vector3.one);
+	}
+
+	private bool ShouldSpawnCamera(Transform gorillaGrabberTransform)
+	{
+		Matrix4x4 worldToLocalMatrix = base.transform.worldToLocalMatrix;
+		Vector3 vector = worldToLocalMatrix.MultiplyPoint(_cameraModelOriginTransform.position);
+		Vector3 vector2 = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
+		return Vector3.SqrMagnitude(vector - vector2) >= _activateDistance * _activateDistance;
+	}
+
+	private void ChangeCameraModelParent(Transform transform)
+	{
+		if (_cameraModelTransform != null)
+		{
+			_cameraModelGrabbable.SetOriginalTargetParent(transform);
+			if (!_cameraModelGrabbable.isGrabbed)
+			{
+				_cameraModelTransform.transform.parent = transform;
+				_cameraModelTransform.transform.localPosition = Vector3.zero;
+			}
+		}
+	}
+
+	private void InitCameraStrap()
+	{
+		_cameraStrapRenderer.positionCount = _cameraStrapPoints.Length;
+		_cameraStrapPositions = new Vector3[_cameraStrapPoints.Length];
+	}
+
+	private void UpdateCameraStrap()
+	{
+		for (int i = 0; i < _cameraStrapPoints.Length; i++)
+		{
+			_cameraStrapPositions[i] = _cameraStrapPoints[i].position;
+		}
+		_cameraStrapRenderer.SetPositions(_cameraStrapPositions);
+		Vector3 lossyScale = base.transform.lossyScale;
+		float num = (lossyScale.x + lossyScale.y + lossyScale.z) * 0.3333333f;
+		_cameraStrapRenderer.widthMultiplier = num * 0.02f;
+		Color color = ((cameraState == CameraState.CameraSpawned) ? _ghostColor : _normalColor);
+		_cameraStrapRenderer.startColor = color;
+		_cameraStrapRenderer.endColor = color;
+	}
+
+	private void ResetCameraModel()
+	{
+		_cameraModelTransform.localPosition = Vector3.zero;
+		_cameraModelTransform.localRotation = Quaternion.identity;
+	}
+
+	private VRRig GetLocalRig()
+	{
+		if (_localRig == null)
+		{
+			_localRig = VRRigCache.Instance.localRig.Rig;
+		}
+		return _localRig;
+	}
+
+	private bool IsSlingshotHeldInHand(out bool leftHand, out bool rightHand)
+	{
+		VRRig localRig = GetLocalRig();
+		if (localRig == null)
+		{
+			leftHand = false;
+			rightHand = false;
+			return false;
+		}
+		leftHand = localRig.projectileWeapon.InLeftHand();
+		rightHand = localRig.projectileWeapon.InRightHand();
+		return localRig.projectileWeapon.InHand();
+	}
+
+	private bool IsSlingshotActiveInHierarchy()
+	{
+		VRRig localRig = GetLocalRig();
+		if (localRig == null || localRig.projectileWeapon == null)
+		{
+			return false;
+		}
+		return localRig.projectileWeapon.gameObject.activeInHierarchy;
+	}
 }

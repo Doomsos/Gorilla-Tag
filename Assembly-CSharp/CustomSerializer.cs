@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -7,135 +7,135 @@ public static class CustomSerializer
 {
 	public static byte[] ByteSerialize(this object obj)
 	{
-		return CustomSerializer.Serialize(obj);
+		return Serialize(obj);
 	}
 
 	public static object ByteDeserialize(this byte[] bytes)
 	{
-		return CustomSerializer.Deserialize(bytes);
+		return Deserialize(bytes);
 	}
 
 	public static byte[] Serialize(object obj)
 	{
-		byte[] result;
-		using (MemoryStream memoryStream = new MemoryStream())
-		{
-			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8))
-			{
-				CustomSerializer.SerializeObject(binaryWriter, obj);
-				result = memoryStream.ToArray();
-			}
-		}
-		return result;
+		using MemoryStream memoryStream = new MemoryStream();
+		using BinaryWriter writer = new BinaryWriter(memoryStream, Encoding.UTF8);
+		SerializeObject(writer, obj);
+		return memoryStream.ToArray();
 	}
 
 	public static object Deserialize(byte[] data)
 	{
-		object result;
-		using (MemoryStream memoryStream = new MemoryStream(data))
-		{
-			using (BinaryReader binaryReader = new BinaryReader(memoryStream, Encoding.UTF8))
-			{
-				result = CustomSerializer.DeserializeObject(binaryReader);
-			}
-		}
-		return result;
+		using MemoryStream input = new MemoryStream(data);
+		using BinaryReader reader = new BinaryReader(input, Encoding.UTF8);
+		return DeserializeObject(reader);
 	}
 
 	private static void SerializeObject(BinaryWriter writer, object obj)
 	{
-		string text = obj as string;
-		if (text != null)
+		if (!(obj is string value))
 		{
-			writer.Write(1);
-			writer.Write(text);
-			return;
+			if (!(obj is bool value2))
+			{
+				if (!(obj is int value3))
+				{
+					if (!(obj is float value4))
+					{
+						if (!(obj is double value5))
+						{
+							if (!(obj is Vector2 vector))
+							{
+								if (!(obj is Vector3 vector2))
+								{
+									if (!(obj is object[] objects))
+									{
+										if (!(obj is byte value6))
+										{
+											if (!(obj is Enum obj2))
+											{
+												if (!(obj is NetEventOptions options))
+												{
+													if (obj is Quaternion quaternion)
+													{
+														writer.Write((byte)12);
+														writer.Write(quaternion.x);
+														writer.Write(quaternion.y);
+														writer.Write(quaternion.z);
+														writer.Write(quaternion.w);
+													}
+													else
+													{
+														Debug.LogWarning("<color=blue>type not supported " + obj.GetType().ToString() + "</color>");
+													}
+												}
+												else
+												{
+													writer.Write((byte)11);
+													SerializeNetEventOptions(writer, options);
+												}
+											}
+											else
+											{
+												writer.Write((byte)10);
+												writer.Write(Convert.ToInt32(obj2));
+												writer.Write(obj2.GetType().AssemblyQualifiedName);
+											}
+										}
+										else
+										{
+											writer.Write((byte)9);
+											writer.Write(value6);
+										}
+									}
+									else
+									{
+										writer.Write((byte)8);
+										SerializeObjectArray(writer, objects);
+									}
+								}
+								else
+								{
+									writer.Write((byte)7);
+									writer.Write(vector2.x);
+									writer.Write(vector2.y);
+									writer.Write(vector2.z);
+								}
+							}
+							else
+							{
+								writer.Write((byte)6);
+								writer.Write(vector.x);
+								writer.Write(vector.y);
+							}
+						}
+						else
+						{
+							writer.Write((byte)5);
+							writer.Write(value5);
+						}
+					}
+					else
+					{
+						writer.Write((byte)4);
+						writer.Write(value4);
+					}
+				}
+				else
+				{
+					writer.Write((byte)3);
+					writer.Write(value3);
+				}
+			}
+			else
+			{
+				writer.Write((byte)2);
+				writer.Write(value2);
+			}
 		}
-		if (obj is bool)
+		else
 		{
-			bool value = (bool)obj;
-			writer.Write(2);
+			writer.Write((byte)1);
 			writer.Write(value);
-			return;
 		}
-		if (obj is int)
-		{
-			int value2 = (int)obj;
-			writer.Write(3);
-			writer.Write(value2);
-			return;
-		}
-		if (obj is float)
-		{
-			float value3 = (float)obj;
-			writer.Write(4);
-			writer.Write(value3);
-			return;
-		}
-		if (obj is double)
-		{
-			double value4 = (double)obj;
-			writer.Write(5);
-			writer.Write(value4);
-			return;
-		}
-		if (obj is Vector2)
-		{
-			Vector2 vector = (Vector2)obj;
-			writer.Write(6);
-			writer.Write(vector.x);
-			writer.Write(vector.y);
-			return;
-		}
-		if (obj is Vector3)
-		{
-			Vector3 vector2 = (Vector3)obj;
-			writer.Write(7);
-			writer.Write(vector2.x);
-			writer.Write(vector2.y);
-			writer.Write(vector2.z);
-			return;
-		}
-		object[] array = obj as object[];
-		if (array != null)
-		{
-			writer.Write(8);
-			CustomSerializer.SerializeObjectArray(writer, array);
-			return;
-		}
-		if (obj is byte)
-		{
-			byte value5 = (byte)obj;
-			writer.Write(9);
-			writer.Write(value5);
-			return;
-		}
-		Enum @enum = obj as Enum;
-		if (@enum != null)
-		{
-			writer.Write(10);
-			writer.Write(Convert.ToInt32(@enum));
-			writer.Write(@enum.GetType().AssemblyQualifiedName);
-			return;
-		}
-		NetEventOptions netEventOptions = obj as NetEventOptions;
-		if (netEventOptions != null)
-		{
-			writer.Write(11);
-			CustomSerializer.SerializeNetEventOptions(writer, netEventOptions);
-			return;
-		}
-		if (obj is Quaternion)
-		{
-			Quaternion quaternion = (Quaternion)obj;
-			writer.Write(12);
-			writer.Write(quaternion.x);
-			writer.Write(quaternion.y);
-			writer.Write(quaternion.z);
-			writer.Write(quaternion.w);
-			return;
-		}
-		Debug.LogWarning("<color=blue>type not supported " + obj.GetType().ToString() + "</color>");
 	}
 
 	private static void SerializeObjectArray(BinaryWriter writer, object[] objects)
@@ -143,7 +143,7 @@ public static class CustomSerializer
 		writer.Write(objects.Length);
 		foreach (object obj in objects)
 		{
-			CustomSerializer.SerializeObject(writer, obj);
+			SerializeObject(writer, obj);
 		}
 	}
 
@@ -157,7 +157,8 @@ public static class CustomSerializer
 		else
 		{
 			writer.Write(options.TargetActors.Length);
-			foreach (int value in options.TargetActors)
+			int[] targetActors = options.TargetActors;
+			foreach (int value in targetActors)
 			{
 				writer.Write(value);
 			}
@@ -183,19 +184,19 @@ public static class CustomSerializer
 			return reader.ReadDouble();
 		case 6:
 		{
-			float x = reader.ReadSingle();
-			float y = reader.ReadSingle();
-			return new Vector2(x, y);
+			float x3 = reader.ReadSingle();
+			float y3 = reader.ReadSingle();
+			return new Vector2(x3, y3);
 		}
 		case 7:
 		{
 			float x2 = reader.ReadSingle();
 			float y2 = reader.ReadSingle();
-			float z = reader.ReadSingle();
-			return new Vector3(x2, y2, z);
+			float z2 = reader.ReadSingle();
+			return new Vector3(x2, y2, z2);
 		}
 		case 8:
-			return CustomSerializer.DeserializeObjectArray(reader);
+			return DeserializeObjectArray(reader);
 		case 9:
 			return reader.ReadByte();
 		case 10:
@@ -204,14 +205,14 @@ public static class CustomSerializer
 			return Enum.ToObject(Type.GetType(reader.ReadString()), value);
 		}
 		case 11:
-			return CustomSerializer.DeserializeNetEventOptions(reader);
+			return DeserializeNetEventOptions(reader);
 		case 12:
 		{
-			float x3 = reader.ReadSingle();
-			float y3 = reader.ReadSingle();
-			float z2 = reader.ReadSingle();
+			float x = reader.ReadSingle();
+			float y = reader.ReadSingle();
+			float z = reader.ReadSingle();
 			float w = reader.ReadSingle();
-			return new Quaternion(x3, y3, z2, w);
+			return new Quaternion(x, y, z, w);
 		}
 		default:
 			throw new InvalidOperationException("Unsupported type");
@@ -224,7 +225,7 @@ public static class CustomSerializer
 		object[] array = new object[num];
 		for (int i = 0; i < num; i++)
 		{
-			array[i] = CustomSerializer.DeserializeObject(reader);
+			array[i] = DeserializeObject(reader);
 		}
 		return array;
 	}

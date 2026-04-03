@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using Photon.Pun;
 using UnityEngine;
@@ -6,132 +6,11 @@ using UnityEngine.Events;
 
 public class HoldableLighterCosmetic : MonoBehaviour
 {
-	private void OnEnable()
+	public enum LighterResult
 	{
-	}
-
-	private void Awake()
-	{
-		this.rig = base.GetComponentInParent<VRRig>();
-		this.parentTransferable = base.GetComponentInParent<TransferrableObject>();
-	}
-
-	private bool IsMyItem()
-	{
-		return this.rig != null && this.rig.isOfflineVRRig;
-	}
-
-	private void DebugPull()
-	{
-		this.TriggerPulled();
-	}
-
-	private void DebugRelease()
-	{
-		this.TriggerReleased();
-	}
-
-	public void TriggerPulled()
-	{
-		this.triggerHeld = true;
-		if (this.OwnerID == 0)
-		{
-			this.TrySetID();
-		}
-		double time = PhotonNetwork.Time;
-		switch (this.GetResultAtTime(time, this.OwnerID))
-		{
-		case HoldableLighterCosmetic.LighterResult.Flicker:
-		{
-			UnityEvent onFlicker = this.OnFlicker;
-			if (onFlicker != null)
-			{
-				onFlicker.Invoke();
-			}
-			if (this.parentTransferable.IsMyItem())
-			{
-				GorillaTagger.Instance.StartVibration(this.parentTransferable.InLeftHand(), 0.1f, 0.1f);
-				return;
-			}
-			break;
-		}
-		case HoldableLighterCosmetic.LighterResult.Light:
-		{
-			UnityEvent onLight = this.OnLight;
-			if (onLight != null)
-			{
-				onLight.Invoke();
-			}
-			if (this.parentTransferable.IsMyItem())
-			{
-				GorillaTagger.Instance.StartVibration(this.parentTransferable.InLeftHand(), 0.1f, 0.1f);
-				return;
-			}
-			break;
-		}
-		case HoldableLighterCosmetic.LighterResult.Explode:
-		{
-			UnityEvent onExplode = this.OnExplode;
-			if (onExplode != null)
-			{
-				onExplode.Invoke();
-			}
-			if (this.parentTransferable.IsMyItem())
-			{
-				GorillaTagger.Instance.StartVibration(this.parentTransferable.InLeftHand(), 0.75f, 0.5f);
-			}
-			break;
-		}
-		default:
-			return;
-		}
-	}
-
-	private HoldableLighterCosmetic.LighterResult GetResultAtTime(double photonTime, int seed)
-	{
-		int num = (int)Math.Floor(photonTime);
-		float num2 = (float)new Random(seed ^ num).NextDouble();
-		if (num2 < this.explodeWeight)
-		{
-			return HoldableLighterCosmetic.LighterResult.Explode;
-		}
-		if (num2 < this.explodeWeight + this.lightWeight)
-		{
-			return HoldableLighterCosmetic.LighterResult.Light;
-		}
-		return HoldableLighterCosmetic.LighterResult.Flicker;
-	}
-
-	public void TriggerReleased()
-	{
-		this.triggerHeld = false;
-		UnityEvent onTriggerRelease = this.OnTriggerRelease;
-		if (onTriggerRelease == null)
-		{
-			return;
-		}
-		onTriggerRelease.Invoke();
-	}
-
-	private void TrySetID()
-	{
-		if (this.parentTransferable.IsLocalObject())
-		{
-			PlayFabAuthenticator instance = PlayFabAuthenticator.instance;
-			if (instance != null)
-			{
-				string playFabPlayerId = instance.GetPlayFabPlayerId();
-				Type type = base.GetType();
-				this.OwnerID = (playFabPlayerId + ((type != null) ? type.ToString() : null)).GetStaticHash();
-				return;
-			}
-		}
-		else if (this.parentTransferable.targetRig != null && this.parentTransferable.targetRig.creator != null)
-		{
-			string userId = this.parentTransferable.targetRig.creator.UserId;
-			Type type2 = base.GetType();
-			this.OwnerID = (userId + ((type2 != null) ? type2.ToString() : null)).GetStaticHash();
-		}
+		Flicker,
+		Light,
+		Explode
 	}
 
 	private int OwnerID;
@@ -155,7 +34,7 @@ public class HoldableLighterCosmetic : MonoBehaviour
 
 	public UnityEvent OnTriggerRelease;
 
-	private HoldableLighterCosmetic.LighterResult[] resultTimeline;
+	private LighterResult[] resultTimeline;
 
 	private bool triggerHeld;
 
@@ -165,10 +44,103 @@ public class HoldableLighterCosmetic : MonoBehaviour
 
 	private TransferrableObject parentTransferable;
 
-	public enum LighterResult
+	private void OnEnable()
 	{
-		Flicker,
-		Light,
-		Explode
+	}
+
+	private void Awake()
+	{
+		rig = GetComponentInParent<VRRig>();
+		parentTransferable = GetComponentInParent<TransferrableObject>();
+	}
+
+	private bool IsMyItem()
+	{
+		if (rig != null)
+		{
+			return rig.isOfflineVRRig;
+		}
+		return false;
+	}
+
+	private void DebugPull()
+	{
+		TriggerPulled();
+	}
+
+	private void DebugRelease()
+	{
+		TriggerReleased();
+	}
+
+	public void TriggerPulled()
+	{
+		triggerHeld = true;
+		if (OwnerID == 0)
+		{
+			TrySetID();
+		}
+		double time = PhotonNetwork.Time;
+		switch (GetResultAtTime(time, OwnerID))
+		{
+		case LighterResult.Flicker:
+			OnFlicker?.Invoke();
+			if (parentTransferable.IsMyItem())
+			{
+				GorillaTagger.Instance.StartVibration(parentTransferable.InLeftHand(), 0.1f, 0.1f);
+			}
+			break;
+		case LighterResult.Light:
+			OnLight?.Invoke();
+			if (parentTransferable.IsMyItem())
+			{
+				GorillaTagger.Instance.StartVibration(parentTransferable.InLeftHand(), 0.1f, 0.1f);
+			}
+			break;
+		case LighterResult.Explode:
+			OnExplode?.Invoke();
+			if (parentTransferable.IsMyItem())
+			{
+				GorillaTagger.Instance.StartVibration(parentTransferable.InLeftHand(), 0.75f, 0.5f);
+			}
+			break;
+		}
+	}
+
+	private LighterResult GetResultAtTime(double photonTime, int seed)
+	{
+		int num = (int)Math.Floor(photonTime);
+		float num2 = (float)new System.Random(seed ^ num).NextDouble();
+		if (num2 < explodeWeight)
+		{
+			return LighterResult.Explode;
+		}
+		if (num2 < explodeWeight + lightWeight)
+		{
+			return LighterResult.Light;
+		}
+		return LighterResult.Flicker;
+	}
+
+	public void TriggerReleased()
+	{
+		triggerHeld = false;
+		OnTriggerRelease?.Invoke();
+	}
+
+	private void TrySetID()
+	{
+		if (parentTransferable.IsLocalObject())
+		{
+			PlayFabAuthenticator instance = PlayFabAuthenticator.instance;
+			if (instance != null)
+			{
+				OwnerID = (instance.GetPlayFabPlayerId() + GetType()).GetStaticHash();
+			}
+		}
+		else if (parentTransferable.targetRig != null && parentTransferable.targetRig.creator != null)
+		{
+			OwnerID = (parentTransferable.targetRig.creator.UserId + GetType()).GetStaticHash();
+		}
 	}
 }

@@ -1,9 +1,6 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class GetAcceptedAgreementsRequest
 {
-	public class GetAcceptedAgreementsRequest
-	{
-		public string[] AgreementKeys;
-	}
+	public string[] AgreementKeys;
 }

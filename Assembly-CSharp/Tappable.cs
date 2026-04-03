@@ -1,20 +1,33 @@
-﻿using System;
 using System.Diagnostics;
 using Photon.Pun;
 using UnityEngine;
 
 public class Tappable : MonoBehaviour
 {
+	public int tappableId;
+
+	public string staticId;
+
+	public bool useStaticId;
+
+	[Tooltip("If true, tap cooldown will be ignored.  Tapping will be allowed/disallowed based on result of CanTap()")]
+	public bool overrideTapCooldown;
+
+	[Space]
+	public TappableManager manager;
+
+	public RpcTarget rpcTarget;
+
 	public void Validate()
 	{
-		this.CalculateId(true);
+		CalculateId(force: true);
 	}
 
 	protected virtual void OnEnable()
 	{
-		if (!this.useStaticId)
+		if (!useStaticId)
 		{
-			this.CalculateId(false);
+			CalculateId();
 		}
 		TappableManager.Register(this);
 	}
@@ -31,56 +44,31 @@ public class Tappable : MonoBehaviour
 
 	public void OnTap()
 	{
-		this.OnTap(1f);
+		OnTap(1f);
 	}
 
 	public void OnTap(float tapStrength)
 	{
-		if (!NetworkSystem.Instance.InRoom)
+		if (NetworkSystem.Instance.InRoom && (bool)manager)
 		{
-			return;
+			manager.photonView.RPC("SendOnTapRPC", RpcTarget.All, tappableId, tapStrength);
 		}
-		if (!this.manager)
-		{
-			return;
-		}
-		this.manager.photonView.RPC("SendOnTapRPC", RpcTarget.All, new object[]
-		{
-			this.tappableId,
-			tapStrength
-		});
 	}
 
 	public void OnGrab()
 	{
-		if (!NetworkSystem.Instance.InRoom)
+		if (NetworkSystem.Instance.InRoom && (bool)manager)
 		{
-			return;
+			manager.photonView.RPC("SendOnGrabRPC", RpcTarget.All, tappableId);
 		}
-		if (!this.manager)
-		{
-			return;
-		}
-		this.manager.photonView.RPC("SendOnGrabRPC", RpcTarget.All, new object[]
-		{
-			this.tappableId
-		});
 	}
 
 	public void OnRelease()
 	{
-		if (!NetworkSystem.Instance.InRoom)
+		if (NetworkSystem.Instance.InRoom && (bool)manager)
 		{
-			return;
+			manager.photonView.RPC("SendOnReleaseRPC", RpcTarget.All, tappableId);
 		}
-		if (!this.manager)
-		{
-			return;
-		}
-		this.manager.photonView.RPC("SendOnReleaseRPC", RpcTarget.All, new object[]
-		{
-			this.tappableId
-		});
 	}
 
 	public virtual void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped sender)
@@ -97,47 +85,35 @@ public class Tappable : MonoBehaviour
 
 	private void EdRecalculateId()
 	{
-		this.CalculateId(true);
+		CalculateId(force: true);
 	}
 
 	private void CalculateId(bool force = false)
 	{
 		Transform transform = base.transform;
 		int hashCode = TransformUtils.ComputePathHash(transform).ToId128().GetHashCode();
-		int staticHash = base.GetType().Name.GetStaticHash();
+		int staticHash = GetType().Name.GetStaticHash();
 		int hashCode2 = transform.position.QuantizedId128().GetHashCode();
 		int num = StaticHash.Compute(hashCode, staticHash, hashCode2);
-		if (this.useStaticId)
+		if (useStaticId)
 		{
-			if (string.IsNullOrEmpty(this.staticId) || force)
+			if (string.IsNullOrEmpty(staticId) || force)
 			{
 				int instanceID = transform.GetInstanceID();
 				int num2 = StaticHash.Compute(num, instanceID);
-				this.staticId = string.Format("#ID_{0:X8}", num2);
+				staticId = $"#ID_{num2:X8}";
 			}
-			this.tappableId = this.staticId.GetStaticHash();
-			return;
+			tappableId = staticId.GetStaticHash();
 		}
-		this.tappableId = (Application.isPlaying ? num : 0);
+		else
+		{
+			tappableId = (Application.isPlaying ? num : 0);
+		}
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	private void OnValidate()
 	{
-		this.CalculateId(false);
+		CalculateId();
 	}
-
-	public int tappableId;
-
-	public string staticId;
-
-	public bool useStaticId;
-
-	[Tooltip("If true, tap cooldown will be ignored.  Tapping will be allowed/disallowed based on result of CanTap()")]
-	public bool overrideTapCooldown;
-
-	[Space]
-	public TappableManager manager;
-
-	public RpcTarget rpcTarget;
 }

@@ -1,45 +1,8 @@
-﻿using System;
 using GorillaExtensions;
 using UnityEngine;
 
 public class SpinWithGorillaSpeed : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.rig = base.GetComponentInParent<VRRig>();
-		this.initialRotation = base.transform.localRotation;
-		this.spinAxis = this.initialRotation * this.axisOfRotation * Vector3.forward;
-	}
-
-	private void Update()
-	{
-		Vector3 vector = (this.optionalVelocityEstimator != null) ? this.optionalVelocityEstimator.linearVelocity : this.rig.LatestVelocity();
-		vector.y *= this.verticalSpeedInfluence;
-		float time = vector.magnitude / this.maxSpeed;
-		float num = Time.deltaTime * this.degreesPerSecondAtSpeed.Evaluate(time) * (this.clockwise ? -1f : 1f);
-		this.currentAngle = Mathf.Repeat(this.currentAngle + num, 360f);
-		Quaternion quaternion = this.initialRotation * Quaternion.AngleAxis(this.currentAngle, this.spinAxis);
-		base.transform.SetLocalPositionAndRotation(quaternion * this.centerOfRotation, quaternion);
-		if (this.tickSound != null && this.tickClips.Length != 0)
-		{
-			this.tickAngle += num;
-			if (this.tickAngle >= this.tickSoundDegrees)
-			{
-				this.tickSound.pitch = this.tickPitchAtSpeed.Evaluate(time);
-				this.tickSound.volume = this.tickVolumeAtSpeed.Evaluate(time);
-				this.tickSound.clip = this.tickClips.GetRandomItem<AudioClip>();
-				this.tickSound.GTPlay();
-				this.tickAngle = Mathf.Repeat(this.tickAngle, this.tickSoundDegrees);
-			}
-		}
-	}
-
-	private void OnDisable()
-	{
-		this.currentAngle = 0f;
-		this.tickAngle = 0f;
-	}
-
 	[Tooltip("Get the velocity from this component when determining the spin speed. If this is unset, it will use the unsmoothed velocity of the parent VRRig component.")]
 	[SerializeField]
 	private GorillaVelocityEstimator optionalVelocityEstimator;
@@ -90,4 +53,40 @@ public class SpinWithGorillaSpeed : MonoBehaviour
 	private float currentAngle;
 
 	private float tickAngle;
+
+	private void Awake()
+	{
+		rig = GetComponentInParent<VRRig>();
+		initialRotation = base.transform.localRotation;
+		spinAxis = initialRotation * axisOfRotation * Vector3.forward;
+	}
+
+	private void Update()
+	{
+		Vector3 vector = ((optionalVelocityEstimator != null) ? optionalVelocityEstimator.linearVelocity : rig.LatestVelocity());
+		vector.y *= verticalSpeedInfluence;
+		float time = vector.magnitude / maxSpeed;
+		float num = Time.deltaTime * degreesPerSecondAtSpeed.Evaluate(time) * (clockwise ? (-1f) : 1f);
+		currentAngle = Mathf.Repeat(currentAngle + num, 360f);
+		Quaternion quaternion = initialRotation * Quaternion.AngleAxis(currentAngle, spinAxis);
+		base.transform.SetLocalPositionAndRotation(quaternion * centerOfRotation, quaternion);
+		if (tickSound != null && tickClips.Length != 0)
+		{
+			tickAngle += num;
+			if (tickAngle >= tickSoundDegrees)
+			{
+				tickSound.pitch = tickPitchAtSpeed.Evaluate(time);
+				tickSound.volume = tickVolumeAtSpeed.Evaluate(time);
+				tickSound.clip = tickClips.GetRandomItem();
+				tickSound.GTPlay();
+				tickAngle = Mathf.Repeat(tickAngle, tickSoundDegrees);
+			}
+		}
+	}
+
+	private void OnDisable()
+	{
+		currentAngle = 0f;
+		tickAngle = 0f;
+	}
 }

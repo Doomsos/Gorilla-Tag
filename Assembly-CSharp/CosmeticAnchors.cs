@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaNetworking;
 using GorillaTag;
@@ -7,149 +6,6 @@ using UnityEngine;
 
 public class CosmeticAnchors : MonoBehaviour, ISpawnable
 {
-	bool ISpawnable.IsSpawned { get; set; }
-
-	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
-
-	void ISpawnable.OnSpawn(VRRig rig)
-	{
-	}
-
-	void ISpawnable.OnDespawn()
-	{
-	}
-
-	private void AssignAnchorToPath(ref GameObject anchorGObjRef, string path)
-	{
-		if (string.IsNullOrEmpty(path))
-		{
-			return;
-		}
-		Transform transform;
-		if (!base.transform.TryFindByPath(path, out transform, false))
-		{
-			this.vrRig = base.GetComponentInParent<VRRig>(true);
-			if (this.vrRig && this.vrRig.isOfflineVRRig)
-			{
-				Debug.LogError("CosmeticAnchors: Could not find path: \"" + path + "\".\nPath to this component: " + base.transform.GetPathQ(), this);
-			}
-			return;
-		}
-		anchorGObjRef = transform.gameObject;
-	}
-
-	private void OnEnable()
-	{
-	}
-
-	private void OnDisable()
-	{
-	}
-
-	public void TryUpdate()
-	{
-	}
-
-	public void EnableAnchor(bool enable)
-	{
-	}
-
-	private void SetHuntComputerAnchor(bool enable)
-	{
-		Transform huntComputer = this.anchorOverrides.HuntComputer;
-		if (!GorillaTagger.Instance.offlineVRRig.huntComputer.activeSelf || !enable)
-		{
-			huntComputer.parent = this.anchorOverrides.HuntDefaultAnchor;
-		}
-		else
-		{
-			huntComputer.parent = this.huntComputerAnchor.transform;
-		}
-		huntComputer.transform.localPosition = Vector3.zero;
-		huntComputer.transform.localRotation = Quaternion.identity;
-	}
-
-	private void SetBuilderWatchAnchor(bool enable)
-	{
-		Transform builderWatch = this.anchorOverrides.BuilderWatch;
-		if (!GorillaTagger.Instance.offlineVRRig.builderResizeWatch.activeSelf || !enable)
-		{
-			builderWatch.parent = this.anchorOverrides.BuilderWatchAnchor;
-		}
-		else
-		{
-			builderWatch.parent = this.builderWatchAnchor.transform;
-		}
-		builderWatch.transform.localPosition = Vector3.zero;
-		builderWatch.transform.localRotation = Quaternion.identity;
-	}
-
-	private void SetCustomAnchor(Transform target, bool enable, GameObject overrideAnchor, Transform defaultAnchor)
-	{
-		Transform transform = (enable && overrideAnchor != null) ? overrideAnchor.transform : defaultAnchor;
-		if (target != null && target.parent != transform)
-		{
-			target.parent = transform;
-			target.transform.localPosition = Vector3.zero;
-			target.transform.localRotation = Quaternion.identity;
-			target.transform.localScale = Vector3.one;
-		}
-	}
-
-	public Transform GetPositionAnchor(TransferrableObject.PositionState pos)
-	{
-		if (pos != TransferrableObject.PositionState.OnLeftArm)
-		{
-			if (pos != TransferrableObject.PositionState.OnRightArm)
-			{
-				if (pos != TransferrableObject.PositionState.OnChest)
-				{
-					return null;
-				}
-				if (!this.chestAnchor)
-				{
-					return null;
-				}
-				return this.chestAnchor.transform;
-			}
-			else
-			{
-				if (!this.rightArmAnchor)
-				{
-					return null;
-				}
-				return this.rightArmAnchor.transform;
-			}
-		}
-		else
-		{
-			if (!this.leftArmAnchor)
-			{
-				return null;
-			}
-			return this.leftArmAnchor.transform;
-		}
-	}
-
-	public Transform GetNameAnchor()
-	{
-		if (!this.nameAnchor)
-		{
-			return null;
-		}
-		return this.nameAnchor.transform;
-	}
-
-	public bool AffectedByHunt()
-	{
-		return this.huntComputerAnchor != null;
-	}
-
-	public bool AffectedByBuilder()
-	{
-		return this.builderWatchAnchor != null;
-	}
-
 	[SerializeField]
 	private bool deprecatedWarning = true;
 
@@ -216,5 +72,141 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 
 	private bool anchorEnabled;
 
-	private static GTLogErrorLimiter k_debugLogError_anchorOverridesNull = new GTLogErrorLimiter("The array `anchorOverrides` was null. Is the cosmetic getting initialized properly? ", 10, "\n- ");
+	private static GTLogErrorLimiter k_debugLogError_anchorOverridesNull = new GTLogErrorLimiter("The array `anchorOverrides` was null. Is the cosmetic getting initialized properly? ");
+
+	bool ISpawnable.IsSpawned { get; set; }
+
+	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
+
+	void ISpawnable.OnSpawn(VRRig rig)
+	{
+	}
+
+	void ISpawnable.OnDespawn()
+	{
+	}
+
+	private void AssignAnchorToPath(ref GameObject anchorGObjRef, string path)
+	{
+		if (string.IsNullOrEmpty(path))
+		{
+			return;
+		}
+		if (!base.transform.TryFindByPath(path, out var result))
+		{
+			vrRig = GetComponentInParent<VRRig>(includeInactive: true);
+			if ((bool)vrRig && vrRig.isOfflineVRRig)
+			{
+				Debug.LogError("CosmeticAnchors: Could not find path: \"" + path + "\".\nPath to this component: " + base.transform.GetPathQ(), this);
+			}
+		}
+		else
+		{
+			anchorGObjRef = result.gameObject;
+		}
+	}
+
+	private void OnEnable()
+	{
+	}
+
+	private void OnDisable()
+	{
+	}
+
+	public void TryUpdate()
+	{
+	}
+
+	public void EnableAnchor(bool enable)
+	{
+	}
+
+	private void SetHuntComputerAnchor(bool enable)
+	{
+		Transform huntComputer = anchorOverrides.HuntComputer;
+		if (!GorillaTagger.Instance.offlineVRRig.huntComputer.activeSelf || !enable)
+		{
+			huntComputer.parent = anchorOverrides.HuntDefaultAnchor;
+		}
+		else
+		{
+			huntComputer.parent = huntComputerAnchor.transform;
+		}
+		huntComputer.transform.localPosition = Vector3.zero;
+		huntComputer.transform.localRotation = Quaternion.identity;
+	}
+
+	private void SetBuilderWatchAnchor(bool enable)
+	{
+		Transform builderWatch = anchorOverrides.BuilderWatch;
+		if (!GorillaTagger.Instance.offlineVRRig.builderResizeWatch.activeSelf || !enable)
+		{
+			builderWatch.parent = anchorOverrides.BuilderWatchAnchor;
+		}
+		else
+		{
+			builderWatch.parent = builderWatchAnchor.transform;
+		}
+		builderWatch.transform.localPosition = Vector3.zero;
+		builderWatch.transform.localRotation = Quaternion.identity;
+	}
+
+	private void SetCustomAnchor(Transform target, bool enable, GameObject overrideAnchor, Transform defaultAnchor)
+	{
+		Transform transform = ((enable && overrideAnchor != null) ? overrideAnchor.transform : defaultAnchor);
+		if (target != null && target.parent != transform)
+		{
+			target.parent = transform;
+			target.transform.localPosition = Vector3.zero;
+			target.transform.localRotation = Quaternion.identity;
+			target.transform.localScale = Vector3.one;
+		}
+	}
+
+	public Transform GetPositionAnchor(TransferrableObject.PositionState pos)
+	{
+		switch (pos)
+		{
+		case TransferrableObject.PositionState.OnLeftArm:
+			if (!leftArmAnchor)
+			{
+				return null;
+			}
+			return leftArmAnchor.transform;
+		case TransferrableObject.PositionState.OnRightArm:
+			if (!rightArmAnchor)
+			{
+				return null;
+			}
+			return rightArmAnchor.transform;
+		case TransferrableObject.PositionState.OnChest:
+			if (!chestAnchor)
+			{
+				return null;
+			}
+			return chestAnchor.transform;
+		default:
+			return null;
+		}
+	}
+
+	public Transform GetNameAnchor()
+	{
+		if (!nameAnchor)
+		{
+			return null;
+		}
+		return nameAnchor.transform;
+	}
+
+	public bool AffectedByHunt()
+	{
+		return huntComputerAnchor != null;
+	}
+
+	public bool AffectedByBuilder()
+	{
+		return builderWatchAnchor != null;
+	}
 }

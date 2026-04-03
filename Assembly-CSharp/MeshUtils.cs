@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,7 +12,7 @@ public static class MeshUtils
 		byte[] data = new byte[num];
 		vertexBuffer.GetData(data);
 		mesh.SetVertexBufferParams(sourceMesh.vertexCount, sourceMesh.GetVertexAttributes());
-		mesh.SetVertexBufferData<byte>(data, 0, 0, num, 0, MeshUpdateFlags.Default);
+		mesh.SetVertexBufferData(data, 0, 0, num);
 		vertexBuffer.Release();
 		mesh.subMeshCount = sourceMesh.subMeshCount;
 		GraphicsBuffer indexBuffer = sourceMesh.GetIndexBuffer();
@@ -21,13 +20,13 @@ public static class MeshUtils
 		byte[] data2 = new byte[num2];
 		indexBuffer.GetData(data2);
 		mesh.SetIndexBufferParams(indexBuffer.count, sourceMesh.indexFormat);
-		mesh.SetIndexBufferData<byte>(data2, 0, 0, num2, MeshUpdateFlags.Default);
+		mesh.SetIndexBufferData(data2, 0, 0, num2);
 		indexBuffer.Release();
-		uint num3 = 0U;
+		uint num3 = 0u;
 		for (int i = 0; i < mesh.subMeshCount; i++)
 		{
 			uint indexCount = sourceMesh.GetIndexCount(i);
-			mesh.SetSubMesh(i, new SubMeshDescriptor((int)num3, (int)indexCount, MeshTopology.Triangles), MeshUpdateFlags.Default);
+			mesh.SetSubMesh(i, new SubMeshDescriptor((int)num3, (int)indexCount));
 			num3 += indexCount;
 		}
 		mesh.RecalculateNormals();

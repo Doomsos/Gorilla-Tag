@@ -1,24 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class HandFXModifier : FXModifier
 {
-	private void Awake()
-	{
-		this.originalScale = base.transform.localScale;
-	}
-
-	private void OnDisable()
-	{
-		base.transform.localScale = this.originalScale;
-	}
-
-	public override void UpdateScale(float scale, Color color)
-	{
-		scale = Mathf.Clamp(scale, this.minScale, this.maxScale);
-		base.transform.localScale = this.originalScale * scale;
-	}
-
 	private Vector3 originalScale;
 
 	[SerializeField]
@@ -32,4 +15,20 @@ public class HandFXModifier : FXModifier
 
 	[SerializeField]
 	private ParticleSystem dustLinger;
+
+	private void Awake()
+	{
+		originalScale = base.transform.localScale;
+	}
+
+	private void OnDisable()
+	{
+		base.transform.localScale = originalScale;
+	}
+
+	public override void UpdateScale(float scale, Color color)
+	{
+		scale = Mathf.Clamp(scale, minScale, maxScale);
+		base.transform.localScale = originalScale * scale;
+	}
 }

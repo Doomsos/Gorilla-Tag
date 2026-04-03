@@ -1,18 +1,18 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum GestureNodeFlags : uint
 {
-	None = 0U,
-	HandLeft = 1U,
-	HandRight = 2U,
-	HandOpen = 4U,
-	HandClosed = 8U,
-	DigitOpen = 16U,
-	DigitClosed = 32U,
-	DigitBent = 64U,
-	TowardFace = 128U,
-	AwayFromFace = 256U,
-	AxisWorldUp = 512U,
-	AxisWorldDown = 1024U
+	None = 0u,
+	HandLeft = 1u,
+	HandRight = 2u,
+	HandOpen = 4u,
+	HandClosed = 8u,
+	DigitOpen = 0x10u,
+	DigitClosed = 0x20u,
+	DigitBent = 0x40u,
+	TowardFace = 0x80u,
+	AwayFromFace = 0x100u,
+	AxisWorldUp = 0x200u,
+	AxisWorldDown = 0x400u
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 internal abstract class TickSystemMono : MonoBehaviour, ITickSystem, ITickSystemPre, ITickSystemTick, ITickSystemPost

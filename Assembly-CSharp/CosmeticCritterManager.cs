@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using Photon.Pun;
@@ -6,6 +6,26 @@ using UnityEngine;
 
 public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 {
+	private List<CosmeticCritterHoldable> localHoldables;
+
+	private List<CosmeticCritterSpawnerIndependent> localCritterSpawners;
+
+	private List<CosmeticCritterSpawnerIndependent> remoteCritterSpawners;
+
+	private List<CosmeticCritterCatcher> localCritterCatchers;
+
+	private List<CosmeticCritterCatcher> remoteCritterCatchers;
+
+	private List<CosmeticCritter> activeCritters;
+
+	private Dictionary<Type, int> activeCrittersPerType;
+
+	private Dictionary<int, CosmeticCritter> activeCrittersBySeed;
+
+	private Dictionary<Type, Stack<CosmeticCritter>> inactiveCrittersByType;
+
+	private Dictionary<Type, List<ICosmeticCritterTickForEach>> tickForEachCritterOfType;
+
 	public static CosmeticCritterManager Instance { get; private set; }
 
 	public bool TickRunning { get; set; }
@@ -26,160 +46,160 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 
 	public void RegisterLocalHoldable(CosmeticCritterHoldable holdable)
 	{
-		this.localHoldables.Add(holdable);
+		localHoldables.Add(holdable);
 	}
 
 	public void RegisterIndependentSpawner(CosmeticCritterSpawnerIndependent spawner)
 	{
 		if (spawner.IsLocal)
 		{
-			this.localCritterSpawners.AddIfNew(spawner);
-			return;
+			localCritterSpawners.AddIfNew(spawner);
 		}
-		this.remoteCritterSpawners.AddIfNew(spawner);
+		else
+		{
+			remoteCritterSpawners.AddIfNew(spawner);
+		}
 	}
 
 	public void UnregisterIndependentSpawner(CosmeticCritterSpawnerIndependent spawner)
 	{
 		if (spawner.IsLocal)
 		{
-			this.localCritterSpawners.Remove(spawner);
-			return;
+			localCritterSpawners.Remove(spawner);
 		}
-		this.remoteCritterSpawners.Remove(spawner);
+		else
+		{
+			remoteCritterSpawners.Remove(spawner);
+		}
 	}
 
 	public void RegisterCatcher(CosmeticCritterCatcher catcher)
 	{
 		if (catcher.IsLocal)
 		{
-			this.localCritterCatchers.AddIfNew(catcher);
-			return;
+			localCritterCatchers.AddIfNew(catcher);
 		}
-		this.remoteCritterCatchers.AddIfNew(catcher);
+		else
+		{
+			remoteCritterCatchers.AddIfNew(catcher);
+		}
 	}
 
 	public void UnregisterCatcher(CosmeticCritterCatcher catcher)
 	{
 		if (catcher.IsLocal)
 		{
-			this.localCritterCatchers.Remove(catcher);
-			return;
+			localCritterCatchers.Remove(catcher);
 		}
-		this.remoteCritterCatchers.Remove(catcher);
+		else
+		{
+			remoteCritterCatchers.Remove(catcher);
+		}
 	}
 
 	public void RegisterTickForEachCritter(Type type, ICosmeticCritterTickForEach target)
 	{
-		List<ICosmeticCritterTickForEach> list;
-		if (!this.tickForEachCritterOfType.TryGetValue(type, out list) || list == null)
+		if (!tickForEachCritterOfType.TryGetValue(type, out var value) || value == null)
 		{
-			list = new List<ICosmeticCritterTickForEach>();
-			this.tickForEachCritterOfType.Add(type, list);
+			value = new List<ICosmeticCritterTickForEach>();
+			tickForEachCritterOfType.Add(type, value);
 		}
-		list.AddIfNew(target);
+		value.AddIfNew(target);
 	}
 
 	public void UnregisterTickForEachCritter(Type type, ICosmeticCritterTickForEach target)
 	{
-		List<ICosmeticCritterTickForEach> list;
-		if (this.tickForEachCritterOfType.TryGetValue(type, out list) && list != null)
+		if (tickForEachCritterOfType.TryGetValue(type, out var value))
 		{
-			list.Remove(target);
+			value?.Remove(target);
 		}
 	}
 
 	private void ResetLocalCallLimiters()
 	{
-		int i = 0;
-		while (i < this.localHoldables.Count)
+		int num = 0;
+		while (num < localHoldables.Count)
 		{
-			if (this.localHoldables[i] == null)
+			if (localHoldables[num] == null)
 			{
-				this.localHoldables.RemoveAt(i);
+				localHoldables.RemoveAt(num);
+				continue;
 			}
-			else
-			{
-				this.localHoldables[i].ResetCallLimiter();
-				i++;
-			}
+			localHoldables[num].ResetCallLimiter();
+			num++;
 		}
 	}
 
 	private void ResetCosmeticCritters(NetPlayer player)
 	{
-		if (NetworkSystem.Instance.LocalPlayer != player)
+		if (NetworkSystem.Instance.LocalPlayer == player)
 		{
-			return;
-		}
-		this.ResetLocalCallLimiters();
-		for (int i = 0; i < this.activeCritters.Count; i++)
-		{
-			this.FreeCritter(this.activeCritters[i]);
+			ResetLocalCallLimiters();
+			for (int i = 0; i < activeCritters.Count; i++)
+			{
+				FreeCritter(activeCritters[i]);
+			}
 		}
 	}
 
 	private void Awake()
 	{
-		if (CosmeticCritterManager.Instance != null && CosmeticCritterManager.Instance != this)
+		if (Instance != null && Instance != this)
 		{
 			UnityEngine.Object.Destroy(this);
 			return;
 		}
-		CosmeticCritterManager.Instance = this;
-		this.localHoldables = new List<CosmeticCritterHoldable>();
-		this.localCritterSpawners = new List<CosmeticCritterSpawnerIndependent>();
-		this.remoteCritterSpawners = new List<CosmeticCritterSpawnerIndependent>();
-		this.localCritterCatchers = new List<CosmeticCritterCatcher>();
-		this.remoteCritterCatchers = new List<CosmeticCritterCatcher>();
-		this.activeCritters = new List<CosmeticCritter>();
-		this.activeCrittersPerType = new Dictionary<Type, int>();
-		this.activeCrittersBySeed = new Dictionary<int, CosmeticCritter>();
-		this.inactiveCrittersByType = new Dictionary<Type, Stack<CosmeticCritter>>();
-		this.tickForEachCritterOfType = new Dictionary<Type, List<ICosmeticCritterTickForEach>>();
-		NetworkSystem.Instance.OnPlayerJoined += this.ResetCosmeticCritters;
-		NetworkSystem.Instance.OnPlayerLeft += this.ResetCosmeticCritters;
+		Instance = this;
+		localHoldables = new List<CosmeticCritterHoldable>();
+		localCritterSpawners = new List<CosmeticCritterSpawnerIndependent>();
+		remoteCritterSpawners = new List<CosmeticCritterSpawnerIndependent>();
+		localCritterCatchers = new List<CosmeticCritterCatcher>();
+		remoteCritterCatchers = new List<CosmeticCritterCatcher>();
+		activeCritters = new List<CosmeticCritter>();
+		activeCrittersPerType = new Dictionary<Type, int>();
+		activeCrittersBySeed = new Dictionary<int, CosmeticCritter>();
+		inactiveCrittersByType = new Dictionary<Type, Stack<CosmeticCritter>>();
+		tickForEachCritterOfType = new Dictionary<Type, List<ICosmeticCritterTickForEach>>();
+		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(ResetCosmeticCritters);
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(ResetCosmeticCritters);
 	}
 
 	private void ReuseOrSpawnNewCritter(CosmeticCritterSpawner spawner, int seed, double time)
 	{
 		Type critterType = spawner.GetCritterType();
-		Stack<CosmeticCritter> stack;
-		CosmeticCritter component;
-		if (!this.inactiveCrittersByType.TryGetValue(critterType, out stack))
+		CosmeticCritter result;
+		if (!inactiveCrittersByType.TryGetValue(critterType, out var value))
 		{
-			stack = new Stack<CosmeticCritter>();
-			this.inactiveCrittersByType.Add(critterType, stack);
-			component = UnityEngine.Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
+			value = new Stack<CosmeticCritter>();
+			inactiveCrittersByType.Add(critterType, value);
+			result = UnityEngine.Object.Instantiate(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
 		}
-		else if (stack.TryPop(out component))
+		else if (value.TryPop(out result))
 		{
-			component.gameObject.SetActive(true);
-		}
-		else
-		{
-			component = UnityEngine.Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
-		}
-		component.SetSeedSpawnerTypeAndTime(seed, spawner, critterType, time);
-		this.activeCritters.Add(component);
-		if (!this.activeCrittersPerType.ContainsKey(critterType))
-		{
-			this.activeCrittersPerType.Add(critterType, 1);
+			result.gameObject.SetActive(value: true);
 		}
 		else
 		{
-			Dictionary<Type, int> dictionary = this.activeCrittersPerType;
-			Type key = critterType;
-			dictionary[key]++;
+			result = UnityEngine.Object.Instantiate(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
 		}
-		this.activeCrittersBySeed.Add(seed, component);
-		Random.State state = Random.state;
-		Random.InitState(seed);
-		spawner.SetRandomVariables(component);
-		component.SetRandomVariables();
-		Random.state = state;
-		spawner.OnSpawn(component);
-		component.OnSpawn();
+		result.SetSeedSpawnerTypeAndTime(seed, spawner, critterType, time);
+		activeCritters.Add(result);
+		if (!activeCrittersPerType.ContainsKey(critterType))
+		{
+			activeCrittersPerType.Add(critterType, 1);
+		}
+		else
+		{
+			activeCrittersPerType[critterType]++;
+		}
+		activeCrittersBySeed.Add(seed, result);
+		UnityEngine.Random.State state = UnityEngine.Random.state;
+		UnityEngine.Random.InitState(seed);
+		spawner.SetRandomVariables(result);
+		result.SetRandomVariables();
+		UnityEngine.Random.state = state;
+		spawner.OnSpawn(result);
+		result.OnSpawn();
 	}
 
 	private void FreeCritter(CosmeticCritter critter)
@@ -189,100 +209,79 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		{
 			critter.Spawner.OnDespawn(critter);
 		}
-		critter.gameObject.SetActive(false);
+		critter.gameObject.SetActive(value: false);
 		Type cachedType = critter.CachedType;
-		Stack<CosmeticCritter> stack;
-		if (!this.inactiveCrittersByType.TryGetValue(cachedType, out stack))
+		if (!inactiveCrittersByType.TryGetValue(cachedType, out var value))
 		{
-			stack = new Stack<CosmeticCritter>();
-			this.inactiveCrittersByType.Add(cachedType, stack);
+			value = new Stack<CosmeticCritter>();
+			inactiveCrittersByType.Add(cachedType, value);
 		}
-		stack.Push(critter);
-		this.activeCritters.Remove(critter);
-		int num;
-		if (this.activeCrittersPerType.TryGetValue(cachedType, out num))
+		value.Push(critter);
+		activeCritters.Remove(critter);
+		if (activeCrittersPerType.TryGetValue(cachedType, out var value2))
 		{
-			this.activeCrittersPerType[cachedType] = Math.Max(num - 1, 0);
+			activeCrittersPerType[cachedType] = Math.Max(value2 - 1, 0);
 		}
-		this.activeCrittersBySeed.Remove(critter.Seed);
+		activeCrittersBySeed.Remove(critter.Seed);
 	}
 
 	public void Tick()
 	{
-		for (int i = 0; i < this.activeCritters.Count; i++)
+		for (int i = 0; i < activeCritters.Count; i++)
 		{
-			CosmeticCritter cosmeticCritter = this.activeCritters[i];
+			CosmeticCritter cosmeticCritter = activeCritters[i];
 			if (cosmeticCritter.Expired())
 			{
-				this.FreeCritter(cosmeticCritter);
+				FreeCritter(cosmeticCritter);
+				continue;
 			}
-			else
+			cosmeticCritter.Tick();
+			if (tickForEachCritterOfType.TryGetValue(cosmeticCritter.CachedType, out var value))
 			{
-				cosmeticCritter.Tick();
-				List<ICosmeticCritterTickForEach> list;
-				if (this.tickForEachCritterOfType.TryGetValue(cosmeticCritter.CachedType, out list))
+				for (int j = 0; j < value.Count; j++)
 				{
-					for (int j = 0; j < list.Count; j++)
-					{
-						list[j].TickForEachCritter(cosmeticCritter);
-					}
+					value[j].TickForEachCritter(cosmeticCritter);
 				}
-				int k = 0;
-				while (k < this.localCritterCatchers.Count)
+			}
+			for (int k = 0; k < localCritterCatchers.Count; k++)
+			{
+				CosmeticCritterCatcher cosmeticCritterCatcher = localCritterCatchers[k];
+				CosmeticCritterAction localCatchAction = cosmeticCritterCatcher.GetLocalCatchAction(cosmeticCritter);
+				if (localCatchAction != CosmeticCritterAction.None)
 				{
-					CosmeticCritterCatcher cosmeticCritterCatcher = this.localCritterCatchers[k];
-					CosmeticCritterAction localCatchAction = cosmeticCritterCatcher.GetLocalCatchAction(cosmeticCritter);
-					if (localCatchAction != CosmeticCritterAction.None)
+					double num = (PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble);
+					cosmeticCritterCatcher.OnCatch(cosmeticCritter, localCatchAction, num);
+					if ((localCatchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
 					{
-						double num = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble;
-						cosmeticCritterCatcher.OnCatch(cosmeticCritter, localCatchAction, num);
-						if ((localCatchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
-						{
-							this.FreeCritter(cosmeticCritter);
-							i--;
-						}
-						if ((localCatchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null)
-						{
-							this.ReuseOrSpawnNewCritter(cosmeticCritterCatcher.GetLinkedSpawner(), cosmeticCritter.Seed + 1, num);
-						}
-						if (PhotonNetwork.InRoom && (localCatchAction & CosmeticCritterAction.RPC) != CosmeticCritterAction.None)
-						{
-							this.photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, new object[]
-							{
-								localCatchAction,
-								cosmeticCritterCatcher.OwnerID,
-								cosmeticCritter.Seed
-							});
-							break;
-						}
-						break;
+						FreeCritter(cosmeticCritter);
+						i--;
 					}
-					else
+					if ((localCatchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null)
 					{
-						k++;
+						ReuseOrSpawnNewCritter(cosmeticCritterCatcher.GetLinkedSpawner(), cosmeticCritter.Seed + 1, num);
 					}
+					if (PhotonNetwork.InRoom && (localCatchAction & CosmeticCritterAction.RPC) != CosmeticCritterAction.None)
+					{
+						photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, localCatchAction, cosmeticCritterCatcher.OwnerID, cosmeticCritter.Seed);
+					}
+					break;
 				}
 			}
 		}
-		for (int l = 0; l < this.localCritterSpawners.Count; l++)
+		for (int l = 0; l < localCritterSpawners.Count; l++)
 		{
-			CosmeticCritterSpawnerIndependent cosmeticCritterSpawnerIndependent = this.localCritterSpawners[l];
-			int num2;
-			if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out num2) || num2 < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnLocal())
+			CosmeticCritterSpawnerIndependent cosmeticCritterSpawnerIndependent = localCritterSpawners[l];
+			if ((activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out var value2) && value2 >= cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) || !cosmeticCritterSpawnerIndependent.CanSpawnLocal())
 			{
-				int num3 = Random.Range(0, int.MaxValue);
-				if (!this.activeCrittersBySeed.ContainsKey(num3))
+				continue;
+			}
+			int num2 = UnityEngine.Random.Range(0, int.MaxValue);
+			if (!activeCrittersBySeed.ContainsKey(num2))
+			{
+				ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, num2, PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble);
+				if (PhotonNetwork.InRoom)
 				{
-					this.ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, num3, PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble);
-					if (PhotonNetwork.InRoom)
-					{
-						this.photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, new object[]
-						{
-							CosmeticCritterAction.RPC | CosmeticCritterAction.Spawn,
-							cosmeticCritterSpawnerIndependent.OwnerID,
-							num3
-						});
-					}
+					photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, CosmeticCritterAction.RPC | CosmeticCritterAction.Spawn, cosmeticCritterSpawnerIndependent.OwnerID, num2);
 				}
 			}
 		}
@@ -293,104 +292,65 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 	{
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
 		MonkeAgent.IncrementRPCCall(photonMessageInfoWrapped, "CosmeticCritterRPC");
-		if ((action & CosmeticCritterAction.RPC) == CosmeticCritterAction.None)
+		if ((action & CosmeticCritterAction.RPC) != CosmeticCritterAction.None)
 		{
-			return;
+			if (action == (CosmeticCritterAction.RPC | CosmeticCritterAction.Spawn))
+			{
+				SpawnCosmeticCritterRPC(holdableID, seed, photonMessageInfoWrapped);
+			}
+			else
+			{
+				CatchCosmeticCritterRPC(action, holdableID, seed, photonMessageInfoWrapped);
+			}
 		}
-		if (action == (CosmeticCritterAction.RPC | CosmeticCritterAction.Spawn))
-		{
-			this.SpawnCosmeticCritterRPC(holdableID, seed, photonMessageInfoWrapped);
-			return;
-		}
-		this.CatchCosmeticCritterRPC(action, holdableID, seed, photonMessageInfoWrapped);
 	}
 
 	private void CatchCosmeticCritterRPC(CosmeticCritterAction catchAction, int catcherID, int seed, PhotonMessageInfoWrapped info)
 	{
-		CosmeticCritter critter;
-		if (!this.activeCrittersBySeed.TryGetValue(seed, out critter))
+		if (!activeCrittersBySeed.TryGetValue(seed, out var value))
 		{
 			return;
 		}
-		int i = 0;
-		while (i < this.remoteCritterCatchers.Count)
+		for (int i = 0; i < remoteCritterCatchers.Count; i++)
 		{
-			CosmeticCritterCatcher cosmeticCritterCatcher = this.remoteCritterCatchers[i];
-			if (cosmeticCritterCatcher.OwnerID == catcherID)
+			CosmeticCritterCatcher cosmeticCritterCatcher = remoteCritterCatchers[i];
+			if (cosmeticCritterCatcher.OwnerID != catcherID)
 			{
-				if (!cosmeticCritterCatcher.OwningPlayerMatches(info))
-				{
-					return;
-				}
-				if (cosmeticCritterCatcher.ValidateRemoteCatchAction(critter, catchAction, info.SentServerTime))
-				{
-					cosmeticCritterCatcher.OnCatch(critter, catchAction, info.SentServerTime);
-					if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
-					{
-						this.FreeCritter(critter);
-					}
-					int num;
-					if ((catchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null && (!this.activeCrittersPerType.TryGetValue(cosmeticCritterCatcher.GetLinkedSpawner().GetCritterType(), out num) || num < cosmeticCritterCatcher.GetLinkedSpawner().GetCritter().GetGlobalMaxCritters() + 1))
-					{
-						this.ReuseOrSpawnNewCritter(cosmeticCritterCatcher.GetLinkedSpawner(), seed + 1, info.SentServerTime);
-					}
-				}
-				return;
+				continue;
 			}
-			else
+			if (cosmeticCritterCatcher.OwningPlayerMatches(info) && cosmeticCritterCatcher.ValidateRemoteCatchAction(value, catchAction, info.SentServerTime))
 			{
-				i++;
+				cosmeticCritterCatcher.OnCatch(value, catchAction, info.SentServerTime);
+				if ((catchAction & CosmeticCritterAction.Despawn) != CosmeticCritterAction.None)
+				{
+					FreeCritter(value);
+				}
+				if ((catchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null && (!activeCrittersPerType.TryGetValue(cosmeticCritterCatcher.GetLinkedSpawner().GetCritterType(), out var value2) || value2 < cosmeticCritterCatcher.GetLinkedSpawner().GetCritter().GetGlobalMaxCritters() + 1))
+				{
+					ReuseOrSpawnNewCritter(cosmeticCritterCatcher.GetLinkedSpawner(), seed + 1, info.SentServerTime);
+				}
 			}
+			break;
 		}
 	}
 
 	private void SpawnCosmeticCritterRPC(int spawnerID, int seed, PhotonMessageInfoWrapped info)
 	{
-		if (this.activeCrittersBySeed.ContainsKey(seed))
+		if (activeCrittersBySeed.ContainsKey(seed))
 		{
 			return;
 		}
-		int i = 0;
-		while (i < this.remoteCritterSpawners.Count)
+		for (int i = 0; i < remoteCritterSpawners.Count; i++)
 		{
-			CosmeticCritterSpawnerIndependent cosmeticCritterSpawnerIndependent = this.remoteCritterSpawners[i];
+			CosmeticCritterSpawnerIndependent cosmeticCritterSpawnerIndependent = remoteCritterSpawners[i];
 			if (cosmeticCritterSpawnerIndependent.OwnerID == spawnerID)
 			{
-				if (!cosmeticCritterSpawnerIndependent.OwningPlayerMatches(info))
+				if (cosmeticCritterSpawnerIndependent.OwningPlayerMatches(info) && (!activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out var value) || value < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnRemote(info.SentServerTime))
 				{
-					return;
+					ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, seed, info.SentServerTime);
 				}
-				int num;
-				if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out num) || num < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnRemote(info.SentServerTime))
-				{
-					this.ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, seed, info.SentServerTime);
-				}
-				return;
-			}
-			else
-			{
-				i++;
+				break;
 			}
 		}
 	}
-
-	private List<CosmeticCritterHoldable> localHoldables;
-
-	private List<CosmeticCritterSpawnerIndependent> localCritterSpawners;
-
-	private List<CosmeticCritterSpawnerIndependent> remoteCritterSpawners;
-
-	private List<CosmeticCritterCatcher> localCritterCatchers;
-
-	private List<CosmeticCritterCatcher> remoteCritterCatchers;
-
-	private List<CosmeticCritter> activeCritters;
-
-	private Dictionary<Type, int> activeCrittersPerType;
-
-	private Dictionary<int, CosmeticCritter> activeCrittersBySeed;
-
-	private Dictionary<Type, Stack<CosmeticCritter>> inactiveCrittersByType;
-
-	private Dictionary<Type, List<ICosmeticCritterTickForEach>> tickForEachCritterOfType;
 }

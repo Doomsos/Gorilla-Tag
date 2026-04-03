@@ -1,13 +1,10 @@
-﻿using System;
+namespace PerformanceSystems;
 
-namespace PerformanceSystems
+public interface ITimeSlice
 {
-	public interface ITimeSlice
-	{
-		void SliceUpdate();
+	void SliceUpdate();
 
-		void SliceUpdateAlways(float deltaTime);
+	void SliceUpdateAlways(float deltaTime);
 
-		void SliceUpdate(float deltaTime);
-	}
+	void SliceUpdate(float deltaTime);
 }

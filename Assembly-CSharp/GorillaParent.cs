@@ -1,53 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GorillaParent : MonoBehaviour
 {
-	public void Awake()
-	{
-		if (GorillaParent.instance == null)
-		{
-			GorillaParent.instance = this;
-			GorillaParent.hasInstance = true;
-			return;
-		}
-		if (GorillaParent.instance != this)
-		{
-			Object.Destroy(base.gameObject);
-			return;
-		}
-	}
-
-	protected void OnDestroy()
-	{
-		if (GorillaParent.instance == this)
-		{
-			GorillaParent.hasInstance = false;
-			GorillaParent.instance = null;
-		}
-	}
-
-	public static void ReplicatedClientReady()
-	{
-		GorillaParent.replicatedClientReady = true;
-		Action action = GorillaParent.onReplicatedClientReady;
-		if (action == null)
-		{
-			return;
-		}
-		action();
-	}
-
-	public static void OnReplicatedClientReady(Action action)
-	{
-		if (GorillaParent.replicatedClientReady)
-		{
-			action();
-			return;
-		}
-		GorillaParent.onReplicatedClientReady = (Action)Delegate.Combine(GorillaParent.onReplicatedClientReady, action);
-	}
-
 	[OnEnterPlay_SetNull]
 	public static volatile GorillaParent instance;
 
@@ -59,4 +14,44 @@ public class GorillaParent : MonoBehaviour
 	private static bool replicatedClientReady;
 
 	private static Action onReplicatedClientReady;
+
+	public void Awake()
+	{
+		if (instance == null)
+		{
+			instance = this;
+			hasInstance = true;
+		}
+		else if (instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
+
+	protected void OnDestroy()
+	{
+		if (instance == this)
+		{
+			hasInstance = false;
+			instance = null;
+		}
+	}
+
+	public static void ReplicatedClientReady()
+	{
+		replicatedClientReady = true;
+		onReplicatedClientReady?.Invoke();
+	}
+
+	public static void OnReplicatedClientReady(Action action)
+	{
+		if (replicatedClientReady)
+		{
+			action();
+		}
+		else
+		{
+			onReplicatedClientReady = (Action)Delegate.Combine(onReplicatedClientReady, action);
+		}
+	}
 }

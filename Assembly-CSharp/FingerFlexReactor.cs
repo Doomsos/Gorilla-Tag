@@ -1,117 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class FingerFlexReactor : MonoBehaviour
 {
-	private void Setup()
-	{
-		this._rig = base.GetComponentInParent<VRRig>();
-		if (!this._rig)
-		{
-			return;
-		}
-		this._fingers = new VRMap[]
-		{
-			this._rig.leftThumb,
-			this._rig.leftIndex,
-			this._rig.leftMiddle,
-			this._rig.rightThumb,
-			this._rig.rightIndex,
-			this._rig.rightMiddle
-		};
-	}
-
-	private void Awake()
-	{
-		this.Setup();
-	}
-
-	private void FixedUpdate()
-	{
-		this.UpdateBlendShapes();
-	}
-
-	public void UpdateBlendShapes()
-	{
-		if (!this._rig)
-		{
-			return;
-		}
-		if (this._blendShapeTargets == null || this._fingers == null)
-		{
-			return;
-		}
-		if (this._blendShapeTargets.Length == 0 || this._fingers.Length == 0)
-		{
-			return;
-		}
-		for (int i = 0; i < this._blendShapeTargets.Length; i++)
-		{
-			FingerFlexReactor.BlendShapeTarget blendShapeTarget = this._blendShapeTargets[i];
-			if (blendShapeTarget != null)
-			{
-				int sourceFinger = (int)blendShapeTarget.sourceFinger;
-				if (sourceFinger != -1)
-				{
-					SkinnedMeshRenderer targetRenderer = blendShapeTarget.targetRenderer;
-					if (targetRenderer)
-					{
-						float lerpValue = FingerFlexReactor.GetLerpValue(this._fingers[sourceFinger]);
-						Vector2 inputRange = blendShapeTarget.inputRange;
-						Vector2 outputRange = blendShapeTarget.outputRange;
-						float num = MathUtils.Linear(lerpValue, inputRange.x, inputRange.y, outputRange.x, outputRange.y);
-						blendShapeTarget.currentValue = num;
-						targetRenderer.SetBlendShapeWeight(blendShapeTarget.blendShapeIndex, num);
-					}
-				}
-			}
-		}
-	}
-
-	private static float GetLerpValue(VRMap map)
-	{
-		VRMapThumb vrmapThumb = map as VRMapThumb;
-		float result;
-		if (vrmapThumb == null)
-		{
-			VRMapIndex vrmapIndex = map as VRMapIndex;
-			if (vrmapIndex == null)
-			{
-				VRMapMiddle vrmapMiddle = map as VRMapMiddle;
-				if (vrmapMiddle == null)
-				{
-					result = 0f;
-				}
-				else
-				{
-					result = vrmapMiddle.calcT;
-				}
-			}
-			else
-			{
-				result = vrmapIndex.calcT;
-			}
-		}
-		else
-		{
-			result = ((vrmapThumb.calcT > 0.1f) ? 1f : 0f);
-		}
-		return result;
-	}
-
-	[SerializeField]
-	private VRRig _rig;
-
-	[SerializeField]
-	private VRMap[] _fingers = new VRMap[0];
-
-	[SerializeField]
-	private FingerFlexReactor.BlendShapeTarget[] _blendShapeTargets = new FingerFlexReactor.BlendShapeTarget[0];
-
 	[Serializable]
 	public class BlendShapeTarget
 	{
-		public FingerFlexReactor.FingerMap sourceFinger;
+		public FingerMap sourceFinger;
 
 		public SkinnedMeshRenderer targetRenderer;
 
@@ -134,5 +29,78 @@ public class FingerFlexReactor : MonoBehaviour
 		RightThumb,
 		RightIndex,
 		RightMiddle
+	}
+
+	[SerializeField]
+	private VRRig _rig;
+
+	[SerializeField]
+	private VRMap[] _fingers = new VRMap[0];
+
+	[SerializeField]
+	private BlendShapeTarget[] _blendShapeTargets = new BlendShapeTarget[0];
+
+	private void Setup()
+	{
+		_rig = GetComponentInParent<VRRig>();
+		if ((bool)_rig)
+		{
+			_fingers = new VRMap[6] { _rig.leftThumb, _rig.leftIndex, _rig.leftMiddle, _rig.rightThumb, _rig.rightIndex, _rig.rightMiddle };
+		}
+	}
+
+	private void Awake()
+	{
+		Setup();
+	}
+
+	private void FixedUpdate()
+	{
+		UpdateBlendShapes();
+	}
+
+	public void UpdateBlendShapes()
+	{
+		if (!_rig || _blendShapeTargets == null || _fingers == null || _blendShapeTargets.Length == 0 || _fingers.Length == 0)
+		{
+			return;
+		}
+		for (int i = 0; i < _blendShapeTargets.Length; i++)
+		{
+			BlendShapeTarget blendShapeTarget = _blendShapeTargets[i];
+			if (blendShapeTarget == null)
+			{
+				continue;
+			}
+			int sourceFinger = (int)blendShapeTarget.sourceFinger;
+			if (sourceFinger != -1)
+			{
+				SkinnedMeshRenderer targetRenderer = blendShapeTarget.targetRenderer;
+				if ((bool)targetRenderer)
+				{
+					float lerpValue = GetLerpValue(_fingers[sourceFinger]);
+					Vector2 inputRange = blendShapeTarget.inputRange;
+					Vector2 outputRange = blendShapeTarget.outputRange;
+					targetRenderer.SetBlendShapeWeight(value: blendShapeTarget.currentValue = MathUtils.Linear(lerpValue, inputRange.x, inputRange.y, outputRange.x, outputRange.y), index: blendShapeTarget.blendShapeIndex);
+				}
+			}
+		}
+	}
+
+	private static float GetLerpValue(VRMap map)
+	{
+		if (!(map is VRMapThumb vRMapThumb))
+		{
+			if (!(map is VRMapIndex { calcT: var calcT }))
+			{
+				if (!(map is VRMapMiddle { calcT: var calcT2 }))
+				{
+					return 0f;
+				}
+				return calcT2;
+			}
+			return calcT;
+		}
+		return (vRMapThumb.calcT > 0.1f) ? 1f : 0f;
 	}
 }

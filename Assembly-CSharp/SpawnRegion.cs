@@ -1,197 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object where TRegion : SpawnRegion<TItem, TRegion>
 {
-	public static List<TRegion> Regions
-	{
-		get
-		{
-			return SpawnRegion<TItem, TRegion>._regions;
-		}
-	}
-
-	public int MaxItems { get; private set; } = 10;
-
-	private bool HasSpawnOrigins
-	{
-		get
-		{
-			Transform[] array = this.spawnOrigins;
-			return array != null && array.Length != 0;
-		}
-	}
-
-	public List<TItem> Items
-	{
-		get
-		{
-			return this._items;
-		}
-	}
-
-	public int ItemCount
-	{
-		get
-		{
-			return this._items.Count;
-		}
-	}
-
-	public int ID { get; private set; }
-
-	private void OnEnable()
-	{
-		Transform[] array = this.spawnOrigins;
-		this._useSpawnOrigins = (array != null && array.Length != 0);
-		this._testAgainstGeo = (!this._useSpawnOrigins && this.geoTestPoint);
-		if (this._testAgainstGeo && this._hitTestBuffer == null)
-		{
-			this._hitTestBuffer = new RaycastHit[20];
-		}
-		SpawnRegion<TItem, TRegion>.RegisterRegion((TRegion)((object)this));
-	}
-
-	private void OnDisable()
-	{
-		SpawnRegion<TItem, TRegion>.UnregisterRegion((TRegion)((object)this));
-		foreach (TItem titem in this._items)
-		{
-			if (titem)
-			{
-				SpawnRegion<TItem, TRegion>._itemRegionLookup.Remove(titem);
-			}
-		}
-		this._items.Clear();
-	}
-
-	private static void RegisterRegion(TRegion region)
-	{
-		SpawnRegion<TItem, TRegion>._regionLookup[region.ID] = region;
-		SpawnRegion<TItem, TRegion>._regions.Add(region);
-	}
-
-	private static void UnregisterRegion(TRegion region)
-	{
-		SpawnRegion<TItem, TRegion>._regionLookup.Remove(region.ID);
-		SpawnRegion<TItem, TRegion>._regions.Remove(region);
-	}
-
-	public static void AddItemToRegion(TItem item, int regionId)
-	{
-		TRegion tregion;
-		if (SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(regionId, out tregion))
-		{
-			tregion.AddItem(item);
-		}
-	}
-
-	public static void RemoveItemFromRegion(TItem item)
-	{
-		int key;
-		TRegion tregion;
-		if (SpawnRegion<TItem, TRegion>._itemRegionLookup.TryGetValue(item, out key) && SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(key, out tregion))
-		{
-			tregion.RemoveItem(item);
-		}
-	}
-
-	public void AddItem(TItem item)
-	{
-		this._items.Add(item);
-		SpawnRegion<TItem, TRegion>._itemRegionLookup[item] = this.ID;
-	}
-
-	public void RemoveItem(TItem item)
-	{
-		this._items.Remove(item);
-		SpawnRegion<TItem, TRegion>._itemRegionLookup.Remove(item);
-	}
-
-	[return: TupleElementNames(new string[]
-	{
-		"isOnGround",
-		"position",
-		"normal"
-	})]
-	public ValueTuple<bool, Vector3, Vector3> GetSpawnPointWithNormal(int maxTries = 5)
-	{
-		for (int i = 0; i < maxTries; i++)
-		{
-			RaycastHit raycastHit;
-			if (this.TryGetSpawnPoint(out raycastHit))
-			{
-				return new ValueTuple<bool, Vector3, Vector3>(true, raycastHit.point, raycastHit.normal);
-			}
-		}
-		float num = this._scale / 2f;
-		Vector3 item = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
-		return new ValueTuple<bool, Vector3, Vector3>(false, item, Vector3.up);
-	}
-
-	private bool TryGetSpawnPoint(out RaycastHit spawnPoint)
-	{
-		float num = base.transform.lossyScale.y * this._scale;
-		if (this._useSpawnOrigins)
-		{
-			Vector3 vector = this.spawnOrigins[Random.Range(0, this.spawnOrigins.Length)].position;
-			if (this.TryGetSpawnPoint(vector, Random.onUnitSphere, Mathf.Max(num, 100f), out spawnPoint))
-			{
-				return spawnPoint.normal.y > 0f || this.TryGetSpawnPoint(spawnPoint.point, Vector3.down, num, out spawnPoint);
-			}
-			spawnPoint = default(RaycastHit);
-			return false;
-		}
-		else
-		{
-			float num2 = this._scale / 2f;
-			Vector3 vector = base.transform.TransformPoint(new Vector3(Random.Range(-num2, num2), num2, Random.Range(-num2, num2)));
-			if (this._testAgainstGeo && this.IsInsideGeo(vector))
-			{
-				spawnPoint = default(RaycastHit);
-				return false;
-			}
-			return this.TryGetSpawnPoint(vector, Vector3.down, num, out spawnPoint);
-		}
-	}
-
-	private bool TryGetSpawnPoint(Vector3 origin, Vector3 direction, float distance, out RaycastHit spawnPoint)
-	{
-		RaycastHit raycastHit;
-		if (Physics.Raycast(origin, direction, out raycastHit, distance, -1, QueryTriggerInteraction.Ignore))
-		{
-			Debug.DrawLine(origin, raycastHit.point, Color.green, 5f);
-			spawnPoint = raycastHit;
-			return true;
-		}
-		Debug.DrawLine(origin, origin + direction * distance, Color.red, 5f);
-		spawnPoint = default(RaycastHit);
-		return false;
-	}
-
-	private bool IsInsideGeo(Vector3 point)
-	{
-		Vector3 position = this.geoTestPoint.position;
-		Vector3 vector = position - point;
-		int num;
-		int num2;
-		for (;;)
-		{
-			num = Physics.RaycastNonAlloc(point, vector, this._hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
-			num2 = Physics.RaycastNonAlloc(position, -vector, this._hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
-			if (num < this._hitTestBuffer.Length && num2 < this._hitTestBuffer.Length)
-			{
-				break;
-			}
-			this._hitTestBuffer = new RaycastHit[this._hitTestBuffer.Length * 2];
-		}
-		bool flag = (num + num2) % 2 != 0;
-		Debug.DrawLine(point, position, flag ? Color.red : Color.green, 5f);
-		return flag;
-	}
-
 	private static List<TRegion> _regions = new List<TRegion>();
 
 	private static Dictionary<int, TRegion> _regionLookup = new Dictionary<int, TRegion>();
@@ -216,4 +27,168 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 	private bool _testAgainstGeo;
 
 	private RaycastHit[] _hitTestBuffer;
+
+	public static List<TRegion> Regions => _regions;
+
+	public int MaxItems { get; private set; } = 10;
+
+	private bool HasSpawnOrigins
+	{
+		get
+		{
+			Transform[] array = spawnOrigins;
+			if (array == null)
+			{
+				return false;
+			}
+			return array.Length != 0;
+		}
+	}
+
+	public List<TItem> Items => _items;
+
+	public int ItemCount => _items.Count;
+
+	public int ID { get; private set; }
+
+	private void OnEnable()
+	{
+		Transform[] array = spawnOrigins;
+		_useSpawnOrigins = array != null && array.Length != 0;
+		_testAgainstGeo = !_useSpawnOrigins && (bool)geoTestPoint;
+		if (_testAgainstGeo && _hitTestBuffer == null)
+		{
+			_hitTestBuffer = new RaycastHit[20];
+		}
+		RegisterRegion((TRegion)this);
+	}
+
+	private void OnDisable()
+	{
+		UnregisterRegion((TRegion)this);
+		foreach (TItem item in _items)
+		{
+			if ((bool)item)
+			{
+				_itemRegionLookup.Remove(item);
+			}
+		}
+		_items.Clear();
+	}
+
+	private static void RegisterRegion(TRegion region)
+	{
+		_regionLookup[region.ID] = region;
+		_regions.Add(region);
+	}
+
+	private static void UnregisterRegion(TRegion region)
+	{
+		_regionLookup.Remove(region.ID);
+		_regions.Remove(region);
+	}
+
+	public static void AddItemToRegion(TItem item, int regionId)
+	{
+		if (_regionLookup.TryGetValue(regionId, out var value))
+		{
+			value.AddItem(item);
+		}
+	}
+
+	public static void RemoveItemFromRegion(TItem item)
+	{
+		if (_itemRegionLookup.TryGetValue(item, out var value) && _regionLookup.TryGetValue(value, out var value2))
+		{
+			value2.RemoveItem(item);
+		}
+	}
+
+	public void AddItem(TItem item)
+	{
+		_items.Add(item);
+		_itemRegionLookup[item] = ID;
+	}
+
+	public void RemoveItem(TItem item)
+	{
+		_items.Remove(item);
+		_itemRegionLookup.Remove(item);
+	}
+
+	public (bool isOnGround, Vector3 position, Vector3 normal) GetSpawnPointWithNormal(int maxTries = 5)
+	{
+		for (int i = 0; i < maxTries; i++)
+		{
+			if (TryGetSpawnPoint(out var spawnPoint))
+			{
+				return (isOnGround: true, position: spawnPoint.point, normal: spawnPoint.normal);
+			}
+		}
+		float num = _scale / 2f;
+		Vector3 item = base.transform.TransformPoint(new Vector3(Random.Range(0f - num, num), num, Random.Range(0f - num, num)));
+		return (isOnGround: false, position: item, normal: Vector3.up);
+	}
+
+	private bool TryGetSpawnPoint(out RaycastHit spawnPoint)
+	{
+		float num = base.transform.lossyScale.y * _scale;
+		Vector3 position;
+		if (_useSpawnOrigins)
+		{
+			position = spawnOrigins[Random.Range(0, spawnOrigins.Length)].position;
+			if (TryGetSpawnPoint(position, Random.onUnitSphere, Mathf.Max(num, 100f), out spawnPoint))
+			{
+				if (!(spawnPoint.normal.y > 0f))
+				{
+					return TryGetSpawnPoint(spawnPoint.point, Vector3.down, num, out spawnPoint);
+				}
+				return true;
+			}
+			spawnPoint = default(RaycastHit);
+			return false;
+		}
+		float num2 = _scale / 2f;
+		position = base.transform.TransformPoint(new Vector3(Random.Range(0f - num2, num2), num2, Random.Range(0f - num2, num2)));
+		if (_testAgainstGeo && IsInsideGeo(position))
+		{
+			spawnPoint = default(RaycastHit);
+			return false;
+		}
+		return TryGetSpawnPoint(position, Vector3.down, num, out spawnPoint);
+	}
+
+	private bool TryGetSpawnPoint(Vector3 origin, Vector3 direction, float distance, out RaycastHit spawnPoint)
+	{
+		if (Physics.Raycast(origin, direction, out var hitInfo, distance, -1, QueryTriggerInteraction.Ignore))
+		{
+			Debug.DrawLine(origin, hitInfo.point, Color.green, 5f);
+			spawnPoint = hitInfo;
+			return true;
+		}
+		Debug.DrawLine(origin, origin + direction * distance, Color.red, 5f);
+		spawnPoint = default(RaycastHit);
+		return false;
+	}
+
+	private bool IsInsideGeo(Vector3 point)
+	{
+		Vector3 position = geoTestPoint.position;
+		Vector3 vector = position - point;
+		int num;
+		int num2;
+		while (true)
+		{
+			num = Physics.RaycastNonAlloc(point, vector, _hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
+			num2 = Physics.RaycastNonAlloc(position, -vector, _hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
+			if (num < _hitTestBuffer.Length && num2 < _hitTestBuffer.Length)
+			{
+				break;
+			}
+			_hitTestBuffer = new RaycastHit[_hitTestBuffer.Length * 2];
+		}
+		bool flag = (num + num2) % 2 != 0;
+		Debug.DrawLine(point, position, flag ? Color.red : Color.green, 5f);
+		return flag;
+	}
 }

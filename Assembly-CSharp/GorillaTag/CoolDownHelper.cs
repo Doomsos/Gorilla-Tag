@@ -1,55 +1,54 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Serializable]
+public class CoolDownHelper
 {
-	[Serializable]
-	public class CoolDownHelper
+	public float coolDown;
+
+	[NonSerialized]
+	public float checkTime;
+
+	public CoolDownHelper()
 	{
-		public CoolDownHelper()
+		coolDown = 1f;
+		checkTime = 0f;
+	}
+
+	public CoolDownHelper(float cd)
+	{
+		coolDown = cd;
+		checkTime = 0f;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public bool CheckCooldown()
+	{
+		float unscaledTime = Time.unscaledTime;
+		if (unscaledTime < checkTime)
 		{
-			this.coolDown = 1f;
-			this.checkTime = 0f;
+			return false;
 		}
+		OnCheckPass();
+		checkTime = unscaledTime + coolDown;
+		return true;
+	}
 
-		public CoolDownHelper(float cd)
-		{
-			this.coolDown = cd;
-			this.checkTime = 0f;
-		}
+	public virtual void Start()
+	{
+		checkTime = Time.unscaledTime + coolDown;
+	}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool CheckCooldown()
-		{
-			float unscaledTime = Time.unscaledTime;
-			if (unscaledTime < this.checkTime)
-			{
-				return false;
-			}
-			this.OnCheckPass();
-			this.checkTime = unscaledTime + this.coolDown;
-			return true;
-		}
+	public virtual void Stop()
+	{
+		checkTime = float.MaxValue;
+	}
 
-		public virtual void Start()
-		{
-			this.checkTime = Time.unscaledTime + this.coolDown;
-		}
-
-		public virtual void Stop()
-		{
-			this.checkTime = float.MaxValue;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public virtual void OnCheckPass()
-		{
-		}
-
-		public float coolDown;
-
-		[NonSerialized]
-		public float checkTime;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public virtual void OnCheckPass()
+	{
 	}
 }

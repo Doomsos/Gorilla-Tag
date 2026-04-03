@@ -1,5 +1,3 @@
-﻿using System;
-
 public class NetworkRegionInfo
 {
 	public int playersInRegion;

@@ -1,62 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public abstract class RandomContainer<T> : ScriptableObject
 {
-	public T lastItem
-	{
-		get
-		{
-			return this._lastItem;
-		}
-	}
-
-	public int lastItemIndex
-	{
-		get
-		{
-			return this._lastItemIndex;
-		}
-	}
-
-	public void ResetRandom(int? seedValue = null)
-	{
-		if (!this.staticSeed)
-		{
-			this._seed = (seedValue ?? StaticHash.Compute(DateTime.UtcNow.Ticks));
-		}
-		else
-		{
-			this._seed = this.seed;
-		}
-		this._rnd = new SRand(this._seed);
-	}
-
-	public void Reset()
-	{
-		this.ResetRandom(null);
-		this._lastItem = default(T);
-		this._lastItemIndex = -1;
-	}
-
-	private void Awake()
-	{
-		this.Reset();
-	}
-
-	public virtual T GetItem(int index)
-	{
-		return this.items[index];
-	}
-
-	public virtual T NextItem()
-	{
-		this._lastItemIndex = (this.distinct ? this._rnd.NextIntWithExclusion(0, this.items.Length, this._lastItemIndex) : this._rnd.NextInt(0, this.items.Length));
-		T t = this.items[this._lastItemIndex];
-		this._lastItem = t;
-		return t;
-	}
-
 	public T[] items = new T[0];
 
 	public int seed;
@@ -65,8 +11,8 @@ public abstract class RandomContainer<T> : ScriptableObject
 
 	public bool distinct = true;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private int _seed;
 
 	[NonSerialized]
@@ -77,4 +23,44 @@ public abstract class RandomContainer<T> : ScriptableObject
 
 	[NonSerialized]
 	private SRand _rnd;
+
+	public T lastItem => _lastItem;
+
+	public int lastItemIndex => _lastItemIndex;
+
+	public void ResetRandom(int? seedValue = null)
+	{
+		if (!staticSeed)
+		{
+			_seed = seedValue ?? StaticHash.Compute(DateTime.UtcNow.Ticks);
+		}
+		else
+		{
+			_seed = seed;
+		}
+		_rnd = new SRand(_seed);
+	}
+
+	public void Reset()
+	{
+		ResetRandom();
+		_lastItem = default(T);
+		_lastItemIndex = -1;
+	}
+
+	private void Awake()
+	{
+		Reset();
+	}
+
+	public virtual T GetItem(int index)
+	{
+		return items[index];
+	}
+
+	public virtual T NextItem()
+	{
+		_lastItemIndex = (distinct ? _rnd.NextIntWithExclusion(0, items.Length, _lastItemIndex) : _rnd.NextInt(0, items.Length));
+		return _lastItem = items[_lastItemIndex];
+	}
 }

@@ -1,14 +1,28 @@
-﻿using System;
 using GorillaLocomotion;
 using Photon.Pun;
 using UnityEngine;
 
 public class SIGadgetGrenadeKnockBack : SIGadgetGrenade
 {
+	private enum State
+	{
+		Idle,
+		Thrown,
+		Triggered
+	}
+
+	[SerializeField]
+	private float knockbackStrength;
+
+	[SerializeField]
+	private float explosionRadius;
+
+	private State state;
+
 	protected override void OnEnable()
 	{
 		base.OnEnable();
-		this.state = SIGadgetGrenadeKnockBack.State.Idle;
+		state = State.Idle;
 	}
 
 	protected override void HandleActivated()
@@ -17,17 +31,17 @@ public class SIGadgetGrenadeKnockBack : SIGadgetGrenade
 
 	protected override void HandleHitSurface()
 	{
-		if (this.state == SIGadgetGrenadeKnockBack.State.Thrown)
+		if (state == State.Thrown)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeKnockBack.State.Triggered);
+			SetStateAuthority(State.Triggered);
 		}
 	}
 
 	protected override void HandleThrown()
 	{
-		if (this.state == SIGadgetGrenadeKnockBack.State.Idle)
+		if (state == State.Idle)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeKnockBack.State.Thrown);
+			SetStateAuthority(State.Thrown);
 		}
 	}
 
@@ -37,36 +51,33 @@ public class SIGadgetGrenadeKnockBack : SIGadgetGrenade
 
 	protected override void OnUpdateRemote(float dt)
 	{
-		SIGadgetGrenadeKnockBack.State state = (SIGadgetGrenadeKnockBack.State)this.gameEntity.GetState();
+		State state = (State)gameEntity.GetState();
 		if (state != this.state)
 		{
-			this.SetState(state);
+			SetState(state);
 		}
 	}
 
-	private void SetStateAuthority(SIGadgetGrenadeKnockBack.State newState)
+	private void SetStateAuthority(State newState)
 	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
 	}
 
-	private void SetState(SIGadgetGrenadeKnockBack.State newState)
+	private void SetState(State newState)
 	{
-		if (newState == this.state)
+		if (newState != state)
 		{
-			return;
-		}
-		this.state = newState;
-		switch (this.state)
-		{
-		case SIGadgetGrenadeKnockBack.State.Idle:
-		case SIGadgetGrenadeKnockBack.State.Thrown:
-			break;
-		case SIGadgetGrenadeKnockBack.State.Triggered:
-			this.TriggerExplosion();
-			break;
-		default:
-			return;
+			state = newState;
+			switch (state)
+			{
+			case State.Triggered:
+				TriggerExplosion();
+				break;
+			case State.Idle:
+			case State.Thrown:
+				break;
+			}
 		}
 	}
 
@@ -74,37 +85,17 @@ public class SIGadgetGrenadeKnockBack : SIGadgetGrenade
 	{
 		Vector3 vector = GTPlayer.Instance.transform.position - base.transform.position;
 		float sqrMagnitude = vector.sqrMagnitude;
-		if (this.explosionRadius * this.explosionRadius > sqrMagnitude)
+		if (explosionRadius * explosionRadius > sqrMagnitude)
 		{
 			float num = Mathf.Sqrt(sqrMagnitude);
-			float num2 = 1f - num / this.explosionRadius;
-			float speed = this.knockbackStrength * num2;
-			GTPlayer.Instance.ApplyKnockback(vector.normalized, speed, false);
+			float num2 = 1f - num / explosionRadius;
+			float speed = knockbackStrength * num2;
+			GTPlayer.Instance.ApplyKnockback(vector.normalized, speed);
 		}
-		if (this.gameEntity.lastHeldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+		if (gameEntity.lastHeldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeKnockBack.State.Idle);
+			SetStateAuthority(State.Idle);
 		}
-		Action grenadeFinished = this.GrenadeFinished;
-		if (grenadeFinished == null)
-		{
-			return;
-		}
-		grenadeFinished();
-	}
-
-	[SerializeField]
-	private float knockbackStrength;
-
-	[SerializeField]
-	private float explosionRadius;
-
-	private SIGadgetGrenadeKnockBack.State state;
-
-	private enum State
-	{
-		Idle,
-		Thrown,
-		Triggered
+		GrenadeFinished?.Invoke();
 	}
 }

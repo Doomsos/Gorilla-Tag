@@ -1,15 +1,14 @@
-﻿using System;
 using UnityEngine;
 
 public class FirstPersonXRaySpecs : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		GorillaBodyRenderer.SetAllSkeletons(true);
+		GorillaBodyRenderer.SetAllSkeletons(allSkeletons: true);
 	}
 
 	private void OnDisable()
 	{
-		GorillaBodyRenderer.SetAllSkeletons(false);
+		GorillaBodyRenderer.SetAllSkeletons(allSkeletons: false);
 	}
 }

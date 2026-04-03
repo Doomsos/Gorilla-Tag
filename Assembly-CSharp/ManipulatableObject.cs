@@ -1,9 +1,12 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class ManipulatableObject : HoldableObject
 {
+	protected bool isHeld;
+
+	protected GameObject holdingHand;
+
 	protected virtual void OnStartManipulation(GameObject grabbingHand)
 	{
 	}
@@ -27,23 +30,22 @@ public class ManipulatableObject : HoldableObject
 
 	public virtual void LateUpdate()
 	{
-		if (this.isHeld)
+		if (isHeld)
 		{
-			if (this.holdingHand == null)
+			if (holdingHand == null)
 			{
 				EquipmentInteractor.instance.ForceDropManipulatableObject(this);
 				return;
 			}
-			this.OnHeldUpdate(this.holdingHand);
-			if (this.ShouldHandDetach(this.holdingHand))
+			OnHeldUpdate(holdingHand);
+			if (ShouldHandDetach(holdingHand))
 			{
 				EquipmentInteractor.instance.ForceDropManipulatableObject(this);
-				return;
 			}
 		}
 		else
 		{
-			this.OnReleasedUpdate();
+			OnReleasedUpdate();
 		}
 	}
 
@@ -55,9 +57,9 @@ public class ManipulatableObject : HoldableObject
 	{
 		bool forLeftHand = grabbingHand == EquipmentInteractor.instance.leftHand;
 		EquipmentInteractor.instance.UpdateHandEquipment(this, forLeftHand);
-		this.isHeld = true;
-		this.holdingHand = grabbingHand;
-		this.OnStartManipulation(this.holdingHand);
+		isHeld = true;
+		holdingHand = grabbingHand;
+		OnStartManipulation(holdingHand);
 	}
 
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
@@ -67,7 +69,7 @@ public class ManipulatableObject : HoldableObject
 			return false;
 		}
 		bool flag = releasingHand == EquipmentInteractor.instance.leftHand;
-		Vector3 averageVelocity = GTPlayer.Instance.GetHandVelocityTracker(flag).GetAverageVelocity(true, 0.15f, false);
+		Vector3 averageVelocity = GTPlayer.Instance.GetHandVelocityTracker(flag).GetAverageVelocity(worldSpace: true);
 		if (flag)
 		{
 			EquipmentInteractor.instance.leftHandHeldEquipment = null;
@@ -76,17 +78,13 @@ public class ManipulatableObject : HoldableObject
 		{
 			EquipmentInteractor.instance.rightHandHeldEquipment = null;
 		}
-		this.isHeld = false;
-		this.holdingHand = null;
-		this.OnStopManipulation(releasingHand, averageVelocity);
+		isHeld = false;
+		holdingHand = null;
+		OnStopManipulation(releasingHand, averageVelocity);
 		return true;
 	}
 
 	public override void DropItemCleanup()
 	{
 	}
-
-	protected bool isHeld;
-
-	protected GameObject holdingHand;
 }

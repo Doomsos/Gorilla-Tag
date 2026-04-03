@@ -1,30 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 public class GRMeterEnergy : MonoBehaviour
 {
-	public void Awake()
+	public enum MeterType
 	{
-	}
-
-	public void Refresh()
-	{
-		float num = 0f;
-		if (this.tool != null && this.tool.GetEnergyMax() > 0)
-		{
-			num = (float)this.tool.energy / (float)this.tool.GetEnergyMax();
-		}
-		num = Mathf.Clamp(num, 0f, 1f);
-		GRMeterEnergy.MeterType meterType = this.meterType;
-		if (meterType == GRMeterEnergy.MeterType.Linear || meterType != GRMeterEnergy.MeterType.Radial)
-		{
-			this.meter.localScale = new Vector3(1f, num, 1f);
-			return;
-		}
-		float value = Mathf.Lerp(this.angularRange.x, this.angularRange.y, num);
-		Vector3 zero = Vector3.zero;
-		zero[this.rotationAxis] = value;
-		this.meter.localRotation = Quaternion.Euler(zero);
+		Linear,
+		Radial
 	}
 
 	public GRTool tool;
@@ -33,16 +14,34 @@ public class GRMeterEnergy : MonoBehaviour
 
 	public Transform chargePoint;
 
-	public GRMeterEnergy.MeterType meterType;
+	public MeterType meterType;
 
 	public Vector2 angularRange = new Vector2(-45f, 45f);
 
 	[Range(0f, 2f)]
 	public int rotationAxis;
 
-	public enum MeterType
+	public void Awake()
 	{
-		Linear,
-		Radial
+	}
+
+	public void Refresh()
+	{
+		float value = 0f;
+		if (tool != null && tool.GetEnergyMax() > 0)
+		{
+			value = (float)tool.energy / (float)tool.GetEnergyMax();
+		}
+		value = Mathf.Clamp(value, 0f, 1f);
+		MeterType meterType = this.meterType;
+		if (meterType == MeterType.Linear || meterType != MeterType.Radial)
+		{
+			meter.localScale = new Vector3(1f, value, 1f);
+			return;
+		}
+		float value2 = Mathf.Lerp(angularRange.x, angularRange.y, value);
+		Vector3 zero = Vector3.zero;
+		zero[rotationAxis] = value2;
+		meter.localRotation = Quaternion.Euler(zero);
 	}
 }

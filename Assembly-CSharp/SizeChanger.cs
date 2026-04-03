@@ -1,246 +1,18 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class SizeChanger : GorillaTriggerBox
 {
-	public int SizeLayerMask
+	public enum ChangerType
 	{
-		get
-		{
-			int num = 0;
-			if (this.affectLayerA)
-			{
-				num |= 1;
-			}
-			if (this.affectLayerB)
-			{
-				num |= 2;
-			}
-			if (this.affectLayerC)
-			{
-				num |= 4;
-			}
-			if (this.affectLayerD)
-			{
-				num |= 8;
-			}
-			return num;
-		}
-	}
-
-	public SizeChanger.ChangerType MyType
-	{
-		get
-		{
-			return this.myType;
-		}
-	}
-
-	public float MaxScale
-	{
-		get
-		{
-			return this.maxScale;
-		}
-	}
-
-	public float MinScale
-	{
-		get
-		{
-			return this.minScale;
-		}
-	}
-
-	public Transform StartPos
-	{
-		get
-		{
-			return this.startPos;
-		}
-	}
-
-	public Transform EndPos
-	{
-		get
-		{
-			return this.endPos;
-		}
-	}
-
-	public float StaticEasing
-	{
-		get
-		{
-			return this.staticEasing;
-		}
-	}
-
-	private void Awake()
-	{
-		this.minScale = Mathf.Max(this.minScale, 0.01f);
-		this.myCollider = base.GetComponent<Collider>();
-	}
-
-	public void OnEnable()
-	{
-		if (this.enterTrigger)
-		{
-			this.enterTrigger.OnEnter += this.OnTriggerEnter;
-		}
-		if (this.exitTrigger)
-		{
-			this.exitTrigger.OnExit += this.OnTriggerExit;
-		}
-		if (this.exitOnEnterTrigger)
-		{
-			this.exitOnEnterTrigger.OnEnter += this.OnTriggerExit;
-		}
-	}
-
-	public void OnDisable()
-	{
-		if (this.enterTrigger)
-		{
-			this.enterTrigger.OnEnter -= this.OnTriggerEnter;
-		}
-		if (this.exitTrigger)
-		{
-			this.exitTrigger.OnExit -= this.OnTriggerExit;
-		}
-		if (this.exitOnEnterTrigger)
-		{
-			this.exitOnEnterTrigger.OnEnter -= this.OnTriggerExit;
-		}
-	}
-
-	public void AddEnterTrigger(SizeChangerTrigger trigger)
-	{
-		if (trigger)
-		{
-			trigger.OnEnter += this.OnTriggerEnter;
-		}
-	}
-
-	public void RemoveEnterTrigger(SizeChangerTrigger trigger)
-	{
-		if (trigger)
-		{
-			trigger.OnEnter -= this.OnTriggerEnter;
-		}
-	}
-
-	public void AddExitOnEnterTrigger(SizeChangerTrigger trigger)
-	{
-		if (trigger)
-		{
-			trigger.OnEnter += this.OnTriggerExit;
-		}
-	}
-
-	public void RemoveExitOnEnterTrigger(SizeChangerTrigger trigger)
-	{
-		if (trigger)
-		{
-			trigger.OnEnter -= this.OnTriggerExit;
-		}
-	}
-
-	public void OnTriggerEnter(Collider other)
-	{
-		if (!other.GetComponent<SphereCollider>())
-		{
-			return;
-		}
-		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null)
-		{
-			return;
-		}
-		this.acceptRig(component);
-	}
-
-	public void acceptRig(VRRig rig)
-	{
-		if (!rig.sizeManager.touchingChangers.Contains(this))
-		{
-			rig.sizeManager.touchingChangers.Add(this);
-		}
-		UnityAction onEnter = this.OnEnter;
-		if (onEnter == null)
-		{
-			return;
-		}
-		onEnter();
-	}
-
-	public void OnTriggerExit(Collider other)
-	{
-		if (!other.GetComponent<SphereCollider>())
-		{
-			return;
-		}
-		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null)
-		{
-			return;
-		}
-		this.unacceptRig(component);
-	}
-
-	public void unacceptRig(VRRig rig)
-	{
-		rig.sizeManager.touchingChangers.Remove(this);
-		UnityAction onExit = this.OnExit;
-		if (onExit == null)
-		{
-			return;
-		}
-		onExit();
-	}
-
-	public Vector3 ClosestPoint(Vector3 position)
-	{
-		if (this.enterTrigger && this.exitTrigger)
-		{
-			Vector3 vector = this.enterTrigger.ClosestPoint(position);
-			Vector3 vector2 = this.exitTrigger.ClosestPoint(position);
-			if (Vector3.Distance(position, vector) >= Vector3.Distance(position, vector2))
-			{
-				return vector2;
-			}
-			return vector;
-		}
-		else
-		{
-			if (this.myCollider)
-			{
-				return this.myCollider.ClosestPoint(position);
-			}
-			return position;
-		}
-	}
-
-	public void SetScaleCenterPoint(Transform centerPoint)
-	{
-		this.scaleAwayFromPoint = centerPoint;
-	}
-
-	public bool TryGetScaleCenterPoint(out Vector3 centerPoint)
-	{
-		if (this.scaleAwayFromPoint != null)
-		{
-			centerPoint = this.scaleAwayFromPoint.position;
-			return true;
-		}
-		centerPoint = Vector3.zero;
-		return false;
+		Static,
+		Continuous,
+		Radius
 	}
 
 	[SerializeField]
-	private SizeChanger.ChangerType myType;
+	private ChangerType myType;
 
 	[SerializeField]
 	private float staticEasing;
@@ -295,10 +67,184 @@ public class SizeChanger : GorillaTriggerBox
 
 	private HashSet<VRRig> unregisteredPresentRigs;
 
-	public enum ChangerType
+	public int SizeLayerMask
 	{
-		Static,
-		Continuous,
-		Radius
+		get
+		{
+			int num = 0;
+			if (affectLayerA)
+			{
+				num |= 1;
+			}
+			if (affectLayerB)
+			{
+				num |= 2;
+			}
+			if (affectLayerC)
+			{
+				num |= 4;
+			}
+			if (affectLayerD)
+			{
+				num |= 8;
+			}
+			return num;
+		}
+	}
+
+	public ChangerType MyType => myType;
+
+	public float MaxScale => maxScale;
+
+	public float MinScale => minScale;
+
+	public Transform StartPos => startPos;
+
+	public Transform EndPos => endPos;
+
+	public float StaticEasing => staticEasing;
+
+	private void Awake()
+	{
+		minScale = Mathf.Max(minScale, 0.01f);
+		myCollider = GetComponent<Collider>();
+	}
+
+	public void OnEnable()
+	{
+		if ((bool)enterTrigger)
+		{
+			enterTrigger.OnEnter += OnTriggerEnter;
+		}
+		if ((bool)exitTrigger)
+		{
+			exitTrigger.OnExit += OnTriggerExit;
+		}
+		if ((bool)exitOnEnterTrigger)
+		{
+			exitOnEnterTrigger.OnEnter += OnTriggerExit;
+		}
+	}
+
+	public void OnDisable()
+	{
+		if ((bool)enterTrigger)
+		{
+			enterTrigger.OnEnter -= OnTriggerEnter;
+		}
+		if ((bool)exitTrigger)
+		{
+			exitTrigger.OnExit -= OnTriggerExit;
+		}
+		if ((bool)exitOnEnterTrigger)
+		{
+			exitOnEnterTrigger.OnEnter -= OnTriggerExit;
+		}
+	}
+
+	public void AddEnterTrigger(SizeChangerTrigger trigger)
+	{
+		if ((bool)trigger)
+		{
+			trigger.OnEnter += OnTriggerEnter;
+		}
+	}
+
+	public void RemoveEnterTrigger(SizeChangerTrigger trigger)
+	{
+		if ((bool)trigger)
+		{
+			trigger.OnEnter -= OnTriggerEnter;
+		}
+	}
+
+	public void AddExitOnEnterTrigger(SizeChangerTrigger trigger)
+	{
+		if ((bool)trigger)
+		{
+			trigger.OnEnter += OnTriggerExit;
+		}
+	}
+
+	public void RemoveExitOnEnterTrigger(SizeChangerTrigger trigger)
+	{
+		if ((bool)trigger)
+		{
+			trigger.OnEnter -= OnTriggerExit;
+		}
+	}
+
+	public void OnTriggerEnter(Collider other)
+	{
+		if ((bool)other.GetComponent<SphereCollider>())
+		{
+			VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(component == null))
+			{
+				acceptRig(component);
+			}
+		}
+	}
+
+	public void acceptRig(VRRig rig)
+	{
+		if (!rig.sizeManager.touchingChangers.Contains(this))
+		{
+			rig.sizeManager.touchingChangers.Add(this);
+		}
+		OnEnter?.Invoke();
+	}
+
+	public void OnTriggerExit(Collider other)
+	{
+		if ((bool)other.GetComponent<SphereCollider>())
+		{
+			VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(component == null))
+			{
+				unacceptRig(component);
+			}
+		}
+	}
+
+	public void unacceptRig(VRRig rig)
+	{
+		rig.sizeManager.touchingChangers.Remove(this);
+		OnExit?.Invoke();
+	}
+
+	public Vector3 ClosestPoint(Vector3 position)
+	{
+		if ((bool)enterTrigger && (bool)exitTrigger)
+		{
+			Vector3 vector = enterTrigger.ClosestPoint(position);
+			Vector3 vector2 = exitTrigger.ClosestPoint(position);
+			if (!(Vector3.Distance(position, vector) < Vector3.Distance(position, vector2)))
+			{
+				return vector2;
+			}
+			return vector;
+		}
+		if ((bool)myCollider)
+		{
+			return myCollider.ClosestPoint(position);
+		}
+		return position;
+	}
+
+	public void SetScaleCenterPoint(Transform centerPoint)
+	{
+		scaleAwayFromPoint = centerPoint;
+	}
+
+	public bool TryGetScaleCenterPoint(out Vector3 centerPoint)
+	{
+		if (scaleAwayFromPoint != null)
+		{
+			centerPoint = scaleAwayFromPoint.position;
+			return true;
+		}
+		centerPoint = Vector3.zero;
+		return false;
 	}
 }

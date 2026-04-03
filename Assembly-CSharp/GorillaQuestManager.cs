@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface GorillaQuestManager
 {
 	void LoadQuestsFromJson(string jsonString);

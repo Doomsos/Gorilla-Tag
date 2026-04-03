@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ExitGames.Client.Photon;
 using Fusion;
+using GorillaNetworking;
 using GorillaTag;
 using GorillaTag.Audio;
 using GorillaTagScripts;
@@ -15,1093 +15,13 @@ using Photon.Pun;
 using Photon.Realtime;
 using Photon.Voice.PUN;
 using Photon.Voice.Unity;
+using PlayFab;
+using PlayFab.ClientModels;
 using UnityEngine;
 
 [RequireComponent(typeof(PUNCallbackNotifier))]
 public class NetworkSystemPUN : NetworkSystem
 {
-	public override NetPlayer[] AllNetPlayers
-	{
-		get
-		{
-			return this.m_allNetPlayers;
-		}
-	}
-
-	public override NetPlayer[] PlayerListOthers
-	{
-		get
-		{
-			return this.m_otherNetPlayers;
-		}
-	}
-
-	public override VoiceConnection VoiceConnection
-	{
-		get
-		{
-			return this.punVoice;
-		}
-	}
-
-	private int lowestPingRegionIndex
-	{
-		get
-		{
-			int num = 9999;
-			int result = -1;
-			for (int i = 0; i < this.regionData.Length; i++)
-			{
-				if (this.regionData[i].pingToRegion < num)
-				{
-					num = this.regionData[i].pingToRegion;
-					result = i;
-				}
-			}
-			return result;
-		}
-	}
-
-	private NetworkSystemPUN.InternalState internalState
-	{
-		get
-		{
-			return this.currentState;
-		}
-		set
-		{
-			this.currentState = value;
-		}
-	}
-
-	public override string CurrentPhotonBackend
-	{
-		get
-		{
-			return "PUN";
-		}
-	}
-
-	public override bool IsOnline
-	{
-		get
-		{
-			return this.InRoom;
-		}
-	}
-
-	public override bool InRoom
-	{
-		get
-		{
-			return PhotonNetwork.InRoom;
-		}
-	}
-
-	public override string RoomName
-	{
-		get
-		{
-			Room currentRoom = PhotonNetwork.CurrentRoom;
-			return ((currentRoom != null) ? currentRoom.Name : null) ?? string.Empty;
-		}
-	}
-
-	public override string RoomStringStripped()
-	{
-		Room currentRoom = PhotonNetwork.CurrentRoom;
-		NetworkSystem.reusableSB.Clear();
-		NetworkSystem.reusableSB.AppendFormat("Room: '{0}' ", (currentRoom.Name.Length < 20) ? currentRoom.Name : currentRoom.Name.Remove(20));
-		NetworkSystem.reusableSB.AppendFormat("{0},{1} {3}/{2} players.", new object[]
-		{
-			currentRoom.IsVisible ? "visible" : "hidden",
-			currentRoom.IsOpen ? "open" : "closed",
-			currentRoom.MaxPlayers,
-			currentRoom.PlayerCount
-		});
-		NetworkSystem.reusableSB.Append("\ncustomProps: {");
-		NetworkSystem.reusableSB.AppendFormat("joinedGameMode={0}, ", (RoomSystem.RoomGameMode.Length < 50) ? RoomSystem.RoomGameMode : RoomSystem.RoomGameMode.Remove(50));
-		IDictionary customProperties = currentRoom.CustomProperties;
-		this.AppendStringFromDict(customProperties, "gameMode", 50, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append(", ");
-		this.AppendStringFromDict(customProperties, "platform", 10, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append(", ");
-		this.AppendStringFromDict(customProperties, "queueName", 15, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append(", ");
-		this.AppendStringFromDict(customProperties, "language", 15, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append(", ");
-		this.AppendStringFromDict(customProperties, "fan_club", 6, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append(", ");
-		this.AppendStringFromDict(customProperties, "mmrTier", 8, NetworkSystem.reusableSB);
-		NetworkSystem.reusableSB.Append("}");
-		return NetworkSystem.reusableSB.ToString();
-	}
-
-	private void AppendStringFromDict(IDictionary dict, string key, int maxStrLen, StringBuilder sb)
-	{
-		sb.AppendFormat("{0}=", key);
-		if (dict.Contains(key))
-		{
-			string text = dict[key] as string;
-			if (text != null)
-			{
-				sb.Append((text.Length < maxStrLen) ? text : text.Remove(maxStrLen));
-				return;
-			}
-		}
-		sb.Append("null");
-	}
-
-	public override string GameModeString
-	{
-		get
-		{
-			object obj;
-			PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("gameMode", out obj);
-			if (obj != null)
-			{
-				return obj.ToString();
-			}
-			return null;
-		}
-	}
-
-	public override string CurrentRegion
-	{
-		get
-		{
-			return PhotonNetwork.CloudRegion;
-		}
-	}
-
-	public override bool SessionIsPrivate
-	{
-		get
-		{
-			Room currentRoom = PhotonNetwork.CurrentRoom;
-			return currentRoom != null && !currentRoom.IsVisible;
-		}
-	}
-
-	public override bool SessionIsSubscription
-	{
-		get
-		{
-			Room currentRoom = PhotonNetwork.CurrentRoom;
-			byte? b = (currentRoom != null) ? new byte?(currentRoom.MaxPlayers) : null;
-			int? num = (b != null) ? new int?((int)b.GetValueOrDefault()) : null;
-			int num2 = 10;
-			return num.GetValueOrDefault() > num2 & num != null;
-		}
-	}
-
-	public override int LocalPlayerID
-	{
-		get
-		{
-			return PhotonNetwork.LocalPlayer.ActorNumber;
-		}
-	}
-
-	public override int ServerTimestamp
-	{
-		get
-		{
-			return PhotonNetwork.ServerTimestamp;
-		}
-	}
-
-	public override double SimTime
-	{
-		get
-		{
-			return PhotonNetwork.Time;
-		}
-	}
-
-	public override float SimDeltaTime
-	{
-		get
-		{
-			return Time.deltaTime;
-		}
-	}
-
-	public override int SimTick
-	{
-		get
-		{
-			return PhotonNetwork.ServerTimestamp;
-		}
-	}
-
-	public override int TickRate
-	{
-		get
-		{
-			return PhotonNetwork.SerializationRate;
-		}
-	}
-
-	public override int RoomPlayerCount
-	{
-		get
-		{
-			return (int)PhotonNetwork.CurrentRoom.PlayerCount;
-		}
-	}
-
-	public override bool IsMasterClient
-	{
-		get
-		{
-			return PhotonNetwork.IsMasterClient;
-		}
-	}
-
-	public override void Initialise()
-	{
-		NetworkSystemPUN.<Initialise>d__56 <Initialise>d__;
-		<Initialise>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Initialise>d__.<>4__this = this;
-		<Initialise>d__.<>1__state = -1;
-		<Initialise>d__.<>t__builder.Start<NetworkSystemPUN.<Initialise>d__56>(ref <Initialise>d__);
-	}
-
-	private Task CacheRegionInfo()
-	{
-		NetworkSystemPUN.<CacheRegionInfo>d__57 <CacheRegionInfo>d__;
-		<CacheRegionInfo>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<CacheRegionInfo>d__.<>4__this = this;
-		<CacheRegionInfo>d__.<>1__state = -1;
-		<CacheRegionInfo>d__.<>t__builder.Start<NetworkSystemPUN.<CacheRegionInfo>d__57>(ref <CacheRegionInfo>d__);
-		return <CacheRegionInfo>d__.<>t__builder.Task;
-	}
-
-	public override AuthenticationValues GetAuthenticationValues()
-	{
-		return PhotonNetwork.AuthValues;
-	}
-
-	public override void SetAuthenticationValues(AuthenticationValues authValues)
-	{
-		PhotonNetwork.AuthValues = authValues;
-	}
-
-	public override void FinishAuthenticating()
-	{
-		if (PhotonNetwork.AuthValues == null)
-		{
-			this._taskCancelTokens.ForEach(delegate(CancellationTokenSource cts)
-			{
-				cts.Cancel();
-				cts.Dispose();
-			});
-			this._taskCancelTokens.Clear();
-			return;
-		}
-		this.internalState = NetworkSystemPUN.InternalState.Authenticated;
-	}
-
-	private Task WaitForState(CancellationToken ct, NetworkSystemPUN.InternalState[] desiredStates, float timeout)
-	{
-		NetworkSystemPUN.<WaitForState>d__61 <WaitForState>d__;
-		<WaitForState>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<WaitForState>d__.<>4__this = this;
-		<WaitForState>d__.ct = ct;
-		<WaitForState>d__.desiredStates = desiredStates;
-		<WaitForState>d__.timeout = timeout;
-		<WaitForState>d__.<>1__state = -1;
-		<WaitForState>d__.<>t__builder.Start<NetworkSystemPUN.<WaitForState>d__61>(ref <WaitForState>d__);
-		return <WaitForState>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> WaitForStateCheck(NetworkSystemPUN.InternalState[] desiredStates, float timeout = 10f)
-	{
-		NetworkSystemPUN.<WaitForStateCheck>d__62 <WaitForStateCheck>d__;
-		<WaitForStateCheck>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<WaitForStateCheck>d__.<>4__this = this;
-		<WaitForStateCheck>d__.desiredStates = desiredStates;
-		<WaitForStateCheck>d__.timeout = timeout;
-		<WaitForStateCheck>d__.<>1__state = -1;
-		<WaitForStateCheck>d__.<>t__builder.Start<NetworkSystemPUN.<WaitForStateCheck>d__62>(ref <WaitForStateCheck>d__);
-		return <WaitForStateCheck>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> WaitForStateCheck(NetworkSystemPUN.InternalState desiredState, float timeout = 10f)
-	{
-		return this.WaitForStateCheck(new NetworkSystemPUN.InternalState[]
-		{
-			desiredState
-		}, timeout);
-	}
-
-	private Task<NetJoinResult> MakeOrFindRoom(string roomName, RoomConfig opts, int regionIndex = -1)
-	{
-		NetworkSystemPUN.<MakeOrFindRoom>d__64 <MakeOrFindRoom>d__;
-		<MakeOrFindRoom>d__.<>t__builder = AsyncTaskMethodBuilder<NetJoinResult>.Create();
-		<MakeOrFindRoom>d__.<>4__this = this;
-		<MakeOrFindRoom>d__.roomName = roomName;
-		<MakeOrFindRoom>d__.opts = opts;
-		<MakeOrFindRoom>d__.regionIndex = regionIndex;
-		<MakeOrFindRoom>d__.<>1__state = -1;
-		<MakeOrFindRoom>d__.<>t__builder.Start<NetworkSystemPUN.<MakeOrFindRoom>d__64>(ref <MakeOrFindRoom>d__);
-		return <MakeOrFindRoom>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> TryJoinRoom(string roomName, RoomConfig opts)
-	{
-		NetworkSystemPUN.<TryJoinRoom>d__65 <TryJoinRoom>d__;
-		<TryJoinRoom>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<TryJoinRoom>d__.<>4__this = this;
-		<TryJoinRoom>d__.roomName = roomName;
-		<TryJoinRoom>d__.opts = opts;
-		<TryJoinRoom>d__.<>1__state = -1;
-		<TryJoinRoom>d__.<>t__builder.Start<NetworkSystemPUN.<TryJoinRoom>d__65>(ref <TryJoinRoom>d__);
-		return <TryJoinRoom>d__.<>t__builder.Task;
-	}
-
-	private Task<bool> TryJoinRoomInRegion(string roomName, RoomConfig opts, int regionIndex)
-	{
-		NetworkSystemPUN.<TryJoinRoomInRegion>d__66 <TryJoinRoomInRegion>d__;
-		<TryJoinRoomInRegion>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<TryJoinRoomInRegion>d__.<>4__this = this;
-		<TryJoinRoomInRegion>d__.roomName = roomName;
-		<TryJoinRoomInRegion>d__.opts = opts;
-		<TryJoinRoomInRegion>d__.regionIndex = regionIndex;
-		<TryJoinRoomInRegion>d__.<>1__state = -1;
-		<TryJoinRoomInRegion>d__.<>t__builder.Start<NetworkSystemPUN.<TryJoinRoomInRegion>d__66>(ref <TryJoinRoomInRegion>d__);
-		return <TryJoinRoomInRegion>d__.<>t__builder.Task;
-	}
-
-	private Task<NetJoinResult> TryCreateRoom(string roomName, RoomConfig opts)
-	{
-		NetworkSystemPUN.<TryCreateRoom>d__67 <TryCreateRoom>d__;
-		<TryCreateRoom>d__.<>t__builder = AsyncTaskMethodBuilder<NetJoinResult>.Create();
-		<TryCreateRoom>d__.<>4__this = this;
-		<TryCreateRoom>d__.roomName = roomName;
-		<TryCreateRoom>d__.opts = opts;
-		<TryCreateRoom>d__.<>1__state = -1;
-		<TryCreateRoom>d__.<>t__builder.Start<NetworkSystemPUN.<TryCreateRoom>d__67>(ref <TryCreateRoom>d__);
-		return <TryCreateRoom>d__.<>t__builder.Task;
-	}
-
-	private Task<NetJoinResult> JoinRandomPublicRoom(RoomConfig opts)
-	{
-		NetworkSystemPUN.<JoinRandomPublicRoom>d__68 <JoinRandomPublicRoom>d__;
-		<JoinRandomPublicRoom>d__.<>t__builder = AsyncTaskMethodBuilder<NetJoinResult>.Create();
-		<JoinRandomPublicRoom>d__.<>4__this = this;
-		<JoinRandomPublicRoom>d__.opts = opts;
-		<JoinRandomPublicRoom>d__.<>1__state = -1;
-		<JoinRandomPublicRoom>d__.<>t__builder.Start<NetworkSystemPUN.<JoinRandomPublicRoom>d__68>(ref <JoinRandomPublicRoom>d__);
-		return <JoinRandomPublicRoom>d__.<>t__builder.Task;
-	}
-
-	public override Task<NetJoinResult> ConnectToRoom(string roomName, RoomConfig opts, int regionIndex = -1)
-	{
-		NetworkSystemPUN.<ConnectToRoom>d__69 <ConnectToRoom>d__;
-		<ConnectToRoom>d__.<>t__builder = AsyncTaskMethodBuilder<NetJoinResult>.Create();
-		<ConnectToRoom>d__.<>4__this = this;
-		<ConnectToRoom>d__.roomName = roomName;
-		<ConnectToRoom>d__.opts = opts;
-		<ConnectToRoom>d__.regionIndex = regionIndex;
-		<ConnectToRoom>d__.<>1__state = -1;
-		<ConnectToRoom>d__.<>t__builder.Start<NetworkSystemPUN.<ConnectToRoom>d__69>(ref <ConnectToRoom>d__);
-		return <ConnectToRoom>d__.<>t__builder.Task;
-	}
-
-	public override Task JoinFriendsRoom(string userID, int actorIDToFollow, string keyToFollow, string shufflerToFollow)
-	{
-		NetworkSystemPUN.<JoinFriendsRoom>d__70 <JoinFriendsRoom>d__;
-		<JoinFriendsRoom>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<JoinFriendsRoom>d__.<>4__this = this;
-		<JoinFriendsRoom>d__.userID = userID;
-		<JoinFriendsRoom>d__.actorIDToFollow = actorIDToFollow;
-		<JoinFriendsRoom>d__.keyToFollow = keyToFollow;
-		<JoinFriendsRoom>d__.shufflerToFollow = shufflerToFollow;
-		<JoinFriendsRoom>d__.<>1__state = -1;
-		<JoinFriendsRoom>d__.<>t__builder.Start<NetworkSystemPUN.<JoinFriendsRoom>d__70>(ref <JoinFriendsRoom>d__);
-		return <JoinFriendsRoom>d__.<>t__builder.Task;
-	}
-
-	public override void JoinPubWithFriends()
-	{
-		throw new NotImplementedException();
-	}
-
-	public override string GetRandomWeightedRegion()
-	{
-		float value = Random.value;
-		int num = 0;
-		for (int i = 0; i < this.regionData.Length; i++)
-		{
-			num += this.regionData[i].playersInRegion;
-		}
-		float num2 = 0f;
-		int num3 = -1;
-		while (num2 < value && num3 < this.regionData.Length - 1)
-		{
-			num3++;
-			num2 += (float)this.regionData[num3].playersInRegion / (float)num;
-		}
-		return this.regionNames[num3];
-	}
-
-	public override Task ReturnToSinglePlayer()
-	{
-		NetworkSystemPUN.<ReturnToSinglePlayer>d__73 <ReturnToSinglePlayer>d__;
-		<ReturnToSinglePlayer>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<ReturnToSinglePlayer>d__.<>4__this = this;
-		<ReturnToSinglePlayer>d__.<>1__state = -1;
-		<ReturnToSinglePlayer>d__.<>t__builder.Start<NetworkSystemPUN.<ReturnToSinglePlayer>d__73>(ref <ReturnToSinglePlayer>d__);
-		return <ReturnToSinglePlayer>d__.<>t__builder.Task;
-	}
-
-	private Task InternalDisconnect()
-	{
-		NetworkSystemPUN.<InternalDisconnect>d__74 <InternalDisconnect>d__;
-		<InternalDisconnect>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<InternalDisconnect>d__.<>4__this = this;
-		<InternalDisconnect>d__.<>1__state = -1;
-		<InternalDisconnect>d__.<>t__builder.Start<NetworkSystemPUN.<InternalDisconnect>d__74>(ref <InternalDisconnect>d__);
-		return <InternalDisconnect>d__.<>t__builder.Task;
-	}
-
-	private void AddVoice()
-	{
-		this.SetupVoice();
-	}
-
-	private void SetupVoice()
-	{
-		try
-		{
-			this.punVoice = PhotonVoiceNetwork.Instance;
-			this.VoiceNetworkObject = this.punVoice.gameObject;
-			this.VoiceNetworkObject.name = "VoiceNetworkObject";
-			this.VoiceNetworkObject.transform.parent = base.transform;
-			this.VoiceNetworkObject.transform.localPosition = Vector3.zero;
-			this.punVoice.LogLevel = this.VoiceSettings.LogLevel;
-			this.punVoice.GlobalRecordersLogLevel = this.VoiceSettings.GlobalRecordersLogLevel;
-			this.punVoice.GlobalSpeakersLogLevel = this.VoiceSettings.GlobalSpeakersLogLevel;
-			this.punVoice.AutoConnectAndJoin = this.VoiceSettings.AutoConnectAndJoin;
-			this.punVoice.AutoLeaveAndDisconnect = this.VoiceSettings.AutoLeaveAndDisconnect;
-			this.punVoice.WorkInOfflineMode = this.VoiceSettings.WorkInOfflineMode;
-			this.punVoice.AutoCreateSpeakerIfNotFound = this.VoiceSettings.CreateSpeakerIfNotFound;
-			AppSettings appSettings = new AppSettings();
-			appSettings.AppIdRealtime = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime;
-			appSettings.AppIdVoice = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdVoice;
-			this.punVoice.Settings = appSettings;
-			this.remoteVoiceAddedCallbacks.ForEach(delegate(Action<RemoteVoiceLink> callback)
-			{
-				this.punVoice.RemoteVoiceAdded += callback;
-			});
-			this.localRecorder = this.VoiceNetworkObject.GetComponent<GTRecorder>();
-			if (this.localRecorder == null)
-			{
-				this.localRecorder = this.VoiceNetworkObject.AddComponent<GTRecorder>();
-				if (VRRigCache.Instance != null && VRRigCache.Instance.localRig != null)
-				{
-					LoudSpeakerActivator[] componentsInChildren = VRRigCache.Instance.localRig.GetComponentsInChildren<LoudSpeakerActivator>();
-					for (int i = 0; i < componentsInChildren.Length; i++)
-					{
-						componentsInChildren[i].SetRecorder((GTRecorder)this.localRecorder);
-					}
-				}
-			}
-			this.localRecorder.LogLevel = this.VoiceSettings.LogLevel;
-			this.localRecorder.RecordOnlyWhenEnabled = this.VoiceSettings.RecordOnlyWhenEnabled;
-			this.localRecorder.RecordOnlyWhenJoined = this.VoiceSettings.RecordOnlyWhenJoined;
-			this.localRecorder.StopRecordingWhenPaused = this.VoiceSettings.StopRecordingWhenPaused;
-			this.localRecorder.TransmitEnabled = this.VoiceSettings.TransmitEnabled;
-			this.localRecorder.AutoStart = this.VoiceSettings.AutoStart;
-			this.localRecorder.Encrypt = this.VoiceSettings.Encrypt;
-			this.localRecorder.FrameDuration = this.VoiceSettings.FrameDuration;
-			this.localRecorder.InterestGroup = this.VoiceSettings.InterestGroup;
-			this.localRecorder.SourceType = this.VoiceSettings.InputSourceType;
-			this.localRecorder.MicrophoneType = this.VoiceSettings.MicrophoneType;
-			this.localRecorder.UseMicrophoneTypeFallback = this.VoiceSettings.UseFallback;
-			this.localRecorder.VoiceDetection = this.VoiceSettings.Detect;
-			this.localRecorder.VoiceDetectionThreshold = this.VoiceSettings.Threshold;
-			this.localRecorder.VoiceDetectionDelayMs = this.VoiceSettings.Delay;
-			this.localRecorder.DebugEchoMode = this.VoiceSettings.DebugEcho;
-			if (!SubscriptionManager.IsLocalSubscribed())
-			{
-				this.localRecorder.SamplingRate = this.VoiceSettings.SamplingRate;
-				this.localRecorder.Bitrate = this.VoiceSettings.Bitrate;
-			}
-			else
-			{
-				this.localRecorder.SamplingRate = this.VoiceSettings.SubsSamplingRate;
-				this.localRecorder.Bitrate = this.VoiceSettings.SubsBitrate;
-			}
-			this.VoiceNetworkObject.AddComponent<VoiceToLoudness>();
-			this.punVoice.PrimaryRecorder = this.localRecorder;
-		}
-		catch (Exception ex)
-		{
-			Debug.LogError("An exception was thrown when trying to setup photon voice, please check microphone permissions:\n" + ex.ToString());
-		}
-	}
-
-	public override void AddRemoteVoiceAddedCallback(Action<RemoteVoiceLink> callback)
-	{
-		this.remoteVoiceAddedCallbacks.Add(callback);
-	}
-
-	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, bool isRoomObject = false)
-	{
-		if (PhotonNetwork.CurrentRoom == null)
-		{
-			return null;
-		}
-		if (isRoomObject)
-		{
-			return PhotonNetwork.InstantiateRoomObject(prefab.name, position, rotation, 0, null);
-		}
-		return PhotonNetwork.Instantiate(prefab.name, position, rotation, 0, null);
-	}
-
-	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, int playerAuthID, bool isRoomObject = false)
-	{
-		return this.NetInstantiate(prefab, position, rotation, isRoomObject);
-	}
-
-	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, bool isRoomObject, byte group = 0, object[] data = null, NetworkRunner.OnBeforeSpawned callback = null)
-	{
-		if (PhotonNetwork.CurrentRoom == null)
-		{
-			return null;
-		}
-		if (isRoomObject)
-		{
-			return PhotonNetwork.InstantiateRoomObject(prefab.name, position, rotation, group, data);
-		}
-		return PhotonNetwork.Instantiate(prefab.name, position, rotation, group, data);
-	}
-
-	public override void NetDestroy(GameObject instance)
-	{
-		PhotonView photonView;
-		if (instance.TryGetComponent<PhotonView>(out photonView) && photonView.AmOwner)
-		{
-			PhotonNetwork.Destroy(instance);
-			return;
-		}
-		Object.Destroy(instance);
-	}
-
-	public override void SetPlayerObject(GameObject playerInstance, int? owningPlayerID = null)
-	{
-	}
-
-	public override void CallRPC(MonoBehaviour component, NetworkSystem.RPC rpcMethod, bool sendToSelf = true)
-	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
-		{
-			NetworkSystem.EmptyArgs
-		});
-	}
-
-	public override void CallRPC<T>(MonoBehaviour component, NetworkSystem.RPC rpcMethod, RPCArgBuffer<T> args, bool sendToSelf = true)
-	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
-		ref args.SerializeToRPCData<T>();
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
-		{
-			args.Data
-		});
-	}
-
-	public override void CallRPC(MonoBehaviour component, NetworkSystem.StringRPC rpcMethod, string message, bool sendToSelf = true)
-	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
-		{
-			message
-		});
-	}
-
-	public override void CallRPC(int targetPlayerID, MonoBehaviour component, NetworkSystem.RPC rpcMethod)
-	{
-		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID, false);
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, new object[]
-		{
-			NetworkSystem.EmptyArgs
-		});
-	}
-
-	public override void CallRPC<T>(int targetPlayerID, MonoBehaviour component, NetworkSystem.RPC rpcMethod, RPCArgBuffer<T> args)
-	{
-		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID, false);
-		ref args.SerializeToRPCData<T>();
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, new object[]
-		{
-			args.Data
-		});
-	}
-
-	public override void CallRPC(int targetPlayerID, MonoBehaviour component, NetworkSystem.StringRPC rpcMethod, string message)
-	{
-		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID, false);
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, new object[]
-		{
-			message
-		});
-	}
-
-	public override Task AwaitSceneReady()
-	{
-		NetworkSystemPUN.<AwaitSceneReady>d__89 <AwaitSceneReady>d__;
-		<AwaitSceneReady>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<AwaitSceneReady>d__.<>1__state = -1;
-		<AwaitSceneReady>d__.<>t__builder.Start<NetworkSystemPUN.<AwaitSceneReady>d__89>(ref <AwaitSceneReady>d__);
-		return <AwaitSceneReady>d__.<>t__builder.Task;
-	}
-
-	public override NetPlayer GetLocalPlayer()
-	{
-		if (this.netPlayerCache.Count == 0)
-		{
-			base.UpdatePlayers();
-		}
-		foreach (NetPlayer netPlayer in this.netPlayerCache)
-		{
-			if (netPlayer.IsLocal)
-			{
-				return netPlayer;
-			}
-		}
-		Debug.LogError("Somehow no local net players found. This shouldn't happen");
-		return null;
-	}
-
-	public override NetPlayer GetPlayer(int PlayerID)
-	{
-		if (this.InRoom && !PhotonNetwork.CurrentRoom.Players.ContainsKey(PlayerID))
-		{
-			return null;
-		}
-		foreach (NetPlayer netPlayer in this.netPlayerCache)
-		{
-			if (netPlayer.ActorNumber == PlayerID)
-			{
-				return netPlayer;
-			}
-		}
-		base.UpdatePlayers();
-		foreach (NetPlayer netPlayer2 in this.netPlayerCache)
-		{
-			if (netPlayer2.ActorNumber == PlayerID)
-			{
-				return netPlayer2;
-			}
-		}
-		GTDev.LogWarning<string>("There is no NetPlayer with this ID currently in game. Passed ID: " + PlayerID.ToString(), null);
-		return null;
-	}
-
-	public override void SetMyNickName(string id)
-	{
-		if (!KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags) && !id.StartsWith("gorilla"))
-		{
-			Debug.Log("[KID] Trying to set custom nickname but that permission has been disallowed");
-			PhotonNetwork.LocalPlayer.NickName = "gorilla";
-			return;
-		}
-		PlayerPrefs.SetString("playerName", id);
-		string nickName = PhotonNetwork.LocalPlayer.NickName;
-		PhotonNetwork.LocalPlayer.NickName = id;
-		nickName != id;
-	}
-
-	public override string GetMyNickName()
-	{
-		return PhotonNetwork.LocalPlayer.NickName;
-	}
-
-	public override string GetMyDefaultName()
-	{
-		return PhotonNetwork.LocalPlayer.DefaultName;
-	}
-
-	public override string GetNickName(int playerID)
-	{
-		NetPlayer player = this.GetPlayer(playerID);
-		if (player != null)
-		{
-			return player.NickName;
-		}
-		return null;
-	}
-
-	public override string GetNickName(NetPlayer player)
-	{
-		return player.NickName;
-	}
-
-	public override void SetMyTutorialComplete()
-	{
-		bool flag = PlayerPrefs.GetString("didTutorial", "nope") == "done";
-		if (!flag)
-		{
-			PlayerPrefs.SetString("didTutorial", "done");
-			PlayerPrefs.Save();
-		}
-		Hashtable hashtable = new Hashtable();
-		hashtable.Add("didTutorial", flag);
-		PhotonNetwork.LocalPlayer.SetCustomProperties(hashtable, null, null);
-	}
-
-	public override bool GetMyTutorialCompletion()
-	{
-		return PlayerPrefs.GetString("didTutorial", "nope") == "done";
-	}
-
-	public override bool GetPlayerTutorialCompletion(int playerID)
-	{
-		NetPlayer player = this.GetPlayer(playerID);
-		if (player == null)
-		{
-			return false;
-		}
-		Player player2 = PhotonNetwork.CurrentRoom.GetPlayer(player.ActorNumber, false);
-		if (player2 == null)
-		{
-			return false;
-		}
-		object obj;
-		if (player2.CustomProperties.TryGetValue("didTutorial", out obj))
-		{
-			bool flag;
-			bool flag2;
-			if (obj is bool)
-			{
-				flag = (bool)obj;
-				flag2 = (1 == 0);
-			}
-			else
-			{
-				flag2 = true;
-			}
-			return flag2 || flag;
-		}
-		return false;
-	}
-
-	public override string GetMyUserID()
-	{
-		return PhotonNetwork.LocalPlayer.UserId;
-	}
-
-	public override string GetUserID(int playerID)
-	{
-		NetPlayer player = this.GetPlayer(playerID);
-		if (player != null)
-		{
-			return player.UserId;
-		}
-		return null;
-	}
-
-	public override string GetUserID(NetPlayer netPlayer)
-	{
-		Player playerRef = ((PunNetPlayer)netPlayer).PlayerRef;
-		if (playerRef != null)
-		{
-			return playerRef.UserId;
-		}
-		return null;
-	}
-
-	public override int GlobalPlayerCount()
-	{
-		int num = 0;
-		foreach (NetworkRegionInfo networkRegionInfo in this.regionData)
-		{
-			num += networkRegionInfo.playersInRegion;
-		}
-		return num;
-	}
-
-	public override bool IsObjectLocallyOwned(GameObject obj)
-	{
-		PhotonView photonView;
-		return !this.IsOnline || !obj.TryGetComponent<PhotonView>(out photonView) || photonView.IsMine;
-	}
-
-	protected override void UpdateNetPlayerList()
-	{
-		if (!this.IsOnline)
-		{
-			bool flag = false;
-			PunNetPlayer punNetPlayer = null;
-			if (this.netPlayerCache.Count > 0)
-			{
-				for (int i = 0; i < this.netPlayerCache.Count; i++)
-				{
-					NetPlayer netPlayer = this.netPlayerCache[i];
-					if (netPlayer.IsLocal)
-					{
-						punNetPlayer = (PunNetPlayer)netPlayer;
-						flag = true;
-					}
-					else
-					{
-						this.playerPool.Return((PunNetPlayer)netPlayer);
-					}
-				}
-				this.netPlayerCache.Clear();
-			}
-			if (!flag)
-			{
-				punNetPlayer = this.playerPool.Take();
-				punNetPlayer.InitPlayer(PhotonNetwork.LocalPlayer);
-			}
-			this.netPlayerCache.Add(punNetPlayer);
-		}
-		else
-		{
-			Dictionary<int, Player>.ValueCollection values = PhotonNetwork.CurrentRoom.Players.Values;
-			foreach (Player player in values)
-			{
-				bool flag2 = false;
-				for (int j = 0; j < this.netPlayerCache.Count; j++)
-				{
-					if (player == ((PunNetPlayer)this.netPlayerCache[j]).PlayerRef)
-					{
-						flag2 = true;
-						break;
-					}
-				}
-				if (!flag2)
-				{
-					PunNetPlayer punNetPlayer2 = this.playerPool.Take();
-					punNetPlayer2.InitPlayer(player);
-					this.netPlayerCache.Add(punNetPlayer2);
-				}
-			}
-			for (int k = 0; k < this.netPlayerCache.Count; k++)
-			{
-				PunNetPlayer punNetPlayer3 = (PunNetPlayer)this.netPlayerCache[k];
-				bool flag3 = false;
-				using (Dictionary<int, Player>.ValueCollection.Enumerator enumerator = values.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current == punNetPlayer3.PlayerRef)
-						{
-							flag3 = true;
-							break;
-						}
-					}
-				}
-				if (!flag3)
-				{
-					this.playerPool.Return(punNetPlayer3);
-					this.netPlayerCache.Remove(punNetPlayer3);
-				}
-			}
-		}
-		this.m_allNetPlayers = this.netPlayerCache.ToArray();
-		this.m_otherNetPlayers = new NetPlayer[this.m_allNetPlayers.Length - 1];
-		int num = 0;
-		for (int l = 0; l < this.m_allNetPlayers.Length; l++)
-		{
-			NetPlayer netPlayer2 = this.m_allNetPlayers[l];
-			if (netPlayer2.IsLocal)
-			{
-				num++;
-			}
-			else
-			{
-				int num2 = l - num;
-				if (num2 == this.m_otherNetPlayers.Length)
-				{
-					break;
-				}
-				this.m_otherNetPlayers[num2] = netPlayer2;
-			}
-		}
-	}
-
-	public override bool IsObjectRoomObject(GameObject obj)
-	{
-		PhotonView component = obj.GetComponent<PhotonView>();
-		if (component == null)
-		{
-			Debug.LogError("No photonview found on this Object, this shouldn't happen");
-			return false;
-		}
-		return component.IsRoomView;
-	}
-
-	public override bool ShouldUpdateObject(GameObject obj)
-	{
-		return this.IsObjectLocallyOwned(obj);
-	}
-
-	public override bool ShouldWriteObjectData(GameObject obj)
-	{
-		return this.IsObjectLocallyOwned(obj);
-	}
-
-	public override int GetOwningPlayerID(GameObject obj)
-	{
-		PhotonView photonView;
-		if (obj.TryGetComponent<PhotonView>(out photonView) && photonView.Owner != null)
-		{
-			return photonView.Owner.ActorNumber;
-		}
-		return -1;
-	}
-
-	public override bool ShouldSpawnLocally(int playerID)
-	{
-		return this.LocalPlayerID == playerID || (playerID == -1 && PhotonNetwork.MasterClient.IsLocal);
-	}
-
-	public override bool IsTotalAuthority()
-	{
-		return false;
-	}
-
-	public void OnConnectedtoMaster()
-	{
-		if (this.internalState == NetworkSystemPUN.InternalState.ConnectingToMaster)
-		{
-			this.internalState = NetworkSystemPUN.InternalState.ConnectedToMaster;
-		}
-		base.UpdatePlayers();
-	}
-
-	public void OnJoinedRoom()
-	{
-		if (this.internalState == NetworkSystemPUN.InternalState.Searching_Joining)
-		{
-			this.internalState = NetworkSystemPUN.InternalState.Searching_Joined;
-		}
-		else if (this.internalState == NetworkSystemPUN.InternalState.Searching_Creating)
-		{
-			this.internalState = NetworkSystemPUN.InternalState.Searching_Created;
-		}
-		this.AddVoice();
-		base.UpdatePlayers();
-		base.JoinedNetworkRoom();
-	}
-
-	public void OnJoinRoomFailed(short returnCode, string message)
-	{
-		Debug.Log("onJoinRoomFailed " + returnCode.ToString() + " " + message);
-		if (this.internalState == NetworkSystemPUN.InternalState.Searching_Joining)
-		{
-			if (returnCode == 32765)
-			{
-				this.internalState = NetworkSystemPUN.InternalState.Searching_JoinFailed_Full;
-				return;
-			}
-			this.internalState = NetworkSystemPUN.InternalState.Searching_JoinFailed;
-		}
-	}
-
-	public void OnCreateRoomFailed(short returnCode, string message)
-	{
-		if (this.internalState == NetworkSystemPUN.InternalState.Searching_Creating)
-		{
-			this.internalState = NetworkSystemPUN.InternalState.Searching_CreateFailed;
-		}
-	}
-
-	public void OnPlayerEnteredRoom(Player newPlayer)
-	{
-		base.UpdatePlayers();
-		NetPlayer player = base.GetPlayer(newPlayer);
-		base.PlayerJoined(player);
-	}
-
-	public void OnPlayerLeftRoom(Player otherPlayer)
-	{
-		NetPlayer player = base.GetPlayer(otherPlayer);
-		base.UpdatePlayers();
-		base.PlayerLeft(player);
-	}
-
-	public void OnDisconnected(DisconnectCause cause)
-	{
-		NetworkSystemPUN.<OnDisconnected>d__118 <OnDisconnected>d__;
-		<OnDisconnected>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<OnDisconnected>d__.<>4__this = this;
-		<OnDisconnected>d__.<>1__state = -1;
-		<OnDisconnected>d__.<>t__builder.Start<NetworkSystemPUN.<OnDisconnected>d__118>(ref <OnDisconnected>d__);
-	}
-
-	public void OnMasterClientSwitched(Player newMasterClient)
-	{
-		base.OnMasterClientSwitchedCallback(newMasterClient);
-	}
-
-	private ValueTuple<CancellationTokenSource, CancellationToken> GetCancellationToken()
-	{
-		CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-		CancellationToken token = cancellationTokenSource.Token;
-		this._taskCancelTokens.Add(cancellationTokenSource);
-		return new ValueTuple<CancellationTokenSource, CancellationToken>(cancellationTokenSource, token);
-	}
-
-	public void ResetSystem()
-	{
-		if (this.VoiceNetworkObject)
-		{
-			Object.Destroy(this.VoiceNetworkObject);
-		}
-		PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = this.regionNames[this.lowestPingRegionIndex];
-		this.currentRegionIndex = this.lowestPingRegionIndex;
-		PhotonNetwork.Disconnect();
-		this._taskCancelTokens.ForEach(delegate(CancellationTokenSource token)
-		{
-			token.Cancel();
-			token.Dispose();
-		});
-		this._taskCancelTokens.Clear();
-		this.internalState = NetworkSystemPUN.InternalState.Idle;
-		base.netState = NetSystemState.Idle;
-	}
-
-	private void UpdateZoneInfo(bool roomIsPublic, string zoneName = null)
-	{
-		AuthenticationValues authenticationValues = this.GetAuthenticationValues();
-		Dictionary<string, object> dictionary = ((authenticationValues != null) ? authenticationValues.AuthPostData : null) as Dictionary<string, object>;
-		if (dictionary != null)
-		{
-			dictionary["Zone"] = ((zoneName != null) ? zoneName : ((ZoneManagement.instance.activeZones.Count > 0) ? ZoneManagement.instance.activeZones.First<GTZone>().GetName<GTZone>() : ""));
-			dictionary["SubZone"] = GTSubZone.none.GetName<GTSubZone>();
-			dictionary["IsPublic"] = roomIsPublic;
-			authenticationValues.SetAuthPostData(dictionary);
-			this.SetAuthenticationValues(authenticationValues);
-		}
-	}
-
-	private NetworkRegionInfo[] regionData;
-
-	private Task<NetJoinResult> roomTask;
-
-	private ObjectPool<PunNetPlayer> playerPool;
-
-	private NetPlayer[] m_allNetPlayers = new NetPlayer[0];
-
-	private NetPlayer[] m_otherNetPlayers = new NetPlayer[0];
-
-	private List<CancellationTokenSource> _taskCancelTokens = new List<CancellationTokenSource>();
-
-	private PhotonVoiceNetwork punVoice;
-
-	private GameObject VoiceNetworkObject;
-
-	private NetworkSystemPUN.InternalState currentState;
-
-	private bool firstRoomJoin;
-
 	private enum InternalState
 	{
 		AwaitingAuth,
@@ -1124,5 +44,1276 @@ public class NetworkSystemPUN : NetworkSystem
 		Searching_CreateFailed,
 		Searching_Disconnecting,
 		Searching_Disconnected
+	}
+
+	private NetworkRegionInfo[] regionData;
+
+	private Task<NetJoinResult> roomTask;
+
+	private ObjectPool<PunNetPlayer> playerPool;
+
+	private NetPlayer[] m_allNetPlayers = new NetPlayer[0];
+
+	private NetPlayer[] m_otherNetPlayers = new NetPlayer[0];
+
+	private List<CancellationTokenSource> _taskCancelTokens = new List<CancellationTokenSource>();
+
+	private PhotonVoiceNetwork punVoice;
+
+	private GameObject VoiceNetworkObject;
+
+	private InternalState currentState;
+
+	private bool firstRoomJoin;
+
+	public override NetPlayer[] AllNetPlayers => m_allNetPlayers;
+
+	public override NetPlayer[] PlayerListOthers => m_otherNetPlayers;
+
+	public override VoiceConnection VoiceConnection => punVoice;
+
+	private int lowestPingRegionIndex
+	{
+		get
+		{
+			int num = 9999;
+			int result = -1;
+			for (int i = 0; i < regionData.Length; i++)
+			{
+				if (regionData[i].pingToRegion < num)
+				{
+					num = regionData[i].pingToRegion;
+					result = i;
+				}
+			}
+			return result;
+		}
+	}
+
+	private InternalState internalState
+	{
+		get
+		{
+			return currentState;
+		}
+		set
+		{
+			currentState = value;
+		}
+	}
+
+	public override string CurrentPhotonBackend => "PUN";
+
+	public override bool IsOnline => InRoom;
+
+	public override bool InRoom => PhotonNetwork.InRoom;
+
+	public override string RoomName => PhotonNetwork.CurrentRoom?.Name ?? string.Empty;
+
+	public override string GameModeString
+	{
+		get
+		{
+			PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("gameMode", out var value);
+			return value?.ToString();
+		}
+	}
+
+	public override string CurrentRegion => PhotonNetwork.CloudRegion;
+
+	public override bool SessionIsPrivate
+	{
+		get
+		{
+			Room currentRoom = PhotonNetwork.CurrentRoom;
+			if (currentRoom == null)
+			{
+				return false;
+			}
+			return !currentRoom.IsVisible;
+		}
+	}
+
+	public override bool SessionIsSubscription => PhotonNetwork.CurrentRoom?.MaxPlayers > 10;
+
+	public override int LocalPlayerID => PhotonNetwork.LocalPlayer.ActorNumber;
+
+	public override int ServerTimestamp => PhotonNetwork.ServerTimestamp;
+
+	public override double SimTime => PhotonNetwork.Time;
+
+	public override float SimDeltaTime => Time.deltaTime;
+
+	public override int SimTick => PhotonNetwork.ServerTimestamp;
+
+	public override int TickRate => PhotonNetwork.SerializationRate;
+
+	public override int RoomPlayerCount => PhotonNetwork.CurrentRoom.PlayerCount;
+
+	public override bool IsMasterClient => PhotonNetwork.IsMasterClient;
+
+	public override string RoomStringStripped()
+	{
+		Room currentRoom = PhotonNetwork.CurrentRoom;
+		NetworkSystem.reusableSB.Clear();
+		NetworkSystem.reusableSB.AppendFormat("Room: '{0}' ", (currentRoom.Name.Length < 20) ? currentRoom.Name : currentRoom.Name.Remove(20));
+		NetworkSystem.reusableSB.AppendFormat("{0},{1} {3}/{2} players.", currentRoom.IsVisible ? "visible" : "hidden", currentRoom.IsOpen ? "open" : "closed", currentRoom.MaxPlayers, currentRoom.PlayerCount);
+		NetworkSystem.reusableSB.Append("\ncustomProps: {");
+		NetworkSystem.reusableSB.AppendFormat("joinedGameMode={0}, ", (RoomSystem.RoomGameMode.Length < 50) ? RoomSystem.RoomGameMode : RoomSystem.RoomGameMode.Remove(50));
+		IDictionary customProperties = currentRoom.CustomProperties;
+		AppendStringFromDict(customProperties, "gameMode", 50, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append(", ");
+		AppendStringFromDict(customProperties, "platform", 10, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append(", ");
+		AppendStringFromDict(customProperties, "queueName", 15, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append(", ");
+		AppendStringFromDict(customProperties, "language", 15, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append(", ");
+		AppendStringFromDict(customProperties, "fan_club", 6, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append(", ");
+		AppendStringFromDict(customProperties, "mmrTier", 8, NetworkSystem.reusableSB);
+		NetworkSystem.reusableSB.Append("}");
+		return NetworkSystem.reusableSB.ToString();
+	}
+
+	private void AppendStringFromDict(IDictionary dict, string key, int maxStrLen, StringBuilder sb)
+	{
+		sb.AppendFormat("{0}=", key);
+		if (!dict.Contains(key) || !(dict[key] is string text))
+		{
+			sb.Append("null");
+		}
+		else
+		{
+			sb.Append((text.Length < maxStrLen) ? text : text.Remove(maxStrLen));
+		}
+	}
+
+	public override async void Initialise()
+	{
+		base.Initialise();
+		base.netState = NetSystemState.Initialization;
+		PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = NetworkSystemConfig.AppVersion;
+		PhotonNetwork.PhotonServerSettings.AppSettings.UseNameServer = true;
+		PhotonNetwork.EnableCloseConnection = false;
+		PhotonNetwork.AutomaticallySyncScene = false;
+		string playerName = PlayerPrefs.GetString("playerName", "gorilla" + UnityEngine.Random.Range(0, 9999).ToString().PadLeft(4, '0'));
+		playerPool = new ObjectPool<PunNetPlayer>(20);
+		UpdatePlayers();
+		await CacheRegionInfo();
+		UpdatePlayers();
+		SetMyNickName(playerName);
+	}
+
+	private async Task CacheRegionInfo()
+	{
+		if (isWrongVersion)
+		{
+			return;
+		}
+		regionData = new NetworkRegionInfo[regionNames.Length];
+		for (int i = 0; i < regionData.Length; i++)
+		{
+			regionData[i] = new NetworkRegionInfo();
+		}
+		if (!(await WaitForStateCheck(InternalState.Authenticated, float.PositiveInfinity)))
+		{
+			return;
+		}
+		base.netState = NetSystemState.PingRecon;
+		int tryingRegionIndex = 0;
+		while (tryingRegionIndex < regionNames.Length)
+		{
+			internalState = InternalState.ConnectingToMaster;
+			PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = regionNames[tryingRegionIndex];
+			currentRegionIndex = tryingRegionIndex;
+			PhotonNetwork.ConnectUsingSettings();
+			if (!(await WaitForStateCheck(InternalState.ConnectedToMaster)))
+			{
+				base.netState = NetSystemState.PingRecon;
+			}
+			else
+			{
+				regionData[currentRegionIndex].playersInRegion = PhotonNetwork.CountOfPlayers;
+				regionData[currentRegionIndex].pingToRegion = PhotonNetwork.GetPing();
+				Utils.Log("Ping for " + PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion.ToString() + " is " + PhotonNetwork.GetPing());
+				internalState = InternalState.PingGathering;
+				PhotonNetwork.Disconnect();
+				if (!(await WaitForStateCheck(InternalState.Internal_Disconnected)))
+				{
+					return;
+				}
+			}
+			int num = tryingRegionIndex + 1;
+			tryingRegionIndex = num;
+		}
+		internalState = InternalState.Idle;
+		base.netState = NetSystemState.Idle;
+	}
+
+	public override AuthenticationValues GetAuthenticationValues()
+	{
+		return PhotonNetwork.AuthValues;
+	}
+
+	public override void SetAuthenticationValues(AuthenticationValues authValues)
+	{
+		PhotonNetwork.AuthValues = authValues;
+	}
+
+	public override void FinishAuthenticating()
+	{
+		if (PhotonNetwork.AuthValues == null)
+		{
+			_taskCancelTokens.ForEach(delegate(CancellationTokenSource cts)
+			{
+				cts.Cancel();
+				cts.Dispose();
+			});
+			_taskCancelTokens.Clear();
+		}
+		else
+		{
+			internalState = InternalState.Authenticated;
+		}
+	}
+
+	private async Task WaitForState(CancellationToken ct, InternalState[] desiredStates, float timeout)
+	{
+		float timeoutTime = Time.realtimeSinceStartup + timeout;
+		while (!Enumerable.Contains(desiredStates, this.internalState))
+		{
+			if (ct.IsCancellationRequested)
+			{
+				string text = "";
+				InternalState[] array = desiredStates;
+				foreach (InternalState internalState in array)
+				{
+					text += $"- {internalState}";
+				}
+				Debug.LogError("Got cancelation token while waiting for states " + text);
+				this.internalState = InternalState.StateCheckFailed;
+				break;
+			}
+			if (timeoutTime < Time.realtimeSinceStartup)
+			{
+				string text2 = "";
+				InternalState[] array = desiredStates;
+				foreach (InternalState internalState2 in array)
+				{
+					text2 += $"- {internalState2}";
+				}
+				Debug.LogError("Got stuck waiting for states " + text2);
+				this.internalState = InternalState.StateCheckFailed;
+				break;
+			}
+			await Task.Yield();
+		}
+	}
+
+	private async Task<bool> WaitForStateCheck(InternalState[] desiredStates, float timeout = 10f)
+	{
+		(CancellationTokenSource, CancellationToken) token = GetCancellationToken();
+		await WaitForState(token.Item2, desiredStates, timeout);
+		_taskCancelTokens.Remove(token.Item1);
+		token.Item1.Dispose();
+		if (internalState != InternalState.StateCheckFailed)
+		{
+			return true;
+		}
+		ResetSystem();
+		return false;
+	}
+
+	private Task<bool> WaitForStateCheck(InternalState desiredState, float timeout = 10f)
+	{
+		return WaitForStateCheck(new InternalState[1] { desiredState }, timeout);
+	}
+
+	private async Task<NetJoinResult> MakeOrFindRoom(string roomName, RoomConfig opts, int regionIndex = -1)
+	{
+		if (InRoom)
+		{
+			await InternalDisconnect();
+		}
+		currentRegionIndex = 0;
+		bool flag = ((regionIndex >= 0) ? (await TryJoinRoomInRegion(roomName, opts, regionIndex)) : (await TryJoinRoom(roomName, opts)));
+		bool flag2 = flag;
+		if (internalState == InternalState.Searching_JoinFailed_Full)
+		{
+			return NetJoinResult.Failed_Full;
+		}
+		if (!flag2)
+		{
+			return await TryCreateRoom(roomName, opts);
+		}
+		return NetJoinResult.Success;
+	}
+
+	private async Task<bool> TryJoinRoom(string roomName, RoomConfig opts)
+	{
+		while (currentRegionIndex < regionNames.Length)
+		{
+			if (await TryJoinRoomInRegion(roomName, opts, currentRegionIndex))
+			{
+				return true;
+			}
+			currentRegionIndex++;
+		}
+		return false;
+	}
+
+	private async Task<bool> TryJoinRoomInRegion(string roomName, RoomConfig opts, int regionIndex)
+	{
+		internalState = InternalState.ConnectingToMaster;
+		string fixedRegion = regionNames[regionIndex];
+		PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = fixedRegion;
+		currentRegionIndex = regionIndex;
+		UpdateZoneInfo(opts.isPublic);
+		PhotonNetwork.ConnectUsingSettings();
+		if (!(await WaitForStateCheck(InternalState.ConnectedToMaster)))
+		{
+			return false;
+		}
+		internalState = InternalState.Searching_Joining;
+		PhotonNetwork.JoinRoom(roomName);
+		if (!(await WaitForStateCheck(new InternalState[3]
+		{
+			InternalState.Searching_Joined,
+			InternalState.Searching_JoinFailed,
+			InternalState.Searching_JoinFailed_Full
+		})))
+		{
+			return false;
+		}
+		if (internalState == InternalState.Searching_JoinFailed_Full)
+		{
+			return true;
+		}
+		bool foundRoom = internalState == InternalState.Searching_Joined;
+		if (!foundRoom)
+		{
+			PhotonNetwork.Disconnect();
+			internalState = InternalState.Searching_Disconnecting;
+			if (!(await WaitForStateCheck(InternalState.Searching_Disconnected)))
+			{
+				return false;
+			}
+		}
+		return foundRoom;
+	}
+
+	private async Task<NetJoinResult> TryCreateRoom(string roomName, RoomConfig opts)
+	{
+		Debug.Log("returning to best region to create room");
+		internalState = InternalState.ConnectingToMaster;
+		PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = regionNames[lowestPingRegionIndex];
+		currentRegionIndex = lowestPingRegionIndex;
+		UpdateZoneInfo(opts.isPublic);
+		PhotonNetwork.ConnectUsingSettings();
+		if (!(await WaitForStateCheck(InternalState.ConnectedToMaster)))
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		internalState = InternalState.Searching_Creating;
+		PhotonNetwork.CreateRoom(roomName, opts.ToPUNOpts());
+		if (!(await WaitForStateCheck(new InternalState[2]
+		{
+			InternalState.Searching_Created,
+			InternalState.Searching_CreateFailed
+		})))
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		if (internalState == InternalState.Searching_CreateFailed)
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		return NetJoinResult.FallbackCreated;
+	}
+
+	private async Task<NetJoinResult> JoinRandomPublicRoom(RoomConfig opts)
+	{
+		if (InRoom)
+		{
+			await InternalDisconnect();
+		}
+		internalState = InternalState.ConnectingToMaster;
+		if (!firstRoomJoin && opts.CustomProps.TryGetValue("gameMode", out var value) && !value.ToString().StartsWith("city"))
+		{
+			firstRoomJoin = true;
+			PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = regionNames[lowestPingRegionIndex];
+			currentRegionIndex = lowestPingRegionIndex;
+		}
+		else if (!opts.IsJoiningWithFriends)
+		{
+			PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = GetRandomWeightedRegion();
+			currentRegionIndex = Array.IndexOf(regionNames, PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion);
+		}
+		UpdateZoneInfo(roomIsPublic: true, PhotonNetworkController.Instance.currentJoinTrigger.zone.GetName());
+		PhotonNetwork.ConnectUsingSettings();
+		if (!(await WaitForStateCheck(InternalState.ConnectedToMaster)))
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		internalState = InternalState.Searching_Joining;
+		if (opts.IsJoiningWithFriends)
+		{
+			PhotonNetwork.JoinRandomRoom(opts.CustomProps, opts.MaxPlayers, MatchmakingMode.RandomMatching, null, null, opts.joinFriendIDs.ToArray());
+		}
+		else
+		{
+			PhotonNetwork.JoinRandomRoom(opts.CustomProps, opts.MaxPlayers, MatchmakingMode.FillRoom, null, null);
+		}
+		if (!(await WaitForStateCheck(new InternalState[2]
+		{
+			InternalState.Searching_Joined,
+			InternalState.Searching_JoinFailed
+		})))
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		if (internalState == InternalState.Searching_JoinFailed)
+		{
+			internalState = InternalState.Searching_Creating;
+			string text = "";
+			if (opts.MaxPlayers == 20 && opts.isPublic)
+			{
+				text = ":GTFC";
+			}
+			if (opts.IsJoiningWithFriends)
+			{
+				PhotonNetwork.CreateRoom(NetworkSystem.GetRandomRoomName() + text, opts.ToPUNOpts(), null, opts.joinFriendIDs);
+			}
+			else
+			{
+				PhotonNetwork.CreateRoom(NetworkSystem.GetRandomRoomName() + text, opts.ToPUNOpts());
+			}
+			if (!(await WaitForStateCheck(new InternalState[2]
+			{
+				InternalState.Searching_Created,
+				InternalState.Searching_CreateFailed
+			})))
+			{
+				return NetJoinResult.Failed_Other;
+			}
+			if (internalState == InternalState.Searching_CreateFailed)
+			{
+				return NetJoinResult.Failed_Other;
+			}
+			return NetJoinResult.FallbackCreated;
+		}
+		return NetJoinResult.Success;
+	}
+
+	public override async Task<NetJoinResult> ConnectToRoom(string roomName, RoomConfig opts, int regionIndex = -1)
+	{
+		if (isWrongVersion)
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		if (base.netState != NetSystemState.Idle && base.netState != NetSystemState.InGame)
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		if (InRoom && roomName == RoomName)
+		{
+			return NetJoinResult.AlreadyInRoom;
+		}
+		if (roomTask != null && !roomTask.IsCompleted)
+		{
+			return NetJoinResult.Failed_Other;
+		}
+		base.netState = NetSystemState.Connecting;
+		NetJoinResult netJoinResult;
+		if (roomName != null)
+		{
+			roomTask = MakeOrFindRoom(roomName, opts, regionIndex);
+			netJoinResult = await roomTask;
+			roomTask = null;
+		}
+		else
+		{
+			roomTask = JoinRandomPublicRoom(opts);
+			netJoinResult = await roomTask;
+			roomTask = null;
+		}
+		switch (netJoinResult)
+		{
+		case NetJoinResult.Failed_Full:
+			GorillaComputer.instance.roomFull = true;
+			GorillaComputer.instance.UpdateScreen();
+			ResetSystem();
+			roomTask = null;
+			return netJoinResult;
+		case NetJoinResult.Failed_Other:
+			ResetSystem();
+			roomTask = null;
+			return netJoinResult;
+		case NetJoinResult.AlreadyInRoom:
+			base.netState = NetSystemState.InGame;
+			roomTask = null;
+			return netJoinResult;
+		default:
+			if (!InRoom)
+			{
+				GTDev.LogError("NetworkSystem: room joined success but we have disconnected");
+				return NetJoinResult.Failed_Other;
+			}
+			base.netState = NetSystemState.InGame;
+			PlayerJoined(base.LocalPlayer);
+			localRecorder.StartRecording();
+			return netJoinResult;
+		}
+	}
+
+	public override async Task JoinFriendsRoom(string userID, int actorIDToFollow, string keyToFollow, string shufflerToFollow)
+	{
+		bool foundFriend = false;
+		float searchStartTime = Time.realtimeSinceStartup;
+		float timeToSpendSearching = 15f;
+		Dictionary<string, PlayFab.ClientModels.SharedGroupDataRecord> dummyData = new Dictionary<string, PlayFab.ClientModels.SharedGroupDataRecord>();
+		bool failedToJoinFriend = false;
+		try
+		{
+			base.groupJoinInProgress = true;
+			while (!foundFriend && searchStartTime + timeToSpendSearching > Time.realtimeSinceStartup)
+			{
+				Dictionary<string, PlayFab.ClientModels.SharedGroupDataRecord> data = dummyData;
+				bool callbackFinished = false;
+				PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
+				{
+					Keys = new List<string> { keyToFollow },
+					SharedGroupId = userID
+				}, delegate(GetSharedGroupDataResult getSharedGroupDataResult)
+				{
+					data = getSharedGroupDataResult.Data;
+					Debug.Log($"Got friend follow data, {data.Count} entries");
+					callbackFinished = true;
+				}, delegate(PlayFabError error)
+				{
+					Debug.Log($"GetSharedGroupData returns error: {error}");
+					callbackFinished = true;
+				});
+				while (!callbackFinished)
+				{
+					await Task.Yield();
+				}
+				foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> item in data)
+				{
+					if (!(item.Key == keyToFollow))
+					{
+						continue;
+					}
+					string[] array = item.Value.Value.Split("|");
+					if (array.Length != 2)
+					{
+						continue;
+					}
+					string roomID = NetworkSystem.ShuffleRoomName(array[0], shufflerToFollow.Substring(2, 8), encode: false);
+					string value = NetworkSystem.ShuffleRoomName(array[1], shufflerToFollow.Substring(0, 2), encode: false);
+					int regionIndex = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".IndexOf(value);
+					if (regionIndex < 0 || regionIndex >= NetworkSystem.Instance.regionNames.Length)
+					{
+						continue;
+					}
+					foundFriend = true;
+					if (InRoom && PhotonNetwork.CurrentRoom.Players.TryGetValue(actorIDToFollow, out var value2) && value2 != null)
+					{
+						MonkeAgent.instance.SendReport("possible kick attempt", value2.UserId, value2.NickName);
+					}
+					else if (RoomName != roomID)
+					{
+						await ReturnToSinglePlayer();
+						RoomConfig roomConfig = new RoomConfig();
+						roomConfig.createIfMissing = false;
+						roomConfig.isPublic = true;
+						roomConfig.isJoinable = true;
+						Task<NetJoinResult> ConnectToRoomTask = ConnectToRoom(roomID, roomConfig, regionIndex);
+						await ConnectToRoomTask;
+						NetJoinResult result = ConnectToRoomTask.Result;
+						failedToJoinFriend = result != NetJoinResult.Success;
+						if (result == NetJoinResult.Success)
+						{
+							groupJoinOverrideGameMode = NetworkSystem.Instance.GameModeString;
+						}
+					}
+				}
+				await Task.Delay(500);
+			}
+		}
+		finally
+		{
+			base.groupJoinInProgress = false;
+			if (failedToJoinFriend)
+			{
+				FriendshipGroupDetection.Instance.OnFailedToFollowParty();
+			}
+		}
+	}
+
+	public override void JoinPubWithFriends()
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetRandomWeightedRegion()
+	{
+		float value = UnityEngine.Random.value;
+		int num = 0;
+		for (int i = 0; i < regionData.Length; i++)
+		{
+			num += regionData[i].playersInRegion;
+		}
+		float num2 = 0f;
+		int num3;
+		for (num3 = -1; num2 < value; num2 += (float)regionData[num3].playersInRegion / (float)num)
+		{
+			if (num3 >= regionData.Length - 1)
+			{
+				break;
+			}
+			num3++;
+		}
+		return regionNames[num3];
+	}
+
+	public override async Task ReturnToSinglePlayer()
+	{
+		if (base.netState == NetSystemState.InGame || base.netState == NetSystemState.Connecting)
+		{
+			base.netState = NetSystemState.Disconnecting;
+			_taskCancelTokens.ForEach(delegate(CancellationTokenSource cts)
+			{
+				cts.Cancel();
+				cts.Dispose();
+			});
+			_taskCancelTokens.Clear();
+			await InternalDisconnect();
+			base.netState = NetSystemState.Idle;
+		}
+	}
+
+	private async Task InternalDisconnect()
+	{
+		internalState = InternalState.Internal_Disconnecting;
+		PhotonNetwork.Disconnect();
+		if (!(await WaitForStateCheck(InternalState.Internal_Disconnected)))
+		{
+			Debug.LogError("Failed to achieve internal disconnected state");
+		}
+		UnityEngine.Object.Destroy(VoiceNetworkObject);
+		UpdatePlayers();
+		SinglePlayerStarted();
+	}
+
+	private void AddVoice()
+	{
+		SetupVoice();
+	}
+
+	private void SetupVoice()
+	{
+		try
+		{
+			punVoice = PhotonVoiceNetwork.Instance;
+			VoiceNetworkObject = punVoice.gameObject;
+			VoiceNetworkObject.name = "VoiceNetworkObject";
+			VoiceNetworkObject.transform.parent = base.transform;
+			VoiceNetworkObject.transform.localPosition = Vector3.zero;
+			punVoice.LogLevel = VoiceSettings.LogLevel;
+			punVoice.GlobalRecordersLogLevel = VoiceSettings.GlobalRecordersLogLevel;
+			punVoice.GlobalSpeakersLogLevel = VoiceSettings.GlobalSpeakersLogLevel;
+			punVoice.AutoConnectAndJoin = VoiceSettings.AutoConnectAndJoin;
+			punVoice.AutoLeaveAndDisconnect = VoiceSettings.AutoLeaveAndDisconnect;
+			punVoice.WorkInOfflineMode = VoiceSettings.WorkInOfflineMode;
+			punVoice.AutoCreateSpeakerIfNotFound = VoiceSettings.CreateSpeakerIfNotFound;
+			AppSettings appSettings = new AppSettings();
+			appSettings.AppIdRealtime = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime;
+			appSettings.AppIdVoice = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdVoice;
+			punVoice.Settings = appSettings;
+			remoteVoiceAddedCallbacks.ForEach(delegate(Action<RemoteVoiceLink> callback)
+			{
+				punVoice.RemoteVoiceAdded += callback;
+			});
+			localRecorder = VoiceNetworkObject.GetComponent<GTRecorder>();
+			if (localRecorder == null)
+			{
+				localRecorder = VoiceNetworkObject.AddComponent<GTRecorder>();
+				if (VRRigCache.Instance != null && VRRigCache.Instance.localRig != null)
+				{
+					LoudSpeakerActivator[] componentsInChildren = VRRigCache.Instance.localRig.GetComponentsInChildren<LoudSpeakerActivator>();
+					for (int num = 0; num < componentsInChildren.Length; num++)
+					{
+						componentsInChildren[num].SetRecorder((GTRecorder)localRecorder);
+					}
+				}
+			}
+			localRecorder.LogLevel = VoiceSettings.LogLevel;
+			localRecorder.RecordOnlyWhenEnabled = VoiceSettings.RecordOnlyWhenEnabled;
+			localRecorder.RecordOnlyWhenJoined = VoiceSettings.RecordOnlyWhenJoined;
+			localRecorder.StopRecordingWhenPaused = VoiceSettings.StopRecordingWhenPaused;
+			localRecorder.TransmitEnabled = VoiceSettings.TransmitEnabled;
+			localRecorder.AutoStart = VoiceSettings.AutoStart;
+			localRecorder.Encrypt = VoiceSettings.Encrypt;
+			localRecorder.FrameDuration = VoiceSettings.FrameDuration;
+			localRecorder.InterestGroup = VoiceSettings.InterestGroup;
+			localRecorder.SourceType = VoiceSettings.InputSourceType;
+			localRecorder.MicrophoneType = VoiceSettings.MicrophoneType;
+			localRecorder.UseMicrophoneTypeFallback = VoiceSettings.UseFallback;
+			localRecorder.VoiceDetection = VoiceSettings.Detect;
+			localRecorder.VoiceDetectionThreshold = VoiceSettings.Threshold;
+			localRecorder.VoiceDetectionDelayMs = VoiceSettings.Delay;
+			localRecorder.DebugEchoMode = VoiceSettings.DebugEcho;
+			if (!SubscriptionManager.IsLocalSubscribed())
+			{
+				localRecorder.SamplingRate = VoiceSettings.SamplingRate;
+				localRecorder.Bitrate = VoiceSettings.Bitrate;
+			}
+			else
+			{
+				localRecorder.SamplingRate = VoiceSettings.SubsSamplingRate;
+				localRecorder.Bitrate = VoiceSettings.SubsBitrate;
+			}
+			VoiceNetworkObject.AddComponent<VoiceToLoudness>();
+			punVoice.PrimaryRecorder = localRecorder;
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("An exception was thrown when trying to setup photon voice, please check microphone permissions:\n" + ex.ToString());
+		}
+	}
+
+	public override void AddRemoteVoiceAddedCallback(Action<RemoteVoiceLink> callback)
+	{
+		remoteVoiceAddedCallbacks.Add(callback);
+	}
+
+	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, bool isRoomObject = false)
+	{
+		if (PhotonNetwork.CurrentRoom == null)
+		{
+			return null;
+		}
+		if (isRoomObject)
+		{
+			return PhotonNetwork.InstantiateRoomObject(prefab.name, position, rotation, 0);
+		}
+		return PhotonNetwork.Instantiate(prefab.name, position, rotation, 0);
+	}
+
+	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, int playerAuthID, bool isRoomObject = false)
+	{
+		return NetInstantiate(prefab, position, rotation, isRoomObject);
+	}
+
+	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, bool isRoomObject, byte group = 0, object[] data = null, NetworkRunner.OnBeforeSpawned callback = null)
+	{
+		if (PhotonNetwork.CurrentRoom == null)
+		{
+			return null;
+		}
+		if (isRoomObject)
+		{
+			return PhotonNetwork.InstantiateRoomObject(prefab.name, position, rotation, group, data);
+		}
+		return PhotonNetwork.Instantiate(prefab.name, position, rotation, group, data);
+	}
+
+	public override void NetDestroy(GameObject instance)
+	{
+		if (instance.TryGetComponent<PhotonView>(out var component) && component.AmOwner)
+		{
+			PhotonNetwork.Destroy(instance);
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(instance);
+		}
+	}
+
+	public override void SetPlayerObject(GameObject playerInstance, int? owningPlayerID = null)
+	{
+	}
+
+	public override void CallRPC(MonoBehaviour component, RPC rpcMethod, bool sendToSelf = true)
+	{
+		RpcTarget target = ((!sendToSelf) ? RpcTarget.Others : RpcTarget.All);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, NetworkSystem.EmptyArgs);
+	}
+
+	public override void CallRPC<T>(MonoBehaviour component, RPC rpcMethod, RPCArgBuffer<T> args, bool sendToSelf = true)
+	{
+		RpcTarget target = ((!sendToSelf) ? RpcTarget.Others : RpcTarget.All);
+		NetCrossoverUtils.SerializeToRPCData(ref args);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, args.Data);
+	}
+
+	public override void CallRPC(MonoBehaviour component, StringRPC rpcMethod, string message, bool sendToSelf = true)
+	{
+		RpcTarget target = ((!sendToSelf) ? RpcTarget.Others : RpcTarget.All);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, message);
+	}
+
+	public override void CallRPC(int targetPlayerID, MonoBehaviour component, RPC rpcMethod)
+	{
+		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, NetworkSystem.EmptyArgs);
+	}
+
+	public override void CallRPC<T>(int targetPlayerID, MonoBehaviour component, RPC rpcMethod, RPCArgBuffer<T> args)
+	{
+		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID);
+		NetCrossoverUtils.SerializeToRPCData(ref args);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, args.Data);
+	}
+
+	public override void CallRPC(int targetPlayerID, MonoBehaviour component, StringRPC rpcMethod, string message)
+	{
+		Player player = PhotonNetwork.CurrentRoom.GetPlayer(targetPlayerID);
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, player, message);
+	}
+
+	public override async Task AwaitSceneReady()
+	{
+		while (PhotonNetwork.LevelLoadingProgress < 1f)
+		{
+			await Task.Yield();
+		}
+	}
+
+	public override NetPlayer GetLocalPlayer()
+	{
+		if (netPlayerCache.Count == 0)
+		{
+			UpdatePlayers();
+		}
+		foreach (NetPlayer item in netPlayerCache)
+		{
+			if (item.IsLocal)
+			{
+				return item;
+			}
+		}
+		Debug.LogError("Somehow no local net players found. This shouldn't happen");
+		return null;
+	}
+
+	public override NetPlayer GetPlayer(int PlayerID)
+	{
+		if (InRoom && !PhotonNetwork.CurrentRoom.Players.ContainsKey(PlayerID))
+		{
+			return null;
+		}
+		foreach (NetPlayer item in netPlayerCache)
+		{
+			if (item.ActorNumber == PlayerID)
+			{
+				return item;
+			}
+		}
+		UpdatePlayers();
+		foreach (NetPlayer item2 in netPlayerCache)
+		{
+			if (item2.ActorNumber == PlayerID)
+			{
+				return item2;
+			}
+		}
+		GTDev.LogWarning("There is no NetPlayer with this ID currently in game. Passed ID: " + PlayerID);
+		return null;
+	}
+
+	public override void SetMyNickName(string id)
+	{
+		if (!KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags) && !id.StartsWith("gorilla"))
+		{
+			Debug.Log("[KID] Trying to set custom nickname but that permission has been disallowed");
+			PhotonNetwork.LocalPlayer.NickName = "gorilla";
+			return;
+		}
+		PlayerPrefs.SetString("playerName", id);
+		string nickName = PhotonNetwork.LocalPlayer.NickName;
+		PhotonNetwork.LocalPlayer.NickName = id;
+		_ = nickName != id;
+	}
+
+	public override string GetMyNickName()
+	{
+		return PhotonNetwork.LocalPlayer.NickName;
+	}
+
+	public override string GetMyDefaultName()
+	{
+		return PhotonNetwork.LocalPlayer.DefaultName;
+	}
+
+	public override string GetNickName(int playerID)
+	{
+		return GetPlayer(playerID)?.NickName;
+	}
+
+	public override string GetNickName(NetPlayer player)
+	{
+		return player.NickName;
+	}
+
+	public override void SetMyTutorialComplete()
+	{
+		bool flag = PlayerPrefs.GetString("didTutorial", "nope") == "done";
+		if (!flag)
+		{
+			PlayerPrefs.SetString("didTutorial", "done");
+			PlayerPrefs.Save();
+		}
+		ExitGames.Client.Photon.Hashtable hashtable = new ExitGames.Client.Photon.Hashtable();
+		hashtable.Add("didTutorial", flag);
+		PhotonNetwork.LocalPlayer.SetCustomProperties(hashtable);
+	}
+
+	public override bool GetMyTutorialCompletion()
+	{
+		return PlayerPrefs.GetString("didTutorial", "nope") == "done";
+	}
+
+	public override bool GetPlayerTutorialCompletion(int playerID)
+	{
+		NetPlayer player = GetPlayer(playerID);
+		if (player == null)
+		{
+			return false;
+		}
+		Player player2 = PhotonNetwork.CurrentRoom.GetPlayer(player.ActorNumber);
+		if (player2 == null)
+		{
+			return false;
+		}
+		if (player2.CustomProperties.TryGetValue("didTutorial", out var value))
+		{
+			bool flag = default(bool);
+			int num;
+			if (value is bool)
+			{
+				flag = (bool)value;
+				num = ((1 == 0) ? 1 : 0);
+			}
+			else
+			{
+				num = 1;
+			}
+			return (byte)((uint)num | (flag ? 1u : 0u)) != 0;
+		}
+		return false;
+	}
+
+	public override string GetMyUserID()
+	{
+		return PhotonNetwork.LocalPlayer.UserId;
+	}
+
+	public override string GetUserID(int playerID)
+	{
+		return GetPlayer(playerID)?.UserId;
+	}
+
+	public override string GetUserID(NetPlayer netPlayer)
+	{
+		return ((PunNetPlayer)netPlayer).PlayerRef?.UserId;
+	}
+
+	public override int GlobalPlayerCount()
+	{
+		int num = 0;
+		NetworkRegionInfo[] array = regionData;
+		foreach (NetworkRegionInfo networkRegionInfo in array)
+		{
+			num += networkRegionInfo.playersInRegion;
+		}
+		return num;
+	}
+
+	public override bool IsObjectLocallyOwned(GameObject obj)
+	{
+		if (!IsOnline)
+		{
+			return true;
+		}
+		if (obj.TryGetComponent<PhotonView>(out var component))
+		{
+			return component.IsMine;
+		}
+		return true;
+	}
+
+	protected override void UpdateNetPlayerList()
+	{
+		if (!IsOnline)
+		{
+			bool flag = false;
+			PunNetPlayer punNetPlayer = null;
+			if (netPlayerCache.Count > 0)
+			{
+				for (int i = 0; i < netPlayerCache.Count; i++)
+				{
+					NetPlayer netPlayer = netPlayerCache[i];
+					if (netPlayer.IsLocal)
+					{
+						punNetPlayer = (PunNetPlayer)netPlayer;
+						flag = true;
+					}
+					else
+					{
+						playerPool.Return((PunNetPlayer)netPlayer);
+					}
+				}
+				netPlayerCache.Clear();
+			}
+			if (!flag)
+			{
+				punNetPlayer = playerPool.Take();
+				punNetPlayer.InitPlayer(PhotonNetwork.LocalPlayer);
+			}
+			netPlayerCache.Add(punNetPlayer);
+		}
+		else
+		{
+			Dictionary<int, Player>.ValueCollection values = PhotonNetwork.CurrentRoom.Players.Values;
+			foreach (Player item in values)
+			{
+				bool flag2 = false;
+				for (int j = 0; j < netPlayerCache.Count; j++)
+				{
+					if (item == ((PunNetPlayer)netPlayerCache[j]).PlayerRef)
+					{
+						flag2 = true;
+						break;
+					}
+				}
+				if (!flag2)
+				{
+					PunNetPlayer punNetPlayer2 = playerPool.Take();
+					punNetPlayer2.InitPlayer(item);
+					netPlayerCache.Add(punNetPlayer2);
+				}
+			}
+			for (int k = 0; k < netPlayerCache.Count; k++)
+			{
+				PunNetPlayer punNetPlayer3 = (PunNetPlayer)netPlayerCache[k];
+				bool flag3 = false;
+				foreach (Player item2 in values)
+				{
+					if (item2 == punNetPlayer3.PlayerRef)
+					{
+						flag3 = true;
+						break;
+					}
+				}
+				if (!flag3)
+				{
+					playerPool.Return(punNetPlayer3);
+					netPlayerCache.Remove(punNetPlayer3);
+				}
+			}
+		}
+		m_allNetPlayers = netPlayerCache.ToArray();
+		m_otherNetPlayers = new NetPlayer[m_allNetPlayers.Length - 1];
+		int num = 0;
+		for (int l = 0; l < m_allNetPlayers.Length; l++)
+		{
+			NetPlayer netPlayer2 = m_allNetPlayers[l];
+			if (netPlayer2.IsLocal)
+			{
+				num++;
+				continue;
+			}
+			int num2 = l - num;
+			if (num2 != m_otherNetPlayers.Length)
+			{
+				m_otherNetPlayers[num2] = netPlayer2;
+				continue;
+			}
+			break;
+		}
+	}
+
+	public override bool IsObjectRoomObject(GameObject obj)
+	{
+		PhotonView component = obj.GetComponent<PhotonView>();
+		if (component == null)
+		{
+			Debug.LogError("No photonview found on this Object, this shouldn't happen");
+			return false;
+		}
+		return component.IsRoomView;
+	}
+
+	public override bool ShouldUpdateObject(GameObject obj)
+	{
+		return IsObjectLocallyOwned(obj);
+	}
+
+	public override bool ShouldWriteObjectData(GameObject obj)
+	{
+		return IsObjectLocallyOwned(obj);
+	}
+
+	public override int GetOwningPlayerID(GameObject obj)
+	{
+		if (obj.TryGetComponent<PhotonView>(out var component) && component.Owner != null)
+		{
+			return component.Owner.ActorNumber;
+		}
+		return -1;
+	}
+
+	public override bool ShouldSpawnLocally(int playerID)
+	{
+		if (LocalPlayerID != playerID)
+		{
+			if (playerID == -1)
+			{
+				return PhotonNetwork.MasterClient.IsLocal;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public override bool IsTotalAuthority()
+	{
+		return false;
+	}
+
+	public void OnConnectedtoMaster()
+	{
+		if (internalState == InternalState.ConnectingToMaster)
+		{
+			internalState = InternalState.ConnectedToMaster;
+		}
+		UpdatePlayers();
+	}
+
+	public void OnJoinedRoom()
+	{
+		if (internalState == InternalState.Searching_Joining)
+		{
+			internalState = InternalState.Searching_Joined;
+		}
+		else if (internalState == InternalState.Searching_Creating)
+		{
+			internalState = InternalState.Searching_Created;
+		}
+		AddVoice();
+		UpdatePlayers();
+		JoinedNetworkRoom();
+	}
+
+	public void OnJoinRoomFailed(short returnCode, string message)
+	{
+		Debug.Log("onJoinRoomFailed " + returnCode + " " + message);
+		if (internalState == InternalState.Searching_Joining)
+		{
+			if (returnCode == 32765)
+			{
+				internalState = InternalState.Searching_JoinFailed_Full;
+			}
+			else
+			{
+				internalState = InternalState.Searching_JoinFailed;
+			}
+		}
+	}
+
+	public void OnCreateRoomFailed(short returnCode, string message)
+	{
+		if (internalState == InternalState.Searching_Creating)
+		{
+			internalState = InternalState.Searching_CreateFailed;
+		}
+	}
+
+	public void OnPlayerEnteredRoom(Player newPlayer)
+	{
+		UpdatePlayers();
+		NetPlayer player = GetPlayer(newPlayer);
+		PlayerJoined(player);
+	}
+
+	public void OnPlayerLeftRoom(Player otherPlayer)
+	{
+		NetPlayer player = GetPlayer(otherPlayer);
+		UpdatePlayers();
+		PlayerLeft(player);
+	}
+
+	public async void OnDisconnected(DisconnectCause cause)
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			groupJoinOverrideGameMode = "";
+			await RefreshNonce();
+			if (internalState == InternalState.Searching_Disconnecting)
+			{
+				internalState = InternalState.Searching_Disconnected;
+				return;
+			}
+			if (internalState == InternalState.PingGathering)
+			{
+				internalState = InternalState.Internal_Disconnected;
+				return;
+			}
+			if (internalState == InternalState.Internal_Disconnecting)
+			{
+				internalState = InternalState.Internal_Disconnected;
+				return;
+			}
+			UpdatePlayers();
+			SinglePlayerStarted();
+		}
+	}
+
+	public void OnMasterClientSwitched(Player newMasterClient)
+	{
+		OnMasterClientSwitchedCallback(newMasterClient);
+	}
+
+	private (CancellationTokenSource, CancellationToken) GetCancellationToken()
+	{
+		CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+		CancellationToken token = cancellationTokenSource.Token;
+		_taskCancelTokens.Add(cancellationTokenSource);
+		return (cancellationTokenSource, token);
+	}
+
+	public void ResetSystem()
+	{
+		if ((bool)VoiceNetworkObject)
+		{
+			UnityEngine.Object.Destroy(VoiceNetworkObject);
+		}
+		PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = regionNames[lowestPingRegionIndex];
+		currentRegionIndex = lowestPingRegionIndex;
+		PhotonNetwork.Disconnect();
+		_taskCancelTokens.ForEach(delegate(CancellationTokenSource token)
+		{
+			token.Cancel();
+			token.Dispose();
+		});
+		_taskCancelTokens.Clear();
+		internalState = InternalState.Idle;
+		base.netState = NetSystemState.Idle;
+	}
+
+	private void UpdateZoneInfo(bool roomIsPublic, string zoneName = null)
+	{
+		AuthenticationValues authenticationValues = GetAuthenticationValues();
+		if (authenticationValues?.AuthPostData is Dictionary<string, object> dictionary)
+		{
+			dictionary["Zone"] = ((zoneName != null) ? zoneName : ((ZoneManagement.instance.activeZones.Count > 0) ? ZoneManagement.instance.activeZones.First().GetName() : ""));
+			dictionary["SubZone"] = GTSubZone.none.GetName();
+			dictionary["IsPublic"] = roomIsPublic;
+			authenticationValues.SetAuthPostData(dictionary);
+			SetAuthenticationValues(authenticationValues);
+		}
 	}
 }

@@ -1,12 +1,9 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public class WhackAMoleButton : GorillaPressableButton
 {
-	public class WhackAMoleButton : GorillaPressableButton
+	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
-		public override void ButtonActivationWithHand(bool isLeftHand)
-		{
-			base.ButtonActivationWithHand(isLeftHand);
-		}
+		base.ButtonActivationWithHand(isLeftHand);
 	}
 }

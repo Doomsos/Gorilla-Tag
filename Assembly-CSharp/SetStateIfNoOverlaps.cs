@@ -1,22 +1,21 @@
-﻿using System;
 using UnityEngine;
 
 public class SetStateIfNoOverlaps : SetStateConditional
 {
+	public VolumeCast _volume;
+
 	protected override void Setup(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
-		this._volume = animator.GetComponent<VolumeCast>();
+		_volume = animator.GetComponent<VolumeCast>();
 	}
 
 	protected override bool CanSetState(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
-		bool flag = this._volume.CheckOverlaps();
-		if (flag)
+		bool num = _volume.CheckOverlaps();
+		if (num)
 		{
-			this._sinceEnter = 0f;
+			_sinceEnter = 0f;
 		}
-		return !flag;
+		return !num;
 	}
-
-	public VolumeCast _volume;
 }

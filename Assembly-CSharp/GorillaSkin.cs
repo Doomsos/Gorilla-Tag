@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
@@ -6,21 +6,56 @@ using UnityEngine.Serialization;
 
 public class GorillaSkin : ScriptableObject
 {
-	public Mesh bodyMesh
+	public enum SkinType
 	{
-		get
-		{
-			return this._bodyMesh;
-		}
+		cosmetic,
+		gameMode,
+		temporaryEffect
 	}
 
-	public bool allowHeadless
-	{
-		get
-		{
-			return !this._disableHeadless;
-		}
-	}
+	[FormerlySerializedAs("chestMaterial")]
+	[FormerlySerializedAs("chestEarsMaterial")]
+	[SerializeField]
+	private Material _chestMaterial;
+
+	[FormerlySerializedAs("bodyMaterial")]
+	[SerializeField]
+	private Material _bodyMaterial;
+
+	[SerializeField]
+	private Material _scoreboardMaterial;
+
+	[Tooltip("Check this if skin materials are incompatible with HeadlessMonkeRig mesh")]
+	[SerializeField]
+	private bool _disableHeadless;
+
+	[Space]
+	[SerializeField]
+	private Mesh _bodyMesh;
+
+	[NonSerialized]
+	[Space]
+	private Material _bodyRuntime;
+
+	[NonSerialized]
+	private Material _chestRuntime;
+
+	[NonSerialized]
+	private Material _scoreRuntime;
+
+	private static List<Material> _g_sharedMaterialsCache = new List<Material>(2);
+
+	private static List<Material> _g_materialsWriteCache = new List<Material>(3);
+
+	public Mesh bodyMesh => _bodyMesh;
+
+	public bool allowHeadless => !_disableHeadless;
+
+	public Material bodyMaterial => _bodyMaterial;
+
+	public Material chestMaterial => _chestMaterial;
+
+	public Material scoreboardMaterial => _scoreboardMaterial;
 
 	public static GorillaSkin CopyWithInstancedMaterials(GorillaSkin basis)
 	{
@@ -32,110 +67,82 @@ public class GorillaSkin : ScriptableObject
 		return gorillaSkin;
 	}
 
-	public Material bodyMaterial
-	{
-		get
-		{
-			return this._bodyMaterial;
-		}
-	}
-
-	public Material chestMaterial
-	{
-		get
-		{
-			return this._chestMaterial;
-		}
-	}
-
-	public Material scoreboardMaterial
-	{
-		get
-		{
-			return this._scoreboardMaterial;
-		}
-	}
-
 	public static void ShowActiveSkin(VRRig rig)
 	{
 		bool useDefaultBodySkin;
-		GorillaSkin activeSkin = GorillaSkin.GetActiveSkin(rig, out useDefaultBodySkin);
-		GorillaSkin.ShowSkin(rig, activeSkin, useDefaultBodySkin);
+		GorillaSkin activeSkin = GetActiveSkin(rig, out useDefaultBodySkin);
+		ShowSkin(rig, activeSkin, useDefaultBodySkin);
 	}
 
 	public void ApplySkinToMannequin(GameObject mannequin, bool swapMesh = false)
 	{
-		SkinnedMeshRenderer skinnedMeshRenderer;
-		if (!mannequin.TryGetComponent<SkinnedMeshRenderer>(out skinnedMeshRenderer))
+		MeshRenderer component2;
+		if (mannequin.TryGetComponent<SkinnedMeshRenderer>(out var component))
 		{
-			MeshRenderer meshRenderer;
-			if (mannequin.TryGetComponent<MeshRenderer>(out meshRenderer))
+			int subMeshCount = component.sharedMesh.subMeshCount;
+			if (swapMesh && bodyMesh != null)
 			{
-				meshRenderer.GetSharedMaterials(GorillaSkin._g_sharedMaterialsCache);
-				GorillaSkin._g_sharedMaterialsCache[0] = this.bodyMaterial;
-				GorillaSkin._g_sharedMaterialsCache[1] = this.chestMaterial;
-				meshRenderer.SetSharedMaterials(GorillaSkin._g_sharedMaterialsCache);
+				component.sharedMesh = bodyMesh;
 			}
-			return;
-		}
-		int subMeshCount = skinnedMeshRenderer.sharedMesh.subMeshCount;
-		if (swapMesh && this.bodyMesh != null)
-		{
-			skinnedMeshRenderer.sharedMesh = this.bodyMesh;
-		}
-		int subMeshCount2 = skinnedMeshRenderer.sharedMesh.subMeshCount;
-		skinnedMeshRenderer.GetSharedMaterials(GorillaSkin._g_sharedMaterialsCache);
-		if (subMeshCount == subMeshCount2)
-		{
-			GorillaSkin._g_sharedMaterialsCache[0] = this.bodyMaterial;
-			if (subMeshCount > 2)
+			int subMeshCount2 = component.sharedMesh.subMeshCount;
+			component.GetSharedMaterials(_g_sharedMaterialsCache);
+			if (subMeshCount == subMeshCount2)
 			{
-				GorillaSkin._g_sharedMaterialsCache[1] = this.chestMaterial;
-			}
-			skinnedMeshRenderer.SetSharedMaterials(GorillaSkin._g_sharedMaterialsCache);
-			return;
-		}
-		if (GorillaSkin._g_sharedMaterialsCache.Count == subMeshCount)
-		{
-			if (subMeshCount2 == 2 && subMeshCount > subMeshCount2)
-			{
-				GorillaSkin._g_materialsWriteCache.Clear();
-				GorillaSkin._g_materialsWriteCache.Add(this.bodyMaterial);
-				GorillaSkin._g_materialsWriteCache.Add(GorillaSkin._g_sharedMaterialsCache[2]);
-				skinnedMeshRenderer.SetSharedMaterials(GorillaSkin._g_materialsWriteCache);
+				_g_sharedMaterialsCache[0] = bodyMaterial;
+				if (subMeshCount > 2)
+				{
+					_g_sharedMaterialsCache[1] = chestMaterial;
+				}
+				component.SetSharedMaterials(_g_sharedMaterialsCache);
 				return;
 			}
-			if (subMeshCount2 == 3 && subMeshCount < subMeshCount2 && GorillaSkin._g_sharedMaterialsCache.Count > 1)
+			if (_g_sharedMaterialsCache.Count == subMeshCount)
 			{
-				GorillaSkin._g_materialsWriteCache.Clear();
-				GorillaSkin._g_materialsWriteCache.Add(this.bodyMaterial);
-				GorillaSkin._g_materialsWriteCache.Add(this.chestMaterial);
-				GorillaSkin._g_materialsWriteCache.Add(GorillaSkin._g_sharedMaterialsCache[1]);
-				skinnedMeshRenderer.SetSharedMaterials(GorillaSkin._g_materialsWriteCache);
+				if (subMeshCount2 == 2 && subMeshCount > subMeshCount2)
+				{
+					_g_materialsWriteCache.Clear();
+					_g_materialsWriteCache.Add(bodyMaterial);
+					_g_materialsWriteCache.Add(_g_sharedMaterialsCache[2]);
+					component.SetSharedMaterials(_g_materialsWriteCache);
+				}
+				else if (subMeshCount2 == 3 && subMeshCount < subMeshCount2 && _g_sharedMaterialsCache.Count > 1)
+				{
+					_g_materialsWriteCache.Clear();
+					_g_materialsWriteCache.Add(bodyMaterial);
+					_g_materialsWriteCache.Add(chestMaterial);
+					_g_materialsWriteCache.Add(_g_sharedMaterialsCache[1]);
+					component.SetSharedMaterials(_g_materialsWriteCache);
+				}
+				else
+				{
+					Debug.LogError($"Unexpected Submesh count {subMeshCount} {subMeshCount2}");
+				}
 				return;
 			}
-			Debug.LogError(string.Format("Unexpected Submesh count {0} {1}", subMeshCount, subMeshCount2));
-			return;
+			switch (subMeshCount2)
+			{
+			case 2:
+				_g_materialsWriteCache.Clear();
+				_g_materialsWriteCache.Add(bodyMaterial);
+				component.SetSharedMaterials(_g_materialsWriteCache);
+				break;
+			case 3:
+				_g_materialsWriteCache.Clear();
+				_g_materialsWriteCache.Add(bodyMaterial);
+				_g_materialsWriteCache.Add(chestMaterial);
+				component.SetSharedMaterials(_g_materialsWriteCache);
+				break;
+			default:
+				Debug.LogError($"Unexpected Submesh count {subMeshCount2}");
+				break;
+			}
 		}
-		else
+		else if (mannequin.TryGetComponent<MeshRenderer>(out component2))
 		{
-			if (subMeshCount2 == 2)
-			{
-				GorillaSkin._g_materialsWriteCache.Clear();
-				GorillaSkin._g_materialsWriteCache.Add(this.bodyMaterial);
-				skinnedMeshRenderer.SetSharedMaterials(GorillaSkin._g_materialsWriteCache);
-				return;
-			}
-			if (subMeshCount2 == 3)
-			{
-				GorillaSkin._g_materialsWriteCache.Clear();
-				GorillaSkin._g_materialsWriteCache.Add(this.bodyMaterial);
-				GorillaSkin._g_materialsWriteCache.Add(this.chestMaterial);
-				skinnedMeshRenderer.SetSharedMaterials(GorillaSkin._g_materialsWriteCache);
-				return;
-			}
-			Debug.LogError(string.Format("Unexpected Submesh count {0}", subMeshCount2));
-			return;
+			component2.GetSharedMaterials(_g_sharedMaterialsCache);
+			_g_sharedMaterialsCache[0] = bodyMaterial;
+			_g_sharedMaterialsCache[1] = chestMaterial;
+			component2.SetSharedMaterials(_g_sharedMaterialsCache);
 		}
 	}
 
@@ -182,71 +189,30 @@ public class GorillaSkin : ScriptableObject
 		rig.scoreboardMaterial = skin.scoreboardMaterial;
 	}
 
-	public static void ApplyToRig(VRRig rig, GorillaSkin skin, GorillaSkin.SkinType type)
+	public static void ApplyToRig(VRRig rig, GorillaSkin skin, SkinType type)
 	{
-		bool flag;
-		GorillaSkin activeSkin = GorillaSkin.GetActiveSkin(rig, out flag);
+		bool useDefaultBodySkin;
+		GorillaSkin activeSkin = GetActiveSkin(rig, out useDefaultBodySkin);
 		switch (type)
 		{
-		case GorillaSkin.SkinType.cosmetic:
+		case SkinType.cosmetic:
 			rig.CurrentCosmeticSkin = skin;
 			break;
-		case GorillaSkin.SkinType.gameMode:
+		case SkinType.gameMode:
 			rig.CurrentModeSkin = skin;
 			break;
-		case GorillaSkin.SkinType.temporaryEffect:
+		case SkinType.temporaryEffect:
 			rig.TemporaryEffectSkin = skin;
 			break;
 		default:
 			Debug.LogError("Unknown skin slot");
 			break;
 		}
-		bool useDefaultBodySkin;
-		GorillaSkin activeSkin2 = GorillaSkin.GetActiveSkin(rig, out useDefaultBodySkin);
+		bool useDefaultBodySkin2;
+		GorillaSkin activeSkin2 = GetActiveSkin(rig, out useDefaultBodySkin2);
 		if (activeSkin != activeSkin2)
 		{
-			GorillaSkin.ShowSkin(rig, activeSkin2, useDefaultBodySkin);
+			ShowSkin(rig, activeSkin2, useDefaultBodySkin2);
 		}
-	}
-
-	[FormerlySerializedAs("chestMaterial")]
-	[FormerlySerializedAs("chestEarsMaterial")]
-	[SerializeField]
-	private Material _chestMaterial;
-
-	[FormerlySerializedAs("bodyMaterial")]
-	[SerializeField]
-	private Material _bodyMaterial;
-
-	[SerializeField]
-	private Material _scoreboardMaterial;
-
-	[Tooltip("Check this if skin materials are incompatible with HeadlessMonkeRig mesh")]
-	[SerializeField]
-	private bool _disableHeadless;
-
-	[Space]
-	[SerializeField]
-	private Mesh _bodyMesh;
-
-	[Space]
-	[NonSerialized]
-	private Material _bodyRuntime;
-
-	[NonSerialized]
-	private Material _chestRuntime;
-
-	[NonSerialized]
-	private Material _scoreRuntime;
-
-	private static List<Material> _g_sharedMaterialsCache = new List<Material>(2);
-
-	private static List<Material> _g_materialsWriteCache = new List<Material>(3);
-
-	public enum SkinType
-	{
-		cosmetic,
-		gameMode,
-		temporaryEffect
 	}
 }

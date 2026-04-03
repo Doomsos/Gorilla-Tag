@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEngine.SceneManagement;
 
@@ -11,7 +11,15 @@ public static class GTSceneUtils
 
 	public static bool Equals(GTScene x, Scene y)
 	{
-		return !(x == null) && y.IsValid() && x.Equals(y);
+		if (x == null)
+		{
+			return false;
+		}
+		if (!y.IsValid())
+		{
+			return false;
+		}
+		return x.Equals(y);
 	}
 
 	public static GTScene[] ScenesInBuild()

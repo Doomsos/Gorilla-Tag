@@ -1,73 +1,71 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class PrimaryButtonWatcher : MonoBehaviour
 {
+	public PrimaryButtonEvent primaryButtonPress;
+
+	private bool lastButtonState;
+
+	private List<InputDevice> devicesWithPrimaryButton;
+
 	private void Awake()
 	{
-		if (this.primaryButtonPress == null)
+		if (primaryButtonPress == null)
 		{
-			this.primaryButtonPress = new PrimaryButtonEvent();
+			primaryButtonPress = new PrimaryButtonEvent();
 		}
-		this.devicesWithPrimaryButton = new List<InputDevice>();
+		devicesWithPrimaryButton = new List<InputDevice>();
 	}
 
 	private void OnEnable()
 	{
 		List<InputDevice> list = new List<InputDevice>();
 		InputDevices.GetDevices(list);
-		foreach (InputDevice device in list)
+		foreach (InputDevice item in list)
 		{
-			this.InputDevices_deviceConnected(device);
+			InputDevices_deviceConnected(item);
 		}
-		InputDevices.deviceConnected += this.InputDevices_deviceConnected;
-		InputDevices.deviceDisconnected += this.InputDevices_deviceDisconnected;
+		InputDevices.deviceConnected += InputDevices_deviceConnected;
+		InputDevices.deviceDisconnected += InputDevices_deviceDisconnected;
 	}
 
 	private void OnDisable()
 	{
-		InputDevices.deviceConnected -= this.InputDevices_deviceConnected;
-		InputDevices.deviceDisconnected -= this.InputDevices_deviceDisconnected;
-		this.devicesWithPrimaryButton.Clear();
+		InputDevices.deviceConnected -= InputDevices_deviceConnected;
+		InputDevices.deviceDisconnected -= InputDevices_deviceDisconnected;
+		devicesWithPrimaryButton.Clear();
 	}
 
 	private void InputDevices_deviceConnected(InputDevice device)
 	{
-		bool flag;
-		if (device.TryGetFeatureValue(CommonUsages.primaryButton, out flag))
+		if (device.TryGetFeatureValue(CommonUsages.primaryButton, out var _))
 		{
-			this.devicesWithPrimaryButton.Add(device);
+			devicesWithPrimaryButton.Add(device);
 		}
 	}
 
 	private void InputDevices_deviceDisconnected(InputDevice device)
 	{
-		if (this.devicesWithPrimaryButton.Contains(device))
+		if (devicesWithPrimaryButton.Contains(device))
 		{
-			this.devicesWithPrimaryButton.Remove(device);
+			devicesWithPrimaryButton.Remove(device);
 		}
 	}
 
 	private void Update()
 	{
 		bool flag = false;
-		foreach (InputDevice inputDevice in this.devicesWithPrimaryButton)
+		foreach (InputDevice item in devicesWithPrimaryButton)
 		{
-			bool flag2 = false;
-			flag = ((inputDevice.TryGetFeatureValue(CommonUsages.primaryButton, out flag2) && flag2) || flag);
+			bool value = false;
+			flag = (item.TryGetFeatureValue(CommonUsages.primaryButton, out value) && value) || flag;
 		}
-		if (flag != this.lastButtonState)
+		if (flag != lastButtonState)
 		{
-			this.primaryButtonPress.Invoke(flag);
-			this.lastButtonState = flag;
+			primaryButtonPress.Invoke(flag);
+			lastButtonState = flag;
 		}
 	}
-
-	public PrimaryButtonEvent primaryButtonPress;
-
-	private bool lastButtonState;
-
-	private List<InputDevice> devicesWithPrimaryButton;
 }

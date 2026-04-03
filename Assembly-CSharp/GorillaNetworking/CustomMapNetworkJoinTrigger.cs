@@ -1,25 +1,14 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class CustomMapNetworkJoinTrigger : GorillaNetworkJoinTrigger
 {
-	public class CustomMapNetworkJoinTrigger : GorillaNetworkJoinTrigger
+	public override string GetFullDesiredGameModeString()
 	{
-		public override string GetFullDesiredGameModeString()
-		{
-			return string.Concat(new string[]
-			{
-				this.networkZone,
-				GorillaComputer.instance.currentQueue,
-				CustomMapLoader.LoadedMapModId.ToString(),
-				"_",
-				CustomMapLoader.LoadedMapModFileId.ToString(),
-				base.GetDesiredGameType()
-			});
-		}
+		return networkZone + GorillaComputer.instance.currentQueue + CustomMapLoader.LoadedMapModId.ToString() + "_" + CustomMapLoader.LoadedMapModFileId + GetDesiredGameType();
+	}
 
-		public override byte GetRoomSize(bool subscribed)
-		{
-			return CustomMapLoader.GetRoomSizeForCurrentlyLoadedMap();
-		}
+	public override byte GetRoomSize(bool subscribed)
+	{
+		return CustomMapLoader.GetRoomSizeForCurrentlyLoadedMap();
 	}
 }

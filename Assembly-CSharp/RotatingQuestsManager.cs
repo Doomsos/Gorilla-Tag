@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using GorillaNetworking;
 using Newtonsoft.Json;
 using PlayFab;
@@ -8,402 +7,61 @@ using UnityEngine;
 
 public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQuestManager
 {
-	public bool TickRunning { get; set; }
-
-	public DateTime DailyQuestCountdown { get; private set; }
-
-	public DateTime WeeklyQuestCountdown { get; private set; }
-
-	private void Start()
+	[Serializable]
+	public class RotatingQuestGroup
 	{
-		this._questAudio = base.GetComponent<AudioSource>();
-		this.RequestQuestsFromTitleData();
+		public int selectCount;
+
+		public string name;
+
+		public List<RotatingQuest> quests;
 	}
 
-	private void OnEnable()
+	[Serializable]
+	public class RotatingQuestList
 	{
-		TickSystem<object>.AddTickCallback(this);
-	}
+		public List<RotatingQuestGroup> DailyQuests;
 
-	private void OnDisable()
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-	}
+		public List<RotatingQuestGroup> WeeklyQuests;
 
-	public void Tick()
-	{
-		if (this.hasQuest && this.nextQuestUpdateTime < DateTime.UtcNow)
+		public void Init()
 		{
-			this.SetupQuests();
-		}
-	}
-
-	private void ProcessAllQuests(Action<RotatingQuest> action)
-	{
-		RotatingQuestsManager.<>c__DisplayClass29_0 CS$<>8__locals1;
-		CS$<>8__locals1.action = action;
-		RotatingQuestsManager.<ProcessAllQuests>g__ProcessAllQuestsInList|29_0(this.quests.DailyQuests, ref CS$<>8__locals1);
-		RotatingQuestsManager.<ProcessAllQuests>g__ProcessAllQuestsInList|29_0(this.quests.WeeklyQuests, ref CS$<>8__locals1);
-	}
-
-	private void QuestLoadPostProcess(RotatingQuest quest)
-	{
-		if (quest.requiredZones.Count == 1 && quest.requiredZones[0] == GTZone.none)
-		{
-			quest.requiredZones.Clear();
-		}
-	}
-
-	private void QuestSavePreProcess(RotatingQuest quest)
-	{
-		if (quest.requiredZones.Count == 0)
-		{
-			quest.requiredZones.Add(GTZone.none);
-		}
-	}
-
-	public void LoadTestQuestsFromFile()
-	{
-		TextAsset textAsset = Resources.Load<TextAsset>(this.localQuestPath);
-		this.LoadQuestsFromJson(textAsset.text);
-	}
-
-	public void RequestQuestsFromTitleData()
-	{
-		PlayFabTitleDataCache.Instance.GetTitleData("AllActiveQuests", delegate(string data)
-		{
-			this.LoadQuestsFromJson(data);
-		}, delegate(PlayFabError e)
-		{
-			Debug.LogError(string.Format("Error getting AllActiveQuests data: {0}", e));
-		}, false);
-	}
-
-	public void LoadQuestsFromJson(string jsonString)
-	{
-		this.quests = JsonConvert.DeserializeObject<RotatingQuestsManager.RotatingQuestList>(jsonString);
-		this.ProcessAllQuests(new Action<RotatingQuest>(this.QuestLoadPostProcess));
-		if (this.quests == null)
-		{
-			Debug.LogError("Error: Quests failed to parse!");
-			return;
-		}
-		this.hasQuest = true;
-		this.quests.Init();
-		if (Application.isPlaying)
-		{
-			this.SetupQuests();
-		}
-	}
-
-	private void SetupQuests()
-	{
-		this.ClearAllQuestEventListeners();
-		this.SelectActiveQuests();
-		this.LoadQuestProgress();
-		this.HandleQuestProgressChanged(true);
-		this.SetupAllQuestEventListeners();
-		this.nextQuestUpdateTime = this.DailyQuestCountdown;
-		this.nextQuestUpdateTime = this.nextQuestUpdateTime.AddMinutes(1.0);
-	}
-
-	private void SelectActiveQuests()
-	{
-		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
-		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
-		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
-		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
-		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
-		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
-		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[]
-		{
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
-		});
-		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
-		{
-			dateTime -= TimeSpan.FromHours(1.0);
-		}
-		TimeSpan timeSpan2 = DateTime.UtcNow - dateTime;
-		this.RemoveDisabledQuests();
-		int days = timeSpan2.Days;
-		this.dailyQuestSetID = days;
-		this.weeklyQuestSetID = days / 7;
-		RotatingQuestsManager.LastQuestDailyID = this.dailyQuestSetID;
-		this.DailyQuestCountdown = dateTime + TimeSpan.FromDays((double)(this.dailyQuestSetID + 1));
-		this.WeeklyQuestCountdown = dateTime + TimeSpan.FromDays((double)((this.weeklyQuestSetID + 1) * 7));
-		Random.InitState(this.dailyQuestSetID);
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in this.quests.DailyQuests)
-		{
-			int num = Math.Min(rotatingQuestGroup.selectCount, rotatingQuestGroup.quests.Count);
-			float num2 = 0f;
-			List<ValueTuple<int, float>> list = new List<ValueTuple<int, float>>(rotatingQuestGroup.quests.Count);
-			for (int i = 0; i < rotatingQuestGroup.quests.Count; i++)
+			SetIsDaily(DailyQuests, isDaily: true);
+			SetIsDaily(WeeklyQuests, isDaily: false);
+			static void SetIsDaily(List<RotatingQuestGroup> questList, bool isDaily)
 			{
-				rotatingQuestGroup.quests[i].isQuestActive = false;
-				num2 += rotatingQuestGroup.quests[i].weight;
-				list.Add(new ValueTuple<int, float>(i, rotatingQuestGroup.quests[i].weight));
-			}
-			for (int j = 0; j < num; j++)
-			{
-				float num3 = Random.Range(0f, num2);
-				for (int k = 0; k < list.Count; k++)
+				foreach (RotatingQuestGroup quest in questList)
 				{
-					float item = list[k].Item2;
-					if (num3 <= item || k == list.Count - 1)
+					foreach (RotatingQuest quest2 in quest.quests)
 					{
-						num2 -= item;
-						int item2 = list[k].Item1;
-						list.RemoveAt(k);
-						rotatingQuestGroup.quests[item2].isQuestActive = true;
-						rotatingQuestGroup.quests[item2].SetRequiredZone();
-						break;
+						quest2.isDailyQuest = isDaily;
 					}
-					num3 -= item;
 				}
 			}
 		}
-		Random.InitState(this.weeklyQuestSetID);
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup2 in this.quests.WeeklyQuests)
-		{
-			int num4 = Math.Min(rotatingQuestGroup2.selectCount, rotatingQuestGroup2.quests.Count);
-			float num5 = 0f;
-			List<ValueTuple<int, float>> list2 = new List<ValueTuple<int, float>>(rotatingQuestGroup2.quests.Count);
-			for (int l = 0; l < rotatingQuestGroup2.quests.Count; l++)
-			{
-				rotatingQuestGroup2.quests[l].isQuestActive = false;
-				num5 += rotatingQuestGroup2.quests[l].weight;
-				list2.Add(new ValueTuple<int, float>(l, rotatingQuestGroup2.quests[l].weight));
-			}
-			for (int m = 0; m < num4; m++)
-			{
-				float num6 = Random.Range(0f, num5);
-				for (int n = 0; n < list2.Count; n++)
-				{
-					float item3 = list2[n].Item2;
-					if (num6 <= item3 || n == list2.Count - 1)
-					{
-						num5 -= item3;
-						int item4 = list2[n].Item1;
-						list2.RemoveAt(n);
-						rotatingQuestGroup2.quests[item4].isQuestActive = true;
-						rotatingQuestGroup2.quests[item4].SetRequiredZone();
-						break;
-					}
-					num6 -= item3;
-				}
-			}
-		}
-		ProgressionController.ReportQuestSelectionChanged();
-	}
 
-	private void RemoveDisabledQuests()
-	{
-		RotatingQuestsManager.<RemoveDisabledQuests>g__RemoveDisabledQuestsFromGroupList|37_0(this.quests.DailyQuests);
-		RotatingQuestsManager.<RemoveDisabledQuests>g__RemoveDisabledQuestsFromGroupList|37_0(this.quests.WeeklyQuests);
-	}
-
-	public void LoadQuestProgress()
-	{
-		int @int = PlayerPrefs.GetInt("Rotating_Quest_Daily_SetID_Key", -1);
-		int int2 = PlayerPrefs.GetInt("Rotating_Quest_Daily_SaveCount_Key", -1);
-		if (@int == this.dailyQuestSetID)
+		public RotatingQuest GetQuest(int questID)
 		{
-			for (int i = 0; i < int2; i++)
+			RotatingQuest rotatingQuest = null;
+			rotatingQuest = GetQuestFrom(DailyQuests);
+			if (rotatingQuest == null)
 			{
-				int int3 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_ID_Key", i), -1);
-				int int4 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_Progress_Key", i), -1);
-				if (int3 != -1)
+				rotatingQuest = GetQuestFrom(WeeklyQuests);
+			}
+			return rotatingQuest;
+			RotatingQuest GetQuestFrom(List<RotatingQuestGroup> list)
+			{
+				foreach (RotatingQuestGroup item in list)
 				{
-					for (int j = 0; j < this.quests.DailyQuests.Count; j++)
+					foreach (RotatingQuest quest in item.quests)
 					{
-						for (int k = 0; k < this.quests.DailyQuests[j].quests.Count; k++)
+						if (quest.questID == questID)
 						{
-							RotatingQuest rotatingQuest = this.quests.DailyQuests[j].quests[k];
-							if (rotatingQuest.questID == int3)
-							{
-								rotatingQuest.ApplySavedProgress(int4);
-								break;
-							}
+							return quest;
 						}
 					}
 				}
-			}
-		}
-		int int5 = PlayerPrefs.GetInt("Rotating_Quest_Weekly_SetID_Key", -1);
-		int int6 = PlayerPrefs.GetInt("Rotating_Quest_Weekly_SaveCount_Key", -1);
-		if (int5 == this.weeklyQuestSetID)
-		{
-			for (int l = 0; l < int6; l++)
-			{
-				int int7 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_ID_Key", l), -1);
-				int int8 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_Progress_Key", l), -1);
-				if (int7 != -1)
-				{
-					for (int m = 0; m < this.quests.WeeklyQuests.Count; m++)
-					{
-						for (int n = 0; n < this.quests.WeeklyQuests[m].quests.Count; n++)
-						{
-							RotatingQuest rotatingQuest2 = this.quests.WeeklyQuests[m].quests[n];
-							if (rotatingQuest2.questID == int7)
-							{
-								rotatingQuest2.ApplySavedProgress(int8);
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public void SaveQuestProgress()
-	{
-		int num = 0;
-		for (int i = 0; i < this.quests.DailyQuests.Count; i++)
-		{
-			for (int j = 0; j < this.quests.DailyQuests[i].quests.Count; j++)
-			{
-				RotatingQuest rotatingQuest = this.quests.DailyQuests[i].quests[j];
-				int progress = rotatingQuest.GetProgress();
-				if (progress > 0)
-				{
-					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_ID_Key", num), rotatingQuest.questID);
-					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_Progress_Key", num), progress);
-					num++;
-				}
-			}
-		}
-		if (num > 0)
-		{
-			PlayerPrefs.SetInt("Rotating_Quest_Daily_SetID_Key", this.dailyQuestSetID);
-			PlayerPrefs.SetInt("Rotating_Quest_Daily_SaveCount_Key", num);
-		}
-		int num2 = 0;
-		for (int k = 0; k < this.quests.WeeklyQuests.Count; k++)
-		{
-			for (int l = 0; l < this.quests.WeeklyQuests[k].quests.Count; l++)
-			{
-				RotatingQuest rotatingQuest2 = this.quests.WeeklyQuests[k].quests[l];
-				int progress2 = rotatingQuest2.GetProgress();
-				if (progress2 > 0)
-				{
-					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_ID_Key", num2), rotatingQuest2.questID);
-					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_Progress_Key", num2), progress2);
-					num2++;
-				}
-			}
-		}
-		if (num2 > 0)
-		{
-			PlayerPrefs.SetInt("Rotating_Quest_Weekly_SetID_Key", this.weeklyQuestSetID);
-			PlayerPrefs.SetInt("Rotating_Quest_Weekly_SaveCount_Key", num2);
-		}
-		PlayerPrefs.Save();
-	}
-
-	public void SetupAllQuestEventListeners()
-	{
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in this.quests.DailyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
-			{
-				rotatingQuest.questManager = this;
-				if (rotatingQuest.isQuestActive && !rotatingQuest.isQuestComplete)
-				{
-					rotatingQuest.AddEventListener();
-				}
-			}
-		}
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup2 in this.quests.WeeklyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest2 in rotatingQuestGroup2.quests)
-			{
-				rotatingQuest2.questManager = this;
-				if (rotatingQuest2.isQuestActive && !rotatingQuest2.isQuestComplete)
-				{
-					rotatingQuest2.AddEventListener();
-				}
-			}
-		}
-	}
-
-	public void ClearAllQuestEventListeners()
-	{
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in this.quests.DailyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
-			{
-				rotatingQuest.RemoveEventListener();
-			}
-		}
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup2 in this.quests.WeeklyQuests)
-		{
-			foreach (RotatingQuest rotatingQuest2 in rotatingQuestGroup2.quests)
-			{
-				rotatingQuest2.RemoveEventListener();
-			}
-		}
-	}
-
-	public void HandleQuestCompleted(int questID)
-	{
-		RotatingQuest quest = this.quests.GetQuest(questID);
-		if (quest == null)
-		{
-			return;
-		}
-		ProgressionController.ReportQuestComplete(questID, quest.isDailyQuest);
-		if (this._playQuestSounds)
-		{
-			AudioSource questAudio = this._questAudio;
-			if (questAudio == null)
-			{
-				return;
-			}
-			questAudio.GTPlay();
-		}
-	}
-
-	public void HandleQuestProgressChanged(bool initialLoad)
-	{
-		if (!initialLoad)
-		{
-			this.SaveQuestProgress();
-		}
-		RotatingQuestsManager.LastQuestChange = Time.frameCount;
-		ProgressionController.ReportQuestChanged(initialLoad);
-	}
-
-	[CompilerGenerated]
-	internal static void <ProcessAllQuests>g__ProcessAllQuestsInList|29_0(List<RotatingQuestsManager.RotatingQuestGroup> questGroups, ref RotatingQuestsManager.<>c__DisplayClass29_0 A_1)
-	{
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in questGroups)
-		{
-			foreach (RotatingQuest obj in rotatingQuestGroup.quests)
-			{
-				A_1.action(obj);
-			}
-		}
-	}
-
-	[CompilerGenerated]
-	internal static void <RemoveDisabledQuests>g__RemoveDisabledQuestsFromGroupList|37_0(List<RotatingQuestsManager.RotatingQuestGroup> questList)
-	{
-		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in questList)
-		{
-			for (int i = rotatingQuestGroup.quests.Count - 1; i >= 0; i--)
-			{
-				if (rotatingQuestGroup.quests[i].disable)
-				{
-					rotatingQuestGroup.quests.RemoveAt(i);
-				}
+				return null;
 			}
 		}
 	}
@@ -420,7 +78,7 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 
 	public static int LastQuestDailyID;
 
-	public RotatingQuestsManager.RotatingQuestList quests;
+	public RotatingQuestList quests;
 
 	public int dailyQuestSetID;
 
@@ -449,67 +107,392 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 
 	private const string kWeeklyQuestProgressKey = "Rotating_Quest_Weekly_Progress_Key";
 
-	[Serializable]
-	public class RotatingQuestGroup
+	public bool TickRunning { get; set; }
+
+	public DateTime DailyQuestCountdown { get; private set; }
+
+	public DateTime WeeklyQuestCountdown { get; private set; }
+
+	private void Start()
 	{
-		public int selectCount;
-
-		public string name;
-
-		public List<RotatingQuest> quests;
+		_questAudio = GetComponent<AudioSource>();
+		RequestQuestsFromTitleData();
 	}
 
-	[Serializable]
-	public class RotatingQuestList
+	private void OnEnable()
 	{
-		public void Init()
-		{
-			RotatingQuestsManager.RotatingQuestList.<Init>g__SetIsDaily|2_0(this.DailyQuests, true);
-			RotatingQuestsManager.RotatingQuestList.<Init>g__SetIsDaily|2_0(this.WeeklyQuests, false);
-		}
+		TickSystem<object>.AddTickCallback(this);
+	}
 
-		public RotatingQuest GetQuest(int questID)
-		{
-			RotatingQuestsManager.RotatingQuestList.<>c__DisplayClass3_0 CS$<>8__locals1;
-			CS$<>8__locals1.questID = questID;
-			RotatingQuest rotatingQuest = RotatingQuestsManager.RotatingQuestList.<GetQuest>g__GetQuestFrom|3_0(this.DailyQuests, ref CS$<>8__locals1);
-			if (rotatingQuest == null)
-			{
-				rotatingQuest = RotatingQuestsManager.RotatingQuestList.<GetQuest>g__GetQuestFrom|3_0(this.WeeklyQuests, ref CS$<>8__locals1);
-			}
-			return rotatingQuest;
-		}
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
 
-		[CompilerGenerated]
-		internal static void <Init>g__SetIsDaily|2_0(List<RotatingQuestsManager.RotatingQuestGroup> questList, bool isDaily)
+	public void Tick()
+	{
+		if (hasQuest && nextQuestUpdateTime < DateTime.UtcNow)
 		{
-			foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in questList)
+			SetupQuests();
+		}
+	}
+
+	private void ProcessAllQuests(Action<RotatingQuest> action)
+	{
+		ProcessAllQuestsInList(quests.DailyQuests);
+		ProcessAllQuestsInList(quests.WeeklyQuests);
+		void ProcessAllQuestsInList(List<RotatingQuestGroup> questGroups)
+		{
+			foreach (RotatingQuestGroup questGroup in questGroups)
 			{
-				foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
+				foreach (RotatingQuest quest in questGroup.quests)
 				{
-					rotatingQuest.isDailyQuest = isDaily;
+					action(quest);
 				}
 			}
 		}
+	}
 
-		[CompilerGenerated]
-		internal static RotatingQuest <GetQuest>g__GetQuestFrom|3_0(List<RotatingQuestsManager.RotatingQuestGroup> list, ref RotatingQuestsManager.RotatingQuestList.<>c__DisplayClass3_0 A_1)
+	private void QuestLoadPostProcess(RotatingQuest quest)
+	{
+		if (quest.requiredZones.Count == 1 && quest.requiredZones[0] == GTZone.none)
 		{
-			foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in list)
+			quest.requiredZones.Clear();
+		}
+	}
+
+	private void QuestSavePreProcess(RotatingQuest quest)
+	{
+		if (quest.requiredZones.Count == 0)
+		{
+			quest.requiredZones.Add(GTZone.none);
+		}
+	}
+
+	public void LoadTestQuestsFromFile()
+	{
+		TextAsset textAsset = Resources.Load<TextAsset>(localQuestPath);
+		LoadQuestsFromJson(textAsset.text);
+	}
+
+	public void RequestQuestsFromTitleData()
+	{
+		PlayFabTitleDataCache.Instance.GetTitleData("AllActiveQuests", delegate(string data)
+		{
+			LoadQuestsFromJson(data);
+		}, delegate(PlayFabError e)
+		{
+			Debug.LogError($"Error getting AllActiveQuests data: {e}");
+		});
+	}
+
+	public void LoadQuestsFromJson(string jsonString)
+	{
+		quests = JsonConvert.DeserializeObject<RotatingQuestList>(jsonString);
+		ProcessAllQuests(QuestLoadPostProcess);
+		if (quests == null)
+		{
+			Debug.LogError("Error: Quests failed to parse!");
+			return;
+		}
+		hasQuest = true;
+		quests.Init();
+		if (Application.isPlaying)
+		{
+			SetupQuests();
+		}
+	}
+
+	private void SetupQuests()
+	{
+		ClearAllQuestEventListeners();
+		SelectActiveQuests();
+		LoadQuestProgress();
+		HandleQuestProgressChanged(initialLoad: true);
+		SetupAllQuestEventListeners();
+		nextQuestUpdateTime = DailyQuestCountdown;
+		nextQuestUpdateTime = nextQuestUpdateTime.AddMinutes(1.0);
+	}
+
+	private void SelectActiveQuests()
+	{
+		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
+		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
+		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
+		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
+		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
+		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
+		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
+		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
+		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
+		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
+		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[2]
+		{
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
+		});
+		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
+		{
+			dateTime -= TimeSpan.FromHours(1.0);
+		}
+		TimeSpan timeSpan2 = DateTime.UtcNow - dateTime;
+		RemoveDisabledQuests();
+		weeklyQuestSetID = (dailyQuestSetID = timeSpan2.Days) / 7;
+		LastQuestDailyID = dailyQuestSetID;
+		DailyQuestCountdown = dateTime + TimeSpan.FromDays(dailyQuestSetID + 1);
+		WeeklyQuestCountdown = dateTime + TimeSpan.FromDays((weeklyQuestSetID + 1) * 7);
+		UnityEngine.Random.InitState(dailyQuestSetID);
+		foreach (RotatingQuestGroup dailyQuest in quests.DailyQuests)
+		{
+			int num = Math.Min(dailyQuest.selectCount, dailyQuest.quests.Count);
+			float num2 = 0f;
+			List<(int, float)> list = new List<(int, float)>(dailyQuest.quests.Count);
+			for (int i = 0; i < dailyQuest.quests.Count; i++)
 			{
-				foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
+				dailyQuest.quests[i].isQuestActive = false;
+				num2 += dailyQuest.quests[i].weight;
+				list.Add((i, dailyQuest.quests[i].weight));
+			}
+			for (int j = 0; j < num; j++)
+			{
+				float num3 = UnityEngine.Random.Range(0f, num2);
+				for (int k = 0; k < list.Count; k++)
 				{
-					if (rotatingQuest.questID == A_1.questID)
+					float item = list[k].Item2;
+					if (num3 <= item || k == list.Count - 1)
 					{
-						return rotatingQuest;
+						num2 -= item;
+						int item2 = list[k].Item1;
+						list.RemoveAt(k);
+						dailyQuest.quests[item2].isQuestActive = true;
+						dailyQuest.quests[item2].SetRequiredZone();
+						break;
+					}
+					num3 -= item;
+				}
+			}
+		}
+		UnityEngine.Random.InitState(weeklyQuestSetID);
+		foreach (RotatingQuestGroup weeklyQuest in quests.WeeklyQuests)
+		{
+			int num4 = Math.Min(weeklyQuest.selectCount, weeklyQuest.quests.Count);
+			float num5 = 0f;
+			List<(int, float)> list2 = new List<(int, float)>(weeklyQuest.quests.Count);
+			for (int l = 0; l < weeklyQuest.quests.Count; l++)
+			{
+				weeklyQuest.quests[l].isQuestActive = false;
+				num5 += weeklyQuest.quests[l].weight;
+				list2.Add((l, weeklyQuest.quests[l].weight));
+			}
+			for (int m = 0; m < num4; m++)
+			{
+				float num6 = UnityEngine.Random.Range(0f, num5);
+				for (int n = 0; n < list2.Count; n++)
+				{
+					float item3 = list2[n].Item2;
+					if (num6 <= item3 || n == list2.Count - 1)
+					{
+						num5 -= item3;
+						int item4 = list2[n].Item1;
+						list2.RemoveAt(n);
+						weeklyQuest.quests[item4].isQuestActive = true;
+						weeklyQuest.quests[item4].SetRequiredZone();
+						break;
+					}
+					num6 -= item3;
+				}
+			}
+		}
+		ProgressionController.ReportQuestSelectionChanged();
+	}
+
+	private void RemoveDisabledQuests()
+	{
+		RemoveDisabledQuestsFromGroupList(quests.DailyQuests);
+		RemoveDisabledQuestsFromGroupList(quests.WeeklyQuests);
+		static void RemoveDisabledQuestsFromGroupList(List<RotatingQuestGroup> questList)
+		{
+			foreach (RotatingQuestGroup quest in questList)
+			{
+				for (int num = quest.quests.Count - 1; num >= 0; num--)
+				{
+					if (quest.quests[num].disable)
+					{
+						quest.quests.RemoveAt(num);
 					}
 				}
 			}
-			return null;
 		}
+	}
 
-		public List<RotatingQuestsManager.RotatingQuestGroup> DailyQuests;
+	public void LoadQuestProgress()
+	{
+		int num = PlayerPrefs.GetInt("Rotating_Quest_Daily_SetID_Key", -1);
+		int num2 = PlayerPrefs.GetInt("Rotating_Quest_Daily_SaveCount_Key", -1);
+		if (num == dailyQuestSetID)
+		{
+			for (int i = 0; i < num2; i++)
+			{
+				int num3 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_ID_Key", i), -1);
+				int progress = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_Progress_Key", i), -1);
+				if (num3 == -1)
+				{
+					continue;
+				}
+				for (int j = 0; j < quests.DailyQuests.Count; j++)
+				{
+					for (int k = 0; k < quests.DailyQuests[j].quests.Count; k++)
+					{
+						RotatingQuest rotatingQuest = quests.DailyQuests[j].quests[k];
+						if (rotatingQuest.questID == num3)
+						{
+							rotatingQuest.ApplySavedProgress(progress);
+							break;
+						}
+					}
+				}
+			}
+		}
+		int num4 = PlayerPrefs.GetInt("Rotating_Quest_Weekly_SetID_Key", -1);
+		int num5 = PlayerPrefs.GetInt("Rotating_Quest_Weekly_SaveCount_Key", -1);
+		if (num4 != weeklyQuestSetID)
+		{
+			return;
+		}
+		for (int l = 0; l < num5; l++)
+		{
+			int num6 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_ID_Key", l), -1);
+			int progress2 = PlayerPrefs.GetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_Progress_Key", l), -1);
+			if (num6 == -1)
+			{
+				continue;
+			}
+			for (int m = 0; m < quests.WeeklyQuests.Count; m++)
+			{
+				for (int n = 0; n < quests.WeeklyQuests[m].quests.Count; n++)
+				{
+					RotatingQuest rotatingQuest2 = quests.WeeklyQuests[m].quests[n];
+					if (rotatingQuest2.questID == num6)
+					{
+						rotatingQuest2.ApplySavedProgress(progress2);
+						break;
+					}
+				}
+			}
+		}
+	}
 
-		public List<RotatingQuestsManager.RotatingQuestGroup> WeeklyQuests;
+	public void SaveQuestProgress()
+	{
+		int num = 0;
+		for (int i = 0; i < quests.DailyQuests.Count; i++)
+		{
+			for (int j = 0; j < quests.DailyQuests[i].quests.Count; j++)
+			{
+				RotatingQuest rotatingQuest = quests.DailyQuests[i].quests[j];
+				int progress = rotatingQuest.GetProgress();
+				if (progress > 0)
+				{
+					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_ID_Key", num), rotatingQuest.questID);
+					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Daily_Progress_Key", num), progress);
+					num++;
+				}
+			}
+		}
+		if (num > 0)
+		{
+			PlayerPrefs.SetInt("Rotating_Quest_Daily_SetID_Key", dailyQuestSetID);
+			PlayerPrefs.SetInt("Rotating_Quest_Daily_SaveCount_Key", num);
+		}
+		int num2 = 0;
+		for (int k = 0; k < quests.WeeklyQuests.Count; k++)
+		{
+			for (int l = 0; l < quests.WeeklyQuests[k].quests.Count; l++)
+			{
+				RotatingQuest rotatingQuest2 = quests.WeeklyQuests[k].quests[l];
+				int progress2 = rotatingQuest2.GetProgress();
+				if (progress2 > 0)
+				{
+					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_ID_Key", num2), rotatingQuest2.questID);
+					PlayerPrefs.SetInt(string.Format("{0}{1}", "Rotating_Quest_Weekly_Progress_Key", num2), progress2);
+					num2++;
+				}
+			}
+		}
+		if (num2 > 0)
+		{
+			PlayerPrefs.SetInt("Rotating_Quest_Weekly_SetID_Key", weeklyQuestSetID);
+			PlayerPrefs.SetInt("Rotating_Quest_Weekly_SaveCount_Key", num2);
+		}
+		PlayerPrefs.Save();
+	}
+
+	public void SetupAllQuestEventListeners()
+	{
+		foreach (RotatingQuestGroup dailyQuest in quests.DailyQuests)
+		{
+			foreach (RotatingQuest quest in dailyQuest.quests)
+			{
+				quest.questManager = this;
+				if (quest.isQuestActive && !quest.isQuestComplete)
+				{
+					quest.AddEventListener();
+				}
+			}
+		}
+		foreach (RotatingQuestGroup weeklyQuest in quests.WeeklyQuests)
+		{
+			foreach (RotatingQuest quest2 in weeklyQuest.quests)
+			{
+				quest2.questManager = this;
+				if (quest2.isQuestActive && !quest2.isQuestComplete)
+				{
+					quest2.AddEventListener();
+				}
+			}
+		}
+	}
+
+	public void ClearAllQuestEventListeners()
+	{
+		foreach (RotatingQuestGroup dailyQuest in quests.DailyQuests)
+		{
+			foreach (RotatingQuest quest in dailyQuest.quests)
+			{
+				quest.RemoveEventListener();
+			}
+		}
+		foreach (RotatingQuestGroup weeklyQuest in quests.WeeklyQuests)
+		{
+			foreach (RotatingQuest quest2 in weeklyQuest.quests)
+			{
+				quest2.RemoveEventListener();
+			}
+		}
+	}
+
+	public void HandleQuestCompleted(int questID)
+	{
+		RotatingQuest quest = quests.GetQuest(questID);
+		if (quest != null)
+		{
+			ProgressionController.ReportQuestComplete(questID, quest.isDailyQuest);
+			if (_playQuestSounds)
+			{
+				_questAudio?.GTPlay();
+			}
+		}
+	}
+
+	public void HandleQuestProgressChanged(bool initialLoad)
+	{
+		if (!initialLoad)
+		{
+			SaveQuestProgress();
+		}
+		LastQuestChange = Time.frameCount;
+		ProgressionController.ReportQuestChanged(initialLoad);
 	}
 }

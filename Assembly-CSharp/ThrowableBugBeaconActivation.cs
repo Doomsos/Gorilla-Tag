@@ -1,46 +1,13 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class ThrowableBugBeaconActivation : MonoBehaviour
 {
-	private void Awake()
+	private enum ActivationMode
 	{
-		this.tbb = base.GetComponent<ThrowableBugBeacon>();
-	}
-
-	private void OnEnable()
-	{
-		base.StartCoroutine(this.SendSignals());
-	}
-
-	private void OnDisable()
-	{
-		base.StopAllCoroutines();
-	}
-
-	private IEnumerator SendSignals()
-	{
-		uint count = 0U;
-		while (this.signalCount == 0U || count < this.signalCount)
-		{
-			yield return new WaitForSeconds(Random.Range(this.minCallTime, this.maxCallTime));
-			switch (this.mode)
-			{
-			case ThrowableBugBeaconActivation.ActivationMode.CALL:
-				this.tbb.Call();
-				break;
-			case ThrowableBugBeaconActivation.ActivationMode.DISMISS:
-				this.tbb.Dismiss();
-				break;
-			case ThrowableBugBeaconActivation.ActivationMode.LOCK:
-				this.tbb.Lock();
-				break;
-			}
-			uint num = count;
-			count = num + 1U;
-		}
-		yield break;
+		CALL,
+		DISMISS,
+		LOCK
 	}
 
 	[SerializeField]
@@ -53,14 +20,42 @@ public class ThrowableBugBeaconActivation : MonoBehaviour
 	private uint signalCount;
 
 	[SerializeField]
-	private ThrowableBugBeaconActivation.ActivationMode mode;
+	private ActivationMode mode;
 
 	private ThrowableBugBeacon tbb;
 
-	private enum ActivationMode
+	private void Awake()
 	{
-		CALL,
-		DISMISS,
-		LOCK
+		tbb = GetComponent<ThrowableBugBeacon>();
+	}
+
+	private void OnEnable()
+	{
+		StartCoroutine(SendSignals());
+	}
+
+	private void OnDisable()
+	{
+		StopAllCoroutines();
+	}
+
+	private IEnumerator SendSignals()
+	{
+		for (uint count = 0u; signalCount == 0 || count < signalCount; count++)
+		{
+			yield return new WaitForSeconds(Random.Range(minCallTime, maxCallTime));
+			switch (mode)
+			{
+			case ActivationMode.CALL:
+				tbb.Call();
+				break;
+			case ActivationMode.DISMISS:
+				tbb.Dismiss();
+				break;
+			case ActivationMode.LOCK:
+				tbb.Lock();
+				break;
+			}
+		}
 	}
 }

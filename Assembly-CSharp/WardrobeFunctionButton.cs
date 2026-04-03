@@ -1,15 +1,18 @@
-﻿using System;
 using System.Collections;
 using GorillaNetworking;
 using UnityEngine;
 
 public class WardrobeFunctionButton : GorillaPressableButton
 {
+	public string function;
+
+	public float buttonFadeTime = 0.25f;
+
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		CosmeticsController.instance.PressWardrobeFunctionButton(this.function);
-		base.StartCoroutine(this.ButtonColorUpdate());
+		CosmeticsController.instance.PressWardrobeFunctionButton(function);
+		StartCoroutine(ButtonColorUpdate());
 	}
 
 	public override void UpdateColor()
@@ -18,13 +21,8 @@ public class WardrobeFunctionButton : GorillaPressableButton
 
 	private IEnumerator ButtonColorUpdate()
 	{
-		this.buttonRenderer.material = this.pressedMaterial;
-		yield return new WaitForSeconds(this.buttonFadeTime);
-		this.buttonRenderer.material = this.unpressedMaterial;
-		yield break;
+		buttonRenderer.material = pressedMaterial;
+		yield return new WaitForSeconds(buttonFadeTime);
+		buttonRenderer.material = unpressedMaterial;
 	}
-
-	public string function;
-
-	public float buttonFadeTime = 0.25f;
 }

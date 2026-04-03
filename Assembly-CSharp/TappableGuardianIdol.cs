@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using Photon.Pun;
 using UnityEngine;
@@ -8,309 +7,32 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class TappableGuardianIdol : Tappable
 {
-	public bool isChangingPositions { get; private set; }
-
-	protected override void OnEnable()
+	[Serializable]
+	public struct IdolActivationSound
 	{
-		base.OnEnable();
-		this._colliderBaseRadius = this.tapCollision.radius;
+		public AudioClip activation;
+
+		public AudioClip loop;
 	}
 
-	protected override void OnDisable()
+	[Serializable]
+	public struct StageActivatedObject
 	{
-		base.OnDisable();
-		this.isChangingPositions = false;
-		this._activationState = -1;
-		this.isActivationReady = true;
-		this.tapCollision.radius = this._colliderBaseRadius;
-	}
+		public GameObject[] objects;
 
-	public void OnZoneActiveStateChanged(bool zoneActive)
-	{
-		this._zoneIsActive = zoneActive;
-		this.idolVisualRoot.SetActive(this._zoneIsActive);
-	}
+		public int min;
 
-	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
-	{
-		if (info.Sender.IsLocal)
+		public int max;
+
+		public void UpdateActiveState(int stage)
 		{
-			this.zoneManager.SetScaleCenterPoint(base.transform);
-		}
-		if (!this.isChangingPositions)
-		{
-			if (!this.zoneManager.IsZoneValid())
+			bool active = stage >= min && stage <= max;
+			GameObject[] array = objects;
+			for (int i = 0; i < array.Length; i++)
 			{
-				return;
-			}
-			RigContainer rigContainer;
-			if (PhotonNetwork.LocalPlayer.IsMasterClient && VRRigCache.Instance.TryGetVrrig(info.Sender, out rigContainer))
-			{
-				if (Vector3.Magnitude(rigContainer.Rig.transform.position - base.transform.position) > this.requiredTapDistance + Mathf.Epsilon)
-				{
-					return;
-				}
-				this.zoneManager.IdolWasTapped(info.Sender);
-			}
-			if (!this.zoneManager.IsPlayerGuardian(info.Sender))
-			{
-				this.tapFX.Play();
+				array[i].SetActive(active);
 			}
 		}
-	}
-
-	public void SetPosition(Vector3 position)
-	{
-		base.transform.position = position + new Vector3(0f, this.activeHeight, 0f);
-		this.UpdateStageActivatedObjects();
-		this._audio.GTPlayOneShot(this._activateSound, this._audio.volume);
-		base.StartCoroutine(this.<SetPosition>g__Unshrink|49_0());
-	}
-
-	public void MovePositions(Vector3 finalPosition)
-	{
-		if (this.isChangingPositions)
-		{
-			return;
-		}
-		this.transitionPos = finalPosition + this.fallStartOffset;
-		this.finalPos = finalPosition;
-		base.StartCoroutine(this.TransitionToNextIdol());
-	}
-
-	public void UpdateActivationProgress(float rawProgress, bool progressing)
-	{
-		this.isActivationReady = !progressing;
-		if (rawProgress <= 0f && !progressing)
-		{
-			if (this._activationState >= 0)
-			{
-				if (this._activationRoutine != null)
-				{
-					base.StopCoroutine(this._activationRoutine);
-					this._activationRoutine = null;
-				}
-				this.idolMeshRoot.transform.localScale = Vector3.one;
-			}
-			this._activationState = -1;
-			this.UpdateStageActivatedObjects();
-			this._audio.GTStop();
-			return;
-		}
-		int num = (int)rawProgress;
-		progressing &= (this._activationStageSounds.Length > num);
-		if (this._activationState == num || !progressing)
-		{
-			return;
-		}
-		if (this._activationRoutine != null)
-		{
-			base.StopCoroutine(this._activationRoutine);
-		}
-		this._activationRoutine = base.StartCoroutine(this.ShowActivationEffect());
-		this._activationState = num;
-		this.UpdateStageActivatedObjects();
-		TappableGuardianIdol.IdolActivationSound idolActivationSound = this._activationStageSounds[num];
-		this._audio.GTPlayOneShot(idolActivationSound.activation, this._audio.volume);
-		this._audio.clip = idolActivationSound.loop;
-		this._audio.loop = true;
-		this._audio.GTPlay();
-	}
-
-	public void StartLookingAround()
-	{
-		if (this._lookRoutine != null)
-		{
-			base.StopCoroutine(this._lookRoutine);
-		}
-		this._lookRoutine = base.StartCoroutine(this.DoLookingAround());
-	}
-
-	public void StopLookingAround()
-	{
-		if (this._lookRoutine == null)
-		{
-			return;
-		}
-		base.StopCoroutine(this._lookRoutine);
-		this._lookRoot.localRotation = Quaternion.identity;
-		this._lookRoutine = null;
-	}
-
-	private IEnumerator DoLookingAround()
-	{
-		TappableGuardianIdol.<>c__DisplayClass54_0 CS$<>8__locals1;
-		CS$<>8__locals1.<>4__this = this;
-		CS$<>8__locals1.nextLookTime = Time.time;
-		CS$<>8__locals1._lookDirection = this._lookRoot.rotation;
-		yield return null;
-		for (;;)
-		{
-			if (Time.time >= CS$<>8__locals1.nextLookTime)
-			{
-				this.<DoLookingAround>g__PickLookTarget|54_0(ref CS$<>8__locals1);
-			}
-			this._lookRoot.rotation = Quaternion.Slerp(this._lookRoot.rotation, CS$<>8__locals1._lookDirection, Time.deltaTime * Mathf.Max(1f, (float)this._activationState * this._baseLookRate));
-			yield return null;
-		}
-		yield break;
-	}
-
-	private void UpdateStageActivatedObjects()
-	{
-		foreach (TappableGuardianIdol.StageActivatedObject stageActivatedObject in this._stageActivatedObjects)
-		{
-			stageActivatedObject.UpdateActiveState(this._activationState);
-		}
-	}
-
-	private IEnumerator ShowActivationEffect()
-	{
-		float bulgeDuration = 1f;
-		float lerpVal = 0f;
-		while (lerpVal < 1f)
-		{
-			lerpVal += Time.deltaTime / bulgeDuration;
-			float num = Mathf.Lerp(1f, this.bulgeScale, this.bulgeCurve.Evaluate(lerpVal));
-			this.idolMeshRoot.transform.localScale = Vector3.one * num;
-			this.tapCollision.radius = this._colliderBaseRadius * num;
-			yield return null;
-		}
-		this._activationRoutine = null;
-		yield break;
-	}
-
-	private IEnumerator TransitionToNextIdol()
-	{
-		this.isChangingPositions = true;
-		this._audio.GTStop();
-		if (this.knockbackOnTrigger)
-		{
-			this.zoneManager.TriggerIdolKnockback();
-		}
-		if (this.explodeFX)
-		{
-			ObjectPools.instance.Instantiate(this.explodeFX, base.transform.position, true);
-		}
-		this.UpdateActivationProgress(-1f, false);
-		this.idolMeshRoot.SetActive(false);
-		this.tapCollision.enabled = false;
-		base.transform.position = this.transitionPos;
-		yield return new WaitForSeconds(this.floatDuration);
-		this.idolMeshRoot.SetActive(true);
-		this.tapCollision.enabled = true;
-		if (this.startFallFX)
-		{
-			ObjectPools.instance.Instantiate(this.startFallFX, this.transitionPos, true);
-		}
-		this._audio.GTPlayOneShot(this._descentSound, 1f);
-		this.trailFX.Play();
-		float fall = 0f;
-		Vector3 startPos = this.transitionPos;
-		Vector3 destinationPos = this.finalPos;
-		while (fall < this.fallDuration)
-		{
-			fall += Time.deltaTime;
-			base.transform.position = Vector3.Lerp(startPos, destinationPos, fall / this.fallDuration);
-			yield return null;
-		}
-		base.transform.position = destinationPos;
-		this.trailFX.Stop();
-		if (this.landedFX)
-		{
-			ObjectPools.instance.Instantiate(this.landedFX, destinationPos, true);
-		}
-		if (this.knockbackOnLand)
-		{
-			this.zoneManager.TriggerIdolKnockback();
-		}
-		yield return new WaitForSeconds(this.inactiveDuration);
-		this._audio.GTPlayOneShot(this._activateSound, this._audio.volume);
-		float activateLerp = 0f;
-		startPos = this.finalPos;
-		destinationPos = this.finalPos + new Vector3(0f, this.activeHeight, 0f);
-		AnimationCurve animCurve = AnimationCurves.EaseInOutQuad;
-		while (activateLerp < 1f)
-		{
-			activateLerp = Mathf.Clamp01(activateLerp + Time.deltaTime / this.activationDuration);
-			base.transform.position = Vector3.Lerp(startPos, destinationPos, animCurve.Evaluate(activateLerp));
-			yield return null;
-		}
-		if (this.activatedFX)
-		{
-			ObjectPools.instance.Instantiate(this.activatedFX, base.transform.position, true);
-		}
-		if (this.knockbackOnActivate)
-		{
-			this.zoneManager.TriggerIdolKnockback();
-		}
-		this.isChangingPositions = false;
-		yield break;
-	}
-
-	private float EaseInOut(float input)
-	{
-		if (input >= 0.5f)
-		{
-			return 1f - Mathf.Pow(-2f * input + 2f, 3f) / 2f;
-		}
-		return 4f * input * input * input;
-	}
-
-	[CompilerGenerated]
-	private IEnumerator <SetPosition>g__Unshrink|49_0()
-	{
-		float lerpVal = 0f;
-		float growDuration = 0.5f;
-		while (lerpVal < 1f)
-		{
-			lerpVal += Time.deltaTime / growDuration;
-			float num = Mathf.Lerp(0f, 1f, AnimationCurves.EaseOutQuad.Evaluate(lerpVal));
-			this.idolMeshRoot.transform.localScale = Vector3.one * num;
-			this.tapCollision.radius = this._colliderBaseRadius * num;
-			yield return null;
-		}
-		yield break;
-	}
-
-	[CompilerGenerated]
-	private void <DoLookingAround>g__PickLookTarget|54_0(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
-	{
-		Transform transform = this.<DoLookingAround>g__GetClosestPlayerPosition|54_2(ref A_1);
-		A_1._lookDirection = (transform ? Quaternion.LookRotation(transform.position - this._lookRoot.position) : Quaternion.Euler((float)Random.Range(-15, 15), this._lookRoot.rotation.eulerAngles.y + (float)Random.Range(-45, 45), 0f));
-		this.<DoLookingAround>g__SetLookTime|54_1(ref A_1);
-	}
-
-	[CompilerGenerated]
-	private void <DoLookingAround>g__SetLookTime|54_1(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
-	{
-		A_1.nextLookTime = Time.time + this._lookInterval / (float)this._activationState * 0.5f + Random.value;
-	}
-
-	[CompilerGenerated]
-	private Transform <DoLookingAround>g__GetClosestPlayerPosition|54_2(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
-	{
-		if (Random.value < this._randomLookChance)
-		{
-			return null;
-		}
-		Vector3 position = base.transform.position;
-		float num = float.MaxValue;
-		Transform result = null;
-		foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
-		{
-			if (!rigContainer.IsNull())
-			{
-				bool flag = rigContainer.Creator == this.zoneManager.CurrentGuardian;
-				float num2 = Vector3.SqrMagnitude(rigContainer.transform.position - position) * (float)(flag ? 100 : 1);
-				if (num2 < num)
-				{
-					num = num2;
-					result = rigContainer.transform;
-				}
-			}
-		}
-		return result;
 	}
 
 	[SerializeField]
@@ -371,12 +93,7 @@ public class TappableGuardianIdol : Tappable
 	private GameObject idolMeshRoot;
 
 	[SerializeField]
-	private AnimationCurve bulgeCurve = new AnimationCurve(new Keyframe[]
-	{
-		new Keyframe(0f, 0f),
-		new Keyframe(0.5f, 1f),
-		new Keyframe(1f, 0f)
-	});
+	private AnimationCurve bulgeCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(0.5f, 1f), new Keyframe(1f, 0f));
 
 	[SerializeField]
 	private float bulgeScale = 1.1f;
@@ -391,10 +108,10 @@ public class TappableGuardianIdol : Tappable
 	private AudioClip[] _activateSound;
 
 	[SerializeField]
-	private TappableGuardianIdol.IdolActivationSound[] _activationStageSounds;
+	private IdolActivationSound[] _activationStageSounds;
 
 	[SerializeField]
-	private TappableGuardianIdol.StageActivatedObject[] _stageActivatedObjects;
+	private StageActivatedObject[] _stageActivatedObjects;
 
 	[Header("Look Around")]
 	[SerializeField]
@@ -427,31 +144,288 @@ public class TappableGuardianIdol : Tappable
 
 	private float requiredTapDistance = 3f;
 
-	[Serializable]
-	public struct IdolActivationSound
-	{
-		public AudioClip activation;
+	public bool isChangingPositions { get; private set; }
 
-		public AudioClip loop;
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		_colliderBaseRadius = tapCollision.radius;
 	}
 
-	[Serializable]
-	public struct StageActivatedObject
+	protected override void OnDisable()
 	{
-		public void UpdateActiveState(int stage)
+		base.OnDisable();
+		isChangingPositions = false;
+		_activationState = -1;
+		isActivationReady = true;
+		tapCollision.radius = _colliderBaseRadius;
+	}
+
+	public void OnZoneActiveStateChanged(bool zoneActive)
+	{
+		_zoneIsActive = zoneActive;
+		idolVisualRoot.SetActive(_zoneIsActive);
+	}
+
+	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
+	{
+		if (info.Sender.IsLocal)
 		{
-			bool active = stage >= this.min && stage <= this.max;
-			GameObject[] array = this.objects;
-			for (int i = 0; i < array.Length; i++)
+			zoneManager.SetScaleCenterPoint(base.transform);
+		}
+		if (isChangingPositions || !zoneManager.IsZoneValid())
+		{
+			return;
+		}
+		if (PhotonNetwork.LocalPlayer.IsMasterClient && VRRigCache.Instance.TryGetVrrig(info.Sender, out var playerRig))
+		{
+			if (Vector3.Magnitude(playerRig.Rig.transform.position - base.transform.position) > requiredTapDistance + Mathf.Epsilon)
 			{
-				array[i].SetActive(active);
+				return;
+			}
+			zoneManager.IdolWasTapped(info.Sender);
+		}
+		if (!zoneManager.IsPlayerGuardian(info.Sender))
+		{
+			tapFX.Play();
+		}
+	}
+
+	public void SetPosition(Vector3 position)
+	{
+		base.transform.position = position + new Vector3(0f, activeHeight, 0f);
+		UpdateStageActivatedObjects();
+		_audio.GTPlayOneShot(_activateSound, _audio.volume);
+		StartCoroutine(Unshrink());
+		IEnumerator Unshrink()
+		{
+			float lerpVal = 0f;
+			float growDuration = 0.5f;
+			while (lerpVal < 1f)
+			{
+				lerpVal += Time.deltaTime / growDuration;
+				float num = Mathf.Lerp(0f, 1f, AnimationCurves.EaseOutQuad.Evaluate(lerpVal));
+				idolMeshRoot.transform.localScale = Vector3.one * num;
+				tapCollision.radius = _colliderBaseRadius * num;
+				yield return null;
 			}
 		}
+	}
 
-		public GameObject[] objects;
+	public void MovePositions(Vector3 finalPosition)
+	{
+		if (!isChangingPositions)
+		{
+			transitionPos = finalPosition + fallStartOffset;
+			finalPos = finalPosition;
+			StartCoroutine(TransitionToNextIdol());
+		}
+	}
 
-		public int min;
+	public void UpdateActivationProgress(float rawProgress, bool progressing)
+	{
+		isActivationReady = !progressing;
+		if (rawProgress <= 0f && !progressing)
+		{
+			if (_activationState >= 0)
+			{
+				if (_activationRoutine != null)
+				{
+					StopCoroutine(_activationRoutine);
+					_activationRoutine = null;
+				}
+				idolMeshRoot.transform.localScale = Vector3.one;
+			}
+			_activationState = -1;
+			UpdateStageActivatedObjects();
+			_audio.GTStop();
+			return;
+		}
+		int num = (int)rawProgress;
+		progressing &= _activationStageSounds.Length > num;
+		if (_activationState != num && progressing)
+		{
+			if (_activationRoutine != null)
+			{
+				StopCoroutine(_activationRoutine);
+			}
+			_activationRoutine = StartCoroutine(ShowActivationEffect());
+			_activationState = num;
+			UpdateStageActivatedObjects();
+			IdolActivationSound idolActivationSound = _activationStageSounds[num];
+			_audio.GTPlayOneShot(idolActivationSound.activation, _audio.volume);
+			_audio.clip = idolActivationSound.loop;
+			_audio.loop = true;
+			_audio.GTPlay();
+		}
+	}
 
-		public int max;
+	public void StartLookingAround()
+	{
+		if (_lookRoutine != null)
+		{
+			StopCoroutine(_lookRoutine);
+		}
+		_lookRoutine = StartCoroutine(DoLookingAround());
+	}
+
+	public void StopLookingAround()
+	{
+		if (_lookRoutine != null)
+		{
+			StopCoroutine(_lookRoutine);
+			_lookRoot.localRotation = Quaternion.identity;
+			_lookRoutine = null;
+		}
+	}
+
+	private IEnumerator DoLookingAround()
+	{
+		float nextLookTime = Time.time;
+		Quaternion _lookDirection = _lookRoot.rotation;
+		yield return null;
+		while (true)
+		{
+			if (Time.time >= nextLookTime)
+			{
+				PickLookTarget();
+			}
+			_lookRoot.rotation = Quaternion.Slerp(_lookRoot.rotation, _lookDirection, Time.deltaTime * Mathf.Max(1f, (float)_activationState * _baseLookRate));
+			yield return null;
+		}
+		Transform GetClosestPlayerPosition()
+		{
+			if (UnityEngine.Random.value < _randomLookChance)
+			{
+				return null;
+			}
+			Vector3 position = base.transform.position;
+			float num = float.MaxValue;
+			Transform result = null;
+			foreach (RigContainer activeRigContainer in VRRigCache.ActiveRigContainers)
+			{
+				if (!activeRigContainer.IsNull())
+				{
+					bool flag = activeRigContainer.Creator == zoneManager.CurrentGuardian;
+					float num2 = Vector3.SqrMagnitude(activeRigContainer.transform.position - position) * (float)((!flag) ? 1 : 100);
+					if (num2 < num)
+					{
+						num = num2;
+						result = activeRigContainer.transform;
+					}
+				}
+			}
+			return result;
+		}
+		void PickLookTarget()
+		{
+			Transform transform = GetClosestPlayerPosition();
+			_lookDirection = (transform ? Quaternion.LookRotation(transform.position - _lookRoot.position) : Quaternion.Euler(UnityEngine.Random.Range(-15, 15), _lookRoot.rotation.eulerAngles.y + (float)UnityEngine.Random.Range(-45, 45), 0f));
+			SetLookTime();
+		}
+		void SetLookTime()
+		{
+			nextLookTime = Time.time + _lookInterval / (float)_activationState * 0.5f + UnityEngine.Random.value;
+		}
+	}
+
+	private void UpdateStageActivatedObjects()
+	{
+		StageActivatedObject[] stageActivatedObjects = _stageActivatedObjects;
+		foreach (StageActivatedObject stageActivatedObject in stageActivatedObjects)
+		{
+			stageActivatedObject.UpdateActiveState(_activationState);
+		}
+	}
+
+	private IEnumerator ShowActivationEffect()
+	{
+		float bulgeDuration = 1f;
+		float lerpVal = 0f;
+		while (lerpVal < 1f)
+		{
+			lerpVal += Time.deltaTime / bulgeDuration;
+			float num = Mathf.Lerp(1f, bulgeScale, bulgeCurve.Evaluate(lerpVal));
+			idolMeshRoot.transform.localScale = Vector3.one * num;
+			tapCollision.radius = _colliderBaseRadius * num;
+			yield return null;
+		}
+		_activationRoutine = null;
+	}
+
+	private IEnumerator TransitionToNextIdol()
+	{
+		isChangingPositions = true;
+		_audio.GTStop();
+		if (knockbackOnTrigger)
+		{
+			zoneManager.TriggerIdolKnockback();
+		}
+		if ((bool)explodeFX)
+		{
+			ObjectPools.instance.Instantiate(explodeFX, base.transform.position);
+		}
+		UpdateActivationProgress(-1f, progressing: false);
+		idolMeshRoot.SetActive(value: false);
+		tapCollision.enabled = false;
+		base.transform.position = transitionPos;
+		yield return new WaitForSeconds(floatDuration);
+		idolMeshRoot.SetActive(value: true);
+		tapCollision.enabled = true;
+		if ((bool)startFallFX)
+		{
+			ObjectPools.instance.Instantiate(startFallFX, transitionPos);
+		}
+		_audio.GTPlayOneShot(_descentSound);
+		trailFX.Play();
+		float fall = 0f;
+		Vector3 startPos = transitionPos;
+		Vector3 destinationPos = finalPos;
+		while (fall < fallDuration)
+		{
+			fall += Time.deltaTime;
+			base.transform.position = Vector3.Lerp(startPos, destinationPos, fall / fallDuration);
+			yield return null;
+		}
+		base.transform.position = destinationPos;
+		trailFX.Stop();
+		if ((bool)landedFX)
+		{
+			ObjectPools.instance.Instantiate(landedFX, destinationPos);
+		}
+		if (knockbackOnLand)
+		{
+			zoneManager.TriggerIdolKnockback();
+		}
+		yield return new WaitForSeconds(inactiveDuration);
+		_audio.GTPlayOneShot(_activateSound, _audio.volume);
+		float activateLerp = 0f;
+		startPos = finalPos;
+		destinationPos = finalPos + new Vector3(0f, activeHeight, 0f);
+		AnimationCurve animCurve = AnimationCurves.EaseInOutQuad;
+		while (activateLerp < 1f)
+		{
+			activateLerp = Mathf.Clamp01(activateLerp + Time.deltaTime / activationDuration);
+			base.transform.position = Vector3.Lerp(startPos, destinationPos, animCurve.Evaluate(activateLerp));
+			yield return null;
+		}
+		if ((bool)activatedFX)
+		{
+			ObjectPools.instance.Instantiate(activatedFX, base.transform.position);
+		}
+		if (knockbackOnActivate)
+		{
+			zoneManager.TriggerIdolKnockback();
+		}
+		isChangingPositions = false;
+	}
+
+	private float EaseInOut(float input)
+	{
+		if (!(input < 0.5f))
+		{
+			return 1f - Mathf.Pow(-2f * input + 2f, 3f) / 2f;
+		}
+		return 4f * input * input * input;
 	}
 }

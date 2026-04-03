@@ -1,13 +1,14 @@
-﻿using System;
 using UnityEngine;
 
 public class GRDebugFtueResetButton : GorillaPressableReleaseButton
 {
+	public bool availableOnLive;
+
 	private void Awake()
 	{
-		if (!this.availableOnLive)
+		if (!availableOnLive)
 		{
-			base.gameObject.SetActive(false);
+			base.gameObject.SetActive(value: false);
 		}
 	}
 
@@ -20,16 +21,14 @@ public class GRDebugFtueResetButton : GorillaPressableReleaseButton
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
-		this.isOn = true;
-		this.UpdateColor();
+		isOn = true;
+		UpdateColor();
 	}
 
 	public override void ButtonDeactivation()
 	{
 		base.ButtonDeactivation();
-		this.isOn = false;
-		this.UpdateColor();
+		isOn = false;
+		UpdateColor();
 	}
-
-	public bool availableOnLive;
 }

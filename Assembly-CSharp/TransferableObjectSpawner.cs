@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using Photon.Pun;
@@ -6,15 +5,52 @@ using UnityEngine;
 
 public class TransferableObjectSpawner : MonoBehaviour
 {
+	private enum SpawnMode
+	{
+		OnGround,
+		AtCurrentTransform
+	}
+
+	private enum SpawnTrigger
+	{
+		Timer
+	}
+
+	private Vector3 spawnPosition = Vector3.zero;
+
+	private Quaternion spawnRotation = Quaternion.identity;
+
+	[SerializeField]
+	private GameObject[] TransferrableObjectsToSpawn;
+
+	private List<TransferrableObject> objectsToSpawn = new List<TransferrableObject>();
+
+	[SerializeField]
+	private SpawnMode spawnMode;
+
+	[SerializeField]
+	private SpawnTrigger spawnTrigger;
+
+	[SerializeField]
+	private double SpawnDelay = 5.0;
+
+	private double lastSpawnTime;
+
+	[SerializeField]
+	private LayerMask groundRaycastMask = LayerMask.NameToLayer("Gorilla Object");
+
+	[SerializeField]
+	private float spawnRadius = 0.5f;
+
 	public void Awake()
 	{
-		GameObject[] transferrableObjectsToSpawn = this.TransferrableObjectsToSpawn;
+		GameObject[] transferrableObjectsToSpawn = TransferrableObjectsToSpawn;
 		for (int i = 0; i < transferrableObjectsToSpawn.Length; i++)
 		{
 			TransferrableObject componentInChildren = transferrableObjectsToSpawn[i].GetComponentInChildren<TransferrableObject>();
 			if (componentInChildren.IsNotNull())
 			{
-				this.objectsToSpawn.Add(componentInChildren);
+				objectsToSpawn.Add(componentInChildren);
 			}
 			else
 			{
@@ -29,52 +65,36 @@ public class TransferableObjectSpawner : MonoBehaviour
 		{
 			return;
 		}
-		foreach (GameObject gameObject in this.TransferrableObjectsToSpawn)
+		GameObject[] transferrableObjectsToSpawn = TransferrableObjectsToSpawn;
+		foreach (GameObject gameObject in transferrableObjectsToSpawn)
 		{
 			TransferrableObject componentInChildren = gameObject.GetComponentInChildren<TransferrableObject>();
 			if (componentInChildren.IsNull())
 			{
-				Debug.LogError(string.Concat(new string[]
-				{
-					base.name,
-					" at path ",
-					this.GetComponentPath(int.MaxValue),
-					" has ",
-					gameObject.name,
-					" assigned to TransferrableObjectsToSpawn collection, but it does not have a TransferrableObject component.  It will not spawn."
-				}));
+				Debug.LogError(base.name + " at path " + this.GetComponentPath() + " has " + gameObject.name + " assigned to TransferrableObjectsToSpawn collection, but it does not have a TransferrableObject component.  It will not spawn.");
 			}
 			else if (componentInChildren.worldShareableInstance == null)
 			{
-				Debug.LogError(string.Concat(new string[]
-				{
-					base.name,
-					" at path ",
-					this.GetComponentPath(int.MaxValue),
-					" has ",
-					gameObject.name,
-					" assigned to TransferrableObjectsToSpawn collection, but it's worldShareableInstance is null."
-				}));
+				Debug.LogError(base.name + " at path " + this.GetComponentPath() + " has " + gameObject.name + " assigned to TransferrableObjectsToSpawn collection, but it's worldShareableInstance is null.");
 			}
 		}
 	}
 
 	public void Update()
 	{
-		if (this.spawnTrigger == TransferableObjectSpawner.SpawnTrigger.Timer && PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && PhotonNetwork.Time > this.lastSpawnTime + this.SpawnDelay)
+		if (spawnTrigger == SpawnTrigger.Timer && PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && PhotonNetwork.Time > lastSpawnTime + SpawnDelay)
 		{
-			this.SpawnTransferrableObject();
-			this.lastSpawnTime = PhotonNetwork.Time;
+			SpawnTransferrableObject();
+			lastSpawnTime = PhotonNetwork.Time;
 		}
 	}
 
 	private bool SpawnOnGround()
 	{
-		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.spawnRadius, Vector3.down), out raycastHit, 3f, this.groundRaycastMask))
+		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * spawnRadius, Vector3.down), out var hitInfo, 3f, groundRaycastMask))
 		{
-			this.spawnPosition = raycastHit.point;
-			this.spawnRotation = Quaternion.FromToRotation(Vector3.up, raycastHit.normal);
+			spawnPosition = hitInfo.point;
+			spawnRotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
 			return true;
 		}
 		return false;
@@ -82,8 +102,8 @@ public class TransferableObjectSpawner : MonoBehaviour
 
 	private void SpawnAtCurrentLocation()
 	{
-		this.spawnPosition = base.transform.position;
-		this.spawnRotation = base.transform.rotation;
+		spawnPosition = base.transform.position;
+		spawnRotation = base.transform.rotation;
 	}
 
 	public void SpawnTransferrableObject()
@@ -92,29 +112,30 @@ public class TransferableObjectSpawner : MonoBehaviour
 		{
 			return;
 		}
-		TransferableObjectSpawner.SpawnMode spawnMode = this.spawnMode;
-		if (spawnMode != TransferableObjectSpawner.SpawnMode.OnGround)
+		switch (spawnMode)
 		{
-			if (spawnMode != TransferableObjectSpawner.SpawnMode.AtCurrentTransform)
+		case SpawnMode.AtCurrentTransform:
+			SpawnAtCurrentLocation();
+			break;
+		case SpawnMode.OnGround:
+			if (!SpawnOnGround())
 			{
 				return;
 			}
-			this.SpawnAtCurrentLocation();
-		}
-		else if (!this.SpawnOnGround())
-		{
+			break;
+		default:
 			return;
 		}
 		TransferrableObject transferrableObject = null;
 		int num = 0;
-		foreach (TransferrableObject transferrableObject2 in this.objectsToSpawn)
+		foreach (TransferrableObject item in objectsToSpawn)
 		{
-			if (!transferrableObject2.InHand())
+			if (!item.InHand())
 			{
 				num++;
 				if (Random.Range(0, num) == 0)
 				{
-					transferrableObject = transferrableObject2;
+					transferrableObject = item;
 				}
 			}
 		}
@@ -126,48 +147,13 @@ public class TransferableObjectSpawner : MonoBehaviour
 			}
 			if (transferrableObject.worldShareableInstance != null)
 			{
-				transferrableObject.transform.SetPositionAndRotation(this.spawnPosition, this.spawnRotation);
+				transferrableObject.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
 				transferrableObject.worldShareableInstance.SetWillTeleport();
-				return;
 			}
-			Debug.LogError("WorldShareableInstance for " + transferrableObject.name + " is null");
+			else
+			{
+				Debug.LogError("WorldShareableInstance for " + transferrableObject.name + " is null");
+			}
 		}
-	}
-
-	private Vector3 spawnPosition = Vector3.zero;
-
-	private Quaternion spawnRotation = Quaternion.identity;
-
-	[SerializeField]
-	private GameObject[] TransferrableObjectsToSpawn;
-
-	private List<TransferrableObject> objectsToSpawn = new List<TransferrableObject>();
-
-	[SerializeField]
-	private TransferableObjectSpawner.SpawnMode spawnMode;
-
-	[SerializeField]
-	private TransferableObjectSpawner.SpawnTrigger spawnTrigger;
-
-	[SerializeField]
-	private double SpawnDelay = 5.0;
-
-	private double lastSpawnTime;
-
-	[SerializeField]
-	private LayerMask groundRaycastMask = LayerMask.NameToLayer("Gorilla Object");
-
-	[SerializeField]
-	private float spawnRadius = 0.5f;
-
-	private enum SpawnMode
-	{
-		OnGround,
-		AtCurrentTransform
-	}
-
-	private enum SpawnTrigger
-	{
-		Timer
 	}
 }

@@ -1,59 +1,49 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public static class LinqUtils
 {
 	public static IEnumerable<TResult> SelectManyNullSafe<TSource, TResult>(this IEnumerable<TSource> sources, Func<TSource, IEnumerable<TResult>> selector)
 	{
-		if (sources == null)
+		if (sources == null || selector == null)
 		{
 			yield break;
 		}
-		if (selector == null)
+		foreach (TSource source in sources)
 		{
-			yield break;
-		}
-		foreach (TSource tsource in sources)
-		{
-			if (tsource != null)
+			if (source == null)
 			{
-				IEnumerable<TResult> enumerable = selector(tsource);
-				foreach (TResult tresult in enumerable)
+				continue;
+			}
+			IEnumerable<TResult> enumerable = selector(source);
+			foreach (TResult item in enumerable)
+			{
+				if (item != null)
 				{
-					if (tresult != null)
-					{
-						yield return tresult;
-					}
+					yield return item;
 				}
-				IEnumerator<TResult> enumerator2 = null;
 			}
 		}
-		IEnumerator<TSource> enumerator = null;
-		yield break;
-		yield break;
 	}
 
 	public static IEnumerable<TSource> DistinctBy<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
 	{
 		HashSet<TResult> set = new HashSet<TResult>();
-		foreach (TSource tsource in source)
+		foreach (TSource item2 in source)
 		{
-			TResult item = selector(tsource);
+			TResult item = selector(item2);
 			if (set.Add(item))
 			{
-				yield return tsource;
+				yield return item2;
 			}
 		}
-		IEnumerator<TSource> enumerator = null;
-		yield break;
-		yield break;
 	}
 
 	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
 	{
-		foreach (T obj in source)
+		foreach (T item in source)
 		{
-			action(obj);
+			action(item);
 		}
 		return source;
 	}
@@ -80,6 +70,5 @@ public static class LinqUtils
 	public static IEnumerable<T> Self<T>(this T value)
 	{
 		yield return value;
-		yield break;
 	}
 }

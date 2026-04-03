@@ -1,171 +1,54 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class MarkOneMitts : HandTapBehaviour, ITickSystemTick, IProximityEffectReceiver
 {
-	private void Awake()
+	[Serializable]
+	private class Mitt
 	{
-		this.leftMitt.Init();
-		this.rightMitt.Init();
-		this.rig = base.GetComponentInParent<VRRig>();
-		this.vibrateController = (this.vibrateController && this.rig.isOfflineVRRig);
-		this.proximityEffect.AddReceiver(this);
-	}
+		public ParticleSystem burst;
 
-	private void OnEnable()
-	{
-		TickSystem<object>.AddTickCallback(this);
-	}
+		public ParticleSystem flame;
 
-	private void OnDisable()
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-	}
+		public ThermalSourceVolume thermalSource;
 
-	public void OnProximityCalculated(float distance, float alignment, float parallel)
-	{
-		float num = distance * alignment * parallel;
-		if (num > 0.1f)
-		{
-			float speed = this.proximitySpeedCurve.Evaluate(num);
-			float num2 = this.proximitySpreadCurve.Evaluate(num);
-			ParticleSystem.MinMaxCurve xy = new ParticleSystem.MinMaxCurve(-num2, num2);
-			this.StartFlame(this.leftMitt, num, speed, xy);
-			this.StartFlame(this.rightMitt, num, speed, xy);
-			if (this.vibrateController && this.vibrationStrengthMult > 0f)
-			{
-				GorillaTagger.Instance.StartVibration(true, this.vibrationStrengthMult * 0.5f * num, Time.deltaTime);
-				GorillaTagger.Instance.StartVibration(false, this.vibrationStrengthMult * 0.5f * num, Time.deltaTime);
-			}
-			this.SetInterferenceAudio(true);
-			float t = 1f - Mathf.Exp(-this.proximityAudioReactionSpeed * Time.deltaTime);
-			this.proximityAudioSource.pitch = Mathf.Lerp(this.proximityAudioSource.pitch, this.proximityAudioPitch.Evaluate(num), t);
-			this.proximityAudioSource.volume = Mathf.Lerp(this.proximityAudioSource.volume, this.proximityAudioVolume.Evaluate(num), t);
-			return;
-		}
-		if (this.leftMitt.thermalSource.enabled || this.rightMitt.thermalSource.enabled)
-		{
-			this.leftMitt.flame.Stop();
-			this.leftMitt.thermalSource.enabled = false;
-			this.rightMitt.flame.Stop();
-			this.rightMitt.thermalSource.enabled = false;
-			this.SetInterferenceAudio(false);
-		}
-	}
+		[NonSerialized]
+		public float lastTapStrength;
 
-	private void StartFlame(MarkOneMitts.Mitt mitt, float scale, float speed, ParticleSystem.MinMaxCurve xy)
-	{
-		if (!mitt.thermalSource.enabled)
-		{
-			mitt.flame.Play();
-			mitt.thermalSource.enabled = true;
-		}
-		mitt.flameTransform.localScale = this.flameScale * scale * Vector3.one;
-		mitt.flameMain.startSpeed = speed;
-		mitt.flameForce.x = xy;
-		mitt.flameForce.y = xy;
-		mitt.thermalSource.celsius = this.heatMultiplier * scale;
-	}
+		[NonSerialized]
+		public ParticleSystem.Burst[] bursts;
 
-	private void RunTimer(MarkOneMitts.Mitt mitt, bool isLeftHand)
-	{
-		if (mitt.timer <= 0f)
-		{
-			return;
-		}
-		mitt.timer -= Time.deltaTime;
-		if (mitt.timer <= 0f)
-		{
-			mitt.timer = 0f;
-			mitt.flame.Stop();
-			mitt.thermalSource.enabled = false;
-			if (this.leftMitt.timer <= 0f && this.rightMitt.timer <= 0f)
-			{
-				this.proximityEffect.enabled = true;
-				return;
-			}
-		}
-		else
-		{
-			float num = mitt.lastTapStrength * mitt.timer;
-			mitt.flameTransform.localScale = this.flameScale * num * Vector3.one;
-			mitt.thermalSource.celsius = this.heatMultiplier * num;
-			if (this.vibrateController)
-			{
-				GorillaTagger.Instance.StartVibration(isLeftHand, this.vibrationStrengthMult * num, 0.1f);
-			}
-		}
-	}
+		[NonSerialized]
+		public Transform burstTransform;
 
-	private void TryPlayProximityStartStopAudio(AudioClip clip, float volume)
-	{
-		if (this.proximityStartStopAudioSource.isPlaying)
-		{
-			return;
-		}
-		this.proximityStartStopAudioSource.clip = clip;
-		this.proximityStartStopAudioSource.volume = volume;
-		this.proximityStartStopAudioSource.Play();
-	}
+		[NonSerialized]
+		public Transform flameTransform;
 
-	private void SetInterferenceAudio(bool active)
-	{
-		if (this.proximityAudioSource.isPlaying == active)
-		{
-			return;
-		}
-		if (active)
-		{
-			this.TryPlayProximityStartStopAudio(this.proximityStartAudioClip, this.proximityStartAudioVolume);
-			this.proximityAudioSource.Play();
-			return;
-		}
-		this.TryPlayProximityStartStopAudio(this.proximityStopAudioClip, this.proximityStopAudioVolume);
-		this.proximityAudioSource.Stop();
-	}
+		[NonSerialized]
+		public float timer;
 
-	public bool TickRunning { get; set; }
+		[NonSerialized]
+		public ParticleSystem.MainModule flameMain;
 
-	public void Tick()
-	{
-		if (this.leftMitt.timer <= 0f && this.rightMitt.timer <= 0f)
-		{
-			TickSystem<object>.RemoveTickCallback(this);
-			return;
-		}
-		this.RunTimer(this.leftMitt, true);
-		this.RunTimer(this.rightMitt, false);
-	}
+		[NonSerialized]
+		public ParticleSystem.ForceOverLifetimeModule flameForce;
 
-	internal override void OnTap(HandEffectContext handContext)
-	{
-		float num = this.handSpeedToEffectStrength.Evaluate(handContext.Speed);
-		if (num >= this.minEffectStrength)
+		public void Init()
 		{
-			TickSystem<object>.AddTickCallback(this);
-			MarkOneMitts.Mitt mitt = handContext.isLeftHand ? this.leftMitt : this.rightMitt;
-			mitt.lastTapStrength = num;
-			mitt.timer = this.flameTime;
-			mitt.bursts[0].count = num * 10f;
-			mitt.bursts[1].count = num * 5f;
-			mitt.burst.emission.SetBursts(mitt.bursts);
-			mitt.burstTransform.localScale = num * Vector3.one;
-			this.StartFlame(mitt, num * this.flameScale * this.flameTime, this.flameSpeed, this.emptyParticleCurve);
-			mitt.burst.Play();
-			Keyframe[] keys = this.handSpeedToEffectStrength.keys;
-			float value = keys[keys.Length - 1].value;
-			handContext.soundPitch = Mathf.Clamp(value / num, 1f, 3f);
-			this.proximityEffect.enabled = false;
-			return;
+			bursts = new ParticleSystem.Burst[2];
+			burst.emission.GetBursts(bursts);
+			burstTransform = burst.transform;
+			flameTransform = flame.transform;
+			flameMain = flame.main;
+			flameForce = flame.forceOverLifetime;
 		}
-		handContext.soundFX = null;
 	}
 
 	[SerializeField]
-	private MarkOneMitts.Mitt leftMitt;
+	private Mitt leftMitt;
 
 	[SerializeField]
-	private MarkOneMitts.Mitt rightMitt;
+	private Mitt rightMitt;
 
 	[SerializeField]
 	private ProximityEffect proximityEffect;
@@ -234,44 +117,160 @@ public class MarkOneMitts : HandTapBehaviour, ITickSystemTick, IProximityEffectR
 
 	private ParticleSystem.MinMaxCurve emptyParticleCurve = new ParticleSystem.MinMaxCurve(0f);
 
-	[Serializable]
-	private class Mitt
+	public bool TickRunning { get; set; }
+
+	private void Awake()
 	{
-		public void Init()
+		leftMitt.Init();
+		rightMitt.Init();
+		rig = GetComponentInParent<VRRig>();
+		vibrateController = vibrateController && rig.isOfflineVRRig;
+		proximityEffect.AddReceiver(this);
+	}
+
+	private void OnEnable()
+	{
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void OnProximityCalculated(float distance, float alignment, float parallel)
+	{
+		float num = distance * alignment * parallel;
+		if (num > 0.1f)
 		{
-			this.bursts = new ParticleSystem.Burst[2];
-			this.burst.emission.GetBursts(this.bursts);
-			this.burstTransform = this.burst.transform;
-			this.flameTransform = this.flame.transform;
-			this.flameMain = this.flame.main;
-			this.flameForce = this.flame.forceOverLifetime;
+			float speed = proximitySpeedCurve.Evaluate(num);
+			float num2 = proximitySpreadCurve.Evaluate(num);
+			ParticleSystem.MinMaxCurve xy = new ParticleSystem.MinMaxCurve(0f - num2, num2);
+			StartFlame(leftMitt, num, speed, xy);
+			StartFlame(rightMitt, num, speed, xy);
+			if (vibrateController && vibrationStrengthMult > 0f)
+			{
+				GorillaTagger.Instance.StartVibration(forLeftController: true, vibrationStrengthMult * 0.5f * num, Time.deltaTime);
+				GorillaTagger.Instance.StartVibration(forLeftController: false, vibrationStrengthMult * 0.5f * num, Time.deltaTime);
+			}
+			SetInterferenceAudio(active: true);
+			float t = 1f - Mathf.Exp((0f - proximityAudioReactionSpeed) * Time.deltaTime);
+			proximityAudioSource.pitch = Mathf.Lerp(proximityAudioSource.pitch, proximityAudioPitch.Evaluate(num), t);
+			proximityAudioSource.volume = Mathf.Lerp(proximityAudioSource.volume, proximityAudioVolume.Evaluate(num), t);
 		}
+		else if (leftMitt.thermalSource.enabled || rightMitt.thermalSource.enabled)
+		{
+			leftMitt.flame.Stop();
+			leftMitt.thermalSource.enabled = false;
+			rightMitt.flame.Stop();
+			rightMitt.thermalSource.enabled = false;
+			SetInterferenceAudio(active: false);
+		}
+	}
 
-		public ParticleSystem burst;
+	private void StartFlame(Mitt mitt, float scale, float speed, ParticleSystem.MinMaxCurve xy)
+	{
+		if (!mitt.thermalSource.enabled)
+		{
+			mitt.flame.Play();
+			mitt.thermalSource.enabled = true;
+		}
+		mitt.flameTransform.localScale = flameScale * scale * Vector3.one;
+		mitt.flameMain.startSpeed = speed;
+		mitt.flameForce.x = xy;
+		mitt.flameForce.y = xy;
+		mitt.thermalSource.celsius = heatMultiplier * scale;
+	}
 
-		public ParticleSystem flame;
+	private void RunTimer(Mitt mitt, bool isLeftHand)
+	{
+		if (mitt.timer <= 0f)
+		{
+			return;
+		}
+		mitt.timer -= Time.deltaTime;
+		if (mitt.timer <= 0f)
+		{
+			mitt.timer = 0f;
+			mitt.flame.Stop();
+			mitt.thermalSource.enabled = false;
+			if (leftMitt.timer <= 0f && rightMitt.timer <= 0f)
+			{
+				proximityEffect.enabled = true;
+			}
+		}
+		else
+		{
+			float num = mitt.lastTapStrength * mitt.timer;
+			mitt.flameTransform.localScale = flameScale * num * Vector3.one;
+			mitt.thermalSource.celsius = heatMultiplier * num;
+			if (vibrateController)
+			{
+				GorillaTagger.Instance.StartVibration(isLeftHand, vibrationStrengthMult * num, 0.1f);
+			}
+		}
+	}
 
-		public ThermalSourceVolume thermalSource;
+	private void TryPlayProximityStartStopAudio(AudioClip clip, float volume)
+	{
+		if (!proximityStartStopAudioSource.isPlaying)
+		{
+			proximityStartStopAudioSource.clip = clip;
+			proximityStartStopAudioSource.volume = volume;
+			proximityStartStopAudioSource.Play();
+		}
+	}
 
-		[NonSerialized]
-		public float lastTapStrength;
+	private void SetInterferenceAudio(bool active)
+	{
+		if (proximityAudioSource.isPlaying != active)
+		{
+			if (active)
+			{
+				TryPlayProximityStartStopAudio(proximityStartAudioClip, proximityStartAudioVolume);
+				proximityAudioSource.Play();
+			}
+			else
+			{
+				TryPlayProximityStartStopAudio(proximityStopAudioClip, proximityStopAudioVolume);
+				proximityAudioSource.Stop();
+			}
+		}
+	}
 
-		[NonSerialized]
-		public ParticleSystem.Burst[] bursts;
+	public void Tick()
+	{
+		if (leftMitt.timer <= 0f && rightMitt.timer <= 0f)
+		{
+			TickSystem<object>.RemoveTickCallback(this);
+			return;
+		}
+		RunTimer(leftMitt, isLeftHand: true);
+		RunTimer(rightMitt, isLeftHand: false);
+	}
 
-		[NonSerialized]
-		public Transform burstTransform;
-
-		[NonSerialized]
-		public Transform flameTransform;
-
-		[NonSerialized]
-		public float timer;
-
-		[NonSerialized]
-		public ParticleSystem.MainModule flameMain;
-
-		[NonSerialized]
-		public ParticleSystem.ForceOverLifetimeModule flameForce;
+	internal override void OnTap(HandEffectContext handContext)
+	{
+		float num = handSpeedToEffectStrength.Evaluate(handContext.Speed);
+		if (num >= minEffectStrength)
+		{
+			TickSystem<object>.AddTickCallback(this);
+			Mitt mitt = (handContext.isLeftHand ? leftMitt : rightMitt);
+			mitt.lastTapStrength = num;
+			mitt.timer = flameTime;
+			mitt.bursts[0].count = num * 10f;
+			mitt.bursts[1].count = num * 5f;
+			mitt.burst.emission.SetBursts(mitt.bursts);
+			mitt.burstTransform.localScale = num * Vector3.one;
+			StartFlame(mitt, num * flameScale * flameTime, flameSpeed, emptyParticleCurve);
+			mitt.burst.Play();
+			float value = handSpeedToEffectStrength.keys[^1].value;
+			handContext.soundPitch = Mathf.Clamp(value / num, 1f, 3f);
+			proximityEffect.enabled = false;
+		}
+		else
+		{
+			handContext.soundFX = null;
+		}
 	}
 }

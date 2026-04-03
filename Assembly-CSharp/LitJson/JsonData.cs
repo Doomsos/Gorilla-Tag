@@ -1,931 +1,772 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 
-namespace LitJson
+namespace LitJson;
+
+public class JsonData : IJsonWrapper, IList, ICollection, IEnumerable, IOrderedDictionary, IDictionary, IEquatable<JsonData>
 {
-	public class JsonData : IJsonWrapper, IList, ICollection, IEnumerable, IOrderedDictionary, IDictionary, IEquatable<JsonData>
+	private IList<JsonData> inst_array;
+
+	private bool inst_boolean;
+
+	private double inst_double;
+
+	private int inst_int;
+
+	private long inst_long;
+
+	private IDictionary<string, JsonData> inst_object;
+
+	private string inst_string;
+
+	private string json;
+
+	private JsonType type;
+
+	private IList<KeyValuePair<string, JsonData>> object_list;
+
+	public int Count => EnsureCollection().Count;
+
+	public bool IsArray => type == JsonType.Array;
+
+	public bool IsBoolean => type == JsonType.Boolean;
+
+	public bool IsDouble => type == JsonType.Double;
+
+	public bool IsInt => type == JsonType.Int;
+
+	public bool IsLong => type == JsonType.Long;
+
+	public bool IsObject => type == JsonType.Object;
+
+	public bool IsString => type == JsonType.String;
+
+	int ICollection.Count => Count;
+
+	bool ICollection.IsSynchronized => EnsureCollection().IsSynchronized;
+
+	object ICollection.SyncRoot => EnsureCollection().SyncRoot;
+
+	bool IDictionary.IsFixedSize => EnsureDictionary().IsFixedSize;
+
+	bool IDictionary.IsReadOnly => EnsureDictionary().IsReadOnly;
+
+	ICollection IDictionary.Keys
 	{
-		public int Count
+		get
 		{
-			get
+			EnsureDictionary();
+			IList<string> list = new List<string>();
+			foreach (KeyValuePair<string, JsonData> item in object_list)
 			{
-				return this.EnsureCollection().Count;
+				list.Add(item.Key);
 			}
+			return (ICollection)list;
 		}
+	}
 
-		public bool IsArray
+	ICollection IDictionary.Values
+	{
+		get
 		{
-			get
+			EnsureDictionary();
+			IList<JsonData> list = new List<JsonData>();
+			foreach (KeyValuePair<string, JsonData> item in object_list)
 			{
-				return this.type == JsonType.Array;
+				list.Add(item.Value);
 			}
+			return (ICollection)list;
 		}
+	}
 
-		public bool IsBoolean
+	bool IJsonWrapper.IsArray => IsArray;
+
+	bool IJsonWrapper.IsBoolean => IsBoolean;
+
+	bool IJsonWrapper.IsDouble => IsDouble;
+
+	bool IJsonWrapper.IsInt => IsInt;
+
+	bool IJsonWrapper.IsLong => IsLong;
+
+	bool IJsonWrapper.IsObject => IsObject;
+
+	bool IJsonWrapper.IsString => IsString;
+
+	bool IList.IsFixedSize => EnsureList().IsFixedSize;
+
+	bool IList.IsReadOnly => EnsureList().IsReadOnly;
+
+	object IDictionary.this[object key]
+	{
+		get
 		{
-			get
+			return EnsureDictionary()[key];
+		}
+		set
+		{
+			if (!(key is string))
 			{
-				return this.type == JsonType.Boolean;
+				throw new ArgumentException("The key has to be a string");
 			}
+			JsonData value2 = ToJsonData(value);
+			this[(string)key] = value2;
 		}
+	}
 
-		public bool IsDouble
+	object IOrderedDictionary.this[int idx]
+	{
+		get
 		{
-			get
-			{
-				return this.type == JsonType.Double;
-			}
+			EnsureDictionary();
+			return object_list[idx].Value;
 		}
-
-		public bool IsInt
+		set
 		{
-			get
-			{
-				return this.type == JsonType.Int;
-			}
+			EnsureDictionary();
+			JsonData value2 = ToJsonData(value);
+			KeyValuePair<string, JsonData> keyValuePair = object_list[idx];
+			inst_object[keyValuePair.Key] = value2;
+			KeyValuePair<string, JsonData> value3 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value2);
+			object_list[idx] = value3;
 		}
+	}
 
-		public bool IsLong
+	object IList.this[int index]
+	{
+		get
 		{
-			get
-			{
-				return this.type == JsonType.Long;
-			}
+			return EnsureList()[index];
 		}
-
-		public bool IsObject
+		set
 		{
-			get
-			{
-				return this.type == JsonType.Object;
-			}
+			EnsureList();
+			JsonData value2 = ToJsonData(value);
+			this[index] = value2;
 		}
+	}
 
-		public bool IsString
+	public JsonData this[string prop_name]
+	{
+		get
 		{
-			get
-			{
-				return this.type == JsonType.String;
-			}
+			EnsureDictionary();
+			return inst_object[prop_name];
 		}
-
-		int ICollection.Count
+		set
 		{
-			get
+			EnsureDictionary();
+			KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>(prop_name, value);
+			if (inst_object.ContainsKey(prop_name))
 			{
-				return this.Count;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.EnsureCollection().IsSynchronized;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.EnsureCollection().SyncRoot;
-			}
-		}
-
-		bool IDictionary.IsFixedSize
-		{
-			get
-			{
-				return this.EnsureDictionary().IsFixedSize;
-			}
-		}
-
-		bool IDictionary.IsReadOnly
-		{
-			get
-			{
-				return this.EnsureDictionary().IsReadOnly;
-			}
-		}
-
-		ICollection IDictionary.Keys
-		{
-			get
-			{
-				this.EnsureDictionary();
-				IList<string> list = new List<string>();
-				foreach (KeyValuePair<string, JsonData> keyValuePair in this.object_list)
+				for (int i = 0; i < object_list.Count; i++)
 				{
-					list.Add(keyValuePair.Key);
-				}
-				return (ICollection)list;
-			}
-		}
-
-		ICollection IDictionary.Values
-		{
-			get
-			{
-				this.EnsureDictionary();
-				IList<JsonData> list = new List<JsonData>();
-				foreach (KeyValuePair<string, JsonData> keyValuePair in this.object_list)
-				{
-					list.Add(keyValuePair.Value);
-				}
-				return (ICollection)list;
-			}
-		}
-
-		bool IJsonWrapper.IsArray
-		{
-			get
-			{
-				return this.IsArray;
-			}
-		}
-
-		bool IJsonWrapper.IsBoolean
-		{
-			get
-			{
-				return this.IsBoolean;
-			}
-		}
-
-		bool IJsonWrapper.IsDouble
-		{
-			get
-			{
-				return this.IsDouble;
-			}
-		}
-
-		bool IJsonWrapper.IsInt
-		{
-			get
-			{
-				return this.IsInt;
-			}
-		}
-
-		bool IJsonWrapper.IsLong
-		{
-			get
-			{
-				return this.IsLong;
-			}
-		}
-
-		bool IJsonWrapper.IsObject
-		{
-			get
-			{
-				return this.IsObject;
-			}
-		}
-
-		bool IJsonWrapper.IsString
-		{
-			get
-			{
-				return this.IsString;
-			}
-		}
-
-		bool IList.IsFixedSize
-		{
-			get
-			{
-				return this.EnsureList().IsFixedSize;
-			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return this.EnsureList().IsReadOnly;
-			}
-		}
-
-		object IDictionary.this[object key]
-		{
-			get
-			{
-				return this.EnsureDictionary()[key];
-			}
-			set
-			{
-				if (!(key is string))
-				{
-					throw new ArgumentException("The key has to be a string");
-				}
-				JsonData value2 = this.ToJsonData(value);
-				this[(string)key] = value2;
-			}
-		}
-
-		object IOrderedDictionary.this[int idx]
-		{
-			get
-			{
-				this.EnsureDictionary();
-				return this.object_list[idx].Value;
-			}
-			set
-			{
-				this.EnsureDictionary();
-				JsonData value2 = this.ToJsonData(value);
-				KeyValuePair<string, JsonData> keyValuePair = this.object_list[idx];
-				this.inst_object[keyValuePair.Key] = value2;
-				KeyValuePair<string, JsonData> value3 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value2);
-				this.object_list[idx] = value3;
-			}
-		}
-
-		object IList.this[int index]
-		{
-			get
-			{
-				return this.EnsureList()[index];
-			}
-			set
-			{
-				this.EnsureList();
-				JsonData value2 = this.ToJsonData(value);
-				this[index] = value2;
-			}
-		}
-
-		public JsonData this[string prop_name]
-		{
-			get
-			{
-				this.EnsureDictionary();
-				return this.inst_object[prop_name];
-			}
-			set
-			{
-				this.EnsureDictionary();
-				KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>(prop_name, value);
-				if (this.inst_object.ContainsKey(prop_name))
-				{
-					for (int i = 0; i < this.object_list.Count; i++)
+					if (object_list[i].Key == prop_name)
 					{
-						if (this.object_list[i].Key == prop_name)
-						{
-							this.object_list[i] = keyValuePair;
-							break;
-						}
+						object_list[i] = keyValuePair;
+						break;
 					}
 				}
-				else
-				{
-					this.object_list.Add(keyValuePair);
-				}
-				this.inst_object[prop_name] = value;
-				this.json = null;
 			}
-		}
-
-		public JsonData this[int index]
-		{
-			get
+			else
 			{
-				this.EnsureCollection();
-				if (this.type == JsonType.Array)
-				{
-					return this.inst_array[index];
-				}
-				return this.object_list[index].Value;
+				object_list.Add(keyValuePair);
 			}
-			set
+			inst_object[prop_name] = value;
+			json = null;
+		}
+	}
+
+	public JsonData this[int index]
+	{
+		get
+		{
+			EnsureCollection();
+			if (type == JsonType.Array)
 			{
-				this.EnsureCollection();
-				if (this.type == JsonType.Array)
-				{
-					this.inst_array[index] = value;
-				}
-				else
-				{
-					KeyValuePair<string, JsonData> keyValuePair = this.object_list[index];
-					KeyValuePair<string, JsonData> value2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
-					this.object_list[index] = value2;
-					this.inst_object[keyValuePair.Key] = value;
-				}
-				this.json = null;
+				return inst_array[index];
 			}
+			return object_list[index].Value;
 		}
-
-		public JsonData()
+		set
 		{
-		}
-
-		public JsonData(bool boolean)
-		{
-			this.type = JsonType.Boolean;
-			this.inst_boolean = boolean;
-		}
-
-		public JsonData(double number)
-		{
-			this.type = JsonType.Double;
-			this.inst_double = number;
-		}
-
-		public JsonData(int number)
-		{
-			this.type = JsonType.Int;
-			this.inst_int = number;
-		}
-
-		public JsonData(long number)
-		{
-			this.type = JsonType.Long;
-			this.inst_long = number;
-		}
-
-		public JsonData(object obj)
-		{
-			if (obj is bool)
+			EnsureCollection();
+			if (type == JsonType.Array)
 			{
-				this.type = JsonType.Boolean;
-				this.inst_boolean = (bool)obj;
-				return;
+				inst_array[index] = value;
 			}
-			if (obj is double)
+			else
 			{
-				this.type = JsonType.Double;
-				this.inst_double = (double)obj;
-				return;
+				KeyValuePair<string, JsonData> keyValuePair = object_list[index];
+				KeyValuePair<string, JsonData> value2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
+				object_list[index] = value2;
+				inst_object[keyValuePair.Key] = value;
 			}
-			if (obj is int)
+			json = null;
+		}
+	}
+
+	public JsonData()
+	{
+	}
+
+	public JsonData(bool boolean)
+	{
+		type = JsonType.Boolean;
+		inst_boolean = boolean;
+	}
+
+	public JsonData(double number)
+	{
+		type = JsonType.Double;
+		inst_double = number;
+	}
+
+	public JsonData(int number)
+	{
+		type = JsonType.Int;
+		inst_int = number;
+	}
+
+	public JsonData(long number)
+	{
+		type = JsonType.Long;
+		inst_long = number;
+	}
+
+	public JsonData(object obj)
+	{
+		if (obj is bool)
+		{
+			type = JsonType.Boolean;
+			inst_boolean = (bool)obj;
+			return;
+		}
+		if (obj is double)
+		{
+			type = JsonType.Double;
+			inst_double = (double)obj;
+			return;
+		}
+		if (obj is int)
+		{
+			type = JsonType.Int;
+			inst_int = (int)obj;
+			return;
+		}
+		if (obj is long)
+		{
+			type = JsonType.Long;
+			inst_long = (long)obj;
+			return;
+		}
+		if (obj is string)
+		{
+			type = JsonType.String;
+			inst_string = (string)obj;
+			return;
+		}
+		throw new ArgumentException("Unable to wrap the given object with JsonData");
+	}
+
+	public JsonData(string str)
+	{
+		type = JsonType.String;
+		inst_string = str;
+	}
+
+	public static implicit operator JsonData(bool data)
+	{
+		return new JsonData(data);
+	}
+
+	public static implicit operator JsonData(double data)
+	{
+		return new JsonData(data);
+	}
+
+	public static implicit operator JsonData(int data)
+	{
+		return new JsonData(data);
+	}
+
+	public static implicit operator JsonData(long data)
+	{
+		return new JsonData(data);
+	}
+
+	public static implicit operator JsonData(string data)
+	{
+		return new JsonData(data);
+	}
+
+	public static explicit operator bool(JsonData data)
+	{
+		if (data.type != JsonType.Boolean)
+		{
+			throw new InvalidCastException("Instance of JsonData doesn't hold a double");
+		}
+		return data.inst_boolean;
+	}
+
+	public static explicit operator double(JsonData data)
+	{
+		if (data.type != JsonType.Double)
+		{
+			throw new InvalidCastException("Instance of JsonData doesn't hold a double");
+		}
+		return data.inst_double;
+	}
+
+	public static explicit operator int(JsonData data)
+	{
+		if (data.type != JsonType.Int)
+		{
+			throw new InvalidCastException("Instance of JsonData doesn't hold an int");
+		}
+		return data.inst_int;
+	}
+
+	public static explicit operator long(JsonData data)
+	{
+		if (data.type != JsonType.Long)
+		{
+			throw new InvalidCastException("Instance of JsonData doesn't hold an int");
+		}
+		return data.inst_long;
+	}
+
+	public static explicit operator string(JsonData data)
+	{
+		if (data.type != JsonType.String)
+		{
+			throw new InvalidCastException("Instance of JsonData doesn't hold a string");
+		}
+		return data.inst_string;
+	}
+
+	void ICollection.CopyTo(Array array, int index)
+	{
+		EnsureCollection().CopyTo(array, index);
+	}
+
+	void IDictionary.Add(object key, object value)
+	{
+		JsonData value2 = ToJsonData(value);
+		EnsureDictionary().Add(key, value2);
+		KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>((string)key, value2);
+		object_list.Add(item);
+		json = null;
+	}
+
+	void IDictionary.Clear()
+	{
+		EnsureDictionary().Clear();
+		object_list.Clear();
+		json = null;
+	}
+
+	bool IDictionary.Contains(object key)
+	{
+		return EnsureDictionary().Contains(key);
+	}
+
+	IDictionaryEnumerator IDictionary.GetEnumerator()
+	{
+		return ((IOrderedDictionary)this).GetEnumerator();
+	}
+
+	void IDictionary.Remove(object key)
+	{
+		EnsureDictionary().Remove(key);
+		for (int i = 0; i < object_list.Count; i++)
+		{
+			if (object_list[i].Key == (string)key)
 			{
-				this.type = JsonType.Int;
-				this.inst_int = (int)obj;
-				return;
+				object_list.RemoveAt(i);
+				break;
 			}
-			if (obj is long)
+		}
+		json = null;
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return EnsureCollection().GetEnumerator();
+	}
+
+	bool IJsonWrapper.GetBoolean()
+	{
+		if (type != JsonType.Boolean)
+		{
+			throw new InvalidOperationException("JsonData instance doesn't hold a boolean");
+		}
+		return inst_boolean;
+	}
+
+	double IJsonWrapper.GetDouble()
+	{
+		if (type != JsonType.Double)
+		{
+			throw new InvalidOperationException("JsonData instance doesn't hold a double");
+		}
+		return inst_double;
+	}
+
+	int IJsonWrapper.GetInt()
+	{
+		if (type != JsonType.Int)
+		{
+			throw new InvalidOperationException("JsonData instance doesn't hold an int");
+		}
+		return inst_int;
+	}
+
+	long IJsonWrapper.GetLong()
+	{
+		if (type != JsonType.Long)
+		{
+			throw new InvalidOperationException("JsonData instance doesn't hold a long");
+		}
+		return inst_long;
+	}
+
+	string IJsonWrapper.GetString()
+	{
+		if (type != JsonType.String)
+		{
+			throw new InvalidOperationException("JsonData instance doesn't hold a string");
+		}
+		return inst_string;
+	}
+
+	void IJsonWrapper.SetBoolean(bool val)
+	{
+		type = JsonType.Boolean;
+		inst_boolean = val;
+		json = null;
+	}
+
+	void IJsonWrapper.SetDouble(double val)
+	{
+		type = JsonType.Double;
+		inst_double = val;
+		json = null;
+	}
+
+	void IJsonWrapper.SetInt(int val)
+	{
+		type = JsonType.Int;
+		inst_int = val;
+		json = null;
+	}
+
+	void IJsonWrapper.SetLong(long val)
+	{
+		type = JsonType.Long;
+		inst_long = val;
+		json = null;
+	}
+
+	void IJsonWrapper.SetString(string val)
+	{
+		type = JsonType.String;
+		inst_string = val;
+		json = null;
+	}
+
+	string IJsonWrapper.ToJson()
+	{
+		return ToJson();
+	}
+
+	void IJsonWrapper.ToJson(JsonWriter writer)
+	{
+		ToJson(writer);
+	}
+
+	int IList.Add(object value)
+	{
+		return Add(value);
+	}
+
+	void IList.Clear()
+	{
+		EnsureList().Clear();
+		json = null;
+	}
+
+	bool IList.Contains(object value)
+	{
+		return EnsureList().Contains(value);
+	}
+
+	int IList.IndexOf(object value)
+	{
+		return EnsureList().IndexOf(value);
+	}
+
+	void IList.Insert(int index, object value)
+	{
+		EnsureList().Insert(index, value);
+		json = null;
+	}
+
+	void IList.Remove(object value)
+	{
+		EnsureList().Remove(value);
+		json = null;
+	}
+
+	void IList.RemoveAt(int index)
+	{
+		EnsureList().RemoveAt(index);
+		json = null;
+	}
+
+	IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
+	{
+		EnsureDictionary();
+		return new OrderedDictionaryEnumerator(object_list.GetEnumerator());
+	}
+
+	void IOrderedDictionary.Insert(int idx, object key, object value)
+	{
+		string text = (string)key;
+		JsonData value2 = (this[text] = ToJsonData(value));
+		KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>(text, value2);
+		object_list.Insert(idx, item);
+	}
+
+	void IOrderedDictionary.RemoveAt(int idx)
+	{
+		EnsureDictionary();
+		inst_object.Remove(object_list[idx].Key);
+		object_list.RemoveAt(idx);
+	}
+
+	private ICollection EnsureCollection()
+	{
+		if (type == JsonType.Array)
+		{
+			return (ICollection)inst_array;
+		}
+		if (type == JsonType.Object)
+		{
+			return (ICollection)inst_object;
+		}
+		throw new InvalidOperationException("The JsonData instance has to be initialized first");
+	}
+
+	private IDictionary EnsureDictionary()
+	{
+		if (type == JsonType.Object)
+		{
+			return (IDictionary)inst_object;
+		}
+		if (type != JsonType.None)
+		{
+			throw new InvalidOperationException("Instance of JsonData is not a dictionary");
+		}
+		type = JsonType.Object;
+		inst_object = new Dictionary<string, JsonData>();
+		object_list = new List<KeyValuePair<string, JsonData>>();
+		return (IDictionary)inst_object;
+	}
+
+	private IList EnsureList()
+	{
+		if (type == JsonType.Array)
+		{
+			return (IList)inst_array;
+		}
+		if (type != JsonType.None)
+		{
+			throw new InvalidOperationException("Instance of JsonData is not a list");
+		}
+		type = JsonType.Array;
+		inst_array = new List<JsonData>();
+		return (IList)inst_array;
+	}
+
+	private JsonData ToJsonData(object obj)
+	{
+		if (obj == null)
+		{
+			return null;
+		}
+		if (obj is JsonData)
+		{
+			return (JsonData)obj;
+		}
+		return new JsonData(obj);
+	}
+
+	private static void WriteJson(IJsonWrapper obj, JsonWriter writer)
+	{
+		if (obj.IsString)
+		{
+			writer.Write(obj.GetString());
+		}
+		else if (obj.IsBoolean)
+		{
+			writer.Write(obj.GetBoolean());
+		}
+		else if (obj.IsDouble)
+		{
+			writer.Write(obj.GetDouble());
+		}
+		else if (obj.IsInt)
+		{
+			writer.Write(obj.GetInt());
+		}
+		else if (obj.IsLong)
+		{
+			writer.Write(obj.GetLong());
+		}
+		else if (obj.IsArray)
+		{
+			writer.WriteArrayStart();
+			foreach (JsonData item in (IEnumerable)obj)
 			{
-				this.type = JsonType.Long;
-				this.inst_long = (long)obj;
-				return;
+				WriteJson(item, writer);
 			}
-			if (obj is string)
-			{
-				this.type = JsonType.String;
-				this.inst_string = (string)obj;
-				return;
-			}
-			throw new ArgumentException("Unable to wrap the given object with JsonData");
+			writer.WriteArrayEnd();
 		}
-
-		public JsonData(string str)
+		else
 		{
-			this.type = JsonType.String;
-			this.inst_string = str;
-		}
-
-		public static implicit operator JsonData(bool data)
-		{
-			return new JsonData(data);
-		}
-
-		public static implicit operator JsonData(double data)
-		{
-			return new JsonData(data);
-		}
-
-		public static implicit operator JsonData(int data)
-		{
-			return new JsonData(data);
-		}
-
-		public static implicit operator JsonData(long data)
-		{
-			return new JsonData(data);
-		}
-
-		public static implicit operator JsonData(string data)
-		{
-			return new JsonData(data);
-		}
-
-		public static explicit operator bool(JsonData data)
-		{
-			if (data.type != JsonType.Boolean)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
-			}
-			return data.inst_boolean;
-		}
-
-		public static explicit operator double(JsonData data)
-		{
-			if (data.type != JsonType.Double)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
-			}
-			return data.inst_double;
-		}
-
-		public static explicit operator int(JsonData data)
-		{
-			if (data.type != JsonType.Int)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
-			}
-			return data.inst_int;
-		}
-
-		public static explicit operator long(JsonData data)
-		{
-			if (data.type != JsonType.Long)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
-			}
-			return data.inst_long;
-		}
-
-		public static explicit operator string(JsonData data)
-		{
-			if (data.type != JsonType.String)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a string");
-			}
-			return data.inst_string;
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.EnsureCollection().CopyTo(array, index);
-		}
-
-		void IDictionary.Add(object key, object value)
-		{
-			JsonData value2 = this.ToJsonData(value);
-			this.EnsureDictionary().Add(key, value2);
-			KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>((string)key, value2);
-			this.object_list.Add(item);
-			this.json = null;
-		}
-
-		void IDictionary.Clear()
-		{
-			this.EnsureDictionary().Clear();
-			this.object_list.Clear();
-			this.json = null;
-		}
-
-		bool IDictionary.Contains(object key)
-		{
-			return this.EnsureDictionary().Contains(key);
-		}
-
-		IDictionaryEnumerator IDictionary.GetEnumerator()
-		{
-			return ((IOrderedDictionary)this).GetEnumerator();
-		}
-
-		void IDictionary.Remove(object key)
-		{
-			this.EnsureDictionary().Remove(key);
-			for (int i = 0; i < this.object_list.Count; i++)
-			{
-				if (this.object_list[i].Key == (string)key)
-				{
-					this.object_list.RemoveAt(i);
-					break;
-				}
-			}
-			this.json = null;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.EnsureCollection().GetEnumerator();
-		}
-
-		bool IJsonWrapper.GetBoolean()
-		{
-			if (this.type != JsonType.Boolean)
-			{
-				throw new InvalidOperationException("JsonData instance doesn't hold a boolean");
-			}
-			return this.inst_boolean;
-		}
-
-		double IJsonWrapper.GetDouble()
-		{
-			if (this.type != JsonType.Double)
-			{
-				throw new InvalidOperationException("JsonData instance doesn't hold a double");
-			}
-			return this.inst_double;
-		}
-
-		int IJsonWrapper.GetInt()
-		{
-			if (this.type != JsonType.Int)
-			{
-				throw new InvalidOperationException("JsonData instance doesn't hold an int");
-			}
-			return this.inst_int;
-		}
-
-		long IJsonWrapper.GetLong()
-		{
-			if (this.type != JsonType.Long)
-			{
-				throw new InvalidOperationException("JsonData instance doesn't hold a long");
-			}
-			return this.inst_long;
-		}
-
-		string IJsonWrapper.GetString()
-		{
-			if (this.type != JsonType.String)
-			{
-				throw new InvalidOperationException("JsonData instance doesn't hold a string");
-			}
-			return this.inst_string;
-		}
-
-		void IJsonWrapper.SetBoolean(bool val)
-		{
-			this.type = JsonType.Boolean;
-			this.inst_boolean = val;
-			this.json = null;
-		}
-
-		void IJsonWrapper.SetDouble(double val)
-		{
-			this.type = JsonType.Double;
-			this.inst_double = val;
-			this.json = null;
-		}
-
-		void IJsonWrapper.SetInt(int val)
-		{
-			this.type = JsonType.Int;
-			this.inst_int = val;
-			this.json = null;
-		}
-
-		void IJsonWrapper.SetLong(long val)
-		{
-			this.type = JsonType.Long;
-			this.inst_long = val;
-			this.json = null;
-		}
-
-		void IJsonWrapper.SetString(string val)
-		{
-			this.type = JsonType.String;
-			this.inst_string = val;
-			this.json = null;
-		}
-
-		string IJsonWrapper.ToJson()
-		{
-			return this.ToJson();
-		}
-
-		void IJsonWrapper.ToJson(JsonWriter writer)
-		{
-			this.ToJson(writer);
-		}
-
-		int IList.Add(object value)
-		{
-			return this.Add(value);
-		}
-
-		void IList.Clear()
-		{
-			this.EnsureList().Clear();
-			this.json = null;
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.EnsureList().Contains(value);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.EnsureList().IndexOf(value);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.EnsureList().Insert(index, value);
-			this.json = null;
-		}
-
-		void IList.Remove(object value)
-		{
-			this.EnsureList().Remove(value);
-			this.json = null;
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			this.EnsureList().RemoveAt(index);
-			this.json = null;
-		}
-
-		IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
-		{
-			this.EnsureDictionary();
-			return new OrderedDictionaryEnumerator(this.object_list.GetEnumerator());
-		}
-
-		void IOrderedDictionary.Insert(int idx, object key, object value)
-		{
-			string text = (string)key;
-			JsonData value2 = this.ToJsonData(value);
-			this[text] = value2;
-			KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>(text, value2);
-			this.object_list.Insert(idx, item);
-		}
-
-		void IOrderedDictionary.RemoveAt(int idx)
-		{
-			this.EnsureDictionary();
-			this.inst_object.Remove(this.object_list[idx].Key);
-			this.object_list.RemoveAt(idx);
-		}
-
-		private ICollection EnsureCollection()
-		{
-			if (this.type == JsonType.Array)
-			{
-				return (ICollection)this.inst_array;
-			}
-			if (this.type == JsonType.Object)
-			{
-				return (ICollection)this.inst_object;
-			}
-			throw new InvalidOperationException("The JsonData instance has to be initialized first");
-		}
-
-		private IDictionary EnsureDictionary()
-		{
-			if (this.type == JsonType.Object)
-			{
-				return (IDictionary)this.inst_object;
-			}
-			if (this.type != JsonType.None)
-			{
-				throw new InvalidOperationException("Instance of JsonData is not a dictionary");
-			}
-			this.type = JsonType.Object;
-			this.inst_object = new Dictionary<string, JsonData>();
-			this.object_list = new List<KeyValuePair<string, JsonData>>();
-			return (IDictionary)this.inst_object;
-		}
-
-		private IList EnsureList()
-		{
-			if (this.type == JsonType.Array)
-			{
-				return (IList)this.inst_array;
-			}
-			if (this.type != JsonType.None)
-			{
-				throw new InvalidOperationException("Instance of JsonData is not a list");
-			}
-			this.type = JsonType.Array;
-			this.inst_array = new List<JsonData>();
-			return (IList)this.inst_array;
-		}
-
-		private JsonData ToJsonData(object obj)
-		{
-			if (obj == null)
-			{
-				return null;
-			}
-			if (obj is JsonData)
-			{
-				return (JsonData)obj;
-			}
-			return new JsonData(obj);
-		}
-
-		private static void WriteJson(IJsonWrapper obj, JsonWriter writer)
-		{
-			if (obj.IsString)
-			{
-				writer.Write(obj.GetString());
-				return;
-			}
-			if (obj.IsBoolean)
-			{
-				writer.Write(obj.GetBoolean());
-				return;
-			}
-			if (obj.IsDouble)
-			{
-				writer.Write(obj.GetDouble());
-				return;
-			}
-			if (obj.IsInt)
-			{
-				writer.Write(obj.GetInt());
-				return;
-			}
-			if (obj.IsLong)
-			{
-				writer.Write(obj.GetLong());
-				return;
-			}
-			if (obj.IsArray)
-			{
-				writer.WriteArrayStart();
-				foreach (object obj2 in obj)
-				{
-					JsonData.WriteJson((JsonData)obj2, writer);
-				}
-				writer.WriteArrayEnd();
-				return;
-			}
-			if (obj.IsObject)
-			{
-				writer.WriteObjectStart();
-				foreach (object obj3 in obj)
-				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj3;
-					writer.WritePropertyName((string)dictionaryEntry.Key);
-					JsonData.WriteJson((JsonData)dictionaryEntry.Value, writer);
-				}
-				writer.WriteObjectEnd();
-				return;
-			}
-		}
-
-		public int Add(object value)
-		{
-			JsonData value2 = this.ToJsonData(value);
-			this.json = null;
-			return this.EnsureList().Add(value2);
-		}
-
-		public void Clear()
-		{
-			if (this.IsObject)
-			{
-				((IDictionary)this).Clear();
-				return;
-			}
-			if (this.IsArray)
-			{
-				((IList)this).Clear();
-				return;
-			}
-		}
-
-		public bool Equals(JsonData x)
-		{
-			if (x == null)
-			{
-				return false;
-			}
-			if (x.type != this.type)
-			{
-				return false;
-			}
-			switch (this.type)
-			{
-			case JsonType.None:
-				return true;
-			case JsonType.Object:
-				return this.inst_object.Equals(x.inst_object);
-			case JsonType.Array:
-				return this.inst_array.Equals(x.inst_array);
-			case JsonType.String:
-				return this.inst_string.Equals(x.inst_string);
-			case JsonType.Int:
-				return this.inst_int.Equals(x.inst_int);
-			case JsonType.Long:
-				return this.inst_long.Equals(x.inst_long);
-			case JsonType.Double:
-				return this.inst_double.Equals(x.inst_double);
-			case JsonType.Boolean:
-				return this.inst_boolean.Equals(x.inst_boolean);
-			default:
-				return false;
-			}
-		}
-
-		public JsonType GetJsonType()
-		{
-			return this.type;
-		}
-
-		public void SetJsonType(JsonType type)
-		{
-			if (this.type == type)
+			if (!obj.IsObject)
 			{
 				return;
 			}
+			writer.WriteObjectStart();
+			foreach (DictionaryEntry item2 in (IDictionary)obj)
+			{
+				writer.WritePropertyName((string)item2.Key);
+				WriteJson((JsonData)item2.Value, writer);
+			}
+			writer.WriteObjectEnd();
+		}
+	}
+
+	public int Add(object value)
+	{
+		JsonData value2 = ToJsonData(value);
+		json = null;
+		return EnsureList().Add(value2);
+	}
+
+	public void Clear()
+	{
+		if (IsObject)
+		{
+			((IDictionary)this).Clear();
+		}
+		else if (IsArray)
+		{
+			((IList)this).Clear();
+		}
+	}
+
+	public bool Equals(JsonData x)
+	{
+		if (x == null)
+		{
+			return false;
+		}
+		if (x.type != type)
+		{
+			return false;
+		}
+		return type switch
+		{
+			JsonType.None => true, 
+			JsonType.Object => inst_object.Equals(x.inst_object), 
+			JsonType.Array => inst_array.Equals(x.inst_array), 
+			JsonType.String => inst_string.Equals(x.inst_string), 
+			JsonType.Int => inst_int.Equals(x.inst_int), 
+			JsonType.Long => inst_long.Equals(x.inst_long), 
+			JsonType.Double => inst_double.Equals(x.inst_double), 
+			JsonType.Boolean => inst_boolean.Equals(x.inst_boolean), 
+			_ => false, 
+		};
+	}
+
+	public JsonType GetJsonType()
+	{
+		return type;
+	}
+
+	public void SetJsonType(JsonType type)
+	{
+		if (this.type != type)
+		{
 			switch (type)
 			{
 			case JsonType.Object:
-				this.inst_object = new Dictionary<string, JsonData>();
-				this.object_list = new List<KeyValuePair<string, JsonData>>();
+				inst_object = new Dictionary<string, JsonData>();
+				object_list = new List<KeyValuePair<string, JsonData>>();
 				break;
 			case JsonType.Array:
-				this.inst_array = new List<JsonData>();
+				inst_array = new List<JsonData>();
 				break;
 			case JsonType.String:
-				this.inst_string = null;
+				inst_string = null;
 				break;
 			case JsonType.Int:
-				this.inst_int = 0;
+				inst_int = 0;
 				break;
 			case JsonType.Long:
-				this.inst_long = 0L;
+				inst_long = 0L;
 				break;
 			case JsonType.Double:
-				this.inst_double = 0.0;
+				inst_double = 0.0;
 				break;
 			case JsonType.Boolean:
-				this.inst_boolean = false;
+				inst_boolean = false;
 				break;
 			}
 			this.type = type;
 		}
+	}
 
-		public string ToJson()
+	public string ToJson()
+	{
+		if (json != null)
 		{
-			if (this.json != null)
-			{
-				return this.json;
-			}
-			StringWriter stringWriter = new StringWriter();
-			JsonData.WriteJson(this, new JsonWriter(stringWriter)
-			{
-				Validate = false
-			});
-			this.json = stringWriter.ToString();
-			return this.json;
+			return json;
 		}
+		StringWriter stringWriter = new StringWriter();
+		JsonWriter jsonWriter = new JsonWriter(stringWriter);
+		jsonWriter.Validate = false;
+		WriteJson(this, jsonWriter);
+		json = stringWriter.ToString();
+		return json;
+	}
 
-		public void ToJson(JsonWriter writer)
+	public void ToJson(JsonWriter writer)
+	{
+		bool validate = writer.Validate;
+		writer.Validate = false;
+		WriteJson(this, writer);
+		writer.Validate = validate;
+	}
+
+	public override string ToString()
+	{
+		return type switch
 		{
-			bool validate = writer.Validate;
-			writer.Validate = false;
-			JsonData.WriteJson(this, writer);
-			writer.Validate = validate;
-		}
-
-		public override string ToString()
-		{
-			switch (this.type)
-			{
-			case JsonType.Object:
-				return "JsonData object";
-			case JsonType.Array:
-				return "JsonData array";
-			case JsonType.String:
-				return this.inst_string;
-			case JsonType.Int:
-				return this.inst_int.ToString();
-			case JsonType.Long:
-				return this.inst_long.ToString();
-			case JsonType.Double:
-				return this.inst_double.ToString();
-			case JsonType.Boolean:
-				return this.inst_boolean.ToString();
-			default:
-				return "Uninitialized JsonData";
-			}
-		}
-
-		private IList<JsonData> inst_array;
-
-		private bool inst_boolean;
-
-		private double inst_double;
-
-		private int inst_int;
-
-		private long inst_long;
-
-		private IDictionary<string, JsonData> inst_object;
-
-		private string inst_string;
-
-		private string json;
-
-		private JsonType type;
-
-		private IList<KeyValuePair<string, JsonData>> object_list;
+			JsonType.Array => "JsonData array", 
+			JsonType.Boolean => inst_boolean.ToString(), 
+			JsonType.Double => inst_double.ToString(), 
+			JsonType.Int => inst_int.ToString(), 
+			JsonType.Long => inst_long.ToString(), 
+			JsonType.Object => "JsonData object", 
+			JsonType.String => inst_string, 
+			_ => "Uninitialized JsonData", 
+		};
 	}
 }

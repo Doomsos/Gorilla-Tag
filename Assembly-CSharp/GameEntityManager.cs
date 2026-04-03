@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -17,3517 +17,65 @@ using UnityEngine.Serialization;
 [NetworkBehaviourWeaved(0)]
 public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCallbacks, ITickSystemTick, IGorillaSliceableSimple
 {
-	public event GameEntityManager.ZoneStartEvent onZoneStart;
+	public delegate void ZoneStartEvent(GTZone zoneId);
 
-	public event GameEntityManager.ZoneClearEvent onZoneClear;
+	public delegate void ZoneClearEvent(GTZone zoneId);
 
-	public static GameEntityManager activeManager { get; private set; }
-
-	public bool TickRunning { get; set; }
-
-	public bool PendingTableData { get; private set; }
-
-	protected override void Awake()
-	{
-		base.Awake();
-		this.entities = new List<GameEntity>(64);
-		this.entitiesActiveCount = 0;
-		this.gameEntityData = new List<GameEntityData>(64);
-		this.netIdToIndex = new Dictionary<int, int>(16384);
-		this.netIds = new NativeArray<int>(16384, Unity.Collections.Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		this.createdItemTypeCount = new Dictionary<int, int>();
-		this.OnEntityRemoved = (Action<GameEntity>)Delegate.Combine(this.OnEntityRemoved, new Action<GameEntity>(CustomGameMode.OnGameEntityRemoved));
-		this.zoneStateData = new GameEntityManager.ZoneStateData
-		{
-			zoneStateRequests = new List<GameEntityManager.ZoneStateRequest>(),
-			zonePlayers = new List<Player>(),
-			recievedStateBytes = new byte[15360],
-			numRecievedStateBytes = 0
-		};
-		this.guard.AddCallbackTarget(this);
-		this.netIdsForCreate = new List<int>();
-		this.entityTypeIdsForCreate = new List<int>();
-		this.packedPositionsForCreate = new List<long>();
-		this.packedRotationsForCreate = new List<int>();
-		this.createDataForCreate = new List<long>();
-		this.createdByEntityNetIdForCreate = new List<int>();
-		this.netIdsForDelete = new List<int>();
-		this.netIdsForState = new List<int>();
-		this.statesForState = new List<long>();
-		this.zoneComponents = new List<IGameEntityZoneComponent>(8);
-		if (this.ghostReactorManager != null)
-		{
-			this.zoneComponents.Add(this.ghostReactorManager);
-		}
-		if (this.customMapsManager != null)
-		{
-			this.zoneComponents.Add(this.customMapsManager);
-		}
-		if (this.superInfectionManager != null)
-		{
-			this.zoneComponents.Add(this.superInfectionManager);
-		}
-		this.BuildFactory();
-		GameEntityManager.allManagers.Add(this);
-	}
-
-	internal override void OnEnable()
-	{
-		NetworkBehaviourUtils.InternalOnEnable(this);
-		base.OnEnable();
-		TickSystem<object>.AddTickCallback(this);
-		VRRigCache.OnRigDeactivated += this.OnRigDeactivated;
-		VRRigCache.OnActiveRigsChanged += this.RefreshRigList;
-		RoomSystem.JoinedRoomEvent += new Action(this.OnNetworkJoinedRoom);
-		RoomSystem.LeftRoomEvent += new Action(this.OnNetworkLeftRoom);
-		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(this.OnNetworkPlayerLeft);
-		this.RefreshRigList();
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	internal override void OnDisable()
-	{
-		NetworkBehaviourUtils.InternalOnDisable(this);
-		base.OnDisable();
-		TickSystem<object>.RemoveTickCallback(this);
-		VRRigCache.OnRigDeactivated -= this.OnRigDeactivated;
-		VRRigCache.OnActiveRigsChanged -= this.RefreshRigList;
-		RoomSystem.JoinedRoomEvent -= new Action(this.OnNetworkJoinedRoom);
-		RoomSystem.LeftRoomEvent -= new Action(this.OnNetworkLeftRoom);
-		RoomSystem.PlayerLeftEvent -= new Action<NetPlayer>(this.OnNetworkPlayerLeft);
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	private void OnDestroy()
-	{
-		NetworkBehaviourUtils.InternalOnDestroy(this);
-		this.netIds.Dispose();
-		GameEntityManager.allManagers.Remove(this);
-	}
-
-	public static GameEntityManager GetManagerForZone(GTZone zone)
-	{
-		for (int i = 0; i < GameEntityManager.allManagers.Count; i++)
-		{
-			if (GameEntityManager.allManagers[i].zone == zone)
-			{
-				return GameEntityManager.allManagers[i];
-			}
-		}
-		return null;
-	}
-
-	public void SliceUpdate()
-	{
-		this.UpdateZoneState();
-	}
-
-	public void Tick()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		float time = Time.time;
-		for (int i = 0; i < this.entities.Count; i++)
-		{
-			GameEntity gameEntity = this.entities[i];
-			if (gameEntity != null && gameEntity.LastTickTime + gameEntity.MinTimeBetweenTicks < time && gameEntity.isActiveAndEnabled)
-			{
-				Action onTick = gameEntity.OnTick;
-				if (onTick != null)
-				{
-					onTick();
-				}
-				gameEntity.LastTickTime = time;
-			}
-		}
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		if (this.netIdsForCreate.Count > 0 && Time.time > this.lastCreateSent + this.createCooldown)
-		{
-			this.lastCreateSent = Time.time;
-			this.photonView.RPC("CreateItemRPC", RpcTarget.Others, new object[]
-			{
-				this.netIdsForCreate.ToArray(),
-				this.entityTypeIdsForCreate.ToArray(),
-				this.packedPositionsForCreate.ToArray(),
-				this.packedRotationsForCreate.ToArray(),
-				this.createDataForCreate.ToArray(),
-				this.createdByEntityNetIdForCreate.ToArray()
-			});
-			this.netIdsForCreate.Clear();
-			this.entityTypeIdsForCreate.Clear();
-			this.packedPositionsForCreate.Clear();
-			this.packedRotationsForCreate.Clear();
-			this.createDataForCreate.Clear();
-			this.createdByEntityNetIdForCreate.Clear();
-		}
-		if (this.netIdsForDelete.Count > 0 && Time.time > this.lastDestroySent + this.destroyCooldown)
-		{
-			this.lastDestroySent = Time.time;
-			this.photonView.RPC("DestroyItemRPC", RpcTarget.Others, new object[]
-			{
-				this.netIdsForDelete.ToArray()
-			});
-			this.netIdsForDelete.Clear();
-		}
-		if (this.netIdsForState.Count > 0 && Time.time > this.lastStateSent + this.stateCooldown)
-		{
-			this.lastStateSent = Time.time;
-			this.photonView.RPC("ApplyStateRPC", RpcTarget.All, new object[]
-			{
-				this.netIdsForState.ToArray(),
-				this.statesForState.ToArray()
-			});
-			this.netIdsForState.Clear();
-			this.statesForState.Clear();
-		}
-	}
-
-	public GameEntityId AddGameEntity(GameEntity gameEntity)
-	{
-		return this.AddGameEntity(this.CreateNetId(1 + gameEntity.builtInEntities.Count), gameEntity);
-	}
-
-	public GameEntityId AddGameEntity(int netId, GameEntity gameEntity)
-	{
-		if (netId == -1)
-		{
-			Debug.LogError("[GT/GameEntityManager]  ERROR!!!  AddGameEntity: Aborting. Invalid netId for GameEntity '" + ((gameEntity != null) ? gameEntity.name : null) + "'.", gameEntity);
-			return GameEntityId.Invalid;
-		}
-		int num;
-		if (this.netIdToIndex.TryGetValue(netId, out num) && num != -1)
-		{
-			GameEntity gameEntity2 = this.GetGameEntity(num);
-			if (gameEntity2 != null)
-			{
-				if (gameEntity2 == gameEntity)
-				{
-					return gameEntity.id;
-				}
-				Debug.LogError(string.Concat(new string[]
-				{
-					"[GT/GameEntityManager]  ERROR!!!  AddGameEntity",
-					string.Format(": NetId {0} collision: ", netId),
-					"'",
-					gameEntity2.name,
-					"' replaced by '",
-					gameEntity.name,
-					"'. Destroying old entity to prevent zombie."
-				}));
-				this.DestroyItemLocal(gameEntity2.id);
-			}
-		}
-		int num2 = this.FindNewEntityIndex();
-		this.entities[num2] = gameEntity;
-		this.entitiesActiveCount++;
-		GameEntityData item = default(GameEntityData);
-		this.gameEntityData.Add(item);
-		gameEntity.id = new GameEntityId
-		{
-			index = num2
-		};
-		this.netIdToIndex[netId] = num2;
-		this.netIds[num2] = netId;
-		Action<GameEntity> onEntityAdded = this.OnEntityAdded;
-		if (onEntityAdded != null)
-		{
-			onEntityAdded(gameEntity);
-		}
-		return gameEntity.id;
-	}
-
-	private int FindNewEntityIndex()
-	{
-		for (int i = 0; i < this.entities.Count; i++)
-		{
-			if (this.entities[i] == null)
-			{
-				return i;
-			}
-		}
-		this.entities.Add(null);
-		return this.entities.Count - 1;
-	}
-
-	public void RemoveGameEntity(GameEntity entity)
-	{
-		this.netIdToIndex.Remove(entity.GetNetId());
-		int index = entity.id.index;
-		if (index < 0 || index >= this.entities.Count)
-		{
-			return;
-		}
-		if (this.entities[index] == entity)
-		{
-			this.entities[index] = null;
-			this.entitiesActiveCount--;
-		}
-		else
-		{
-			for (int i = 0; i < this.entities.Count; i++)
-			{
-				if (this.entities[i] == entity)
-				{
-					this.entities[i] = null;
-					this.entitiesActiveCount--;
-					break;
-				}
-			}
-		}
-		Action<GameEntity> onEntityRemoved = this.OnEntityRemoved;
-		if (onEntityRemoved == null)
-		{
-			return;
-		}
-		onEntityRemoved(entity);
-	}
-
-	public List<GameEntity> GetGameEntities()
-	{
-		return this.entities;
-	}
-
-	public bool IsValidNetId(int netId)
-	{
-		int num;
-		return this.netIdToIndex.TryGetValue(netId, out num) && num >= 0 && num < this.entities.Count;
-	}
-
-	public int FindOpenIndex()
-	{
-		for (int i = 0; i < this.netIds.Length; i++)
-		{
-			if (this.netIds[i] != -1)
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	public GameEntityId GetEntityIdFromNetId(int netId)
-	{
-		int index;
-		if (this.netIdToIndex.TryGetValue(netId, out index))
-		{
-			return new GameEntityId
-			{
-				index = index
-			};
-		}
-		return GameEntityId.Invalid;
-	}
-
-	public int GetNetIdFromEntityId(GameEntityId id)
-	{
-		if (id.index < 0 || id.index >= this.netIds.Length)
-		{
-			return -1;
-		}
-		return this.netIds[id.index];
-	}
-
-	public virtual bool IsAuthority()
-	{
-		return !NetworkSystem.Instance.InRoom || this.guard.isTrulyMine;
-	}
-
-	public bool IsAuthorityPlayer(NetPlayer player)
-	{
-		return player != null && this.IsAuthorityPlayer(player.GetPlayerRef());
-	}
-
-	public bool IsAuthorityPlayer(Player player)
-	{
-		if (player != null && this.guard.actualOwner != null)
-		{
-			int actorNumber = player.ActorNumber;
-			Player playerRef = this.guard.actualOwner.GetPlayerRef();
-			int? num = (playerRef != null) ? new int?(playerRef.ActorNumber) : null;
-			return actorNumber == num.GetValueOrDefault() & num != null;
-		}
-		return false;
-	}
-
-	public bool IsZoneAuthority()
-	{
-		return this.IsAuthority();
-	}
-
-	public bool HasAuthority()
-	{
-		return this.GetAuthorityPlayer() != null;
-	}
-
-	public Player GetAuthorityPlayer()
-	{
-		if (this.guard.actualOwner != null)
-		{
-			return this.guard.actualOwner.GetPlayerRef();
-		}
-		return null;
-	}
-
-	public virtual bool IsZoneActive()
-	{
-		return this.zoneStateData.state == GameEntityManager.ZoneState.Active;
-	}
-
-	public bool IsPositionInManagerBounds(Vector3 pos)
-	{
-		return this.boundsBoxCollider == null || this.boundsBoxCollider.bounds.Contains(pos);
-	}
-
-	public virtual bool IsValidClientRPC(Player sender)
-	{
-		return this.IsAuthorityPlayer(sender) && (this.IsZoneActive() || sender.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber);
-	}
-
-	public bool IsValidClientRPC(Player sender, int entityNetId)
-	{
-		return this.IsValidClientRPC(sender) && this.IsValidNetId(entityNetId);
-	}
-
-	public bool IsValidClientRPC(Player sender, int entityNetId, Vector3 pos)
-	{
-		return this.IsValidClientRPC(sender, entityNetId) && this.IsPositionInManagerBounds(pos);
-	}
-
-	public bool IsValidClientRPC(Player sender, Vector3 pos)
-	{
-		return this.IsValidClientRPC(sender) && this.IsPositionInManagerBounds(pos);
-	}
-
-	public bool IsValidAuthorityRPC(Player sender)
-	{
-		return this.IsAuthority() && (this.IsZoneActive() || sender.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber);
-	}
-
-	public bool IsValidAuthorityRPC(Player sender, int entityNetId)
-	{
-		return this.IsValidAuthorityRPC(sender) && this.IsValidNetId(entityNetId);
-	}
-
-	public bool IsValidAuthorityRPC(Player sender, int entityNetId, Vector3 pos)
-	{
-		return this.IsValidAuthorityRPC(sender, entityNetId) && this.IsPositionInManagerBounds(pos);
-	}
-
-	public bool IsValidAuthorityRPC(Player sender, Vector3 pos)
-	{
-		return this.IsValidAuthorityRPC(sender) && this.IsPositionInManagerBounds(pos);
-	}
-
-	public bool IsValidEntity(GameEntityId id)
-	{
-		return this.GetGameEntity(id) != null;
-	}
-
-	public GameEntity GetGameEntity(GameEntityId id)
-	{
-		if (!id.IsValid())
-		{
-			return null;
-		}
-		return this.GetGameEntity(id.index);
-	}
-
-	public GameEntity GetGameEntityFromNetId(int netId)
-	{
-		int index;
-		if (this.netIdToIndex.TryGetValue(netId, out index))
-		{
-			return this.GetGameEntity(index);
-		}
-		return null;
-	}
-
-	private GameEntity GetGameEntity(int index)
-	{
-		if (index == -1)
-		{
-			return null;
-		}
-		if (index < 0 || index >= this.entities.Count)
-		{
-			return null;
-		}
-		return this.entities[index];
-	}
-
-	public T GetGameComponent<T>(GameEntityId id) where T : Component
-	{
-		GameEntity gameEntity = this.GetGameEntity(id);
-		if (gameEntity == null)
-		{
-			return default(T);
-		}
-		return gameEntity.GetComponent<T>();
-	}
-
-	public bool LocalValidateMigrationRecoveryItem(int entityTypeId, ref long createData)
-	{
-		GameObject gameObject = this.FactoryPrefabById(entityTypeId);
-		if (gameObject == null)
-		{
-			return false;
-		}
-		GameEntity component = gameObject.GetComponent<GameEntity>();
-		if (component != null)
-		{
-			for (int i = 0; i < this.zoneComponents.Count; i++)
-			{
-				createData = this.zoneComponents[i].ProcessMigratedGameEntityCreateData(component, createData);
-			}
-		}
-		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-		for (int j = 0; j < this.zoneComponents.Count; j++)
-		{
-			if (!this.zoneComponents[j].ValidateMigratedGameEntity(0, entityTypeId, Vector3.zero, Quaternion.identity, createData, actorNumber))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public bool IsEntityValidToMigrate(GameEntity entity)
-	{
-		if (entity == null)
-		{
-			return false;
-		}
-		Vector3 position = VRRig.LocalRig.transform.position;
-		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-		bool flag = true;
-		int num = 0;
-		while (num < this.zoneComponents.Count && flag)
-		{
-			flag &= this.zoneComponents[num].ValidateMigratedGameEntity(this.GetNetIdFromEntityId(entity.id), entity.typeId, position, Quaternion.identity, entity.createData, actorNumber);
-			num++;
-		}
-		return flag;
-	}
-
-	private void BuildFactory()
-	{
-		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder(true))
-		{
-			string value = "[GT/GameEntityManager]  BuildFactory: Entity names and typeIds for manager \"" + base.name + "\":";
-			utf16ValueStringBuilder.AppendLine(value);
-			foreach (IGameEntityZoneComponent gameEntityZoneComponent in this.zoneComponents)
-			{
-				IFactoryItemProvider factoryItemProvider = gameEntityZoneComponent as IFactoryItemProvider;
-				if (factoryItemProvider != null)
-				{
-					foreach (GameEntity item in factoryItemProvider.GetFactoryItems())
-					{
-						if (!this.tempFactoryItems.Contains(item))
-						{
-							this.tempFactoryItems.Add(item);
-						}
-					}
-				}
-			}
-			this.itemPrefabFactory = new Dictionary<int, GameObject>(1024);
-			this.priceLookupByEntityId = new Dictionary<int, int>();
-			for (int i = 0; i < this.tempFactoryItems.Count; i++)
-			{
-				GameObject gameObject = this.tempFactoryItems[i].gameObject;
-				int staticHash = gameObject.name.GetStaticHash();
-				if (gameObject.GetComponent<GRToolLantern>())
-				{
-					this.priceLookupByEntityId.Add(staticHash, 50);
-				}
-				else if (gameObject.GetComponent<GRToolCollector>())
-				{
-					this.priceLookupByEntityId.Add(staticHash, 50);
-				}
-				this.itemPrefabFactory.Add(staticHash, gameObject);
-				utf16ValueStringBuilder.AppendFormat<string, int>("    - name=\"{0}\", typeId={1}\n", gameObject.name, staticHash);
-				if (utf16ValueStringBuilder.Length > 5000)
-				{
-					utf16ValueStringBuilder.Append("... (continued in next log message) ...");
-					utf16ValueStringBuilder.Clear();
-					if (i + 1 < this.tempFactoryItems.Count)
-					{
-						utf16ValueStringBuilder.Append(value);
-						utf16ValueStringBuilder.Append(" ... CONTINUED FROM PREVIOUS ...\n");
-					}
-				}
-			}
-		}
-	}
-
-	private int CreateNetId(int numToCreate)
-	{
-		int result = this.nextNetId;
-		this.nextNetId += numToCreate;
-		return result;
-	}
-
-	public GameEntityId RequestCreateItem(int entityTypeId, Vector3 position, Quaternion rotation, long createData)
-	{
-		return this.RequestCreateItem(entityTypeId, position, rotation, createData, GameEntityId.Invalid);
-	}
-
-	public GameEntityId RequestCreateItem(int entityTypeId, Vector3 position, Quaternion rotation, long createData, GameEntityId createdByEntityId)
-	{
-		if (!this.IsZoneAuthority() || !this.IsZoneActive() || !this.IsPositionInManagerBounds(position))
-		{
-			return GameEntityId.Invalid;
-		}
-		int netIdFromEntityId = this.GetNetIdFromEntityId(createdByEntityId);
-		for (int i = 0; i < this.zoneComponents.Count; i++)
-		{
-			if (!this.zoneComponents[i].ValidateCreateItem(0, entityTypeId, position, rotation, createData, netIdFromEntityId))
-			{
-				MonoBehaviour monoBehaviour = this.zoneComponents[i] as MonoBehaviour;
-				if (monoBehaviour != null)
-				{
-					string name = monoBehaviour.name;
-				}
-				return GameEntityId.Invalid;
-			}
-		}
-		long item = BitPackUtils.PackWorldPosForNetwork(position);
-		int item2 = BitPackUtils.PackQuaternionForNetwork(rotation);
-		int numToCreate = 1 + this.FactoryGetBuiltInEntityCountById(entityTypeId);
-		int num = this.CreateNetId(numToCreate);
-		this.netIdsForCreate.Add(num);
-		this.entityTypeIdsForCreate.Add(entityTypeId);
-		this.packedPositionsForCreate.Add(item);
-		this.packedRotationsForCreate.Add(item2);
-		this.createDataForCreate.Add(createData);
-		this.createdByEntityNetIdForCreate.Add(netIdFromEntityId);
-		return this.CreateAndInitItemLocal(num, entityTypeId, position, rotation, createData, netIdFromEntityId);
-	}
-
-	[PunRPC]
-	public void CreateItemRPC(int[] netId, int[] entityTypeId, long[] packedPos, int[] packedRot, long[] createData, int[] createdByEntityNetId, PhotonMessageInfo info)
-	{
-		if (!this.IsValidClientRPC(info.Sender) || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.CreateItem))
-		{
-			return;
-		}
-		if (netId == null || entityTypeId == null || packedPos == null || createData == null || createdByEntityNetId == null || netId.Length != entityTypeId.Length || netId.Length != packedPos.Length || netId.Length != packedRot.Length || netId.Length != createData.Length || netId.Length != createdByEntityNetId.Length)
-		{
-			return;
-		}
-		if (netId.Length > 1)
-		{
-			for (int i = 0; i < this.zoneComponents.Count; i++)
-			{
-				if (!this.zoneComponents[i].ValidateCreateItemBatchSize(netId.Length))
-				{
-					return;
-				}
-			}
-		}
-		for (int j = 0; j < netId.Length; j++)
-		{
-			Vector3 vector = BitPackUtils.UnpackWorldPosFromNetwork(packedPos[j]);
-			Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(packedRot[j]);
-			float num = 10000f;
-			if (!vector.IsValid(num) || !rotation.IsValid() || !this.FactoryHasEntity(entityTypeId[j]) || !this.IsPositionInManagerBounds(vector))
-			{
-				return;
-			}
-			int num2 = netId[j];
-			int entityTypeId2 = entityTypeId[j];
-			long createData2 = createData[j];
-			int createdByEntityNetId2 = createdByEntityNetId[j];
-			bool flag = true;
-			for (int k = 0; k < this.zoneComponents.Count; k++)
-			{
-				if (!this.zoneComponents[k].ValidateCreateItem(num2, entityTypeId2, vector, rotation, createData2, createdByEntityNetId2))
-				{
-					MonoBehaviour monoBehaviour = this.zoneComponents[k] as MonoBehaviour;
-					if (monoBehaviour != null)
-					{
-						string name = monoBehaviour.name;
-					}
-					flag = false;
-				}
-			}
-			if (flag)
-			{
-				this.CreateAndInitItemLocal(num2, entityTypeId2, vector, rotation, createData2, createdByEntityNetId2);
-			}
-		}
-	}
-
-	public void RequestCreateItems(List<GameEntityCreateData> entityData)
-	{
-		if (!this.IsZoneAuthority() || !this.IsZoneActive())
-		{
-			GTDev.LogError<string>(string.Format("[GameEntityManager::RequestCreateItems] Cannot create items. Zone Auth: {0} ", this.IsZoneAuthority()) + string.Format("| Zone Active: {0}", this.IsZoneActive()), null);
-			return;
-		}
-		GameEntityManager.ClearByteBuffer(GameEntityManager.tempSerializeGameState);
-		MemoryStream memoryStream = new MemoryStream(GameEntityManager.tempSerializeGameState);
-		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		binaryWriter.Write(entityData.Count);
-		for (int i = 0; i < entityData.Count; i++)
-		{
-			GameEntityCreateData gameEntityCreateData = entityData[i];
-			int numToCreate = 1 + this.FactoryGetBuiltInEntityCountById(gameEntityCreateData.entityTypeId);
-			int value = this.CreateNetId(numToCreate);
-			long value2 = BitPackUtils.PackWorldPosForNetwork(gameEntityCreateData.position);
-			int value3 = BitPackUtils.PackQuaternionForNetwork(gameEntityCreateData.rotation);
-			binaryWriter.Write(value);
-			binaryWriter.Write(gameEntityCreateData.entityTypeId);
-			binaryWriter.Write(value2);
-			binaryWriter.Write(value3);
-			binaryWriter.Write(gameEntityCreateData.createData);
-			binaryWriter.Write(gameEntityCreateData.createdByEntityId);
-		}
-		long position = memoryStream.Position;
-		byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-		this.photonView.RPC("CreateItemsRPC", RpcTarget.All, new object[]
-		{
-			(int)this.zone,
-			array
-		});
-	}
-
-	[PunRPC]
-	public void CreateItemsRPC(int zoneId, byte[] stateData, PhotonMessageInfo info)
-	{
-		if (!this.IsValidClientRPC(info.Sender) || stateData == null || stateData.Length >= 15360 || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.CreateItems))
-		{
-			return;
-		}
-		try
-		{
-			byte[] array = GZipStream.UncompressBuffer(stateData);
-			int num = array.Length;
-			using (MemoryStream memoryStream = new MemoryStream(array))
-			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					int num2 = binaryReader.ReadInt32();
-					for (int i = 0; i < this.zoneComponents.Count; i++)
-					{
-						if (!this.zoneComponents[i].ValidateCreateMultipleItems(zoneId, stateData, num2))
-						{
-							return;
-						}
-					}
-					for (int j = 0; j < num2; j++)
-					{
-						int num3 = binaryReader.ReadInt32();
-						int entityTypeId = binaryReader.ReadInt32();
-						long data = binaryReader.ReadInt64();
-						int data2 = binaryReader.ReadInt32();
-						long createData = binaryReader.ReadInt64();
-						int createdByEntityNetId = binaryReader.ReadInt32();
-						Vector3 vector = BitPackUtils.UnpackWorldPosFromNetwork(data);
-						Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(data2);
-						float num4 = 10000f;
-						if (vector.IsValid(num4) && rotation.IsValid() && this.FactoryHasEntity(entityTypeId) && this.IsPositionInManagerBounds(vector))
-						{
-							bool flag = true;
-							for (int k = 0; k < this.zoneComponents.Count; k++)
-							{
-								flag &= this.zoneComponents[k].ValidateCreateItem(num3, entityTypeId, vector, rotation, createData, createdByEntityNetId);
-							}
-							if (flag)
-							{
-								this.CreateAndInitItemLocal(num3, entityTypeId, vector, rotation, createData, createdByEntityNetId);
-							}
-						}
-					}
-				}
-			}
-		}
-		catch (Exception)
-		{
-		}
-	}
-
-	public void RequestMigrationRecovery(List<GameEntityCreateData> entityData)
-	{
-		if (entityData == null || entityData.Count == 0)
-		{
-			return;
-		}
-		GameEntityManager.ClearByteBuffer(GameEntityManager.tempSerializeGameState);
-		using (MemoryStream memoryStream = new MemoryStream(GameEntityManager.tempSerializeGameState))
-		{
-			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-			{
-				binaryWriter.Write(entityData.Count);
-				for (int i = 0; i < entityData.Count; i++)
-				{
-					GameEntityCreateData gameEntityCreateData = entityData[i];
-					GameEntityManager._JoinWithItems_WriteOne(binaryWriter, gameEntityCreateData.entityTypeId, gameEntityCreateData.position, gameEntityCreateData.rotation, gameEntityCreateData.createData, gameEntityCreateData.createdByEntityId, gameEntityCreateData.slotIndex);
-				}
-				byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-				this.photonView.RPC("JoinWithItemsRPC", this.GetAuthorityPlayer(), new object[]
-				{
-					array,
-					Array.Empty<int>(),
-					PhotonNetwork.LocalPlayer.ActorNumber
-				});
-			}
-		}
-	}
-
-	public void JoinWithItems(List<GameEntity> entities)
-	{
-		if (entities.Count == 0)
-		{
-			return;
-		}
-		GameEntityManager.ClearByteBuffer(GameEntityManager.tempSerializeGameState);
-		MemoryStream memoryStream = new MemoryStream(GameEntityManager.tempSerializeGameState);
-		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		int num = 0;
-		for (int i = 0; i < entities.Count; i++)
-		{
-			if (entities[i] != null)
-			{
-				num++;
-			}
-		}
-		binaryWriter.Write(num);
-		for (int j = 0; j < entities.Count; j++)
-		{
-			GameEntity gameEntity = entities[j];
-			if (!(gameEntity == null))
-			{
-				long createData = gameEntity.createData;
-				for (int k = 0; k < this.zoneComponents.Count; k++)
-				{
-					createData = this.zoneComponents[k].ProcessMigratedGameEntityCreateData(gameEntity, createData);
-				}
-				GameEntityManager._JoinWithItems_WriteOne(binaryWriter, gameEntity.typeId, gameEntity.transform.localPosition, gameEntity.transform.localRotation, createData, this.GetNetIdFromEntityId(gameEntity.createdByEntityId), gameEntity.slotIndex);
-			}
-		}
-		long position = memoryStream.Position;
-		byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-		this.photonView.RPC("JoinWithItemsRPC", this.GetAuthorityPlayer(), new object[]
-		{
-			array,
-			Array.Empty<int>(),
-			PhotonNetwork.LocalPlayer.ActorNumber
-		});
-	}
-
-	[PunRPC]
-	public void PlayerLeftZoneRPC(PhotonMessageInfo info)
-	{
-		GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
-		if (NetworkSystem.Instance.SessionIsPrivate)
-		{
-			gamePlayer.DidJoinWithItems = false;
-		}
-		int num = 0;
-		foreach (GameEntityId gameEntityId in gamePlayer.IterateHeldAndSnappedItems(this))
-		{
-			this.GetGameEntity(gameEntityId);
-			if (!this.netIdsForDelete.Contains(this.GetNetIdFromEntityId(gameEntityId)))
-			{
-				this.netIdsForDelete.Add(this.GetNetIdFromEntityId(gameEntityId));
-			}
-			this.DestroyItemLocal(gameEntityId);
-			num++;
-		}
-		this.playerZoneJoinTimes.Remove(info.Sender.ActorNumber);
-		Action onPlayerLeftZone = gamePlayer.OnPlayerLeftZone;
-		if (onPlayerLeftZone == null)
-		{
-			return;
-		}
-		onPlayerLeftZone();
-	}
-
-	[PunRPC]
-	public void JoinWithItemsRPC(byte[] stateData, int[] netIds, int joiningActorNum, PhotonMessageInfo info)
-	{
-		bool isAuthority = this.IsAuthority();
-		if (isAuthority)
-		{
-			if (!this.IsValidAuthorityRPC(info.Sender))
-			{
-				return;
-			}
-		}
-		else if (!this.IsAuthorityPlayer(info.Sender))
-		{
-			return;
-		}
-		float num;
-		bool flag = this.playerZoneJoinTimes.TryGetValue(joiningActorNum, out num) && Time.unscaledTime - num < 10f;
-		GamePlayer joiningPlayer;
-		bool flag2 = GamePlayer.TryGetGamePlayer(joiningActorNum, out joiningPlayer);
-		bool flag3;
-		if (!isAuthority)
-		{
-			Player authorityPlayer = this.GetAuthorityPlayer();
-			int? num2 = (authorityPlayer != null) ? new int?(authorityPlayer.ActorNumber) : null;
-			int actorNumber = info.Sender.ActorNumber;
-			flag3 = !(num2.GetValueOrDefault() == actorNumber & num2 != null);
-		}
-		else
-		{
-			flag3 = false;
-		}
-		bool flag4 = flag3;
-		bool flag5 = isAuthority && info.Sender.ActorNumber != joiningActorNum;
-		bool flag6 = stateData == null || stateData.Length >= 255;
-		bool flag7 = flag2 && joiningPlayer.DidJoinWithItems && !flag;
-		if (!flag2 || flag4 || flag5 || flag6 || flag7)
-		{
-			return;
-		}
-		if (!this.IsInZone())
-		{
-			return;
-		}
-		if (isAuthority)
-		{
-			joiningPlayer.DidJoinWithItems = true;
-		}
-		Action createItemsCallback = null;
-		createItemsCallback = delegate()
-		{
-			try
-			{
-				GamePlayer joiningPlayer2 = joiningPlayer;
-				joiningPlayer2.OnPlayerInitialized = (Action)Delegate.Remove(joiningPlayer2.OnPlayerInitialized, createItemsCallback);
-				byte[] array = GZipStream.UncompressBuffer(stateData);
-				int num3 = array.Length;
-				using (MemoryStream memoryStream = new MemoryStream(array))
-				{
-					using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-					{
-						int num4 = binaryReader.ReadInt32();
-						if (num4 <= 4)
-						{
-							if (isAuthority || netIds.Length == num4)
-							{
-								if (isAuthority)
-								{
-									netIds = new int[num4];
-								}
-								for (int i = 0; i < num4; i++)
-								{
-									int entityTypeId;
-									Vector3 vector;
-									Quaternion quaternion;
-									long createData;
-									int createdByEntityNetId;
-									int num5;
-									GameEntityManager._JoinWithItems_ReadOne(binaryReader, out entityTypeId, out vector, out quaternion, out createData, out createdByEntityNetId, out num5);
-									Transform transform;
-									if (!joiningPlayer.TryGetSlotXform(num5, out transform))
-									{
-										Debug.LogError("[GT/GameEntityManager]  ERROR!!!  " + string.Format("JoinWithItemsRPC: No slot transform for item's slot, {0}.", num5));
-									}
-									else
-									{
-										if (isAuthority)
-										{
-											int numToCreate = 1 + this.FactoryGetBuiltInEntityCountById(entityTypeId);
-											netIds[i] = this.CreateNetId(numToCreate);
-										}
-										int netId = netIds[i];
-										Vector3 pos = transform.TransformPoint(vector);
-										float num6 = 10000f;
-										if (vector.IsValid(num6) && quaternion.IsValid() && this.FactoryHasEntity(entityTypeId) && this.IsPositionInManagerBounds(pos))
-										{
-											bool flag8 = true;
-											int num7 = 0;
-											while (num7 < this.zoneComponents.Count && flag8)
-											{
-												flag8 &= this.zoneComponents[num7].ValidateMigratedGameEntity(netId, entityTypeId, joiningPlayer.rig.transform.position, Quaternion.identity, createData, joiningActorNum);
-												num7++;
-											}
-											if (flag8)
-											{
-												GameEntityId gameEntityId = this.CreateAndInitItemLocal(netId, entityTypeId, joiningPlayer.rig.transform.position, Quaternion.identity, createData, createdByEntityNetId);
-												bool isLeftHand = num5 == 0;
-												SnapJointType snapIndexToJoint = GameSnappable.GetSnapIndexToJoint(num5);
-												if (snapIndexToJoint != SnapJointType.None)
-												{
-													this.SnapEntityLocal(gameEntityId, isLeftHand, vector, quaternion, (int)snapIndexToJoint, joiningPlayer.rig.Creator);
-												}
-												else
-												{
-													this.GrabEntityOnCreate(gameEntityId, isLeftHand, vector, quaternion, joiningPlayer.rig.Creator);
-												}
-											}
-										}
-									}
-								}
-								if (isAuthority)
-								{
-									this.photonView.RPC("JoinWithItemsRPC", RpcTarget.Others, new object[]
-									{
-										stateData,
-										netIds,
-										joiningActorNum
-									});
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception)
-			{
-			}
-		};
-		if (joiningPlayer.AdditionalDataInitialized)
-		{
-			createItemsCallback();
-			return;
-		}
-		GamePlayer joiningPlayer3 = joiningPlayer;
-		joiningPlayer3.OnPlayerInitialized = (Action)Delegate.Combine(joiningPlayer3.OnPlayerInitialized, createItemsCallback);
-	}
-
-	private static void _JoinWithItems_WriteOne(BinaryWriter writer, int typeId, Vector3 localPos, Quaternion localRot, long createData, int createdByEntityId, int slotIndex)
-	{
-		writer.Write(typeId);
-		writer.Write(BitPackUtils.PackWorldPosForNetwork(localPos));
-		writer.Write(BitPackUtils.PackQuaternionForNetwork(localRot));
-		writer.Write(createData);
-		writer.Write(createdByEntityId);
-		writer.Write((byte)(slotIndex + 1));
-	}
-
-	private static void _JoinWithItems_ReadOne(BinaryReader reader, out int entityTypeId, out Vector3 localPos, out Quaternion localRot, out long createData, out int createdByEntityNetId, out int slotIndex)
-	{
-		entityTypeId = reader.ReadInt32();
-		localPos = BitPackUtils.UnpackWorldPosFromNetwork(reader.ReadInt64());
-		localRot = BitPackUtils.UnpackQuaternionFromNetwork(reader.ReadInt32());
-		createData = reader.ReadInt64();
-		createdByEntityNetId = reader.ReadInt32();
-		slotIndex = (int)(reader.ReadByte() - 1);
-	}
-
-	public bool FactoryHasEntity(int entityTypeId)
-	{
-		GameObject gameObject;
-		return this.itemPrefabFactory.TryGetValue(entityTypeId, out gameObject);
-	}
-
-	public GameObject FactoryPrefabById(int entityTypeId)
-	{
-		GameObject result;
-		if (this.itemPrefabFactory.TryGetValue(entityTypeId, out result))
-		{
-			return result;
-		}
-		return null;
-	}
-
-	public GameEntity FactoryEntityById(int entityTypeId)
-	{
-		GameObject gameObject;
-		if (this.itemPrefabFactory.TryGetValue(entityTypeId, out gameObject))
-		{
-			return gameObject.GetComponent<GameEntity>();
-		}
-		return null;
-	}
-
-	public int FactoryGetBuiltInEntityCountById(int entityTypeId)
-	{
-		GameEntity gameEntity = this.FactoryEntityById(entityTypeId);
-		if (gameEntity == null || gameEntity.builtInEntities == null)
-		{
-			return 0;
-		}
-		return gameEntity.builtInEntities.Count;
-	}
-
-	public bool PriceLookup(int entityTypeId, out int price)
-	{
-		if (this.priceLookupByEntityId.TryGetValue(entityTypeId, out price))
-		{
-			return true;
-		}
-		price = -1;
-		return false;
-	}
-
-	private void ValidateThatNetIdIsNotAlreadyUsed(int netId, int newTypeId)
-	{
-		for (int i = 0; i < this.netIds.Length; i++)
-		{
-			if (i < this.entities.Count && this.netIds[i] == netId)
-			{
-				this.entities[i] == null;
-			}
-		}
-	}
-
-	public GameEntityId CreateAndInitItemLocal(int netId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int createdByEntityNetId)
-	{
-		GameEntity gameEntity = this.CreateItemLocal(netId, entityTypeId, position, rotation);
-		if (gameEntity == null)
-		{
-			return GameEntityId.Invalid;
-		}
-		this.InitItemLocal(gameEntity, createData, createdByEntityNetId);
-		return gameEntity.id;
-	}
-
-	public GameEntity CreateItemLocal(int netId, int entityTypeId, Vector3 position, Quaternion rotation)
-	{
-		if (entityTypeId == -1)
-		{
-			return null;
-		}
-		this.nextNetId = Mathf.Max(netId + 1, this.nextNetId);
-		GameObject original;
-		if (!this.itemPrefabFactory.TryGetValue(entityTypeId, out original))
-		{
-			return null;
-		}
-		if (!this.createdItemTypeCount.ContainsKey(entityTypeId))
-		{
-			this.createdItemTypeCount[entityTypeId] = 0;
-		}
-		if (this.createdItemTypeCount[entityTypeId] > 100)
-		{
-			return null;
-		}
-		Dictionary<int, int> dictionary = this.createdItemTypeCount;
-		int num = dictionary[entityTypeId];
-		dictionary[entityTypeId] = num + 1;
-		GameEntity componentInChildren = UnityEngine.Object.Instantiate<GameObject>(original, position, rotation).GetComponentInChildren<GameEntity>();
-		this.AddGameEntity(netId, componentInChildren);
-		componentInChildren.Create(this, netId, entityTypeId);
-		return componentInChildren;
-	}
-
-	public void InitItemLocal(GameEntity entity, long createData, int createdByEntityNetId)
-	{
-		entity.Init(createData, createdByEntityNetId);
-		for (int i = 0; i < this.zoneComponents.Count; i++)
-		{
-			this.zoneComponents[i].OnCreateGameEntity(entity);
-		}
-	}
-
-	public void RequestDestroyItem(GameEntityId entityId)
-	{
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		if (!this.netIdsForDelete.Contains(this.GetNetIdFromEntityId(entityId)))
-		{
-			this.netIdsForDelete.Add(this.GetNetIdFromEntityId(entityId));
-		}
-		this.DestroyItemLocal(entityId);
-	}
-
-	public void RequestDestroyItems(List<GameEntityId> entityIds)
-	{
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		List<int> list = new List<int>();
-		for (int i = 0; i < entityIds.Count; i++)
-		{
-			list.Add(this.GetNetIdFromEntityId(entityIds[i]));
-		}
-		if (PhotonNetwork.InRoom)
-		{
-			this.photonView.RPC("DestroyItemRPC", RpcTarget.All, new object[]
-			{
-				list.ToArray()
-			});
-		}
-	}
-
-	[PunRPC]
-	public void DestroyItemRPC(int[] entityNetId, PhotonMessageInfo info)
-	{
-		if (entityNetId == null || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.DestroyItem))
-		{
-			return;
-		}
-		for (int i = 0; i < entityNetId.Length; i++)
-		{
-			if (!this.IsValidClientRPC(info.Sender, entityNetId[i]))
-			{
-				return;
-			}
-			this.DestroyItemLocal(this.GetEntityIdFromNetId(entityNetId[i]));
-		}
-	}
-
-	public void DestroyItemLocal(GameEntityId entityId)
-	{
-		GameEntity gameEntity = this.GetGameEntity(entityId);
-		if (gameEntity == null)
-		{
-			return;
-		}
-		if (!this.createdItemTypeCount.ContainsKey(gameEntity.typeId))
-		{
-			this.createdItemTypeCount[gameEntity.typeId] = 1;
-		}
-		Dictionary<int, int> dictionary = this.createdItemTypeCount;
-		int typeId = gameEntity.typeId;
-		int num = dictionary[typeId];
-		dictionary[typeId] = num - 1;
-		GamePlayer gamePlayer;
-		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			if (gamePlayer.IsLocal())
-			{
-				GamePlayerLocal.instance.ClearGrabbedIfHeld(gameEntity.id, this);
-			}
-			gamePlayer.ClearGrabbedIfHeld(gameEntity.id, this);
-		}
-		GamePlayer gamePlayer2;
-		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out gamePlayer2))
-		{
-			gamePlayer2.ClearSnappedIfSnapped(gameEntity.id, this);
-		}
-		this.RemoveGameEntity(gameEntity);
-		if (gameEntity.isBuiltIn)
-		{
-			gameEntity.gameObject.SetActive(false);
-			return;
-		}
-		UnityEngine.Object.Destroy(gameEntity.gameObject);
-	}
-
-	public void RequestState(GameEntityId entityId, long newState)
-	{
-		if (this.IsAuthority())
-		{
-			this.RequestStateAuthority(entityId, newState);
-			return;
-		}
-		this.photonView.RPC("RequestStateRPC", this.GetAuthorityPlayer(), new object[]
-		{
-			this.GetNetIdFromEntityId(entityId),
-			newState
-		});
-	}
-
-	private void RequestStateAuthority(GameEntityId entityId, long newState)
-	{
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		int netIdFromEntityId = this.GetNetIdFromEntityId(entityId);
-		if (!this.IsValidNetId(netIdFromEntityId))
-		{
-			return;
-		}
-		if (this.netIdsForState.Contains(netIdFromEntityId))
-		{
-			this.statesForState[this.netIdsForState.IndexOf(netIdFromEntityId)] = newState;
-			return;
-		}
-		this.netIdsForState.Add(netIdFromEntityId);
-		this.statesForState.Add(newState);
-	}
-
-	[PunRPC]
-	public void RequestStateRPC(int entityNetId, long newState, PhotonMessageInfo info)
-	{
-		if (!this.IsValidAuthorityRPC(info.Sender, entityNetId))
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(info.Sender, out gamePlayer) || !gamePlayer.netStateLimiter.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(entityNetId);
-		GameEntity gameEntity = this.GetGameEntity(entityIdFromNetId);
-		if (gameEntity == null || gameEntity.IsNull())
-		{
-			return;
-		}
-		bool flag = false;
-		GRToolClub component = gameEntity.GetComponent<GRToolClub>();
-		GRToolCollector component2 = gameEntity.GetComponent<GRToolCollector>();
-		GRToolRevive component3 = gameEntity.GetComponent<GRToolRevive>();
-		GRToolLantern component4 = gameEntity.GetComponent<GRToolLantern>();
-		GRToolFlash component5 = gameEntity.GetComponent<GRToolFlash>();
-		GRToolDirectionalShield component6 = gameEntity.GetComponent<GRToolDirectionalShield>();
-		GRToolShieldGun component7 = gameEntity.GetComponent<GRToolShieldGun>();
-		if (component == null && component2 == null && component3 == null && component4 == null && component5 == null && component6 == null && component7 == null)
-		{
-			flag = this.IsAuthorityPlayer(info.Sender);
-		}
-		bool flag2 = gamePlayer.IsHoldingEntity(entityIdFromNetId, false) || gamePlayer.IsHoldingEntity(entityIdFromNetId, true);
-		bool flag3 = gameEntity.lastHeldByActorNumber == info.Sender.ActorNumber;
-		if (!flag && (flag2 || flag3))
-		{
-			if (component4 != null)
-			{
-				flag = component4.CanChangeState(newState);
-			}
-			if (component5 != null)
-			{
-				flag = component5.CanChangeState(newState);
-			}
-			if (component != null || component2 != null || component3 != null || component6 != null || component7 != null)
-			{
-				flag = true;
-			}
-		}
-		if (!flag)
-		{
-			bool flag4 = gameEntity.snappedByActorNumber == gamePlayer.rig.OwningNetPlayer.ActorNumber;
-			if (gameEntity.canHoldingPlayerUpdateState && flag2)
-			{
-				flag = true;
-			}
-			else if (gameEntity.canLastHoldingPlayerUpdateState && flag3)
-			{
-				flag = true;
-			}
-			else if (gameEntity.canSnapPlayerUpdateState && flag4)
-			{
-				flag = true;
-			}
-		}
-		if (flag)
-		{
-			if (this.netIdsForState.Contains(entityNetId))
-			{
-				this.statesForState[this.netIdsForState.IndexOf(entityNetId)] = newState;
-				return;
-			}
-			this.netIdsForState.Add(entityNetId);
-			this.statesForState.Add(newState);
-		}
-	}
-
-	[PunRPC]
-	public void ApplyStateRPC(int[] netId, long[] newState, PhotonMessageInfo info)
-	{
-		if (netId == null || newState == null || netId.Length != newState.Length || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.ApplyState))
-		{
-			return;
-		}
-		for (int i = 0; i < netId.Length; i++)
-		{
-			if (!this.IsValidClientRPC(info.Sender, netId[i]))
-			{
-				return;
-			}
-			GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(netId[i]);
-			GameEntity gameEntity = this.entities[entityIdFromNetId.index];
-			if (gameEntity != null)
-			{
-				gameEntity.SetState(newState[i]);
-			}
-		}
-	}
-
-	public void RequestGrabEntity(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation)
-	{
-		bool inRoom = PhotonNetwork.InRoom;
-		if (!this.IsAuthority() || !inRoom)
-		{
-			this.GrabEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer));
-		}
-		if (inRoom)
-		{
-			long num = BitPackUtils.PackHandPosRotForNetwork(localPosition, localRotation);
-			this.photonView.RPC("RequestGrabEntityRPC", this.GetAuthorityPlayer(), new object[]
-			{
-				this.GetNetIdFromEntityId(gameEntityId),
-				isLeftHand,
-				num
-			});
-			PhotonNetwork.SendAllOutgoingCommands();
-		}
-	}
-
-	[PunRPC]
-	public void RequestGrabEntityRPC(int entityNetId, bool isLeftHand, long packedPosRot, PhotonMessageInfo info)
-	{
-		if (!this.IsValidAuthorityRPC(info.Sender, entityNetId))
-		{
-			return;
-		}
-		Vector3 vector;
-		Quaternion quaternion;
-		BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out vector, out quaternion);
-		float num = 10000f;
-		if (!vector.IsValid(num) || !quaternion.IsValid() || vector.sqrMagnitude > 6400f)
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(info.Sender, out gamePlayer) || !this.IsPlayerHandNearEntity(gamePlayer, entityNetId, isLeftHand, false, 16f) || this.IsValidEntity(gamePlayer.GetGameEntityId(isLeftHand)) || !gamePlayer.netGrabLimiter.CheckCallTime(Time.time) || gamePlayer.IsHoldingEntity(this, isLeftHand))
-		{
-			return;
-		}
-		GameEntity gameEntity = this.GetGameEntity(this.GetEntityIdFromNetId(entityNetId));
-		if (gameEntity == null)
-		{
-			return;
-		}
-		if (!this.ValidateGrab(gameEntity, info.Sender.ActorNumber, isLeftHand))
-		{
-			return;
-		}
-		this.photonView.RPC("GrabEntityRPC", RpcTarget.All, new object[]
-		{
-			entityNetId,
-			isLeftHand,
-			packedPosRot,
-			info.Sender
-		});
-		PhotonNetwork.SendAllOutgoingCommands();
-	}
-
-	[PunRPC]
-	public void GrabEntityRPC(int entityNetId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
-	{
-		if (!this.IsValidClientRPC(info.Sender, entityNetId) || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.GrabEntity))
-		{
-			return;
-		}
-		Vector3 localPosition;
-		Quaternion localRotation;
-		BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out localPosition, out localRotation);
-		float num = 10000f;
-		if (!localPosition.IsValid(num) || !localRotation.IsValid() || localPosition.sqrMagnitude > 6400f)
-		{
-			return;
-		}
-		this.GrabEntityLocal(this.GetEntityIdFromNetId(entityNetId), isLeftHand, localPosition, localRotation, NetPlayer.Get(grabbedByPlayer));
-	}
-
-	private void GrabEntityLocal(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, NetPlayer grabbedByPlayer)
-	{
-		RigContainer rigContainer;
-		if (!VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(grabbedByPlayer.ActorNumber), out rigContainer))
-		{
-			return;
-		}
-		GameEntity gameEntity = this.entities[gameEntityId.index];
-		if (gameEntityId.index < 0 || gameEntityId.index >= this.entities.Count)
-		{
-			return;
-		}
-		if (gameEntity == null)
-		{
-			return;
-		}
-		if (grabbedByPlayer == null)
-		{
-			return;
-		}
-		int handIndex = GamePlayer.GetHandIndex(isLeftHand);
-		if (grabbedByPlayer.IsLocal && gameEntity.heldByActorNumber == grabbedByPlayer.ActorNumber && gameEntity.heldByHandIndex == handIndex)
-		{
-			return;
-		}
-		GameEntityManager.TryDetachCompletely(gameEntity);
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(grabbedByPlayer.ActorNumber, out gamePlayer))
-		{
-			return;
-		}
-		GamePlayer gamePlayer2;
-		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out gamePlayer2))
-		{
-			int num = gamePlayer2.FindHandIndex(gameEntityId);
-			bool flag = gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
-			gamePlayer2.ClearGrabbedIfHeld(gameEntityId, this);
-			if (num != -1 && flag)
-			{
-				GamePlayerLocal.instance.ClearGrabbed(num);
-			}
-		}
-		Transform handTransform = gamePlayer.GetHandTransform(handIndex);
-		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
-		if (component != null)
-		{
-			if (grabbedByPlayer.IsLocal)
-			{
-				component.constraints = RigidbodyConstraints.FreezeAll;
-				component.isKinematic = false;
-			}
-			else
-			{
-				component.constraints = RigidbodyConstraints.None;
-				component.isKinematic = true;
-			}
-		}
-		gameEntity.transform.SetParent(handTransform);
-		gameEntity.transform.SetLocalPositionAndRotation(localPosition, localRotation);
-		gameEntity.transform.localScale = Vector3.one;
-		gameEntity.heldByActorNumber = grabbedByPlayer.ActorNumber;
-		gameEntity.heldByHandIndex = handIndex;
-		gameEntity.lastHeldByActorNumber = gameEntity.heldByActorNumber;
-		gamePlayer.SetGrabbed(gameEntityId, handIndex, this);
-		if (grabbedByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-		{
-			GamePlayerLocal.instance.SetGrabbed(gameEntityId, GamePlayer.GetHandIndex(isLeftHand));
-			GamePlayerLocal.instance.PlayCatchFx(isLeftHand);
-		}
-		GameEntityManager.TryUnsnapLocal(gameEntity);
-		gameEntity.PlayCatchFx();
-		Action onGrabbed = gameEntity.OnGrabbed;
-		if (onGrabbed != null)
-		{
-			onGrabbed();
-		}
-		CustomGameMode.OnEntityGrabbed(gameEntity, true);
-	}
-
-	public void GrabEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, NetPlayer grabbedByPlayer)
-	{
-		if (grabbedByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-		{
-			GamePlayerLocal.instance.gamePlayer.DeleteGrabbedEntityLocal(GamePlayer.GetHandIndex(isLeftHand));
-		}
-		this.GrabEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, grabbedByPlayer);
-	}
-
-	public GameEntityId TryGrabLocal(Vector3 handPosition, Vector3 fingerPosition, bool isLeftHand, out Vector3 closestPointOnBoundingBox, out bool fingerPositionUsed)
-	{
-		float a = 0.03f;
-		float maxAdjustedGrabDistance = 0f;
-		float num = 0.1f;
-		float max = 0.25f;
-		fingerPositionUsed = false;
-		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-		Vector3 rigidbodyVelocity = GTPlayer.Instance.RigidbodyVelocity;
-		GameEntity gameEntity = null;
-		float num2 = float.MaxValue;
-		Vector3 vector = handPosition;
-		for (int i = 0; i < this.entities.Count; i++)
-		{
-			GameEntity gameEntity2 = this.entities[i];
-			if (this.ValidateGrab(gameEntity2, actorNumber, isLeftHand))
-			{
-				float num3 = 0.75f;
-				float magnitude = (handPosition - gameEntity2.transform.position).magnitude;
-				if (magnitude <= num3 && (gameEntity2.snappedByActorNumber == -1 || gameEntity2.snappedByActorNumber != actorNumber || magnitude <= 0.1f))
-				{
-					Vector3 vector2 = gameEntity2.GetVelocity() - rigidbodyVelocity;
-					float magnitude2 = vector2.magnitude;
-					float num4 = Mathf.Clamp(magnitude2 * num, 0f, max);
-					Vector3 slopProjection = (magnitude2 > 0.2f) ? (vector2.normalized * num4) : Vector3.zero;
-					maxAdjustedGrabDistance = Mathf.Max(a, gameEntity2.pickupRangeFromSurface);
-					GameEntity.RendererSet grabbableRenderers = gameEntity2.GetGrabbableRenderers();
-					foreach (ValueTuple<MeshFilter, MeshRenderer> valueTuple in grabbableRenderers.renderers)
-					{
-						MeshFilter item = valueTuple.Item1;
-						MeshRenderer item2 = valueTuple.Item2;
-						if (item2.gameObject.activeInHierarchy && item2.enabled)
-						{
-							GameEntityManager._TryGrabLocal_TestBounds(handPosition, item2.transform, slopProjection, item.sharedMesh.bounds, num4, maxAdjustedGrabDistance, gameEntity2, false, ref num2, ref gameEntity, ref vector, ref fingerPositionUsed);
-							if (GameEntityManager.IsThinAlongDirection(item2.transform, item.sharedMesh.bounds, fingerPosition - handPosition, 0.1f))
-							{
-								GameEntityManager._TryGrabLocal_TestBounds(fingerPosition, item2.transform, slopProjection, item.sharedMesh.bounds, num4, maxAdjustedGrabDistance, gameEntity2, true, ref num2, ref gameEntity, ref vector, ref fingerPositionUsed);
-							}
-						}
-					}
-					foreach (SkinnedMeshRenderer skinnedMeshRenderer in grabbableRenderers.skinnedRenderers)
-					{
-						if (skinnedMeshRenderer.gameObject.activeInHierarchy && skinnedMeshRenderer.enabled)
-						{
-							GameEntityManager._TryGrabLocal_TestBounds(handPosition, skinnedMeshRenderer.rootBone, slopProjection, skinnedMeshRenderer.localBounds, num4, maxAdjustedGrabDistance, gameEntity2, false, ref num2, ref gameEntity, ref vector, ref fingerPositionUsed);
-							if (GameEntityManager.IsThinAlongDirection(skinnedMeshRenderer.rootBone, skinnedMeshRenderer.bounds, fingerPosition - handPosition, 0.1f))
-							{
-								GameEntityManager._TryGrabLocal_TestBounds(fingerPosition, skinnedMeshRenderer.rootBone, slopProjection, skinnedMeshRenderer.localBounds, num4, maxAdjustedGrabDistance, gameEntity2, true, ref num2, ref gameEntity, ref vector, ref fingerPositionUsed);
-							}
-						}
-					}
-					if (grabbableRenderers.renderers.Count == 0 && grabbableRenderers.skinnedRenderers.Count == 0)
-					{
-						float num5 = magnitude;
-						if (num5 < num2)
-						{
-							num2 = num5;
-							gameEntity = gameEntity2;
-							vector = gameEntity2.transform.position;
-						}
-					}
-				}
-			}
-		}
-		closestPointOnBoundingBox = vector;
-		if (!(gameEntity != null))
-		{
-			return GameEntityId.Invalid;
-		}
-		if (num2 > Mathf.Max(a, gameEntity.pickupRangeFromSurface))
-		{
-			return GameEntityId.Invalid;
-		}
-		return gameEntity.id;
-	}
-
-	private static bool IsThinAlongDirection(Transform transform, Bounds bounds, Vector3 direction, float thinThreshold = 0.1f)
-	{
-		return GameEntityManager.GetBoundsThicknessAlongDirection(bounds, transform.InverseTransformDirection(direction)) <= thinThreshold;
-	}
-
-	private static float GetBoundsThicknessAlongDirection(Bounds bounds, Vector3 localDirection)
-	{
-		localDirection.Normalize();
-		Vector3 rhs = new Vector3(Mathf.Abs(localDirection.x), Mathf.Abs(localDirection.y), Mathf.Abs(localDirection.z));
-		return Vector3.Dot(bounds.extents, rhs);
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static void _TryGrabLocal_TestBounds(Vector3 handPosition, Transform t, Vector3 slopProjection, Bounds bounds, float slopForSpeed, float maxAdjustedGrabDistance, GameEntity entity, bool isTestingAltPosition, ref float bestDist, ref GameEntity bestEntity, ref Vector3 closestPoint, ref bool usedAltPosition)
-	{
-		Vector3 vector = t.InverseTransformPoint(handPosition);
-		Vector3 b = t.InverseTransformPoint(handPosition + slopProjection);
-		bounds.extents != bounds.extents;
-		Vector3 b2;
-		float num;
-		Vector3 b3;
-		float num2;
-		if (GameEntityManager.SegmentHitsBounds(bounds, vector, b, out b2, out num))
-		{
-			b3 = ((num <= 0f) ? Vector3.zero : t.TransformVector(vector - b2));
-			num2 = b3.magnitude - slopForSpeed;
-		}
-		else
-		{
-			b3 = t.TransformVector(vector - bounds.ClosestPoint(vector));
-			num2 = b3.magnitude;
-		}
-		num2 = Mathf.Max(0f, num2 - maxAdjustedGrabDistance);
-		b3 = b3.normalized * num2;
-		if (num2 < bestDist)
-		{
-			bestDist = num2;
-			bestEntity = entity;
-			closestPoint = handPosition - b3;
-			usedAltPosition = isTestingAltPosition;
-		}
-	}
-
-	private void DrawDebugStar(Vector3 position, float radius)
-	{
-		for (int i = 0; i < 20; i++)
-		{
-			Debug.DrawLine(position, position + Random.onUnitSphere * radius, Color.red, 10f);
-		}
-	}
-
-	private static bool SegmentHitsBounds(Bounds bounds, Vector3 a, Vector3 b, out Vector3 hitPoint, out float distance)
-	{
-		hitPoint = default(Vector3);
-		distance = float.MaxValue;
-		Vector3 a2 = b - a;
-		float magnitude = a2.magnitude;
-		if (magnitude <= Mathf.Epsilon)
-		{
-			if (bounds.Contains(a))
-			{
-				distance = 0f;
-				hitPoint = a;
-				return true;
-			}
-			return false;
-		}
-		else
-		{
-			Ray ray = new Ray(a, a2 / magnitude);
-			if (bounds.IntersectRay(ray, out distance) && distance <= magnitude)
-			{
-				hitPoint = a + ray.direction * distance;
-				return true;
-			}
-			return false;
-		}
-	}
-
-	public bool GetEntitiesWithComponentInRadius<T>(Vector3 center, float radius, bool checkRootOnly, List<T> nearbyEntities)
-	{
-		float num = radius * radius;
-		for (int i = 0; i < this.entities.Count; i++)
-		{
-			GameEntity gameEntity = this.entities[i];
-			if (!(gameEntity == null))
-			{
-				T t;
-				if (checkRootOnly)
-				{
-					t = gameEntity.GetComponent<T>();
-				}
-				else
-				{
-					t = gameEntity.GetComponentInChildren<T>();
-				}
-				if (t != null && (this.entities[i].transform.position - center).sqrMagnitude < num)
-				{
-					nearbyEntities.Add(t);
-				}
-			}
-		}
-		return nearbyEntities.Count > 0;
-	}
-
-	private bool ValidateGrab(GameEntity gameEntity, int playerActorNumber, bool isLeftHand)
-	{
-		if (gameEntity == null || !gameEntity.pickupable)
-		{
-			return false;
-		}
-		if (gameEntity.onlyGrabActorNumber != -1 && gameEntity.onlyGrabActorNumber != playerActorNumber)
-		{
-			return false;
-		}
-		GamePlayer gamePlayer;
-		if (gameEntity.heldByActorNumber != -1 && gameEntity.heldByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			return false;
-		}
-		if (gameEntity.snappedByActorNumber != -1 && gameEntity.snappedByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out gamePlayer))
-		{
-			return false;
-		}
-		GameSnappable component = gameEntity.GetComponent<GameSnappable>();
-		if (component != null && !component.CanGrabWithHand(isLeftHand))
-		{
-			return false;
-		}
-		if (this.IsValidEntity(gameEntity.attachedToEntityId))
-		{
-			GameEntity gameEntity2 = this.GetGameEntity(gameEntity.attachedToEntityId);
-			if (gameEntity2 != null)
-			{
-				if (gameEntity2.snappedByActorNumber != -1 && gameEntity2.snappedByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity2.snappedByActorNumber, out gamePlayer))
-				{
-					return false;
-				}
-				GameSnappable component2 = gameEntity2.GetComponent<GameSnappable>();
-				if (component2 != null && !component2.CanGrabWithHand(isLeftHand))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	public T GetParentEntity<T>(Transform transform) where T : MonoBehaviour
-	{
-		while (transform != null)
-		{
-			T component = transform.GetComponent<T>();
-			if (component != null)
-			{
-				return component;
-			}
-			transform = transform.parent;
-		}
-		return default(T);
-	}
-
-	public void RequestThrowEntity(GameEntityId entityId, bool isLeftHand, Vector3 headPosition, Vector3 velocity, Vector3 angVelocity)
-	{
-		GameEntity gameEntity = this.GetGameEntity(entityId);
-		if (gameEntity == null)
-		{
-			return;
-		}
-		Vector3 vector = gameEntity.transform.position;
-		Quaternion rotation = gameEntity.transform.rotation;
-		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
-		if (component != null)
-		{
-			Vector3 vector2 = gameEntity.transform.TransformPoint(component.centerOfMass);
-			Vector3 vector3 = vector2 - headPosition;
-			float magnitude = vector3.magnitude;
-			if (magnitude > 0f)
-			{
-				vector3 /= magnitude;
-				RaycastHit raycastHit;
-				if (Physics.SphereCast(headPosition, 0.05f, vector3, out raycastHit, magnitude + 0.1f, 513, QueryTriggerInteraction.Ignore))
-				{
-					component.GetComponentsInChildren<Collider>(this._collidersList);
-					Vector3 position = component.position + -raycastHit.normal * 1000f;
-					float num = float.MaxValue;
-					bool flag = false;
-					Plane plane = new Plane(raycastHit.normal, raycastHit.point);
-					foreach (Collider collider in this._collidersList)
-					{
-						if (collider.enabled && !collider.isTrigger)
-						{
-							Vector3 point = collider.ClosestPoint(position);
-							float num2 = Mathf.Abs(plane.GetDistanceToPoint(point));
-							if (num2 < num)
-							{
-								num = num2;
-								flag = true;
-							}
-						}
-					}
-					if (flag)
-					{
-						vector += raycastHit.normal * num;
-					}
-					else
-					{
-						float d = Mathf.Max(raycastHit.distance - 0.2f, 0f);
-						Vector3 a = headPosition + vector3 * d;
-						vector += a - vector2;
-					}
-				}
-			}
-		}
-		bool inRoom = PhotonNetwork.InRoom;
-		if (!this.IsAuthority() || !inRoom)
-		{
-			this.ThrowEntityLocal(entityId, isLeftHand, vector, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer));
-		}
-		if (inRoom)
-		{
-			this.photonView.RPC("RequestThrowEntityRPC", this.GetAuthorityPlayer(), new object[]
-			{
-				this.GetNetIdFromEntityId(entityId),
-				isLeftHand,
-				vector,
-				rotation,
-				velocity,
-				angVelocity
-			});
-			PhotonNetwork.SendAllOutgoingCommands();
-		}
-	}
-
-	[PunRPC]
-	public void RequestThrowEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, PhotonMessageInfo info)
-	{
-		if (this.IsValidAuthorityRPC(info.Sender, entityNetId))
-		{
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid())
-			{
-				float num2 = 10000f;
-				if (velocity.IsValid(num2))
-				{
-					float num3 = 10000f;
-					if (angVelocity.IsValid(num3) && velocity.sqrMagnitude <= 1600f && this.IsPositionInManagerBounds(position))
-					{
-						GamePlayer gamePlayer;
-						if (!GamePlayer.TryGetGamePlayer(info.Sender, out gamePlayer) || !GameEntityManager.IsPlayerHandNearPosition(gamePlayer, position, isLeftHand, false, 16f) || !gamePlayer.IsHoldingEntity(this.GetEntityIdFromNetId(entityNetId), isLeftHand) || !gamePlayer.netThrowLimiter.CheckCallTime(Time.time))
-						{
-							return;
-						}
-						this.photonView.RPC("ThrowEntityRPC", RpcTarget.All, new object[]
-						{
-							entityNetId,
-							isLeftHand,
-							position,
-							rotation,
-							velocity,
-							angVelocity,
-							info.Sender,
-							info.SentServerTime
-						});
-						PhotonNetwork.SendAllOutgoingCommands();
-						return;
-					}
-				}
-			}
-		}
-	}
-
-	[PunRPC]
-	public void ThrowEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player thrownByPlayer, double throwTime, PhotonMessageInfo info)
-	{
-		if (this.IsValidClientRPC(info.Sender, entityNetId, position) && !this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.ThrowEntity))
-		{
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid())
-			{
-				float num2 = 10000f;
-				if (velocity.IsValid(num2))
-				{
-					float num3 = 10000f;
-					if (angVelocity.IsValid(num3) && velocity.sqrMagnitude <= 1600f)
-					{
-						NetPlayer netPlayer = NetPlayer.Get(thrownByPlayer);
-						if (netPlayer.IsLocal && !this.IsAuthority())
-						{
-							return;
-						}
-						this.ThrowEntityLocal(this.GetEntityIdFromNetId(entityNetId), isLeftHand, position, rotation, velocity, angVelocity, netPlayer);
-						return;
-					}
-				}
-			}
-		}
-	}
-
-	private void ThrowEntityLocal(GameEntityId entityId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, NetPlayer thrownByPlayer)
-	{
-		if (entityId.index < 0 || entityId.index >= this.entities.Count)
-		{
-			return;
-		}
-		GameEntity gameEntity = this.entities[entityId.index];
-		if (gameEntity == null)
-		{
-			return;
-		}
-		if (thrownByPlayer == null)
-		{
-			return;
-		}
-		gameEntity.transform.SetParent(null);
-		gameEntity.transform.SetLocalPositionAndRotation(position, rotation);
-		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
-		if (component != null)
-		{
-			component.isKinematic = false;
-			component.constraints = RigidbodyConstraints.None;
-			component.position = position;
-			component.rotation = rotation;
-			component.linearVelocity = velocity;
-			component.angularVelocity = angVelocity;
-		}
-		gameEntity.heldByActorNumber = -1;
-		gameEntity.heldByHandIndex = -1;
-		gameEntity.attachedToEntityId = GameEntityId.Invalid;
-		VRRig vrrig = GorillaGameManager.StaticFindRigForPlayer(thrownByPlayer);
-		if (vrrig != null && gameEntity.gravityController != null)
-		{
-			gameEntity.gravityController.SetPersonalGravityDirection(-vrrig.transform.up);
-		}
-		bool flag = thrownByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
-		int handIndex = GamePlayer.GetHandIndex(isLeftHand);
-		RigContainer rigContainer;
-		if (flag)
-		{
-			GamePlayerLocal.instance.gamePlayer.ClearGrabbed(handIndex);
-			GamePlayerLocal.instance.ClearGrabbed(handIndex);
-			GamePlayerLocal.instance.PlayThrowFx(isLeftHand);
-		}
-		else if (VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(thrownByPlayer.ActorNumber), out rigContainer))
-		{
-			GamePlayer gamePlayerRef = rigContainer.Rig.GamePlayerRef;
-			if (gamePlayerRef != null)
-			{
-				gamePlayerRef.ClearGrabbedIfHeld(entityId, this);
-				gamePlayerRef.ClearSnappedIfSnapped(entityId, this);
-			}
-		}
-		gameEntity.PlayThrowFx();
-		Action onReleased = gameEntity.OnReleased;
-		if (onReleased != null)
-		{
-			onReleased();
-		}
-		CustomGameMode.OnEntityGrabbed(gameEntity, false);
-		GRBadge component2 = gameEntity.GetComponent<GRBadge>();
-		if (component2 != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(thrownByPlayer.ActorNumber);
-			if (grplayer != null)
-			{
-				grplayer.AttachBadge(component2);
-			}
-		}
-	}
-
-	public void RequestSnapEntity(GameEntityId entityId, bool isLeftHand, SnapJointType jointType)
-	{
-		GameEntity gameEntity = this.GetGameEntity(entityId);
-		if (gameEntity == null)
-		{
-			return;
-		}
-		Vector3 position = gameEntity.transform.position;
-		Quaternion rotation = gameEntity.transform.rotation;
-		if (!this.IsAuthority())
-		{
-			this.SnapEntityLocal(entityId, isLeftHand, position, rotation, (int)jointType, NetPlayer.Get(PhotonNetwork.LocalPlayer));
-		}
-		this.photonView.RPC("RequestSnapEntityRPC", this.GetAuthorityPlayer(), new object[]
-		{
-			this.GetNetIdFromEntityId(entityId),
-			isLeftHand,
-			position,
-			rotation,
-			(int)jointType
-		});
-		PhotonNetwork.SendAllOutgoingCommands();
-	}
-
-	[PunRPC]
-	public void RequestSnapEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, PhotonMessageInfo info)
-	{
-		if (this.IsValidAuthorityRPC(info.Sender, entityNetId))
-		{
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid() && this.IsPositionInManagerBounds(position))
-			{
-				GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
-				if (gamePlayer == null || !GameEntityManager.IsPlayerHandNearPosition(gamePlayer, position, isLeftHand, false, 16f) || !gamePlayer.IsHoldingEntity(this.GetEntityIdFromNetId(entityNetId), isLeftHand) || !gamePlayer.netSnapLimiter.CheckCallTime(Time.time))
-				{
-					return;
-				}
-				this.photonView.RPC("SnapEntityRPC", RpcTarget.All, new object[]
-				{
-					entityNetId,
-					isLeftHand,
-					position,
-					rotation,
-					jointType,
-					info.Sender,
-					info.SentServerTime
-				});
-				PhotonNetwork.SendAllOutgoingCommands();
-				return;
-			}
-		}
-	}
-
-	[PunRPC]
-	public void SnapEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, Player thrownByPlayer, double snapTime, PhotonMessageInfo info)
-	{
-		if (this.IsValidClientRPC(info.Sender, entityNetId, position) && !this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.ThrowEntity))
-		{
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid())
-			{
-				if (!this.IsAuthority() && thrownByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-				{
-					return;
-				}
-				this.SnapEntityLocal(this.GetEntityIdFromNetId(entityNetId), isLeftHand, position, rotation, jointType, NetPlayer.Get(thrownByPlayer));
-				return;
-			}
-		}
-	}
-
-	private void SnapEntityLocal(GameEntityId gameEntityId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, NetPlayer snappedByPlayer)
-	{
-		if (gameEntityId.index < 0 || gameEntityId.index >= this.entities.Count)
-		{
-			return;
-		}
-		GameEntity gameEntity = this.entities[gameEntityId.index];
-		if (gameEntity == null)
-		{
-			return;
-		}
-		if (snappedByPlayer == null)
-		{
-			return;
-		}
-		if (snappedByPlayer.IsLocal && gameEntity.heldByActorNumber != snappedByPlayer.ActorNumber && gameEntity.lastHeldByActorNumber == snappedByPlayer.ActorNumber)
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(snappedByPlayer.ActorNumber, out gamePlayer))
-		{
-			return;
-		}
-		GameEntityManager.TryDetachCompletely(gameEntity);
-		SuperInfectionSnapPoint superInfectionSnapPoint;
-		if (jointType == 64)
-		{
-			gameEntity.GetComponent<GameSnappable>();
-			superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(gamePlayer, (SnapJointType)jointType);
-		}
-		else
-		{
-			superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(gamePlayer, (SnapJointType)jointType);
-			int num = -1;
-			if (jointType == 1)
-			{
-				num = 2;
-			}
-			if (jointType == 4)
-			{
-				num = 3;
-			}
-			if (num != -1)
-			{
-				gamePlayer.SetSnapped(gameEntityId, num, this);
-			}
-		}
-		if (superInfectionSnapPoint == null)
-		{
-			return;
-		}
-		if (superInfectionSnapPoint.HasSnapped())
-		{
-			GameEntity snappedEntity = superInfectionSnapPoint.GetSnappedEntity();
-			snappedEntity.transform.SetParent(null);
-			snappedEntity.transform.SetLocalPositionAndRotation(position, rotation);
-			Rigidbody component = snappedEntity.GetComponent<Rigidbody>();
-			if (component != null)
-			{
-				component.isKinematic = false;
-				component.constraints = RigidbodyConstraints.None;
-				component.position = position;
-				component.rotation = rotation;
-				component.linearVelocity = Vector3.up * 5f;
-			}
-			snappedEntity.heldByActorNumber = -1;
-			snappedEntity.heldByHandIndex = -1;
-			snappedEntity.snappedByActorNumber = -1;
-			snappedEntity.snappedJoint = SnapJointType.None;
-			snappedEntity.PlayThrowFx();
-			Action onReleased = snappedEntity.OnReleased;
-			if (onReleased != null)
-			{
-				onReleased();
-			}
-		}
-		superInfectionSnapPoint.Snapped(gameEntity);
-		gameEntity.transform.SetParent(superInfectionSnapPoint.transform);
-		gameEntity.transform.SetLocalPositionAndRotation(position, rotation);
-		gameEntity.transform.localScale = Vector3.one;
-		Rigidbody component2 = gameEntity.GetComponent<Rigidbody>();
-		if (component2 != null)
-		{
-			component2.isKinematic = true;
-		}
-		Vector3 zero = Vector3.zero;
-		Quaternion identity = Quaternion.identity;
-		GameSnappable component3 = gameEntity.GetComponent<GameSnappable>();
-		if (component3 != null)
-		{
-			component3.GetSnapOffset((SnapJointType)jointType, out zero, out identity);
-		}
-		gameEntity.transform.localPosition = zero;
-		gameEntity.transform.localRotation = identity;
-		gameEntity.snappedByActorNumber = snappedByPlayer.ActorNumber;
-		gameEntity.snappedJoint = (SnapJointType)jointType;
-		if (component3 != null)
-		{
-			component3.OnSnap();
-		}
-		Action onSnapped = gameEntity.OnSnapped;
-		if (onSnapped != null)
-		{
-			onSnapped();
-		}
-		gameEntity.PlaySnapFx();
-	}
-
-	public void SnapEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, int jointType, NetPlayer grabbedByPlayer)
-	{
-		this.SnapEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, jointType, grabbedByPlayer);
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static void TryUnsnapLocal(GameEntity gameEntity)
-	{
-		GamePlayer gamePlayer;
-		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out gamePlayer))
-		{
-			gamePlayer.ClearSnappedIfSnapped(gameEntity.id, gameEntity.manager);
-		}
-		GameSnappable component = gameEntity.GetComponent<GameSnappable>();
-		if (component != null && component.snappedToJoint != null && component.snappedToJoint.jointType != SnapJointType.None)
-		{
-			SuperInfectionSnapPoint superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(gamePlayer, component.snappedToJoint.jointType);
-			if (superInfectionSnapPoint == null)
-			{
-				superInfectionSnapPoint = component.snappedToJoint;
-			}
-			component.OnUnsnap();
-			superInfectionSnapPoint.Unsnapped();
-			Action onUnsnapped = gameEntity.OnUnsnapped;
-			if (onUnsnapped != null)
-			{
-				onUnsnapped();
-			}
-		}
-		gameEntity.snappedByActorNumber = -1;
-		gameEntity.snappedJoint = SnapJointType.None;
-	}
-
-	public void RequestAttachEntity(GameEntityId entityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
-	{
-		if (this.GetGameEntity(entityId) == null)
-		{
-			return;
-		}
-		if (!this.IsAuthority())
-		{
-			this.AttachEntityLocal(entityId, attachToEntityId, slotId, localPosition, localRotation);
-		}
-		this.photonView.RPC("RequestAttachEntityRPC", this.GetAuthorityPlayer(), new object[]
-		{
-			this.GetNetIdFromEntityId(entityId),
-			this.GetNetIdFromEntityId(attachToEntityId),
-			slotId,
-			localPosition,
-			localRotation
-		});
-		PhotonNetwork.SendAllOutgoingCommands();
-	}
-
-	public void RequestAttachEntityAuthority(GameEntityId entityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
-	{
-		if (this.GetGameEntity(entityId) == null)
-		{
-			return;
-		}
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		this.photonView.RPC("AttachEntityRPC", RpcTarget.All, new object[]
-		{
-			this.GetNetIdFromEntityId(entityId),
-			this.GetNetIdFromEntityId(attachToEntityId),
-			slotId,
-			localPosition,
-			localRotation,
-			null,
-			PhotonNetwork.Time
-		});
-		PhotonNetwork.SendAllOutgoingCommands();
-	}
-
-	[PunRPC]
-	public void RequestAttachEntityRPC(int entityNetId, int attachToEntityNetId, int slotId, Vector3 localPosition, Quaternion localRotation, PhotonMessageInfo info)
-	{
-		bool flag = !this.IsValidNetId(attachToEntityNetId);
-		if (this.IsValidAuthorityRPC(info.Sender, entityNetId))
-		{
-			float num = 10000f;
-			if (localPosition.IsValid(num) && localRotation.IsValid())
-			{
-				if (!flag)
-				{
-					if (localPosition.sqrMagnitude > 4f || !this.IsEntityNearEntity(entityNetId, attachToEntityNetId, 16f))
-					{
-						return;
-					}
-				}
-				else if (!this.IsPositionInManagerBounds(localPosition))
-				{
-					return;
-				}
-				GameEntity gameEntityFromNetId = this.GetGameEntityFromNetId(entityNetId);
-				if (gameEntityFromNetId == null)
-				{
-					return;
-				}
-				GameDockable component = gameEntityFromNetId.GetComponent<GameDockable>();
-				if (component == null)
-				{
-					return;
-				}
-				GameEntity gameEntityFromNetId2 = this.GetGameEntityFromNetId(attachToEntityNetId);
-				if (gameEntityFromNetId2 != null)
-				{
-					GameDock component2 = gameEntityFromNetId2.GetComponent<GameDock>();
-					if (component2 == null)
-					{
-						return;
-					}
-					if (!component2.CanDock(component))
-					{
-						return;
-					}
-				}
-				GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
-				if (gamePlayer == null || !gamePlayer.IsHoldingEntity(this.GetEntityIdFromNetId(entityNetId)) || !gamePlayer.netSnapLimiter.CheckCallTime(Time.time))
-				{
-					return;
-				}
-				this.photonView.RPC("AttachEntityRPC", RpcTarget.All, new object[]
-				{
-					entityNetId,
-					attachToEntityNetId,
-					slotId,
-					localPosition,
-					localRotation,
-					info.Sender,
-					info.SentServerTime
-				});
-				PhotonNetwork.SendAllOutgoingCommands();
-				return;
-			}
-		}
-	}
-
-	[PunRPC]
-	public void AttachEntityRPC(int entityNetId, int attachToEntityNetId, int slotId, Vector3 localPosition, Quaternion localRotation, Player attachedByPlayer, double snapTime, PhotonMessageInfo info)
-	{
-		if (this.IsValidClientRPC(info.Sender, entityNetId) && this.IsValidNetId(attachToEntityNetId) && !this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.ThrowEntity))
-		{
-			float num = 10000f;
-			if (localPosition.IsValid(num) && localRotation.IsValid())
-			{
-				if (!this.IsAuthority() && attachedByPlayer != null && attachedByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-				{
-					return;
-				}
-				this.AttachEntityLocal(this.GetEntityIdFromNetId(entityNetId), this.GetEntityIdFromNetId(attachToEntityNetId), slotId, localPosition, localRotation);
-				return;
-			}
-		}
-	}
-
-	private void AttachEntityLocal(GameEntityId gameEntityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
-	{
-		if (gameEntityId.index < 0 || gameEntityId.index >= this.entities.Count)
-		{
-			return;
-		}
-		GameEntity gameEntity = this.entities[gameEntityId.index];
-		if (gameEntity == null)
-		{
-			return;
-		}
-		GameEntity gameEntity2 = this.entities[attachToEntityId.index];
-		GameEntityManager.TryDetachCompletely(gameEntity);
-		bool flag = gameEntity2 == null;
-		Transform parent = (gameEntity2 == null) ? null : gameEntity2.transform;
-		gameEntity.transform.SetParent(parent);
-		gameEntity.transform.SetLocalPositionAndRotation(localPosition, localRotation);
-		gameEntity.attachedToEntityId = (flag ? GameEntityId.Invalid : gameEntity2.id);
-		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
-		if (component != null)
-		{
-			component.isKinematic = !flag;
-			component.constraints = RigidbodyConstraints.None;
-		}
-		GameDockable component2 = gameEntity.GetComponent<GameDockable>();
-		if (gameEntity2 != null)
-		{
-			Action onAttached = gameEntity.OnAttached;
-			if (onAttached != null)
-			{
-				onAttached();
-			}
-			GameDock component3 = gameEntity2.GetComponent<GameDock>();
-			if (component3 != null)
-			{
-				component3.OnDock(gameEntity, gameEntity2);
-				if (component2 != null)
-				{
-					component2.OnDock(gameEntity, gameEntity2);
-				}
-			}
-		}
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static void TryDetachLocal(GameEntity gameEntity)
-	{
-		if (gameEntity.attachedToEntityId != GameEntityId.Invalid)
-		{
-			GameEntity gameEntity2 = gameEntity.manager.entities[gameEntity.attachedToEntityId.index];
-			if (gameEntity2 != null)
-			{
-				GameDock component = gameEntity2.GetComponent<GameDock>();
-				if (component != null)
-				{
-					component.OnUndock(gameEntity, gameEntity2);
-					GameDockable component2 = gameEntity.GetComponent<GameDockable>();
-					if (component2 != null)
-					{
-						component2.OnUndock(gameEntity, gameEntity2);
-					}
-				}
-			}
-		}
-		if (gameEntity.attachedToEntityId != GameEntityId.Invalid)
-		{
-			Action onDetached = gameEntity.OnDetached;
-			if (onDetached != null)
-			{
-				onDetached();
-			}
-		}
-		gameEntity.attachedToEntityId = GameEntityId.Invalid;
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	internal static void TryDetachCompletely(GameEntity gameEntity)
-	{
-		if (gameEntity == null)
-		{
-			return;
-		}
-		GameEntityManager.TryRemoveFromHandLocal(gameEntity);
-		GameEntityManager.TryUnsnapLocal(gameEntity);
-		GameEntityManager.TryDetachLocal(gameEntity);
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static void TryRemoveFromHandLocal(GameEntity gameEntity)
-	{
-		GameEntityId id = gameEntity.id;
-		int heldByActorNumber = gameEntity.heldByActorNumber;
-		GamePlayer gamePlayer;
-		if (GamePlayer.TryGetGamePlayer(heldByActorNumber, out gamePlayer))
-		{
-			if (heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-			{
-				GamePlayerLocal.instance.ClearGrabbedIfHeld(id, gameEntity.manager);
-			}
-			gamePlayer.ClearGrabbedIfHeld(id, gameEntity.manager);
-			Action onReleased = gameEntity.OnReleased;
-			if (onReleased != null)
-			{
-				onReleased();
-			}
-		}
-		gameEntity.heldByActorNumber = -1;
-		gameEntity.heldByHandIndex = -1;
-	}
-
-	public void AttachEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, int jointType, NetPlayer grabbedByPlayer)
-	{
-		this.SnapEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, jointType, grabbedByPlayer);
-	}
-
-	public void RequestHit(GameHitData hit)
-	{
-		GameHittable gameComponent = this.GetGameComponent<GameHittable>(hit.hitEntityId);
-		if (gameComponent == null)
-		{
-			return;
-		}
-		gameComponent.ApplyHit(hit);
-		base.SendRPC("RequestHitRPC", this.GetAuthorityPlayer(), new object[]
-		{
-			this.GetNetIdFromEntityId(hit.hitEntityId),
-			this.GetNetIdFromEntityId(hit.hitByEntityId),
-			hit.hitTypeId,
-			hit.hitEntityPosition,
-			hit.hitPosition,
-			hit.hitImpulse,
-			hit.hittablePoint
-		});
-	}
-
-	[PunRPC]
-	public void RequestHitRPC(int hittableNetId, int hitByNetId, int hitTypeId, Vector3 entityPosition, Vector3 hitPosition, Vector3 hitImpulse, int hittablePoint, PhotonMessageInfo info)
-	{
-		float num = 10000f;
-		if (entityPosition.IsValid(num))
-		{
-			float num2 = 10000f;
-			if (hitPosition.IsValid(num2))
-			{
-				float num3 = 10000f;
-				if (hitImpulse.IsValid(num3) && this.IsValidAuthorityRPC(info.Sender, hittableNetId, entityPosition) && this.IsPositionInManagerBounds(hitPosition))
-				{
-					GamePlayer gamePlayer;
-					if (!GamePlayer.TryGetGamePlayer(info.Sender, out gamePlayer) || !gamePlayer.netImpulseLimiter.CheckCallTime(Time.time))
-					{
-						return;
-					}
-					GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(hittableNetId);
-					GameHittable gameComponent = this.GetGameComponent<GameHittable>(entityIdFromNetId);
-					if (gameComponent == null)
-					{
-						return;
-					}
-					GameHitData hitData = new GameHitData
-					{
-						hitTypeId = hitTypeId,
-						hitEntityId = entityIdFromNetId,
-						hitByEntityId = this.GetEntityIdFromNetId(hitByNetId),
-						hitEntityPosition = entityPosition,
-						hitPosition = hitPosition,
-						hitImpulse = hitImpulse,
-						hittablePoint = hittablePoint
-					};
-					if (!gameComponent.IsHitValid(hitData))
-					{
-						return;
-					}
-					base.SendRPC("ApplyHitRPC", RpcTarget.All, new object[]
-					{
-						hittableNetId,
-						hitByNetId,
-						hitTypeId,
-						entityPosition,
-						hitPosition,
-						hitImpulse,
-						hittablePoint,
-						info.Sender
-					});
-					return;
-				}
-			}
-		}
-	}
-
-	[PunRPC]
-	public void ApplyHitRPC(int hittableNetId, int hitByNetId, int hitTypeId, Vector3 entityPosition, Vector3 hitPosition, Vector3 hitImpulse, int hittablePoint, Player player, PhotonMessageInfo info)
-	{
-		float num = 10000f;
-		if (hitPosition.IsValid(num))
-		{
-			float num2 = 10000f;
-			if (hitImpulse.IsValid(num2) && this.IsValidClientRPC(info.Sender, hittableNetId, entityPosition) && !this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.HitEntity) && player != null)
-			{
-				if (player.IsLocal)
-				{
-					return;
-				}
-				if (this.GetGameEntity(this.GetEntityIdFromNetId(hittableNetId)) == null)
-				{
-					return;
-				}
-				hitImpulse = Vector3.ClampMagnitude(hitImpulse, 100f);
-				GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(hittableNetId);
-				GameHitData hitData = new GameHitData
-				{
-					hitTypeId = hitTypeId,
-					hitEntityId = entityIdFromNetId,
-					hitByEntityId = this.GetEntityIdFromNetId(hitByNetId),
-					hitEntityPosition = entityPosition,
-					hitPosition = hitPosition,
-					hitImpulse = hitImpulse,
-					hitAmount = 0,
-					hittablePoint = hittablePoint
-				};
-				GameEntity gameEntity = this.GetGameEntity(this.GetEntityIdFromNetId(hitByNetId));
-				GameHittable gameComponent = this.GetGameComponent<GameHittable>(entityIdFromNetId);
-				if (gameEntity != null)
-				{
-					GameHitter component = gameEntity.GetComponent<GameHitter>();
-					if (component != null)
-					{
-						hitData.hitAmount = component.CalcHitAmount((GameHitType)hitTypeId, gameComponent, gameEntity);
-					}
-				}
-				if (gameComponent != null)
-				{
-					gameComponent.ApplyHit(hitData);
-				}
-				return;
-			}
-		}
-	}
-
-	public bool IsPlayerHandNearEntity(GamePlayer player, int entityNetId, bool isLeftHand, bool checkBothHands, float acceptableRadius = 16f)
-	{
-		GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(entityNetId);
-		GameEntity gameEntity = this.GetGameEntity(entityIdFromNetId);
-		return !(gameEntity == null) && GameEntityManager.IsPlayerHandNearPosition(player, gameEntity.transform.position, isLeftHand, checkBothHands, acceptableRadius);
-	}
-
-	public static bool IsPlayerHandNearPosition(GamePlayer player, Vector3 worldPosition, bool isLeftHand, bool checkBothHands, float acceptableRadius = 16f)
-	{
-		bool flag = true;
-		if (player != null && player.rig != null)
-		{
-			if (isLeftHand || checkBothHands)
-			{
-				flag = ((worldPosition - player.rig.leftHandTransform.position).sqrMagnitude < acceptableRadius * acceptableRadius);
-			}
-			if (!isLeftHand || checkBothHands)
-			{
-				float sqrMagnitude = (worldPosition - player.rig.rightHandTransform.position).sqrMagnitude;
-				flag = (flag && sqrMagnitude < acceptableRadius * acceptableRadius);
-			}
-		}
-		return flag;
-	}
-
-	public bool IsEntityNearEntity(int entityNetId, int otherEntityNetId, float acceptableRadius = 16f)
-	{
-		GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(otherEntityNetId);
-		GameEntity gameEntity = this.GetGameEntity(entityIdFromNetId);
-		return !(gameEntity == null) && this.IsEntityNearPosition(entityNetId, gameEntity.transform.position, acceptableRadius);
-	}
-
-	public bool IsEntityNearPosition(int entityNetId, Vector3 position, float acceptableRadius = 16f)
-	{
-		GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(entityNetId);
-		GameEntity gameEntity = this.GetGameEntity(entityIdFromNetId);
-		return !(gameEntity == null) && Vector3.SqrMagnitude(gameEntity.transform.position - position) < acceptableRadius * acceptableRadius;
-	}
-
-	public static bool ValidateDataType<T>(object obj, out T dataAsType)
-	{
-		if (obj is T)
-		{
-			dataAsType = (T)((object)obj);
-			return true;
-		}
-		dataAsType = default(T);
-		return false;
-	}
-
-	private void ClearZone(bool ignoreHeldGadgets = false)
-	{
-		GamePlayerLocal.instance.DebugSlotsReport(string.Format("Pre ClearZone zone={0}", this.zone));
-		if (ignoreHeldGadgets)
-		{
-			List<GameEntity> list = GamePlayerLocal.instance.gamePlayer.HeldAndSnappedEntities(null);
-			for (int i = list.Count - 1; i >= 0; i--)
-			{
-				if (list[i] == null || list[i].manager != this)
-				{
-					list.RemoveAt(i);
-				}
-				else if (list[i].shouldDestroyOnZoneExit)
-				{
-					list.RemoveAt(i);
-				}
-			}
-			for (int j = this.entities.Count - 1; j >= 0; j--)
-			{
-				if (!(this.entities[j] == null) && !list.Contains(this.entities[j]))
-				{
-					this.DestroyItemLocal(this.entities[j].id);
-				}
-			}
-			GamePlayerLocal.instance.joinWithItemsSentForCurrentMigration = false;
-			GamePlayerLocal.instance.gamePlayer.DidJoinWithItems = false;
-			GamePlayerLocal.instance.DebugSlotsReport(string.Format("ClearZone post-preserve zone={0}", this.zone));
-		}
-		else
-		{
-			for (int k = 0; k < this.entities.Count; k++)
-			{
-				if (this.entities[k] != null && this.entities[k].manager == this)
-				{
-					this.DestroyItemLocal(this.entities[k].id);
-				}
-			}
-			GamePlayerLocal.instance.DebugSlotsReport(string.Format("ClearZone post-destroy zone={0}", this.zone));
-			GamePlayer gamePlayerRef = VRRig.LocalRig.GamePlayerRef;
-			if (gamePlayerRef != null)
-			{
-				gamePlayerRef.ClearZone(this);
-			}
-			GamePlayerLocal.instance.DebugSlotsReport(string.Format("ClearZone post-ClearZone(player) zone={0}", this.zone));
-		}
-		for (int l = 0; l < this.entities.Count; l++)
-		{
-			if (this.entities[l] != null && this.entities[l].manager != this)
-			{
-				this.entities[l] = null;
-			}
-		}
-		foreach (VRRig vrrig in VRRigCache.ActiveRigs)
-		{
-			GamePlayer component = vrrig.GetComponent<GamePlayer>();
-			if (!component.IsLocal())
-			{
-				component.ClearZone(this);
-			}
-		}
-		this.gameEntityData.Clear();
-		for (int m = 0; m < this.zoneComponents.Count; m++)
-		{
-			this.zoneComponents[m].OnZoneClear(this.zoneClearReason);
-		}
-		GamePlayerLocal.instance.DebugSlotsReport(string.Format("ClearZone END zone={0}", this.zone));
-	}
-
-	public int SerializeGameState(int zoneId, byte[] bytes, int maxBytes)
-	{
-		MemoryStream memoryStream = new MemoryStream(bytes);
-		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		for (int i = 0; i < this.zoneComponents.Count; i++)
-		{
-			this.zoneComponents[i].SerializeZoneData(binaryWriter);
-		}
-		GameEntityManager.tempEntitiesToSerialize.Clear();
-		for (int j = 0; j < this.entities.Count; j++)
-		{
-			GameEntity gameEntity = this.entities[j];
-			if (!(gameEntity == null))
-			{
-				int attachedPlayerActorNr = gameEntity.AttachedPlayerActorNr;
-				if (attachedPlayerActorNr != -1)
-				{
-					bool flag = false;
-					for (int k = 0; k < GameEntityManager.tempRigs.Count; k++)
-					{
-						if (GameEntityManager.tempRigs[k].Creator.ActorNumber == attachedPlayerActorNr)
-						{
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						goto IL_B7;
-					}
-				}
-				GameEntityManager.tempEntitiesToSerialize.Add(gameEntity);
-			}
-			IL_B7:;
-		}
-		binaryWriter.Write(GameEntityManager.tempEntitiesToSerialize.Count);
-		for (int l = 0; l < GameEntityManager.tempEntitiesToSerialize.Count; l++)
-		{
-			GameEntity gameEntity2 = GameEntityManager.tempEntitiesToSerialize[l];
-			if (!(gameEntity2 == null))
-			{
-				int netIdFromEntityId = this.GetNetIdFromEntityId(gameEntity2.id);
-				binaryWriter.Write(netIdFromEntityId);
-				binaryWriter.Write(gameEntity2.typeId);
-				long value = BitPackUtils.PackWorldPosForNetwork(gameEntity2.transform.position);
-				int value2 = BitPackUtils.PackQuaternionForNetwork(gameEntity2.transform.rotation);
-				binaryWriter.Write(value);
-				binaryWriter.Write(value2);
-			}
-		}
-		for (int m = 0; m < GameEntityManager.tempEntitiesToSerialize.Count; m++)
-		{
-			GameEntity gameEntity3 = GameEntityManager.tempEntitiesToSerialize[m];
-			if (!(gameEntity3 == null))
-			{
-				int netIdFromEntityId2 = this.GetNetIdFromEntityId(gameEntity3.id);
-				binaryWriter.Write(netIdFromEntityId2);
-				binaryWriter.Write(gameEntity3.createData);
-				binaryWriter.Write(this.GetNetIdFromEntityId(gameEntity3.createdByEntityId));
-				binaryWriter.Write(gameEntity3.GetState());
-				int num = -1;
-				GameEntity gameEntity4 = this.GetGameEntity(gameEntity3.attachedToEntityId);
-				if (gameEntity4 != null)
-				{
-					num = this.GetNetIdFromEntityId(gameEntity4.id);
-				}
-				binaryWriter.Write(num);
-				if (num != -1)
-				{
-					long value3 = BitPackUtils.PackHandPosRotForNetwork(gameEntity3.transform.localPosition, gameEntity3.transform.localRotation);
-					binaryWriter.Write(value3);
-				}
-				GameAgent component = gameEntity3.GetComponent<GameAgent>();
-				bool flag2 = component != null;
-				binaryWriter.Write(flag2);
-				if (flag2)
-				{
-					Vector3 worldPos = Vector3.zero;
-					if (component.navAgent != null)
-					{
-						worldPos = component.navAgent.destination;
-					}
-					long value4 = BitPackUtils.PackWorldPosForNetwork(worldPos);
-					binaryWriter.Write(value4);
-					NetPlayer targetPlayer = component.targetPlayer;
-					int value5 = (targetPlayer != null) ? targetPlayer.ActorNumber : -1;
-					binaryWriter.Write(value5);
-				}
-				byte b = (byte)gameEntity3.entitySerialize.Count;
-				binaryWriter.Write(b);
-				for (int n = 0; n < (int)b; n++)
-				{
-					gameEntity3.entitySerialize[n].OnGameEntitySerialize(binaryWriter);
-				}
-				for (int num2 = 0; num2 < this.zoneComponents.Count; num2++)
-				{
-					this.zoneComponents[num2].SerializeZoneEntityData(binaryWriter, gameEntity3);
-				}
-			}
-		}
-		int count = GameEntityManager.tempRigs.Count;
-		binaryWriter.Write(count);
-		for (int num3 = 0; num3 < GameEntityManager.tempRigs.Count; num3++)
-		{
-			VRRig vrrig = GameEntityManager.tempRigs[num3];
-			NetPlayer owningNetPlayer = vrrig.OwningNetPlayer;
-			binaryWriter.Write(owningNetPlayer.ActorNumber);
-			GamePlayer gamePlayerRef = vrrig.GamePlayerRef;
-			bool flag3 = gamePlayerRef != null;
-			binaryWriter.Write(flag3);
-			if (flag3)
-			{
-				gamePlayerRef.SerializeNetworkState(binaryWriter, owningNetPlayer, this);
-				for (int num4 = 0; num4 < this.zoneComponents.Count; num4++)
-				{
-					this.zoneComponents[num4].SerializeZonePlayerData(binaryWriter, owningNetPlayer.ActorNumber);
-				}
-			}
-		}
-		return (int)memoryStream.Position;
-	}
-
-	public unsafe void DeserializeTableState(byte[] bytes, int numBytes)
-	{
-		if (numBytes <= 0)
-		{
-			return;
-		}
-		GameEntityManager.tempAttachments.Clear();
-		using (MemoryStream memoryStream = new MemoryStream(bytes))
-		{
-			using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-			{
-				for (int i = 0; i < this.zoneComponents.Count; i++)
-				{
-					this.zoneComponents[i].DeserializeZoneData(binaryReader);
-				}
-				int num = binaryReader.ReadInt32();
-				int num2 = num;
-				Span<bool> span = new Span<bool>(stackalloc byte[(UIntPtr)num2], num2);
-				for (int j = 0; j < num; j++)
-				{
-					int netId = binaryReader.ReadInt32();
-					int entityTypeId = binaryReader.ReadInt32();
-					long data = binaryReader.ReadInt64();
-					int data2 = binaryReader.ReadInt32();
-					if (this.GetGameEntityFromNetId(netId) != null)
-					{
-						*span[j] = true;
-					}
-					else
-					{
-						Vector3 position = BitPackUtils.UnpackWorldPosFromNetwork(data);
-						Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(data2);
-						this.CreateItemLocal(netId, entityTypeId, position, rotation);
-					}
-				}
-				int k = 0;
-				while (k < num)
-				{
-					int num3 = binaryReader.ReadInt32();
-					long createData = binaryReader.ReadInt64();
-					int createdByEntityNetId = binaryReader.ReadInt32();
-					long state = binaryReader.ReadInt64();
-					GameEntity gameEntityFromNetId = this.GetGameEntityFromNetId(num3);
-					if (gameEntityFromNetId != null && !(*span[k]))
-					{
-						this.InitItemLocal(gameEntityFromNetId, createData, createdByEntityNetId);
-						gameEntityFromNetId.SetState(state);
-					}
-					int num4 = binaryReader.ReadInt32();
-					if (num4 == -1)
-					{
-						goto IL_191;
-					}
-					long data3 = binaryReader.ReadInt64();
-					if (!(gameEntityFromNetId == null))
-					{
-						Vector3 localPosition;
-						Quaternion localRotation;
-						BitPackUtils.UnpackHandPosRotFromNetwork(data3, out localPosition, out localRotation);
-						GameEntityManager.tempAttachments.Add(new GameEntityManager.AttachmentData
-						{
-							entityNetId = num3,
-							attachToEntityNetId = num4,
-							localPosition = localPosition,
-							localRotation = localRotation
-						});
-						goto IL_191;
-					}
-					IL_247:
-					k++;
-					continue;
-					IL_191:
-					if (binaryReader.ReadBoolean())
-					{
-						long data4 = binaryReader.ReadInt64();
-						int playerID = binaryReader.ReadInt32();
-						Vector3 destination = BitPackUtils.UnpackWorldPosFromNetwork(data4);
-						GameAgent component = gameEntityFromNetId.GetComponent<GameAgent>();
-						if (component != null)
-						{
-							if (component.IsOnNavMesh())
-							{
-								component.navAgent.destination = destination;
-							}
-							component.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
-						}
-					}
-					byte b = binaryReader.ReadByte();
-					for (int l = 0; l < (int)b; l++)
-					{
-						gameEntityFromNetId.entitySerialize[l].OnGameEntityDeserialize(binaryReader);
-					}
-					for (int m = 0; m < this.zoneComponents.Count; m++)
-					{
-						this.zoneComponents[m].DeserializeZoneEntityData(binaryReader, gameEntityFromNetId);
-					}
-					goto IL_247;
-				}
-				int num5 = binaryReader.ReadInt32();
-				for (int n = 0; n < num5; n++)
-				{
-					int actorNumber = binaryReader.ReadInt32();
-					if (binaryReader.ReadBoolean())
-					{
-						GamePlayer gamePlayer;
-						GamePlayer.TryGetGamePlayer(actorNumber, out gamePlayer);
-						GamePlayer.DeserializeNetworkState(binaryReader, gamePlayer, this);
-						for (int num6 = 0; num6 < this.zoneComponents.Count; num6++)
-						{
-							this.zoneComponents[num6].DeserializeZonePlayerData(binaryReader, actorNumber);
-						}
-					}
-				}
-				for (int num7 = 0; num7 < GameEntityManager.tempAttachments.Count; num7++)
-				{
-					GameEntityManager.AttachmentData attachmentData = GameEntityManager.tempAttachments[num7];
-					GameEntityId entityIdFromNetId = this.GetEntityIdFromNetId(attachmentData.entityNetId);
-					GameEntityId entityIdFromNetId2 = this.GetEntityIdFromNetId(attachmentData.attachToEntityNetId);
-					if (!(entityIdFromNetId == entityIdFromNetId2))
-					{
-						this.AttachEntityLocal(entityIdFromNetId, entityIdFromNetId2, 0, attachmentData.localPosition, attachmentData.localRotation);
-					}
-				}
-			}
-		}
-	}
-
-	private void UpdateZoneState()
-	{
-		this.UpdateAuthority(GameEntityManager.tempRigs);
-		if (this.IsAuthority())
-		{
-			this.UpdateClientsFromAuthority(GameEntityManager.tempRigs);
-			this.UpdateZoneStateAuthority();
-		}
-		else
-		{
-			this.UpdateZoneStateClient();
-		}
-		for (int i = this.zoneStateData.zonePlayers.Count - 1; i >= 0; i--)
-		{
-			if (this.zoneStateData.zonePlayers[i] == null)
-			{
-				this.zoneStateData.zonePlayers.RemoveAt(i);
-			}
-		}
-	}
-
-	private void UpdateAuthority(List<VRRig> allRigs)
-	{
-		if (!PhotonNetwork.InRoom && base.IsMine)
-		{
-			if (!this.IsAuthority())
-			{
-				this.guard.SetOwnership(NetworkSystem.Instance.LocalPlayer, false, false);
-				return;
-			}
-		}
-		else if (this.IsAuthority() && !this.IsInZone())
-		{
-			Player player = null;
-			GTZone currentZone = VRRig.LocalRig.zoneEntity.currentZone;
-			if (this.useRandomCheckForAuthority)
-			{
-				int num = 0;
-				while (player == null)
-				{
-					if (num >= 10)
-					{
-						break;
-					}
-					num++;
-					int index = Random.Range(0, allRigs.Count);
-					VRRig vrrig = allRigs[index];
-					GamePlayer gamePlayer;
-					if (GamePlayer.TryGetGamePlayer(vrrig, out gamePlayer) && !(gamePlayer.rig == null) && gamePlayer.rig.Creator != null && !gamePlayer.rig.isLocal)
-					{
-						GTZone currentZone2 = vrrig.zoneEntity.currentZone;
-						if (currentZone2 == this.zone && currentZone2 != currentZone)
-						{
-							player = gamePlayer.rig.Creator.GetPlayerRef();
-						}
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < allRigs.Count; i++)
-				{
-					VRRig vrrig2 = allRigs[i];
-					GamePlayer gamePlayer2;
-					if (GamePlayer.TryGetGamePlayer(vrrig2, out gamePlayer2) && !(gamePlayer2.rig == null) && gamePlayer2.rig.Creator != null && !gamePlayer2.rig.isLocal)
-					{
-						GTZone currentZone3 = vrrig2.zoneEntity.currentZone;
-						if (currentZone3 == this.zone && currentZone3 != currentZone)
-						{
-							player = gamePlayer2.rig.Creator.GetPlayerRef();
-						}
-					}
-				}
-			}
-			if (player != null)
-			{
-				this.guard.TransferOwnership(player, "");
-			}
-		}
-	}
-
-	private void UpdateClientsFromAuthority(List<VRRig> allRigs)
-	{
-		if (!this.IsInZone())
-		{
-			return;
-		}
-		for (int i = 0; i < this.zoneStateData.zoneStateRequests.Count; i++)
-		{
-			GameEntityManager.ZoneStateRequest zoneStateRequest = this.zoneStateData.zoneStateRequests[i];
-			if (zoneStateRequest.player != null && zoneStateRequest.zone == this.zone)
-			{
-				this.SendZoneStateToPlayerOrTarget(zoneStateRequest.zone, zoneStateRequest.player, RpcTarget.MasterClient);
-				zoneStateRequest.completed = true;
-				this.zoneStateData.zoneStateRequests[i] = zoneStateRequest;
-				this.zoneStateData.zoneStateRequests.RemoveAt(i);
-				return;
-			}
-			this.zoneStateData.zoneStateRequests.RemoveAt(i);
-			i--;
-		}
-	}
-
-	public void TestSerializeTableState()
-	{
-		GameEntityManager.ClearByteBuffer(GameEntityManager.tempSerializeGameState);
-		int num = this.SerializeGameState((int)this.zone, GameEntityManager.tempSerializeGameState, 15360);
-		byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-		Debug.LogFormat("Test Serialize Game State Buffer Size Uncompressed {0}", new object[]
-		{
-			num
-		});
-		Debug.LogFormat("Test Serialize Game State Buffer Size Compressed {0}", new object[]
-		{
-			array.Length
-		});
-	}
-
-	public static void ClearByteBuffer(byte[] buffer)
-	{
-		int num = buffer.Length;
-		for (int i = 0; i < num; i++)
-		{
-			buffer[i] = 0;
-		}
-	}
-
-	private void SendZoneStateToPlayerOrTarget(GTZone zone, Player player, RpcTarget target)
-	{
-		GameEntityManager.ClearByteBuffer(GameEntityManager.tempSerializeGameState);
-		this.SerializeGameState((int)zone, GameEntityManager.tempSerializeGameState, 15360);
-		byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-		byte[] array2 = new byte[512];
-		int i = 0;
-		int num = 0;
-		int num2 = array.Length;
-		while (i < num2)
-		{
-			int num3 = Mathf.Min(512, num2 - i);
-			Array.Copy(array, i, array2, 0, num3);
-			if (player != null)
-			{
-				this.photonView.RPC("SendTableDataRPC", player, new object[]
-				{
-					num,
-					num2,
-					array2
-				});
-			}
-			else
-			{
-				this.photonView.RPC("SendTableDataRPC", target, new object[]
-				{
-					num,
-					num2,
-					array2
-				});
-			}
-			i += num3;
-			num++;
-		}
-	}
-
-	[PunRPC]
-	public void SendTableDataRPC(int packetNum, int totalBytes, byte[] bytes, PhotonMessageInfo info)
-	{
-		if (!this.IsAuthorityPlayer(info.Sender) || this.m_RpcSpamChecks.IsSpamming(GameEntityManager.RPC.SendTableData) || bytes == null || bytes.Length >= 15360)
-		{
-			return;
-		}
-		if (this.zoneStateData.state != GameEntityManager.ZoneState.WaitingForState)
-		{
-			return;
-		}
-		if (packetNum == 0)
-		{
-			this.zoneStateData.numRecievedStateBytes = 0;
-			for (int i = 0; i < this.zoneStateData.recievedStateBytes.Length; i++)
-			{
-				this.zoneStateData.recievedStateBytes[i] = 0;
-			}
-		}
-		Array.Copy(bytes, 0, this.zoneStateData.recievedStateBytes, this.zoneStateData.numRecievedStateBytes, bytes.Length);
-		this.zoneStateData.numRecievedStateBytes += bytes.Length;
-		if (this.zoneStateData.numRecievedStateBytes >= totalBytes)
-		{
-			if (this.superInfectionManager != null && this.superInfectionManager.zoneSuperInfection == null)
-			{
-				this.PendingTableData = true;
-				return;
-			}
-			this.ResolveTableData();
-		}
-	}
-
-	public void ResolveTableData()
-	{
-		this.PendingTableData = false;
-		if (GameEntityManager.activeManager.IsNotNull() && GameEntityManager.activeManager != this)
-		{
-			GameEntityManager.activeManager.zoneClearReason = ZoneClearReason.MigrateGameEntityZone;
-			GameEntityManager.activeManager.ClearZone(true);
-		}
-		this.ClearZone(true);
-		try
-		{
-			byte[] array = GZipStream.UncompressBuffer(this.zoneStateData.recievedStateBytes);
-			int numBytes = array.Length;
-			this.DeserializeTableState(array, numBytes);
-			this.SetZoneState(GameEntityManager.ZoneState.Active);
-		}
-		catch (Exception exception)
-		{
-			Debug.LogException(exception);
-			Debug.LogError("[GT/GameEntityManager]  ERROR!!!  ResolveTableData: See exception in previous message.");
-		}
-	}
-
-	private void UpdateZoneStateAuthority()
-	{
-		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
-		if (gamePlayer == null || gamePlayer.rig == null || gamePlayer.rig.OwningNetPlayer == null)
-		{
-			return;
-		}
-		if (!this.IsInZone())
-		{
-			if (this.zoneStateData.state != GameEntityManager.ZoneState.WaitingToEnterZone)
-			{
-				this.zoneClearReason = ZoneClearReason.LeaveZone;
-				this.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
-				return;
-			}
-			if (this.entitiesActiveCount > 0 && this.ShouldClearZone())
-			{
-				this.zoneClearReason = ZoneClearReason.LeaveZone;
-				this.ClearZone(false);
-				return;
-			}
-		}
-		GameEntityManager.ZoneState state = this.zoneStateData.state;
-		if (state > GameEntityManager.ZoneState.WaitingForState)
-		{
-			return;
-		}
-		if (this.IsInZone() && PhotonNetwork.InRoom)
-		{
-			this.SetZoneState(GameEntityManager.ZoneState.Active);
-			for (int i = 0; i < this.zoneComponents.Count; i++)
-			{
-				this.zoneComponents[i].OnZoneCreate();
-			}
-		}
-	}
-
-	private void UpdateZoneStateClient()
-	{
-		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
-		if (gamePlayer == null || gamePlayer.rig == null || gamePlayer.rig.OwningNetPlayer == null)
-		{
-			return;
-		}
-		if (!this.IsInZone())
-		{
-			if (this.zoneStateData.state != GameEntityManager.ZoneState.WaitingToEnterZone)
-			{
-				this.zoneClearReason = ZoneClearReason.LeaveZone;
-				this.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
-				return;
-			}
-			if (this.entities.Count > 0 && this.ShouldClearZone())
-			{
-				this.zoneClearReason = ZoneClearReason.LeaveZone;
-				this.ClearZone(true);
-				return;
-			}
-		}
-		GameEntityManager.ZoneState state = this.zoneStateData.state;
-		if (state != GameEntityManager.ZoneState.WaitingToEnterZone)
-		{
-			if (state != GameEntityManager.ZoneState.WaitingToRequestState)
-			{
-				return;
-			}
-			if (Time.timeAsDouble - this.zoneStateData.stateStartTime > 1.0)
-			{
-				this.nextNetId = 1;
-				List<GameEntity> list = GamePlayerLocal.instance.gamePlayer.HeldAndSnappedEntities(null);
-				this.SetZoneState(GameEntityManager.ZoneState.WaitingForState);
-				this.photonView.RPC("RequestZoneStateRPC", this.GetAuthorityPlayer(), new object[]
-				{
-					(int)this.zone
-				});
-				this.JoinWithItems(list);
-				GamePlayerLocal.instance.joinWithItemsSentForCurrentMigration = true;
-			}
-		}
-		else if (this.HasAuthority() && this.IsInZone() && !this.IsAuthority())
-		{
-			this.SetZoneState(GameEntityManager.ZoneState.WaitingToRequestState);
-			return;
-		}
-	}
-
-	private bool IsInZone()
-	{
-		bool flag = true;
-		for (int i = 0; i < this.zoneComponents.Count; i++)
-		{
-			flag &= this.zoneComponents[i].IsZoneReady();
-		}
-		return flag;
-	}
-
-	private bool ShouldClearZone()
-	{
-		bool flag = false;
-		for (int i = 0; i < this.zoneComponents.Count; i++)
-		{
-			flag |= this.zoneComponents[i].ShouldClearZone();
-		}
-		return flag;
-	}
-
-	private void SetZoneState(GameEntityManager.ZoneState newState)
-	{
-		if (newState == this.zoneStateData.state)
-		{
-			return;
-		}
-		this.zoneStateData.state = newState;
-		this.zoneStateData.stateStartTime = Time.timeAsDouble;
-		switch (this.zoneStateData.state)
-		{
-		case GameEntityManager.ZoneState.WaitingToEnterZone:
-		{
-			bool flag = this.ShouldClearZone();
-			bool flag2 = this.zoneClearReason == ZoneClearReason.MigrateGameEntityZone;
-			bool flag3 = this.zoneClearReason == ZoneClearReason.Disconnect;
-			bool ignoreHeldGadgets = !flag && !flag2 && !flag3;
-			if (flag3 && GameEntityManager.activeManager == this)
-			{
-				GameEntityManager.activeManager = null;
-				GamePlayerLocal.instance.currGameEntityManager = null;
-			}
-			if (!this.IsAuthority())
-			{
-				this.photonView.RPC("PlayerLeftZoneRPC", this.GetAuthorityPlayer(), Array.Empty<object>());
-			}
-			this.ClearZone(ignoreHeldGadgets);
-			return;
-		}
-		case GameEntityManager.ZoneState.WaitingToRequestState:
-			break;
-		case GameEntityManager.ZoneState.WaitingForState:
-			this.zoneStateData.numRecievedStateBytes = 0;
-			for (int i = 0; i < this.zoneStateData.recievedStateBytes.Length; i++)
-			{
-				this.zoneStateData.recievedStateBytes[i] = 0;
-			}
-			return;
-		case GameEntityManager.ZoneState.Active:
-		{
-			if (GameEntityManager.activeManager == this)
-			{
-				for (int j = 0; j < this.zoneComponents.Count; j++)
-				{
-					try
-					{
-						this.zoneComponents[j].OnZoneInit();
-					}
-					catch (Exception exception)
-					{
-						Debug.LogException(exception);
-					}
-				}
-				return;
-			}
-			GameEntityManager activeManager = GameEntityManager.activeManager;
-			GameEntityManager.activeManager = this;
-			for (int k = 0; k < this.zoneComponents.Count; k++)
-			{
-				try
-				{
-					this.zoneComponents[k].OnZoneInit();
-				}
-				catch (Exception exception2)
-				{
-					Debug.LogException(exception2);
-				}
-			}
-			GamePlayerLocal.instance.MigrateToEntityManager(this);
-			if (activeManager.IsNotNull())
-			{
-				activeManager.zoneClearReason = ZoneClearReason.MigrateGameEntityZone;
-				activeManager.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
-			}
-			break;
-		}
-		default:
-			return;
-		}
-	}
-
-	public void DebugSendState()
-	{
-		this.SetZoneState(GameEntityManager.ZoneState.WaitingToRequestState);
-	}
-
-	[PunRPC]
-	public void RequestZoneStateRPC(int zoneId, PhotonMessageInfo info)
+	private enum ZoneState
 	{
-		int actorNumber = info.Sender.ActorNumber;
-		if (!this.IsAuthority())
-		{
-			return;
-		}
-		if (zoneId != (int)this.zone || this.zoneStateData.zoneStateRequests == null)
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(info.Sender, out gamePlayer))
-		{
-			return;
-		}
-		if (!gamePlayer.newJoinZoneLimiter.CheckCallTime(Time.time))
-		{
-			return;
-		}
-		this.playerZoneJoinTimes[actorNumber] = Time.unscaledTime;
-		for (int i = 0; i < this.zoneStateData.zoneStateRequests.Count; i++)
-		{
-			Player player = this.zoneStateData.zoneStateRequests[i].player;
-			if (player != null && player.ActorNumber == actorNumber)
-			{
-				return;
-			}
-		}
-		this.zoneStateData.zoneStateRequests.Add(new GameEntityManager.ZoneStateRequest
-		{
-			player = info.Sender,
-			zone = this.zone,
-			completed = false
-		});
+		WaitingToEnterZone,
+		WaitingToRequestState,
+		WaitingForState,
+		Active
 	}
 
-	public override void WriteDataFusion()
+	private struct ZoneStateRequest
 	{
-	}
-
-	public override void ReadDataFusion()
-	{
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.superInfectionManager != null)
-		{
-			this.superInfectionManager.WriteDataPUN(stream, info);
-		}
-	}
+		public Player player;
 
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.superInfectionManager != null)
-		{
-			this.superInfectionManager.ReadDataPUN(stream, info);
-		}
-	}
+		public GTZone zone;
 
-	private void OnNetworkJoinedRoom()
-	{
-		this.zoneClearReason = ZoneClearReason.JoinZone;
-		this.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
+		public bool completed;
 	}
 
-	private void OnNetworkLeftRoom()
+	private class ZoneStateData
 	{
-		this.zoneClearReason = ZoneClearReason.Disconnect;
-		if (this.zoneStateData.state != GameEntityManager.ZoneState.WaitingToEnterZone)
-		{
-			this.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
-		}
-		else
-		{
-			if (GameEntityManager.activeManager == this)
-			{
-				GameEntityManager.activeManager = null;
-				GamePlayerLocal.instance.currGameEntityManager = null;
-			}
-			this.ClearZone(false);
-		}
-		this.playerZoneJoinTimes.Clear();
-	}
+		public ZoneState state;
 
-	private void OnNetworkPlayerLeft(NetPlayer leavingPlayer)
-	{
-		int num = 0;
-		foreach (GameEntity gameEntity in this.entities)
-		{
-			if (gameEntity != null && gameEntity.IsAttachedToPlayer(leavingPlayer))
-			{
-				num++;
-			}
-		}
-		this.playerZoneJoinTimes.Remove(leavingPlayer.ActorNumber);
-	}
+		public double stateStartTime;
 
-	public void OnRigDeactivated(RigContainer container)
-	{
-		GamePlayer component = container.GetComponent<GamePlayer>();
-		int? num;
-		if (component == null)
-		{
-			num = null;
-		}
-		else
-		{
-			VRRig rig = component.rig;
-			if (rig == null)
-			{
-				num = null;
-			}
-			else
-			{
-				NetPlayer owningNetPlayer = rig.OwningNetPlayer;
-				num = ((owningNetPlayer != null) ? new int?(owningNetPlayer.ActorNumber) : null);
-			}
-		}
-		int? num2 = num;
-		if (num2 != null)
-		{
-			num2.GetValueOrDefault();
-		}
-		if (this != GameEntityManager.activeManager)
-		{
-			int num3 = 0;
-			foreach (GameEntity gameEntity in this.entities)
-			{
-				if (gameEntity != null)
-				{
-					GameEntity gameEntity2 = gameEntity;
-					NetPlayer player;
-					if (component == null)
-					{
-						player = null;
-					}
-					else
-					{
-						VRRig rig2 = component.rig;
-						player = ((rig2 != null) ? rig2.OwningNetPlayer : null);
-					}
-					if (gameEntity2.IsAttachedToPlayer(player))
-					{
-						num3++;
-					}
-				}
-			}
-			return;
-		}
-		if (this.IsAuthority())
-		{
-			this.RequestDestroyItems(component.HeldAndSnappedItems(this));
-		}
-		component.ResetData();
-	}
+		public List<ZoneStateRequest> zoneStateRequests;
 
-	public void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
-	{
-		if (toPlayer == null || !toPlayer.IsLocal)
-		{
-			return;
-		}
-		if (fromPlayer == null || fromPlayer.InRoom)
-		{
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(fromPlayer.ActorNumber, out gamePlayer))
-		{
-			return;
-		}
-		foreach (GameEntityId gameEntityId in gamePlayer.IterateHeldAndSnappedItems(this))
-		{
-			if (!this.netIdsForDelete.Contains(this.GetNetIdFromEntityId(gameEntityId)))
-			{
-				this.netIdsForDelete.Add(this.GetNetIdFromEntityId(gameEntityId));
-			}
-			this.DestroyItemLocal(gameEntityId);
-		}
-		Action onPlayerLeftZone = gamePlayer.OnPlayerLeftZone;
-		if (onPlayerLeftZone == null)
-		{
-			return;
-		}
-		onPlayerLeftZone();
-	}
+		public List<Player> zonePlayers;
 
-	public bool OnOwnershipRequest(NetPlayer fromPlayer)
-	{
-		return false;
-	}
+		[HideInInspector]
+		public byte[] recievedStateBytes;
 
-	public void OnMyOwnerLeft()
-	{
+		[HideInInspector]
+		public int numRecievedStateBytes;
 	}
 
-	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)
+	public enum RPC
 	{
-		return false;
+		CreateItem,
+		CreateItems,
+		DestroyItem,
+		ApplyState,
+		GrabEntity,
+		ThrowEntity,
+		SendTableData,
+		HitEntity
 	}
 
-	public void OnMyCreatorLeft()
+	private struct AttachmentData
 	{
-	}
+		public int entityNetId;
 
-	public void RefreshRigList()
-	{
-		GameEntityManager.tempRigs.Clear();
-		GameEntityManager.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GameEntityManager.tempRigs);
-	}
+		public int attachToEntityNetId;
 
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-	}
+		public Vector3 localPosition;
 
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
+		public Quaternion localRotation;
 	}
 
 	private const string preLog = "[GT/GameEntityManager]  ";
@@ -3644,11 +192,11 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 	public Action<GameEntity> OnEntityAdded;
 
 	[DebugReadout]
-	private GameEntityManager.ZoneStateData zoneStateData;
+	private ZoneStateData zoneStateData;
 
 	private int nextNetId = 1;
 
-	public CallLimitersList<CallLimiter, GameEntityManager.RPC> m_RpcSpamChecks = new CallLimitersList<CallLimiter, GameEntityManager.RPC>();
+	public CallLimitersList<CallLimiter, RPC> m_RpcSpamChecks = new CallLimitersList<CallLimiter, RPC>();
 
 	private List<Collider> _collidersList = new List<Collider>(16);
 
@@ -3656,68 +204,3054 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 
 	private static List<GameEntity> tempEntitiesToSerialize = new List<GameEntity>(512);
 
-	private static List<GameEntityManager.AttachmentData> tempAttachments = new List<GameEntityManager.AttachmentData>(512);
+	private static List<AttachmentData> tempAttachments = new List<AttachmentData>(512);
 
 	private static byte[] tempSerializeGameState = new byte[15360];
 
-	public delegate void ZoneStartEvent(GTZone zoneId);
+	public static GameEntityManager activeManager { get; private set; }
 
-	public delegate void ZoneClearEvent(GTZone zoneId);
+	public bool TickRunning { get; set; }
 
-	private enum ZoneState
+	public bool PendingTableData { get; private set; }
+
+	public event ZoneStartEvent onZoneStart;
+
+	public event ZoneClearEvent onZoneClear;
+
+	protected override void Awake()
 	{
-		WaitingToEnterZone,
-		WaitingToRequestState,
-		WaitingForState,
-		Active
+		base.Awake();
+		entities = new List<GameEntity>(64);
+		entitiesActiveCount = 0;
+		gameEntityData = new List<GameEntityData>(64);
+		netIdToIndex = new Dictionary<int, int>(16384);
+		netIds = new NativeArray<int>(16384, Unity.Collections.Allocator.Persistent);
+		createdItemTypeCount = new Dictionary<int, int>();
+		OnEntityRemoved = (Action<GameEntity>)Delegate.Combine(OnEntityRemoved, new Action<GameEntity>(CustomGameMode.OnGameEntityRemoved));
+		zoneStateData = new ZoneStateData
+		{
+			zoneStateRequests = new List<ZoneStateRequest>(),
+			zonePlayers = new List<Player>(),
+			recievedStateBytes = new byte[15360],
+			numRecievedStateBytes = 0
+		};
+		guard.AddCallbackTarget(this);
+		netIdsForCreate = new List<int>();
+		entityTypeIdsForCreate = new List<int>();
+		packedPositionsForCreate = new List<long>();
+		packedRotationsForCreate = new List<int>();
+		createDataForCreate = new List<long>();
+		createdByEntityNetIdForCreate = new List<int>();
+		netIdsForDelete = new List<int>();
+		netIdsForState = new List<int>();
+		statesForState = new List<long>();
+		zoneComponents = new List<IGameEntityZoneComponent>(8);
+		if (ghostReactorManager != null)
+		{
+			zoneComponents.Add(ghostReactorManager);
+		}
+		if (customMapsManager != null)
+		{
+			zoneComponents.Add(customMapsManager);
+		}
+		if (superInfectionManager != null)
+		{
+			zoneComponents.Add(superInfectionManager);
+		}
+		BuildFactory();
+		allManagers.Add(this);
 	}
 
-	private struct ZoneStateRequest
+	internal override void OnEnable()
 	{
-		public Player player;
-
-		public GTZone zone;
-
-		public bool completed;
+		NetworkBehaviourUtils.InternalOnEnable(this);
+		base.OnEnable();
+		TickSystem<object>.AddTickCallback(this);
+		VRRigCache.OnRigDeactivated += OnRigDeactivated;
+		VRRigCache.OnActiveRigsChanged += RefreshRigList;
+		RoomSystem.JoinedRoomEvent += new Action(OnNetworkJoinedRoom);
+		RoomSystem.LeftRoomEvent += new Action(OnNetworkLeftRoom);
+		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(OnNetworkPlayerLeft);
+		RefreshRigList();
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	private class ZoneStateData
+	internal override void OnDisable()
 	{
-		public GameEntityManager.ZoneState state;
-
-		public double stateStartTime;
-
-		public List<GameEntityManager.ZoneStateRequest> zoneStateRequests;
-
-		public List<Player> zonePlayers;
-
-		[HideInInspector]
-		public byte[] recievedStateBytes;
-
-		[HideInInspector]
-		public int numRecievedStateBytes;
+		NetworkBehaviourUtils.InternalOnDisable(this);
+		base.OnDisable();
+		TickSystem<object>.RemoveTickCallback(this);
+		VRRigCache.OnRigDeactivated -= OnRigDeactivated;
+		VRRigCache.OnActiveRigsChanged -= RefreshRigList;
+		RoomSystem.JoinedRoomEvent -= new Action(OnNetworkJoinedRoom);
+		RoomSystem.LeftRoomEvent -= new Action(OnNetworkLeftRoom);
+		RoomSystem.PlayerLeftEvent -= new Action<NetPlayer>(OnNetworkPlayerLeft);
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	public enum RPC
+	private void OnDestroy()
 	{
-		CreateItem,
-		CreateItems,
-		DestroyItem,
-		ApplyState,
-		GrabEntity,
-		ThrowEntity,
-		SendTableData,
-		HitEntity
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		netIds.Dispose();
+		allManagers.Remove(this);
 	}
 
-	private struct AttachmentData
+	public static GameEntityManager GetManagerForZone(GTZone zone)
 	{
-		public int entityNetId;
+		for (int i = 0; i < allManagers.Count; i++)
+		{
+			if (allManagers[i].zone == zone)
+			{
+				return allManagers[i];
+			}
+		}
+		return null;
+	}
 
-		public int attachToEntityNetId;
+	public void SliceUpdate()
+	{
+		UpdateZoneState();
+	}
 
-		public Vector3 localPosition;
+	public void Tick()
+	{
+		if (ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
+		float time = Time.time;
+		for (int i = 0; i < entities.Count; i++)
+		{
+			GameEntity gameEntity = entities[i];
+			if (gameEntity != null && gameEntity.LastTickTime + gameEntity.MinTimeBetweenTicks < time && gameEntity.isActiveAndEnabled)
+			{
+				gameEntity.OnTick?.Invoke();
+				gameEntity.LastTickTime = time;
+			}
+		}
+		if (IsAuthority())
+		{
+			if (netIdsForCreate.Count > 0 && Time.time > lastCreateSent + createCooldown)
+			{
+				lastCreateSent = Time.time;
+				photonView.RPC("CreateItemRPC", RpcTarget.Others, netIdsForCreate.ToArray(), entityTypeIdsForCreate.ToArray(), packedPositionsForCreate.ToArray(), packedRotationsForCreate.ToArray(), createDataForCreate.ToArray(), createdByEntityNetIdForCreate.ToArray());
+				netIdsForCreate.Clear();
+				entityTypeIdsForCreate.Clear();
+				packedPositionsForCreate.Clear();
+				packedRotationsForCreate.Clear();
+				createDataForCreate.Clear();
+				createdByEntityNetIdForCreate.Clear();
+			}
+			if (netIdsForDelete.Count > 0 && Time.time > lastDestroySent + destroyCooldown)
+			{
+				lastDestroySent = Time.time;
+				photonView.RPC("DestroyItemRPC", RpcTarget.Others, netIdsForDelete.ToArray());
+				netIdsForDelete.Clear();
+			}
+			if (netIdsForState.Count > 0 && Time.time > lastStateSent + stateCooldown)
+			{
+				lastStateSent = Time.time;
+				photonView.RPC("ApplyStateRPC", RpcTarget.All, netIdsForState.ToArray(), statesForState.ToArray());
+				netIdsForState.Clear();
+				statesForState.Clear();
+			}
+		}
+	}
 
-		public Quaternion localRotation;
+	public GameEntityId AddGameEntity(GameEntity gameEntity)
+	{
+		return AddGameEntity(CreateNetId(1 + gameEntity.builtInEntities.Count), gameEntity);
+	}
+
+	public GameEntityId AddGameEntity(int netId, GameEntity gameEntity)
+	{
+		if (netId == -1)
+		{
+			Debug.LogError("[GT/GameEntityManager]  ERROR!!!  AddGameEntity: Aborting. Invalid netId for GameEntity '" + gameEntity?.name + "'.", gameEntity);
+			return GameEntityId.Invalid;
+		}
+		if (netIdToIndex.TryGetValue(netId, out var value) && value != -1)
+		{
+			GameEntity gameEntity2 = GetGameEntity(value);
+			if (gameEntity2 != null)
+			{
+				if (gameEntity2 == gameEntity)
+				{
+					return gameEntity.id;
+				}
+				Debug.LogError("[GT/GameEntityManager]  ERROR!!!  AddGameEntity" + $": NetId {netId} collision: " + "'" + gameEntity2.name + "' replaced by '" + gameEntity.name + "'. Destroying old entity to prevent zombie.");
+				DestroyItemLocal(gameEntity2.id);
+			}
+		}
+		int num = FindNewEntityIndex();
+		entities[num] = gameEntity;
+		entitiesActiveCount++;
+		gameEntityData.Add(default(GameEntityData));
+		gameEntity.id = new GameEntityId
+		{
+			index = num
+		};
+		netIdToIndex[netId] = num;
+		netIds[num] = netId;
+		OnEntityAdded?.Invoke(gameEntity);
+		return gameEntity.id;
+	}
+
+	private int FindNewEntityIndex()
+	{
+		for (int i = 0; i < entities.Count; i++)
+		{
+			if (entities[i] == null)
+			{
+				return i;
+			}
+		}
+		entities.Add(null);
+		return entities.Count - 1;
+	}
+
+	public void RemoveGameEntity(GameEntity entity)
+	{
+		netIdToIndex.Remove(entity.GetNetId());
+		int index = entity.id.index;
+		if (index < 0 || index >= entities.Count)
+		{
+			return;
+		}
+		if (entities[index] == entity)
+		{
+			entities[index] = null;
+			entitiesActiveCount--;
+		}
+		else
+		{
+			for (int i = 0; i < entities.Count; i++)
+			{
+				if (entities[i] == entity)
+				{
+					entities[i] = null;
+					entitiesActiveCount--;
+					break;
+				}
+			}
+		}
+		OnEntityRemoved?.Invoke(entity);
+	}
+
+	public List<GameEntity> GetGameEntities()
+	{
+		return entities;
+	}
+
+	public bool IsValidNetId(int netId)
+	{
+		if (netIdToIndex.TryGetValue(netId, out var value) && value >= 0)
+		{
+			return value < entities.Count;
+		}
+		return false;
+	}
+
+	public int FindOpenIndex()
+	{
+		for (int i = 0; i < netIds.Length; i++)
+		{
+			if (netIds[i] != -1)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public GameEntityId GetEntityIdFromNetId(int netId)
+	{
+		if (netIdToIndex.TryGetValue(netId, out var value))
+		{
+			return new GameEntityId
+			{
+				index = value
+			};
+		}
+		return GameEntityId.Invalid;
+	}
+
+	public int GetNetIdFromEntityId(GameEntityId id)
+	{
+		if (id.index < 0 || id.index >= netIds.Length)
+		{
+			return -1;
+		}
+		return netIds[id.index];
+	}
+
+	public virtual bool IsAuthority()
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			return guard.isTrulyMine;
+		}
+		return true;
+	}
+
+	public bool IsAuthorityPlayer(NetPlayer player)
+	{
+		if (player != null)
+		{
+			return IsAuthorityPlayer(player.GetPlayerRef());
+		}
+		return false;
+	}
+
+	public bool IsAuthorityPlayer(Player player)
+	{
+		if (player != null && guard.actualOwner != null)
+		{
+			return player.ActorNumber == guard.actualOwner.GetPlayerRef()?.ActorNumber;
+		}
+		return false;
+	}
+
+	public bool IsZoneAuthority()
+	{
+		return IsAuthority();
+	}
+
+	public bool HasAuthority()
+	{
+		return GetAuthorityPlayer() != null;
+	}
+
+	public Player GetAuthorityPlayer()
+	{
+		if (guard.actualOwner != null)
+		{
+			return guard.actualOwner.GetPlayerRef();
+		}
+		return null;
+	}
+
+	public virtual bool IsZoneActive()
+	{
+		return zoneStateData.state == ZoneState.Active;
+	}
+
+	public bool IsPositionInManagerBounds(Vector3 pos)
+	{
+		if (!(boundsBoxCollider == null))
+		{
+			return boundsBoxCollider.bounds.Contains(pos);
+		}
+		return true;
+	}
+
+	public virtual bool IsValidClientRPC(Player sender)
+	{
+		if (IsAuthorityPlayer(sender))
+		{
+			if (!IsZoneActive())
+			{
+				return sender.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public bool IsValidClientRPC(Player sender, int entityNetId)
+	{
+		if (IsValidClientRPC(sender))
+		{
+			return IsValidNetId(entityNetId);
+		}
+		return false;
+	}
+
+	public bool IsValidClientRPC(Player sender, int entityNetId, Vector3 pos)
+	{
+		if (IsValidClientRPC(sender, entityNetId))
+		{
+			return IsPositionInManagerBounds(pos);
+		}
+		return false;
+	}
+
+	public bool IsValidClientRPC(Player sender, Vector3 pos)
+	{
+		if (IsValidClientRPC(sender))
+		{
+			return IsPositionInManagerBounds(pos);
+		}
+		return false;
+	}
+
+	public bool IsValidAuthorityRPC(Player sender)
+	{
+		if (IsAuthority())
+		{
+			if (!IsZoneActive())
+			{
+				return sender.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public bool IsValidAuthorityRPC(Player sender, int entityNetId)
+	{
+		if (IsValidAuthorityRPC(sender))
+		{
+			return IsValidNetId(entityNetId);
+		}
+		return false;
+	}
+
+	public bool IsValidAuthorityRPC(Player sender, int entityNetId, Vector3 pos)
+	{
+		if (IsValidAuthorityRPC(sender, entityNetId))
+		{
+			return IsPositionInManagerBounds(pos);
+		}
+		return false;
+	}
+
+	public bool IsValidAuthorityRPC(Player sender, Vector3 pos)
+	{
+		if (IsValidAuthorityRPC(sender))
+		{
+			return IsPositionInManagerBounds(pos);
+		}
+		return false;
+	}
+
+	public bool IsValidEntity(GameEntityId id)
+	{
+		return GetGameEntity(id) != null;
+	}
+
+	public GameEntity GetGameEntity(GameEntityId id)
+	{
+		if (!id.IsValid())
+		{
+			return null;
+		}
+		return GetGameEntity(id.index);
+	}
+
+	public GameEntity GetGameEntityFromNetId(int netId)
+	{
+		if (netIdToIndex.TryGetValue(netId, out var value))
+		{
+			return GetGameEntity(value);
+		}
+		return null;
+	}
+
+	private GameEntity GetGameEntity(int index)
+	{
+		if (index == -1)
+		{
+			return null;
+		}
+		if (index < 0 || index >= entities.Count)
+		{
+			return null;
+		}
+		return entities[index];
+	}
+
+	public T GetGameComponent<T>(GameEntityId id) where T : Component
+	{
+		GameEntity gameEntity = GetGameEntity(id);
+		if (gameEntity == null)
+		{
+			return null;
+		}
+		return gameEntity.GetComponent<T>();
+	}
+
+	public bool LocalValidateMigrationRecoveryItem(int entityTypeId, ref long createData)
+	{
+		GameObject gameObject = FactoryPrefabById(entityTypeId);
+		if (gameObject == null)
+		{
+			return false;
+		}
+		GameEntity component = gameObject.GetComponent<GameEntity>();
+		if (component != null)
+		{
+			for (int i = 0; i < zoneComponents.Count; i++)
+			{
+				createData = zoneComponents[i].ProcessMigratedGameEntityCreateData(component, createData);
+			}
+		}
+		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+		for (int j = 0; j < zoneComponents.Count; j++)
+		{
+			if (!zoneComponents[j].ValidateMigratedGameEntity(0, entityTypeId, Vector3.zero, Quaternion.identity, createData, actorNumber))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool IsEntityValidToMigrate(GameEntity entity)
+	{
+		if (entity == null)
+		{
+			return false;
+		}
+		Vector3 position = VRRig.LocalRig.transform.position;
+		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+		bool flag = true;
+		for (int i = 0; i < zoneComponents.Count && flag; i++)
+		{
+			flag &= zoneComponents[i].ValidateMigratedGameEntity(GetNetIdFromEntityId(entity.id), entity.typeId, position, Quaternion.identity, entity.createData, actorNumber);
+		}
+		return flag;
+	}
+
+	private void BuildFactory()
+	{
+		using Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder(notNested: true);
+		string value = "[GT/GameEntityManager]  BuildFactory: Entity names and typeIds for manager \"" + base.name + "\":";
+		utf16ValueStringBuilder.AppendLine(value);
+		foreach (IGameEntityZoneComponent zoneComponent in zoneComponents)
+		{
+			if (!(zoneComponent is IFactoryItemProvider factoryItemProvider))
+			{
+				continue;
+			}
+			foreach (GameEntity factoryItem in factoryItemProvider.GetFactoryItems())
+			{
+				if (!tempFactoryItems.Contains(factoryItem))
+				{
+					tempFactoryItems.Add(factoryItem);
+				}
+			}
+		}
+		itemPrefabFactory = new Dictionary<int, GameObject>(1024);
+		priceLookupByEntityId = new Dictionary<int, int>();
+		for (int i = 0; i < tempFactoryItems.Count; i++)
+		{
+			GameObject gameObject = tempFactoryItems[i].gameObject;
+			int staticHash = gameObject.name.GetStaticHash();
+			if ((bool)gameObject.GetComponent<GRToolLantern>())
+			{
+				priceLookupByEntityId.Add(staticHash, 50);
+			}
+			else if ((bool)gameObject.GetComponent<GRToolCollector>())
+			{
+				priceLookupByEntityId.Add(staticHash, 50);
+			}
+			itemPrefabFactory.Add(staticHash, gameObject);
+			utf16ValueStringBuilder.AppendFormat("    - name=\"{0}\", typeId={1}\n", gameObject.name, staticHash);
+			if (utf16ValueStringBuilder.Length > 5000)
+			{
+				utf16ValueStringBuilder.Append("... (continued in next log message) ...");
+				utf16ValueStringBuilder.Clear();
+				if (i + 1 < tempFactoryItems.Count)
+				{
+					utf16ValueStringBuilder.Append(value);
+					utf16ValueStringBuilder.Append(" ... CONTINUED FROM PREVIOUS ...\n");
+				}
+			}
+		}
+	}
+
+	private int CreateNetId(int numToCreate)
+	{
+		int result = nextNetId;
+		nextNetId += numToCreate;
+		return result;
+	}
+
+	public GameEntityId RequestCreateItem(int entityTypeId, Vector3 position, Quaternion rotation, long createData)
+	{
+		return RequestCreateItem(entityTypeId, position, rotation, createData, GameEntityId.Invalid);
+	}
+
+	public GameEntityId RequestCreateItem(int entityTypeId, Vector3 position, Quaternion rotation, long createData, GameEntityId createdByEntityId)
+	{
+		if (!IsZoneAuthority() || !IsZoneActive() || !IsPositionInManagerBounds(position))
+		{
+			return GameEntityId.Invalid;
+		}
+		int netIdFromEntityId = GetNetIdFromEntityId(createdByEntityId);
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			if (!zoneComponents[i].ValidateCreateItem(0, entityTypeId, position, rotation, createData, netIdFromEntityId))
+			{
+				if (zoneComponents[i] is MonoBehaviour monoBehaviour)
+				{
+					_ = monoBehaviour.name;
+				}
+				return GameEntityId.Invalid;
+			}
+		}
+		long item = BitPackUtils.PackWorldPosForNetwork(position);
+		int item2 = BitPackUtils.PackQuaternionForNetwork(rotation);
+		int numToCreate = 1 + FactoryGetBuiltInEntityCountById(entityTypeId);
+		int num = CreateNetId(numToCreate);
+		netIdsForCreate.Add(num);
+		entityTypeIdsForCreate.Add(entityTypeId);
+		packedPositionsForCreate.Add(item);
+		packedRotationsForCreate.Add(item2);
+		createDataForCreate.Add(createData);
+		createdByEntityNetIdForCreate.Add(netIdFromEntityId);
+		return CreateAndInitItemLocal(num, entityTypeId, position, rotation, createData, netIdFromEntityId);
+	}
+
+	[PunRPC]
+	public void CreateItemRPC(int[] netId, int[] entityTypeId, long[] packedPos, int[] packedRot, long[] createData, int[] createdByEntityNetId, PhotonMessageInfo info)
+	{
+		if (!IsValidClientRPC(info.Sender) || m_RpcSpamChecks.IsSpamming(RPC.CreateItem) || netId == null || entityTypeId == null || packedPos == null || createData == null || createdByEntityNetId == null || netId.Length != entityTypeId.Length || netId.Length != packedPos.Length || netId.Length != packedRot.Length || netId.Length != createData.Length || netId.Length != createdByEntityNetId.Length)
+		{
+			return;
+		}
+		if (netId.Length > 1)
+		{
+			for (int i = 0; i < zoneComponents.Count; i++)
+			{
+				if (!zoneComponents[i].ValidateCreateItemBatchSize(netId.Length))
+				{
+					return;
+				}
+			}
+		}
+		for (int j = 0; j < netId.Length; j++)
+		{
+			Vector3 v = BitPackUtils.UnpackWorldPosFromNetwork(packedPos[j]);
+			Quaternion q = BitPackUtils.UnpackQuaternionFromNetwork(packedRot[j]);
+			if (!v.IsValid(10000f) || !q.IsValid() || !FactoryHasEntity(entityTypeId[j]) || !IsPositionInManagerBounds(v))
+			{
+				break;
+			}
+			int num = netId[j];
+			int entityTypeId2 = entityTypeId[j];
+			long createData2 = createData[j];
+			int createdByEntityNetId2 = createdByEntityNetId[j];
+			bool flag = true;
+			for (int k = 0; k < zoneComponents.Count; k++)
+			{
+				if (!zoneComponents[k].ValidateCreateItem(num, entityTypeId2, v, q, createData2, createdByEntityNetId2))
+				{
+					if (zoneComponents[k] is MonoBehaviour monoBehaviour)
+					{
+						_ = monoBehaviour.name;
+					}
+					flag = false;
+				}
+			}
+			if (flag)
+			{
+				CreateAndInitItemLocal(num, entityTypeId2, v, q, createData2, createdByEntityNetId2);
+			}
+		}
+	}
+
+	public void RequestCreateItems(List<GameEntityCreateData> entityData)
+	{
+		if (!IsZoneAuthority() || !IsZoneActive())
+		{
+			GTDev.LogError($"[GameEntityManager::RequestCreateItems] Cannot create items. Zone Auth: {IsZoneAuthority()} " + $"| Zone Active: {IsZoneActive()}");
+			return;
+		}
+		ClearByteBuffer(tempSerializeGameState);
+		MemoryStream memoryStream = new MemoryStream(tempSerializeGameState);
+		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		binaryWriter.Write(entityData.Count);
+		for (int i = 0; i < entityData.Count; i++)
+		{
+			GameEntityCreateData gameEntityCreateData = entityData[i];
+			int numToCreate = 1 + FactoryGetBuiltInEntityCountById(gameEntityCreateData.entityTypeId);
+			int value = CreateNetId(numToCreate);
+			long value2 = BitPackUtils.PackWorldPosForNetwork(gameEntityCreateData.position);
+			int value3 = BitPackUtils.PackQuaternionForNetwork(gameEntityCreateData.rotation);
+			binaryWriter.Write(value);
+			binaryWriter.Write(gameEntityCreateData.entityTypeId);
+			binaryWriter.Write(value2);
+			binaryWriter.Write(value3);
+			binaryWriter.Write(gameEntityCreateData.createData);
+			binaryWriter.Write(gameEntityCreateData.createdByEntityId);
+		}
+		_ = memoryStream.Position;
+		byte[] array = GZipStream.CompressBuffer(tempSerializeGameState);
+		photonView.RPC("CreateItemsRPC", RpcTarget.All, (int)zone, array);
+	}
+
+	[PunRPC]
+	public void CreateItemsRPC(int zoneId, byte[] stateData, PhotonMessageInfo info)
+	{
+		if (!IsValidClientRPC(info.Sender) || stateData == null || stateData.Length >= 15360 || m_RpcSpamChecks.IsSpamming(RPC.CreateItems))
+		{
+			return;
+		}
+		try
+		{
+			byte[] array = GZipStream.UncompressBuffer(stateData);
+			_ = array.Length;
+			using MemoryStream input = new MemoryStream(array);
+			using BinaryReader binaryReader = new BinaryReader(input);
+			int num = binaryReader.ReadInt32();
+			for (int i = 0; i < zoneComponents.Count; i++)
+			{
+				if (!zoneComponents[i].ValidateCreateMultipleItems(zoneId, stateData, num))
+				{
+					return;
+				}
+			}
+			for (int j = 0; j < num; j++)
+			{
+				int num2 = binaryReader.ReadInt32();
+				int entityTypeId = binaryReader.ReadInt32();
+				long data = binaryReader.ReadInt64();
+				int data2 = binaryReader.ReadInt32();
+				long createData = binaryReader.ReadInt64();
+				int createdByEntityNetId = binaryReader.ReadInt32();
+				Vector3 v = BitPackUtils.UnpackWorldPosFromNetwork(data);
+				Quaternion q = BitPackUtils.UnpackQuaternionFromNetwork(data2);
+				if (v.IsValid(10000f) && q.IsValid() && FactoryHasEntity(entityTypeId) && IsPositionInManagerBounds(v))
+				{
+					bool flag = true;
+					for (int k = 0; k < zoneComponents.Count; k++)
+					{
+						flag &= zoneComponents[k].ValidateCreateItem(num2, entityTypeId, v, q, createData, createdByEntityNetId);
+					}
+					if (flag)
+					{
+						CreateAndInitItemLocal(num2, entityTypeId, v, q, createData, createdByEntityNetId);
+					}
+				}
+			}
+		}
+		catch (Exception)
+		{
+		}
+	}
+
+	public void RequestMigrationRecovery(List<GameEntityCreateData> entityData)
+	{
+		if (entityData == null || entityData.Count == 0)
+		{
+			return;
+		}
+		ClearByteBuffer(tempSerializeGameState);
+		using MemoryStream output = new MemoryStream(tempSerializeGameState);
+		using BinaryWriter binaryWriter = new BinaryWriter(output);
+		binaryWriter.Write(entityData.Count);
+		for (int i = 0; i < entityData.Count; i++)
+		{
+			GameEntityCreateData gameEntityCreateData = entityData[i];
+			_JoinWithItems_WriteOne(binaryWriter, gameEntityCreateData.entityTypeId, gameEntityCreateData.position, gameEntityCreateData.rotation, gameEntityCreateData.createData, gameEntityCreateData.createdByEntityId, gameEntityCreateData.slotIndex);
+		}
+		byte[] array = GZipStream.CompressBuffer(tempSerializeGameState);
+		photonView.RPC("JoinWithItemsRPC", GetAuthorityPlayer(), array, Array.Empty<int>(), PhotonNetwork.LocalPlayer.ActorNumber);
+	}
+
+	public void JoinWithItems(List<GameEntity> entities)
+	{
+		if (entities.Count == 0)
+		{
+			return;
+		}
+		ClearByteBuffer(tempSerializeGameState);
+		MemoryStream memoryStream = new MemoryStream(tempSerializeGameState);
+		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		int num = 0;
+		for (int i = 0; i < entities.Count; i++)
+		{
+			if (entities[i] != null)
+			{
+				num++;
+			}
+		}
+		binaryWriter.Write(num);
+		for (int j = 0; j < entities.Count; j++)
+		{
+			GameEntity gameEntity = entities[j];
+			if (!(gameEntity == null))
+			{
+				long createData = gameEntity.createData;
+				for (int k = 0; k < zoneComponents.Count; k++)
+				{
+					createData = zoneComponents[k].ProcessMigratedGameEntityCreateData(gameEntity, createData);
+				}
+				_JoinWithItems_WriteOne(binaryWriter, gameEntity.typeId, gameEntity.transform.localPosition, gameEntity.transform.localRotation, createData, GetNetIdFromEntityId(gameEntity.createdByEntityId), gameEntity.slotIndex);
+			}
+		}
+		_ = memoryStream.Position;
+		byte[] array = GZipStream.CompressBuffer(tempSerializeGameState);
+		photonView.RPC("JoinWithItemsRPC", GetAuthorityPlayer(), array, Array.Empty<int>(), PhotonNetwork.LocalPlayer.ActorNumber);
+	}
+
+	[PunRPC]
+	public void PlayerLeftZoneRPC(PhotonMessageInfo info)
+	{
+		GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
+		if (NetworkSystem.Instance.SessionIsPrivate)
+		{
+			gamePlayer.DidJoinWithItems = false;
+		}
+		int num = 0;
+		foreach (GameEntityId item in gamePlayer.IterateHeldAndSnappedItems(this))
+		{
+			GetGameEntity(item);
+			if (!netIdsForDelete.Contains(GetNetIdFromEntityId(item)))
+			{
+				netIdsForDelete.Add(GetNetIdFromEntityId(item));
+			}
+			DestroyItemLocal(item);
+			num++;
+		}
+		playerZoneJoinTimes.Remove(info.Sender.ActorNumber);
+		gamePlayer.OnPlayerLeftZone?.Invoke();
+	}
+
+	[PunRPC]
+	public void JoinWithItemsRPC(byte[] stateData, int[] netIds, int joiningActorNum, PhotonMessageInfo info)
+	{
+		bool isAuthority = IsAuthority();
+		if (isAuthority)
+		{
+			if (!IsValidAuthorityRPC(info.Sender))
+			{
+				return;
+			}
+		}
+		else if (!IsAuthorityPlayer(info.Sender))
+		{
+			return;
+		}
+		float value;
+		bool flag = playerZoneJoinTimes.TryGetValue(joiningActorNum, out value) && Time.unscaledTime - value < 10f;
+		GamePlayer joiningPlayer;
+		bool num = GamePlayer.TryGetGamePlayer(joiningActorNum, out joiningPlayer);
+		bool flag2 = !isAuthority && GetAuthorityPlayer()?.ActorNumber != info.Sender.ActorNumber;
+		bool flag3 = isAuthority && info.Sender.ActorNumber != joiningActorNum;
+		bool flag4 = stateData == null || stateData.Length >= 255;
+		bool flag5 = num && joiningPlayer.DidJoinWithItems && !flag;
+		if (!num || flag2 || flag3 || flag4 || flag5 || !IsInZone())
+		{
+			return;
+		}
+		if (isAuthority)
+		{
+			joiningPlayer.DidJoinWithItems = true;
+		}
+		Action createItemsCallback = null;
+		createItemsCallback = delegate
+		{
+			try
+			{
+				GamePlayer gamePlayer2 = joiningPlayer;
+				gamePlayer2.OnPlayerInitialized = (Action)Delegate.Remove(gamePlayer2.OnPlayerInitialized, createItemsCallback);
+				byte[] array = GZipStream.UncompressBuffer(stateData);
+				_ = array.Length;
+				using MemoryStream input = new MemoryStream(array);
+				using BinaryReader binaryReader = new BinaryReader(input);
+				int num2 = binaryReader.ReadInt32();
+				if (num2 <= 4 && (isAuthority || netIds.Length == num2))
+				{
+					if (isAuthority)
+					{
+						netIds = new int[num2];
+					}
+					for (int i = 0; i < num2; i++)
+					{
+						_JoinWithItems_ReadOne(binaryReader, out var entityTypeId, out var localPos, out var localRot, out var createData, out var createdByEntityNetId, out var slotIndex);
+						if (!joiningPlayer.TryGetSlotXform(slotIndex, out var slotXform))
+						{
+							Debug.LogError("[GT/GameEntityManager]  ERROR!!!  " + $"JoinWithItemsRPC: No slot transform for item's slot, {slotIndex}.");
+						}
+						else
+						{
+							if (isAuthority)
+							{
+								int numToCreate = 1 + FactoryGetBuiltInEntityCountById(entityTypeId);
+								netIds[i] = CreateNetId(numToCreate);
+							}
+							int netId = netIds[i];
+							Vector3 pos = slotXform.TransformPoint(localPos);
+							if (localPos.IsValid(10000f) && localRot.IsValid() && FactoryHasEntity(entityTypeId) && IsPositionInManagerBounds(pos))
+							{
+								bool flag6 = true;
+								for (int j = 0; j < zoneComponents.Count && flag6; j++)
+								{
+									flag6 &= zoneComponents[j].ValidateMigratedGameEntity(netId, entityTypeId, joiningPlayer.rig.transform.position, Quaternion.identity, createData, joiningActorNum);
+								}
+								if (flag6)
+								{
+									GameEntityId gameEntityId = CreateAndInitItemLocal(netId, entityTypeId, joiningPlayer.rig.transform.position, Quaternion.identity, createData, createdByEntityNetId);
+									bool isLeftHand = slotIndex == 0;
+									SnapJointType snapIndexToJoint = GameSnappable.GetSnapIndexToJoint(slotIndex);
+									if (snapIndexToJoint != SnapJointType.None)
+									{
+										SnapEntityLocal(gameEntityId, isLeftHand, localPos, localRot, (int)snapIndexToJoint, joiningPlayer.rig.Creator);
+									}
+									else
+									{
+										GrabEntityOnCreate(gameEntityId, isLeftHand, localPos, localRot, joiningPlayer.rig.Creator);
+									}
+								}
+							}
+						}
+					}
+					if (isAuthority)
+					{
+						photonView.RPC("JoinWithItemsRPC", RpcTarget.Others, stateData, netIds, joiningActorNum);
+					}
+				}
+			}
+			catch (Exception)
+			{
+			}
+		};
+		if (joiningPlayer.AdditionalDataInitialized)
+		{
+			createItemsCallback();
+			return;
+		}
+		GamePlayer gamePlayer = joiningPlayer;
+		gamePlayer.OnPlayerInitialized = (Action)Delegate.Combine(gamePlayer.OnPlayerInitialized, createItemsCallback);
+	}
+
+	private static void _JoinWithItems_WriteOne(BinaryWriter writer, int typeId, Vector3 localPos, Quaternion localRot, long createData, int createdByEntityId, int slotIndex)
+	{
+		writer.Write(typeId);
+		writer.Write(BitPackUtils.PackWorldPosForNetwork(localPos));
+		writer.Write(BitPackUtils.PackQuaternionForNetwork(localRot));
+		writer.Write(createData);
+		writer.Write(createdByEntityId);
+		writer.Write((byte)(slotIndex + 1));
+	}
+
+	private static void _JoinWithItems_ReadOne(BinaryReader reader, out int entityTypeId, out Vector3 localPos, out Quaternion localRot, out long createData, out int createdByEntityNetId, out int slotIndex)
+	{
+		entityTypeId = reader.ReadInt32();
+		localPos = BitPackUtils.UnpackWorldPosFromNetwork(reader.ReadInt64());
+		localRot = BitPackUtils.UnpackQuaternionFromNetwork(reader.ReadInt32());
+		createData = reader.ReadInt64();
+		createdByEntityNetId = reader.ReadInt32();
+		slotIndex = reader.ReadByte() - 1;
+	}
+
+	public bool FactoryHasEntity(int entityTypeId)
+	{
+		GameObject value;
+		return itemPrefabFactory.TryGetValue(entityTypeId, out value);
+	}
+
+	public GameObject FactoryPrefabById(int entityTypeId)
+	{
+		if (itemPrefabFactory.TryGetValue(entityTypeId, out var value))
+		{
+			return value;
+		}
+		return null;
+	}
+
+	public GameEntity FactoryEntityById(int entityTypeId)
+	{
+		if (itemPrefabFactory.TryGetValue(entityTypeId, out var value))
+		{
+			return value.GetComponent<GameEntity>();
+		}
+		return null;
+	}
+
+	public int FactoryGetBuiltInEntityCountById(int entityTypeId)
+	{
+		GameEntity gameEntity = FactoryEntityById(entityTypeId);
+		if (gameEntity == null || gameEntity.builtInEntities == null)
+		{
+			return 0;
+		}
+		return gameEntity.builtInEntities.Count;
+	}
+
+	public bool PriceLookup(int entityTypeId, out int price)
+	{
+		if (priceLookupByEntityId.TryGetValue(entityTypeId, out price))
+		{
+			return true;
+		}
+		price = -1;
+		return false;
+	}
+
+	private void ValidateThatNetIdIsNotAlreadyUsed(int netId, int newTypeId)
+	{
+		for (int i = 0; i < netIds.Length; i++)
+		{
+			if (i < entities.Count && netIds[i] == netId)
+			{
+				_ = entities[i] == null;
+			}
+		}
+	}
+
+	public GameEntityId CreateAndInitItemLocal(int netId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int createdByEntityNetId)
+	{
+		GameEntity gameEntity = CreateItemLocal(netId, entityTypeId, position, rotation);
+		if (gameEntity == null)
+		{
+			return GameEntityId.Invalid;
+		}
+		InitItemLocal(gameEntity, createData, createdByEntityNetId);
+		return gameEntity.id;
+	}
+
+	public GameEntity CreateItemLocal(int netId, int entityTypeId, Vector3 position, Quaternion rotation)
+	{
+		if (entityTypeId == -1)
+		{
+			return null;
+		}
+		nextNetId = Mathf.Max(netId + 1, nextNetId);
+		if (!itemPrefabFactory.TryGetValue(entityTypeId, out var value))
+		{
+			return null;
+		}
+		if (!createdItemTypeCount.ContainsKey(entityTypeId))
+		{
+			createdItemTypeCount[entityTypeId] = 0;
+		}
+		if (createdItemTypeCount[entityTypeId] > 100)
+		{
+			return null;
+		}
+		createdItemTypeCount[entityTypeId]++;
+		GameEntity componentInChildren = UnityEngine.Object.Instantiate(value, position, rotation).GetComponentInChildren<GameEntity>();
+		AddGameEntity(netId, componentInChildren);
+		componentInChildren.Create(this, netId, entityTypeId);
+		return componentInChildren;
+	}
+
+	public void InitItemLocal(GameEntity entity, long createData, int createdByEntityNetId)
+	{
+		entity.Init(createData, createdByEntityNetId);
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			zoneComponents[i].OnCreateGameEntity(entity);
+		}
+	}
+
+	public void RequestDestroyItem(GameEntityId entityId)
+	{
+		if (IsAuthority())
+		{
+			if (!netIdsForDelete.Contains(GetNetIdFromEntityId(entityId)))
+			{
+				netIdsForDelete.Add(GetNetIdFromEntityId(entityId));
+			}
+			DestroyItemLocal(entityId);
+		}
+	}
+
+	public void RequestDestroyItems(List<GameEntityId> entityIds)
+	{
+		if (IsAuthority())
+		{
+			List<int> list = new List<int>();
+			for (int i = 0; i < entityIds.Count; i++)
+			{
+				list.Add(GetNetIdFromEntityId(entityIds[i]));
+			}
+			if (PhotonNetwork.InRoom)
+			{
+				photonView.RPC("DestroyItemRPC", RpcTarget.All, list.ToArray());
+			}
+		}
+	}
+
+	[PunRPC]
+	public void DestroyItemRPC(int[] entityNetId, PhotonMessageInfo info)
+	{
+		if (entityNetId != null && !m_RpcSpamChecks.IsSpamming(RPC.DestroyItem))
+		{
+			for (int i = 0; i < entityNetId.Length && IsValidClientRPC(info.Sender, entityNetId[i]); i++)
+			{
+				DestroyItemLocal(GetEntityIdFromNetId(entityNetId[i]));
+			}
+		}
+	}
+
+	public void DestroyItemLocal(GameEntityId entityId)
+	{
+		GameEntity gameEntity = GetGameEntity(entityId);
+		if (gameEntity == null)
+		{
+			return;
+		}
+		if (!createdItemTypeCount.ContainsKey(gameEntity.typeId))
+		{
+			createdItemTypeCount[gameEntity.typeId] = 1;
+		}
+		createdItemTypeCount[gameEntity.typeId]--;
+		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			if (out_gamePlayer.IsLocal())
+			{
+				GamePlayerLocal.instance.ClearGrabbedIfHeld(gameEntity.id, this);
+			}
+			out_gamePlayer.ClearGrabbedIfHeld(gameEntity.id, this);
+		}
+		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out var out_gamePlayer2))
+		{
+			out_gamePlayer2.ClearSnappedIfSnapped(gameEntity.id, this);
+		}
+		RemoveGameEntity(gameEntity);
+		if (gameEntity.isBuiltIn)
+		{
+			gameEntity.gameObject.SetActive(value: false);
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(gameEntity.gameObject);
+		}
+	}
+
+	public void RequestState(GameEntityId entityId, long newState)
+	{
+		if (IsAuthority())
+		{
+			RequestStateAuthority(entityId, newState);
+			return;
+		}
+		photonView.RPC("RequestStateRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(entityId), newState);
+	}
+
+	private void RequestStateAuthority(GameEntityId entityId, long newState)
+	{
+		if (!IsAuthority())
+		{
+			return;
+		}
+		int netIdFromEntityId = GetNetIdFromEntityId(entityId);
+		if (IsValidNetId(netIdFromEntityId))
+		{
+			if (netIdsForState.Contains(netIdFromEntityId))
+			{
+				statesForState[netIdsForState.IndexOf(netIdFromEntityId)] = newState;
+				return;
+			}
+			netIdsForState.Add(netIdFromEntityId);
+			statesForState.Add(newState);
+		}
+	}
+
+	[PunRPC]
+	public void RequestStateRPC(int entityNetId, long newState, PhotonMessageInfo info)
+	{
+		if (!IsValidAuthorityRPC(info.Sender, entityNetId) || !GamePlayer.TryGetGamePlayer(info.Sender, out var gamePlayer) || !gamePlayer.netStateLimiter.CheckCallTime(Time.unscaledTime))
+		{
+			return;
+		}
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(entityNetId);
+		GameEntity gameEntity = GetGameEntity(entityIdFromNetId);
+		if (gameEntity == null || gameEntity.IsNull())
+		{
+			return;
+		}
+		bool flag = false;
+		GRToolClub component = gameEntity.GetComponent<GRToolClub>();
+		GRToolCollector component2 = gameEntity.GetComponent<GRToolCollector>();
+		GRToolRevive component3 = gameEntity.GetComponent<GRToolRevive>();
+		GRToolLantern component4 = gameEntity.GetComponent<GRToolLantern>();
+		GRToolFlash component5 = gameEntity.GetComponent<GRToolFlash>();
+		GRToolDirectionalShield component6 = gameEntity.GetComponent<GRToolDirectionalShield>();
+		GRToolShieldGun component7 = gameEntity.GetComponent<GRToolShieldGun>();
+		if (component == null && component2 == null && component3 == null && component4 == null && component5 == null && component6 == null && component7 == null)
+		{
+			flag = IsAuthorityPlayer(info.Sender);
+		}
+		bool flag2 = gamePlayer.IsHoldingEntity(entityIdFromNetId, isLeftHand: false) || gamePlayer.IsHoldingEntity(entityIdFromNetId, isLeftHand: true);
+		bool flag3 = gameEntity.lastHeldByActorNumber == info.Sender.ActorNumber;
+		if (!flag && (flag2 || flag3))
+		{
+			if (component4 != null)
+			{
+				flag = component4.CanChangeState(newState);
+			}
+			if (component5 != null)
+			{
+				flag = component5.CanChangeState(newState);
+			}
+			if (component != null || component2 != null || component3 != null || component6 != null || component7 != null)
+			{
+				flag = true;
+			}
+		}
+		if (!flag)
+		{
+			bool flag4 = gameEntity.snappedByActorNumber == gamePlayer.rig.OwningNetPlayer.ActorNumber;
+			if (gameEntity.canHoldingPlayerUpdateState && flag2)
+			{
+				flag = true;
+			}
+			else if (gameEntity.canLastHoldingPlayerUpdateState && flag3)
+			{
+				flag = true;
+			}
+			else if (gameEntity.canSnapPlayerUpdateState && flag4)
+			{
+				flag = true;
+			}
+		}
+		if (flag)
+		{
+			if (netIdsForState.Contains(entityNetId))
+			{
+				statesForState[netIdsForState.IndexOf(entityNetId)] = newState;
+				return;
+			}
+			netIdsForState.Add(entityNetId);
+			statesForState.Add(newState);
+		}
+	}
+
+	[PunRPC]
+	public void ApplyStateRPC(int[] netId, long[] newState, PhotonMessageInfo info)
+	{
+		if (netId == null || newState == null || netId.Length != newState.Length || m_RpcSpamChecks.IsSpamming(RPC.ApplyState))
+		{
+			return;
+		}
+		for (int i = 0; i < netId.Length && IsValidClientRPC(info.Sender, netId[i]); i++)
+		{
+			GameEntityId entityIdFromNetId = GetEntityIdFromNetId(netId[i]);
+			GameEntity gameEntity = entities[entityIdFromNetId.index];
+			if (gameEntity != null)
+			{
+				gameEntity.SetState(newState[i]);
+			}
+		}
+	}
+
+	public void RequestGrabEntity(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation)
+	{
+		bool inRoom = PhotonNetwork.InRoom;
+		if (!IsAuthority() || !inRoom)
+		{
+			GrabEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer));
+		}
+		if (inRoom)
+		{
+			long num = BitPackUtils.PackHandPosRotForNetwork(localPosition, localRotation);
+			photonView.RPC("RequestGrabEntityRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(gameEntityId), isLeftHand, num);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void RequestGrabEntityRPC(int entityNetId, bool isLeftHand, long packedPosRot, PhotonMessageInfo info)
+	{
+		if (!IsValidAuthorityRPC(info.Sender, entityNetId))
+		{
+			return;
+		}
+		BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out var localPos, out var handRot);
+		if (localPos.IsValid(10000f) && handRot.IsValid() && !(localPos.sqrMagnitude > 6400f) && GamePlayer.TryGetGamePlayer(info.Sender, out var gamePlayer) && IsPlayerHandNearEntity(gamePlayer, entityNetId, isLeftHand, checkBothHands: false) && !IsValidEntity(gamePlayer.GetGameEntityId(isLeftHand)) && gamePlayer.netGrabLimiter.CheckCallTime(Time.time) && !gamePlayer.IsHoldingEntity(this, isLeftHand))
+		{
+			GameEntity gameEntity = GetGameEntity(GetEntityIdFromNetId(entityNetId));
+			if (!(gameEntity == null) && ValidateGrab(gameEntity, info.Sender.ActorNumber, isLeftHand))
+			{
+				photonView.RPC("GrabEntityRPC", RpcTarget.All, entityNetId, isLeftHand, packedPosRot, info.Sender);
+				PhotonNetwork.SendAllOutgoingCommands();
+			}
+		}
+	}
+
+	[PunRPC]
+	public void GrabEntityRPC(int entityNetId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
+	{
+		if (IsValidClientRPC(info.Sender, entityNetId) && !m_RpcSpamChecks.IsSpamming(RPC.GrabEntity))
+		{
+			BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out var localPos, out var handRot);
+			if (localPos.IsValid(10000f) && handRot.IsValid() && !(localPos.sqrMagnitude > 6400f))
+			{
+				GrabEntityLocal(GetEntityIdFromNetId(entityNetId), isLeftHand, localPos, handRot, NetPlayer.Get(grabbedByPlayer));
+			}
+		}
+	}
+
+	private void GrabEntityLocal(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, NetPlayer grabbedByPlayer)
+	{
+		if (!VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(grabbedByPlayer.ActorNumber), out var _))
+		{
+			return;
+		}
+		GameEntity gameEntity = entities[gameEntityId.index];
+		if (gameEntityId.index < 0 || gameEntityId.index >= entities.Count || gameEntity == null || grabbedByPlayer == null)
+		{
+			return;
+		}
+		int handIndex = GamePlayer.GetHandIndex(isLeftHand);
+		if (grabbedByPlayer.IsLocal && gameEntity.heldByActorNumber == grabbedByPlayer.ActorNumber && gameEntity.heldByHandIndex == handIndex)
+		{
+			return;
+		}
+		TryDetachCompletely(gameEntity);
+		if (!GamePlayer.TryGetGamePlayer(grabbedByPlayer.ActorNumber, out var out_gamePlayer))
+		{
+			return;
+		}
+		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer2))
+		{
+			int num = out_gamePlayer2.FindHandIndex(gameEntityId);
+			bool flag = gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+			out_gamePlayer2.ClearGrabbedIfHeld(gameEntityId, this);
+			if (num != -1 && flag)
+			{
+				GamePlayerLocal.instance.ClearGrabbed(num);
+			}
+		}
+		Transform handTransform = out_gamePlayer.GetHandTransform(handIndex);
+		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
+		if (component != null)
+		{
+			if (grabbedByPlayer.IsLocal)
+			{
+				component.constraints = RigidbodyConstraints.FreezeAll;
+				component.isKinematic = false;
+			}
+			else
+			{
+				component.constraints = RigidbodyConstraints.None;
+				component.isKinematic = true;
+			}
+		}
+		gameEntity.transform.SetParent(handTransform);
+		gameEntity.transform.SetLocalPositionAndRotation(localPosition, localRotation);
+		gameEntity.transform.localScale = Vector3.one;
+		gameEntity.heldByActorNumber = grabbedByPlayer.ActorNumber;
+		gameEntity.heldByHandIndex = handIndex;
+		gameEntity.lastHeldByActorNumber = gameEntity.heldByActorNumber;
+		out_gamePlayer.SetGrabbed(gameEntityId, handIndex, this);
+		if (grabbedByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+		{
+			GamePlayerLocal.instance.SetGrabbed(gameEntityId, GamePlayer.GetHandIndex(isLeftHand));
+			GamePlayerLocal.instance.PlayCatchFx(isLeftHand);
+		}
+		TryUnsnapLocal(gameEntity);
+		gameEntity.PlayCatchFx();
+		gameEntity.OnGrabbed?.Invoke();
+		CustomGameMode.OnEntityGrabbed(gameEntity, isGrabbed: true);
+	}
+
+	public void GrabEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, NetPlayer grabbedByPlayer)
+	{
+		if (grabbedByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+		{
+			GamePlayerLocal.instance.gamePlayer.DeleteGrabbedEntityLocal(GamePlayer.GetHandIndex(isLeftHand));
+		}
+		GrabEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, grabbedByPlayer);
+	}
+
+	public GameEntityId TryGrabLocal(Vector3 handPosition, Vector3 fingerPosition, bool isLeftHand, out Vector3 closestPointOnBoundingBox, out bool fingerPositionUsed)
+	{
+		float a = 0.03f;
+		float num = 0f;
+		float num2 = 0.1f;
+		float max = 0.25f;
+		fingerPositionUsed = false;
+		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+		Vector3 rigidbodyVelocity = GTPlayer.Instance.RigidbodyVelocity;
+		GameEntity bestEntity = null;
+		float bestDist = float.MaxValue;
+		Vector3 closestPoint = handPosition;
+		for (int i = 0; i < entities.Count; i++)
+		{
+			GameEntity gameEntity = entities[i];
+			if (!ValidateGrab(gameEntity, actorNumber, isLeftHand))
+			{
+				continue;
+			}
+			float num3 = 0.75f;
+			float magnitude = (handPosition - gameEntity.transform.position).magnitude;
+			if (magnitude > num3 || (gameEntity.snappedByActorNumber != -1 && gameEntity.snappedByActorNumber == actorNumber && magnitude > 0.1f))
+			{
+				continue;
+			}
+			Vector3 vector = gameEntity.GetVelocity() - rigidbodyVelocity;
+			float magnitude2 = vector.magnitude;
+			float num4 = Mathf.Clamp(magnitude2 * num2, 0f, max);
+			Vector3 slopProjection = ((magnitude2 > 0.2f) ? (vector.normalized * num4) : Vector3.zero);
+			num = Mathf.Max(a, gameEntity.pickupRangeFromSurface);
+			GameEntity.RendererSet grabbableRenderers = gameEntity.GetGrabbableRenderers();
+			foreach (var (meshFilter, meshRenderer) in grabbableRenderers.renderers)
+			{
+				if (meshRenderer.gameObject.activeInHierarchy && meshRenderer.enabled)
+				{
+					_TryGrabLocal_TestBounds(handPosition, meshRenderer.transform, slopProjection, meshFilter.sharedMesh.bounds, num4, num, gameEntity, isTestingAltPosition: false, ref bestDist, ref bestEntity, ref closestPoint, ref fingerPositionUsed);
+					if (IsThinAlongDirection(meshRenderer.transform, meshFilter.sharedMesh.bounds, fingerPosition - handPosition))
+					{
+						_TryGrabLocal_TestBounds(fingerPosition, meshRenderer.transform, slopProjection, meshFilter.sharedMesh.bounds, num4, num, gameEntity, isTestingAltPosition: true, ref bestDist, ref bestEntity, ref closestPoint, ref fingerPositionUsed);
+					}
+				}
+			}
+			foreach (SkinnedMeshRenderer skinnedRenderer in grabbableRenderers.skinnedRenderers)
+			{
+				if (skinnedRenderer.gameObject.activeInHierarchy && skinnedRenderer.enabled)
+				{
+					_TryGrabLocal_TestBounds(handPosition, skinnedRenderer.rootBone, slopProjection, skinnedRenderer.localBounds, num4, num, gameEntity, isTestingAltPosition: false, ref bestDist, ref bestEntity, ref closestPoint, ref fingerPositionUsed);
+					if (IsThinAlongDirection(skinnedRenderer.rootBone, skinnedRenderer.bounds, fingerPosition - handPosition))
+					{
+						_TryGrabLocal_TestBounds(fingerPosition, skinnedRenderer.rootBone, slopProjection, skinnedRenderer.localBounds, num4, num, gameEntity, isTestingAltPosition: true, ref bestDist, ref bestEntity, ref closestPoint, ref fingerPositionUsed);
+					}
+				}
+			}
+			if (grabbableRenderers.renderers.Count == 0 && grabbableRenderers.skinnedRenderers.Count == 0)
+			{
+				float num5 = magnitude;
+				if (num5 < bestDist)
+				{
+					bestDist = num5;
+					bestEntity = gameEntity;
+					closestPoint = gameEntity.transform.position;
+				}
+			}
+		}
+		closestPointOnBoundingBox = closestPoint;
+		if (bestEntity != null)
+		{
+			if (!(bestDist <= Mathf.Max(a, bestEntity.pickupRangeFromSurface)))
+			{
+				return GameEntityId.Invalid;
+			}
+			return bestEntity.id;
+		}
+		return GameEntityId.Invalid;
+	}
+
+	private static bool IsThinAlongDirection(Transform transform, Bounds bounds, Vector3 direction, float thinThreshold = 0.1f)
+	{
+		return GetBoundsThicknessAlongDirection(bounds, transform.InverseTransformDirection(direction)) <= thinThreshold;
+	}
+
+	private static float GetBoundsThicknessAlongDirection(Bounds bounds, Vector3 localDirection)
+	{
+		localDirection.Normalize();
+		return Vector3.Dot(rhs: new Vector3(Mathf.Abs(localDirection.x), Mathf.Abs(localDirection.y), Mathf.Abs(localDirection.z)), lhs: bounds.extents);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static void _TryGrabLocal_TestBounds(Vector3 handPosition, Transform t, Vector3 slopProjection, Bounds bounds, float slopForSpeed, float maxAdjustedGrabDistance, GameEntity entity, bool isTestingAltPosition, ref float bestDist, ref GameEntity bestEntity, ref Vector3 closestPoint, ref bool usedAltPosition)
+	{
+		Vector3 vector = t.InverseTransformPoint(handPosition);
+		Vector3 b = t.InverseTransformPoint(handPosition + slopProjection);
+		_ = bounds.extents != bounds.extents;
+		float num;
+		Vector3 vector2;
+		if (SegmentHitsBounds(bounds, vector, b, out var hitPoint, out var distance))
+		{
+			vector2 = ((distance <= 0f) ? Vector3.zero : t.TransformVector(vector - hitPoint));
+			num = vector2.magnitude - slopForSpeed;
+		}
+		else
+		{
+			vector2 = t.TransformVector(vector - bounds.ClosestPoint(vector));
+			num = vector2.magnitude;
+		}
+		num = Mathf.Max(0f, num - maxAdjustedGrabDistance);
+		vector2 = vector2.normalized * num;
+		if (num < bestDist)
+		{
+			bestDist = num;
+			bestEntity = entity;
+			closestPoint = handPosition - vector2;
+			usedAltPosition = isTestingAltPosition;
+		}
+	}
+
+	private void DrawDebugStar(Vector3 position, float radius)
+	{
+		for (int i = 0; i < 20; i++)
+		{
+			Debug.DrawLine(position, position + UnityEngine.Random.onUnitSphere * radius, Color.red, 10f);
+		}
+	}
+
+	private static bool SegmentHitsBounds(Bounds bounds, Vector3 a, Vector3 b, out Vector3 hitPoint, out float distance)
+	{
+		hitPoint = default(Vector3);
+		distance = float.MaxValue;
+		Vector3 vector = b - a;
+		float magnitude = vector.magnitude;
+		if (magnitude <= Mathf.Epsilon)
+		{
+			if (bounds.Contains(a))
+			{
+				distance = 0f;
+				hitPoint = a;
+				return true;
+			}
+			return false;
+		}
+		Ray ray = new Ray(a, vector / magnitude);
+		if (bounds.IntersectRay(ray, out distance) && distance <= magnitude)
+		{
+			hitPoint = a + ray.direction * distance;
+			return true;
+		}
+		return false;
+	}
+
+	public bool GetEntitiesWithComponentInRadius<T>(Vector3 center, float radius, bool checkRootOnly, List<T> nearbyEntities)
+	{
+		float num = radius * radius;
+		for (int i = 0; i < entities.Count; i++)
+		{
+			GameEntity gameEntity = entities[i];
+			if (!(gameEntity == null))
+			{
+				T val = ((!checkRootOnly) ? gameEntity.GetComponentInChildren<T>() : gameEntity.GetComponent<T>());
+				if (val != null && (entities[i].transform.position - center).sqrMagnitude < num)
+				{
+					nearbyEntities.Add(val);
+				}
+			}
+		}
+		return nearbyEntities.Count > 0;
+	}
+
+	private bool ValidateGrab(GameEntity gameEntity, int playerActorNumber, bool isLeftHand)
+	{
+		if (gameEntity == null || !gameEntity.pickupable)
+		{
+			return false;
+		}
+		if (gameEntity.onlyGrabActorNumber != -1 && gameEntity.onlyGrabActorNumber != playerActorNumber)
+		{
+			return false;
+		}
+		if (gameEntity.heldByActorNumber != -1 && gameEntity.heldByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			return false;
+		}
+		if (gameEntity.snappedByActorNumber != -1 && gameEntity.snappedByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out out_gamePlayer))
+		{
+			return false;
+		}
+		GameSnappable component = gameEntity.GetComponent<GameSnappable>();
+		if (component != null && !component.CanGrabWithHand(isLeftHand))
+		{
+			return false;
+		}
+		if (IsValidEntity(gameEntity.attachedToEntityId))
+		{
+			GameEntity gameEntity2 = GetGameEntity(gameEntity.attachedToEntityId);
+			if (gameEntity2 != null)
+			{
+				if (gameEntity2.snappedByActorNumber != -1 && gameEntity2.snappedByActorNumber != playerActorNumber && GamePlayer.TryGetGamePlayer(gameEntity2.snappedByActorNumber, out out_gamePlayer))
+				{
+					return false;
+				}
+				GameSnappable component2 = gameEntity2.GetComponent<GameSnappable>();
+				if (component2 != null && !component2.CanGrabWithHand(isLeftHand))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public T GetParentEntity<T>(Transform transform) where T : MonoBehaviour
+	{
+		while (transform != null)
+		{
+			T component = transform.GetComponent<T>();
+			if (component != null)
+			{
+				return component;
+			}
+			transform = transform.parent;
+		}
+		return null;
+	}
+
+	public void RequestThrowEntity(GameEntityId entityId, bool isLeftHand, Vector3 headPosition, Vector3 velocity, Vector3 angVelocity)
+	{
+		GameEntity gameEntity = GetGameEntity(entityId);
+		if (gameEntity == null)
+		{
+			return;
+		}
+		Vector3 position = gameEntity.transform.position;
+		Quaternion rotation = gameEntity.transform.rotation;
+		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
+		if (component != null)
+		{
+			Vector3 vector = gameEntity.transform.TransformPoint(component.centerOfMass);
+			Vector3 vector2 = vector - headPosition;
+			float magnitude = vector2.magnitude;
+			if (magnitude > 0f)
+			{
+				vector2 /= magnitude;
+				if (Physics.SphereCast(headPosition, 0.05f, vector2, out var hitInfo, magnitude + 0.1f, 513, QueryTriggerInteraction.Ignore))
+				{
+					component.GetComponentsInChildren(_collidersList);
+					Vector3 position2 = component.position + -hitInfo.normal * 1000f;
+					float num = float.MaxValue;
+					bool flag = false;
+					Plane plane = new Plane(hitInfo.normal, hitInfo.point);
+					foreach (Collider colliders in _collidersList)
+					{
+						if (colliders.enabled && !colliders.isTrigger)
+						{
+							Vector3 point = colliders.ClosestPoint(position2);
+							float num2 = Mathf.Abs(plane.GetDistanceToPoint(point));
+							if (num2 < num)
+							{
+								num = num2;
+								flag = true;
+							}
+						}
+					}
+					if (flag)
+					{
+						position += hitInfo.normal * num;
+					}
+					else
+					{
+						float num3 = Mathf.Max(hitInfo.distance - 0.2f, 0f);
+						Vector3 vector3 = headPosition + vector2 * num3;
+						position += vector3 - vector;
+					}
+				}
+			}
+		}
+		bool inRoom = PhotonNetwork.InRoom;
+		if (!IsAuthority() || !inRoom)
+		{
+			ThrowEntityLocal(entityId, isLeftHand, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer));
+		}
+		if (inRoom)
+		{
+			photonView.RPC("RequestThrowEntityRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(entityId), isLeftHand, position, rotation, velocity, angVelocity);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void RequestThrowEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, PhotonMessageInfo info)
+	{
+		if (IsValidAuthorityRPC(info.Sender, entityNetId) && position.IsValid(10000f) && rotation.IsValid() && velocity.IsValid(10000f) && angVelocity.IsValid(10000f) && !(velocity.sqrMagnitude > 1600f) && IsPositionInManagerBounds(position) && GamePlayer.TryGetGamePlayer(info.Sender, out var gamePlayer) && IsPlayerHandNearPosition(gamePlayer, position, isLeftHand, checkBothHands: false) && gamePlayer.IsHoldingEntity(GetEntityIdFromNetId(entityNetId), isLeftHand) && gamePlayer.netThrowLimiter.CheckCallTime(Time.time))
+		{
+			photonView.RPC("ThrowEntityRPC", RpcTarget.All, entityNetId, isLeftHand, position, rotation, velocity, angVelocity, info.Sender, info.SentServerTime);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void ThrowEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player thrownByPlayer, double throwTime, PhotonMessageInfo info)
+	{
+		if (IsValidClientRPC(info.Sender, entityNetId, position) && !m_RpcSpamChecks.IsSpamming(RPC.ThrowEntity) && position.IsValid(10000f) && rotation.IsValid() && velocity.IsValid(10000f) && angVelocity.IsValid(10000f) && !(velocity.sqrMagnitude > 1600f))
+		{
+			NetPlayer netPlayer = NetPlayer.Get(thrownByPlayer);
+			if (!netPlayer.IsLocal || IsAuthority())
+			{
+				ThrowEntityLocal(GetEntityIdFromNetId(entityNetId), isLeftHand, position, rotation, velocity, angVelocity, netPlayer);
+			}
+		}
+	}
+
+	private void ThrowEntityLocal(GameEntityId entityId, bool isLeftHand, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, NetPlayer thrownByPlayer)
+	{
+		if (entityId.index < 0 || entityId.index >= entities.Count)
+		{
+			return;
+		}
+		GameEntity gameEntity = entities[entityId.index];
+		if (gameEntity == null || thrownByPlayer == null)
+		{
+			return;
+		}
+		gameEntity.transform.SetParent(null);
+		gameEntity.transform.SetLocalPositionAndRotation(position, rotation);
+		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
+		if (component != null)
+		{
+			component.isKinematic = false;
+			component.constraints = RigidbodyConstraints.None;
+			component.position = position;
+			component.rotation = rotation;
+			component.linearVelocity = velocity;
+			component.angularVelocity = angVelocity;
+		}
+		gameEntity.heldByActorNumber = -1;
+		gameEntity.heldByHandIndex = -1;
+		gameEntity.attachedToEntityId = GameEntityId.Invalid;
+		VRRig vRRig = GorillaGameManager.StaticFindRigForPlayer(thrownByPlayer);
+		if (vRRig != null && gameEntity.gravityController != null)
+		{
+			gameEntity.gravityController.SetPersonalGravityDirection(-vRRig.transform.up);
+		}
+		bool num = thrownByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+		int handIndex = GamePlayer.GetHandIndex(isLeftHand);
+		RigContainer playerRig;
+		if (num)
+		{
+			GamePlayerLocal.instance.gamePlayer.ClearGrabbed(handIndex);
+			GamePlayerLocal.instance.ClearGrabbed(handIndex);
+			GamePlayerLocal.instance.PlayThrowFx(isLeftHand);
+		}
+		else if (VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(thrownByPlayer.ActorNumber), out playerRig))
+		{
+			GamePlayer gamePlayerRef = playerRig.Rig.GamePlayerRef;
+			if (gamePlayerRef != null)
+			{
+				gamePlayerRef.ClearGrabbedIfHeld(entityId, this);
+				gamePlayerRef.ClearSnappedIfSnapped(entityId, this);
+			}
+		}
+		gameEntity.PlayThrowFx();
+		gameEntity.OnReleased?.Invoke();
+		CustomGameMode.OnEntityGrabbed(gameEntity, isGrabbed: false);
+		GRBadge component2 = gameEntity.GetComponent<GRBadge>();
+		if (component2 != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(thrownByPlayer.ActorNumber);
+			if (gRPlayer != null)
+			{
+				gRPlayer.AttachBadge(component2);
+			}
+		}
+	}
+
+	public void RequestSnapEntity(GameEntityId entityId, bool isLeftHand, SnapJointType jointType)
+	{
+		GameEntity gameEntity = GetGameEntity(entityId);
+		if (!(gameEntity == null))
+		{
+			Vector3 position = gameEntity.transform.position;
+			Quaternion rotation = gameEntity.transform.rotation;
+			if (!IsAuthority())
+			{
+				SnapEntityLocal(entityId, isLeftHand, position, rotation, (int)jointType, NetPlayer.Get(PhotonNetwork.LocalPlayer));
+			}
+			photonView.RPC("RequestSnapEntityRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(entityId), isLeftHand, position, rotation, (int)jointType);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void RequestSnapEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, PhotonMessageInfo info)
+	{
+		if (IsValidAuthorityRPC(info.Sender, entityNetId) && position.IsValid(10000f) && rotation.IsValid() && IsPositionInManagerBounds(position))
+		{
+			GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
+			if (!(gamePlayer == null) && IsPlayerHandNearPosition(gamePlayer, position, isLeftHand, checkBothHands: false) && gamePlayer.IsHoldingEntity(GetEntityIdFromNetId(entityNetId), isLeftHand) && gamePlayer.netSnapLimiter.CheckCallTime(Time.time))
+			{
+				photonView.RPC("SnapEntityRPC", RpcTarget.All, entityNetId, isLeftHand, position, rotation, jointType, info.Sender, info.SentServerTime);
+				PhotonNetwork.SendAllOutgoingCommands();
+			}
+		}
+	}
+
+	[PunRPC]
+	public void SnapEntityRPC(int entityNetId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, Player thrownByPlayer, double snapTime, PhotonMessageInfo info)
+	{
+		if (IsValidClientRPC(info.Sender, entityNetId, position) && !m_RpcSpamChecks.IsSpamming(RPC.ThrowEntity) && position.IsValid(10000f) && rotation.IsValid() && (IsAuthority() || thrownByPlayer.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber))
+		{
+			SnapEntityLocal(GetEntityIdFromNetId(entityNetId), isLeftHand, position, rotation, jointType, NetPlayer.Get(thrownByPlayer));
+		}
+	}
+
+	private void SnapEntityLocal(GameEntityId gameEntityId, bool isLeftHand, Vector3 position, Quaternion rotation, int jointType, NetPlayer snappedByPlayer)
+	{
+		if (gameEntityId.index < 0 || gameEntityId.index >= entities.Count)
+		{
+			return;
+		}
+		GameEntity gameEntity = entities[gameEntityId.index];
+		if (gameEntity == null || snappedByPlayer == null || (snappedByPlayer.IsLocal && gameEntity.heldByActorNumber != snappedByPlayer.ActorNumber && gameEntity.lastHeldByActorNumber == snappedByPlayer.ActorNumber))
+		{
+			return;
+		}
+		SuperInfectionSnapPoint superInfectionSnapPoint = null;
+		if (!GamePlayer.TryGetGamePlayer(snappedByPlayer.ActorNumber, out var out_gamePlayer))
+		{
+			return;
+		}
+		TryDetachCompletely(gameEntity);
+		if (jointType == 64)
+		{
+			gameEntity.GetComponent<GameSnappable>();
+			superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(out_gamePlayer, (SnapJointType)jointType);
+		}
+		else
+		{
+			superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(out_gamePlayer, (SnapJointType)jointType);
+			int num = -1;
+			if (jointType == 1)
+			{
+				num = 2;
+			}
+			if (jointType == 4)
+			{
+				num = 3;
+			}
+			if (num != -1)
+			{
+				out_gamePlayer.SetSnapped(gameEntityId, num, this);
+			}
+		}
+		if (superInfectionSnapPoint == null)
+		{
+			return;
+		}
+		if (superInfectionSnapPoint.HasSnapped())
+		{
+			GameEntity snappedEntity = superInfectionSnapPoint.GetSnappedEntity();
+			snappedEntity.transform.SetParent(null);
+			snappedEntity.transform.SetLocalPositionAndRotation(position, rotation);
+			Rigidbody component = snappedEntity.GetComponent<Rigidbody>();
+			if (component != null)
+			{
+				component.isKinematic = false;
+				component.constraints = RigidbodyConstraints.None;
+				component.position = position;
+				component.rotation = rotation;
+				component.linearVelocity = Vector3.up * 5f;
+			}
+			snappedEntity.heldByActorNumber = -1;
+			snappedEntity.heldByHandIndex = -1;
+			snappedEntity.snappedByActorNumber = -1;
+			snappedEntity.snappedJoint = SnapJointType.None;
+			snappedEntity.PlayThrowFx();
+			snappedEntity.OnReleased?.Invoke();
+		}
+		superInfectionSnapPoint.Snapped(gameEntity);
+		gameEntity.transform.SetParent(superInfectionSnapPoint.transform);
+		gameEntity.transform.SetLocalPositionAndRotation(position, rotation);
+		gameEntity.transform.localScale = Vector3.one;
+		Rigidbody component2 = gameEntity.GetComponent<Rigidbody>();
+		if (component2 != null)
+		{
+			component2.isKinematic = true;
+		}
+		Vector3 positionOffset = Vector3.zero;
+		Quaternion rotationOffset = Quaternion.identity;
+		GameSnappable component3 = gameEntity.GetComponent<GameSnappable>();
+		if (component3 != null)
+		{
+			component3.GetSnapOffset((SnapJointType)jointType, out positionOffset, out rotationOffset);
+		}
+		gameEntity.transform.localPosition = positionOffset;
+		gameEntity.transform.localRotation = rotationOffset;
+		gameEntity.snappedByActorNumber = snappedByPlayer.ActorNumber;
+		gameEntity.snappedJoint = (SnapJointType)jointType;
+		if (component3 != null)
+		{
+			component3.OnSnap();
+		}
+		gameEntity.OnSnapped?.Invoke();
+		gameEntity.PlaySnapFx();
+	}
+
+	public void SnapEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, int jointType, NetPlayer grabbedByPlayer)
+	{
+		SnapEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, jointType, grabbedByPlayer);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static void TryUnsnapLocal(GameEntity gameEntity)
+	{
+		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out var out_gamePlayer))
+		{
+			out_gamePlayer.ClearSnappedIfSnapped(gameEntity.id, gameEntity.manager);
+		}
+		GameSnappable component = gameEntity.GetComponent<GameSnappable>();
+		if (component != null && component.snappedToJoint != null && component.snappedToJoint.jointType != SnapJointType.None)
+		{
+			SuperInfectionSnapPoint superInfectionSnapPoint = SuperInfectionSnapPointManager.FindSnapPoint(out_gamePlayer, component.snappedToJoint.jointType);
+			if (superInfectionSnapPoint == null)
+			{
+				superInfectionSnapPoint = component.snappedToJoint;
+			}
+			component.OnUnsnap();
+			superInfectionSnapPoint.Unsnapped();
+			gameEntity.OnUnsnapped?.Invoke();
+		}
+		gameEntity.snappedByActorNumber = -1;
+		gameEntity.snappedJoint = SnapJointType.None;
+	}
+
+	public void RequestAttachEntity(GameEntityId entityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
+	{
+		if (!(GetGameEntity(entityId) == null))
+		{
+			if (!IsAuthority())
+			{
+				AttachEntityLocal(entityId, attachToEntityId, slotId, localPosition, localRotation);
+			}
+			photonView.RPC("RequestAttachEntityRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(entityId), GetNetIdFromEntityId(attachToEntityId), slotId, localPosition, localRotation);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	public void RequestAttachEntityAuthority(GameEntityId entityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
+	{
+		if (!(GetGameEntity(entityId) == null) && IsAuthority())
+		{
+			photonView.RPC("AttachEntityRPC", RpcTarget.All, GetNetIdFromEntityId(entityId), GetNetIdFromEntityId(attachToEntityId), slotId, localPosition, localRotation, null, PhotonNetwork.Time);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void RequestAttachEntityRPC(int entityNetId, int attachToEntityNetId, int slotId, Vector3 localPosition, Quaternion localRotation, PhotonMessageInfo info)
+	{
+		bool flag = !IsValidNetId(attachToEntityNetId);
+		if (!IsValidAuthorityRPC(info.Sender, entityNetId) || !localPosition.IsValid(10000f) || !localRotation.IsValid())
+		{
+			return;
+		}
+		if (!flag)
+		{
+			if (localPosition.sqrMagnitude > 4f || !IsEntityNearEntity(entityNetId, attachToEntityNetId))
+			{
+				return;
+			}
+		}
+		else if (!IsPositionInManagerBounds(localPosition))
+		{
+			return;
+		}
+		GameEntity gameEntityFromNetId = GetGameEntityFromNetId(entityNetId);
+		if (gameEntityFromNetId == null)
+		{
+			return;
+		}
+		GameDockable component = gameEntityFromNetId.GetComponent<GameDockable>();
+		if (component == null)
+		{
+			return;
+		}
+		GameEntity gameEntityFromNetId2 = GetGameEntityFromNetId(attachToEntityNetId);
+		if (gameEntityFromNetId2 != null)
+		{
+			GameDock component2 = gameEntityFromNetId2.GetComponent<GameDock>();
+			if (component2 == null || !component2.CanDock(component))
+			{
+				return;
+			}
+		}
+		GamePlayer gamePlayer = GamePlayer.GetGamePlayer(info.Sender);
+		if (!(gamePlayer == null) && gamePlayer.IsHoldingEntity(GetEntityIdFromNetId(entityNetId)) && gamePlayer.netSnapLimiter.CheckCallTime(Time.time))
+		{
+			photonView.RPC("AttachEntityRPC", RpcTarget.All, entityNetId, attachToEntityNetId, slotId, localPosition, localRotation, info.Sender, info.SentServerTime);
+			PhotonNetwork.SendAllOutgoingCommands();
+		}
+	}
+
+	[PunRPC]
+	public void AttachEntityRPC(int entityNetId, int attachToEntityNetId, int slotId, Vector3 localPosition, Quaternion localRotation, Player attachedByPlayer, double snapTime, PhotonMessageInfo info)
+	{
+		if (IsValidClientRPC(info.Sender, entityNetId) && IsValidNetId(attachToEntityNetId) && !m_RpcSpamChecks.IsSpamming(RPC.ThrowEntity) && localPosition.IsValid(10000f) && localRotation.IsValid() && (IsAuthority() || attachedByPlayer == null || attachedByPlayer.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber))
+		{
+			AttachEntityLocal(GetEntityIdFromNetId(entityNetId), GetEntityIdFromNetId(attachToEntityNetId), slotId, localPosition, localRotation);
+		}
+	}
+
+	private void AttachEntityLocal(GameEntityId gameEntityId, GameEntityId attachToEntityId, int slotId, Vector3 localPosition, Quaternion localRotation)
+	{
+		if (gameEntityId.index < 0 || gameEntityId.index >= entities.Count)
+		{
+			return;
+		}
+		GameEntity gameEntity = entities[gameEntityId.index];
+		if (gameEntity == null)
+		{
+			return;
+		}
+		GameEntity gameEntity2 = entities[attachToEntityId.index];
+		TryDetachCompletely(gameEntity);
+		bool flag = gameEntity2 == null;
+		Transform parent = ((gameEntity2 == null) ? null : gameEntity2.transform);
+		gameEntity.transform.SetParent(parent);
+		gameEntity.transform.SetLocalPositionAndRotation(localPosition, localRotation);
+		gameEntity.attachedToEntityId = (flag ? GameEntityId.Invalid : gameEntity2.id);
+		Rigidbody component = gameEntity.GetComponent<Rigidbody>();
+		if (component != null)
+		{
+			component.isKinematic = !flag;
+			component.constraints = RigidbodyConstraints.None;
+		}
+		GameDockable component2 = gameEntity.GetComponent<GameDockable>();
+		if (!(gameEntity2 != null))
+		{
+			return;
+		}
+		gameEntity.OnAttached?.Invoke();
+		GameDock component3 = gameEntity2.GetComponent<GameDock>();
+		if (component3 != null)
+		{
+			component3.OnDock(gameEntity, gameEntity2);
+			if (component2 != null)
+			{
+				component2.OnDock(gameEntity, gameEntity2);
+			}
+		}
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static void TryDetachLocal(GameEntity gameEntity)
+	{
+		if (gameEntity.attachedToEntityId != GameEntityId.Invalid)
+		{
+			GameEntity gameEntity2 = gameEntity.manager.entities[gameEntity.attachedToEntityId.index];
+			if (gameEntity2 != null)
+			{
+				GameDock component = gameEntity2.GetComponent<GameDock>();
+				if (component != null)
+				{
+					component.OnUndock(gameEntity, gameEntity2);
+					GameDockable component2 = gameEntity.GetComponent<GameDockable>();
+					if (component2 != null)
+					{
+						component2.OnUndock(gameEntity, gameEntity2);
+					}
+				}
+			}
+		}
+		if (gameEntity.attachedToEntityId != GameEntityId.Invalid)
+		{
+			gameEntity.OnDetached?.Invoke();
+		}
+		gameEntity.attachedToEntityId = GameEntityId.Invalid;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	internal static void TryDetachCompletely(GameEntity gameEntity)
+	{
+		if (!(gameEntity == null))
+		{
+			TryRemoveFromHandLocal(gameEntity);
+			TryUnsnapLocal(gameEntity);
+			TryDetachLocal(gameEntity);
+		}
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static void TryRemoveFromHandLocal(GameEntity gameEntity)
+	{
+		GameEntityId id = gameEntity.id;
+		int heldByActorNumber = gameEntity.heldByActorNumber;
+		if (GamePlayer.TryGetGamePlayer(heldByActorNumber, out var out_gamePlayer))
+		{
+			if (heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+			{
+				GamePlayerLocal.instance.ClearGrabbedIfHeld(id, gameEntity.manager);
+			}
+			out_gamePlayer.ClearGrabbedIfHeld(id, gameEntity.manager);
+			gameEntity.OnReleased?.Invoke();
+		}
+		gameEntity.heldByActorNumber = -1;
+		gameEntity.heldByHandIndex = -1;
+	}
+
+	public void AttachEntityOnCreate(GameEntityId gameEntityId, bool isLeftHand, Vector3 localPosition, Quaternion localRotation, int jointType, NetPlayer grabbedByPlayer)
+	{
+		SnapEntityLocal(gameEntityId, isLeftHand, localPosition, localRotation, jointType, grabbedByPlayer);
+	}
+
+	public void RequestHit(GameHitData hit)
+	{
+		GameHittable gameComponent = GetGameComponent<GameHittable>(hit.hitEntityId);
+		if (!(gameComponent == null))
+		{
+			gameComponent.ApplyHit(hit);
+			SendRPC("RequestHitRPC", GetAuthorityPlayer(), GetNetIdFromEntityId(hit.hitEntityId), GetNetIdFromEntityId(hit.hitByEntityId), hit.hitTypeId, hit.hitEntityPosition, hit.hitPosition, hit.hitImpulse, hit.hittablePoint);
+		}
+	}
+
+	[PunRPC]
+	public void RequestHitRPC(int hittableNetId, int hitByNetId, int hitTypeId, Vector3 entityPosition, Vector3 hitPosition, Vector3 hitImpulse, int hittablePoint, PhotonMessageInfo info)
+	{
+		if (!entityPosition.IsValid(10000f) || !hitPosition.IsValid(10000f) || !hitImpulse.IsValid(10000f) || !IsValidAuthorityRPC(info.Sender, hittableNetId, entityPosition) || !IsPositionInManagerBounds(hitPosition) || !GamePlayer.TryGetGamePlayer(info.Sender, out var gamePlayer) || !gamePlayer.netImpulseLimiter.CheckCallTime(Time.time))
+		{
+			return;
+		}
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(hittableNetId);
+		GameHittable gameComponent = GetGameComponent<GameHittable>(entityIdFromNetId);
+		if (!(gameComponent == null))
+		{
+			GameHitData hitData = new GameHitData
+			{
+				hitTypeId = hitTypeId,
+				hitEntityId = entityIdFromNetId,
+				hitByEntityId = GetEntityIdFromNetId(hitByNetId),
+				hitEntityPosition = entityPosition,
+				hitPosition = hitPosition,
+				hitImpulse = hitImpulse,
+				hittablePoint = hittablePoint
+			};
+			if (gameComponent.IsHitValid(hitData))
+			{
+				SendRPC("ApplyHitRPC", RpcTarget.All, hittableNetId, hitByNetId, hitTypeId, entityPosition, hitPosition, hitImpulse, hittablePoint, info.Sender);
+			}
+		}
+	}
+
+	[PunRPC]
+	public void ApplyHitRPC(int hittableNetId, int hitByNetId, int hitTypeId, Vector3 entityPosition, Vector3 hitPosition, Vector3 hitImpulse, int hittablePoint, Player player, PhotonMessageInfo info)
+	{
+		if (!hitPosition.IsValid(10000f) || !hitImpulse.IsValid(10000f) || !IsValidClientRPC(info.Sender, hittableNetId, entityPosition) || m_RpcSpamChecks.IsSpamming(RPC.HitEntity) || player == null || player.IsLocal || GetGameEntity(GetEntityIdFromNetId(hittableNetId)) == null)
+		{
+			return;
+		}
+		hitImpulse = Vector3.ClampMagnitude(hitImpulse, 100f);
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(hittableNetId);
+		GameHitData hitData = new GameHitData
+		{
+			hitTypeId = hitTypeId,
+			hitEntityId = entityIdFromNetId,
+			hitByEntityId = GetEntityIdFromNetId(hitByNetId),
+			hitEntityPosition = entityPosition,
+			hitPosition = hitPosition,
+			hitImpulse = hitImpulse,
+			hitAmount = 0,
+			hittablePoint = hittablePoint
+		};
+		GameEntity gameEntity = GetGameEntity(GetEntityIdFromNetId(hitByNetId));
+		GameHittable gameComponent = GetGameComponent<GameHittable>(entityIdFromNetId);
+		if (gameEntity != null)
+		{
+			GameHitter component = gameEntity.GetComponent<GameHitter>();
+			if (component != null)
+			{
+				hitData.hitAmount = component.CalcHitAmount((GameHitType)hitTypeId, gameComponent, gameEntity);
+			}
+		}
+		if (gameComponent != null)
+		{
+			gameComponent.ApplyHit(hitData);
+		}
+	}
+
+	public bool IsPlayerHandNearEntity(GamePlayer player, int entityNetId, bool isLeftHand, bool checkBothHands, float acceptableRadius = 16f)
+	{
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(entityNetId);
+		GameEntity gameEntity = GetGameEntity(entityIdFromNetId);
+		if (gameEntity == null)
+		{
+			return false;
+		}
+		return IsPlayerHandNearPosition(player, gameEntity.transform.position, isLeftHand, checkBothHands, acceptableRadius);
+	}
+
+	public static bool IsPlayerHandNearPosition(GamePlayer player, Vector3 worldPosition, bool isLeftHand, bool checkBothHands, float acceptableRadius = 16f)
+	{
+		bool flag = true;
+		if (player != null && player.rig != null)
+		{
+			if (isLeftHand || checkBothHands)
+			{
+				flag = (worldPosition - player.rig.leftHandTransform.position).sqrMagnitude < acceptableRadius * acceptableRadius;
+			}
+			if (!isLeftHand || checkBothHands)
+			{
+				float sqrMagnitude = (worldPosition - player.rig.rightHandTransform.position).sqrMagnitude;
+				flag = flag && sqrMagnitude < acceptableRadius * acceptableRadius;
+			}
+		}
+		return flag;
+	}
+
+	public bool IsEntityNearEntity(int entityNetId, int otherEntityNetId, float acceptableRadius = 16f)
+	{
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(otherEntityNetId);
+		GameEntity gameEntity = GetGameEntity(entityIdFromNetId);
+		if (gameEntity == null)
+		{
+			return false;
+		}
+		return IsEntityNearPosition(entityNetId, gameEntity.transform.position, acceptableRadius);
+	}
+
+	public bool IsEntityNearPosition(int entityNetId, Vector3 position, float acceptableRadius = 16f)
+	{
+		GameEntityId entityIdFromNetId = GetEntityIdFromNetId(entityNetId);
+		GameEntity gameEntity = GetGameEntity(entityIdFromNetId);
+		if (gameEntity == null)
+		{
+			return false;
+		}
+		return Vector3.SqrMagnitude(gameEntity.transform.position - position) < acceptableRadius * acceptableRadius;
+	}
+
+	public static bool ValidateDataType<T>(object obj, out T dataAsType)
+	{
+		if (obj is T)
+		{
+			dataAsType = (T)obj;
+			return true;
+		}
+		dataAsType = default(T);
+		return false;
+	}
+
+	private void ClearZone(bool ignoreHeldGadgets = false)
+	{
+		GamePlayerLocal.instance.DebugSlotsReport($"Pre ClearZone zone={zone}");
+		if (ignoreHeldGadgets)
+		{
+			List<GameEntity> list = GamePlayerLocal.instance.gamePlayer.HeldAndSnappedEntities();
+			for (int num = list.Count - 1; num >= 0; num--)
+			{
+				if (list[num] == null || list[num].manager != this)
+				{
+					list.RemoveAt(num);
+				}
+				else if (list[num].shouldDestroyOnZoneExit)
+				{
+					list.RemoveAt(num);
+				}
+			}
+			for (int num2 = entities.Count - 1; num2 >= 0; num2--)
+			{
+				if (!(entities[num2] == null) && !list.Contains(entities[num2]))
+				{
+					DestroyItemLocal(entities[num2].id);
+				}
+			}
+			GamePlayerLocal.instance.joinWithItemsSentForCurrentMigration = false;
+			GamePlayerLocal.instance.gamePlayer.DidJoinWithItems = false;
+			GamePlayerLocal.instance.DebugSlotsReport($"ClearZone post-preserve zone={zone}");
+		}
+		else
+		{
+			for (int i = 0; i < entities.Count; i++)
+			{
+				if (entities[i] != null && entities[i].manager == this)
+				{
+					DestroyItemLocal(entities[i].id);
+				}
+			}
+			GamePlayerLocal.instance.DebugSlotsReport($"ClearZone post-destroy zone={zone}");
+			GamePlayer gamePlayerRef = VRRig.LocalRig.GamePlayerRef;
+			if (gamePlayerRef != null)
+			{
+				gamePlayerRef.ClearZone(this);
+			}
+			GamePlayerLocal.instance.DebugSlotsReport($"ClearZone post-ClearZone(player) zone={zone}");
+		}
+		for (int j = 0; j < entities.Count; j++)
+		{
+			if (entities[j] != null && entities[j].manager != this)
+			{
+				entities[j] = null;
+			}
+		}
+		foreach (VRRig activeRig in VRRigCache.ActiveRigs)
+		{
+			GamePlayer component = activeRig.GetComponent<GamePlayer>();
+			if (!component.IsLocal())
+			{
+				component.ClearZone(this);
+			}
+		}
+		gameEntityData.Clear();
+		for (int k = 0; k < zoneComponents.Count; k++)
+		{
+			zoneComponents[k].OnZoneClear(zoneClearReason);
+		}
+		GamePlayerLocal.instance.DebugSlotsReport($"ClearZone END zone={zone}");
+	}
+
+	public int SerializeGameState(int zoneId, byte[] bytes, int maxBytes)
+	{
+		MemoryStream memoryStream = new MemoryStream(bytes);
+		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			zoneComponents[i].SerializeZoneData(binaryWriter);
+		}
+		tempEntitiesToSerialize.Clear();
+		for (int j = 0; j < entities.Count; j++)
+		{
+			GameEntity gameEntity = entities[j];
+			if (gameEntity == null)
+			{
+				continue;
+			}
+			int attachedPlayerActorNr = gameEntity.AttachedPlayerActorNr;
+			if (attachedPlayerActorNr != -1)
+			{
+				bool flag = false;
+				for (int k = 0; k < tempRigs.Count; k++)
+				{
+					if (tempRigs[k].Creator.ActorNumber == attachedPlayerActorNr)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					continue;
+				}
+			}
+			tempEntitiesToSerialize.Add(gameEntity);
+		}
+		binaryWriter.Write(tempEntitiesToSerialize.Count);
+		for (int l = 0; l < tempEntitiesToSerialize.Count; l++)
+		{
+			GameEntity gameEntity2 = tempEntitiesToSerialize[l];
+			if (!(gameEntity2 == null))
+			{
+				int netIdFromEntityId = GetNetIdFromEntityId(gameEntity2.id);
+				binaryWriter.Write(netIdFromEntityId);
+				binaryWriter.Write(gameEntity2.typeId);
+				long value = BitPackUtils.PackWorldPosForNetwork(gameEntity2.transform.position);
+				int value2 = BitPackUtils.PackQuaternionForNetwork(gameEntity2.transform.rotation);
+				binaryWriter.Write(value);
+				binaryWriter.Write(value2);
+			}
+		}
+		for (int m = 0; m < tempEntitiesToSerialize.Count; m++)
+		{
+			GameEntity gameEntity3 = tempEntitiesToSerialize[m];
+			if (gameEntity3 == null)
+			{
+				continue;
+			}
+			int netIdFromEntityId2 = GetNetIdFromEntityId(gameEntity3.id);
+			binaryWriter.Write(netIdFromEntityId2);
+			binaryWriter.Write(gameEntity3.createData);
+			binaryWriter.Write(GetNetIdFromEntityId(gameEntity3.createdByEntityId));
+			binaryWriter.Write(gameEntity3.GetState());
+			int num = -1;
+			GameEntity gameEntity4 = GetGameEntity(gameEntity3.attachedToEntityId);
+			if (gameEntity4 != null)
+			{
+				num = GetNetIdFromEntityId(gameEntity4.id);
+			}
+			binaryWriter.Write(num);
+			if (num != -1)
+			{
+				long value3 = BitPackUtils.PackHandPosRotForNetwork(gameEntity3.transform.localPosition, gameEntity3.transform.localRotation);
+				binaryWriter.Write(value3);
+			}
+			GameAgent component = gameEntity3.GetComponent<GameAgent>();
+			bool flag2 = component != null;
+			binaryWriter.Write(flag2);
+			if (flag2)
+			{
+				Vector3 worldPos = Vector3.zero;
+				if (component.navAgent != null)
+				{
+					worldPos = component.navAgent.destination;
+				}
+				long value4 = BitPackUtils.PackWorldPosForNetwork(worldPos);
+				binaryWriter.Write(value4);
+				int value5 = component.targetPlayer?.ActorNumber ?? (-1);
+				binaryWriter.Write(value5);
+			}
+			byte b = (byte)gameEntity3.entitySerialize.Count;
+			binaryWriter.Write(b);
+			for (int n = 0; n < b; n++)
+			{
+				gameEntity3.entitySerialize[n].OnGameEntitySerialize(binaryWriter);
+			}
+			for (int num2 = 0; num2 < zoneComponents.Count; num2++)
+			{
+				zoneComponents[num2].SerializeZoneEntityData(binaryWriter, gameEntity3);
+			}
+		}
+		int count = tempRigs.Count;
+		binaryWriter.Write(count);
+		for (int num3 = 0; num3 < tempRigs.Count; num3++)
+		{
+			VRRig vRRig = tempRigs[num3];
+			NetPlayer owningNetPlayer = vRRig.OwningNetPlayer;
+			binaryWriter.Write(owningNetPlayer.ActorNumber);
+			GamePlayer gamePlayerRef = vRRig.GamePlayerRef;
+			bool flag3 = gamePlayerRef != null;
+			binaryWriter.Write(flag3);
+			if (flag3)
+			{
+				gamePlayerRef.SerializeNetworkState(binaryWriter, owningNetPlayer, this);
+				for (int num4 = 0; num4 < zoneComponents.Count; num4++)
+				{
+					zoneComponents[num4].SerializeZonePlayerData(binaryWriter, owningNetPlayer.ActorNumber);
+				}
+			}
+		}
+		return (int)memoryStream.Position;
+	}
+
+	public void DeserializeTableState(byte[] bytes, int numBytes)
+	{
+		if (numBytes <= 0)
+		{
+			return;
+		}
+		tempAttachments.Clear();
+		using MemoryStream input = new MemoryStream(bytes);
+		using BinaryReader binaryReader = new BinaryReader(input);
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			zoneComponents[i].DeserializeZoneData(binaryReader);
+		}
+		int num = binaryReader.ReadInt32();
+		Span<bool> span = stackalloc bool[num];
+		for (int j = 0; j < num; j++)
+		{
+			int netId = binaryReader.ReadInt32();
+			int entityTypeId = binaryReader.ReadInt32();
+			long data = binaryReader.ReadInt64();
+			int data2 = binaryReader.ReadInt32();
+			if (GetGameEntityFromNetId(netId) != null)
+			{
+				span[j] = true;
+				continue;
+			}
+			Vector3 position = BitPackUtils.UnpackWorldPosFromNetwork(data);
+			Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(data2);
+			CreateItemLocal(netId, entityTypeId, position, rotation);
+		}
+		for (int k = 0; k < num; k++)
+		{
+			int num2 = binaryReader.ReadInt32();
+			long createData = binaryReader.ReadInt64();
+			int createdByEntityNetId = binaryReader.ReadInt32();
+			long state = binaryReader.ReadInt64();
+			GameEntity gameEntityFromNetId = GetGameEntityFromNetId(num2);
+			if (gameEntityFromNetId != null && !span[k])
+			{
+				InitItemLocal(gameEntityFromNetId, createData, createdByEntityNetId);
+				gameEntityFromNetId.SetState(state);
+			}
+			int num3 = binaryReader.ReadInt32();
+			if (num3 != -1)
+			{
+				long data3 = binaryReader.ReadInt64();
+				if (gameEntityFromNetId == null)
+				{
+					continue;
+				}
+				BitPackUtils.UnpackHandPosRotFromNetwork(data3, out var localPos, out var handRot);
+				tempAttachments.Add(new AttachmentData
+				{
+					entityNetId = num2,
+					attachToEntityNetId = num3,
+					localPosition = localPos,
+					localRotation = handRot
+				});
+			}
+			if (binaryReader.ReadBoolean())
+			{
+				long data4 = binaryReader.ReadInt64();
+				int playerID = binaryReader.ReadInt32();
+				Vector3 destination = BitPackUtils.UnpackWorldPosFromNetwork(data4);
+				GameAgent component = gameEntityFromNetId.GetComponent<GameAgent>();
+				if (component != null)
+				{
+					if (component.IsOnNavMesh())
+					{
+						component.navAgent.destination = destination;
+					}
+					component.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
+				}
+			}
+			byte b = binaryReader.ReadByte();
+			for (int l = 0; l < b; l++)
+			{
+				gameEntityFromNetId.entitySerialize[l].OnGameEntityDeserialize(binaryReader);
+			}
+			for (int m = 0; m < zoneComponents.Count; m++)
+			{
+				zoneComponents[m].DeserializeZoneEntityData(binaryReader, gameEntityFromNetId);
+			}
+		}
+		int num4 = binaryReader.ReadInt32();
+		for (int n = 0; n < num4; n++)
+		{
+			int actorNumber = binaryReader.ReadInt32();
+			if (binaryReader.ReadBoolean())
+			{
+				GamePlayer.TryGetGamePlayer(actorNumber, out var out_gamePlayer);
+				GamePlayer.DeserializeNetworkState(binaryReader, out_gamePlayer, this);
+				for (int num5 = 0; num5 < zoneComponents.Count; num5++)
+				{
+					zoneComponents[num5].DeserializeZonePlayerData(binaryReader, actorNumber);
+				}
+			}
+		}
+		for (int num6 = 0; num6 < tempAttachments.Count; num6++)
+		{
+			AttachmentData attachmentData = tempAttachments[num6];
+			GameEntityId entityIdFromNetId = GetEntityIdFromNetId(attachmentData.entityNetId);
+			GameEntityId entityIdFromNetId2 = GetEntityIdFromNetId(attachmentData.attachToEntityNetId);
+			if (!(entityIdFromNetId == entityIdFromNetId2))
+			{
+				AttachEntityLocal(entityIdFromNetId, entityIdFromNetId2, 0, attachmentData.localPosition, attachmentData.localRotation);
+			}
+		}
+	}
+
+	private void UpdateZoneState()
+	{
+		UpdateAuthority(tempRigs);
+		if (IsAuthority())
+		{
+			UpdateClientsFromAuthority(tempRigs);
+			UpdateZoneStateAuthority();
+		}
+		else
+		{
+			UpdateZoneStateClient();
+		}
+		for (int num = zoneStateData.zonePlayers.Count - 1; num >= 0; num--)
+		{
+			if (zoneStateData.zonePlayers[num] == null)
+			{
+				zoneStateData.zonePlayers.RemoveAt(num);
+			}
+		}
+	}
+
+	private void UpdateAuthority(List<VRRig> allRigs)
+	{
+		if (!PhotonNetwork.InRoom && base.IsMine)
+		{
+			if (!IsAuthority())
+			{
+				guard.SetOwnership(NetworkSystem.Instance.LocalPlayer);
+			}
+		}
+		else
+		{
+			if (!IsAuthority() || IsInZone())
+			{
+				return;
+			}
+			Player player = null;
+			GTZone currentZone = VRRig.LocalRig.zoneEntity.currentZone;
+			if (useRandomCheckForAuthority)
+			{
+				int num = 0;
+				while (player == null && num < 10)
+				{
+					num++;
+					int index = UnityEngine.Random.Range(0, allRigs.Count);
+					VRRig vRRig = allRigs[index];
+					if (GamePlayer.TryGetGamePlayer(vRRig, out var out_gamePlayer) && !(out_gamePlayer.rig == null) && out_gamePlayer.rig.Creator != null && !out_gamePlayer.rig.isLocal)
+					{
+						GTZone currentZone2 = vRRig.zoneEntity.currentZone;
+						if (currentZone2 == zone && currentZone2 != currentZone)
+						{
+							player = out_gamePlayer.rig.Creator.GetPlayerRef();
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < allRigs.Count; i++)
+				{
+					VRRig vRRig2 = allRigs[i];
+					if (GamePlayer.TryGetGamePlayer(vRRig2, out var out_gamePlayer2) && !(out_gamePlayer2.rig == null) && out_gamePlayer2.rig.Creator != null && !out_gamePlayer2.rig.isLocal)
+					{
+						GTZone currentZone3 = vRRig2.zoneEntity.currentZone;
+						if (currentZone3 == zone && currentZone3 != currentZone)
+						{
+							player = out_gamePlayer2.rig.Creator.GetPlayerRef();
+						}
+					}
+				}
+			}
+			if (player != null)
+			{
+				guard.TransferOwnership(player);
+			}
+		}
+	}
+
+	private void UpdateClientsFromAuthority(List<VRRig> allRigs)
+	{
+		if (!IsInZone())
+		{
+			return;
+		}
+		int num = 0;
+		while (num < zoneStateData.zoneStateRequests.Count)
+		{
+			ZoneStateRequest value = zoneStateData.zoneStateRequests[num];
+			if (value.player == null || value.zone != zone)
+			{
+				zoneStateData.zoneStateRequests.RemoveAt(num);
+				num--;
+				num++;
+				continue;
+			}
+			SendZoneStateToPlayerOrTarget(value.zone, value.player, RpcTarget.MasterClient);
+			value.completed = true;
+			zoneStateData.zoneStateRequests[num] = value;
+			zoneStateData.zoneStateRequests.RemoveAt(num);
+			break;
+		}
+	}
+
+	public void TestSerializeTableState()
+	{
+		ClearByteBuffer(tempSerializeGameState);
+		int num = SerializeGameState((int)zone, tempSerializeGameState, 15360);
+		byte[] array = GZipStream.CompressBuffer(tempSerializeGameState);
+		Debug.LogFormat("Test Serialize Game State Buffer Size Uncompressed {0}", num);
+		Debug.LogFormat("Test Serialize Game State Buffer Size Compressed {0}", array.Length);
+	}
+
+	public static void ClearByteBuffer(byte[] buffer)
+	{
+		int num = buffer.Length;
+		for (int i = 0; i < num; i++)
+		{
+			buffer[i] = 0;
+		}
+	}
+
+	private void SendZoneStateToPlayerOrTarget(GTZone zone, Player player, RpcTarget target)
+	{
+		ClearByteBuffer(tempSerializeGameState);
+		SerializeGameState((int)zone, tempSerializeGameState, 15360);
+		byte[] array = GZipStream.CompressBuffer(tempSerializeGameState);
+		byte[] array2 = new byte[512];
+		int num = 0;
+		int num2 = 0;
+		int num3 = array.Length;
+		while (num < num3)
+		{
+			int num4 = Mathf.Min(512, num3 - num);
+			Array.Copy(array, num, array2, 0, num4);
+			if (player != null)
+			{
+				photonView.RPC("SendTableDataRPC", player, num2, num3, array2);
+			}
+			else
+			{
+				photonView.RPC("SendTableDataRPC", target, num2, num3, array2);
+			}
+			num += num4;
+			num2++;
+		}
+	}
+
+	[PunRPC]
+	public void SendTableDataRPC(int packetNum, int totalBytes, byte[] bytes, PhotonMessageInfo info)
+	{
+		if (!IsAuthorityPlayer(info.Sender) || m_RpcSpamChecks.IsSpamming(RPC.SendTableData) || bytes == null || bytes.Length >= 15360 || zoneStateData.state != ZoneState.WaitingForState)
+		{
+			return;
+		}
+		if (packetNum == 0)
+		{
+			zoneStateData.numRecievedStateBytes = 0;
+			for (int i = 0; i < zoneStateData.recievedStateBytes.Length; i++)
+			{
+				zoneStateData.recievedStateBytes[i] = 0;
+			}
+		}
+		Array.Copy(bytes, 0, zoneStateData.recievedStateBytes, zoneStateData.numRecievedStateBytes, bytes.Length);
+		zoneStateData.numRecievedStateBytes += bytes.Length;
+		if (zoneStateData.numRecievedStateBytes >= totalBytes)
+		{
+			if (superInfectionManager != null && superInfectionManager.zoneSuperInfection == null)
+			{
+				PendingTableData = true;
+			}
+			else
+			{
+				ResolveTableData();
+			}
+		}
+	}
+
+	public void ResolveTableData()
+	{
+		PendingTableData = false;
+		if (activeManager.IsNotNull() && activeManager != this)
+		{
+			activeManager.zoneClearReason = ZoneClearReason.MigrateGameEntityZone;
+			activeManager.ClearZone(ignoreHeldGadgets: true);
+		}
+		ClearZone(ignoreHeldGadgets: true);
+		try
+		{
+			byte[] array = GZipStream.UncompressBuffer(zoneStateData.recievedStateBytes);
+			int numBytes = array.Length;
+			DeserializeTableState(array, numBytes);
+			SetZoneState(ZoneState.Active);
+		}
+		catch (Exception exception)
+		{
+			Debug.LogException(exception);
+			Debug.LogError("[GT/GameEntityManager]  ERROR!!!  ResolveTableData: See exception in previous message.");
+		}
+	}
+
+	private void UpdateZoneStateAuthority()
+	{
+		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
+		if (gamePlayer == null || gamePlayer.rig == null || gamePlayer.rig.OwningNetPlayer == null)
+		{
+			return;
+		}
+		if (!IsInZone())
+		{
+			if (zoneStateData.state != ZoneState.WaitingToEnterZone)
+			{
+				zoneClearReason = ZoneClearReason.LeaveZone;
+				SetZoneState(ZoneState.WaitingToEnterZone);
+				return;
+			}
+			if (entitiesActiveCount > 0 && ShouldClearZone())
+			{
+				zoneClearReason = ZoneClearReason.LeaveZone;
+				ClearZone();
+				return;
+			}
+		}
+		ZoneState state = zoneStateData.state;
+		if ((uint)state > 2u)
+		{
+			_ = 3;
+		}
+		else if (IsInZone() && PhotonNetwork.InRoom)
+		{
+			SetZoneState(ZoneState.Active);
+			for (int i = 0; i < zoneComponents.Count; i++)
+			{
+				zoneComponents[i].OnZoneCreate();
+			}
+		}
+	}
+
+	private void UpdateZoneStateClient()
+	{
+		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
+		if (gamePlayer == null || gamePlayer.rig == null || gamePlayer.rig.OwningNetPlayer == null)
+		{
+			return;
+		}
+		if (!IsInZone())
+		{
+			if (zoneStateData.state != ZoneState.WaitingToEnterZone)
+			{
+				zoneClearReason = ZoneClearReason.LeaveZone;
+				SetZoneState(ZoneState.WaitingToEnterZone);
+				return;
+			}
+			if (entities.Count > 0 && ShouldClearZone())
+			{
+				zoneClearReason = ZoneClearReason.LeaveZone;
+				ClearZone(ignoreHeldGadgets: true);
+				return;
+			}
+		}
+		switch (zoneStateData.state)
+		{
+		case ZoneState.WaitingToEnterZone:
+			if (HasAuthority() && IsInZone() && !IsAuthority())
+			{
+				SetZoneState(ZoneState.WaitingToRequestState);
+			}
+			break;
+		case ZoneState.WaitingToRequestState:
+			if (Time.timeAsDouble - zoneStateData.stateStartTime > 1.0)
+			{
+				nextNetId = 1;
+				List<GameEntity> list = GamePlayerLocal.instance.gamePlayer.HeldAndSnappedEntities();
+				SetZoneState(ZoneState.WaitingForState);
+				photonView.RPC("RequestZoneStateRPC", GetAuthorityPlayer(), (int)zone);
+				JoinWithItems(list);
+				GamePlayerLocal.instance.joinWithItemsSentForCurrentMigration = true;
+			}
+			break;
+		}
+	}
+
+	private bool IsInZone()
+	{
+		bool flag = true;
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			flag &= zoneComponents[i].IsZoneReady();
+		}
+		return flag;
+	}
+
+	private bool ShouldClearZone()
+	{
+		bool flag = false;
+		for (int i = 0; i < zoneComponents.Count; i++)
+		{
+			flag |= zoneComponents[i].ShouldClearZone();
+		}
+		return flag;
+	}
+
+	private void SetZoneState(ZoneState newState)
+	{
+		if (newState == zoneStateData.state)
+		{
+			return;
+		}
+		zoneStateData.state = newState;
+		zoneStateData.stateStartTime = Time.timeAsDouble;
+		switch (zoneStateData.state)
+		{
+		case ZoneState.WaitingToEnterZone:
+		{
+			bool num = ShouldClearZone();
+			bool flag = zoneClearReason == ZoneClearReason.MigrateGameEntityZone;
+			bool flag2 = zoneClearReason == ZoneClearReason.Disconnect;
+			bool ignoreHeldGadgets = !num && !flag && !flag2;
+			if (flag2 && activeManager == this)
+			{
+				activeManager = null;
+				GamePlayerLocal.instance.currGameEntityManager = null;
+			}
+			if (!IsAuthority())
+			{
+				photonView.RPC("PlayerLeftZoneRPC", GetAuthorityPlayer());
+			}
+			ClearZone(ignoreHeldGadgets);
+			break;
+		}
+		case ZoneState.WaitingForState:
+		{
+			zoneStateData.numRecievedStateBytes = 0;
+			for (int k = 0; k < zoneStateData.recievedStateBytes.Length; k++)
+			{
+				zoneStateData.recievedStateBytes[k] = 0;
+			}
+			break;
+		}
+		case ZoneState.Active:
+		{
+			if (activeManager == this)
+			{
+				for (int i = 0; i < zoneComponents.Count; i++)
+				{
+					try
+					{
+						zoneComponents[i].OnZoneInit();
+					}
+					catch (Exception exception)
+					{
+						Debug.LogException(exception);
+					}
+				}
+				break;
+			}
+			GameEntityManager gameEntityManager = activeManager;
+			activeManager = this;
+			for (int j = 0; j < zoneComponents.Count; j++)
+			{
+				try
+				{
+					zoneComponents[j].OnZoneInit();
+				}
+				catch (Exception exception2)
+				{
+					Debug.LogException(exception2);
+				}
+			}
+			GamePlayerLocal.instance.MigrateToEntityManager(this);
+			if (gameEntityManager.IsNotNull())
+			{
+				gameEntityManager.zoneClearReason = ZoneClearReason.MigrateGameEntityZone;
+				gameEntityManager.SetZoneState(ZoneState.WaitingToEnterZone);
+			}
+			break;
+		}
+		case ZoneState.WaitingToRequestState:
+			break;
+		}
+	}
+
+	public void DebugSendState()
+	{
+		SetZoneState(ZoneState.WaitingToRequestState);
+	}
+
+	[PunRPC]
+	public void RequestZoneStateRPC(int zoneId, PhotonMessageInfo info)
+	{
+		int actorNumber = info.Sender.ActorNumber;
+		if (!IsAuthority() || zoneId != (int)zone || zoneStateData.zoneStateRequests == null || !GamePlayer.TryGetGamePlayer(info.Sender, out var gamePlayer) || !gamePlayer.newJoinZoneLimiter.CheckCallTime(Time.time))
+		{
+			return;
+		}
+		playerZoneJoinTimes[actorNumber] = Time.unscaledTime;
+		for (int i = 0; i < zoneStateData.zoneStateRequests.Count; i++)
+		{
+			Player player = zoneStateData.zoneStateRequests[i].player;
+			if (player != null && player.ActorNumber == actorNumber)
+			{
+				return;
+			}
+		}
+		zoneStateData.zoneStateRequests.Add(new ZoneStateRequest
+		{
+			player = info.Sender,
+			zone = zone,
+			completed = false
+		});
+	}
+
+	public override void WriteDataFusion()
+	{
+	}
+
+	public override void ReadDataFusion()
+	{
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (superInfectionManager != null)
+		{
+			superInfectionManager.WriteDataPUN(stream, info);
+		}
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (superInfectionManager != null)
+		{
+			superInfectionManager.ReadDataPUN(stream, info);
+		}
+	}
+
+	private void OnNetworkJoinedRoom()
+	{
+		zoneClearReason = ZoneClearReason.JoinZone;
+		SetZoneState(ZoneState.WaitingToEnterZone);
+	}
+
+	private void OnNetworkLeftRoom()
+	{
+		zoneClearReason = ZoneClearReason.Disconnect;
+		if (zoneStateData.state != ZoneState.WaitingToEnterZone)
+		{
+			SetZoneState(ZoneState.WaitingToEnterZone);
+		}
+		else
+		{
+			if (activeManager == this)
+			{
+				activeManager = null;
+				GamePlayerLocal.instance.currGameEntityManager = null;
+			}
+			ClearZone();
+		}
+		playerZoneJoinTimes.Clear();
+	}
+
+	private void OnNetworkPlayerLeft(NetPlayer leavingPlayer)
+	{
+		int num = 0;
+		foreach (GameEntity entity in entities)
+		{
+			if (entity != null && entity.IsAttachedToPlayer(leavingPlayer))
+			{
+				num++;
+			}
+		}
+		_ = 0;
+		playerZoneJoinTimes.Remove(leavingPlayer.ActorNumber);
+	}
+
+	public void OnRigDeactivated(RigContainer container)
+	{
+		GamePlayer component = container.GetComponent<GamePlayer>();
+		int? num = component?.rig?.OwningNetPlayer?.ActorNumber;
+		if (num.HasValue)
+		{
+			num.GetValueOrDefault();
+		}
+		if (this != activeManager)
+		{
+			int num2 = 0;
+			foreach (GameEntity entity in entities)
+			{
+				if (entity != null && entity.IsAttachedToPlayer(component?.rig?.OwningNetPlayer))
+				{
+					num2++;
+				}
+			}
+			_ = 0;
+		}
+		else
+		{
+			if (IsAuthority())
+			{
+				RequestDestroyItems(component.HeldAndSnappedItems(this));
+			}
+			component.ResetData();
+		}
+	}
+
+	public void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
+	{
+		if (toPlayer == null || !toPlayer.IsLocal || fromPlayer == null || fromPlayer.InRoom || !GamePlayer.TryGetGamePlayer(fromPlayer.ActorNumber, out var out_gamePlayer))
+		{
+			return;
+		}
+		foreach (GameEntityId item in out_gamePlayer.IterateHeldAndSnappedItems(this))
+		{
+			if (!netIdsForDelete.Contains(GetNetIdFromEntityId(item)))
+			{
+				netIdsForDelete.Add(GetNetIdFromEntityId(item));
+			}
+			DestroyItemLocal(item);
+		}
+		out_gamePlayer.OnPlayerLeftZone?.Invoke();
+	}
+
+	public bool OnOwnershipRequest(NetPlayer fromPlayer)
+	{
+		return false;
+	}
+
+	public void OnMyOwnerLeft()
+	{
+	}
+
+	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)
+	{
+		return false;
+	}
+
+	public void OnMyCreatorLeft()
+	{
+	}
+
+	public void RefreshRigList()
+	{
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
 	}
 }

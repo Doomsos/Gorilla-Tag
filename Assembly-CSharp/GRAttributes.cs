@@ -1,41 +1,57 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GRAttributes : MonoBehaviour
 {
+	[Serializable]
+	public struct GRAttributePair
+	{
+		public GRAttributeType type;
+
+		public float value;
+	}
+
+	[SerializeField]
+	private List<GRAttributePair> startingAttributes;
+
+	[NonSerialized]
+	private GRBonusSystem bonusSystem = new GRBonusSystem();
+
+	public Dictionary<GRAttributeType, int> defaultAttributes = new Dictionary<GRAttributeType, int>();
+
 	private void Awake()
 	{
-		foreach (GRAttributes.GRAttributePair grattributePair in this.startingAttributes)
+		foreach (GRAttributePair startingAttribute in startingAttributes)
 		{
-			this.defaultAttributes[grattributePair.type] = (int)(grattributePair.value * 100f);
+			defaultAttributes[startingAttribute.type] = (int)(startingAttribute.value * 100f);
 		}
-		this.bonusSystem.Init(this);
+		bonusSystem.Init(this);
 	}
 
 	public bool HasBeenInitialized()
 	{
-		return this.bonusSystem.GetDefaultAttributes() != null;
+		return bonusSystem.GetDefaultAttributes() != null;
 	}
 
 	public void AddAttribute(GRAttributeType type, float value)
 	{
-		this.defaultAttributes[type] = (int)(value * 100f);
+		defaultAttributes[type] = (int)(value * 100f);
 	}
 
 	public void AddBonus(GRBonusEntry entry)
 	{
-		this.bonusSystem.AddBonus(entry);
+		bonusSystem.AddBonus(entry);
 	}
 
 	public void RemoveBonus(GRBonusEntry entry)
 	{
-		this.bonusSystem.RemoveBonus(entry);
+		bonusSystem.RemoveBonus(entry);
 	}
 
 	public float CalculateFinalFloatValueForAttribute(GRAttributeType attributeType)
 	{
-		int num = this.bonusSystem.CalculateFinalValueForAttribute(attributeType);
+		int num = bonusSystem.CalculateFinalValueForAttribute(attributeType);
 		float result = 0f;
 		if (num > 0)
 		{
@@ -46,7 +62,7 @@ public class GRAttributes : MonoBehaviour
 
 	public int CalculateFinalValueForAttribute(GRAttributeType attributeType)
 	{
-		int num = this.bonusSystem.CalculateFinalValueForAttribute(attributeType);
+		int num = bonusSystem.CalculateFinalValueForAttribute(attributeType);
 		if (num > 0)
 		{
 			num /= 100;
@@ -56,22 +72,6 @@ public class GRAttributes : MonoBehaviour
 
 	public bool HasValueForAttribute(GRAttributeType attributeType)
 	{
-		return this.bonusSystem.HasValueForAttribute(attributeType);
-	}
-
-	[SerializeField]
-	private List<GRAttributes.GRAttributePair> startingAttributes;
-
-	[NonSerialized]
-	private GRBonusSystem bonusSystem = new GRBonusSystem();
-
-	public Dictionary<GRAttributeType, int> defaultAttributes = new Dictionary<GRAttributeType, int>();
-
-	[Serializable]
-	public struct GRAttributePair
-	{
-		public GRAttributeType type;
-
-		public float value;
+		return bonusSystem.HasValueForAttribute(attributeType);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,662 +8,28 @@ using UnityEngine.AI;
 
 public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameAgentComponent, IGameEntityDebugComponent, ITickSystemTick
 {
-	public bool TickRunning { get; set; }
-
-	private void Awake()
+	public enum Behavior
 	{
-		this.rigidBody = base.GetComponent<Rigidbody>();
-		this.colliders = new List<Collider>(4);
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		if (this.armor != null)
-		{
-			this.armor.SetHp(0);
-		}
-		this.navAgent.updateRotation = false;
-		this.behaviorStartTime = -1.0;
-		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-		this.senseNearby.Setup(this.headTransform, this.entity);
-		GameEntity gameEntity = this.entity;
-		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this.OnGrabbed));
-		GameEntity gameEntity2 = this.entity;
-		gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(this.OnReleased));
-		base.Invoke("PlaySpawnAudio", 0.1f);
+		Idle,
+		Wander,
+		Chase,
+		Attack,
+		Stagger,
+		Grabbed,
+		Thrown,
+		Destroyed,
+		Investigate,
+		Jump,
+		Flashed,
+		Count
 	}
 
-	private void OnEnable()
+	public enum BodyState
 	{
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private void OnDisable()
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	private void PlaySpawnAudio()
-	{
-		this.spawnSound.Play(null);
-	}
-
-	public void OnEntityInit()
-	{
-		this.abilityIdle.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityChase.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityAttack.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityWander.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityDie.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityGrabbed.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityThrown.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityStagger.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityFlashed.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityInvestigate.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
-		this.SetBehavior(GREnemyPest.Behavior.Wander, false);
-		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
-		{
-			foreach (GRBonusEntry entry in this.entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
-			{
-				this.attributes.AddBonus(entry);
-			}
-		}
-		this.navAgent.speed = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
-		this.SetHP(this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax));
-		this.agent.navAgent.autoTraverseOffMeshLink = false;
-		this.agent.onJumpRequested += this.OnAgentJumpRequested;
-		if (this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
-		{
-			this.SetBodyState(GREnemyPest.BodyState.Shell, true);
-			return;
-		}
-		this.SetBodyState(GREnemyPest.BodyState.Bones, true);
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnDestroy()
-	{
-		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
-	}
-
-	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
-	{
-		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
-		this.SetBehavior(GREnemyPest.Behavior.Jump, false);
-	}
-
-	public void OnNetworkBehaviorStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 11)
-		{
-			return;
-		}
-		this.SetBehavior((GREnemyPest.Behavior)newState, false);
-	}
-
-	public void SetHP(int hp)
-	{
-		this.hp = hp;
-	}
-
-	public bool TrySetBehavior(GREnemyPest.Behavior newBehavior)
-	{
-		if (this.currBehavior == GREnemyPest.Behavior.Jump && newBehavior == GREnemyPest.Behavior.Stagger)
-		{
-			return false;
-		}
-		this.SetBehavior(newBehavior, false);
-		return true;
-	}
-
-	public void SetBehavior(GREnemyPest.Behavior newBehavior, bool force = false)
-	{
-		if (this.currBehavior == newBehavior && !force)
-		{
-			return;
-		}
-		switch (this.currBehavior)
-		{
-		case GREnemyPest.Behavior.Idle:
-			this.abilityIdle.Stop();
-			break;
-		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.Stop();
-			break;
-		case GREnemyPest.Behavior.Chase:
-			this.abilityChase.Stop();
-			break;
-		case GREnemyPest.Behavior.Attack:
-			this.abilityAttack.Stop();
-			break;
-		case GREnemyPest.Behavior.Stagger:
-			this.abilityStagger.Stop();
-			break;
-		case GREnemyPest.Behavior.Grabbed:
-			this.abilityGrabbed.Stop();
-			break;
-		case GREnemyPest.Behavior.Thrown:
-			this.abilityThrown.Stop();
-			break;
-		case GREnemyPest.Behavior.Destroyed:
-			this.abilityDie.Stop();
-			break;
-		case GREnemyPest.Behavior.Investigate:
-			this.abilityInvestigate.Stop();
-			break;
-		case GREnemyPest.Behavior.Jump:
-			this.abilityJump.Stop();
-			break;
-		case GREnemyPest.Behavior.Flashed:
-			this.abilityFlashed.Stop();
-			break;
-		}
-		this.currBehavior = newBehavior;
-		this.behaviorStartTime = Time.timeAsDouble;
-		switch (this.currBehavior)
-		{
-		case GREnemyPest.Behavior.Idle:
-			this.abilityIdle.Start();
-			break;
-		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.Start();
-			break;
-		case GREnemyPest.Behavior.Chase:
-			this.abilityChase.Start();
-			this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
-			break;
-		case GREnemyPest.Behavior.Attack:
-			this.abilityAttack.Start();
-			this.abilityAttack.SetTargetPlayer(this.agent.targetPlayer);
-			break;
-		case GREnemyPest.Behavior.Stagger:
-			this.abilityStagger.Start();
-			break;
-		case GREnemyPest.Behavior.Grabbed:
-			this.abilityGrabbed.Start();
-			break;
-		case GREnemyPest.Behavior.Thrown:
-			this.abilityThrown.Start();
-			break;
-		case GREnemyPest.Behavior.Destroyed:
-			this.abilityDie.Start();
-			break;
-		case GREnemyPest.Behavior.Investigate:
-			this.abilityInvestigate.Start();
-			break;
-		case GREnemyPest.Behavior.Jump:
-			this.abilityJump.Start();
-			break;
-		case GREnemyPest.Behavior.Flashed:
-			this.abilityFlashed.Start();
-			break;
-		}
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestBehaviorChange((byte)this.currBehavior);
-		}
-	}
-
-	private void OnGrabbed()
-	{
-		if (this.currBehavior == GREnemyPest.Behavior.Destroyed)
-		{
-			return;
-		}
-		this.SetBehavior(GREnemyPest.Behavior.Grabbed, false);
-	}
-
-	private void OnReleased()
-	{
-		if (this.currBehavior == GREnemyPest.Behavior.Destroyed)
-		{
-			return;
-		}
-		this.SetBehavior(GREnemyPest.Behavior.Thrown, false);
-	}
-
-	public void Tick()
-	{
-		this.OnUpdate(Time.deltaTime);
-	}
-
-	public void OnEntityThink(float dt)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		GREnemyPest.tempRigs.Clear();
-		GREnemyPest.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GREnemyPest.tempRigs);
-		this.senseNearby.UpdateNearby(GREnemyPest.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		this.agent.RequestTarget((vrrig == null) ? null : vrrig.OwningNetPlayer);
-		GREnemyPest.Behavior behavior = this.currBehavior;
-		switch (behavior)
-		{
-		case GREnemyPest.Behavior.Idle:
-			this.ChooseNewBehavior();
-			return;
-		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		case GREnemyPest.Behavior.Chase:
-			if (this.agent.targetPlayer != null)
-			{
-				this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
-			}
-			this.abilityChase.Think(dt);
-			return;
-		default:
-			if (behavior != GREnemyPest.Behavior.Investigate)
-			{
-				return;
-			}
-			this.abilityInvestigate.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		}
-	}
-
-	private void ChooseNewBehavior()
-	{
-		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
-		{
-			this.investigateLocation = null;
-			this.SetBehavior(GREnemyPest.Behavior.Chase, false);
-			return;
-		}
-		this.investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, this.hearingRadius, this.investigateLocation);
-		if (this.investigateLocation != null)
-		{
-			this.abilityInvestigate.SetTargetPos(this.investigateLocation.Value);
-			this.SetBehavior(GREnemyPest.Behavior.Investigate, false);
-			return;
-		}
-		this.SetBehavior(GREnemyPest.Behavior.Wander, false);
-	}
-
-	public void OnUpdate(float dt)
-	{
-		if (this.entity.IsAuthority())
-		{
-			this.OnUpdateAuthority(dt);
-			return;
-		}
-		this.OnUpdateRemote(dt);
-	}
-
-	public void OnUpdateAuthority(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyPest.Behavior.Idle:
-			this.abilityIdle.UpdateAuthority(dt);
-			return;
-		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.UpdateAuthority(dt);
-			return;
-		case GREnemyPest.Behavior.Chase:
-		{
-			this.abilityChase.UpdateAuthority(dt);
-			if (this.abilityChase.IsDone())
-			{
-				this.SetBehavior(GREnemyPest.Behavior.Wander, false);
-				return;
-			}
-			GRPlayer grplayer = GRPlayer.Get(this.agent.targetPlayer);
-			if (grplayer != null)
-			{
-				float num = this.attackRange * this.attackRange;
-				if ((grplayer.transform.position - base.transform.position).sqrMagnitude < num)
-				{
-					this.SetBehavior(GREnemyPest.Behavior.Attack, false);
-					return;
-				}
-			}
-			break;
-		}
-		case GREnemyPest.Behavior.Attack:
-			this.abilityAttack.UpdateAuthority(dt);
-			if (this.abilityAttack.IsDone())
-			{
-				this.SetBehavior(GREnemyPest.Behavior.Chase, false);
-				return;
-			}
-			break;
-		case GREnemyPest.Behavior.Stagger:
-			this.abilityStagger.UpdateAuthority(dt);
-			if (this.abilityStagger.IsDone())
-			{
-				this.SetBehavior(GREnemyPest.Behavior.Wander, false);
-				return;
-			}
-			break;
-		case GREnemyPest.Behavior.Grabbed:
-			break;
-		case GREnemyPest.Behavior.Thrown:
-			if (this.abilityThrown.IsDone())
-			{
-				this.SetBehavior(GREnemyPest.Behavior.Wander, false);
-				return;
-			}
-			break;
-		case GREnemyPest.Behavior.Destroyed:
-			this.abilityDie.UpdateAuthority(dt);
-			return;
-		case GREnemyPest.Behavior.Investigate:
-			this.abilityInvestigate.UpdateAuthority(dt);
-			return;
-		case GREnemyPest.Behavior.Jump:
-			this.abilityJump.UpdateAuthority(dt);
-			if (this.abilityJump.IsDone())
-			{
-				this.ChooseNewBehavior();
-				return;
-			}
-			break;
-		case GREnemyPest.Behavior.Flashed:
-			this.abilityFlashed.UpdateAuthority(dt);
-			if (this.abilityFlashed.IsDone())
-			{
-				this.ChooseNewBehavior();
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnUpdateRemote(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Chase:
-			this.abilityChase.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Attack:
-			this.abilityAttack.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Stagger:
-			this.abilityStagger.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Grabbed:
-		case GREnemyPest.Behavior.Thrown:
-			break;
-		case GREnemyPest.Behavior.Destroyed:
-			this.abilityDie.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Investigate:
-			this.abilityInvestigate.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Jump:
-			this.abilityJump.UpdateRemote(dt);
-			return;
-		case GREnemyPest.Behavior.Flashed:
-			this.abilityFlashed.UpdateRemote(dt);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnGameEntitySerialize(BinaryWriter writer)
-	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		writer.Write(value);
-		writer.Write(this.hp);
-		writer.Write(value2);
-	}
-
-	public void OnGameEntityDeserialize(BinaryReader reader)
-	{
-		GREnemyPest.Behavior newBehavior = (GREnemyPest.Behavior)reader.ReadByte();
-		int num = reader.ReadInt32();
-		GREnemyPest.BodyState newBodyState = (GREnemyPest.BodyState)reader.ReadByte();
-		this.SetHP(num);
-		this.SetBehavior(newBehavior, true);
-		this.SetBodyState(newBodyState, true);
-	}
-
-	public bool IsHitValid(GameHitData hit)
-	{
-		return true;
-	}
-
-	public void OnHit(GameHitData hit)
-	{
-		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
-		GRTool gameComponent = this.entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
-		if (gameComponent != null)
-		{
-			switch (hitTypeId)
-			{
-			case GameHitType.Club:
-				this.OnHitByClub(hit);
-				return;
-			case GameHitType.Flash:
-				this.OnHitByFlash(gameComponent, hit);
-				return;
-			case GameHitType.Shield:
-				this.OnHitByShield(hit);
-				break;
-			default:
-				return;
-			}
-		}
-	}
-
-	private void OnHitByClub(GameHitData hit)
-	{
-		if (this.currBodyState != GREnemyPest.BodyState.Bones)
-		{
-			if (this.currBodyState == GREnemyPest.BodyState.Shell && this.armor != null)
-			{
-				this.armor.PlayBlockFx(hit.hitEntityPosition);
-			}
-			return;
-		}
-		if (this.currBehavior == GREnemyPest.Behavior.Destroyed)
-		{
-			return;
-		}
-		this.hp -= hit.hitAmount;
-		if (this.hp <= 0)
-		{
-			this.abilityDie.SetInstigatingPlayerIndex(this.entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
-			this.SetBehavior(GREnemyPest.Behavior.Destroyed, false);
-			return;
-		}
-		this.abilityStagger.SetStaggerVelocity(hit.hitImpulse);
-		this.TrySetBehavior(GREnemyPest.Behavior.Stagger);
-	}
-
-	public void InstantDeath()
-	{
-		this.hp = 0;
-		this.SetBehavior(GREnemyPest.Behavior.Destroyed, false);
-	}
-
-	private void OnHitByFlash(GRTool tool, GameHitData hit)
-	{
-		this.abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
-		if (this.currBodyState == GREnemyPest.BodyState.Shell)
-		{
-			this.hp -= hit.hitAmount;
-			if (this.armor != null)
-			{
-				this.armor.SetHp(this.hp);
-			}
-			if (this.hp <= 0)
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayDestroyFx(this.armor.transform.position);
-				}
-				this.SetBodyState(GREnemyPest.BodyState.Bones, false);
-				if (tool.gameEntity.IsHeldByLocalPlayer())
-				{
-					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name, 1);
-				}
-				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
-				{
-					this.armor.FragmentArmor();
-				}
-			}
-			else
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayHitFx(this.armor.transform.position);
-				}
-				this.RefreshBody();
-			}
-		}
-		GRToolFlash component = tool.GetComponent<GRToolFlash>();
-		if (component != null)
-		{
-			this.abilityFlashed.SetStunTime(component.stunDuration);
-		}
-		this.TrySetBehavior(GREnemyPest.Behavior.Flashed);
-	}
-
-	private void OnHitByShield(GameHitData hit)
-	{
-		this.OnHitByClub(hit);
-	}
-
-	private void OnTriggerEnter(Collider collider)
-	{
-		if (this.currBehavior != GREnemyPest.Behavior.Attack)
-		{
-			return;
-		}
-		GRShieldCollider component = collider.GetComponent<GRShieldCollider>();
-		if (component != null)
-		{
-			Vector3 enemyAttackDirection = this.abilityAttack.targetPos - this.abilityAttack.initialPos;
-			GameHittable component2 = base.GetComponent<GameHittable>();
-			component.BlockHittable(base.transform.position, enemyAttackDirection, component2);
-			return;
-		}
-		Rigidbody attachedRigidbody = collider.attachedRigidbody;
-		if (attachedRigidbody != null)
-		{
-			GRPlayer component3 = attachedRigidbody.GetComponent<GRPlayer>();
-			if (component3 != null && component3.gamePlayer.IsLocal() && Time.time > this.lastHitPlayerTime + this.minTimeBetweenHits)
-			{
-				if (this.tryHitPlayerCoroutine != null)
-				{
-					base.StopCoroutine(this.tryHitPlayerCoroutine);
-				}
-				this.tryHitPlayerCoroutine = base.StartCoroutine(this.TryHitPlayer(component3));
-			}
-			GRBreakable component4 = attachedRigidbody.GetComponent<GRBreakable>();
-			GameHittable component5 = attachedRigidbody.GetComponent<GameHittable>();
-			if (component4 != null && component5 != null)
-			{
-				GameHitData hitData = new GameHitData
-				{
-					hitTypeId = 0,
-					hitEntityId = component5.gameEntity.id,
-					hitByEntityId = this.entity.id,
-					hitEntityPosition = component4.transform.position,
-					hitImpulse = Vector3.zero,
-					hitPosition = component4.transform.position,
-					hittablePoint = component5.FindHittablePoint(collider)
-				};
-				component5.RequestHit(hitData);
-			}
-		}
-	}
-
-	private IEnumerator TryHitPlayer(GRPlayer player)
-	{
-		yield return new WaitForUpdate();
-		if (this.currBehavior == GREnemyPest.Behavior.Attack && player != null && player.gamePlayer.IsLocal() && Time.time > this.lastHitPlayerTime + this.minTimeBetweenHits)
-		{
-			this.lastHitPlayerTime = Time.time;
-			GhostReactorManager.Get(this.entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Chaser, this.entity.id, player, base.transform.position);
-		}
-		yield break;
-	}
-
-	private void RefreshBody()
-	{
-		switch (this.currBodyState)
-		{
-		case GREnemyPest.BodyState.Destroyed:
-			this.armor.SetHp(0);
-			return;
-		case GREnemyPest.BodyState.Bones:
-			this.armor.SetHp(0);
-			GREnemy.HideObjects(this.bonesStateVisibleObjects, false);
-			GREnemy.HideObjects(this.alwaysVisibleObjects, false);
-			return;
-		case GREnemyPest.BodyState.Shell:
-			this.armor.SetHp(this.hp);
-			GREnemy.HideObjects(this.bonesStateVisibleObjects, true);
-			GREnemy.HideObjects(this.alwaysVisibleObjects, false);
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void SetBodyState(GREnemyPest.BodyState newBodyState, bool force = false)
-	{
-		if (this.currBodyState == newBodyState && !force)
-		{
-			return;
-		}
-		switch (this.currBodyState)
-		{
-		case GREnemyPest.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemyPest.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.currBodyState = newBodyState;
-		switch (this.currBodyState)
-		{
-		case GREnemyPest.BodyState.Destroyed:
-			GhostReactorManager.Get(this.entity).ReportEnemyDeath();
-			break;
-		case GREnemyPest.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemyPest.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestStateChange((byte)newBodyState);
-		}
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("State: <color=\"yellow\">{0}<color=\"white\"> HP: <color=\"yellow\">{1}<color=\"white\">", this.currBehavior.ToString(), this.hp));
-		float magnitude = (GRSenseNearby.GetRigTestLocation(VRRig.LocalRig) - base.transform.position).magnitude;
-		bool flag = GRSenseLineOfSight.HasGeoLineOfSight(this.headTransform.position, GRSenseNearby.GetRigTestLocation(VRRig.LocalRig), this.senseLineOfSight.sightDist, this.senseLineOfSight.visibilityMask);
-		strings.Add(string.Format("player rig dis: {0} has los: {1}", magnitude, flag));
+		Destroyed,
+		Bones,
+		Shell,
+		Count
 	}
 
 	public GameEntity entity;
@@ -732,13 +98,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 	public int hp;
 
 	[ReadOnly]
-	public GREnemyPest.Behavior currBehavior;
+	public Behavior currBehavior;
 
 	[ReadOnly]
 	public double behaviorEndTime;
 
 	[ReadOnly]
-	public GREnemyPest.BodyState currBodyState;
+	public BodyState currBodyState;
 
 	[ReadOnly]
 	public int nextPatrolNode;
@@ -761,27 +127,644 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 
 	private Coroutine tryHitPlayerCoroutine;
 
-	public enum Behavior
+	public bool TickRunning { get; set; }
+
+	private void Awake()
 	{
-		Idle,
-		Wander,
-		Chase,
-		Attack,
-		Stagger,
-		Grabbed,
-		Thrown,
-		Destroyed,
-		Investigate,
-		Jump,
-		Flashed,
-		Count
+		rigidBody = GetComponent<Rigidbody>();
+		colliders = new List<Collider>(4);
+		GetComponentsInChildren(colliders);
+		if (armor != null)
+		{
+			armor.SetHp(0);
+		}
+		navAgent.updateRotation = false;
+		behaviorStartTime = -1.0;
+		agent.onBehaviorStateChanged += OnNetworkBehaviorStateChange;
+		senseNearby.Setup(headTransform, entity);
+		GameEntity gameEntity = entity;
+		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(OnGrabbed));
+		GameEntity gameEntity2 = entity;
+		gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(OnReleased));
+		Invoke("PlaySpawnAudio", 0.1f);
 	}
 
-	public enum BodyState
+	private void OnEnable()
 	{
-		Destroyed,
-		Bones,
-		Shell,
-		Count
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	private void PlaySpawnAudio()
+	{
+		spawnSound.Play(null);
+	}
+
+	public void OnEntityInit()
+	{
+		abilityIdle.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityChase.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityAttack.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityWander.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityDie.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityGrabbed.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityThrown.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityStagger.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityFlashed.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityInvestigate.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		abilityJump.Setup(agent, anim, audioSource, base.transform, headTransform, senseLineOfSight);
+		SetBehavior(Behavior.Wander);
+		if ((bool)entity && (bool)entity.manager && (bool)entity.manager.ghostReactorManager && (bool)entity.manager.ghostReactorManager.reactor)
+		{
+			foreach (GRBonusEntry enemyGlobalBonuse in entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
+			{
+				attributes.AddBonus(enemyGlobalBonuse);
+			}
+		}
+		navAgent.speed = attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
+		SetHP(attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax));
+		agent.navAgent.autoTraverseOffMeshLink = false;
+		agent.onJumpRequested += OnAgentJumpRequested;
+		if (attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
+		{
+			SetBodyState(BodyState.Shell, force: true);
+		}
+		else
+		{
+			SetBodyState(BodyState.Bones, force: true);
+		}
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnDestroy()
+	{
+		agent.onBehaviorStateChanged -= OnNetworkBehaviorStateChange;
+	}
+
+	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
+	{
+		abilityJump.SetupJump(start, end, heightScale, speedScale);
+		SetBehavior(Behavior.Jump);
+	}
+
+	public void OnNetworkBehaviorStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 11)
+		{
+			SetBehavior((Behavior)newState);
+		}
+	}
+
+	public void SetHP(int hp)
+	{
+		this.hp = hp;
+	}
+
+	public bool TrySetBehavior(Behavior newBehavior)
+	{
+		if (currBehavior == Behavior.Jump && newBehavior == Behavior.Stagger)
+		{
+			return false;
+		}
+		SetBehavior(newBehavior);
+		return true;
+	}
+
+	public void SetBehavior(Behavior newBehavior, bool force = false)
+	{
+		if (currBehavior != newBehavior || force)
+		{
+			switch (currBehavior)
+			{
+			case Behavior.Chase:
+				abilityChase.Stop();
+				break;
+			case Behavior.Stagger:
+				abilityStagger.Stop();
+				break;
+			case Behavior.Wander:
+				abilityWander.Stop();
+				break;
+			case Behavior.Idle:
+				abilityIdle.Stop();
+				break;
+			case Behavior.Attack:
+				abilityAttack.Stop();
+				break;
+			case Behavior.Destroyed:
+				abilityDie.Stop();
+				break;
+			case Behavior.Grabbed:
+				abilityGrabbed.Stop();
+				break;
+			case Behavior.Thrown:
+				abilityThrown.Stop();
+				break;
+			case Behavior.Investigate:
+				abilityInvestigate.Stop();
+				break;
+			case Behavior.Jump:
+				abilityJump.Stop();
+				break;
+			case Behavior.Flashed:
+				abilityFlashed.Stop();
+				break;
+			}
+			currBehavior = newBehavior;
+			behaviorStartTime = Time.timeAsDouble;
+			switch (currBehavior)
+			{
+			case Behavior.Wander:
+				abilityWander.Start();
+				break;
+			case Behavior.Chase:
+				abilityChase.Start();
+				abilityChase.SetTargetPlayer(agent.targetPlayer);
+				break;
+			case Behavior.Attack:
+				abilityAttack.Start();
+				abilityAttack.SetTargetPlayer(agent.targetPlayer);
+				break;
+			case Behavior.Idle:
+				abilityIdle.Start();
+				break;
+			case Behavior.Stagger:
+				abilityStagger.Start();
+				break;
+			case Behavior.Destroyed:
+				abilityDie.Start();
+				break;
+			case Behavior.Grabbed:
+				abilityGrabbed.Start();
+				break;
+			case Behavior.Thrown:
+				abilityThrown.Start();
+				break;
+			case Behavior.Investigate:
+				abilityInvestigate.Start();
+				break;
+			case Behavior.Jump:
+				abilityJump.Start();
+				break;
+			case Behavior.Flashed:
+				abilityFlashed.Start();
+				break;
+			}
+			if (entity.IsAuthority())
+			{
+				agent.RequestBehaviorChange((byte)currBehavior);
+			}
+		}
+	}
+
+	private void OnGrabbed()
+	{
+		if (currBehavior != Behavior.Destroyed)
+		{
+			SetBehavior(Behavior.Grabbed);
+		}
+	}
+
+	private void OnReleased()
+	{
+		if (currBehavior != Behavior.Destroyed)
+		{
+			SetBehavior(Behavior.Thrown);
+		}
+	}
+
+	public void Tick()
+	{
+		OnUpdate(Time.deltaTime);
+	}
+
+	public void OnEntityThink(float dt)
+	{
+		if (!entity.IsAuthority())
+		{
+			return;
+		}
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+		float outDistanceSq;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		agent.RequestTarget((vRRig == null) ? null : vRRig.OwningNetPlayer);
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			ChooseNewBehavior();
+			break;
+		case Behavior.Wander:
+			abilityWander.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Chase:
+			if (agent.targetPlayer != null)
+			{
+				abilityChase.SetTargetPlayer(agent.targetPlayer);
+			}
+			abilityChase.Think(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Think(dt);
+			ChooseNewBehavior();
+			break;
+		}
+	}
+
+	private void ChooseNewBehavior()
+	{
+		if (!GhostReactorManager.AggroDisabled && senseNearby.IsAnyoneNearby())
+		{
+			investigateLocation = null;
+			SetBehavior(Behavior.Chase);
+			return;
+		}
+		investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, hearingRadius, investigateLocation);
+		if (investigateLocation.HasValue)
+		{
+			abilityInvestigate.SetTargetPos(investigateLocation.Value);
+			SetBehavior(Behavior.Investigate);
+		}
+		else
+		{
+			SetBehavior(Behavior.Wander);
+		}
+	}
+
+	public void OnUpdate(float dt)
+	{
+		if (entity.IsAuthority())
+		{
+			OnUpdateAuthority(dt);
+		}
+		else
+		{
+			OnUpdateRemote(dt);
+		}
+	}
+
+	public void OnUpdateAuthority(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			abilityIdle.UpdateAuthority(dt);
+			break;
+		case Behavior.Chase:
+		{
+			abilityChase.UpdateAuthority(dt);
+			if (abilityChase.IsDone())
+			{
+				SetBehavior(Behavior.Wander);
+				break;
+			}
+			GRPlayer gRPlayer = GRPlayer.Get(agent.targetPlayer);
+			if (gRPlayer != null)
+			{
+				float num = attackRange * attackRange;
+				if ((gRPlayer.transform.position - base.transform.position).sqrMagnitude < num)
+				{
+					SetBehavior(Behavior.Attack);
+				}
+			}
+			break;
+		}
+		case Behavior.Attack:
+			abilityAttack.UpdateAuthority(dt);
+			if (abilityAttack.IsDone())
+			{
+				SetBehavior(Behavior.Chase);
+			}
+			break;
+		case Behavior.Stagger:
+			abilityStagger.UpdateAuthority(dt);
+			if (abilityStagger.IsDone())
+			{
+				SetBehavior(Behavior.Wander);
+			}
+			break;
+		case Behavior.Destroyed:
+			abilityDie.UpdateAuthority(dt);
+			break;
+		case Behavior.Wander:
+			abilityWander.UpdateAuthority(dt);
+			break;
+		case Behavior.Thrown:
+			if (abilityThrown.IsDone())
+			{
+				SetBehavior(Behavior.Wander);
+			}
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateAuthority(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateAuthority(dt);
+			if (abilityJump.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateAuthority(dt);
+			if (abilityFlashed.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		case Behavior.Grabbed:
+			break;
+		}
+	}
+
+	public void OnUpdateRemote(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Attack:
+			abilityAttack.UpdateRemote(dt);
+			break;
+		case Behavior.Chase:
+			abilityChase.UpdateRemote(dt);
+			break;
+		case Behavior.Stagger:
+			abilityStagger.UpdateRemote(dt);
+			break;
+		case Behavior.Destroyed:
+			abilityDie.UpdateRemote(dt);
+			break;
+		case Behavior.Wander:
+			abilityWander.UpdateRemote(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateRemote(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateRemote(dt);
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateRemote(dt);
+			break;
+		case Behavior.Grabbed:
+		case Behavior.Thrown:
+			break;
+		}
+	}
+
+	public void OnGameEntitySerialize(BinaryWriter writer)
+	{
+		byte value = (byte)currBehavior;
+		byte value2 = (byte)currBodyState;
+		writer.Write(value);
+		writer.Write(hp);
+		writer.Write(value2);
+	}
+
+	public void OnGameEntityDeserialize(BinaryReader reader)
+	{
+		Behavior newBehavior = (Behavior)reader.ReadByte();
+		int hP = reader.ReadInt32();
+		BodyState newBodyState = (BodyState)reader.ReadByte();
+		SetHP(hP);
+		SetBehavior(newBehavior, force: true);
+		SetBodyState(newBodyState, force: true);
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		return true;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
+		GRTool gameComponent = entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
+		if (gameComponent != null)
+		{
+			switch (hitTypeId)
+			{
+			case GameHitType.Club:
+				OnHitByClub(hit);
+				break;
+			case GameHitType.Flash:
+				OnHitByFlash(gameComponent, hit);
+				break;
+			case GameHitType.Shield:
+				OnHitByShield(hit);
+				break;
+			}
+		}
+	}
+
+	private void OnHitByClub(GameHitData hit)
+	{
+		if (currBodyState == BodyState.Bones)
+		{
+			if (currBehavior != Behavior.Destroyed)
+			{
+				hp -= hit.hitAmount;
+				if (hp <= 0)
+				{
+					abilityDie.SetInstigatingPlayerIndex(entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
+					SetBehavior(Behavior.Destroyed);
+				}
+				else
+				{
+					abilityStagger.SetStaggerVelocity(hit.hitImpulse);
+					TrySetBehavior(Behavior.Stagger);
+				}
+			}
+		}
+		else if (currBodyState == BodyState.Shell && armor != null)
+		{
+			armor.PlayBlockFx(hit.hitEntityPosition);
+		}
+	}
+
+	public void InstantDeath()
+	{
+		hp = 0;
+		SetBehavior(Behavior.Destroyed);
+	}
+
+	private void OnHitByFlash(GRTool tool, GameHitData hit)
+	{
+		abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
+		if (currBodyState == BodyState.Shell)
+		{
+			hp -= hit.hitAmount;
+			if (armor != null)
+			{
+				armor.SetHp(hp);
+			}
+			if (hp <= 0)
+			{
+				if (armor != null)
+				{
+					armor.PlayDestroyFx(armor.transform.position);
+				}
+				SetBodyState(BodyState.Bones);
+				if (tool.gameEntity.IsHeldByLocalPlayer())
+				{
+					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name);
+				}
+				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
+				{
+					armor.FragmentArmor();
+				}
+			}
+			else
+			{
+				if (armor != null)
+				{
+					armor.PlayHitFx(armor.transform.position);
+				}
+				RefreshBody();
+			}
+		}
+		GRToolFlash component = tool.GetComponent<GRToolFlash>();
+		if (component != null)
+		{
+			abilityFlashed.SetStunTime(component.stunDuration);
+		}
+		TrySetBehavior(Behavior.Flashed);
+	}
+
+	private void OnHitByShield(GameHitData hit)
+	{
+		OnHitByClub(hit);
+	}
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		if (currBehavior != Behavior.Attack)
+		{
+			return;
+		}
+		GRShieldCollider component = collider.GetComponent<GRShieldCollider>();
+		if (component != null)
+		{
+			Vector3 enemyAttackDirection = abilityAttack.targetPos - abilityAttack.initialPos;
+			GameHittable component2 = GetComponent<GameHittable>();
+			component.BlockHittable(base.transform.position, enemyAttackDirection, component2);
+			return;
+		}
+		Rigidbody attachedRigidbody = collider.attachedRigidbody;
+		if (!(attachedRigidbody != null))
+		{
+			return;
+		}
+		GRPlayer component3 = attachedRigidbody.GetComponent<GRPlayer>();
+		if (component3 != null && component3.gamePlayer.IsLocal() && Time.time > lastHitPlayerTime + minTimeBetweenHits)
+		{
+			if (tryHitPlayerCoroutine != null)
+			{
+				StopCoroutine(tryHitPlayerCoroutine);
+			}
+			tryHitPlayerCoroutine = StartCoroutine(TryHitPlayer(component3));
+		}
+		GRBreakable component4 = attachedRigidbody.GetComponent<GRBreakable>();
+		GameHittable component5 = attachedRigidbody.GetComponent<GameHittable>();
+		if (component4 != null && component5 != null)
+		{
+			GameHitData hitData = new GameHitData
+			{
+				hitTypeId = 0,
+				hitEntityId = component5.gameEntity.id,
+				hitByEntityId = entity.id,
+				hitEntityPosition = component4.transform.position,
+				hitImpulse = Vector3.zero,
+				hitPosition = component4.transform.position,
+				hittablePoint = component5.FindHittablePoint(collider)
+			};
+			component5.RequestHit(hitData);
+		}
+	}
+
+	private IEnumerator TryHitPlayer(GRPlayer player)
+	{
+		yield return new WaitForUpdate();
+		if (currBehavior == Behavior.Attack && player != null && player.gamePlayer.IsLocal() && Time.time > lastHitPlayerTime + minTimeBetweenHits)
+		{
+			lastHitPlayerTime = Time.time;
+			GhostReactorManager.Get(entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Chaser, entity.id, player, base.transform.position);
+		}
+	}
+
+	private void RefreshBody()
+	{
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			armor.SetHp(0);
+			break;
+		case BodyState.Bones:
+			armor.SetHp(0);
+			GREnemy.HideObjects(bonesStateVisibleObjects, hide: false);
+			GREnemy.HideObjects(alwaysVisibleObjects, hide: false);
+			break;
+		case BodyState.Shell:
+			armor.SetHp(hp);
+			GREnemy.HideObjects(bonesStateVisibleObjects, hide: true);
+			GREnemy.HideObjects(alwaysVisibleObjects, hide: false);
+			break;
+		}
+	}
+
+	public void SetBodyState(BodyState newBodyState, bool force = false)
+	{
+		if (currBodyState != newBodyState || force)
+		{
+			switch (currBodyState)
+			{
+			case BodyState.Bones:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+				break;
+			case BodyState.Shell:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+				break;
+			}
+			currBodyState = newBodyState;
+			switch (currBodyState)
+			{
+			case BodyState.Destroyed:
+				GhostReactorManager.Get(entity).ReportEnemyDeath();
+				break;
+			case BodyState.Bones:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+				break;
+			case BodyState.Shell:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+				break;
+			}
+			RefreshBody();
+			if (entity.IsAuthority())
+			{
+				agent.RequestStateChange((byte)newBodyState);
+			}
+		}
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"State: <color=\"yellow\">{currBehavior.ToString()}<color=\"white\"> HP: <color=\"yellow\">{hp}<color=\"white\">");
+		float magnitude = (GRSenseNearby.GetRigTestLocation(VRRig.LocalRig) - base.transform.position).magnitude;
+		bool flag = GRSenseLineOfSight.HasGeoLineOfSight(headTransform.position, GRSenseNearby.GetRigTestLocation(VRRig.LocalRig), senseLineOfSight.sightDist, senseLineOfSight.visibilityMask);
+		strings.Add($"player rig dis: {magnitude} has los: {flag}");
 	}
 }

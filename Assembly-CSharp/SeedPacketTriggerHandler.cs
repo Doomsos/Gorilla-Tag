@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,53 +5,6 @@ using UnityEngine.Events;
 [RequireComponent(typeof(OnTriggerEventsCosmetic))]
 public class SeedPacketTriggerHandler : MonoBehaviour
 {
-	public void OnTriggerEntered()
-	{
-		if (this.toggleOnceOnly && this.triggerEntered)
-		{
-			return;
-		}
-		this.triggerEntered = true;
-		UnityEvent<SeedPacketTriggerHandler> unityEvent = this.onTriggerEntered;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke(this);
-		}
-		this.ToggleEffects();
-	}
-
-	public void ToggleEffects()
-	{
-		if (this.particleToPlay)
-		{
-			this.particleToPlay.Play();
-		}
-		if (this.soundBankPlayer)
-		{
-			this.soundBankPlayer.Play();
-		}
-		if (this.destroyOnTriggerEnter)
-		{
-			if (this.destroyDelay > 0f)
-			{
-				base.Invoke("Destroy", this.destroyDelay);
-				return;
-			}
-			this.Destroy();
-		}
-	}
-
-	private void Destroy()
-	{
-		this.triggerEntered = false;
-		if (ObjectPools.instance.DoesPoolExist(base.gameObject))
-		{
-			ObjectPools.instance.Destroy(base.gameObject);
-			return;
-		}
-		Object.Destroy(base.gameObject);
-	}
-
 	[SerializeField]
 	private ParticleSystem particleToPlay;
 
@@ -72,4 +24,50 @@ public class SeedPacketTriggerHandler : MonoBehaviour
 	public UnityEvent<SeedPacketTriggerHandler> onTriggerEntered;
 
 	private bool triggerEntered;
+
+	public void OnTriggerEntered()
+	{
+		if (!toggleOnceOnly || !triggerEntered)
+		{
+			triggerEntered = true;
+			onTriggerEntered?.Invoke(this);
+			ToggleEffects();
+		}
+	}
+
+	public void ToggleEffects()
+	{
+		if ((bool)particleToPlay)
+		{
+			particleToPlay.Play();
+		}
+		if ((bool)soundBankPlayer)
+		{
+			soundBankPlayer.Play();
+		}
+		if (destroyOnTriggerEnter)
+		{
+			if (destroyDelay > 0f)
+			{
+				Invoke("Destroy", destroyDelay);
+			}
+			else
+			{
+				Destroy();
+			}
+		}
+	}
+
+	private void Destroy()
+	{
+		triggerEntered = false;
+		if (ObjectPools.instance.DoesPoolExist(base.gameObject))
+		{
+			ObjectPools.instance.Destroy(base.gameObject);
+		}
+		else
+		{
+			Object.Destroy(base.gameObject);
+		}
+	}
 }

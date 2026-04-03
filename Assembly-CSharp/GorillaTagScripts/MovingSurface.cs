@@ -1,37 +1,35 @@
-﻿using System;
 using GT_CustomMapSupportRuntime;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[RequireComponent(typeof(Collider))]
+public class MovingSurface : MonoBehaviour
 {
-	[RequireComponent(typeof(Collider))]
-	public class MovingSurface : MonoBehaviour
+	[SerializeField]
+	private int uniqueId = -1;
+
+	private void Start()
 	{
-		private void Start()
-		{
-			MovingSurfaceManager.instance == null;
-			MovingSurfaceManager.instance.RegisterMovingSurface(this);
-		}
+		_ = MovingSurfaceManager.instance == null;
+		MovingSurfaceManager.instance.RegisterMovingSurface(this);
+	}
 
-		private void OnDestroy()
+	private void OnDestroy()
+	{
+		if (MovingSurfaceManager.instance != null)
 		{
-			if (MovingSurfaceManager.instance != null)
-			{
-				MovingSurfaceManager.instance.UnregisterMovingSurface(this);
-			}
+			MovingSurfaceManager.instance.UnregisterMovingSurface(this);
 		}
+	}
 
-		public int GetID()
-		{
-			return this.uniqueId;
-		}
+	public int GetID()
+	{
+		return uniqueId;
+	}
 
-		public void CopySettings(MovingSurfaceSettings movingSurfaceSettings)
-		{
-			this.uniqueId = movingSurfaceSettings.uniqueId;
-		}
-
-		[SerializeField]
-		private int uniqueId = -1;
+	public void CopySettings(MovingSurfaceSettings movingSurfaceSettings)
+	{
+		uniqueId = movingSurfaceSettings.uniqueId;
 	}
 }

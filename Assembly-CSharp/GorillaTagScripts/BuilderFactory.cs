@@ -1,368 +1,358 @@
-﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderFactory : MonoBehaviour
 {
-	public class BuilderFactory : MonoBehaviour
+	public Transform spawnLocation;
+
+	private List<int> pieceTypes;
+
+	public List<GameObject> itemList;
+
+	[HideInInspector]
+	public List<BuilderPiece> pieceList;
+
+	public BuilderOptionButton buildItemButton;
+
+	public TextMeshPro itemLabel;
+
+	public BuilderOptionButton prevItemButton;
+
+	public BuilderOptionButton nextItemButton;
+
+	public TextMeshPro materialLabel;
+
+	public BuilderOptionButton prevMaterialButton;
+
+	public BuilderOptionButton nextMaterialButton;
+
+	public AudioSource audioSource;
+
+	public AudioClip buildPieceSound;
+
+	public Transform previewMarker;
+
+	public List<BuilderUIResource> resourceCostUIs;
+
+	private BuilderPiece previewPiece;
+
+	private int currPieceTypeIndex;
+
+	private int currPieceMaterialIndex;
+
+	private Dictionary<int, int> pieceTypeToIndex;
+
+	private BuilderTable table;
+
+	private bool initialized;
+
+	private void Awake()
 	{
-		private void Awake()
-		{
-			this.InitIfNeeded();
-		}
+		InitIfNeeded();
+	}
 
-		public void InitIfNeeded()
+	public void InitIfNeeded()
+	{
+		if (initialized)
 		{
-			if (this.initialized)
+			return;
+		}
+		buildItemButton.Setup(OnBuildItem);
+		currPieceTypeIndex = 0;
+		prevItemButton.Setup(OnPrevItem);
+		nextItemButton.Setup(OnNextItem);
+		currPieceMaterialIndex = 0;
+		prevMaterialButton.Setup(OnPrevMaterial);
+		nextMaterialButton.Setup(OnNextMaterial);
+		pieceTypeToIndex = new Dictionary<int, int>(256);
+		initialized = true;
+		if (resourceCostUIs == null)
+		{
+			return;
+		}
+		for (int i = 0; i < resourceCostUIs.Count; i++)
+		{
+			if (resourceCostUIs[i] != null)
 			{
-				return;
+				resourceCostUIs[i].gameObject.SetActive(value: false);
 			}
-			this.buildItemButton.Setup(new Action<BuilderOptionButton, bool>(this.OnBuildItem));
-			this.currPieceTypeIndex = 0;
-			this.prevItemButton.Setup(new Action<BuilderOptionButton, bool>(this.OnPrevItem));
-			this.nextItemButton.Setup(new Action<BuilderOptionButton, bool>(this.OnNextItem));
-			this.currPieceMaterialIndex = 0;
-			this.prevMaterialButton.Setup(new Action<BuilderOptionButton, bool>(this.OnPrevMaterial));
-			this.nextMaterialButton.Setup(new Action<BuilderOptionButton, bool>(this.OnNextMaterial));
-			this.pieceTypeToIndex = new Dictionary<int, int>(256);
-			this.initialized = true;
-			if (this.resourceCostUIs != null)
+		}
+	}
+
+	public void Setup(BuilderTable tableOwner)
+	{
+		table = tableOwner;
+		InitIfNeeded();
+		List<BuilderPiece> list = pieceList;
+		pieceTypes = new List<int>(list.Count);
+		for (int i = 0; i < list.Count; i++)
+		{
+			string text = list[i].name;
+			int staticHash = text.GetStaticHash();
+			int value;
+			if (pieceTypeToIndex.TryAdd(staticHash, i))
 			{
-				for (int i = 0; i < this.resourceCostUIs.Count; i++)
+				pieceTypes.Add(staticHash);
+			}
+			else if (pieceTypeToIndex.TryGetValue(staticHash, out value))
+			{
+				string text2 = "BuilderFactory: ERROR!! " + $"Could not add pieceType \"{text}\" with hash {staticHash} " + "to 'pieceTypeToIndex' Dictionary because because it was already added!";
+				if (value < 0 || value >= list.Count)
 				{
-					if (this.resourceCostUIs[i] != null)
+					text2 += " Also the index to the conflicting piece is out of range of the pieceList!";
+				}
+				else
+				{
+					BuilderPiece builderPiece = list[value];
+					text2 = ((!(builderPiece != null)) ? (text2 + "And (should never happen) the piece at that slot is null!") : ((!(text == builderPiece.name)) ? (text2 + "Also the conflicting pieceType has the same hash but different name \"" + builderPiece.name + "\"!") : (text2 + "The conflicting piece has the same name (as expected).")));
+				}
+				Debug.LogError(text2, this);
+			}
+		}
+		int num = pieceTypes.Count;
+		foreach (BuilderPieceSet allPieceSet in BuilderSetManager.instance.GetAllPieceSets())
+		{
+			foreach (BuilderPieceSet.BuilderPieceSubset subset in allPieceSet.subsets)
+			{
+				foreach (BuilderPieceSet.PieceInfo pieceInfo in subset.pieceInfos)
+				{
+					int staticHash2 = pieceInfo.piecePrefab.name.GetStaticHash();
+					if (!pieceTypeToIndex.ContainsKey(staticHash2))
 					{
-						this.resourceCostUIs[i].gameObject.SetActive(false);
+						pieceList.Add(pieceInfo.piecePrefab);
+						pieceTypes.Add(staticHash2);
+						pieceTypeToIndex.Add(staticHash2, num);
+						num++;
 					}
 				}
 			}
 		}
+	}
 
-		public void Setup(BuilderTable tableOwner)
+	public void Show()
+	{
+		RefreshUI();
+	}
+
+	public BuilderPiece GetPiecePrefab(int pieceType)
+	{
+		if (pieceTypeToIndex.TryGetValue(pieceType, out var value))
 		{
-			this.table = tableOwner;
-			this.InitIfNeeded();
-			List<BuilderPiece> list = this.pieceList;
-			this.pieceTypes = new List<int>(list.Count);
-			for (int i = 0; i < list.Count; i++)
+			return pieceList[value];
+		}
+		Debug.LogErrorFormat("No Prefab found for type {0}", pieceType);
+		return null;
+	}
+
+	public void OnBuildItem(BuilderOptionButton button, bool isLeftHand)
+	{
+		if (pieceTypes != null && pieceTypes.Count > currPieceTypeIndex)
+		{
+			int selectedMaterialType = GetSelectedMaterialType();
+			table.RequestCreatePiece(pieceTypes[currPieceTypeIndex], spawnLocation.position, spawnLocation.rotation, selectedMaterialType);
+			if (audioSource != null && buildPieceSound != null)
 			{
-				string name = list[i].name;
-				int staticHash = name.GetStaticHash();
-				int num;
-				if (this.pieceTypeToIndex.TryAdd(staticHash, i))
-				{
-					this.pieceTypes.Add(staticHash);
-				}
-				else if (this.pieceTypeToIndex.TryGetValue(staticHash, out num))
-				{
-					string text = "BuilderFactory: ERROR!! " + string.Format("Could not add pieceType \"{0}\" with hash {1} ", name, staticHash) + "to 'pieceTypeToIndex' Dictionary because because it was already added!";
-					if (num < 0 || num >= list.Count)
-					{
-						text += " Also the index to the conflicting piece is out of range of the pieceList!";
-					}
-					else
-					{
-						BuilderPiece builderPiece = list[num];
-						if (builderPiece != null)
-						{
-							if (name == builderPiece.name)
-							{
-								text += "The conflicting piece has the same name (as expected).";
-							}
-							else
-							{
-								text = text + "Also the conflicting pieceType has the same hash but different name \"" + builderPiece.name + "\"!";
-							}
-						}
-						else
-						{
-							text += "And (should never happen) the piece at that slot is null!";
-						}
-					}
-					Debug.LogError(text, this);
-				}
-			}
-			int num2 = this.pieceTypes.Count;
-			foreach (BuilderPieceSet builderPieceSet in BuilderSetManager.instance.GetAllPieceSets())
-			{
-				foreach (BuilderPieceSet.BuilderPieceSubset builderPieceSubset in builderPieceSet.subsets)
-				{
-					foreach (BuilderPieceSet.PieceInfo pieceInfo in builderPieceSubset.pieceInfos)
-					{
-						int staticHash2 = pieceInfo.piecePrefab.name.GetStaticHash();
-						if (!this.pieceTypeToIndex.ContainsKey(staticHash2))
-						{
-							this.pieceList.Add(pieceInfo.piecePrefab);
-							this.pieceTypes.Add(staticHash2);
-							this.pieceTypeToIndex.Add(staticHash2, num2);
-							num2++;
-						}
-					}
-				}
+				audioSource.GTPlayOneShot(buildPieceSound);
 			}
 		}
+	}
 
-		public void Show()
+	public void OnPrevItem(BuilderOptionButton button, bool isLeftHand)
+	{
+		if (pieceTypes == null || pieceTypes.Count <= 0)
 		{
-			this.RefreshUI();
+			return;
 		}
-
-		public BuilderPiece GetPiecePrefab(int pieceType)
+		for (int i = 0; i < pieceTypes.Count; i++)
 		{
-			int index;
-			if (this.pieceTypeToIndex.TryGetValue(pieceType, out index))
+			currPieceTypeIndex = (currPieceTypeIndex - 1 + pieceTypes.Count) % pieceTypes.Count;
+			if (CanBuildPieceType(pieceTypes[currPieceTypeIndex]))
 			{
-				return this.pieceList[index];
+				break;
 			}
-			Debug.LogErrorFormat("No Prefab found for type {0}", new object[]
-			{
-				pieceType
-			});
-			return null;
 		}
+		RefreshUI();
+	}
 
-		public void OnBuildItem(BuilderOptionButton button, bool isLeftHand)
+	public void OnNextItem(BuilderOptionButton button, bool isLeftHand)
+	{
+		if (pieceTypes == null || pieceTypes.Count <= 0)
 		{
-			if (this.pieceTypes != null && this.pieceTypes.Count > this.currPieceTypeIndex)
+			return;
+		}
+		for (int i = 0; i < pieceTypes.Count; i++)
+		{
+			currPieceTypeIndex = (currPieceTypeIndex + 1 + pieceTypes.Count) % pieceTypes.Count;
+			if (CanBuildPieceType(pieceTypes[currPieceTypeIndex]))
 			{
-				int selectedMaterialType = this.GetSelectedMaterialType();
-				this.table.RequestCreatePiece(this.pieceTypes[this.currPieceTypeIndex], this.spawnLocation.position, this.spawnLocation.rotation, selectedMaterialType);
-				if (this.audioSource != null && this.buildPieceSound != null)
+				break;
+			}
+		}
+		RefreshUI();
+	}
+
+	public void OnPrevMaterial(BuilderOptionButton button, bool isLeftHand)
+	{
+		if (pieceTypes == null || pieceTypes.Count <= 0)
+		{
+			return;
+		}
+		BuilderPiece piecePrefab = GetPiecePrefab(pieceTypes[currPieceTypeIndex]);
+		if (!(piecePrefab != null))
+		{
+			return;
+		}
+		BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
+		if (materialOptions != null && materialOptions.options.Count > 0)
+		{
+			for (int i = 0; i < materialOptions.options.Count; i++)
+			{
+				currPieceMaterialIndex = (currPieceMaterialIndex - 1 + materialOptions.options.Count) % materialOptions.options.Count;
+				if (CanUseMaterialType(materialOptions.options[currPieceMaterialIndex].materialId.GetHashCode()))
 				{
-					this.audioSource.GTPlayOneShot(this.buildPieceSound, 1f);
+					break;
 				}
 			}
 		}
+		RefreshUI();
+	}
 
-		public void OnPrevItem(BuilderOptionButton button, bool isLeftHand)
+	public void OnNextMaterial(BuilderOptionButton button, bool isLeftHand)
+	{
+		if (pieceTypes == null || pieceTypes.Count <= 0)
 		{
-			if (this.pieceTypes != null && this.pieceTypes.Count > 0)
-			{
-				for (int i = 0; i < this.pieceTypes.Count; i++)
-				{
-					this.currPieceTypeIndex = (this.currPieceTypeIndex - 1 + this.pieceTypes.Count) % this.pieceTypes.Count;
-					if (this.CanBuildPieceType(this.pieceTypes[this.currPieceTypeIndex]))
-					{
-						break;
-					}
-				}
-				this.RefreshUI();
-			}
+			return;
 		}
-
-		public void OnNextItem(BuilderOptionButton button, bool isLeftHand)
+		BuilderPiece piecePrefab = GetPiecePrefab(pieceTypes[currPieceTypeIndex]);
+		if (!(piecePrefab != null))
 		{
-			if (this.pieceTypes != null && this.pieceTypes.Count > 0)
-			{
-				for (int i = 0; i < this.pieceTypes.Count; i++)
-				{
-					this.currPieceTypeIndex = (this.currPieceTypeIndex + 1 + this.pieceTypes.Count) % this.pieceTypes.Count;
-					if (this.CanBuildPieceType(this.pieceTypes[this.currPieceTypeIndex]))
-					{
-						break;
-					}
-				}
-				this.RefreshUI();
-			}
+			return;
 		}
-
-		public void OnPrevMaterial(BuilderOptionButton button, bool isLeftHand)
+		BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
+		if (materialOptions != null && materialOptions.options.Count > 0)
 		{
-			if (this.pieceTypes != null && this.pieceTypes.Count > 0)
+			for (int i = 0; i < materialOptions.options.Count; i++)
 			{
-				BuilderPiece piecePrefab = this.GetPiecePrefab(this.pieceTypes[this.currPieceTypeIndex]);
-				if (piecePrefab != null)
+				currPieceMaterialIndex = (currPieceMaterialIndex + 1 + materialOptions.options.Count) % materialOptions.options.Count;
+				if (CanUseMaterialType(materialOptions.options[currPieceMaterialIndex].materialId.GetHashCode()))
 				{
-					BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
-					if (materialOptions != null && materialOptions.options.Count > 0)
-					{
-						for (int i = 0; i < materialOptions.options.Count; i++)
-						{
-							this.currPieceMaterialIndex = (this.currPieceMaterialIndex - 1 + materialOptions.options.Count) % materialOptions.options.Count;
-							if (this.CanUseMaterialType(materialOptions.options[this.currPieceMaterialIndex].materialId.GetHashCode()))
-							{
-								break;
-							}
-						}
-					}
-					this.RefreshUI();
+					break;
 				}
 			}
 		}
+		RefreshUI();
+	}
 
-		public void OnNextMaterial(BuilderOptionButton button, bool isLeftHand)
+	private int GetSelectedMaterialType()
+	{
+		int result = -1;
+		BuilderPiece piecePrefab = GetPiecePrefab(pieceTypes[currPieceTypeIndex]);
+		if (piecePrefab != null)
 		{
-			if (this.pieceTypes != null && this.pieceTypes.Count > 0)
+			BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
+			if (materialOptions != null && materialOptions.options != null && currPieceMaterialIndex >= 0 && currPieceMaterialIndex < materialOptions.options.Count)
 			{
-				BuilderPiece piecePrefab = this.GetPiecePrefab(this.pieceTypes[this.currPieceTypeIndex]);
-				if (piecePrefab != null)
+				result = materialOptions.options[currPieceMaterialIndex].materialId.GetHashCode();
+			}
+		}
+		return result;
+	}
+
+	private string GetSelectedMaterialName()
+	{
+		string result = "DEFAULT";
+		BuilderPiece piecePrefab = GetPiecePrefab(pieceTypes[currPieceTypeIndex]);
+		if (piecePrefab != null)
+		{
+			BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
+			if (materialOptions != null && materialOptions.options != null && currPieceMaterialIndex >= 0 && currPieceMaterialIndex < materialOptions.options.Count)
+			{
+				result = materialOptions.options[currPieceMaterialIndex].materialId;
+			}
+		}
+		return result;
+	}
+
+	public bool CanBuildPieceType(int pieceType)
+	{
+		BuilderPiece piecePrefab = GetPiecePrefab(pieceType);
+		if (piecePrefab == null || piecePrefab.isBuiltIntoTable)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public bool CanUseMaterialType(int materalType)
+	{
+		return true;
+	}
+
+	public void RefreshUI()
+	{
+		if (pieceList != null && pieceList.Count > currPieceTypeIndex)
+		{
+			itemLabel.SetText(pieceList[currPieceTypeIndex].displayName);
+		}
+		else
+		{
+			itemLabel.SetText("No Items");
+		}
+		if (previewPiece != null)
+		{
+			table.builderPool.DestroyPiece(previewPiece);
+			previewPiece = null;
+		}
+		if (currPieceTypeIndex >= 0 && currPieceTypeIndex < pieceTypes.Count)
+		{
+			int pieceType = pieceTypes[currPieceTypeIndex];
+			previewPiece = table.builderPool.CreatePiece(pieceType, assertNotEmpty: false);
+			previewPiece.SetTable(table);
+			previewPiece.pieceType = pieceType;
+			string selectedMaterialName = GetSelectedMaterialName();
+			materialLabel.SetText(selectedMaterialName);
+			previewPiece.SetScale(table.pieceScale * 0.75f);
+			previewPiece.SetupPiece(table.gridSize);
+			int selectedMaterialType = GetSelectedMaterialType();
+			previewPiece.SetMaterial(selectedMaterialType, force: true);
+			previewPiece.transform.SetPositionAndRotation(previewMarker.position, previewMarker.rotation);
+			previewPiece.SetState(BuilderPiece.State.Displayed);
+			previewPiece.enabled = false;
+			RefreshCostUI();
+		}
+	}
+
+	private void RefreshCostUI()
+	{
+		List<BuilderResourceQuantity> list = null;
+		if (previewPiece != null)
+		{
+			list = previewPiece.cost.quantities;
+		}
+		for (int i = 0; i < resourceCostUIs.Count; i++)
+		{
+			if (!(resourceCostUIs[i] == null))
+			{
+				bool flag = list != null && i < list.Count;
+				resourceCostUIs[i].gameObject.SetActive(flag);
+				if (flag)
 				{
-					BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
-					if (materialOptions != null && materialOptions.options.Count > 0)
-					{
-						for (int i = 0; i < materialOptions.options.Count; i++)
-						{
-							this.currPieceMaterialIndex = (this.currPieceMaterialIndex + 1 + materialOptions.options.Count) % materialOptions.options.Count;
-							if (this.CanUseMaterialType(materialOptions.options[this.currPieceMaterialIndex].materialId.GetHashCode()))
-							{
-								break;
-							}
-						}
-					}
-					this.RefreshUI();
+					resourceCostUIs[i].SetResourceCost(list[i], table);
 				}
 			}
 		}
+	}
 
-		private int GetSelectedMaterialType()
-		{
-			int result = -1;
-			BuilderPiece piecePrefab = this.GetPiecePrefab(this.pieceTypes[this.currPieceTypeIndex]);
-			if (piecePrefab != null)
-			{
-				BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
-				if (materialOptions != null && materialOptions.options != null && this.currPieceMaterialIndex >= 0 && this.currPieceMaterialIndex < materialOptions.options.Count)
-				{
-					result = materialOptions.options[this.currPieceMaterialIndex].materialId.GetHashCode();
-				}
-			}
-			return result;
-		}
+	public void OnAvailableResourcesChange()
+	{
+		RefreshCostUI();
+	}
 
-		private string GetSelectedMaterialName()
-		{
-			string result = "DEFAULT";
-			BuilderPiece piecePrefab = this.GetPiecePrefab(this.pieceTypes[this.currPieceTypeIndex]);
-			if (piecePrefab != null)
-			{
-				BuilderMaterialOptions materialOptions = piecePrefab.materialOptions;
-				if (materialOptions != null && materialOptions.options != null && this.currPieceMaterialIndex >= 0 && this.currPieceMaterialIndex < materialOptions.options.Count)
-				{
-					result = materialOptions.options[this.currPieceMaterialIndex].materialId;
-				}
-			}
-			return result;
-		}
-
-		public bool CanBuildPieceType(int pieceType)
-		{
-			BuilderPiece piecePrefab = this.GetPiecePrefab(pieceType);
-			return !(piecePrefab == null) && !piecePrefab.isBuiltIntoTable;
-		}
-
-		public bool CanUseMaterialType(int materalType)
-		{
-			return true;
-		}
-
-		public void RefreshUI()
-		{
-			if (this.pieceList != null && this.pieceList.Count > this.currPieceTypeIndex)
-			{
-				this.itemLabel.SetText(this.pieceList[this.currPieceTypeIndex].displayName);
-			}
-			else
-			{
-				this.itemLabel.SetText("No Items");
-			}
-			if (this.previewPiece != null)
-			{
-				this.table.builderPool.DestroyPiece(this.previewPiece);
-				this.previewPiece = null;
-			}
-			if (this.currPieceTypeIndex < 0 || this.currPieceTypeIndex >= this.pieceTypes.Count)
-			{
-				return;
-			}
-			int pieceType = this.pieceTypes[this.currPieceTypeIndex];
-			this.previewPiece = this.table.builderPool.CreatePiece(pieceType, false);
-			this.previewPiece.SetTable(this.table);
-			this.previewPiece.pieceType = pieceType;
-			string selectedMaterialName = this.GetSelectedMaterialName();
-			this.materialLabel.SetText(selectedMaterialName);
-			this.previewPiece.SetScale(this.table.pieceScale * 0.75f);
-			this.previewPiece.SetupPiece(this.table.gridSize);
-			int selectedMaterialType = this.GetSelectedMaterialType();
-			this.previewPiece.SetMaterial(selectedMaterialType, true);
-			this.previewPiece.transform.SetPositionAndRotation(this.previewMarker.position, this.previewMarker.rotation);
-			this.previewPiece.SetState(BuilderPiece.State.Displayed, false);
-			this.previewPiece.enabled = false;
-			this.RefreshCostUI();
-		}
-
-		private void RefreshCostUI()
-		{
-			List<BuilderResourceQuantity> list = null;
-			if (this.previewPiece != null)
-			{
-				list = this.previewPiece.cost.quantities;
-			}
-			for (int i = 0; i < this.resourceCostUIs.Count; i++)
-			{
-				if (!(this.resourceCostUIs[i] == null))
-				{
-					bool flag = list != null && i < list.Count;
-					this.resourceCostUIs[i].gameObject.SetActive(flag);
-					if (flag)
-					{
-						this.resourceCostUIs[i].SetResourceCost(list[i], this.table);
-					}
-				}
-			}
-		}
-
-		public void OnAvailableResourcesChange()
-		{
-			this.RefreshCostUI();
-		}
-
-		public void CreateRandomPiece()
-		{
-			Debug.LogError("Create Random Piece No longer implemented");
-		}
-
-		public Transform spawnLocation;
-
-		private List<int> pieceTypes;
-
-		public List<GameObject> itemList;
-
-		[HideInInspector]
-		public List<BuilderPiece> pieceList;
-
-		public BuilderOptionButton buildItemButton;
-
-		public TextMeshPro itemLabel;
-
-		public BuilderOptionButton prevItemButton;
-
-		public BuilderOptionButton nextItemButton;
-
-		public TextMeshPro materialLabel;
-
-		public BuilderOptionButton prevMaterialButton;
-
-		public BuilderOptionButton nextMaterialButton;
-
-		public AudioSource audioSource;
-
-		public AudioClip buildPieceSound;
-
-		public Transform previewMarker;
-
-		public List<BuilderUIResource> resourceCostUIs;
-
-		private BuilderPiece previewPiece;
-
-		private int currPieceTypeIndex;
-
-		private int currPieceMaterialIndex;
-
-		private Dictionary<int, int> pieceTypeToIndex;
-
-		private BuilderTable table;
-
-		private bool initialized;
+	public void CreateRandomPiece()
+	{
+		Debug.LogError("Create Random Piece No longer implemented");
 	}
 }

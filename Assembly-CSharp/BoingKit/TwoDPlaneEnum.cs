@@ -1,11 +1,8 @@
-﻿using System;
+namespace BoingKit;
 
-namespace BoingKit
+public enum TwoDPlaneEnum
 {
-	public enum TwoDPlaneEnum
-	{
-		XY,
-		XZ,
-		YZ
-	}
+	XY,
+	XZ,
+	YZ
 }

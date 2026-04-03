@@ -1,16 +1,14 @@
-﻿using System;
 using GorillaTag.CosmeticSystem;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public interface ISpawnable
 {
-	public interface ISpawnable
-	{
-		bool IsSpawned { get; set; }
+	bool IsSpawned { get; set; }
 
-		ECosmeticSelectSide CosmeticSelectedSide { get; set; }
+	ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		void OnSpawn(VRRig rig);
+	void OnSpawn(VRRig rig);
 
-		void OnDespawn();
-	}
+	void OnDespawn();
 }

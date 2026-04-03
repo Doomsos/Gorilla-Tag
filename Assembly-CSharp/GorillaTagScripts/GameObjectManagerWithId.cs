@@ -1,67 +1,65 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class GameObjectManagerWithId : MonoBehaviour
 {
-	public class GameObjectManagerWithId : MonoBehaviour
+	private class gameObjectData
 	{
-		private void Awake()
+		public Transform transform;
+
+		public Transform followTransform;
+
+		public string id;
+
+		public bool isMatched;
+	}
+
+	public GameObject objectsContainer;
+
+	public GTZone zone;
+
+	private readonly List<gameObjectData> objectData = new List<gameObjectData>();
+
+	private void Awake()
+	{
+		Transform[] componentsInChildren = objectsContainer.GetComponentsInChildren<Transform>(includeInactive: false);
+		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
-			Transform[] componentsInChildren = this.objectsContainer.GetComponentsInChildren<Transform>(false);
-			for (int i = 0; i < componentsInChildren.Length; i++)
+			gameObjectData gameObjectData2 = new gameObjectData();
+			gameObjectData2.transform = componentsInChildren[i];
+			gameObjectData2.id = zone.ToString() + i;
+			objectData.Add(gameObjectData2);
+		}
+	}
+
+	private void OnDestroy()
+	{
+		objectData.Clear();
+	}
+
+	public void ReceiveEvent(string id, Transform _transform)
+	{
+		foreach (gameObjectData objectDatum in objectData)
+		{
+			if (objectDatum.id == id)
 			{
-				GameObjectManagerWithId.gameObjectData gameObjectData = new GameObjectManagerWithId.gameObjectData();
-				gameObjectData.transform = componentsInChildren[i];
-				gameObjectData.id = this.zone.ToString() + i.ToString();
-				this.objectData.Add(gameObjectData);
+				objectDatum.isMatched = true;
+				objectDatum.followTransform = _transform;
 			}
 		}
+	}
 
-		private void OnDestroy()
+	private void Update()
+	{
+		foreach (gameObjectData objectDatum in objectData)
 		{
-			this.objectData.Clear();
-		}
-
-		public void ReceiveEvent(string id, Transform _transform)
-		{
-			foreach (GameObjectManagerWithId.gameObjectData gameObjectData in this.objectData)
+			if (objectDatum.isMatched)
 			{
-				if (gameObjectData.id == id)
-				{
-					gameObjectData.isMatched = true;
-					gameObjectData.followTransform = _transform;
-				}
+				objectDatum.transform.transform.position = objectDatum.followTransform.position;
+				objectDatum.transform.transform.rotation = objectDatum.followTransform.rotation;
 			}
-		}
-
-		private void Update()
-		{
-			foreach (GameObjectManagerWithId.gameObjectData gameObjectData in this.objectData)
-			{
-				if (gameObjectData.isMatched)
-				{
-					gameObjectData.transform.transform.position = gameObjectData.followTransform.position;
-					gameObjectData.transform.transform.rotation = gameObjectData.followTransform.rotation;
-				}
-			}
-		}
-
-		public GameObject objectsContainer;
-
-		public GTZone zone;
-
-		private readonly List<GameObjectManagerWithId.gameObjectData> objectData = new List<GameObjectManagerWithId.gameObjectData>();
-
-		private class gameObjectData
-		{
-			public Transform transform;
-
-			public Transform followTransform;
-
-			public string id;
-
-			public bool isMatched;
 		}
 	}
 }

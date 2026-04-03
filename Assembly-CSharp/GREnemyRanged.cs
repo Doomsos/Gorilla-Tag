@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using CjLib;
@@ -10,958 +9,28 @@ using UnityEngine.Serialization;
 
 public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameAgentComponent, IGameProjectileLauncher, IGameEntityDebugComponent
 {
-	private bool IsMoving()
+	public enum Behavior
 	{
-		return this.navAgent.velocity.sqrMagnitude > 0f;
+		Idle,
+		Patrol,
+		Search,
+		Stagger,
+		Dying,
+		SeekRangedAttackPosition,
+		RangedAttack,
+		RangedAttackCooldown,
+		Flashed,
+		Investigate,
+		Jump,
+		Count
 	}
 
-	private void SoftResetThrowableHead()
+	public enum BodyState
 	{
-		this.headRemoved = false;
-		this.spitterHeadOnShoulders.SetActive(true);
-		this.spitterHeadOnShouldersVFX.SetActive(false);
-		this.spitterHeadInHand.SetActive(false);
-		this.spitterHeadInHandLight.SetActive(false);
-		this.spitterHeadInHandVFX.SetActive(false);
-		this.headLightReset = true;
-		this.spitterLightTurnOffTime = Time.timeAsDouble + this.spitterLightTurnOffDelay;
-	}
-
-	private void ForceResetThrowableHead()
-	{
-		this.headRemoved = false;
-		this.headLightReset = false;
-		this.spitterHeadOnShoulders.SetActive(true);
-		this.spitterHeadOnShouldersLight.SetActive(false);
-		this.spitterHeadOnShouldersVFX.SetActive(false);
-		this.spitterHeadInHand.SetActive(false);
-		this.spitterHeadInHandLight.SetActive(false);
-		this.spitterHeadInHandVFX.SetActive(false);
-	}
-
-	private void ForceHeadToDeadState()
-	{
-		this.headRemoved = false;
-		this.headLightReset = false;
-		this.spitterHeadOnShoulders.SetActive(true);
-		this.spitterHeadOnShouldersLight.SetActive(false);
-		this.spitterHeadOnShouldersVFX.SetActive(false);
-		this.spitterHeadInHand.SetActive(false);
-		this.spitterHeadInHandLight.SetActive(false);
-		this.spitterHeadInHandVFX.SetActive(false);
-	}
-
-	private void EnableVFXForShoulderHead()
-	{
-		this.headLightReset = false;
-		this.spitterHeadOnShoulders.SetActive(true);
-		this.spitterHeadOnShouldersLight.SetActive(true);
-		this.spitterHeadOnShouldersVFX.SetActive(true);
-		this.spitterHeadInHand.SetActive(false);
-		this.spitterHeadInHandLight.SetActive(false);
-		this.spitterHeadInHandVFX.SetActive(false);
-	}
-
-	private void EnableVFXForHeadInHand()
-	{
-		this.headLightReset = false;
-		this.spitterHeadOnShoulders.SetActive(false);
-		this.spitterHeadOnShouldersLight.SetActive(false);
-		this.spitterHeadOnShouldersVFX.SetActive(false);
-		this.spitterHeadInHand.SetActive(true);
-		this.spitterHeadInHandLight.SetActive(true);
-		this.spitterHeadInHandVFX.SetActive(true);
-	}
-
-	private void DisableHeadInHand()
-	{
-		this.headLightReset = false;
-		this.spitterHeadInHand.SetActive(false);
-	}
-
-	private void DisableHeadOnShoulderAndHeadInHand()
-	{
-		this.headLightReset = false;
-		this.headRemoved = false;
-		this.spitterHeadOnShoulders.SetActive(false);
-		this.spitterHeadOnShouldersLight.SetActive(false);
-		this.spitterHeadOnShouldersVFX.SetActive(false);
-		this.spitterHeadInHand.SetActive(false);
-		this.spitterHeadInHandLight.SetActive(false);
-		this.spitterHeadInHandVFX.SetActive(false);
-	}
-
-	private void Awake()
-	{
-		this.rigidBody = base.GetComponent<Rigidbody>();
-		this.colliders = new List<Collider>(4);
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		this.visibilityLayerMask = LayerMask.GetMask(new string[]
-		{
-			"Default"
-		});
-		this.senseNearby.Setup(this.headTransform, this.entity);
-		if (this.armor != null)
-		{
-			this.armor.SetHp(0);
-		}
-		this.navAgent.updateRotation = false;
-		this.agent.onBodyStateChanged += this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-	}
-
-	public void OnEntityInit()
-	{
-		this.abilityStagger.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.abilityInvestigate.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.abilityPatrol.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.abilityFlashed.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.abilityKeepDistance.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-		this.Setup(this.entity.createData);
-		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
-		{
-			foreach (GRBonusEntry entry in this.entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
-			{
-				this.attributes.AddBonus(entry);
-			}
-		}
-		this.agent.navAgent.autoTraverseOffMeshLink = false;
-		this.agent.onJumpRequested += this.OnAgentJumpRequested;
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnDestroy()
-	{
-		this.agent.onBodyStateChanged -= this.OnNetworkBodyStateChange;
-		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
-		this.DestroyProjectile();
-	}
-
-	public void Setup(long entityCreateData)
-	{
-		this.SetPatrolPath(entityCreateData);
-		if (this.abilityPatrol.HasValidPatrolPath())
-		{
-			this.SetBehavior(GREnemyRanged.Behavior.Patrol, true);
-		}
-		else
-		{
-			this.SetBehavior(GREnemyRanged.Behavior.Idle, true);
-		}
-		if (this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
-		{
-			this.SetBodyState(GREnemyRanged.BodyState.Shell, true);
-		}
-		else
-		{
-			this.SetBodyState(GREnemyRanged.BodyState.Bones, true);
-		}
-		this.abilityDie.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, null);
-	}
-
-	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
-	{
-		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
-		this.SetBehavior(GREnemyRanged.Behavior.Jump, false);
-	}
-
-	public void OnNetworkBehaviorStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 11)
-		{
-			return;
-		}
-		this.SetBehavior((GREnemyRanged.Behavior)newState, false);
-	}
-
-	public void OnNetworkBodyStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 3)
-		{
-			return;
-		}
-		this.SetBodyState((GREnemyRanged.BodyState)newState, false);
-	}
-
-	public void SetPatrolPath(long entityCreateData)
-	{
-		this.abilityPatrol.SetPatrolPath(GhostReactorManager.Get(this.entity).reactor.GetPatrolPath(entityCreateData));
-	}
-
-	public void SetHP(int hp)
-	{
-		this.hp = hp;
-	}
-
-	public bool TrySetBehavior(GREnemyRanged.Behavior newBehavior)
-	{
-		if (this.currBehavior == GREnemyRanged.Behavior.Jump && newBehavior == GREnemyRanged.Behavior.Stagger)
-		{
-			return false;
-		}
-		this.SetBehavior(newBehavior, false);
-		return true;
-	}
-
-	public void SetBehavior(GREnemyRanged.Behavior newBehavior, bool force = false)
-	{
-		if (this.currBehavior == newBehavior && !force)
-		{
-			return;
-		}
-		switch (this.currBehavior)
-		{
-		case GREnemyRanged.Behavior.Patrol:
-			this.abilityPatrol.Stop();
-			break;
-		case GREnemyRanged.Behavior.Stagger:
-			this.abilityStagger.Stop();
-			break;
-		case GREnemyRanged.Behavior.Dying:
-			this.abilityDie.Stop();
-			break;
-		case GREnemyRanged.Behavior.SeekRangedAttackPosition:
-			if (newBehavior != GREnemyRanged.Behavior.RangedAttack)
-			{
-				this.SoftResetThrowableHead();
-			}
-			break;
-		case GREnemyRanged.Behavior.RangedAttack:
-			if (newBehavior != GREnemyRanged.Behavior.RangedAttackCooldown)
-			{
-				this.ForceResetThrowableHead();
-			}
-			break;
-		case GREnemyRanged.Behavior.RangedAttackCooldown:
-			this.ForceResetThrowableHead();
-			this.abilityKeepDistance.Stop();
-			break;
-		case GREnemyRanged.Behavior.Flashed:
-			this.abilityFlashed.Stop();
-			break;
-		case GREnemyRanged.Behavior.Investigate:
-			this.abilityInvestigate.Stop();
-			break;
-		case GREnemyRanged.Behavior.Jump:
-			this.abilityJump.Stop();
-			break;
-		}
-		this.currBehavior = newBehavior;
-		switch (this.currBehavior)
-		{
-		case GREnemyRanged.Behavior.Idle:
-			this.targetPlayer = null;
-			this.PlayAnim("GREnemyRangedIdleSearch", 0.1f, 1f);
-			break;
-		case GREnemyRanged.Behavior.Patrol:
-			this.targetPlayer = null;
-			this.abilityPatrol.Start();
-			break;
-		case GREnemyRanged.Behavior.Search:
-			this.targetPlayer = null;
-			this.PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
-			this.navAgent.speed = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
-			this.lastMoving = false;
-			break;
-		case GREnemyRanged.Behavior.Stagger:
-			this.abilityStagger.Start();
-			break;
-		case GREnemyRanged.Behavior.Dying:
-			this.abilityDie.Start();
-			if (this.entity.IsAuthority())
-			{
-				this.entity.manager.RequestCreateItem(this.corePrefab.gameObject.name.GetStaticHash(), this.coreMarker.position, this.coreMarker.rotation, 0L);
-			}
-			break;
-		case GREnemyRanged.Behavior.SeekRangedAttackPosition:
-			this.PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
-			this.navAgent.speed = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.ChaseSpeed);
-			this.EnableVFXForShoulderHead();
-			this.chaseAbilitySound.Play(this.audioSecondarySource);
-			break;
-		case GREnemyRanged.Behavior.RangedAttack:
-			this.PlayAnim("GREnemyRangedAttack01", 0.1f, 1f);
-			this.navAgent.speed = 0f;
-			this.navAgent.velocity = Vector3.zero;
-			this.headRemovaltime = PhotonNetwork.Time + (double)this.headRemovalFrame;
-			this.attackAbilitySound.Play(this.audioSource);
-			break;
-		case GREnemyRanged.Behavior.RangedAttackCooldown:
-			this.lastMoving = true;
-			this.abilityKeepDistance.SetTargetPlayer(this.targetPlayer);
-			this.abilityKeepDistance.Start();
-			break;
-		case GREnemyRanged.Behavior.Flashed:
-			this.abilityFlashed.Start();
-			break;
-		case GREnemyRanged.Behavior.Investigate:
-			this.abilityInvestigate.Start();
-			break;
-		case GREnemyRanged.Behavior.Jump:
-			this.abilityJump.Start();
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestBehaviorChange((byte)this.currBehavior);
-		}
-	}
-
-	private void PlayAnim(string animName, float blendTime, float speed)
-	{
-		if (this.anim != null)
-		{
-			this.anim[animName].speed = speed;
-			this.anim.CrossFade(animName, blendTime);
-		}
-	}
-
-	public void SetBodyState(GREnemyRanged.BodyState newBodyState, bool force = false)
-	{
-		if (this.currBodyState == newBodyState && !force)
-		{
-			return;
-		}
-		switch (this.currBodyState)
-		{
-		case GREnemyRanged.BodyState.Destroyed:
-			this.ForceResetThrowableHead();
-			for (int i = 0; i < this.colliders.Count; i++)
-			{
-				this.colliders[i].enabled = true;
-			}
-			break;
-		case GREnemyRanged.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemyRanged.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.currBodyState = newBodyState;
-		switch (this.currBodyState)
-		{
-		case GREnemyRanged.BodyState.Destroyed:
-			this.DisableHeadOnShoulderAndHeadInHand();
-			GhostReactorManager.Get(this.entity).ReportEnemyDeath();
-			break;
-		case GREnemyRanged.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemyRanged.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestStateChange((byte)newBodyState);
-		}
-	}
-
-	private void RefreshBody()
-	{
-		switch (this.currBodyState)
-		{
-		case GREnemyRanged.BodyState.Destroyed:
-			this.armor.SetHp(0);
-			GREnemy.HideRenderers(this.bones, true);
-			GREnemy.HideRenderers(this.always, true);
-			this.DisableHeadOnShoulderAndHeadInHand();
-			return;
-		case GREnemyRanged.BodyState.Bones:
-			this.armor.SetHp(0);
-			GREnemy.HideRenderers(this.bones, false);
-			GREnemy.HideRenderers(this.always, false);
-			return;
-		case GREnemyRanged.BodyState.Shell:
-			this.armor.SetHp(this.hp);
-			GREnemy.HideRenderers(this.bones, true);
-			GREnemy.HideRenderers(this.always, false);
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void Update()
-	{
-		if (this.entity.IsAuthority())
-		{
-			this.OnUpdateAuthority(Time.deltaTime);
-		}
-		else
-		{
-			this.OnUpdateRemote(Time.deltaTime);
-		}
-		this.UpdateShared();
-	}
-
-	public void OnEntityThink(float dt)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		if (!GhostReactorManager.AggroDisabled)
-		{
-			GREnemyRanged.Behavior behavior = this.currBehavior;
-			if (behavior > GREnemyRanged.Behavior.Search)
-			{
-				if (behavior == GREnemyRanged.Behavior.RangedAttackCooldown)
-				{
-					this.abilityKeepDistance.Think(dt);
-					this.UpdateTarget();
-					return;
-				}
-				if (behavior != GREnemyRanged.Behavior.Investigate)
-				{
-					return;
-				}
-			}
-			this.UpdateTarget();
-		}
-	}
-
-	private void UpdateTarget()
-	{
-		this.bestTargetPlayer = null;
-		this.bestTargetNetPlayer = null;
-		GREnemyRanged.tempRigs.Clear();
-		GREnemyRanged.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GREnemyRanged.tempRigs);
-		this.senseNearby.UpdateNearby(GREnemyRanged.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		if (vrrig != null)
-		{
-			GRPlayer component = vrrig.GetComponent<GRPlayer>();
-			if (component != null && component.State != GRPlayer.GRPlayerState.Ghost)
-			{
-				this.bestTargetPlayer = component;
-				this.bestTargetNetPlayer = vrrig.OwningNetPlayer;
-				this.lastSeenTargetTime = Time.timeAsDouble;
-				this.lastSeenTargetPosition = vrrig.transform.position;
-			}
-		}
-	}
-
-	private void ChooseNewBehavior()
-	{
-		if (this.bestTargetPlayer != null && Time.timeAsDouble - this.lastSeenTargetTime < (double)this.sightLostFollowStopTime)
-		{
-			this.targetPlayer = this.bestTargetNetPlayer;
-			this.lastSeenTargetTime = Time.timeAsDouble;
-			this.investigateLocation = null;
-			this.SetBehavior(GREnemyRanged.Behavior.SeekRangedAttackPosition, false);
-			return;
-		}
-		if (Time.timeAsDouble - this.lastSeenTargetTime < (double)this.searchTime)
-		{
-			this.SetBehavior(GREnemyRanged.Behavior.Search, false);
-			return;
-		}
-		this.investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, this.hearingRadius, this.investigateLocation);
-		if (this.investigateLocation != null)
-		{
-			this.abilityInvestigate.SetTargetPos(this.investigateLocation.Value);
-			this.SetBehavior(GREnemyRanged.Behavior.Investigate, false);
-			return;
-		}
-		if (this.abilityPatrol.HasValidPatrolPath())
-		{
-			this.SetBehavior(GREnemyRanged.Behavior.Patrol, false);
-			return;
-		}
-		this.SetBehavior(GREnemyRanged.Behavior.Idle, false);
-	}
-
-	private void OnUpdateAuthority(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyRanged.Behavior.Idle:
-			this.ChooseNewBehavior();
-			break;
-		case GREnemyRanged.Behavior.Patrol:
-			this.abilityPatrol.UpdateAuthority(dt);
-			this.ChooseNewBehavior();
-			break;
-		case GREnemyRanged.Behavior.Search:
-			this.UpdateSearch();
-			this.ChooseNewBehavior();
-			break;
-		case GREnemyRanged.Behavior.Stagger:
-			this.abilityStagger.UpdateAuthority(dt);
-			if (this.abilityStagger.IsDone())
-			{
-				if (this.targetPlayer == null)
-				{
-					this.SetBehavior(GREnemyRanged.Behavior.Search, false);
-				}
-				else
-				{
-					this.SetBehavior(GREnemyRanged.Behavior.SeekRangedAttackPosition, false);
-				}
-			}
-			break;
-		case GREnemyRanged.Behavior.Dying:
-			this.abilityDie.UpdateAuthority(dt);
-			break;
-		case GREnemyRanged.Behavior.SeekRangedAttackPosition:
-			if (this.targetPlayer != null)
-			{
-				GRPlayer grplayer = GRPlayer.Get(this.targetPlayer.ActorNumber);
-				if (grplayer != null && grplayer.State == GRPlayer.GRPlayerState.Alive)
-				{
-					Vector3 position = grplayer.transform.position;
-					Vector3 position2 = base.transform.position;
-					float magnitude = (position - position2).magnitude;
-					if (magnitude > this.loseSightDist)
-					{
-						this.ChooseNewBehavior();
-					}
-					else
-					{
-						float num = Vector3.Distance(position, this.headTransform.position);
-						bool flag = false;
-						if (num < this.sightDist)
-						{
-							flag = (Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position - this.headTransform.position), GREnemyChaser.visibilityHits, num, this.visibilityLayerMask.value, QueryTriggerInteraction.Ignore) < 1);
-						}
-						if (flag)
-						{
-							this.lastSeenTargetPosition = position;
-							this.lastSeenTargetTime = Time.timeAsDouble;
-						}
-						if (Time.timeAsDouble - this.lastSeenTargetTime < (double)this.sightLostFollowStopTime)
-						{
-							this.searchPosition = position;
-							this.agent.RequestDestination(this.lastSeenTargetPosition);
-							if (flag)
-							{
-								this.rangedTargetPosition = position;
-								Vector3 b = Vector3.up * 0.4f;
-								this.rangedTargetPosition += b;
-								if (magnitude < this.rangedAttackDistMax)
-								{
-									this.behaviorEndTime = Time.timeAsDouble + (double)this.rangedAttackChargeTime;
-									this.SetBehavior(GREnemyRanged.Behavior.RangedAttack, false);
-									GhostReactorManager.Get(this.entity).RequestFireProjectile(this.entity.id, this.rangedProjectileFirePoint.position, this.rangedTargetPosition, PhotonNetwork.Time + (double)this.rangedAttackChargeTime);
-								}
-							}
-						}
-						else
-						{
-							this.ChooseNewBehavior();
-						}
-					}
-				}
-			}
-			break;
-		case GREnemyRanged.Behavior.RangedAttack:
-			if (Time.timeAsDouble > this.behaviorEndTime)
-			{
-				if (this.targetPlayer != null)
-				{
-					GRPlayer grplayer2 = GRPlayer.Get(this.targetPlayer.ActorNumber);
-					if (grplayer2 != null && grplayer2.State == GRPlayer.GRPlayerState.Alive)
-					{
-						this.rangedTargetPosition = grplayer2.transform.position;
-					}
-				}
-				this.SetBehavior(GREnemyRanged.Behavior.RangedAttackCooldown, false);
-				this.behaviorEndTime = Time.timeAsDouble + (double)this.rangedAttackRecoverTime;
-			}
-			break;
-		case GREnemyRanged.Behavior.RangedAttackCooldown:
-			if (Time.timeAsDouble > this.behaviorEndTime)
-			{
-				this.SetBehavior(GREnemyRanged.Behavior.SeekRangedAttackPosition, false);
-				this.behaviorEndTime = Time.timeAsDouble;
-			}
-			else
-			{
-				this.abilityKeepDistance.UpdateAuthority(dt);
-			}
-			break;
-		case GREnemyRanged.Behavior.Flashed:
-			this.abilityFlashed.UpdateAuthority(dt);
-			if (this.abilityFlashed.IsDone())
-			{
-				if (this.targetPlayer == null)
-				{
-					this.SetBehavior(GREnemyRanged.Behavior.Search, false);
-				}
-				else
-				{
-					this.SetBehavior(GREnemyRanged.Behavior.SeekRangedAttackPosition, false);
-				}
-			}
-			break;
-		case GREnemyRanged.Behavior.Investigate:
-			this.abilityInvestigate.UpdateAuthority(dt);
-			if (GhostReactorManager.noiseDebugEnabled)
-			{
-				DebugUtil.DrawLine(base.transform.position, this.abilityInvestigate.GetTargetPos(), Color.green, true);
-			}
-			this.ChooseNewBehavior();
-			break;
-		case GREnemyRanged.Behavior.Jump:
-			this.abilityJump.UpdateAuthority(dt);
-			if (this.abilityJump.IsDone())
-			{
-				this.ChooseNewBehavior();
-			}
-			break;
-		}
-		GameAgent.UpdateFacing(base.transform, this.navAgent, this.targetPlayer, this.turnSpeed);
-	}
-
-	private void OnUpdateRemote(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemyRanged.Behavior.Patrol:
-			this.abilityPatrol.UpdateRemote(dt);
-			return;
-		case GREnemyRanged.Behavior.Search:
-		case GREnemyRanged.Behavior.SeekRangedAttackPosition:
-		case GREnemyRanged.Behavior.RangedAttack:
-			break;
-		case GREnemyRanged.Behavior.Stagger:
-			this.abilityStagger.UpdateRemote(dt);
-			return;
-		case GREnemyRanged.Behavior.Dying:
-			this.abilityDie.UpdateRemote(dt);
-			return;
-		case GREnemyRanged.Behavior.RangedAttackCooldown:
-			this.abilityKeepDistance.UpdateRemote(dt);
-			return;
-		case GREnemyRanged.Behavior.Flashed:
-			this.abilityFlashed.UpdateRemote(dt);
-			return;
-		case GREnemyRanged.Behavior.Investigate:
-			this.abilityInvestigate.UpdateRemote(dt);
-			if (GhostReactorManager.noiseDebugEnabled)
-			{
-				DebugUtil.DrawLine(base.transform.position, this.abilityInvestigate.GetTargetPos(), Color.green, true);
-				return;
-			}
-			break;
-		case GREnemyRanged.Behavior.Jump:
-			this.abilityJump.UpdateRemote(dt);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void UpdateShared()
-	{
-		if (this.rangedAttackQueued)
-		{
-			if (!this.headRemoved && this.currBehavior == GREnemyRanged.Behavior.RangedAttack && PhotonNetwork.Time >= this.headRemovaltime)
-			{
-				this.headRemoved = true;
-				this.EnableVFXForHeadInHand();
-			}
-			if (PhotonNetwork.Time > this.queuedFiringTime)
-			{
-				this.rangedAttackQueued = false;
-				this.FireRangedAttack(this.queuedFiringPosition, this.queuedTargetPosition);
-			}
-		}
-		if (this.headLightReset && Time.timeAsDouble > this.spitterLightTurnOffTime)
-		{
-			this.spitterHeadOnShouldersLight.SetActive(false);
-			this.headLightReset = false;
-		}
-	}
-
-	private void UpdateSearch()
-	{
-		Vector3 vector = this.searchPosition - base.transform.position;
-		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
-		if (vector2.sqrMagnitude < 0.15f)
-		{
-			Vector3 b = this.lastSeenTargetPosition - this.searchPosition;
-			b.y = 0f;
-			this.searchPosition = this.lastSeenTargetPosition + b;
-		}
-		if (this.IsMoving())
-		{
-			if (!this.lastMoving)
-			{
-				this.PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
-				this.lastMoving = true;
-			}
-		}
-		else if (this.lastMoving)
-		{
-			this.PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
-			this.lastMoving = false;
-		}
-		this.agent.RequestDestination(this.searchPosition);
-		if (Time.timeAsDouble - this.lastSeenTargetTime > (double)this.searchTime)
-		{
-			this.ChooseNewBehavior();
-		}
-	}
-
-	private void OnHitByClub(GRTool tool, GameHitData hit)
-	{
-		if (this.currBodyState != GREnemyRanged.BodyState.Bones)
-		{
-			if (this.currBodyState == GREnemyRanged.BodyState.Shell && this.armor != null)
-			{
-				this.armor.PlayBlockFx(hit.hitEntityPosition);
-			}
-			return;
-		}
-		this.hp -= hit.hitAmount;
-		this.audioSource.PlayOneShot(this.damagedSound, this.damagedSoundVolume);
-		if (this.fxDamaged != null)
-		{
-			this.fxDamaged.SetActive(false);
-			this.fxDamaged.SetActive(true);
-		}
-		if (this.hp <= 0)
-		{
-			this.abilityDie.SetInstigatingPlayerIndex(this.entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
-			this.SetBodyState(GREnemyRanged.BodyState.Destroyed, false);
-			this.SetBehavior(GREnemyRanged.Behavior.Dying, false);
-			return;
-		}
-		this.lastSeenTargetPosition = tool.transform.position;
-		this.lastSeenTargetTime = Time.timeAsDouble;
-		Vector3 vector = this.lastSeenTargetPosition - base.transform.position;
-		vector.y = 0f;
-		this.searchPosition = this.lastSeenTargetPosition + vector.normalized * 1.5f;
-		this.abilityStagger.SetStaggerVelocity(hit.hitImpulse);
-		this.TrySetBehavior(GREnemyRanged.Behavior.Stagger);
-	}
-
-	public void InstantDeath()
-	{
-		this.hp = 0;
-		this.SetBodyState(GREnemyRanged.BodyState.Destroyed, false);
-		this.SetBehavior(GREnemyRanged.Behavior.Dying, false);
-	}
-
-	private void OnHitByFlash(GRTool tool, GameHitData hit)
-	{
-		if (this.currBodyState == GREnemyRanged.BodyState.Shell)
-		{
-			this.hp -= hit.hitAmount;
-			if (this.armor != null)
-			{
-				this.armor.SetHp(this.hp);
-			}
-			if (this.hp <= 0)
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayDestroyFx(this.armor.transform.position);
-				}
-				this.SetBodyState(GREnemyRanged.BodyState.Bones, false);
-				if (tool.gameEntity.IsHeldByLocalPlayer())
-				{
-					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name, 1);
-				}
-				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
-				{
-					this.armor.FragmentArmor();
-				}
-			}
-			else if (tool != null)
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayHitFx(this.armor.transform.position);
-				}
-				this.lastSeenTargetPosition = tool.transform.position;
-				this.lastSeenTargetTime = Time.timeAsDouble;
-				Vector3 vector = this.lastSeenTargetPosition - base.transform.position;
-				vector.y = 0f;
-				this.searchPosition = this.lastSeenTargetPosition + vector.normalized * 1.5f;
-				this.SetBehavior(GREnemyRanged.Behavior.Search, false);
-				this.RefreshBody();
-			}
-			else
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayHitFx(this.armor.transform.position);
-				}
-				this.RefreshBody();
-			}
-		}
-		GRToolFlash component = tool.GetComponent<GRToolFlash>();
-		if (component != null)
-		{
-			this.abilityFlashed.SetStunTime(component.stunDuration);
-		}
-		this.SetBehavior(GREnemyRanged.Behavior.Flashed, false);
-	}
-
-	public void OnHitByShield(GRTool tool, GameHitData hit)
-	{
-		this.OnHitByClub(tool, hit);
-	}
-
-	public void OnGameEntitySerialize(BinaryWriter writer)
-	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		byte value3 = (byte)this.abilityPatrol.nextPatrolNode;
-		int value4 = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
-		writer.Write(value);
-		writer.Write(value2);
-		writer.Write(this.hp);
-		writer.Write(value3);
-		writer.Write(value4);
-	}
-
-	public void OnGameEntityDeserialize(BinaryReader reader)
-	{
-		GREnemyRanged.Behavior newBehavior = (GREnemyRanged.Behavior)reader.ReadByte();
-		GREnemyRanged.BodyState newBodyState = (GREnemyRanged.BodyState)reader.ReadByte();
-		int num = reader.ReadInt32();
-		byte b = reader.ReadByte();
-		int playerID = reader.ReadInt32();
-		this.SetPatrolPath((long)((int)this.entity.createData));
-		this.abilityPatrol.SetNextPatrolNode((int)b);
-		this.SetHP(num);
-		this.SetBehavior(newBehavior, true);
-		this.SetBodyState(newBodyState, true);
-		this.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
-	}
-
-	public bool IsHitValid(GameHitData hit)
-	{
-		return true;
-	}
-
-	public void OnHit(GameHitData hit)
-	{
-		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
-		GRTool gameComponent = this.entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
-		if (gameComponent != null)
-		{
-			switch (hitTypeId)
-			{
-			case GameHitType.Club:
-				this.OnHitByClub(gameComponent, hit);
-				return;
-			case GameHitType.Flash:
-				this.OnHitByFlash(gameComponent, hit);
-				return;
-			case GameHitType.Shield:
-				this.OnHitByShield(gameComponent, hit);
-				break;
-			default:
-				return;
-			}
-		}
-	}
-
-	public void RequestRangedAttack(Vector3 firingPosition, Vector3 targetPosition, double fireTime)
-	{
-		this.rangedAttackQueued = true;
-		this.queuedFiringTime = fireTime;
-		this.queuedFiringPosition = firingPosition;
-		this.queuedTargetPosition = targetPosition;
-	}
-
-	private void DestroyProjectile()
-	{
-		if (this.entity.IsAuthority() && this.rangedProjectileInstance != null)
-		{
-			GameEntity component = this.rangedProjectileInstance.GetComponent<GameEntity>();
-			if (component != null)
-			{
-				component.manager.RequestDestroyItem(component.id);
-			}
-		}
-	}
-
-	private void FireRangedAttack(Vector3 launchPosition, Vector3 targetPosition)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		this.DisableHeadInHand();
-		this.DestroyProjectile();
-		Vector3 forward;
-		if (GREnemyRanged.CalculateLaunchDirection(launchPosition, targetPosition, this.projectileSpeed, out forward))
-		{
-			this.entity.manager.RequestCreateItem(this.rangedProjectilePrefab.name.GetStaticHash(), launchPosition, Quaternion.LookRotation(forward, Vector3.up), (long)this.entity.GetNetId());
-		}
-	}
-
-	public static bool CalculateLaunchDirection(Vector3 startPos, Vector3 targetPos, float speed, out Vector3 direction)
-	{
-		direction = Vector3.zero;
-		Vector3 vector = targetPos - startPos;
-		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
-		float magnitude = vector2.magnitude;
-		Vector3 normalized = vector2.normalized;
-		float y = vector.y;
-		float num = 9.8f;
-		float num2 = speed * speed;
-		float num3 = num2 * num2 - num * (num * magnitude * magnitude + 2f * y * num2);
-		if (num3 < 0f)
-		{
-			return false;
-		}
-		int num4 = 0;
-		float num5 = Mathf.Sqrt(num3);
-		float num6 = (num2 + num5) / (num * magnitude);
-		float num7 = (num2 - num5) / (num * magnitude);
-		float num8 = num2 / (num6 * num6 + 1f);
-		float num9 = num2 / (num7 * num7 + 1f);
-		float num10 = (num4 != 0) ? Mathf.Min(num8, num9) : Mathf.Max(num8, num9);
-		float num11 = (num4 != 0) ? ((num8 < num9) ? Mathf.Sign(num6) : Mathf.Sign(num7)) : ((num8 > num9) ? Mathf.Sign(num6) : Mathf.Sign(num7));
-		float d = Mathf.Sqrt(num10);
-		float num12 = Mathf.Sqrt(Mathf.Abs(num2 - num10));
-		direction = (normalized * d + new Vector3(0f, num12 * num11, 0f)).normalized;
-		return true;
-	}
-
-	public void OnProjectileInit(GRRangedEnemyProjectile projectile)
-	{
-		this.rangedProjectileInstance = projectile.gameObject;
-	}
-
-	public void OnProjectileHit(GRRangedEnemyProjectile projectile, Collision collision)
-	{
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("State: <color=\"yellow\">{0}<color=\"white\"> HP: <color=\"yellow\">{1}<color=\"white\">", this.currBehavior.ToString(), this.hp));
-		strings.Add(string.Format("speed: <color=\"yellow\">{0}<color=\"white\"> patrol node:<color=\"yellow\">{1}/{2}<color=\"white\">", this.navAgent.speed, this.abilityPatrol.nextPatrolNode, (this.abilityPatrol.GetPatrolPath() != null) ? this.abilityPatrol.GetPatrolPath().patrolNodes.Count : 0));
-		if (this.targetPlayer != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(this.targetPlayer.ActorNumber);
-			if (grplayer != null)
-			{
-				float magnitude = (grplayer.transform.position - base.transform.position).magnitude;
-				strings.Add(string.Format("TargetDis: <color=\"yellow\">{0}<color=\"white\"> ", magnitude));
-			}
-		}
+		Destroyed,
+		Bones,
+		Shell,
+		Count
 	}
 
 	public GameEntity entity;
@@ -1083,7 +152,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	private double spitterLightTurnOffTime;
 
 	[FormerlySerializedAs("headRemovalInterval")]
-	public float headRemovalFrame = 0.23333333f;
+	public float headRemovalFrame = 7f / 30f;
 
 	private double headRemovaltime;
 
@@ -1095,13 +164,13 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	public int hp;
 
 	[ReadOnly]
-	public GREnemyRanged.Behavior currBehavior;
+	public Behavior currBehavior;
 
 	[ReadOnly]
 	public double behaviorEndTime;
 
 	[ReadOnly]
-	public GREnemyRanged.BodyState currBodyState;
+	public BodyState currBodyState;
 
 	[ReadOnly]
 	public int nextPatrolNode;
@@ -1158,27 +227,940 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 
 	private static List<VRRig> tempRigs = new List<VRRig>(16);
 
-	public enum Behavior
+	private bool IsMoving()
 	{
-		Idle,
-		Patrol,
-		Search,
-		Stagger,
-		Dying,
-		SeekRangedAttackPosition,
-		RangedAttack,
-		RangedAttackCooldown,
-		Flashed,
-		Investigate,
-		Jump,
-		Count
+		return navAgent.velocity.sqrMagnitude > 0f;
 	}
 
-	public enum BodyState
+	private void SoftResetThrowableHead()
 	{
-		Destroyed,
-		Bones,
-		Shell,
-		Count
+		headRemoved = false;
+		spitterHeadOnShoulders.SetActive(value: true);
+		spitterHeadOnShouldersVFX.SetActive(value: false);
+		spitterHeadInHand.SetActive(value: false);
+		spitterHeadInHandLight.SetActive(value: false);
+		spitterHeadInHandVFX.SetActive(value: false);
+		headLightReset = true;
+		spitterLightTurnOffTime = Time.timeAsDouble + spitterLightTurnOffDelay;
+	}
+
+	private void ForceResetThrowableHead()
+	{
+		headRemoved = false;
+		headLightReset = false;
+		spitterHeadOnShoulders.SetActive(value: true);
+		spitterHeadOnShouldersLight.SetActive(value: false);
+		spitterHeadOnShouldersVFX.SetActive(value: false);
+		spitterHeadInHand.SetActive(value: false);
+		spitterHeadInHandLight.SetActive(value: false);
+		spitterHeadInHandVFX.SetActive(value: false);
+	}
+
+	private void ForceHeadToDeadState()
+	{
+		headRemoved = false;
+		headLightReset = false;
+		spitterHeadOnShoulders.SetActive(value: true);
+		spitterHeadOnShouldersLight.SetActive(value: false);
+		spitterHeadOnShouldersVFX.SetActive(value: false);
+		spitterHeadInHand.SetActive(value: false);
+		spitterHeadInHandLight.SetActive(value: false);
+		spitterHeadInHandVFX.SetActive(value: false);
+	}
+
+	private void EnableVFXForShoulderHead()
+	{
+		headLightReset = false;
+		spitterHeadOnShoulders.SetActive(value: true);
+		spitterHeadOnShouldersLight.SetActive(value: true);
+		spitterHeadOnShouldersVFX.SetActive(value: true);
+		spitterHeadInHand.SetActive(value: false);
+		spitterHeadInHandLight.SetActive(value: false);
+		spitterHeadInHandVFX.SetActive(value: false);
+	}
+
+	private void EnableVFXForHeadInHand()
+	{
+		headLightReset = false;
+		spitterHeadOnShoulders.SetActive(value: false);
+		spitterHeadOnShouldersLight.SetActive(value: false);
+		spitterHeadOnShouldersVFX.SetActive(value: false);
+		spitterHeadInHand.SetActive(value: true);
+		spitterHeadInHandLight.SetActive(value: true);
+		spitterHeadInHandVFX.SetActive(value: true);
+	}
+
+	private void DisableHeadInHand()
+	{
+		headLightReset = false;
+		spitterHeadInHand.SetActive(value: false);
+	}
+
+	private void DisableHeadOnShoulderAndHeadInHand()
+	{
+		headLightReset = false;
+		headRemoved = false;
+		spitterHeadOnShoulders.SetActive(value: false);
+		spitterHeadOnShouldersLight.SetActive(value: false);
+		spitterHeadOnShouldersVFX.SetActive(value: false);
+		spitterHeadInHand.SetActive(value: false);
+		spitterHeadInHandLight.SetActive(value: false);
+		spitterHeadInHandVFX.SetActive(value: false);
+	}
+
+	private void Awake()
+	{
+		rigidBody = GetComponent<Rigidbody>();
+		colliders = new List<Collider>(4);
+		GetComponentsInChildren(colliders);
+		visibilityLayerMask = LayerMask.GetMask("Default");
+		senseNearby.Setup(headTransform, entity);
+		if (armor != null)
+		{
+			armor.SetHp(0);
+		}
+		navAgent.updateRotation = false;
+		agent.onBodyStateChanged += OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged += OnNetworkBehaviorStateChange;
+	}
+
+	public void OnEntityInit()
+	{
+		abilityStagger.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		abilityInvestigate.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		abilityPatrol.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		abilityFlashed.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		abilityKeepDistance.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		abilityJump.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+		Setup(entity.createData);
+		if ((bool)entity && (bool)entity.manager && (bool)entity.manager.ghostReactorManager && (bool)entity.manager.ghostReactorManager.reactor)
+		{
+			foreach (GRBonusEntry enemyGlobalBonuse in entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
+			{
+				attributes.AddBonus(enemyGlobalBonuse);
+			}
+		}
+		agent.navAgent.autoTraverseOffMeshLink = false;
+		agent.onJumpRequested += OnAgentJumpRequested;
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnDestroy()
+	{
+		agent.onBodyStateChanged -= OnNetworkBodyStateChange;
+		agent.onBehaviorStateChanged -= OnNetworkBehaviorStateChange;
+		DestroyProjectile();
+	}
+
+	public void Setup(long entityCreateData)
+	{
+		SetPatrolPath(entityCreateData);
+		if (abilityPatrol.HasValidPatrolPath())
+		{
+			SetBehavior(Behavior.Patrol, force: true);
+		}
+		else
+		{
+			SetBehavior(Behavior.Idle, force: true);
+		}
+		if (attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
+		{
+			SetBodyState(BodyState.Shell, force: true);
+		}
+		else
+		{
+			SetBodyState(BodyState.Bones, force: true);
+		}
+		abilityDie.Setup(agent, anim, audioSource, base.transform, headTransform, null);
+	}
+
+	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
+	{
+		abilityJump.SetupJump(start, end, heightScale, speedScale);
+		SetBehavior(Behavior.Jump);
+	}
+
+	public void OnNetworkBehaviorStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 11)
+		{
+			SetBehavior((Behavior)newState);
+		}
+	}
+
+	public void OnNetworkBodyStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 3)
+		{
+			SetBodyState((BodyState)newState);
+		}
+	}
+
+	public void SetPatrolPath(long entityCreateData)
+	{
+		abilityPatrol.SetPatrolPath(GhostReactorManager.Get(entity).reactor.GetPatrolPath(entityCreateData));
+	}
+
+	public void SetHP(int hp)
+	{
+		this.hp = hp;
+	}
+
+	public bool TrySetBehavior(Behavior newBehavior)
+	{
+		if (currBehavior == Behavior.Jump && newBehavior == Behavior.Stagger)
+		{
+			return false;
+		}
+		SetBehavior(newBehavior);
+		return true;
+	}
+
+	public void SetBehavior(Behavior newBehavior, bool force = false)
+	{
+		if (currBehavior == newBehavior && !force)
+		{
+			return;
+		}
+		switch (currBehavior)
+		{
+		case Behavior.Dying:
+			abilityDie.Stop();
+			break;
+		case Behavior.Stagger:
+			abilityStagger.Stop();
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.Stop();
+			break;
+		case Behavior.SeekRangedAttackPosition:
+			if (newBehavior != Behavior.RangedAttack)
+			{
+				SoftResetThrowableHead();
+			}
+			break;
+		case Behavior.RangedAttack:
+			if (newBehavior != Behavior.RangedAttackCooldown)
+			{
+				ForceResetThrowableHead();
+			}
+			break;
+		case Behavior.RangedAttackCooldown:
+			ForceResetThrowableHead();
+			abilityKeepDistance.Stop();
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Stop();
+			break;
+		case Behavior.Patrol:
+			abilityPatrol.Stop();
+			break;
+		case Behavior.Jump:
+			abilityJump.Stop();
+			break;
+		}
+		currBehavior = newBehavior;
+		switch (currBehavior)
+		{
+		case Behavior.Dying:
+			abilityDie.Start();
+			if (entity.IsAuthority())
+			{
+				entity.manager.RequestCreateItem(corePrefab.gameObject.name.GetStaticHash(), coreMarker.position, coreMarker.rotation, 0L);
+			}
+			break;
+		case Behavior.Stagger:
+			abilityStagger.Start();
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.Start();
+			break;
+		case Behavior.Patrol:
+			targetPlayer = null;
+			abilityPatrol.Start();
+			break;
+		case Behavior.Search:
+			targetPlayer = null;
+			PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
+			navAgent.speed = attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.PatrolSpeed);
+			lastMoving = false;
+			break;
+		case Behavior.SeekRangedAttackPosition:
+			PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
+			navAgent.speed = attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.ChaseSpeed);
+			EnableVFXForShoulderHead();
+			chaseAbilitySound.Play(audioSecondarySource);
+			break;
+		case Behavior.RangedAttack:
+			PlayAnim("GREnemyRangedAttack01", 0.1f, 1f);
+			navAgent.speed = 0f;
+			navAgent.velocity = Vector3.zero;
+			headRemovaltime = PhotonNetwork.Time + (double)headRemovalFrame;
+			attackAbilitySound.Play(audioSource);
+			break;
+		case Behavior.RangedAttackCooldown:
+			lastMoving = true;
+			abilityKeepDistance.SetTargetPlayer(targetPlayer);
+			abilityKeepDistance.Start();
+			break;
+		case Behavior.Idle:
+			targetPlayer = null;
+			PlayAnim("GREnemyRangedIdleSearch", 0.1f, 1f);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Start();
+			break;
+		case Behavior.Jump:
+			abilityJump.Start();
+			break;
+		}
+		RefreshBody();
+		if (entity.IsAuthority())
+		{
+			agent.RequestBehaviorChange((byte)currBehavior);
+		}
+	}
+
+	private void PlayAnim(string animName, float blendTime, float speed)
+	{
+		if (anim != null)
+		{
+			anim[animName].speed = speed;
+			anim.CrossFade(animName, blendTime);
+		}
+	}
+
+	public void SetBodyState(BodyState newBodyState, bool force = false)
+	{
+		if (currBodyState == newBodyState && !force)
+		{
+			return;
+		}
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+		{
+			ForceResetThrowableHead();
+			for (int i = 0; i < colliders.Count; i++)
+			{
+				colliders[i].enabled = true;
+			}
+			break;
+		}
+		case BodyState.Bones:
+			hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+			break;
+		case BodyState.Shell:
+			hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+			break;
+		}
+		currBodyState = newBodyState;
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			DisableHeadOnShoulderAndHeadInHand();
+			GhostReactorManager.Get(entity).ReportEnemyDeath();
+			break;
+		case BodyState.Bones:
+			hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+			break;
+		case BodyState.Shell:
+			hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+			break;
+		}
+		RefreshBody();
+		if (entity.IsAuthority())
+		{
+			agent.RequestStateChange((byte)newBodyState);
+		}
+	}
+
+	private void RefreshBody()
+	{
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			armor.SetHp(0);
+			GREnemy.HideRenderers(bones, hide: true);
+			GREnemy.HideRenderers(always, hide: true);
+			DisableHeadOnShoulderAndHeadInHand();
+			break;
+		case BodyState.Bones:
+			armor.SetHp(0);
+			GREnemy.HideRenderers(bones, hide: false);
+			GREnemy.HideRenderers(always, hide: false);
+			break;
+		case BodyState.Shell:
+			armor.SetHp(hp);
+			GREnemy.HideRenderers(bones, hide: true);
+			GREnemy.HideRenderers(always, hide: false);
+			break;
+		}
+	}
+
+	private void Update()
+	{
+		if (entity.IsAuthority())
+		{
+			OnUpdateAuthority(Time.deltaTime);
+		}
+		else
+		{
+			OnUpdateRemote(Time.deltaTime);
+		}
+		UpdateShared();
+	}
+
+	public void OnEntityThink(float dt)
+	{
+		if (entity.IsAuthority() && !GhostReactorManager.AggroDisabled)
+		{
+			switch (currBehavior)
+			{
+			case Behavior.RangedAttackCooldown:
+				abilityKeepDistance.Think(dt);
+				UpdateTarget();
+				break;
+			case Behavior.Idle:
+			case Behavior.Patrol:
+			case Behavior.Search:
+			case Behavior.Investigate:
+				UpdateTarget();
+				break;
+			}
+		}
+	}
+
+	private void UpdateTarget()
+	{
+		bestTargetPlayer = null;
+		bestTargetNetPlayer = null;
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+		float outDistanceSq;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		if (vRRig != null)
+		{
+			GRPlayer component = vRRig.GetComponent<GRPlayer>();
+			if ((object)component != null && component.State != GRPlayer.GRPlayerState.Ghost)
+			{
+				bestTargetPlayer = component;
+				bestTargetNetPlayer = vRRig.OwningNetPlayer;
+				lastSeenTargetTime = Time.timeAsDouble;
+				lastSeenTargetPosition = vRRig.transform.position;
+			}
+		}
+	}
+
+	private void ChooseNewBehavior()
+	{
+		if (bestTargetPlayer != null && Time.timeAsDouble - lastSeenTargetTime < (double)sightLostFollowStopTime)
+		{
+			targetPlayer = bestTargetNetPlayer;
+			lastSeenTargetTime = Time.timeAsDouble;
+			investigateLocation = null;
+			SetBehavior(Behavior.SeekRangedAttackPosition);
+			return;
+		}
+		if (Time.timeAsDouble - lastSeenTargetTime < (double)searchTime)
+		{
+			SetBehavior(Behavior.Search);
+			return;
+		}
+		investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, hearingRadius, investigateLocation);
+		if (investigateLocation.HasValue)
+		{
+			abilityInvestigate.SetTargetPos(investigateLocation.Value);
+			SetBehavior(Behavior.Investigate);
+		}
+		else if (abilityPatrol.HasValidPatrolPath())
+		{
+			SetBehavior(Behavior.Patrol);
+		}
+		else
+		{
+			SetBehavior(Behavior.Idle);
+		}
+	}
+
+	private void OnUpdateAuthority(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			ChooseNewBehavior();
+			break;
+		case Behavior.Patrol:
+			abilityPatrol.UpdateAuthority(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Search:
+			UpdateSearch();
+			ChooseNewBehavior();
+			break;
+		case Behavior.Stagger:
+			abilityStagger.UpdateAuthority(dt);
+			if (abilityStagger.IsDone())
+			{
+				if (targetPlayer == null)
+				{
+					SetBehavior(Behavior.Search);
+				}
+				else
+				{
+					SetBehavior(Behavior.SeekRangedAttackPosition);
+				}
+			}
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateAuthority(dt);
+			if (abilityFlashed.IsDone())
+			{
+				if (targetPlayer == null)
+				{
+					SetBehavior(Behavior.Search);
+				}
+				else
+				{
+					SetBehavior(Behavior.SeekRangedAttackPosition);
+				}
+			}
+			break;
+		case Behavior.Dying:
+			abilityDie.UpdateAuthority(dt);
+			break;
+		case Behavior.SeekRangedAttackPosition:
+		{
+			if (targetPlayer == null)
+			{
+				break;
+			}
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (!(gRPlayer != null) || gRPlayer.State != GRPlayer.GRPlayerState.Alive)
+			{
+				break;
+			}
+			Vector3 position = gRPlayer.transform.position;
+			Vector3 position2 = base.transform.position;
+			float magnitude = (position - position2).magnitude;
+			if (magnitude > loseSightDist)
+			{
+				ChooseNewBehavior();
+				break;
+			}
+			float num = Vector3.Distance(position, headTransform.position);
+			bool flag = false;
+			if (num < sightDist)
+			{
+				flag = Physics.RaycastNonAlloc(new Ray(headTransform.position, position - headTransform.position), GREnemyChaser.visibilityHits, num, visibilityLayerMask.value, QueryTriggerInteraction.Ignore) < 1;
+			}
+			if (flag)
+			{
+				lastSeenTargetPosition = position;
+				lastSeenTargetTime = Time.timeAsDouble;
+			}
+			if (Time.timeAsDouble - lastSeenTargetTime < (double)sightLostFollowStopTime)
+			{
+				searchPosition = position;
+				agent.RequestDestination(lastSeenTargetPosition);
+				if (flag)
+				{
+					rangedTargetPosition = position;
+					Vector3 vector = Vector3.up * 0.4f;
+					rangedTargetPosition += vector;
+					if (magnitude < rangedAttackDistMax)
+					{
+						behaviorEndTime = Time.timeAsDouble + (double)rangedAttackChargeTime;
+						SetBehavior(Behavior.RangedAttack);
+						GhostReactorManager.Get(entity).RequestFireProjectile(entity.id, rangedProjectileFirePoint.position, rangedTargetPosition, PhotonNetwork.Time + (double)rangedAttackChargeTime);
+					}
+				}
+			}
+			else
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		}
+		case Behavior.RangedAttack:
+			if (!(Time.timeAsDouble > behaviorEndTime))
+			{
+				break;
+			}
+			if (targetPlayer != null)
+			{
+				GRPlayer gRPlayer2 = GRPlayer.Get(targetPlayer.ActorNumber);
+				if (gRPlayer2 != null && gRPlayer2.State == GRPlayer.GRPlayerState.Alive)
+				{
+					rangedTargetPosition = gRPlayer2.transform.position;
+				}
+			}
+			SetBehavior(Behavior.RangedAttackCooldown);
+			behaviorEndTime = Time.timeAsDouble + (double)rangedAttackRecoverTime;
+			break;
+		case Behavior.RangedAttackCooldown:
+			if (Time.timeAsDouble > behaviorEndTime)
+			{
+				SetBehavior(Behavior.SeekRangedAttackPosition);
+				behaviorEndTime = Time.timeAsDouble;
+			}
+			else
+			{
+				abilityKeepDistance.UpdateAuthority(dt);
+			}
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateAuthority(dt);
+			if (GhostReactorManager.noiseDebugEnabled)
+			{
+				DebugUtil.DrawLine(base.transform.position, abilityInvestigate.GetTargetPos(), Color.green);
+			}
+			ChooseNewBehavior();
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateAuthority(dt);
+			if (abilityJump.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		}
+		GameAgent.UpdateFacing(base.transform, navAgent, targetPlayer, turnSpeed);
+	}
+
+	private void OnUpdateRemote(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Stagger:
+			abilityStagger.UpdateRemote(dt);
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateRemote(dt);
+			break;
+		case Behavior.Dying:
+			abilityDie.UpdateRemote(dt);
+			break;
+		case Behavior.Patrol:
+			abilityPatrol.UpdateRemote(dt);
+			break;
+		case Behavior.RangedAttackCooldown:
+			abilityKeepDistance.UpdateRemote(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateRemote(dt);
+			if (GhostReactorManager.noiseDebugEnabled)
+			{
+				DebugUtil.DrawLine(base.transform.position, abilityInvestigate.GetTargetPos(), Color.green);
+			}
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateRemote(dt);
+			break;
+		case Behavior.Search:
+		case Behavior.SeekRangedAttackPosition:
+		case Behavior.RangedAttack:
+			break;
+		}
+	}
+
+	public void UpdateShared()
+	{
+		if (rangedAttackQueued)
+		{
+			if (!headRemoved && currBehavior == Behavior.RangedAttack && PhotonNetwork.Time >= headRemovaltime)
+			{
+				headRemoved = true;
+				EnableVFXForHeadInHand();
+			}
+			if (PhotonNetwork.Time > queuedFiringTime)
+			{
+				rangedAttackQueued = false;
+				FireRangedAttack(queuedFiringPosition, queuedTargetPosition);
+			}
+		}
+		if (headLightReset && Time.timeAsDouble > spitterLightTurnOffTime)
+		{
+			spitterHeadOnShouldersLight.SetActive(value: false);
+			headLightReset = false;
+		}
+	}
+
+	private void UpdateSearch()
+	{
+		Vector3 vector = searchPosition - base.transform.position;
+		if (new Vector3(vector.x, 0f, vector.z).sqrMagnitude < 0.15f)
+		{
+			Vector3 vector2 = lastSeenTargetPosition - searchPosition;
+			vector2.y = 0f;
+			searchPosition = lastSeenTargetPosition + vector2;
+		}
+		if (IsMoving())
+		{
+			if (!lastMoving)
+			{
+				PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
+				lastMoving = true;
+			}
+		}
+		else if (lastMoving)
+		{
+			PlayAnim("GREnemyRangedWalk", 0.1f, 1f);
+			lastMoving = false;
+		}
+		agent.RequestDestination(searchPosition);
+		if (Time.timeAsDouble - lastSeenTargetTime > (double)searchTime)
+		{
+			ChooseNewBehavior();
+		}
+	}
+
+	private void OnHitByClub(GRTool tool, GameHitData hit)
+	{
+		if (currBodyState == BodyState.Bones)
+		{
+			hp -= hit.hitAmount;
+			audioSource.PlayOneShot(damagedSound, damagedSoundVolume);
+			if (fxDamaged != null)
+			{
+				fxDamaged.SetActive(value: false);
+				fxDamaged.SetActive(value: true);
+			}
+			if (hp <= 0)
+			{
+				abilityDie.SetInstigatingPlayerIndex(entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
+				SetBodyState(BodyState.Destroyed);
+				SetBehavior(Behavior.Dying);
+				return;
+			}
+			lastSeenTargetPosition = tool.transform.position;
+			lastSeenTargetTime = Time.timeAsDouble;
+			Vector3 vector = lastSeenTargetPosition - base.transform.position;
+			vector.y = 0f;
+			searchPosition = lastSeenTargetPosition + vector.normalized * 1.5f;
+			abilityStagger.SetStaggerVelocity(hit.hitImpulse);
+			TrySetBehavior(Behavior.Stagger);
+		}
+		else if (currBodyState == BodyState.Shell && armor != null)
+		{
+			armor.PlayBlockFx(hit.hitEntityPosition);
+		}
+	}
+
+	public void InstantDeath()
+	{
+		hp = 0;
+		SetBodyState(BodyState.Destroyed);
+		SetBehavior(Behavior.Dying);
+	}
+
+	private void OnHitByFlash(GRTool tool, GameHitData hit)
+	{
+		if (currBodyState == BodyState.Shell)
+		{
+			hp -= hit.hitAmount;
+			if (armor != null)
+			{
+				armor.SetHp(hp);
+			}
+			if (hp <= 0)
+			{
+				if (armor != null)
+				{
+					armor.PlayDestroyFx(armor.transform.position);
+				}
+				SetBodyState(BodyState.Bones);
+				if (tool.gameEntity.IsHeldByLocalPlayer())
+				{
+					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name);
+				}
+				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
+				{
+					armor.FragmentArmor();
+				}
+			}
+			else if (tool != null)
+			{
+				if (armor != null)
+				{
+					armor.PlayHitFx(armor.transform.position);
+				}
+				lastSeenTargetPosition = tool.transform.position;
+				lastSeenTargetTime = Time.timeAsDouble;
+				Vector3 vector = lastSeenTargetPosition - base.transform.position;
+				vector.y = 0f;
+				searchPosition = lastSeenTargetPosition + vector.normalized * 1.5f;
+				SetBehavior(Behavior.Search);
+				RefreshBody();
+			}
+			else
+			{
+				if (armor != null)
+				{
+					armor.PlayHitFx(armor.transform.position);
+				}
+				RefreshBody();
+			}
+		}
+		GRToolFlash component = tool.GetComponent<GRToolFlash>();
+		if (component != null)
+		{
+			abilityFlashed.SetStunTime(component.stunDuration);
+		}
+		SetBehavior(Behavior.Flashed);
+	}
+
+	public void OnHitByShield(GRTool tool, GameHitData hit)
+	{
+		OnHitByClub(tool, hit);
+	}
+
+	public void OnGameEntitySerialize(BinaryWriter writer)
+	{
+		byte value = (byte)currBehavior;
+		byte value2 = (byte)currBodyState;
+		byte value3 = (byte)abilityPatrol.nextPatrolNode;
+		int value4 = ((targetPlayer == null) ? (-1) : targetPlayer.ActorNumber);
+		writer.Write(value);
+		writer.Write(value2);
+		writer.Write(hp);
+		writer.Write(value3);
+		writer.Write(value4);
+	}
+
+	public void OnGameEntityDeserialize(BinaryReader reader)
+	{
+		Behavior newBehavior = (Behavior)reader.ReadByte();
+		BodyState newBodyState = (BodyState)reader.ReadByte();
+		int hP = reader.ReadInt32();
+		byte b = reader.ReadByte();
+		int playerID = reader.ReadInt32();
+		SetPatrolPath((int)entity.createData);
+		abilityPatrol.SetNextPatrolNode(b);
+		SetHP(hP);
+		SetBehavior(newBehavior, force: true);
+		SetBodyState(newBodyState, force: true);
+		targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		return true;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
+		GRTool gameComponent = entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
+		if (gameComponent != null)
+		{
+			switch (hitTypeId)
+			{
+			case GameHitType.Club:
+				OnHitByClub(gameComponent, hit);
+				break;
+			case GameHitType.Flash:
+				OnHitByFlash(gameComponent, hit);
+				break;
+			case GameHitType.Shield:
+				OnHitByShield(gameComponent, hit);
+				break;
+			}
+		}
+	}
+
+	public void RequestRangedAttack(Vector3 firingPosition, Vector3 targetPosition, double fireTime)
+	{
+		rangedAttackQueued = true;
+		queuedFiringTime = fireTime;
+		queuedFiringPosition = firingPosition;
+		queuedTargetPosition = targetPosition;
+	}
+
+	private void DestroyProjectile()
+	{
+		if (entity.IsAuthority() && rangedProjectileInstance != null)
+		{
+			GameEntity component = rangedProjectileInstance.GetComponent<GameEntity>();
+			if (component != null)
+			{
+				component.manager.RequestDestroyItem(component.id);
+			}
+		}
+	}
+
+	private void FireRangedAttack(Vector3 launchPosition, Vector3 targetPosition)
+	{
+		if (entity.IsAuthority())
+		{
+			DisableHeadInHand();
+			DestroyProjectile();
+			if (CalculateLaunchDirection(launchPosition, targetPosition, projectileSpeed, out var direction))
+			{
+				entity.manager.RequestCreateItem(rangedProjectilePrefab.name.GetStaticHash(), launchPosition, Quaternion.LookRotation(direction, Vector3.up), entity.GetNetId());
+			}
+		}
+	}
+
+	public static bool CalculateLaunchDirection(Vector3 startPos, Vector3 targetPos, float speed, out Vector3 direction)
+	{
+		direction = Vector3.zero;
+		Vector3 vector = targetPos - startPos;
+		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
+		float magnitude = vector2.magnitude;
+		Vector3 normalized = vector2.normalized;
+		float y = vector.y;
+		float num = 9.8f;
+		float num2 = speed * speed;
+		float num3 = num2 * num2 - num * (num * magnitude * magnitude + 2f * y * num2);
+		if (num3 < 0f)
+		{
+			return false;
+		}
+		float num4 = Mathf.Sqrt(num3);
+		float num5 = (num2 + num4) / (num * magnitude);
+		float num6 = (num2 - num4) / (num * magnitude);
+		float num7 = num2 / (num5 * num5 + 1f);
+		float num8 = num2 / (num6 * num6 + 1f);
+		float num9 = (false ? Mathf.Min(num7, num8) : Mathf.Max(num7, num8));
+		float num10 = ((0 == 0) ? ((num7 > num8) ? Mathf.Sign(num5) : Mathf.Sign(num6)) : ((num7 < num8) ? Mathf.Sign(num5) : Mathf.Sign(num6)));
+		float num11 = Mathf.Sqrt(num9);
+		float num12 = Mathf.Sqrt(Mathf.Abs(num2 - num9));
+		direction = (normalized * num11 + new Vector3(0f, num12 * num10, 0f)).normalized;
+		return true;
+	}
+
+	public void OnProjectileInit(GRRangedEnemyProjectile projectile)
+	{
+		rangedProjectileInstance = projectile.gameObject;
+	}
+
+	public void OnProjectileHit(GRRangedEnemyProjectile projectile, Collision collision)
+	{
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"State: <color=\"yellow\">{currBehavior.ToString()}<color=\"white\"> HP: <color=\"yellow\">{hp}<color=\"white\">");
+		strings.Add($"speed: <color=\"yellow\">{navAgent.speed}<color=\"white\"> patrol node:<color=\"yellow\">{abilityPatrol.nextPatrolNode}/{((abilityPatrol.GetPatrolPath() != null) ? abilityPatrol.GetPatrolPath().patrolNodes.Count : 0)}<color=\"white\">");
+		if (targetPlayer != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (gRPlayer != null)
+			{
+				float magnitude = (gRPlayer.transform.position - base.transform.position).magnitude;
+				strings.Add($"TargetDis: <color=\"yellow\">{magnitude}<color=\"white\"> ");
+			}
+		}
 	}
 }

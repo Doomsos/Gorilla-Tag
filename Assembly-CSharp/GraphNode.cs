@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public class GraphNode<T>
@@ -9,42 +9,36 @@ public class GraphNode<T>
 
 	public List<GraphNode<T>> Children { get; } = new List<GraphNode<T>>();
 
-	public int ChildCount
-	{
-		get
-		{
-			return this.Children.Count;
-		}
-	}
+	public int ChildCount => Children.Count;
 
 	public GraphNode(T value)
 	{
-		this.Value = value;
+		Value = value;
 	}
 
 	public GraphNode(T value, GraphNode<T> parent)
 	{
-		this.Value = value;
-		this.Parents.Add(parent);
+		Value = value;
+		Parents.Add(parent);
 	}
 
-	public int GetSubtreeWidth(int depthLimit = 2147483647)
+	public int GetSubtreeWidth(int depthLimit = int.MaxValue)
 	{
-		if (this.ChildCount == 0 || depthLimit == 0)
+		if (ChildCount == 0 || depthLimit == 0)
 		{
 			return 1;
 		}
 		int num = 0;
-		foreach (GraphNode<T> graphNode in this.Children)
+		foreach (GraphNode<T> child in Children)
 		{
-			num += graphNode.GetSubtreeWidth(depthLimit - 1);
+			num += child.GetSubtreeWidth(depthLimit - 1);
 		}
 		return num;
 	}
 
 	public GraphNode<T> AddChild(T value)
 	{
-		return this.AddChild(new GraphNode<T>(value));
+		return AddChild(new GraphNode<T>(value));
 	}
 
 	public GraphNode<T> AddChild(GraphNode<T> child)
@@ -53,14 +47,14 @@ public class GraphNode<T>
 		{
 			throw new InvalidOperationException("Cannot add child more than once");
 		}
-		this.Children.Add(child);
+		Children.Add(child);
 		child.Parents.Add(this);
 		return child;
 	}
 
 	public void RemoveChild(GraphNode<T> child)
 	{
-		if (this.Children.Remove(child))
+		if (Children.Remove(child))
 		{
 			child.Parents.Remove(this);
 		}
@@ -69,17 +63,13 @@ public class GraphNode<T>
 	public IEnumerable<GraphNode<T>> TraversePreOrder()
 	{
 		yield return this;
-		foreach (GraphNode<T> graphNode in this.Children)
+		foreach (GraphNode<T> child in Children)
 		{
-			foreach (GraphNode<T> graphNode2 in graphNode.TraversePreOrder())
+			foreach (GraphNode<T> item in child.TraversePreOrder())
 			{
-				yield return graphNode2;
+				yield return item;
 			}
-			IEnumerator<GraphNode<T>> enumerator2 = null;
 		}
-		List<GraphNode<T>>.Enumerator enumerator = default(List<GraphNode<T>>.Enumerator);
-		yield break;
-		yield break;
 	}
 
 	public IEnumerable<GraphNode<T>> TraversePreOrderDistinct(HashSet<GraphNode<T>> visited = null)
@@ -88,22 +78,19 @@ public class GraphNode<T>
 		{
 			visited = new HashSet<GraphNode<T>>();
 		}
-		if (!visited.Contains(this))
+		if (visited.Contains(this))
 		{
-			yield return this;
-			visited.Add(this);
-			foreach (GraphNode<T> graphNode in this.Children)
-			{
-				foreach (GraphNode<T> graphNode2 in graphNode.TraversePreOrderDistinct(visited))
-				{
-					yield return graphNode2;
-				}
-				IEnumerator<GraphNode<T>> enumerator2 = null;
-			}
-			List<GraphNode<T>>.Enumerator enumerator = default(List<GraphNode<T>>.Enumerator);
+			yield break;
 		}
-		yield break;
-		yield break;
+		yield return this;
+		visited.Add(this);
+		foreach (GraphNode<T> child in Children)
+		{
+			foreach (GraphNode<T> item in child.TraversePreOrderDistinct(visited))
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<GraphNode<T>> TraverseBreadthFirst()
@@ -114,13 +101,11 @@ public class GraphNode<T>
 		{
 			GraphNode<T> current = queue.Dequeue();
 			yield return current;
-			foreach (GraphNode<T> item in current.Children)
+			foreach (GraphNode<T> child in current.Children)
 			{
-				queue.Enqueue(item);
+				queue.Enqueue(child);
 			}
-			current = null;
 		}
-		yield break;
 	}
 
 	public IEnumerable<GraphNode<T>> TraverseBreadthFirstDistinct()
@@ -131,44 +116,43 @@ public class GraphNode<T>
 		while (queue.Count > 0)
 		{
 			GraphNode<T> current = queue.Dequeue();
-			if (!visited.Contains(current))
+			if (visited.Contains(current))
 			{
-				visited.Add(current);
-				yield return current;
-				foreach (GraphNode<T> item in current.Children)
-				{
-					queue.Enqueue(item);
-				}
-				current = null;
+				continue;
+			}
+			visited.Add(current);
+			yield return current;
+			foreach (GraphNode<T> child in current.Children)
+			{
+				queue.Enqueue(child);
 			}
 		}
-		yield break;
 	}
 
 	public int GetGraphDepth()
 	{
-		if (this.Children.Count == 0)
+		if (Children.Count == 0)
 		{
 			return 1;
 		}
 		int num = 0;
-		foreach (GraphNode<T> graphNode in this.Children)
+		foreach (GraphNode<T> child in Children)
 		{
-			num = Math.Max(num, graphNode.GetGraphDepth());
+			num = Math.Max(num, child.GetGraphDepth());
 		}
 		return num + 1;
 	}
 
 	public int GetNodeDepth()
 	{
-		if (this.Parents.Count == 0)
+		if (Parents.Count == 0)
 		{
 			return 1;
 		}
 		int num = 0;
-		foreach (GraphNode<T> graphNode in this.Parents)
+		foreach (GraphNode<T> parent in Parents)
 		{
-			num = Math.Max(num, graphNode.GetNodeDepth());
+			num = Math.Max(num, parent.GetNodeDepth());
 		}
 		return num + 1;
 	}

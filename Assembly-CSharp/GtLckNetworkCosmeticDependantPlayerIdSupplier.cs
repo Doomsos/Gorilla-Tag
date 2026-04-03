@@ -1,26 +1,20 @@
-﻿using System;
 using Liv.Lck.Cosmetics;
 using UnityEngine;
 
 public class GtLckNetworkCosmeticDependantPlayerIdSupplier : MonoBehaviour, ILckCosmeticDependantPlayerIdSupplier
 {
+	[SerializeField]
+	private VRRig vrrig;
+
 	public event PlayerIdUpdatedEvent PlayerIdUpdated;
 
 	public string GetPlayerId()
 	{
-		return this.vrrig.OwningNetPlayer.UserId;
+		return vrrig.OwningNetPlayer.UserId;
 	}
 
 	public void UpdatePlayerId()
 	{
-		PlayerIdUpdatedEvent playerIdUpdated = this.PlayerIdUpdated;
-		if (playerIdUpdated == null)
-		{
-			return;
-		}
-		playerIdUpdated();
+		this.PlayerIdUpdated?.Invoke();
 	}
-
-	[SerializeField]
-	private VRRig vrrig;
 }

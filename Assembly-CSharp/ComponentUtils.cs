@@ -1,16 +1,17 @@
-﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public static class ComponentUtils
 {
+	private static readonly uint[] kHashBits = new uint[4];
+
 	public static T EnsureComponent<T>(this Component ctx, ref T target) where T : Component
 	{
-		if (ctx.AsNull<Component>() == null)
+		if (ctx.AsNull() == null)
 		{
-			return default(T);
+			return null;
 		}
-		if (target.AsNull<T>() != null)
+		if (target.AsNull() != null)
 		{
 			return target;
 		}
@@ -19,11 +20,11 @@ public static class ComponentUtils
 
 	public static bool TryEnsureComponent<T>(this Component ctx, ref T target) where T : Component
 	{
-		if (ctx.AsNull<Component>() == null)
+		if (ctx.AsNull() == null)
 		{
 			return false;
 		}
-		if (target.AsNull<T>() != null)
+		if (target.AsNull() != null)
 		{
 			return true;
 		}
@@ -65,18 +66,7 @@ public static class ComponentUtils
 		{
 			return true;
 		}
-		Debug.LogError(string.Concat(new string[]
-		{
-			caller,
-			": Could not find ",
-			fieldTypeName,
-			" \"",
-			fieldName,
-			"\" on \"",
-			c.name,
-			"\". ",
-			msgSuffix
-		}), c);
+		Debug.LogError(caller + ": Could not find " + fieldTypeName + " \"" + fieldName + "\" on \"" + c.name + "\". " + msgSuffix, c);
 		return false;
 	}
 
@@ -92,7 +82,7 @@ public static class ComponentUtils
 
 	public static Hash128 ComputeStaticHash128(Component c, string k)
 	{
-		return ComponentUtils.ComputeStaticHash128(c, StaticHash.Compute(k));
+		return ComputeStaticHash128(c, StaticHash.Compute(k));
 	}
 
 	public static Hash128 ComputeStaticHash128(Component c, int k = 0)
@@ -103,33 +93,29 @@ public static class ComponentUtils
 		}
 		Transform transform = c.transform;
 		Component[] components = c.gameObject.GetComponents(typeof(Component));
-		uint[] array = ComponentUtils.kHashBits;
+		uint[] array = kHashBits;
 		int siblingIndex = transform.GetSiblingIndex();
 		int num = components.Length;
-		int num2 = 0;
-		while (num2 < num && c != components[num2])
+		int i;
+		for (i = 0; i < num && (object)c != components[i]; i++)
 		{
-			num2++;
 		}
-		int num3 = StaticHash.Compute(k + 2, 1);
-		int num4 = StaticHash.Compute(siblingIndex + 4, num3);
-		int num5 = StaticHash.Compute(num + 8, num4);
-		int num6 = StaticHash.Compute(num2 + 16, num5);
-		array[0] = (uint)num3;
-		array[1] = (uint)num4;
-		array[2] = (uint)num5;
-		array[3] = (uint)num6;
-		SRand srand = new SRand(StaticHash.Compute(num3, num4, num5, num6));
-		srand.Shuffle<uint>(array);
-		Hash128 result = new Hash128(array[0], array[1], array[2], array[3]);
-		Hash128 hash = Hash128.Compute(c.GetType().FullName);
-		Hash128 hash2 = TransformUtils.ComputePathHash(transform);
-		Hash128 hash3 = transform.localToWorldMatrix.QuantizedHash128();
-		HashUtilities.AppendHash(ref hash, ref result);
-		HashUtilities.AppendHash(ref hash2, ref result);
-		HashUtilities.AppendHash(ref hash3, ref result);
-		return result;
+		int num2 = StaticHash.Compute(k + 2, 1);
+		int num3 = StaticHash.Compute(siblingIndex + 4, num2);
+		int num4 = StaticHash.Compute(num + 8, num3);
+		int num5 = StaticHash.Compute(i + 16, num4);
+		array[0] = (uint)num2;
+		array[1] = (uint)num3;
+		array[2] = (uint)num4;
+		array[3] = (uint)num5;
+		new SRand(StaticHash.Compute(num2, num3, num4, num5)).Shuffle(array);
+		Hash128 outHash = new Hash128(array[0], array[1], array[2], array[3]);
+		Hash128 inHash = Hash128.Compute(c.GetType().FullName);
+		Hash128 inHash2 = TransformUtils.ComputePathHash(transform);
+		Hash128 inHash3 = transform.localToWorldMatrix.QuantizedHash128();
+		HashUtilities.AppendHash(ref inHash, ref outHash);
+		HashUtilities.AppendHash(ref inHash2, ref outHash);
+		HashUtilities.AppendHash(ref inHash3, ref outHash);
+		return outHash;
 	}
-
-	private static readonly uint[] kHashBits = new uint[4];
 }

@@ -1,10 +1,8 @@
-﻿using System;
-
 public struct Member
 {
-	public string name { readonly get; set; }
+	public string name { get; set; }
 
-	public string logoImage { readonly get; set; }
+	public string logoImage { get; set; }
 
-	public string profileImage { readonly get; set; }
+	public string profileImage { get; set; }
 }

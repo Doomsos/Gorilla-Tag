@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using GorillaGameModes;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -10,1289 +9,43 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQuestManager
 {
-	public static SIProgression Instance { get; private set; }
-
-	public event Action OnClientReady;
-
-	private void Awake()
+	public struct SINode
 	{
-		if (SIProgression.Instance == null)
-		{
-			SIProgression.Instance = this;
-		}
-		this.emptyNode = default(SIProgression.SINode);
-		SIProgression.InitResourceToStringDictionary();
-		this.resourceCapsArray = Enumerable.Repeat<int>(int.MaxValue, 6).ToArray<int>();
-		for (int i = 0; i < this.resourceCaps.Length; i++)
-		{
-			this.resourceCapsArray[(int)this.resourceCaps[i].resourceType] = this.resourceCaps[i].resourceMax;
-		}
-		foreach (object obj in Enum.GetValues(typeof(SITechTreePageId)))
-		{
-			SITechTreePageId key = (SITechTreePageId)obj;
-			this.heldOrSnappedByGadgetPageType.Add(key, 0);
-		}
-		this.EnsureInitialized();
-		SIProgression.InitializeQuests();
-		this.ResetTelemetryIntervalData();
-		this.LoadSavedTelemetryData();
+		public string id;
+
+		public bool unlocked;
+
+		public Dictionary<SIResource.ResourceType, int> costs;
+
+		public List<SINode> parents;
+
+		public SIUpgradeType upgradeType;
 	}
 
-	public void OnEnable()
+	[Serializable]
+	public class SIQuestsList
 	{
-		if (ProgressionManager.Instance != null)
-		{
-			ProgressionManager.Instance.OnTreeUpdated += this.HandleTreeUpdated;
-			ProgressionManager.Instance.OnInventoryUpdated += this.HandleInventoryUpdated;
-			ProgressionManager.Instance.OnNodeUnlocked += this.HandleNodeUnlocked;
-			ProgressionManager.Instance.RefreshProgressionTree();
-			ProgressionManager.Instance.RefreshUserInventory();
-		}
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
+		public List<RotatingQuest> quests;
 
-	public void OnDisable()
-	{
-		if (ProgressionManager.Instance != null)
+		public RotatingQuest GetQuestById(int questID)
 		{
-			ProgressionManager.Instance.OnTreeUpdated -= this.HandleTreeUpdated;
-			ProgressionManager.Instance.OnInventoryUpdated -= this.HandleInventoryUpdated;
-			ProgressionManager.Instance.OnNodeUnlocked -= this.HandleNodeUnlocked;
-		}
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public static string GetResourceString(SIResource.ResourceType resourceType)
-	{
-		if (SIProgression._resourceToString == null)
-		{
-			SIProgression.InitResourceToStringDictionary();
-		}
-		return SIProgression._resourceToString[resourceType];
-	}
-
-	private static void InitResourceToStringDictionary()
-	{
-		SIProgression._resourceToString = new Dictionary<SIResource.ResourceType, string>();
-		SIProgression._resourceToString[SIResource.ResourceType.TechPoint] = "SI_TechPoints";
-		SIProgression._resourceToString[SIResource.ResourceType.StrangeWood] = "SI_StrangeWood";
-		SIProgression._resourceToString[SIResource.ResourceType.WeirdGear] = "SI_WeirdGear";
-		SIProgression._resourceToString[SIResource.ResourceType.VibratingSpring] = "SI_VibratingSpring";
-		SIProgression._resourceToString[SIResource.ResourceType.BouncySand] = "SI_BouncySand";
-		SIProgression._resourceToString[SIResource.ResourceType.FloppyMetal] = "SI_FloppyMetal";
-	}
-
-	public void Init()
-	{
-		SIPlayer.LocalPlayer.SetProgressionLocal();
-		if (ProgressionManager.Instance != null)
-		{
-			ProgressionManager.Instance.RefreshProgressionTree();
-			ProgressionManager.Instance.RefreshUserInventory();
-		}
-		this.ClearAllQuestEventListeners();
-		this.SetupAllQuestEventListeners();
-	}
-
-	public void EnsureInitialized()
-	{
-		if (this.techTreeSO != null)
-		{
-			this.techTreeSO.EnsureInitialized();
-		}
-		if (SIPlayer.progressionSO == null)
-		{
-			SIPlayer.progressionSO = this.techTreeSO;
-		}
-		int num = 6;
-		if (this.resourceDict == null || this.resourceDict.Count != num)
-		{
-			this.resourceDict = new Dictionary<SIResource.ResourceType, int>();
-			this.resourceDict[SIResource.ResourceType.TechPoint] = 0;
-			this.resourceDict[SIResource.ResourceType.StrangeWood] = 0;
-			this.resourceDict[SIResource.ResourceType.VibratingSpring] = 0;
-			this.resourceDict[SIResource.ResourceType.BouncySand] = 0;
-			this.resourceDict[SIResource.ResourceType.FloppyMetal] = 0;
-			this.resourceDict[SIResource.ResourceType.WeirdGear] = 0;
-		}
-		int num2 = 2;
-		if (this.limitedDepositTimeArray == null || this.limitedDepositTimeArray.Length != num2)
-		{
-			this.limitedDepositTimeArray = new int[num2];
-		}
-		int treePageCount = SIPlayer.progressionSO.TreePageCount;
-		if (this.unlockedTechTreeData == null || this.unlockedTechTreeData.Length != treePageCount)
-		{
-			this.unlockedTechTreeData = new bool[treePageCount][];
-		}
-		for (int i = 0; i < treePageCount; i++)
-		{
-			int num3 = SIPlayer.progressionSO.TreeNodeCounts[i];
-			if (this.unlockedTechTreeData[i] == null || this.unlockedTechTreeData[i].Length != num3)
+			foreach (RotatingQuest quest in quests)
 			{
-				this.unlockedTechTreeData[i] = new bool[num3];
-			}
-		}
-		if (this.activeQuestIds == null || this.activeQuestIds.Length != 3)
-		{
-			this.activeQuestIds = new int[3];
-		}
-		if (this.activeQuestProgresses == null || this.activeQuestProgresses.Length != 3)
-		{
-			this.activeQuestProgresses = new int[3];
-		}
-		this.CopySaveDataToDiff();
-	}
-
-	private void ApplyServerQuestsStatus(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
-	{
-		if (userQuestsStatus == null)
-		{
-			return;
-		}
-		this.stashedQuests = userQuestsStatus.TodayClaimableQuests;
-		this.stashedBonusPoints = userQuestsStatus.TodayClaimableBonus;
-		this.dailyLimitedTurnedIn = (userQuestsStatus.TodayClaimableIdol <= 0);
-		this.lastQuestGrantTime = DateTime.UtcNow;
-		this.RefreshActiveQuests();
-		SIPlayer.SetAndBroadcastProgression();
-		if (!this.questsInitialized)
-		{
-			this.questsInitialized = true;
-			this.ClientReady = true;
-			Action onClientReady = this.OnClientReady;
-			if (onClientReady == null)
-			{
-				return;
-			}
-			onClientReady();
-		}
-	}
-
-	public int GetCurrencyAmount(SIResource.ResourceType currencyType)
-	{
-		ProgressionManager.MothershipItemSummary mothershipItemSummary;
-		if (!ProgressionManager.Instance.GetInventoryItem(SIProgression._resourceToString[currencyType], out mothershipItemSummary))
-		{
-			return 0;
-		}
-		return mothershipItemSummary.Quantity;
-	}
-
-	public bool IsNodeUnlocked(SIUpgradeType upgradeType)
-	{
-		if (this.siNodes != null)
-		{
-			SIProgression.SINode sinode;
-			return this.siNodes.TryGetValue(upgradeType, out sinode) && sinode.unlocked;
-		}
-		ProgressionManager instance = ProgressionManager.Instance;
-		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = (instance != null) ? instance.GetTree("SI_Gadgets") : null;
-		if (userHydratedProgressionTreeResponse != null)
-		{
-			foreach (UserHydratedNodeDefinition userHydratedNodeDefinition in userHydratedProgressionTreeResponse.Nodes)
-			{
-				if (userHydratedNodeDefinition.name == upgradeType.ToString())
+				if (quest.questID == questID)
 				{
-					return userHydratedNodeDefinition.unlocked;
+					return quest.disable ? null : quest;
 				}
 			}
-			return false;
+			return null;
 		}
-		return false;
 	}
 
-	public void UnlockNode(SIUpgradeType upgradeType)
+	[Serializable]
+	public struct SIProgressionResourceCap
 	{
-		if (this._treeReady && this._inventoryReady)
-		{
-			ProgressionManager instance = ProgressionManager.Instance;
-			UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = (instance != null) ? instance.GetTree("SI_Gadgets") : null;
-			SIProgression.SINode sinode;
-			if (this.siNodes == null || !this.siNodes.TryGetValue(upgradeType, out sinode) || sinode.unlocked)
-			{
-				return;
-			}
-			ProgressionManager.Instance.UnlockNode(userHydratedProgressionTreeResponse.Tree.id, sinode.id);
-		}
-	}
-
-	private void HandleTreeUpdated()
-	{
-		this._treeReady = true;
-		this.UpdateTree();
-		this.UpdateUnlockOnPlayer();
-		if (!this._startingPackageGranted)
-		{
-			if (this.IsNodeUnlocked(SIUpgradeType.Initialize))
-			{
-				this._startingPackageGranted = true;
-			}
-			else
-			{
-				this.startingPackageBackupAttempts++;
-				if (this.startingPackageBackupAttempts > 10)
-				{
-					this._startingPackageGranted = true;
-				}
-				else
-				{
-					base.StartCoroutine(this.TryClaimNewPlayerPackage());
-				}
-			}
-		}
-		GTDev.Log<string>("[SIProgression] Updating local tech tree costs from remote tree", null);
-		foreach (GraphNode<SITechTreeNode> graphNode in this.techTreeSO.AllNodes)
-		{
-			SITechTreeNode value = graphNode.Value;
-			SIProgression.SINode sinode;
-			if (this.siNodes.TryGetValue(value.upgradeType, out sinode))
-			{
-				SIResource.ResourceCost[] array = SIResource.GenerateCostsFrom(sinode.costs);
-				if (array.IsValid_AllowZero() && !SIResource.CostsAreEqual(value.nodeCost, array, true))
-				{
-					GTDev.Log<string>(string.Format("[SIProgression] Changing {0} costs from {1} to {2}", value.upgradeType, SIResource.PrintCost(value.nodeCost), SIResource.PrintCost(array)), null);
-					value.nodeCost = array;
-				}
-			}
-		}
-		Action onTreeReady = this.OnTreeReady;
-		if (onTreeReady == null)
-		{
-			return;
-		}
-		onTreeReady();
-	}
-
-	private void HandleInventoryUpdated()
-	{
-		this._inventoryReady = true;
-		this.UpdateCurrencyOnPlayer();
-		Action onInventoryReady = this.OnInventoryReady;
-		if (onInventoryReady == null)
-		{
-			return;
-		}
-		onInventoryReady();
-	}
-
-	private IEnumerator TryClaimNewPlayerPackage()
-	{
-		yield return new WaitForSecondsRealtime(Mathf.Pow((float)this.startingPackageBackupAttempts, 2f));
-		if (!this._startingPackageGranted)
-		{
-			this.TryUnlock(SIUpgradeType.Initialize);
-		}
-		yield break;
-	}
-
-	private void HandleNodeUnlocked(string treeId, string nodeId)
-	{
-		this.UpdateTree();
-		this.UpdateUnlockOnPlayer();
-		SIProgression.SINode nodeFromID = this.GetNodeFromID(nodeId);
-		if (!string.IsNullOrEmpty(nodeFromID.id))
-		{
-			Action<SIUpgradeType> onNodeUnlocked = this.OnNodeUnlocked;
-			if (onNodeUnlocked == null)
-			{
-				return;
-			}
-			onNodeUnlocked(nodeFromID.upgradeType);
-		}
-	}
-
-	private void UpdateTree()
-	{
-		ProgressionManager instance = ProgressionManager.Instance;
-		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = (instance != null) ? instance.GetTree("SI_Gadgets") : null;
-		this.siNodes = new Dictionary<SIUpgradeType, SIProgression.SINode>();
-		foreach (UserHydratedNodeDefinition userHydratedNodeDefinition in userHydratedProgressionTreeResponse.Nodes)
-		{
-			SIUpgradeType siupgradeType;
-			if (!Enum.TryParse<SIUpgradeType>(userHydratedNodeDefinition.name, out siupgradeType))
-			{
-				siupgradeType = SIUpgradeType.InvalidNode;
-			}
-			Dictionary<SIResource.ResourceType, int> dictionary = new Dictionary<SIResource.ResourceType, int>();
-			HydratedProgressionNodeCost cost = userHydratedNodeDefinition.cost;
-			if (((cost != null) ? cost.items : null) != null)
-			{
-				foreach (KeyValuePair<string, MothershipHydratedInventoryChange> keyValuePair in userHydratedNodeDefinition.cost.items)
-				{
-					foreach (KeyValuePair<SIResource.ResourceType, string> keyValuePair2 in SIProgression._resourceToString)
-					{
-						if (keyValuePair2.Value == keyValuePair.Key)
-						{
-							dictionary[keyValuePair2.Key] = keyValuePair.Value.Delta;
-							break;
-						}
-					}
-				}
-			}
-			SIProgression.SINode value = new SIProgression.SINode
-			{
-				id = userHydratedNodeDefinition.id,
-				unlocked = userHydratedNodeDefinition.unlocked,
-				costs = dictionary,
-				parents = new List<SIProgression.SINode>(),
-				upgradeType = siupgradeType
-			};
-			this.siNodes[siupgradeType] = value;
-		}
-	}
-
-	public bool TryUnlock(SIUpgradeType upgrade)
-	{
-		if (upgrade == SIUpgradeType.Initialize)
-		{
-			if (!this._startingPackageGranted)
-			{
-				this.UnlockNode(upgrade);
-				return true;
-			}
-			return false;
-		}
-		else
-		{
-			this.techTreeSO.EnsureInitialized();
-			GraphNode<SITechTreeNode> graphNode;
-			if (!this.techTreeSO.TryGetNode(upgrade, out graphNode))
-			{
-				return false;
-			}
-			SIPlayer localPlayer = SIPlayer.LocalPlayer;
-			SITechTreeNode value = graphNode.Value;
-			if (localPlayer.NodeResearched(upgrade))
-			{
-				return false;
-			}
-			if (!this._treeReady)
-			{
-				ProgressionManager.Instance.RefreshProgressionTree();
-			}
-			if (!this._inventoryReady)
-			{
-				ProgressionManager.Instance.RefreshUserInventory();
-			}
-			if (!localPlayer.NodeParentsUnlocked(upgrade))
-			{
-				return false;
-			}
-			foreach (SIResource.ResourceCost resourceCost in value.nodeCost)
-			{
-				if (resourceCost.amount > this.GetCurrencyAmount(resourceCost.type))
-				{
-					return false;
-				}
-			}
-			this.UnlockNode(upgrade);
-			return true;
-		}
-	}
-
-	private SIProgression.SINode GetNodeFromID(string id)
-	{
-		foreach (KeyValuePair<SIUpgradeType, SIProgression.SINode> keyValuePair in this.siNodes)
-		{
-			if (keyValuePair.Value.id == id)
-			{
-				return keyValuePair.Value;
-			}
-		}
-		return default(SIProgression.SINode);
-	}
-
-	private void UpdateCurrencyOnPlayer()
-	{
-		foreach (SIResource.ResourceType resourceType in this.resourceDict.Keys.ToList<SIResource.ResourceType>())
-		{
-			int value = 0;
-			try
-			{
-				value = this.GetCurrencyAmount(resourceType);
-			}
-			catch
-			{
-			}
-			this.resourceDict[resourceType] = value;
-		}
-		SIPlayer.SetAndBroadcastProgression();
-		if (!this.ClientReady && this.questSourceList != null)
-		{
-			this.ClientReady = true;
-			Action onClientReady = this.OnClientReady;
-			if (onClientReady == null)
-			{
-				return;
-			}
-			onClientReady();
-		}
-	}
-
-	private void UpdateUnlockOnPlayer()
-	{
-		SIPlayer localPlayer = SIPlayer.LocalPlayer;
-		this.techTreeSO.EnsureInitialized();
-		int num = 0;
-		foreach (KeyValuePair<SIUpgradeType, SIProgression.SINode> keyValuePair in this.siNodes)
-		{
-			SIUpgradeType key = keyValuePair.Key;
-			if (key >= SIUpgradeType.Thruster_Unlock)
-			{
-				this.unlockedTechTreeData[key.GetPageId()][key.GetNodeId()] = keyValuePair.Value.unlocked;
-				if (keyValuePair.Value.unlocked)
-				{
-					num++;
-				}
-			}
-		}
-		SIPlayer.SetAndBroadcastProgression();
-		if (!this.ClientReady && this.questSourceList != null)
-		{
-			this.ClientReady = true;
-			Action onClientReady = this.OnClientReady;
-			if (onClientReady == null)
-			{
-				return;
-			}
-			onClientReady();
-		}
-	}
-
-	public int[] ActiveQuestIds
-	{
-		get
-		{
-			return this.activeQuestIds;
-		}
-	}
-
-	public int[] ActiveQuestProgresses
-	{
-		get
-		{
-			return this.activeQuestProgresses;
-		}
-	}
-
-	public bool DailyLimitedTurnedIn
-	{
-		get
-		{
-			return this.dailyLimitedTurnedIn;
-		}
-	}
-
-	public static void InitializeQuests()
-	{
-		SIProgression.Instance._InitializeQuests();
-	}
-
-	private void ProcessAllQuests(Action<RotatingQuest> action)
-	{
-		foreach (RotatingQuest obj in this.questSourceList.quests)
-		{
-			action(obj);
-		}
-	}
-
-	private void QuestLoadPostProcess(RotatingQuest quest)
-	{
-		quest.SetRequiredZone();
-		if (quest.requiredZones.Count == 1 && quest.requiredZones[0] == GTZone.none)
-		{
-			quest.requiredZones.Clear();
-		}
-		quest.isQuestActive = true;
-	}
-
-	private void QuestSavePreProcess(RotatingQuest quest)
-	{
-		if (quest.requiredZones.Count == 0)
-		{
-			quest.requiredZones.Add(GTZone.none);
-		}
-	}
-
-	private void _InitializeQuests()
-	{
-		ProgressionManager.Instance.GetActiveSIQuests(new Action<List<RotatingQuest>>(this.LoadQuestsFromServer), null);
-	}
-
-	public void LoadQuestsFromServer(List<RotatingQuest> serverQuests)
-	{
-		if (serverQuests == null || serverQuests.Count == 0)
-		{
-			Debug.LogError("[SIProgression] Server returned no quests");
-			this.LoadQuestsFromLocalJson();
-		}
-		else
-		{
-			this.questSourceList = new SIProgression.SIQuestsList
-			{
-				quests = serverQuests
-			};
-			this.ProcessAllQuests(new Action<RotatingQuest>(this.QuestLoadPostProcess));
-		}
-		this.LoadQuestProgress();
-		if (!this.questsInitialized)
-		{
-			ProgressionManager.Instance.GetSIQuestStatus(new Action<ProgressionManager.UserQuestsStatusResponse>(this.ApplyServerQuestsStatus), null);
-		}
-	}
-
-	private void LoadQuestsFromLocalJson()
-	{
-		TextAsset textAsset = Resources.Load<TextAsset>("TestingSuperInfectionQuests");
-		this.LoadQuestsFromJson(textAsset.text);
-		this.ProcessAllQuests(new Action<RotatingQuest>(this.QuestLoadPostProcess));
-	}
-
-	public void SliceUpdate()
-	{
-		SuperInfectionManager activeSuperInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
-		if (activeSuperInfectionManager == null || !activeSuperInfectionManager.IsZoneReady())
-		{
-			return;
-		}
-		if (!this.questsInitialized)
-		{
-			return;
-		}
-		this.CheckTimeCrossover();
-		this.SaveQuestProgress();
-		this.CheckTelemetry();
-	}
-
-	private void CheckTimeCrossover()
-	{
-		this.CheckTimeCrossoverServer();
-	}
-
-	private void CheckTimeCrossoverServer()
-	{
-		DateTime utcNow = DateTime.UtcNow;
-		DateTime dateTime = utcNow.Date + this.CROSSOVER_TIME_OF_DAY;
-		if (dateTime > utcNow)
-		{
-			dateTime = dateTime.AddDays(-1.0);
-		}
-		if ((dateTime - this.lastQuestGrantTime).Ticks <= 0L)
-		{
-			return;
-		}
-		this.lastQuestGrantTime = utcNow.Date + this.CROSSOVER_TIME_OF_DAY;
-		ProgressionManager.Instance.GetSIQuestStatus(new Action<ProgressionManager.UserQuestsStatusResponse>(this.ApplyServerQuestsStatus), null);
-	}
-
-	public static void StaticSaveQuestProgress()
-	{
-		SIProgression.Instance.SaveQuestProgress();
-	}
-
-	public void LoadQuestProgress()
-	{
-		this.LoadQuestProgressServer();
-	}
-
-	public void SaveQuestProgress()
-	{
-		this.SaveQuestProgressServer();
-	}
-
-	public void LoadQuestProgressServer()
-	{
-		int num = 0;
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			int @int = PlayerPrefs.GetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_ID_Key", i), -1);
-			int int2 = PlayerPrefs.GetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_Progress_Key", i), -1);
-			this.activeQuestIds[i] = @int;
-			this.activeQuestProgresses[i] = int2;
-			if (@int != -1)
-			{
-				RotatingQuest questById = this.questSourceList.GetQuestById(@int);
-				if (questById == null || !questById.isQuestActive)
-				{
-					this.activeQuestIds[i] = -1;
-					this.activeQuestProgresses[i] = -1;
-				}
-				else
-				{
-					num++;
-					questById.ApplySavedProgress(int2);
-				}
-			}
-		}
-		this.bonusProgress = PlayerPrefs.GetInt("v1_SIProgression:bonusProgress", 0);
-		this.CopySaveDataToDiff();
-	}
-
-	public void SaveQuestProgressServer()
-	{
-		int num = 0;
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			if (num >= this.stashedQuests)
-			{
-				this.activeQuestIds[i] = -1;
-				this.activeQuestProgresses[i] = 0;
-			}
-			RotatingQuest questById = this.questSourceList.GetQuestById(this.activeQuestIds[i]);
-			if (questById == null || !questById.isQuestActive)
-			{
-				this.activeQuestIds[i] = -1;
-				this.activeQuestProgresses[i] = 0;
-			}
-			else
-			{
-				num++;
-			}
-			int num2 = -1;
-			int num3 = 0;
-			if (questById != null)
-			{
-				num2 = questById.questID;
-				num3 = questById.GetProgress();
-			}
-			this.activeQuestProgresses[i] = num3;
-			if (num2 != this.activeQuestIdsDiff[i])
-			{
-				PlayerPrefs.SetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_ID_Key", i), num2);
-			}
-			if (num3 != this.activeQuestProgressesDiff[i])
-			{
-				PlayerPrefs.SetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_Progress_Key", i), num3);
-			}
-		}
-		if (this.bonusProgress != this.bonusProgressDiff)
-		{
-			PlayerPrefs.SetInt("v1_SIProgression:bonusProgress", this.bonusProgress);
-		}
-		PlayerPrefs.Save();
-		this.CopySaveDataToDiff();
-	}
-
-	public void CopySaveDataToDiff()
-	{
-		this.lastQuestGrantTimeDiff = this.lastQuestGrantTime;
-		this.stashedQuestsDiff = this.stashedQuests;
-		this.stashedBonusPointsDiff = this.stashedBonusPoints;
-		this.bonusProgressDiff = this.bonusProgress;
-		int[] array = new int[6];
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i] = this.resourceDict[(SIResource.ResourceType)i];
-		}
-		SIProgression._SafeShallowCopyArray<int>(array, ref this.resourceArrayDiff);
-		SIProgression._SafeShallowCopyArray<int>(this.limitedDepositTimeArray, ref this.limitedDepositTimeDiff);
-		SIProgression._SafeShallowCopyArray<int>(this.activeQuestIds, ref this.activeQuestIdsDiff);
-		SIProgression._SafeShallowCopyArray<int>(this.activeQuestProgresses, ref this.activeQuestProgressesDiff);
-		if (this.unlockedTechTreeDataDiff == null || this.unlockedTechTreeDataDiff.Length != this.unlockedTechTreeData.Length)
-		{
-			this.unlockedTechTreeDataDiff = new bool[this.unlockedTechTreeData.Length][];
-		}
-		for (int j = 0; j < this.unlockedTechTreeData.Length; j++)
-		{
-			SIProgression._SafeShallowCopyArray<bool>(this.unlockedTechTreeData[j], ref this.unlockedTechTreeDataDiff[j]);
-		}
-	}
-
-	private static void _SafeShallowCopyArray<T>(T[] sourceArray, ref T[] ref_destinationArray)
-	{
-		if (ref_destinationArray == null || ref_destinationArray.Length != sourceArray.Length)
-		{
-			ref_destinationArray = new T[sourceArray.Length];
-		}
-		Array.Copy(sourceArray, ref_destinationArray, sourceArray.Length);
-	}
-
-	public int[] GetResourceArray()
-	{
-		int[] array = new int[this.resourceDict.Count];
-		for (int i = 0; i < this.resourceDict.Count; i++)
-		{
-			array[i] = this.resourceDict[(SIResource.ResourceType)i];
-		}
-		return array;
-	}
-
-	public void SetResourceArray(int[] resourceArray)
-	{
-		for (int i = 0; i < resourceArray.Length; i++)
-		{
-			this.resourceDict[(SIResource.ResourceType)i] = resourceArray[i];
-		}
-	}
-
-	public void HandleQuestCompleted(int questID)
-	{
-		this.UpdateQuestProgresses();
-		SIPlayer.SetAndBroadcastProgression();
-		SIPlayer.LocalPlayer.questCompleteCelebrate.SetActive(true);
-	}
-
-	public void HandleQuestProgressChanged(bool initialLoad)
-	{
-		if (this.UpdateQuestProgresses())
-		{
-			SIPlayer.SetAndBroadcastProgression();
-		}
-	}
-
-	private bool UpdateQuestProgresses()
-	{
-		bool result = false;
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			RotatingQuest questById = this.questSourceList.GetQuestById(this.activeQuestIds[i]);
-			int num = 0;
-			if (questById != null)
-			{
-				num = questById.GetProgress();
-				if (questById.questType != QuestType.moveDistance || this.activeQuestProgresses[i] / 100 != num / 100)
-				{
-					result = true;
-				}
-			}
-			this.activeQuestProgresses[i] = num;
-		}
-		this.SaveQuestProgress();
-		return result;
-	}
-
-	public void AttemptIncrementResource(SIResource.ResourceType resource)
-	{
-		ProgressionManager.Instance.IncrementSIResource(resource.ToString(), new Action<string>(this.OnSuccessfulIncrementResource), delegate(string err)
-		{
-			Debug.LogError(err);
-		});
-	}
-
-	private void OnSuccessfulIncrementResource(string resourceStr)
-	{
-		if (Enum.Parse<SIResource.ResourceType>(resourceStr) == SIResource.ResourceType.TechPoint)
-		{
-			SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
-		}
-		ProgressionManager.Instance.RefreshUserInventory();
-	}
-
-	public void AttemptRedeemCompletedQuest(int questIndex)
-	{
-		RotatingQuest quest = this.questSourceList.GetQuestById(this.activeQuestIds[questIndex]);
-		if (quest == null || this.activeQuestIds[questIndex] == -1)
-		{
-			return;
-		}
-		if (!quest.isQuestComplete)
-		{
-			return;
-		}
-		if (this.redeemingQuestInProgress[questIndex])
-		{
-			return;
-		}
-		this.redeemingQuestInProgress[questIndex] = true;
-		ProgressionManager.Instance.CompleteSIQuest(quest.questID, delegate(ProgressionManager.UserQuestsStatusResponse status)
-		{
-			this.OnSuccessfulQuestRedeem(questIndex, quest, status);
-		}, delegate(string err)
-		{
-			if (err.Contains("409") || err.Contains("404"))
-			{
-				this.OnInvalidQuestRedeemAttempt(questIndex, quest);
-			}
-			this.redeemingQuestInProgress[questIndex] = false;
-			Debug.LogError(err);
-		});
-	}
-
-	private void OnSuccessfulQuestRedeem(int questIndex, RotatingQuest quest, ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
-	{
-		this.activeQuestIds[questIndex] = -1;
-		this.activeQuestProgresses[questIndex] = 0;
-		quest.ApplySavedProgress(0);
-		this.redeemingQuestInProgress[questIndex] = false;
-		Dictionary<SIResource.ResourceType, int> dictionary = this.resourceDict;
-		int num = dictionary[SIResource.ResourceType.TechPoint];
-		dictionary[SIResource.ResourceType.TechPoint] = num + 1;
-		this.ApplyServerQuestsStatus(userQuestsStatus);
-		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
-		ProgressionManager.Instance.RefreshUserInventory();
-	}
-
-	private void OnInvalidQuestRedeemAttempt(int questIndex, RotatingQuest quest)
-	{
-		this.activeQuestIds[questIndex] = -1;
-		this.activeQuestProgresses[questIndex] = 0;
-		quest.ApplySavedProgress(0);
-		ProgressionManager.Instance.GetSIQuestStatus(new Action<ProgressionManager.UserQuestsStatusResponse>(this.ApplyServerQuestsStatus), null);
-	}
-
-	public void AttemptRedeemBonusPoint()
-	{
-		ProgressionManager.Instance.CompleteSIBonus(delegate(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
-		{
-			this.OnSuccessfulBonusRedeem(userQuestsStatus);
-		}, delegate(string err)
-		{
-			Debug.LogError(err);
-		});
-	}
-
-	private void OnSuccessfulBonusRedeem(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
-	{
-		this.bonusProgress = 0;
-		this.ApplyServerQuestsStatus(userQuestsStatus);
-		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
-		ProgressionManager.Instance.RefreshUserInventory();
-	}
-
-	public void AttemptCollectMonkeIdol()
-	{
-		ProgressionManager.Instance.CollectSIIdol(new Action<ProgressionManager.UserQuestsStatusResponse>(this.OnSuccessfulMonkeIdolRedeem), delegate(string err)
-		{
-			Debug.LogError(err);
-		});
-	}
-
-	private void OnSuccessfulMonkeIdolRedeem(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
-	{
-		this.ApplyServerQuestsStatus(userQuestsStatus);
-		this.limitedDepositTimeArray[1] = 1;
-		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
-		ProgressionManager.Instance.RefreshUserInventory();
-	}
-
-	public void GetBonusProgress()
-	{
-		this.bonusProgress++;
-	}
-
-	public void SetupAllQuestEventListeners()
-	{
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			RotatingQuest questById = this.questSourceList.GetQuestById(this.activeQuestIds[i]);
-			if (questById != null && this.activeQuestIds[i] != -1)
-			{
-				questById.questManager = this;
-				if (!questById.isQuestComplete)
-				{
-					questById.AddEventListener();
-				}
-			}
-		}
-	}
-
-	public static void StaticClearAllQuestEventListeners()
-	{
-		SIProgression.Instance.ClearAllQuestEventListeners();
-	}
-
-	public void ClearAllQuestEventListeners()
-	{
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			RotatingQuest questById = this.questSourceList.GetQuestById(this.activeQuestIds[i]);
-			if (questById != null)
-			{
-				questById.RemoveEventListener();
-			}
-		}
-	}
-
-	public void LoadQuestsFromJson(string jsonString)
-	{
-		this.questSourceList = JsonConvert.DeserializeObject<SIProgression.SIQuestsList>(jsonString);
-		this.ProcessAllQuests(new Action<RotatingQuest>(this.QuestLoadPostProcess));
-	}
-
-	public void RefreshActiveQuests()
-	{
-		this.ClearAllQuestEventListeners();
-		this.SelectActiveQuests();
-		this.HandleQuestProgressChanged(true);
-		this.SetupAllQuestEventListeners();
-	}
-
-	private void SelectActiveQuests()
-	{
-		int num = 0;
-		for (int i = 0; i < this.activeQuestIds.Length; i++)
-		{
-			RotatingQuest questById = this.questSourceList.GetQuestById(this.activeQuestIds[i]);
-			if (questById != null && questById.isQuestActive && num < this.stashedQuests)
-			{
-				this.activeQuestCategories[i] = questById.category;
-				num++;
-			}
-			else
-			{
-				this.activeQuestIds[i] = -1;
-				this.activeQuestProgresses[i] = 0;
-				this.activeQuestCategories[i] = QuestCategory.NONE;
-				if (questById != null)
-				{
-					questById.ApplySavedProgress(0);
-				}
-			}
-		}
-		int num2 = Mathf.Max(0, this.stashedQuests);
-		int num3 = 0;
-		while (num3 < this.activeQuestIds.Length && num < num2)
-		{
-			RotatingQuest questById2 = this.questSourceList.GetQuestById(this.activeQuestIds[num3]);
-			if (questById2 == null || !questById2.isQuestActive)
-			{
-				int num4 = Random.Range(0, this.questSourceList.quests.Count);
-				for (int j = 0; j < this.questSourceList.quests.Count; j++)
-				{
-					int num5 = (num4 + j) % this.questSourceList.quests.Count;
-					RotatingQuest questById3 = this.questSourceList.GetQuestById(num5);
-					if (questById3 != null && questById3.isQuestActive && this.<SelectActiveQuests>g__GetMatchingCategoryCount|171_0(questById3) < this.perCategoryQuestLimit)
-					{
-						bool flag = false;
-						for (int k = 0; k < this.activeQuestIds.Length; k++)
-						{
-							if (num5 == this.activeQuestIds[k])
-							{
-								flag = true;
-								break;
-							}
-						}
-						if (!flag)
-						{
-							this.activeQuestIds[num3] = num5;
-							this.activeQuestCategories[num3] = questById3.category;
-							questById3.ApplySavedProgress(0);
-							this.activeQuestProgresses[num3] = 0;
-							num++;
-							break;
-						}
-					}
-				}
-			}
-			num3++;
-		}
-		this.SaveQuestProgress();
-	}
-
-	private void SelectCurrentTurnInDate()
-	{
-		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
-		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
-		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
-		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
-		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
-		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
-		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[]
-		{
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
-		});
-		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
-		{
-			dateTime -= TimeSpan.FromHours(1.0);
-		}
-		int days = (DateTime.UtcNow - dateTime).Days;
-	}
-
-	public bool TryDepositResources(SIResource.ResourceType type, int count)
-	{
-		int resourceMaxCap = this.GetResourceMaxCap(type);
-		int num = this.resourceDict[type];
-		if (resourceMaxCap == num)
-		{
-			return false;
-		}
-		count = Math.Min(count, resourceMaxCap - num);
-		Dictionary<SIResource.ResourceType, int> dictionary = this.resourceDict;
-		dictionary[type] += count;
-		this.AttemptIncrementResource(type);
-		return true;
-	}
-
-	public int GetResourceMaxCap(SIResource.ResourceType type)
-	{
-		return this.resourceCapsArray[(int)type];
-	}
+		public SIResource.ResourceType resourceType;
 
-	public bool IsLimitedDepositAvailable(SIResource.LimitedDepositType limitedDepositType)
-	{
-		return !this.dailyLimitedTurnedIn;
-	}
-
-	public void ApplyLimitedDepositTime(SIResource.LimitedDepositType limitedDepositType)
-	{
-		if (limitedDepositType == SIResource.LimitedDepositType.None)
-		{
-			return;
-		}
-		this.AttemptCollectMonkeIdol();
-	}
-
-	private void OnDestroy()
-	{
-		this.SaveQuestProgress();
-	}
-
-	public bool GetOnlineNode(SIUpgradeType type, out SIProgression.SINode node)
-	{
-		if (!this._treeReady)
-		{
-			node = this.emptyNode;
-			return false;
-		}
-		return this.siNodes.TryGetValue(type, out node);
-	}
-
-	public static bool ResourcesMaxed()
-	{
-		return SIProgression.Instance._ResourcesMaxed();
-	}
-
-	public bool _ResourcesMaxed()
-	{
-		foreach (KeyValuePair<SIResource.ResourceType, int> keyValuePair in this.resourceDict)
-		{
-			if (keyValuePair.Key != SIResource.ResourceType.TechPoint && keyValuePair.Value < this.GetResourceMaxCap(keyValuePair.Key))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public void CheckTelemetry()
-	{
-		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
-		if (!(activeGameMode == null))
-		{
-			GameModeType gameModeType = activeGameMode.GameType();
-			if (gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual)
-			{
-				if (!activeGameMode.ValidGameMode())
-				{
-					this.timeTelemetryLastChecked = Time.realtimeSinceStartup;
-					return;
-				}
-				float num = Time.realtimeSinceStartup - this.timeTelemetryLastChecked;
-				this.timeTelemetryLastChecked = Time.realtimeSinceStartup;
-				this.totalPlayTime += num;
-				if (NetworkSystem.Instance.InRoom)
-				{
-					this.roomPlayTime += num;
-				}
-				this.intervalPlayTime += num;
-				for (int i = 0; i < 11; i++)
-				{
-					SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
-					if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
-					{
-						Dictionary<SITechTreePageId, float> dictionary = this.timeUsingGadgetTypeInterval;
-						SITechTreePageId key = sitechTreePageId;
-						dictionary[key] += num;
-						dictionary = this.timeUsingGadgetTypeTotal;
-						key = sitechTreePageId;
-						dictionary[key] += num;
-					}
-				}
-				if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)
-				{
-					this.timeUsingOwnGadgetsInterval += num;
-					this.timeUsingOwnGadgetsTotal += num;
-				}
-				if (SIProgression.Instance.heldOrSnappedOthersGadgets > 0)
-				{
-					this.timeUsingOthersGadgetsInterval += num;
-					this.timeUsingOthersGadgetsTotal += num;
-				}
-				if (this.lastTelemetrySent + this.telemetryCooldown < Time.realtimeSinceStartup)
-				{
-					this.lastTelemetrySent = Time.realtimeSinceStartup;
-					this.SaveTelemetryData();
-					GorillaTelemetry.SuperInfectionEvent(false, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
-					this.ResetTelemetryIntervalData();
-				}
-				return;
-			}
-		}
-	}
-
-	public void SendTelemetryData()
-	{
-		if (Time.realtimeSinceStartup < this.lastDisconnectTelemetrySent + this.minDisconnectTelemetryCooldown)
-		{
-			return;
-		}
-		this.lastDisconnectTelemetrySent = Time.realtimeSinceStartup;
-		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent(true, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.RoomPlayerCount : -1);
-		this.ResetTelemetryIntervalData();
-		this.roomPlayTime = 0f;
-	}
-
-	public void SendPurchaseResourcesData()
-	{
-		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent("si_fill_resources", 500, -1, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup);
-	}
-
-	public void SendPurchaseTechPointsData(int techPointsPurchased)
-	{
-		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent("si_purchase_tech_points", techPointsPurchased * 100, techPointsPurchased, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup);
-	}
-
-	public void LoadSavedTelemetryData()
-	{
-		this.totalPlayTime = PlayerPrefs.GetFloat("super_infection_total_play_time", 0f);
-		for (int i = 0; i < 11; i++)
-		{
-			SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
-			this.timeUsingGadgetTypeTotal[sitechTreePageId] = PlayerPrefs.GetFloat("super_infection_time_holding_gadget_type_total" + sitechTreePageId.GetName<SITechTreePageId>(), 0f);
-			this.tagsUsingGadgetTypeTotal[sitechTreePageId] = PlayerPrefs.GetInt("super_infection_tags_holding_gadget_type_total" + sitechTreePageId.GetName<SITechTreePageId>(), 0);
-		}
-		this.activeTerminalTimeTotal = PlayerPrefs.GetFloat("super_infection_terminal_total_time", 0f);
-		this.tagsHoldingOthersGadgetTotal = PlayerPrefs.GetInt("super_infection_tags_holding_others_gadgets_total", 0);
-		this.tagsHoldingOwnGadgetTotal = PlayerPrefs.GetInt("super_infection_tags_holding_own_gadgets_total", 0);
-		for (int j = 0; j < 6; j++)
-		{
-			SIResource.ResourceType resourceType = (SIResource.ResourceType)j;
-			this.resourcesCollectedTotal[resourceType] = PlayerPrefs.GetInt("super_infection_resource_type_collected_total" + resourceType.GetName<SIResource.ResourceType>(), 0);
-		}
-		this.roundsPlayedTotal = PlayerPrefs.GetInt("super_infection_rounds_played_total", 0);
-	}
-
-	private void SaveTelemetryData()
-	{
-		PlayerPrefs.SetFloat("super_infection_total_play_time", this.totalPlayTime);
-		for (int i = 0; i < 11; i++)
-		{
-			SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
-			PlayerPrefs.SetFloat("super_infection_time_holding_gadget_type_total" + sitechTreePageId.GetName<SITechTreePageId>(), this.timeUsingGadgetTypeTotal[sitechTreePageId]);
-			PlayerPrefs.SetInt("super_infection_tags_holding_gadget_type_total" + sitechTreePageId.GetName<SITechTreePageId>(), this.tagsUsingGadgetTypeTotal[sitechTreePageId]);
-		}
-		PlayerPrefs.SetFloat("super_infection_terminal_total_time", this.activeTerminalTimeTotal);
-		PlayerPrefs.SetInt("super_infection_tags_holding_others_gadgets_total", this.tagsHoldingOthersGadgetTotal);
-		PlayerPrefs.SetInt("super_infection_tags_holding_own_gadgets_total", this.tagsHoldingOwnGadgetTotal);
-		for (int j = 0; j < 6; j++)
-		{
-			SIResource.ResourceType resourceType = (SIResource.ResourceType)j;
-			PlayerPrefs.SetInt("super_infection_resource_type_collected_total" + resourceType.GetName<SIResource.ResourceType>(), this.resourcesCollectedTotal[resourceType]);
-		}
-		PlayerPrefs.SetInt("super_infection_rounds_played_total", this.roundsPlayedTotal);
-		PlayerPrefs.Save();
-	}
-
-	public void ResetTelemetryIntervalData()
-	{
-		this.lastTelemetrySent = Time.realtimeSinceStartup;
-		this.intervalPlayTime = 0f;
-		this.activeTerminalTimeInterval = 0f;
-		for (int i = 0; i < 11; i++)
-		{
-			SITechTreePageId key = (SITechTreePageId)i;
-			this.timeUsingGadgetTypeInterval[key] = 0f;
-			this.tagsUsingGadgetTypeInterval[key] = 0;
-		}
-		this.timeUsingOwnGadgetsInterval = 0f;
-		this.timeUsingOthersGadgetsInterval = 0f;
-		this.tagsHoldingOthersGadgetInterval = 0;
-		this.tagsHoldingOwnGadgetInterval = 0;
-		for (int j = 0; j < 6; j++)
-		{
-			SIResource.ResourceType key2 = (SIResource.ResourceType)j;
-			this.resourcesCollectedInterval[key2] = 0;
-		}
-		this.roundsPlayedInterval = 0;
-	}
-
-	public void HandleTagTelemetry(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
-	{
-		if (taggingPlayer.ActorNumber != SIPlayer.LocalPlayer.ActorNr)
-		{
-			return;
-		}
-		for (int i = 0; i < 11; i++)
-		{
-			SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
-			if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
-			{
-				Dictionary<SITechTreePageId, int> dictionary = this.tagsUsingGadgetTypeTotal;
-				SITechTreePageId key = sitechTreePageId;
-				int num = dictionary[key];
-				dictionary[key] = num + 1;
-				Dictionary<SITechTreePageId, int> dictionary2 = this.tagsUsingGadgetTypeInterval;
-				key = sitechTreePageId;
-				num = dictionary2[key];
-				dictionary2[key] = num + 1;
-			}
-		}
-		if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)
-		{
-			this.tagsHoldingOwnGadgetInterval++;
-			this.tagsHoldingOwnGadgetTotal++;
-		}
-		if (SIProgression.Instance.heldOrSnappedOthersGadgets > 0)
-		{
-			this.tagsHoldingOthersGadgetInterval++;
-			this.tagsHoldingOthersGadgetTotal++;
-		}
-	}
-
-	public void UpdateHeldGadgetsTelemetry(SITechTreePageId id, bool isMine, int changeAmount)
-	{
-		Dictionary<SITechTreePageId, int> dictionary = SIProgression.Instance.heldOrSnappedByGadgetPageType;
-		dictionary[id] += changeAmount;
-		if (isMine)
-		{
-			SIProgression.Instance.heldOrSnappedOwnGadgets += changeAmount;
-			return;
-		}
-		SIProgression.Instance.heldOrSnappedOthersGadgets += changeAmount;
-	}
-
-	public void CollectResourceTelemetry(SIResource.ResourceType type, int count)
-	{
-		Dictionary<SIResource.ResourceType, int> dictionary = this.resourcesCollectedTotal;
-		dictionary[type] += count;
-		dictionary = this.resourcesCollectedInterval;
-		dictionary[type] += count;
-	}
-
-	public void AddRoundTelemetry()
-	{
-		this.roundsPlayedInterval++;
-		this.roundsPlayedTotal++;
-	}
-
-	[CompilerGenerated]
-	private int <SelectActiveQuests>g__GetMatchingCategoryCount|171_0(RotatingQuest quest)
-	{
-		if (quest.category == QuestCategory.NONE)
-		{
-			return 0;
-		}
-		int num = 0;
-		QuestCategory[] array = this.activeQuestCategories;
-		for (int i = 0; i < array.Length; i++)
-		{
-			if (array[i] == quest.category)
-			{
-				num++;
-			}
-		}
-		return num;
+		public int resourceMax;
 	}
 
 	[SerializeField]
@@ -1313,7 +66,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private const string TREE_NAME = "SI_Gadgets";
 
-	private Dictionary<SIUpgradeType, SIProgression.SINode> siNodes;
+	private Dictionary<SIUpgradeType, SINode> siNodes;
 
 	internal bool _treeReady;
 
@@ -1375,9 +128,9 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private int roundsPlayedInterval;
 
-	private SIProgression.SINode emptyNode;
+	private SINode emptyNode;
 
-	public SIProgression.SIQuestsList questSourceList;
+	public SIQuestsList questSourceList;
 
 	private const int STARTING_STASHED_QUESTS = 0;
 
@@ -1464,7 +217,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private bool dailyLimitedTurnedIn;
 
-	public SIProgression.SIProgressionResourceCap[] resourceCaps;
+	public SIProgressionResourceCap[] resourceCaps;
 
 	public int[] resourceCapsArray;
 
@@ -1502,42 +255,1193 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private float minDisconnectTelemetryCooldown = 60f;
 
-	public struct SINode
+	public static SIProgression Instance { get; private set; }
+
+	public int[] ActiveQuestIds => activeQuestIds;
+
+	public int[] ActiveQuestProgresses => activeQuestProgresses;
+
+	public bool DailyLimitedTurnedIn => dailyLimitedTurnedIn;
+
+	public event Action OnClientReady;
+
+	private void Awake()
 	{
-		public string id;
-
-		public bool unlocked;
-
-		public Dictionary<SIResource.ResourceType, int> costs;
-
-		public List<SIProgression.SINode> parents;
-
-		public SIUpgradeType upgradeType;
+		if (Instance == null)
+		{
+			Instance = this;
+		}
+		emptyNode = default(SINode);
+		InitResourceToStringDictionary();
+		resourceCapsArray = Enumerable.Repeat(int.MaxValue, 6).ToArray();
+		for (int i = 0; i < resourceCaps.Length; i++)
+		{
+			resourceCapsArray[(int)resourceCaps[i].resourceType] = resourceCaps[i].resourceMax;
+		}
+		foreach (SITechTreePageId value in Enum.GetValues(typeof(SITechTreePageId)))
+		{
+			heldOrSnappedByGadgetPageType.Add(value, 0);
+		}
+		EnsureInitialized();
+		InitializeQuests();
+		ResetTelemetryIntervalData();
+		LoadSavedTelemetryData();
 	}
 
-	[Serializable]
-	public class SIQuestsList
+	public void OnEnable()
 	{
-		public RotatingQuest GetQuestById(int questID)
+		if (ProgressionManager.Instance != null)
 		{
-			foreach (RotatingQuest rotatingQuest in this.quests)
+			ProgressionManager.Instance.OnTreeUpdated += HandleTreeUpdated;
+			ProgressionManager.Instance.OnInventoryUpdated += HandleInventoryUpdated;
+			ProgressionManager.Instance.OnNodeUnlocked += HandleNodeUnlocked;
+			ProgressionManager.Instance.RefreshProgressionTree();
+			ProgressionManager.Instance.RefreshUserInventory();
+		}
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		if (ProgressionManager.Instance != null)
+		{
+			ProgressionManager.Instance.OnTreeUpdated -= HandleTreeUpdated;
+			ProgressionManager.Instance.OnInventoryUpdated -= HandleInventoryUpdated;
+			ProgressionManager.Instance.OnNodeUnlocked -= HandleNodeUnlocked;
+		}
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public static string GetResourceString(SIResource.ResourceType resourceType)
+	{
+		if (_resourceToString == null)
+		{
+			InitResourceToStringDictionary();
+		}
+		return _resourceToString[resourceType];
+	}
+
+	private static void InitResourceToStringDictionary()
+	{
+		_resourceToString = new Dictionary<SIResource.ResourceType, string>();
+		_resourceToString[SIResource.ResourceType.TechPoint] = "SI_TechPoints";
+		_resourceToString[SIResource.ResourceType.StrangeWood] = "SI_StrangeWood";
+		_resourceToString[SIResource.ResourceType.WeirdGear] = "SI_WeirdGear";
+		_resourceToString[SIResource.ResourceType.VibratingSpring] = "SI_VibratingSpring";
+		_resourceToString[SIResource.ResourceType.BouncySand] = "SI_BouncySand";
+		_resourceToString[SIResource.ResourceType.FloppyMetal] = "SI_FloppyMetal";
+	}
+
+	public void Init()
+	{
+		SIPlayer.LocalPlayer.SetProgressionLocal();
+		if (ProgressionManager.Instance != null)
+		{
+			ProgressionManager.Instance.RefreshProgressionTree();
+			ProgressionManager.Instance.RefreshUserInventory();
+		}
+		ClearAllQuestEventListeners();
+		SetupAllQuestEventListeners();
+	}
+
+	public void EnsureInitialized()
+	{
+		if (techTreeSO != null)
+		{
+			techTreeSO.EnsureInitialized();
+		}
+		if (SIPlayer.progressionSO == null)
+		{
+			SIPlayer.progressionSO = techTreeSO;
+		}
+		int num = 6;
+		if (resourceDict == null || resourceDict.Count != num)
+		{
+			resourceDict = new Dictionary<SIResource.ResourceType, int>();
+			resourceDict[SIResource.ResourceType.TechPoint] = 0;
+			resourceDict[SIResource.ResourceType.StrangeWood] = 0;
+			resourceDict[SIResource.ResourceType.VibratingSpring] = 0;
+			resourceDict[SIResource.ResourceType.BouncySand] = 0;
+			resourceDict[SIResource.ResourceType.FloppyMetal] = 0;
+			resourceDict[SIResource.ResourceType.WeirdGear] = 0;
+		}
+		int num2 = 2;
+		if (limitedDepositTimeArray == null || limitedDepositTimeArray.Length != num2)
+		{
+			limitedDepositTimeArray = new int[num2];
+		}
+		int treePageCount = SIPlayer.progressionSO.TreePageCount;
+		if (unlockedTechTreeData == null || unlockedTechTreeData.Length != treePageCount)
+		{
+			unlockedTechTreeData = new bool[treePageCount][];
+		}
+		for (int i = 0; i < treePageCount; i++)
+		{
+			int num3 = SIPlayer.progressionSO.TreeNodeCounts[i];
+			if (unlockedTechTreeData[i] == null || unlockedTechTreeData[i].Length != num3)
 			{
-				if (rotatingQuest.questID == questID)
+				unlockedTechTreeData[i] = new bool[num3];
+			}
+		}
+		if (activeQuestIds == null || activeQuestIds.Length != 3)
+		{
+			activeQuestIds = new int[3];
+		}
+		if (activeQuestProgresses == null || activeQuestProgresses.Length != 3)
+		{
+			activeQuestProgresses = new int[3];
+		}
+		CopySaveDataToDiff();
+	}
+
+	private void ApplyServerQuestsStatus(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
+	{
+		if (userQuestsStatus != null)
+		{
+			stashedQuests = userQuestsStatus.TodayClaimableQuests;
+			stashedBonusPoints = userQuestsStatus.TodayClaimableBonus;
+			dailyLimitedTurnedIn = userQuestsStatus.TodayClaimableIdol <= 0;
+			lastQuestGrantTime = DateTime.UtcNow;
+			RefreshActiveQuests();
+			SIPlayer.SetAndBroadcastProgression();
+			if (!questsInitialized)
+			{
+				questsInitialized = true;
+				ClientReady = true;
+				this.OnClientReady?.Invoke();
+			}
+		}
+	}
+
+	public int GetCurrencyAmount(SIResource.ResourceType currencyType)
+	{
+		if (!ProgressionManager.Instance.GetInventoryItem(_resourceToString[currencyType], out var item))
+		{
+			return 0;
+		}
+		return item.Quantity;
+	}
+
+	public bool IsNodeUnlocked(SIUpgradeType upgradeType)
+	{
+		if (siNodes != null)
+		{
+			if (siNodes.TryGetValue(upgradeType, out var value))
+			{
+				return value.unlocked;
+			}
+			return false;
+		}
+		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = ProgressionManager.Instance?.GetTree("SI_Gadgets");
+		if (userHydratedProgressionTreeResponse != null)
+		{
+			foreach (UserHydratedNodeDefinition node in userHydratedProgressionTreeResponse.Nodes)
+			{
+				if (node.name == upgradeType.ToString())
 				{
-					return rotatingQuest.disable ? null : rotatingQuest;
+					return node.unlocked;
 				}
 			}
-			return null;
 		}
-
-		public List<RotatingQuest> quests;
+		return false;
 	}
 
-	[Serializable]
-	public struct SIProgressionResourceCap
+	public void UnlockNode(SIUpgradeType upgradeType)
 	{
-		public SIResource.ResourceType resourceType;
+		if (_treeReady && _inventoryReady)
+		{
+			UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = ProgressionManager.Instance?.GetTree("SI_Gadgets");
+			if (siNodes != null && siNodes.TryGetValue(upgradeType, out var value) && !value.unlocked)
+			{
+				ProgressionManager.Instance.UnlockNode(userHydratedProgressionTreeResponse.Tree.id, value.id);
+			}
+		}
+	}
 
-		public int resourceMax;
+	private void HandleTreeUpdated()
+	{
+		_treeReady = true;
+		UpdateTree();
+		UpdateUnlockOnPlayer();
+		if (!_startingPackageGranted)
+		{
+			if (IsNodeUnlocked(SIUpgradeType.Initialize))
+			{
+				_startingPackageGranted = true;
+			}
+			else
+			{
+				startingPackageBackupAttempts++;
+				if (startingPackageBackupAttempts > 10)
+				{
+					_startingPackageGranted = true;
+				}
+				else
+				{
+					StartCoroutine(TryClaimNewPlayerPackage());
+				}
+			}
+		}
+		GTDev.Log("[SIProgression] Updating local tech tree costs from remote tree");
+		foreach (GraphNode<SITechTreeNode> allNode in techTreeSO.AllNodes)
+		{
+			SITechTreeNode value = allNode.Value;
+			if (siNodes.TryGetValue(value.upgradeType, out var value2))
+			{
+				SIResource.ResourceCost[] array = SIResource.GenerateCostsFrom(value2.costs);
+				if (array.IsValid_AllowZero() && !SIResource.CostsAreEqual(value.nodeCost, array))
+				{
+					GTDev.Log($"[SIProgression] Changing {value.upgradeType} costs from {SIResource.PrintCost(value.nodeCost)} to {SIResource.PrintCost(array)}");
+					value.nodeCost = array;
+				}
+			}
+		}
+		OnTreeReady?.Invoke();
+	}
+
+	private void HandleInventoryUpdated()
+	{
+		_inventoryReady = true;
+		UpdateCurrencyOnPlayer();
+		OnInventoryReady?.Invoke();
+	}
+
+	private IEnumerator TryClaimNewPlayerPackage()
+	{
+		yield return new WaitForSecondsRealtime(Mathf.Pow(startingPackageBackupAttempts, 2f));
+		if (!_startingPackageGranted)
+		{
+			TryUnlock(SIUpgradeType.Initialize);
+		}
+	}
+
+	private void HandleNodeUnlocked(string treeId, string nodeId)
+	{
+		UpdateTree();
+		UpdateUnlockOnPlayer();
+		SINode nodeFromID = GetNodeFromID(nodeId);
+		if (!string.IsNullOrEmpty(nodeFromID.id))
+		{
+			OnNodeUnlocked?.Invoke(nodeFromID.upgradeType);
+		}
+	}
+
+	private void UpdateTree()
+	{
+		UserHydratedProgressionTreeResponse obj = ProgressionManager.Instance?.GetTree("SI_Gadgets");
+		siNodes = new Dictionary<SIUpgradeType, SINode>();
+		foreach (UserHydratedNodeDefinition node in obj.Nodes)
+		{
+			if (!Enum.TryParse<SIUpgradeType>(node.name, out var result))
+			{
+				result = SIUpgradeType.InvalidNode;
+			}
+			Dictionary<SIResource.ResourceType, int> dictionary = new Dictionary<SIResource.ResourceType, int>();
+			if (node.cost?.items != null)
+			{
+				foreach (KeyValuePair<string, MothershipHydratedInventoryChange> item in node.cost.items)
+				{
+					foreach (KeyValuePair<SIResource.ResourceType, string> item2 in _resourceToString)
+					{
+						if (item2.Value == item.Key)
+						{
+							dictionary[item2.Key] = item.Value.Delta;
+							break;
+						}
+					}
+				}
+			}
+			SINode value = new SINode
+			{
+				id = node.id,
+				unlocked = node.unlocked,
+				costs = dictionary,
+				parents = new List<SINode>(),
+				upgradeType = result
+			};
+			siNodes[result] = value;
+		}
+	}
+
+	public bool TryUnlock(SIUpgradeType upgrade)
+	{
+		if (upgrade == SIUpgradeType.Initialize)
+		{
+			if (!_startingPackageGranted)
+			{
+				UnlockNode(upgrade);
+				return true;
+			}
+			return false;
+		}
+		techTreeSO.EnsureInitialized();
+		if (!techTreeSO.TryGetNode(upgrade, out var node))
+		{
+			return false;
+		}
+		SIPlayer localPlayer = SIPlayer.LocalPlayer;
+		SITechTreeNode value = node.Value;
+		if (localPlayer.NodeResearched(upgrade))
+		{
+			return false;
+		}
+		if (!_treeReady)
+		{
+			ProgressionManager.Instance.RefreshProgressionTree();
+		}
+		if (!_inventoryReady)
+		{
+			ProgressionManager.Instance.RefreshUserInventory();
+		}
+		if (!localPlayer.NodeParentsUnlocked(upgrade))
+		{
+			return false;
+		}
+		SIResource.ResourceCost[] nodeCost = value.nodeCost;
+		for (int i = 0; i < nodeCost.Length; i++)
+		{
+			SIResource.ResourceCost resourceCost = nodeCost[i];
+			if (resourceCost.amount > GetCurrencyAmount(resourceCost.type))
+			{
+				return false;
+			}
+		}
+		UnlockNode(upgrade);
+		return true;
+	}
+
+	private SINode GetNodeFromID(string id)
+	{
+		foreach (KeyValuePair<SIUpgradeType, SINode> siNode in siNodes)
+		{
+			if (siNode.Value.id == id)
+			{
+				return siNode.Value;
+			}
+		}
+		return default(SINode);
+	}
+
+	private void UpdateCurrencyOnPlayer()
+	{
+		foreach (SIResource.ResourceType item in resourceDict.Keys.ToList())
+		{
+			int value = 0;
+			try
+			{
+				value = GetCurrencyAmount(item);
+			}
+			catch
+			{
+			}
+			resourceDict[item] = value;
+		}
+		SIPlayer.SetAndBroadcastProgression();
+		if (!ClientReady && questSourceList != null)
+		{
+			ClientReady = true;
+			this.OnClientReady?.Invoke();
+		}
+	}
+
+	private void UpdateUnlockOnPlayer()
+	{
+		_ = SIPlayer.LocalPlayer;
+		techTreeSO.EnsureInitialized();
+		int num = 0;
+		foreach (KeyValuePair<SIUpgradeType, SINode> siNode in siNodes)
+		{
+			SIUpgradeType key = siNode.Key;
+			if (key >= SIUpgradeType.Thruster_Unlock)
+			{
+				unlockedTechTreeData[key.GetPageId()][key.GetNodeId()] = siNode.Value.unlocked;
+				if (siNode.Value.unlocked)
+				{
+					num++;
+				}
+			}
+		}
+		SIPlayer.SetAndBroadcastProgression();
+		if (!ClientReady && questSourceList != null)
+		{
+			ClientReady = true;
+			this.OnClientReady?.Invoke();
+		}
+	}
+
+	public static void InitializeQuests()
+	{
+		Instance._InitializeQuests();
+	}
+
+	private void ProcessAllQuests(Action<RotatingQuest> action)
+	{
+		foreach (RotatingQuest quest in questSourceList.quests)
+		{
+			action(quest);
+		}
+	}
+
+	private void QuestLoadPostProcess(RotatingQuest quest)
+	{
+		quest.SetRequiredZone();
+		if (quest.requiredZones.Count == 1 && quest.requiredZones[0] == GTZone.none)
+		{
+			quest.requiredZones.Clear();
+		}
+		quest.isQuestActive = true;
+	}
+
+	private void QuestSavePreProcess(RotatingQuest quest)
+	{
+		if (quest.requiredZones.Count == 0)
+		{
+			quest.requiredZones.Add(GTZone.none);
+		}
+	}
+
+	private void _InitializeQuests()
+	{
+		ProgressionManager.Instance.GetActiveSIQuests(LoadQuestsFromServer);
+	}
+
+	public void LoadQuestsFromServer(List<RotatingQuest> serverQuests)
+	{
+		if (serverQuests == null || serverQuests.Count == 0)
+		{
+			Debug.LogError("[SIProgression] Server returned no quests");
+			LoadQuestsFromLocalJson();
+		}
+		else
+		{
+			questSourceList = new SIQuestsList
+			{
+				quests = serverQuests
+			};
+			ProcessAllQuests(QuestLoadPostProcess);
+		}
+		LoadQuestProgress();
+		if (!questsInitialized)
+		{
+			ProgressionManager.Instance.GetSIQuestStatus(ApplyServerQuestsStatus);
+		}
+	}
+
+	private void LoadQuestsFromLocalJson()
+	{
+		TextAsset textAsset = Resources.Load<TextAsset>("TestingSuperInfectionQuests");
+		LoadQuestsFromJson(textAsset.text);
+		ProcessAllQuests(QuestLoadPostProcess);
+	}
+
+	public void SliceUpdate()
+	{
+		SuperInfectionManager activeSuperInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
+		if ((object)activeSuperInfectionManager != null && activeSuperInfectionManager.IsZoneReady() && questsInitialized)
+		{
+			CheckTimeCrossover();
+			SaveQuestProgress();
+			CheckTelemetry();
+		}
+	}
+
+	private void CheckTimeCrossover()
+	{
+		CheckTimeCrossoverServer();
+	}
+
+	private void CheckTimeCrossoverServer()
+	{
+		DateTime utcNow = DateTime.UtcNow;
+		DateTime dateTime = utcNow.Date + CROSSOVER_TIME_OF_DAY;
+		if (dateTime > utcNow)
+		{
+			dateTime = dateTime.AddDays(-1.0);
+		}
+		if ((dateTime - lastQuestGrantTime).Ticks > 0)
+		{
+			lastQuestGrantTime = utcNow.Date + CROSSOVER_TIME_OF_DAY;
+			ProgressionManager.Instance.GetSIQuestStatus(ApplyServerQuestsStatus);
+		}
+	}
+
+	public static void StaticSaveQuestProgress()
+	{
+		Instance.SaveQuestProgress();
+	}
+
+	public void LoadQuestProgress()
+	{
+		LoadQuestProgressServer();
+	}
+
+	public void SaveQuestProgress()
+	{
+		SaveQuestProgressServer();
+	}
+
+	public void LoadQuestProgressServer()
+	{
+		int num = 0;
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			int num2 = PlayerPrefs.GetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_ID_Key", i), -1);
+			int num3 = PlayerPrefs.GetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_Progress_Key", i), -1);
+			activeQuestIds[i] = num2;
+			activeQuestProgresses[i] = num3;
+			if (num2 != -1)
+			{
+				RotatingQuest questById = questSourceList.GetQuestById(num2);
+				if (questById == null || !questById.isQuestActive)
+				{
+					activeQuestIds[i] = -1;
+					activeQuestProgresses[i] = -1;
+				}
+				else
+				{
+					num++;
+					questById.ApplySavedProgress(num3);
+				}
+			}
+		}
+		bonusProgress = PlayerPrefs.GetInt("v1_SIProgression:bonusProgress", 0);
+		CopySaveDataToDiff();
+	}
+
+	public void SaveQuestProgressServer()
+	{
+		int num = 0;
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			if (num >= stashedQuests)
+			{
+				activeQuestIds[i] = -1;
+				activeQuestProgresses[i] = 0;
+			}
+			RotatingQuest questById = questSourceList.GetQuestById(activeQuestIds[i]);
+			if (questById == null || !questById.isQuestActive)
+			{
+				activeQuestIds[i] = -1;
+				activeQuestProgresses[i] = 0;
+			}
+			else
+			{
+				num++;
+			}
+			int num2 = -1;
+			int num3 = 0;
+			if (questById != null)
+			{
+				num2 = questById.questID;
+				num3 = questById.GetProgress();
+			}
+			activeQuestProgresses[i] = num3;
+			if (num2 != activeQuestIdsDiff[i])
+			{
+				PlayerPrefs.SetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_ID_Key", i), num2);
+			}
+			if (num3 != activeQuestProgressesDiff[i])
+			{
+				PlayerPrefs.SetInt(string.Format("{0}{1}", "v1_Rotating_Quest_Daily_Progress_Key", i), num3);
+			}
+		}
+		if (bonusProgress != bonusProgressDiff)
+		{
+			PlayerPrefs.SetInt("v1_SIProgression:bonusProgress", bonusProgress);
+		}
+		PlayerPrefs.Save();
+		CopySaveDataToDiff();
+	}
+
+	public void CopySaveDataToDiff()
+	{
+		lastQuestGrantTimeDiff = lastQuestGrantTime;
+		stashedQuestsDiff = stashedQuests;
+		stashedBonusPointsDiff = stashedBonusPoints;
+		bonusProgressDiff = bonusProgress;
+		int[] array = new int[6];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = resourceDict[(SIResource.ResourceType)i];
+		}
+		_SafeShallowCopyArray(array, ref resourceArrayDiff);
+		_SafeShallowCopyArray(limitedDepositTimeArray, ref limitedDepositTimeDiff);
+		_SafeShallowCopyArray(activeQuestIds, ref activeQuestIdsDiff);
+		_SafeShallowCopyArray(activeQuestProgresses, ref activeQuestProgressesDiff);
+		if (unlockedTechTreeDataDiff == null || unlockedTechTreeDataDiff.Length != unlockedTechTreeData.Length)
+		{
+			unlockedTechTreeDataDiff = new bool[unlockedTechTreeData.Length][];
+		}
+		for (int j = 0; j < unlockedTechTreeData.Length; j++)
+		{
+			_SafeShallowCopyArray(unlockedTechTreeData[j], ref unlockedTechTreeDataDiff[j]);
+		}
+	}
+
+	private static void _SafeShallowCopyArray<T>(T[] sourceArray, ref T[] ref_destinationArray)
+	{
+		if (ref_destinationArray == null || ref_destinationArray.Length != sourceArray.Length)
+		{
+			ref_destinationArray = new T[sourceArray.Length];
+		}
+		Array.Copy(sourceArray, ref_destinationArray, sourceArray.Length);
+	}
+
+	public int[] GetResourceArray()
+	{
+		int[] array = new int[resourceDict.Count];
+		for (int i = 0; i < resourceDict.Count; i++)
+		{
+			array[i] = resourceDict[(SIResource.ResourceType)i];
+		}
+		return array;
+	}
+
+	public void SetResourceArray(int[] resourceArray)
+	{
+		for (int i = 0; i < resourceArray.Length; i++)
+		{
+			resourceDict[(SIResource.ResourceType)i] = resourceArray[i];
+		}
+	}
+
+	public void HandleQuestCompleted(int questID)
+	{
+		UpdateQuestProgresses();
+		SIPlayer.SetAndBroadcastProgression();
+		SIPlayer.LocalPlayer.questCompleteCelebrate.SetActive(value: true);
+	}
+
+	public void HandleQuestProgressChanged(bool initialLoad)
+	{
+		if (UpdateQuestProgresses())
+		{
+			SIPlayer.SetAndBroadcastProgression();
+		}
+	}
+
+	private bool UpdateQuestProgresses()
+	{
+		bool result = false;
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			RotatingQuest questById = questSourceList.GetQuestById(activeQuestIds[i]);
+			int num = 0;
+			if (questById != null)
+			{
+				num = questById.GetProgress();
+				if (questById.questType != QuestType.moveDistance || activeQuestProgresses[i] / 100 != num / 100)
+				{
+					result = true;
+				}
+			}
+			activeQuestProgresses[i] = num;
+		}
+		SaveQuestProgress();
+		return result;
+	}
+
+	public void AttemptIncrementResource(SIResource.ResourceType resource)
+	{
+		ProgressionManager.Instance.IncrementSIResource(resource.ToString(), OnSuccessfulIncrementResource, delegate(string err)
+		{
+			Debug.LogError(err);
+		});
+	}
+
+	private void OnSuccessfulIncrementResource(string resourceStr)
+	{
+		if (Enum.Parse<SIResource.ResourceType>(resourceStr) == SIResource.ResourceType.TechPoint)
+		{
+			SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
+		}
+		ProgressionManager.Instance.RefreshUserInventory();
+	}
+
+	public void AttemptRedeemCompletedQuest(int questIndex)
+	{
+		RotatingQuest quest = questSourceList.GetQuestById(activeQuestIds[questIndex]);
+		if (quest == null || activeQuestIds[questIndex] == -1 || !quest.isQuestComplete || redeemingQuestInProgress[questIndex])
+		{
+			return;
+		}
+		redeemingQuestInProgress[questIndex] = true;
+		ProgressionManager.Instance.CompleteSIQuest(quest.questID, delegate(ProgressionManager.UserQuestsStatusResponse status)
+		{
+			OnSuccessfulQuestRedeem(questIndex, quest, status);
+		}, delegate(string err)
+		{
+			if (err.Contains("409") || err.Contains("404"))
+			{
+				OnInvalidQuestRedeemAttempt(questIndex, quest);
+			}
+			redeemingQuestInProgress[questIndex] = false;
+			Debug.LogError(err);
+		});
+	}
+
+	private void OnSuccessfulQuestRedeem(int questIndex, RotatingQuest quest, ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
+	{
+		activeQuestIds[questIndex] = -1;
+		activeQuestProgresses[questIndex] = 0;
+		quest.ApplySavedProgress(0);
+		redeemingQuestInProgress[questIndex] = false;
+		resourceDict[SIResource.ResourceType.TechPoint]++;
+		ApplyServerQuestsStatus(userQuestsStatus);
+		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
+		ProgressionManager.Instance.RefreshUserInventory();
+	}
+
+	private void OnInvalidQuestRedeemAttempt(int questIndex, RotatingQuest quest)
+	{
+		activeQuestIds[questIndex] = -1;
+		activeQuestProgresses[questIndex] = 0;
+		quest.ApplySavedProgress(0);
+		ProgressionManager.Instance.GetSIQuestStatus(ApplyServerQuestsStatus);
+	}
+
+	public void AttemptRedeemBonusPoint()
+	{
+		ProgressionManager.Instance.CompleteSIBonus(delegate(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
+		{
+			OnSuccessfulBonusRedeem(userQuestsStatus);
+		}, delegate(string err)
+		{
+			Debug.LogError(err);
+		});
+	}
+
+	private void OnSuccessfulBonusRedeem(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
+	{
+		bonusProgress = 0;
+		ApplyServerQuestsStatus(userQuestsStatus);
+		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
+		ProgressionManager.Instance.RefreshUserInventory();
+	}
+
+	public void AttemptCollectMonkeIdol()
+	{
+		ProgressionManager.Instance.CollectSIIdol(OnSuccessfulMonkeIdolRedeem, delegate(string err)
+		{
+			Debug.LogError(err);
+		});
+	}
+
+	private void OnSuccessfulMonkeIdolRedeem(ProgressionManager.UserQuestsStatusResponse userQuestsStatus)
+	{
+		ApplyServerQuestsStatus(userQuestsStatus);
+		limitedDepositTimeArray[1] = 1;
+		SIPlayer.LocalPlayer.TechPointGrantedCelebrate();
+		ProgressionManager.Instance.RefreshUserInventory();
+	}
+
+	public void GetBonusProgress()
+	{
+		bonusProgress++;
+	}
+
+	public void SetupAllQuestEventListeners()
+	{
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			RotatingQuest questById = questSourceList.GetQuestById(activeQuestIds[i]);
+			if (questById != null && activeQuestIds[i] != -1)
+			{
+				questById.questManager = this;
+				if (!questById.isQuestComplete)
+				{
+					questById.AddEventListener();
+				}
+			}
+		}
+	}
+
+	public static void StaticClearAllQuestEventListeners()
+	{
+		Instance.ClearAllQuestEventListeners();
+	}
+
+	public void ClearAllQuestEventListeners()
+	{
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			questSourceList.GetQuestById(activeQuestIds[i])?.RemoveEventListener();
+		}
+	}
+
+	public void LoadQuestsFromJson(string jsonString)
+	{
+		questSourceList = JsonConvert.DeserializeObject<SIQuestsList>(jsonString);
+		ProcessAllQuests(QuestLoadPostProcess);
+	}
+
+	public void RefreshActiveQuests()
+	{
+		ClearAllQuestEventListeners();
+		SelectActiveQuests();
+		HandleQuestProgressChanged(initialLoad: true);
+		SetupAllQuestEventListeners();
+	}
+
+	private void SelectActiveQuests()
+	{
+		int num = 0;
+		for (int i = 0; i < activeQuestIds.Length; i++)
+		{
+			RotatingQuest questById = questSourceList.GetQuestById(activeQuestIds[i]);
+			if (questById != null && questById.isQuestActive && num < stashedQuests)
+			{
+				activeQuestCategories[i] = questById.category;
+				num++;
+				continue;
+			}
+			activeQuestIds[i] = -1;
+			activeQuestProgresses[i] = 0;
+			activeQuestCategories[i] = QuestCategory.NONE;
+			questById?.ApplySavedProgress(0);
+		}
+		int num2 = Mathf.Max(0, stashedQuests);
+		for (int j = 0; j < activeQuestIds.Length; j++)
+		{
+			if (num >= num2)
+			{
+				break;
+			}
+			RotatingQuest questById2 = questSourceList.GetQuestById(activeQuestIds[j]);
+			if (questById2 != null && questById2.isQuestActive)
+			{
+				continue;
+			}
+			int num3 = -1;
+			int num4 = UnityEngine.Random.Range(0, questSourceList.quests.Count);
+			for (int k = 0; k < questSourceList.quests.Count; k++)
+			{
+				num3 = (num4 + k) % questSourceList.quests.Count;
+				RotatingQuest questById3 = questSourceList.GetQuestById(num3);
+				if (questById3 == null || !questById3.isQuestActive || GetMatchingCategoryCount(questById3) >= perCategoryQuestLimit)
+				{
+					continue;
+				}
+				bool flag = false;
+				for (int l = 0; l < activeQuestIds.Length; l++)
+				{
+					if (num3 == activeQuestIds[l])
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					activeQuestIds[j] = num3;
+					activeQuestCategories[j] = questById3.category;
+					questById3.ApplySavedProgress(0);
+					activeQuestProgresses[j] = 0;
+					num++;
+					break;
+				}
+			}
+		}
+		SaveQuestProgress();
+		int GetMatchingCategoryCount(RotatingQuest quest)
+		{
+			if (quest.category == QuestCategory.NONE)
+			{
+				return 0;
+			}
+			int num5 = 0;
+			QuestCategory[] array = activeQuestCategories;
+			for (int m = 0; m < array.Length; m++)
+			{
+				if (array[m] == quest.category)
+				{
+					num5++;
+				}
+			}
+			return num5;
+		}
+	}
+
+	private void SelectCurrentTurnInDate()
+	{
+		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
+		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
+		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
+		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
+		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
+		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
+		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
+		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
+		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
+		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
+		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[2]
+		{
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
+		});
+		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
+		{
+			dateTime -= TimeSpan.FromHours(1.0);
+		}
+		_ = (DateTime.UtcNow - dateTime).Days;
+	}
+
+	public bool TryDepositResources(SIResource.ResourceType type, int count)
+	{
+		int resourceMaxCap = GetResourceMaxCap(type);
+		int num = resourceDict[type];
+		if (resourceMaxCap == num)
+		{
+			return false;
+		}
+		count = Math.Min(count, resourceMaxCap - num);
+		resourceDict[type] += count;
+		AttemptIncrementResource(type);
+		return true;
+	}
+
+	public int GetResourceMaxCap(SIResource.ResourceType type)
+	{
+		return resourceCapsArray[(int)type];
+	}
+
+	public bool IsLimitedDepositAvailable(SIResource.LimitedDepositType limitedDepositType)
+	{
+		return !dailyLimitedTurnedIn;
+	}
+
+	public void ApplyLimitedDepositTime(SIResource.LimitedDepositType limitedDepositType)
+	{
+		if (limitedDepositType != SIResource.LimitedDepositType.None)
+		{
+			AttemptCollectMonkeIdol();
+		}
+	}
+
+	private void OnDestroy()
+	{
+		SaveQuestProgress();
+	}
+
+	public bool GetOnlineNode(SIUpgradeType type, out SINode node)
+	{
+		if (!_treeReady)
+		{
+			node = emptyNode;
+			return false;
+		}
+		return siNodes.TryGetValue(type, out node);
+	}
+
+	public static bool ResourcesMaxed()
+	{
+		return Instance._ResourcesMaxed();
+	}
+
+	public bool _ResourcesMaxed()
+	{
+		foreach (KeyValuePair<SIResource.ResourceType, int> item in resourceDict)
+		{
+			if (item.Key != SIResource.ResourceType.TechPoint && item.Value < GetResourceMaxCap(item.Key))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void CheckTelemetry()
+	{
+		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
+		if (activeGameMode == null)
+		{
+			return;
+		}
+		GameModeType gameModeType = activeGameMode.GameType();
+		if (gameModeType != GameModeType.SuperInfect && gameModeType != GameModeType.SuperCasual)
+		{
+			return;
+		}
+		if (!activeGameMode.ValidGameMode())
+		{
+			timeTelemetryLastChecked = Time.realtimeSinceStartup;
+			return;
+		}
+		float num = Time.realtimeSinceStartup - timeTelemetryLastChecked;
+		timeTelemetryLastChecked = Time.realtimeSinceStartup;
+		totalPlayTime += num;
+		if (NetworkSystem.Instance.InRoom)
+		{
+			roomPlayTime += num;
+		}
+		intervalPlayTime += num;
+		for (int i = 0; i < 11; i++)
+		{
+			SITechTreePageId key = (SITechTreePageId)i;
+			if (Instance.heldOrSnappedByGadgetPageType[key] > 0)
+			{
+				timeUsingGadgetTypeInterval[key] += num;
+				timeUsingGadgetTypeTotal[key] += num;
+			}
+		}
+		if (Instance.heldOrSnappedOwnGadgets > 0)
+		{
+			timeUsingOwnGadgetsInterval += num;
+			timeUsingOwnGadgetsTotal += num;
+		}
+		if (Instance.heldOrSnappedOthersGadgets > 0)
+		{
+			timeUsingOthersGadgetsInterval += num;
+			timeUsingOthersGadgetsTotal += num;
+		}
+		if (lastTelemetrySent + telemetryCooldown < Time.realtimeSinceStartup)
+		{
+			lastTelemetrySent = Time.realtimeSinceStartup;
+			SaveTelemetryData();
+			GorillaTelemetry.SuperInfectionEvent(roomDisconnect: false, totalPlayTime, roomPlayTime, Time.realtimeSinceStartup, intervalPlayTime, activeTerminalTimeTotal, activeTerminalTimeInterval, timeUsingGadgetTypeTotal, timeUsingGadgetTypeInterval, timeUsingOwnGadgetsTotal, timeUsingOwnGadgetsInterval, timeUsingOthersGadgetsTotal, timeUsingOthersGadgetsInterval, tagsUsingGadgetTypeTotal, tagsUsingGadgetTypeInterval, tagsHoldingOwnGadgetTotal, tagsHoldingOwnGadgetInterval, tagsHoldingOthersGadgetTotal, tagsHoldingOthersGadgetInterval, resourcesCollectedTotal, resourcesCollectedInterval, roundsPlayedTotal, roundsPlayedInterval, Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
+			ResetTelemetryIntervalData();
+		}
+	}
+
+	public void SendTelemetryData()
+	{
+		if (!(Time.realtimeSinceStartup < lastDisconnectTelemetrySent + minDisconnectTelemetryCooldown))
+		{
+			lastDisconnectTelemetrySent = Time.realtimeSinceStartup;
+			SaveTelemetryData();
+			GorillaTelemetry.SuperInfectionEvent(roomDisconnect: true, totalPlayTime, roomPlayTime, Time.realtimeSinceStartup, intervalPlayTime, activeTerminalTimeTotal, activeTerminalTimeInterval, timeUsingGadgetTypeTotal, timeUsingGadgetTypeInterval, timeUsingOwnGadgetsTotal, timeUsingOwnGadgetsInterval, timeUsingOthersGadgetsTotal, timeUsingOthersGadgetsInterval, tagsUsingGadgetTypeTotal, tagsUsingGadgetTypeInterval, tagsHoldingOwnGadgetTotal, tagsHoldingOwnGadgetInterval, tagsHoldingOthersGadgetTotal, tagsHoldingOthersGadgetInterval, resourcesCollectedTotal, resourcesCollectedInterval, roundsPlayedTotal, roundsPlayedInterval, Instance.unlockedTechTreeData, NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.RoomPlayerCount : (-1));
+			ResetTelemetryIntervalData();
+			roomPlayTime = 0f;
+		}
+	}
+
+	public void SendPurchaseResourcesData()
+	{
+		SaveTelemetryData();
+		GorillaTelemetry.SuperInfectionEvent("si_fill_resources", 500, -1, totalPlayTime, roomPlayTime, Time.realtimeSinceStartup);
+	}
+
+	public void SendPurchaseTechPointsData(int techPointsPurchased)
+	{
+		SaveTelemetryData();
+		GorillaTelemetry.SuperInfectionEvent("si_purchase_tech_points", techPointsPurchased * 100, techPointsPurchased, totalPlayTime, roomPlayTime, Time.realtimeSinceStartup);
+	}
+
+	public void LoadSavedTelemetryData()
+	{
+		totalPlayTime = PlayerPrefs.GetFloat("super_infection_total_play_time", 0f);
+		for (int i = 0; i < 11; i++)
+		{
+			SITechTreePageId sITechTreePageId = (SITechTreePageId)i;
+			timeUsingGadgetTypeTotal[sITechTreePageId] = PlayerPrefs.GetFloat("super_infection_time_holding_gadget_type_total" + sITechTreePageId.GetName(), 0f);
+			tagsUsingGadgetTypeTotal[sITechTreePageId] = PlayerPrefs.GetInt("super_infection_tags_holding_gadget_type_total" + sITechTreePageId.GetName(), 0);
+		}
+		activeTerminalTimeTotal = PlayerPrefs.GetFloat("super_infection_terminal_total_time", 0f);
+		tagsHoldingOthersGadgetTotal = PlayerPrefs.GetInt("super_infection_tags_holding_others_gadgets_total", 0);
+		tagsHoldingOwnGadgetTotal = PlayerPrefs.GetInt("super_infection_tags_holding_own_gadgets_total", 0);
+		for (int j = 0; j < 6; j++)
+		{
+			SIResource.ResourceType resourceType = (SIResource.ResourceType)j;
+			resourcesCollectedTotal[resourceType] = PlayerPrefs.GetInt("super_infection_resource_type_collected_total" + resourceType.GetName(), 0);
+		}
+		roundsPlayedTotal = PlayerPrefs.GetInt("super_infection_rounds_played_total", 0);
+	}
+
+	private void SaveTelemetryData()
+	{
+		PlayerPrefs.SetFloat("super_infection_total_play_time", totalPlayTime);
+		for (int i = 0; i < 11; i++)
+		{
+			SITechTreePageId sITechTreePageId = (SITechTreePageId)i;
+			PlayerPrefs.SetFloat("super_infection_time_holding_gadget_type_total" + sITechTreePageId.GetName(), timeUsingGadgetTypeTotal[sITechTreePageId]);
+			PlayerPrefs.SetInt("super_infection_tags_holding_gadget_type_total" + sITechTreePageId.GetName(), tagsUsingGadgetTypeTotal[sITechTreePageId]);
+		}
+		PlayerPrefs.SetFloat("super_infection_terminal_total_time", activeTerminalTimeTotal);
+		PlayerPrefs.SetInt("super_infection_tags_holding_others_gadgets_total", tagsHoldingOthersGadgetTotal);
+		PlayerPrefs.SetInt("super_infection_tags_holding_own_gadgets_total", tagsHoldingOwnGadgetTotal);
+		for (int j = 0; j < 6; j++)
+		{
+			SIResource.ResourceType resourceType = (SIResource.ResourceType)j;
+			PlayerPrefs.SetInt("super_infection_resource_type_collected_total" + resourceType.GetName(), resourcesCollectedTotal[resourceType]);
+		}
+		PlayerPrefs.SetInt("super_infection_rounds_played_total", roundsPlayedTotal);
+		PlayerPrefs.Save();
+	}
+
+	public void ResetTelemetryIntervalData()
+	{
+		lastTelemetrySent = Time.realtimeSinceStartup;
+		intervalPlayTime = 0f;
+		activeTerminalTimeInterval = 0f;
+		for (int i = 0; i < 11; i++)
+		{
+			SITechTreePageId key = (SITechTreePageId)i;
+			timeUsingGadgetTypeInterval[key] = 0f;
+			tagsUsingGadgetTypeInterval[key] = 0;
+		}
+		timeUsingOwnGadgetsInterval = 0f;
+		timeUsingOthersGadgetsInterval = 0f;
+		tagsHoldingOthersGadgetInterval = 0;
+		tagsHoldingOwnGadgetInterval = 0;
+		for (int j = 0; j < 6; j++)
+		{
+			SIResource.ResourceType key2 = (SIResource.ResourceType)j;
+			resourcesCollectedInterval[key2] = 0;
+		}
+		roundsPlayedInterval = 0;
+	}
+
+	public void HandleTagTelemetry(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
+	{
+		if (taggingPlayer.ActorNumber != SIPlayer.LocalPlayer.ActorNr)
+		{
+			return;
+		}
+		for (int i = 0; i < 11; i++)
+		{
+			SITechTreePageId key = (SITechTreePageId)i;
+			if (Instance.heldOrSnappedByGadgetPageType[key] > 0)
+			{
+				tagsUsingGadgetTypeTotal[key]++;
+				tagsUsingGadgetTypeInterval[key]++;
+			}
+		}
+		if (Instance.heldOrSnappedOwnGadgets > 0)
+		{
+			tagsHoldingOwnGadgetInterval++;
+			tagsHoldingOwnGadgetTotal++;
+		}
+		if (Instance.heldOrSnappedOthersGadgets > 0)
+		{
+			tagsHoldingOthersGadgetInterval++;
+			tagsHoldingOthersGadgetTotal++;
+		}
+	}
+
+	public void UpdateHeldGadgetsTelemetry(SITechTreePageId id, bool isMine, int changeAmount)
+	{
+		Instance.heldOrSnappedByGadgetPageType[id] += changeAmount;
+		if (isMine)
+		{
+			Instance.heldOrSnappedOwnGadgets += changeAmount;
+		}
+		else
+		{
+			Instance.heldOrSnappedOthersGadgets += changeAmount;
+		}
+	}
+
+	public void CollectResourceTelemetry(SIResource.ResourceType type, int count)
+	{
+		resourcesCollectedTotal[type] += count;
+		resourcesCollectedInterval[type] += count;
+	}
+
+	public void AddRoundTelemetry()
+	{
+		roundsPlayedInterval++;
+		roundsPlayedTotal++;
 	}
 }

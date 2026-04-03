@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using Photon.Pun;
@@ -6,34 +6,57 @@ using UnityEngine;
 
 internal static class ProjectileTracker
 {
+	public struct ProjectileInfo(double newTime, Vector3 newVel, Vector3 origin, float newScale, SlingshotProjectile projectile)
+	{
+		public double timeLaunched = newTime;
+
+		public Vector3 shotVelocity = newVel;
+
+		public Vector3 launchOrigin = origin;
+
+		public float scale = newScale;
+
+		public SlingshotProjectile projectileInstance = projectile;
+
+		public bool hasImpactOverride = projectile.playerImpactEffectPrefab.IsNotNull();
+	}
+
+	private static LoopingArray<ProjectileInfo>.Pool m_projectileInfoPool;
+
+	private static LoopingArray<ProjectileInfo> m_localProjectiles;
+
+	public static readonly Dictionary<NetPlayer, LoopingArray<ProjectileInfo>> m_playerProjectiles;
+
 	static ProjectileTracker()
 	{
-		RoomSystem.LeftRoomEvent += new Action(ProjectileTracker.ClearProjectiles);
-		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(ProjectileTracker.RemovePlayerProjectiles);
+		m_projectileInfoPool = new LoopingArray<ProjectileInfo>.Pool(50, 9);
+		m_localProjectiles = new LoopingArray<ProjectileInfo>(50);
+		m_playerProjectiles = new Dictionary<NetPlayer, LoopingArray<ProjectileInfo>>(9);
+		RoomSystem.LeftRoomEvent += new Action(ClearProjectiles);
+		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(RemovePlayerProjectiles);
 	}
 
 	public static void RemovePlayerProjectiles(NetPlayer player)
 	{
-		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
-		if (ProjectileTracker.m_playerProjectiles.TryGetValue(player, out loopingArray))
+		if (m_playerProjectiles.TryGetValue(player, out var value))
 		{
-			ProjectileTracker.ResetPlayerProjectiles(loopingArray);
-			ProjectileTracker.m_playerProjectiles.Remove(player);
-			ProjectileTracker.m_projectileInfoPool.Return(loopingArray);
+			ResetPlayerProjectiles(value);
+			m_playerProjectiles.Remove(player);
+			m_projectileInfoPool.Return(value);
 		}
 	}
 
 	private static void ClearProjectiles()
 	{
-		foreach (LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray in ProjectileTracker.m_playerProjectiles.Values)
+		foreach (LoopingArray<ProjectileInfo> value in m_playerProjectiles.Values)
 		{
-			ProjectileTracker.ResetPlayerProjectiles(loopingArray);
-			ProjectileTracker.m_projectileInfoPool.Return(loopingArray);
+			ResetPlayerProjectiles(value);
+			m_projectileInfoPool.Return(value);
 		}
-		ProjectileTracker.m_playerProjectiles.Clear();
+		m_playerProjectiles.Clear();
 	}
 
-	private static void ResetPlayerProjectiles(LoopingArray<ProjectileTracker.ProjectileInfo> projectiles)
+	private static void ResetPlayerProjectiles(LoopingArray<ProjectileInfo> projectiles)
 	{
 		for (int i = 0; i < projectiles.Length; i++)
 		{
@@ -47,26 +70,26 @@ internal static class ProjectileTracker
 
 	public static int AddAndIncrementLocalProjectile(SlingshotProjectile projectile, Vector3 intialVelocity, Vector3 initialPosition, float scale)
 	{
-		SlingshotProjectile projectileInstance = ProjectileTracker.m_localProjectiles[ProjectileTracker.m_localProjectiles.CurrentIndex].projectileInstance;
+		SlingshotProjectile projectileInstance = m_localProjectiles[m_localProjectiles.CurrentIndex].projectileInstance;
 		if (projectileInstance.IsNotNull() && projectileInstance != projectile && projectileInstance.projectileOwner == NetworkSystem.Instance.LocalPlayer && projectileInstance.gameObject.activeSelf)
 		{
 			projectileInstance.Deactivate();
 		}
-		ProjectileTracker.ProjectileInfo projectileInfo = new ProjectileTracker.ProjectileInfo(PhotonNetwork.Time, intialVelocity, initialPosition, scale, projectile);
-		return ProjectileTracker.m_localProjectiles.AddAndIncrement(projectileInfo);
+		ProjectileInfo value = new ProjectileInfo(PhotonNetwork.Time, intialVelocity, initialPosition, scale, projectile);
+		return m_localProjectiles.AddAndIncrement(in value);
 	}
 
 	public static void AddRemotePlayerProjectile(NetPlayer player, SlingshotProjectile projectile, int projectileIndex, double timeShot, Vector3 intialVelocity, Vector3 initialPosition, float scale)
 	{
-		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
-		if (!ProjectileTracker.m_playerProjectiles.ContainsKey(player))
+		LoopingArray<ProjectileInfo> loopingArray;
+		if (!m_playerProjectiles.ContainsKey(player))
 		{
-			loopingArray = ProjectileTracker.m_projectileInfoPool.Take();
-			ProjectileTracker.m_playerProjectiles[player] = loopingArray;
+			loopingArray = m_projectileInfoPool.Take();
+			m_playerProjectiles[player] = loopingArray;
 		}
 		else
 		{
-			loopingArray = ProjectileTracker.m_playerProjectiles[player];
+			loopingArray = m_playerProjectiles[player];
 		}
 		if (projectileIndex < 0 || projectileIndex >= loopingArray.Length)
 		{
@@ -78,61 +101,29 @@ internal static class ProjectileTracker
 		{
 			projectileInstance.Deactivate();
 		}
-		ProjectileTracker.ProjectileInfo value = new ProjectileTracker.ProjectileInfo(timeShot, intialVelocity, initialPosition, scale, projectile);
+		ProjectileInfo value = new ProjectileInfo(timeShot, intialVelocity, initialPosition, scale, projectile);
 		loopingArray[projectileIndex] = value;
 	}
 
-	public static ProjectileTracker.ProjectileInfo GetLocalProjectile(int index)
+	public static ProjectileInfo GetLocalProjectile(int index)
 	{
-		return ProjectileTracker.m_localProjectiles[index];
+		return m_localProjectiles[index];
 	}
 
-	public static ValueTuple<bool, ProjectileTracker.ProjectileInfo> GetAndRemoveRemotePlayerProjectile(NetPlayer player, int index)
+	public static (bool, ProjectileInfo) GetAndRemoveRemotePlayerProjectile(NetPlayer player, int index)
 	{
-		ValueTuple<bool, ProjectileTracker.ProjectileInfo> result = new ValueTuple<bool, ProjectileTracker.ProjectileInfo>(false, default(ProjectileTracker.ProjectileInfo));
-		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
-		if (index < 0 || index >= ProjectileTracker.m_localProjectiles.Length || !ProjectileTracker.m_playerProjectiles.TryGetValue(player, out loopingArray))
+		(bool, ProjectileInfo) result = (false, default(ProjectileInfo));
+		if (index < 0 || index >= m_localProjectiles.Length || !m_playerProjectiles.TryGetValue(player, out var value))
 		{
 			return result;
 		}
-		ProjectileTracker.ProjectileInfo projectileInfo = loopingArray[index];
-		if (projectileInfo.projectileInstance.IsNotNull())
+		ProjectileInfo item = value[index];
+		if (item.projectileInstance.IsNotNull())
 		{
 			result.Item1 = true;
-			result.Item2 = projectileInfo;
-			loopingArray[index] = default(ProjectileTracker.ProjectileInfo);
+			result.Item2 = item;
+			value[index] = default(ProjectileInfo);
 		}
 		return result;
-	}
-
-	private static LoopingArray<ProjectileTracker.ProjectileInfo>.Pool m_projectileInfoPool = new LoopingArray<ProjectileTracker.ProjectileInfo>.Pool(50, 9);
-
-	private static LoopingArray<ProjectileTracker.ProjectileInfo> m_localProjectiles = new LoopingArray<ProjectileTracker.ProjectileInfo>(50);
-
-	public static readonly Dictionary<NetPlayer, LoopingArray<ProjectileTracker.ProjectileInfo>> m_playerProjectiles = new Dictionary<NetPlayer, LoopingArray<ProjectileTracker.ProjectileInfo>>(9);
-
-	public struct ProjectileInfo
-	{
-		public ProjectileInfo(double newTime, Vector3 newVel, Vector3 origin, float newScale, SlingshotProjectile projectile)
-		{
-			this.timeLaunched = newTime;
-			this.shotVelocity = newVel;
-			this.launchOrigin = origin;
-			this.scale = newScale;
-			this.projectileInstance = projectile;
-			this.hasImpactOverride = projectile.playerImpactEffectPrefab.IsNotNull();
-		}
-
-		public double timeLaunched;
-
-		public Vector3 shotVelocity;
-
-		public Vector3 launchOrigin;
-
-		public float scale;
-
-		public SlingshotProjectile projectileInstance;
-
-		public bool hasImpactOverride;
 	}
 }

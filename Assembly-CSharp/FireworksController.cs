@@ -1,164 +1,24 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class FireworksController : MonoBehaviour
 {
-	private void Awake()
+	[Serializable]
+	public struct ExplosionEvent
 	{
-		this._launchOrder = this.fireworks.ToArray<Firework>();
-		this._rnd = new SRand(this.seed);
-	}
+		public TimeSince timeSince;
 
-	public void LaunchVolley()
-	{
-		if (!Application.isPlaying)
-		{
-			return;
-		}
-		this._rnd.Shuffle<Firework>(this._launchOrder);
-		for (int i = 0; i < this._launchOrder.Length; i++)
-		{
-			MonoBehaviour monoBehaviour = this._launchOrder[i];
-			float time = this._rnd.NextFloat() * this.roundLength;
-			monoBehaviour.Invoke("Launch", time);
-		}
-	}
+		public double delay;
 
-	public void LaunchVolleyRound()
-	{
-		int num = 0;
-		while ((long)num < (long)((ulong)this.roundNumVolleys))
-		{
-			float time = this._rnd.NextFloat() * this.roundLength;
-			base.Invoke("LaunchVolley", time);
-			num++;
-		}
-	}
+		public int explosionIndex;
 
-	public void Launch(Firework fw)
-	{
-		if (!fw)
-		{
-			return;
-		}
-		Vector3 position = fw.origin.position;
-		Vector3 position2 = fw.target.position;
-		AudioSource sourceOrigin = fw.sourceOrigin;
-		int num = this._rnd.NextInt(this.bursts.Length);
-		AudioClip audioClip = this.whistles[this._rnd.NextInt(this.whistles.Length)];
-		AudioClip audioClip2 = this.bursts[num];
-		while (this._lastWhistle == audioClip)
-		{
-			audioClip = this.whistles[this._rnd.NextInt(this.whistles.Length)];
-		}
-		while (this._lastBurst == audioClip2)
-		{
-			num = this._rnd.NextInt(this.bursts.Length);
-			audioClip2 = this.bursts[num];
-		}
-		this._lastWhistle = audioClip;
-		this._lastBurst = audioClip2;
-		int num2 = this._rnd.NextInt(fw.explosions.Length);
-		ParticleSystem particleSystem = fw.explosions[num2];
-		if (fw.doTrail)
-		{
-			ParticleSystem trail = fw.trail;
-			trail.startColor = fw.colorOrigin;
-			trail.subEmitters.GetSubEmitterSystem(0).colorOverLifetime.color = new ParticleSystem.MinMaxGradient(fw.colorOrigin, fw.colorTarget);
-			trail.Stop();
-			trail.Play();
-		}
-		sourceOrigin.pitch = this._rnd.NextFloat(0.92f, 1f);
-		fw.doTrailAudio = this._rnd.NextBool();
-		FireworksController.ExplosionEvent ev = new FireworksController.ExplosionEvent
-		{
-			firework = fw,
-			timeSince = TimeSince.Now(),
-			burstIndex = num,
-			explosionIndex = num2,
-			delay = (double)(fw.doTrail ? audioClip.length : 0f),
-			active = true
-		};
-		if (fw.doExplosion)
-		{
-			this.PostExplosionEvent(ev);
-		}
-		if (fw.doTrailAudio && this._timeSinceLastWhistle > this.minWhistleDelay)
-		{
-			this._timeSinceLastWhistle = TimeSince.Now();
-			sourceOrigin.PlayOneShot(audioClip, this._rnd.NextFloat(this.whistleVolumeMin, this.whistleVolumeMax));
-		}
-		particleSystem.Stop();
-		particleSystem.transform.position = position2;
-	}
+		public int burstIndex;
 
-	private void PostExplosionEvent(FireworksController.ExplosionEvent ev)
-	{
-		for (int i = 0; i < this._explosionQueue.Length; i++)
-		{
-			if (!this._explosionQueue[i].active)
-			{
-				this._explosionQueue[i] = ev;
-				return;
-			}
-		}
-	}
+		public bool active;
 
-	private void Update()
-	{
-		this.ProcessEvents();
-	}
-
-	private void ProcessEvents()
-	{
-		if (this._explosionQueue == null || this._explosionQueue.Length == 0)
-		{
-			return;
-		}
-		for (int i = 0; i < this._explosionQueue.Length; i++)
-		{
-			FireworksController.ExplosionEvent explosionEvent = this._explosionQueue[i];
-			if (explosionEvent.active && explosionEvent.timeSince >= explosionEvent.delay)
-			{
-				this.DoExplosion(explosionEvent);
-				this._explosionQueue[i] = default(FireworksController.ExplosionEvent);
-			}
-		}
-	}
-
-	private void DoExplosion(FireworksController.ExplosionEvent ev)
-	{
-		Firework firework = ev.firework;
-		ParticleSystem particleSystem = firework.explosions[ev.explosionIndex];
-		ParticleSystem.MinMaxGradient color = new ParticleSystem.MinMaxGradient(firework.colorOrigin, firework.colorTarget);
-		ParticleSystem.ColorOverLifetimeModule colorOverLifetime = particleSystem.colorOverLifetime;
-		ParticleSystem.ColorOverLifetimeModule colorOverLifetime2 = particleSystem.subEmitters.GetSubEmitterSystem(0).colorOverLifetime;
-		colorOverLifetime.color = color;
-		colorOverLifetime2.color = color;
-		ParticleSystem particleSystem2 = firework.explosions[ev.explosionIndex];
-		particleSystem2.Stop();
-		particleSystem2.Play();
-		firework.sourceTarget.PlayOneShot(this.bursts[ev.burstIndex]);
-	}
-
-	public void RenderGizmo(Firework fw, Color c)
-	{
-		if (!fw)
-		{
-			return;
-		}
-		if (!fw.origin || !fw.target)
-		{
-			return;
-		}
-		Gizmos.color = c;
-		Vector3 position = fw.origin.position;
-		Vector3 position2 = fw.target.position;
-		Gizmos.DrawLine(position, position2);
-		Gizmos.DrawWireCube(position, Vector3.one * 0.5f);
-		Gizmos.DrawWireCube(position2, Vector3.one * 0.5f);
+		public Firework firework;
 	}
 
 	public Firework[] fireworks;
@@ -176,8 +36,8 @@ public class FireworksController : MonoBehaviour
 
 	public float minWhistleDelay = 1f;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private AudioClip _lastWhistle;
 
 	[NonSerialized]
@@ -190,7 +50,7 @@ public class FireworksController : MonoBehaviour
 	private SRand _rnd;
 
 	[NonSerialized]
-	private FireworksController.ExplosionEvent[] _explosionQueue = new FireworksController.ExplosionEvent[8];
+	private ExplosionEvent[] _explosionQueue = new ExplosionEvent[8];
 
 	[NonSerialized]
 	private TimeSince _timeSinceLastWhistle = 10f;
@@ -199,9 +59,9 @@ public class FireworksController : MonoBehaviour
 	public string seed = "Fireworks.Summer23";
 
 	[Space]
-	public uint roundNumVolleys = 6U;
+	public uint roundNumVolleys = 6u;
 
-	public uint roundLength = 6U;
+	public uint roundLength = 6u;
 
 	[FormerlySerializedAs("_timeOfDayEvent")]
 	[FormerlySerializedAs("_timeOfDay")]
@@ -209,19 +69,151 @@ public class FireworksController : MonoBehaviour
 	[SerializeField]
 	private TimeEvent _fireworksEvent;
 
-	[Serializable]
-	public struct ExplosionEvent
+	private void Awake()
 	{
-		public TimeSince timeSince;
+		_launchOrder = fireworks.ToArray();
+		_rnd = new SRand(seed);
+	}
 
-		public double delay;
+	public void LaunchVolley()
+	{
+		if (Application.isPlaying)
+		{
+			_rnd.Shuffle(_launchOrder);
+			for (int i = 0; i < _launchOrder.Length; i++)
+			{
+				Firework obj = _launchOrder[i];
+				float time = _rnd.NextFloat() * (float)roundLength;
+				obj.Invoke("Launch", time);
+			}
+		}
+	}
 
-		public int explosionIndex;
+	public void LaunchVolleyRound()
+	{
+		for (int i = 0; i < roundNumVolleys; i++)
+		{
+			float time = _rnd.NextFloat() * (float)roundLength;
+			Invoke("LaunchVolley", time);
+		}
+	}
 
-		public int burstIndex;
+	public void Launch(Firework fw)
+	{
+		if ((bool)fw)
+		{
+			_ = fw.origin.position;
+			Vector3 position = fw.target.position;
+			AudioSource sourceOrigin = fw.sourceOrigin;
+			int num = _rnd.NextInt(bursts.Length);
+			AudioClip audioClip = whistles[_rnd.NextInt(whistles.Length)];
+			AudioClip audioClip2 = bursts[num];
+			while (_lastWhistle == audioClip)
+			{
+				audioClip = whistles[_rnd.NextInt(whistles.Length)];
+			}
+			while (_lastBurst == audioClip2)
+			{
+				num = _rnd.NextInt(bursts.Length);
+				audioClip2 = bursts[num];
+			}
+			_lastWhistle = audioClip;
+			_lastBurst = audioClip2;
+			int num2 = _rnd.NextInt(fw.explosions.Length);
+			ParticleSystem obj = fw.explosions[num2];
+			if (fw.doTrail)
+			{
+				ParticleSystem trail = fw.trail;
+				trail.startColor = fw.colorOrigin;
+				ParticleSystem.ColorOverLifetimeModule colorOverLifetime = trail.subEmitters.GetSubEmitterSystem(0).colorOverLifetime;
+				colorOverLifetime.color = new ParticleSystem.MinMaxGradient(fw.colorOrigin, fw.colorTarget);
+				trail.Stop();
+				trail.Play();
+			}
+			sourceOrigin.pitch = _rnd.NextFloat(0.92f, 1f);
+			fw.doTrailAudio = _rnd.NextBool();
+			ExplosionEvent ev = new ExplosionEvent
+			{
+				firework = fw,
+				timeSince = TimeSince.Now(),
+				burstIndex = num,
+				explosionIndex = num2,
+				delay = (fw.doTrail ? audioClip.length : 0f),
+				active = true
+			};
+			if (fw.doExplosion)
+			{
+				PostExplosionEvent(ev);
+			}
+			if (fw.doTrailAudio && (float)_timeSinceLastWhistle > minWhistleDelay)
+			{
+				_timeSinceLastWhistle = TimeSince.Now();
+				sourceOrigin.PlayOneShot(audioClip, _rnd.NextFloat(whistleVolumeMin, whistleVolumeMax));
+			}
+			obj.Stop();
+			obj.transform.position = position;
+		}
+	}
 
-		public bool active;
+	private void PostExplosionEvent(ExplosionEvent ev)
+	{
+		for (int i = 0; i < _explosionQueue.Length; i++)
+		{
+			if (!_explosionQueue[i].active)
+			{
+				_explosionQueue[i] = ev;
+				break;
+			}
+		}
+	}
 
-		public Firework firework;
+	private void Update()
+	{
+		ProcessEvents();
+	}
+
+	private void ProcessEvents()
+	{
+		if (_explosionQueue == null || _explosionQueue.Length == 0)
+		{
+			return;
+		}
+		for (int i = 0; i < _explosionQueue.Length; i++)
+		{
+			ExplosionEvent ev = _explosionQueue[i];
+			if (ev.active && !((double)ev.timeSince < ev.delay))
+			{
+				DoExplosion(ev);
+				_explosionQueue[i] = default(ExplosionEvent);
+			}
+		}
+	}
+
+	private void DoExplosion(ExplosionEvent ev)
+	{
+		Firework firework = ev.firework;
+		ParticleSystem obj = firework.explosions[ev.explosionIndex];
+		ParticleSystem.MinMaxGradient color = new ParticleSystem.MinMaxGradient(firework.colorOrigin, firework.colorTarget);
+		ParticleSystem.ColorOverLifetimeModule colorOverLifetime = obj.colorOverLifetime;
+		ParticleSystem.ColorOverLifetimeModule colorOverLifetime2 = obj.subEmitters.GetSubEmitterSystem(0).colorOverLifetime;
+		colorOverLifetime.color = color;
+		colorOverLifetime2.color = color;
+		ParticleSystem obj2 = firework.explosions[ev.explosionIndex];
+		obj2.Stop();
+		obj2.Play();
+		firework.sourceTarget.PlayOneShot(bursts[ev.burstIndex]);
+	}
+
+	public void RenderGizmo(Firework fw, Color c)
+	{
+		if ((bool)fw && (bool)fw.origin && (bool)fw.target)
+		{
+			Gizmos.color = c;
+			Vector3 position = fw.origin.position;
+			Vector3 position2 = fw.target.position;
+			Gizmos.DrawLine(position, position2);
+			Gizmos.DrawWireCube(position, Vector3.one * 0.5f);
+			Gizmos.DrawWireCube(position2, Vector3.one * 0.5f);
+		}
 	}
 }

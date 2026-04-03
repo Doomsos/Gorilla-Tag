@@ -1,51 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GameLight : MonoBehaviour
 {
-	public bool IsRegistered
-	{
-		get
-		{
-			return this.lightId != -1;
-		}
-	}
-
-	public float InitialIntensity { get; private set; }
-
-	public void Awake()
-	{
-		this.intensityMult = 1;
-		this.lightId = -1;
-	}
-
-	protected void OnEnable()
-	{
-		if (this.initialized)
-		{
-			this.lightId = GameLightingManager.instance.AddGameLight(this, false);
-		}
-	}
-
-	protected void Start()
-	{
-		this.lightId = GameLightingManager.instance.AddGameLight(this, false);
-		this.initialized = true;
-	}
-
-	protected void OnDisable()
-	{
-		if (this.initialized)
-		{
-			GameLightingManager.instance.RemoveGameLight(this);
-		}
-	}
-
-	public void UpdateCachedLightColorAndIntensity()
-	{
-		this.cachedColorAndIntensity = (float)this.intensityMult * this.light.intensity * (this.negativeLight ? -1f : 1f) * this.light.color;
-	}
-
 	public Light light;
 
 	public bool negativeLight;
@@ -61,4 +17,41 @@ public class GameLight : MonoBehaviour
 	public int intensityMult = 1;
 
 	private bool initialized;
+
+	public bool IsRegistered => lightId != -1;
+
+	public float InitialIntensity { get; private set; }
+
+	public void Awake()
+	{
+		intensityMult = 1;
+		lightId = -1;
+	}
+
+	protected void OnEnable()
+	{
+		if (initialized)
+		{
+			lightId = GameLightingManager.instance.AddGameLight(this);
+		}
+	}
+
+	protected void Start()
+	{
+		lightId = GameLightingManager.instance.AddGameLight(this);
+		initialized = true;
+	}
+
+	protected void OnDisable()
+	{
+		if (initialized)
+		{
+			GameLightingManager.instance.RemoveGameLight(this);
+		}
+	}
+
+	public void UpdateCachedLightColorAndIntensity()
+	{
+		cachedColorAndIntensity = (float)intensityMult * light.intensity * (negativeLight ? (-1f) : 1f) * light.color;
+	}
 }

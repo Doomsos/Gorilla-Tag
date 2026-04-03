@@ -1,48 +1,44 @@
-﻿using System;
 using System.Collections.Generic;
 
-namespace GorillaExtensions
+namespace GorillaExtensions;
+
+public static class CollectionExtensions
 {
-	public static class CollectionExtensions
+	public static void AddAll<T>(this ICollection<T> collection, IEnumerable<T> ts)
 	{
-		public static void AddAll<T>(this ICollection<T> collection, IEnumerable<T> ts)
+		foreach (T t in ts)
 		{
-			foreach (T item in ts)
-			{
-				collection.Add(item);
-			}
+			collection.Add(t);
 		}
+	}
 
-		public static void CopyStringKeepDelimiterAtEnd(this HashSet<string> hash, string str, char delimiter)
+	public static void CopyStringKeepDelimiterAtEnd(this HashSet<string> hash, string str, char delimiter)
+	{
+		if (string.IsNullOrEmpty(str))
 		{
-			if (string.IsNullOrEmpty(str))
+			return;
+		}
+		int i = 0;
+		int num = 0;
+		for (int length = str.Length; i < length; i++)
+		{
+			if (str[i] == delimiter)
 			{
-				return;
-			}
-			int i = 0;
-			int num = 0;
-			int length = str.Length;
-			while (i < length)
-			{
-				if (str[i] == delimiter)
-				{
-					hash.Add(str.Substring(num, i - num));
-					num = i + 1;
-				}
-				i++;
+				hash.Add(str.Substring(num, i - num));
+				num = i + 1;
 			}
 		}
+	}
 
-		public static bool ContainsAll<T>(this ICollection<T> collection, IEnumerable<T> ts)
+	public static bool ContainsAll<T>(this ICollection<T> collection, IEnumerable<T> ts)
+	{
+		foreach (T t in ts)
 		{
-			foreach (T item in ts)
+			if (!collection.Contains(t))
 			{
-				if (!collection.Contains(item))
-				{
-					return false;
-				}
+				return false;
 			}
-			return true;
 		}
+		return true;
 	}
 }

@@ -1,9 +1,7 @@
-﻿using System;
 using UnityEngine;
 
-namespace Docking
+namespace Docking;
+
+public class Dock : MonoBehaviour
 {
-	public class Dock : MonoBehaviour
-	{
-	}
 }

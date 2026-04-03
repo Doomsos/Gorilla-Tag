@@ -1,67 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class XRaySkeleton : SyncToPlayerColor, IGorillaSimpleBackgroundWorker
 {
-	protected override void Awake()
-	{
-		base.Awake();
-		this.target = this.renderer.material;
-		this.mats = this.rig.materialsToChangeTo;
-		this.tagMaterials = new Material[this.mats.Length];
-		this.tagMaterials[0] = new Material(this.target);
-		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-	}
-
-	public void SimpleWork()
-	{
-		if (this.currentIndex >= 0 && this.currentIndex < this.mats.Length)
-		{
-			Material material = new Material(this.mats[this.currentIndex]);
-			this.tagMaterials[this.currentIndex] = material;
-			this.currentIndex++;
-			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-		}
-	}
-
-	public void SetMaterialIndex(int index)
-	{
-		this.renderer.sharedMaterial = this.tagMaterials[index];
-		this._lastMatIndex = index;
-	}
-
-	private void Setup()
-	{
-		this.colorPropertiesToSync = new ShaderHashId[]
-		{
-			XRaySkeleton._BaseColor,
-			XRaySkeleton._EmissionColor
-		};
-	}
-
-	public override void UpdateColor(Color color)
-	{
-		if (this._lastMatIndex != 0)
-		{
-			return;
-		}
-		Material material = this.tagMaterials[0];
-		float h;
-		float s;
-		float value;
-		Color.RGBToHSV(color, out h, out s, out value);
-		Color value2 = Color.HSVToRGB(h, s, Mathf.Clamp(value, this.baseValueMinMax.x, this.baseValueMinMax.y));
-		material.SetColor(XRaySkeleton._BaseColor, value2);
-		float h2;
-		float num;
-		float num2;
-		Color.RGBToHSV(color, out h2, out num, out num2);
-		Color color2 = Color.HSVToRGB(h2, 0.82f, 0.9f, true);
-		color2 = new Color(color2.r * 1.4f, color2.g * 1.4f, color2.b * 1.4f);
-		material.SetColor(XRaySkeleton._EmissionColor, ColorUtils.ComposeHDR(new Color32(36, 191, 136, byte.MaxValue), 2f));
-		this.renderer.sharedMaterial = material;
-	}
-
 	public SkinnedMeshRenderer renderer;
 
 	public Vector2 baseValueMinMax = new Vector2(0.69f, 1f);
@@ -77,4 +17,52 @@ public class XRaySkeleton : SyncToPlayerColor, IGorillaSimpleBackgroundWorker
 	private static readonly ShaderHashId _BaseColor = "_BaseColor";
 
 	private static readonly ShaderHashId _EmissionColor = "_EmissionColor";
+
+	protected override void Awake()
+	{
+		base.Awake();
+		target = renderer.material;
+		mats = rig.materialsToChangeTo;
+		tagMaterials = new Material[mats.Length];
+		tagMaterials[0] = new Material(target);
+		GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+	}
+
+	public void SimpleWork()
+	{
+		if (currentIndex >= 0 && currentIndex < mats.Length)
+		{
+			Material material = new Material(mats[currentIndex]);
+			tagMaterials[currentIndex] = material;
+			currentIndex++;
+			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+		}
+	}
+
+	public void SetMaterialIndex(int index)
+	{
+		renderer.sharedMaterial = tagMaterials[index];
+		_lastMatIndex = index;
+	}
+
+	private void Setup()
+	{
+		colorPropertiesToSync = new ShaderHashId[2] { _BaseColor, _EmissionColor };
+	}
+
+	public override void UpdateColor(Color color)
+	{
+		if (_lastMatIndex == 0)
+		{
+			Material material = tagMaterials[0];
+			Color.RGBToHSV(color, out var H, out var S, out var V);
+			Color value = Color.HSVToRGB(H, S, Mathf.Clamp(V, baseValueMinMax.x, baseValueMinMax.y));
+			material.SetColor(_BaseColor, value);
+			Color.RGBToHSV(color, out var H2, out var _, out var _);
+			Color color2 = Color.HSVToRGB(H2, 0.82f, 0.9f, hdr: true);
+			color2 = new Color(color2.r * 1.4f, color2.g * 1.4f, color2.b * 1.4f);
+			material.SetColor(_EmissionColor, ColorUtils.ComposeHDR(new Color32(36, 191, 136, byte.MaxValue), 2f));
+			renderer.sharedMaterial = material;
+		}
+	}
 }

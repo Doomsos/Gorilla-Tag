@@ -1,15 +1,32 @@
-﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 {
+	public enum ScoreboardScreen
+	{
+		DefaultInfo,
+		ShiftCutCalculation
+	}
+
+	public List<GRUIScoreboardEntry> entries;
+
+	public TMP_Text total;
+
+	public TMP_Text buttonText;
+
+	public ScoreboardScreen currentScreen;
+
+	public GameObject infoTextParent;
+
+	public GameObject calcTextParent;
+
 	public void SliceUpdate()
 	{
-		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation)
+		if (currentScreen == ScoreboardScreen.ShiftCutCalculation)
 		{
-			this.Refresh(GhostReactor.instance.vrRigs);
+			Refresh(GhostReactor.instance.vrRigs);
 		}
 	}
 
@@ -25,81 +42,65 @@ public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 
 	public void Refresh(List<VRRig> vrRigs)
 	{
-		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation)
+		if (currentScreen == ScoreboardScreen.ShiftCutCalculation)
 		{
 			GhostReactor.instance.shiftManager.CalculatePlayerPercentages();
 		}
-		for (int i = 0; i < this.entries.Count; i++)
+		for (int i = 0; i < entries.Count; i++)
 		{
-			if (!(this.entries[i] == null))
+			if (!(entries[i] == null))
 			{
 				if (i < vrRigs.Count && vrRigs[i] != null && vrRigs[i].OwningNetPlayer != null)
 				{
-					this.entries[i].gameObject.SetActive(true);
-					this.entries[i].Setup(vrRigs[i], vrRigs[i].OwningNetPlayer.ActorNumber, this.currentScreen);
+					entries[i].gameObject.SetActive(value: true);
+					entries[i].Setup(vrRigs[i], vrRigs[i].OwningNetPlayer.ActorNumber, currentScreen);
 				}
 				else
 				{
-					this.entries[i].gameObject.SetActive(false);
+					entries[i].gameObject.SetActive(value: false);
 				}
 			}
 		}
 	}
 
-	public void SwitchToScreen(GRUIScoreboard.ScoreboardScreen screenType)
+	public void SwitchToScreen(ScoreboardScreen screenType)
 	{
-		this.currentScreen = screenType;
-		GRUIScoreboard.ScoreboardScreen scoreboardScreen = this.currentScreen;
-		if (scoreboardScreen == GRUIScoreboard.ScoreboardScreen.DefaultInfo)
+		currentScreen = screenType;
+		switch (currentScreen)
 		{
-			this.infoTextParent.SetActive(true);
-			this.calcTextParent.SetActive(false);
-			this.buttonText.text = "SHOW CUT CALC";
-			return;
+		case ScoreboardScreen.DefaultInfo:
+			infoTextParent.SetActive(value: true);
+			calcTextParent.SetActive(value: false);
+			buttonText.text = "SHOW CUT CALC";
+			break;
+		case ScoreboardScreen.ShiftCutCalculation:
+			infoTextParent.SetActive(value: false);
+			calcTextParent.SetActive(value: true);
+			buttonText.text = "SHOW INFO";
+			break;
 		}
-		if (scoreboardScreen != GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation)
-		{
-			return;
-		}
-		this.infoTextParent.SetActive(false);
-		this.calcTextParent.SetActive(true);
-		this.buttonText.text = "SHOW INFO";
 	}
 
 	public void SwitchState()
 	{
-		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.DefaultInfo)
+		if (currentScreen == ScoreboardScreen.DefaultInfo)
 		{
-			this.SwitchToScreen(GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation);
+			SwitchToScreen(ScoreboardScreen.ShiftCutCalculation);
 		}
 		else
 		{
-			this.SwitchToScreen(GRUIScoreboard.ScoreboardScreen.DefaultInfo);
+			SwitchToScreen(ScoreboardScreen.DefaultInfo);
 		}
-		this.Refresh(GhostReactor.instance.vrRigs);
-		GhostReactor.instance.UpdateRemoteScoreboardScreen(this.currentScreen);
+		Refresh(GhostReactor.instance.vrRigs);
+		GhostReactor.instance.UpdateRemoteScoreboardScreen(currentScreen);
 	}
 
-	public static bool ValidPage(GRUIScoreboard.ScoreboardScreen screen)
+	public static bool ValidPage(ScoreboardScreen screen)
 	{
-		return screen == GRUIScoreboard.ScoreboardScreen.DefaultInfo || screen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation;
-	}
-
-	public List<GRUIScoreboardEntry> entries;
-
-	public TMP_Text total;
-
-	public TMP_Text buttonText;
-
-	public GRUIScoreboard.ScoreboardScreen currentScreen;
-
-	public GameObject infoTextParent;
-
-	public GameObject calcTextParent;
-
-	public enum ScoreboardScreen
-	{
-		DefaultInfo,
-		ShiftCutCalculation
+		if (screen != ScoreboardScreen.DefaultInfo)
+		{
+			return screen == ScoreboardScreen.ShiftCutCalculation;
+		}
+		return true;
 	}
 }

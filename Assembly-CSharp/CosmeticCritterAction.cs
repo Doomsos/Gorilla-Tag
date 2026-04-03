@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum CosmeticCritterAction
@@ -8,5 +8,5 @@ public enum CosmeticCritterAction
 	Spawn = 2,
 	Despawn = 4,
 	SpawnLinked = 8,
-	ShadeHeartbeat = 16
+	ShadeHeartbeat = 0x10
 }

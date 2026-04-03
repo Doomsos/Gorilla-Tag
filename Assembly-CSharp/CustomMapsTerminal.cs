@@ -1,543 +1,22 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using GorillaTagScripts.VirtualStumpCustomMaps;
 using Modio.Mods;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class CustomMapsTerminal : MonoBehaviour
 {
-	public static int LocalPlayerID
+	public enum ScreenType
 	{
-		get
-		{
-			return NetworkSystem.Instance.LocalPlayer.ActorNumber;
-		}
-	}
-
-	public static long LocalModDetailsID
-	{
-		get
-		{
-			return CustomMapsTerminal.localModDetailsID;
-		}
-	}
-
-	public static int CurrentScreen
-	{
-		get
-		{
-			return (int)CustomMapsTerminal.localCurrentScreen;
-		}
-	}
-
-	public static bool IsDriver
-	{
-		get
-		{
-			return CustomMapsTerminal.localDriverID == CustomMapsTerminal.LocalPlayerID;
-		}
-	}
-
-	private void Awake()
-	{
-		CustomMapsTerminal.instance = this;
-		CustomMapsTerminal.hasInstance = true;
-	}
-
-	private void Start()
-	{
-		CustomMapsTerminal.localDriverID = -2;
-		CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.TerminalControlPrompt;
-		CustomMapsTerminal.previousScreen = CustomMapsTerminal.ScreenType.TerminalControlPrompt;
-		this.controlAccessScreen.Show();
-		this.detailsAccessScreen.Show();
-		this.modListScreen.Hide();
-		this.modDetailsScreen.Hide();
-		ModIOManager.OnModIOLoggedIn.AddListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.AddListener(new UnityAction(this.OnModIOLoggedOut));
-		NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnReturnedToSinglePlayer;
-	}
-
-	private void OnDestroy()
-	{
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		NetworkSystem.Instance.OnMultiplayerStarted -= this.OnJoinedRoom;
-		NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnReturnedToSinglePlayer;
-	}
-
-	public static void ShowDetailsScreen(Mod mod)
-	{
-		CustomMapsTerminal.previousScreen = CustomMapsTerminal.localCurrentScreen;
-		CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.ModDetails;
-		CustomMapsTerminal.localModDetailsID = mod.Id;
-		CustomMapsTerminal.instance.modListScreen.Hide();
-		CustomMapsTerminal.instance.controlAccessScreen.Hide();
-		CustomMapsTerminal.instance.detailsAccessScreen.Hide();
-		CustomMapsTerminal.instance.modDetailsScreen.Show();
-		CustomMapsTerminal.instance.modDetailsScreen.SetModProfile(mod);
-		CustomMapsTerminal.instance.modDisplayScreen.Show();
-		CustomMapsTerminal.instance.modDisplayScreen.SetModProfile(mod);
-		CustomMapsTerminal.instance.modSearchScreen.Hide();
-		CustomMapsTerminal.SendTerminalStatus();
-	}
-
-	public static void ReturnFromDetailsScreen()
-	{
-		CustomMapsTerminal.ScreenType screenType = CustomMapsTerminal.previousScreen;
-		if (screenType == CustomMapsTerminal.ScreenType.ModDetails || screenType == CustomMapsTerminal.ScreenType.Invalid || screenType == CustomMapsTerminal.ScreenType.TerminalControlPrompt)
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-			CustomMapsTerminal.previousScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-		}
-		else
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.previousScreen;
-		}
-		switch (CustomMapsTerminal.localCurrentScreen)
-		{
-		case CustomMapsTerminal.ScreenType.TerminalControlPrompt:
-			CustomMapsTerminal.instance.modListScreen.Hide();
-			CustomMapsTerminal.instance.modDetailsScreen.Hide();
-			CustomMapsTerminal.instance.modDisplayScreen.Hide();
-			CustomMapsTerminal.instance.modSearchScreen.Hide();
-			CustomMapsTerminal.instance.controlAccessScreen.Show();
-			CustomMapsTerminal.instance.detailsAccessScreen.Show();
-			break;
-		case CustomMapsTerminal.ScreenType.AvailableMods:
-		case CustomMapsTerminal.ScreenType.InstalledMods:
-		case CustomMapsTerminal.ScreenType.FavoriteMods:
-		case CustomMapsTerminal.ScreenType.SubscribedMods:
-			CustomMapsTerminal.instance.modListScreen.Show();
-			CustomMapsTerminal.instance.modSearchScreen.Hide();
-			CustomMapsTerminal.instance.modDetailsScreen.Hide();
-			CustomMapsTerminal.instance.modDisplayScreen.Hide();
-			CustomMapsTerminal.instance.controlAccessScreen.Hide();
-			CustomMapsTerminal.instance.detailsAccessScreen.Show();
-			break;
-		case CustomMapsTerminal.ScreenType.SearchMods:
-			CustomMapsTerminal.instance.modListScreen.Hide();
-			CustomMapsTerminal.instance.modSearchScreen.ReturnFromDetailsScreen();
-			CustomMapsTerminal.instance.modDetailsScreen.Hide();
-			CustomMapsTerminal.instance.modDisplayScreen.Hide();
-			CustomMapsTerminal.instance.controlAccessScreen.Hide();
-			CustomMapsTerminal.instance.detailsAccessScreen.Show();
-			break;
-		}
-		CustomMapsTerminal.SendTerminalStatus();
-	}
-
-	public static void ShowSearchScreen()
-	{
-		CustomMapsTerminal.previousScreen = CustomMapsTerminal.localCurrentScreen;
-		CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.SearchMods;
-		CustomMapsTerminal.instance.modListScreen.Hide();
-		CustomMapsTerminal.instance.controlAccessScreen.Hide();
-		CustomMapsTerminal.instance.detailsAccessScreen.SetDetailsScreenForDriver();
-		CustomMapsTerminal.instance.detailsAccessScreen.Show();
-		CustomMapsTerminal.instance.modDetailsScreen.Hide();
-		CustomMapsTerminal.instance.modDisplayScreen.Hide();
-		CustomMapsTerminal.instance.modSearchScreen.Show();
-		CustomMapsTerminal.SendTerminalStatus();
-	}
-
-	public static void ReturnFromSearchScreen()
-	{
-		CustomMapsTerminal.ScreenType screenType = CustomMapsTerminal.previousScreen;
-		if (screenType == CustomMapsTerminal.ScreenType.ModDetails || screenType == CustomMapsTerminal.ScreenType.Invalid || screenType == CustomMapsTerminal.ScreenType.TerminalControlPrompt || screenType == CustomMapsTerminal.ScreenType.SearchMods)
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-			CustomMapsTerminal.previousScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-		}
-		else
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.previousScreen;
-		}
-		switch (CustomMapsTerminal.localCurrentScreen)
-		{
-		case CustomMapsTerminal.ScreenType.TerminalControlPrompt:
-			CustomMapsTerminal.instance.modListScreen.Hide();
-			CustomMapsTerminal.instance.modSearchScreen.Hide();
-			CustomMapsTerminal.instance.modDetailsScreen.Hide();
-			CustomMapsTerminal.instance.modDisplayScreen.Hide();
-			CustomMapsTerminal.instance.controlAccessScreen.Show();
-			CustomMapsTerminal.instance.detailsAccessScreen.Show();
-			break;
-		case CustomMapsTerminal.ScreenType.AvailableMods:
-		case CustomMapsTerminal.ScreenType.InstalledMods:
-		case CustomMapsTerminal.ScreenType.FavoriteMods:
-		case CustomMapsTerminal.ScreenType.SubscribedMods:
-			CustomMapsTerminal.instance.modListScreen.Show();
-			CustomMapsTerminal.instance.modSearchScreen.Hide();
-			CustomMapsTerminal.instance.modDetailsScreen.Hide();
-			CustomMapsTerminal.instance.modDisplayScreen.Hide();
-			CustomMapsTerminal.instance.controlAccessScreen.Hide();
-			CustomMapsTerminal.instance.detailsAccessScreen.Show();
-			break;
-		}
-		CustomMapsTerminal.SendTerminalStatus();
-	}
-
-	public static void SendTerminalStatus()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		CustomMapsTerminal.instance.mapTerminalNetworkObject.SendTerminalStatus();
-	}
-
-	public static void ResetTerminalControl()
-	{
-		CustomMapsTerminal.localDriverID = -2;
-		CustomMapsTerminal.instance.terminalControlButton.UnlockTerminalControl();
-		CustomMapsTerminal.ShowTerminalControlScreen();
-	}
-
-	public static void HandleTerminalControlStatusChangeRequest(bool lockedStatus, int playerID)
-	{
-		if (lockedStatus && playerID == -2)
-		{
-			return;
-		}
-		if (CustomMapsTerminal.localDriverID == -2)
-		{
-			if (!lockedStatus)
-			{
-				return;
-			}
-		}
-		else if (CustomMapsTerminal.localDriverID != playerID)
-		{
-			return;
-		}
-		CustomMapsTerminal.SetTerminalControlStatus(lockedStatus, playerID, true);
-	}
-
-	public static void SetTerminalControlStatus(bool isLocked, int driverID = -2, bool sendRPC = false)
-	{
-		GTDev.Log<string>(string.Format("[CustomMapsTerminal::SetTerminalControlStatus] isLocked: {0} | driverID: {1} | playerId {2} | sendRPC: {3}", new object[]
-		{
-			isLocked,
-			driverID,
-			CustomMapsTerminal.LocalPlayerID,
-			sendRPC
-		}), null);
-		if (isLocked)
-		{
-			CustomMapsTerminal.localDriverID = driverID;
-			CustomMapsTerminal.instance.terminalControlButton.LockTerminalControl();
-			if (CustomMapsTerminal.IsDriver)
-			{
-				CustomMapsTerminal.HideTerminalControlScreens();
-			}
-			else
-			{
-				CustomMapsTerminal.ShowTerminalControlScreen();
-			}
-		}
-		else
-		{
-			CustomMapsTerminal.localDriverID = -2;
-			CustomMapsTerminal.instance.terminalControlButton.UnlockTerminalControl();
-			CustomMapsTerminal.ShowTerminalControlScreen();
-		}
-		if (sendRPC && NetworkSystem.Instance.IsMasterClient)
-		{
-			CustomMapsTerminal.instance.mapTerminalNetworkObject.SetTerminalControlStatus(isLocked, CustomMapsTerminal.localDriverID);
-		}
-	}
-
-	public static void UpdateFromDriver(int currentScreen, long modDetailsID, int driverID)
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		CustomMapsTerminal.localDriverID = driverID;
-		CustomMapsTerminal.cachedModDetailsID = modDetailsID;
-		CustomMapsTerminal.localModDetailsID = modDetailsID;
-		CustomMapsTerminal.cachedCurrentScreen = (CustomMapsTerminal.ScreenType)currentScreen;
-		CustomMapsTerminal.localCurrentScreen = (CustomMapsTerminal.ScreenType)currentScreen;
-		Debug.Log(string.Format("[CustomMapsTerminal::UpdateFromDriver] currentScreen {0} modDetailsID {1}", CustomMapsTerminal.localCurrentScreen, CustomMapsTerminal.localModDetailsID));
-		if (CustomMapsTerminal.localDriverID != -2)
-		{
-			CustomMapsTerminal.RefreshDriverNickName();
-		}
-		CustomMapsTerminal.ScreenType screenType = CustomMapsTerminal.localCurrentScreen;
-		if (screenType <= CustomMapsTerminal.ScreenType.SearchMods)
-		{
-			CustomMapsTerminal.ShowTerminalControlScreen();
-			return;
-		}
-		if (screenType != CustomMapsTerminal.ScreenType.ModDetails)
-		{
-			return;
-		}
-		CustomMapsTerminal.ShowTerminalControlScreen();
-		if (CustomMapsTerminal.localModDetailsID <= 0L)
-		{
-			return;
-		}
-		CustomMapsTerminal.instance.detailsAccessScreen.Hide();
-		CustomMapsTerminal.instance.modDisplayScreen.Show();
-		CustomMapsTerminal.instance.modDisplayScreen.RetrieveModFromModIO(CustomMapsTerminal.localModDetailsID, false, null);
-	}
-
-	private void UpdateControlScreenForDriver()
-	{
-		GTDev.Log<string>(string.Format("[CustomMapsTerminal::UpdateScreenToMatchStatus] driverID: {0} ", CustomMapsTerminal.localDriverID) + string.Format("| currentScreen: {0} ", CustomMapsTerminal.localCurrentScreen) + string.Format("| previousScreen: {0} ", CustomMapsTerminal.previousScreen), null);
-		switch (CustomMapsTerminal.localCurrentScreen)
-		{
-		case CustomMapsTerminal.ScreenType.TerminalControlPrompt:
-			return;
-		case CustomMapsTerminal.ScreenType.AvailableMods:
-		case CustomMapsTerminal.ScreenType.InstalledMods:
-		case CustomMapsTerminal.ScreenType.FavoriteMods:
-		case CustomMapsTerminal.ScreenType.SubscribedMods:
-			this.controlAccessScreen.Hide();
-			this.modSearchScreen.Hide();
-			this.detailsAccessScreen.SetDetailsScreenForDriver();
-			this.detailsAccessScreen.Show();
-			this.modListScreen.Show();
-			this.modDetailsScreen.Hide();
-			this.modDisplayScreen.Hide();
-			return;
-		case CustomMapsTerminal.ScreenType.SearchMods:
-			this.controlAccessScreen.Hide();
-			this.modSearchScreen.Show();
-			this.detailsAccessScreen.SetDetailsScreenForDriver();
-			this.detailsAccessScreen.Show();
-			this.modListScreen.Hide();
-			this.modDetailsScreen.Hide();
-			this.modDisplayScreen.Hide();
-			return;
-		case CustomMapsTerminal.ScreenType.ModDetails:
-			this.controlAccessScreen.Hide();
-			this.modSearchScreen.Hide();
-			this.detailsAccessScreen.Hide();
-			this.modListScreen.Hide();
-			this.modDetailsScreen.Show();
-			this.modDetailsScreen.RetrieveModFromModIO(CustomMapsTerminal.localModDetailsID, false, null);
-			this.modDisplayScreen.Show();
-			this.modDisplayScreen.RetrieveModFromModIO(CustomMapsTerminal.localModDetailsID, false, null);
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void ValidateLocalStatus()
-	{
-		if (CustomMapsTerminal.localDriverID == -2)
-		{
-			return;
-		}
-		if (CustomMapLoader.IsMapLoaded())
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.ModDetails;
-			CustomMapsTerminal.localModDetailsID = CustomMapLoader.LoadedMapModId;
-			CustomMapsTerminal.SendTerminalStatus();
-			return;
-		}
-		if (CustomMapManager.IsLoading())
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.ModDetails;
-			CustomMapsTerminal.localModDetailsID = CustomMapManager.LoadingMapId;
-			CustomMapsTerminal.SendTerminalStatus();
-			return;
-		}
-		if (CustomMapManager.GetRoomMapId() != ModId.Null)
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.ModDetails;
-			CustomMapsTerminal.localModDetailsID = CustomMapManager.GetRoomMapId()._id;
-			CustomMapsTerminal.SendTerminalStatus();
-		}
-	}
-
-	private void OnModIOLoggedIn()
-	{
-	}
-
-	private void OnModIOLoggedOut()
-	{
-		if (CustomMapsTerminal.localCurrentScreen == CustomMapsTerminal.ScreenType.SubscribedMods)
-		{
-			if (this.modListScreen.isActiveAndEnabled)
-			{
-				this.modListScreen.SwapListDisplay(CustomMapsListScreen.ListScreenState.AvailableMods, false);
-			}
-			else
-			{
-				CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-			}
-		}
-		if (CustomMapsTerminal.previousScreen == CustomMapsTerminal.ScreenType.SubscribedMods)
-		{
-			CustomMapsTerminal.previousScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-		}
-	}
-
-	public void HandleTerminalControlButtonPressed()
-	{
-		if (!NetworkSystem.Instance.InRoom)
-		{
-			CustomMapsTerminal.SetTerminalControlStatus(!this.terminalControlButton.IsLocked, CustomMapsTerminal.LocalPlayerID, false);
-			return;
-		}
-		if (CustomMapsTerminal.localDriverID != -2 && !CustomMapsTerminal.IsDriver)
-		{
-			return;
-		}
-		if (this.mapTerminalNetworkObject.HasAuthority)
-		{
-			CustomMapsTerminal.HandleTerminalControlStatusChangeRequest(!this.terminalControlButton.IsLocked, CustomMapsTerminal.LocalPlayerID);
-			return;
-		}
-		this.mapTerminalNetworkObject.RequestTerminalControlStatusChange(!this.terminalControlButton.IsLocked);
-	}
-
-	private static void ShowTerminalControlScreen()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		if (CustomMapsTerminal.localDriverID == -2)
-		{
-			CustomMapsTerminal.instance.controlAccessScreen.Reset();
-			CustomMapsTerminal.instance.detailsAccessScreen.Reset();
-		}
-		else
-		{
-			CustomMapsTerminal.instance.controlAccessScreen.SetDriverName();
-			CustomMapsTerminal.instance.detailsAccessScreen.SetDriverName();
-		}
-		CustomMapsTerminal.instance.modListScreen.Hide();
-		CustomMapsTerminal.instance.modDetailsScreen.Hide();
-		CustomMapsTerminal.instance.modDisplayScreen.Hide();
-		CustomMapsTerminal.instance.controlAccessScreen.Show();
-		CustomMapsTerminal.instance.detailsAccessScreen.Show();
-		CustomMapsTerminal.instance.modSearchScreen.Hide();
-		CustomMapsTerminal.previousScreen = CustomMapsTerminal.localCurrentScreen;
-		CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.TerminalControlPrompt;
-	}
-
-	private static void HideTerminalControlScreens()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		if (CustomMapsTerminal.localCurrentScreen != CustomMapsTerminal.ScreenType.TerminalControlPrompt)
-		{
-			return;
-		}
-		if (CustomMapsTerminal.previousScreen > CustomMapsTerminal.ScreenType.TerminalControlPrompt)
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.previousScreen;
-			if ((CustomMapsTerminal.localCurrentScreen == CustomMapsTerminal.ScreenType.SubscribedMods || CustomMapsTerminal.localCurrentScreen == CustomMapsTerminal.ScreenType.FavoriteMods) && !ModIOManager.IsLoggedIn())
-			{
-				CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-			}
-		}
-		else if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.GetRoomMapId() != ModId.Null)
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.ModDetails;
-		}
-		else
-		{
-			CustomMapsTerminal.localCurrentScreen = CustomMapsTerminal.ScreenType.AvailableMods;
-		}
-		CustomMapsTerminal.instance.UpdateControlScreenForDriver();
-	}
-
-	public static void RequestDriverNickNameRefresh()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		if (!CustomMapsTerminal.IsDriver)
-		{
-			return;
-		}
-		CustomMapsTerminal.RefreshDriverNickName();
-		CustomMapsTerminal.instance.mapTerminalNetworkObject.RefreshDriverNickName();
-	}
-
-	public static void RefreshDriverNickName()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return;
-		}
-		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
-		CustomMapsTerminal.instance.terminalControllerLabelText.gameObject.SetActive(true);
-		if (NetworkSystem.Instance.InRoom)
-		{
-			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID(CustomMapsTerminal.localDriverID);
-			CustomMapsTerminal.instance.terminalControllerText.text = netPlayerByID.DefaultName;
-			if (GorillaComputer.instance.NametagsEnabled && flag)
-			{
-				RigContainer rigContainer;
-				if (netPlayerByID.IsLocal)
-				{
-					CustomMapsTerminal.instance.terminalControllerText.text = netPlayerByID.NickName;
-				}
-				else if (VRRigCache.Instance.TryGetVrrig(netPlayerByID, out rigContainer))
-				{
-					CustomMapsTerminal.instance.terminalControllerText.text = rigContainer.Rig.playerNameVisible;
-				}
-			}
-		}
-		else
-		{
-			CustomMapsTerminal.instance.terminalControllerText.text = ((GorillaComputer.instance.NametagsEnabled && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
-		}
-		CustomMapsTerminal.instance.terminalControllerText.gameObject.SetActive(true);
-		CustomMapsTerminal.instance.modListScreen.RefreshDriverNickname(CustomMapsTerminal.instance.terminalControllerText.text);
-	}
-
-	private void OnReturnedToSinglePlayer()
-	{
-		if (CustomMapsTerminal.localDriverID != CustomMapsTerminal.cachedLocalPlayerID)
-		{
-			CustomMapsTerminal.ResetTerminalControl();
-		}
-		else
-		{
-			CustomMapsTerminal.localDriverID = CustomMapsTerminal.LocalPlayerID;
-		}
-		CustomMapsTerminal.cachedLocalPlayerID = -1;
-	}
-
-	private void OnJoinedRoom()
-	{
-		CustomMapsTerminal.cachedLocalPlayerID = CustomMapsTerminal.LocalPlayerID;
-		CustomMapsTerminal.ResetTerminalControl();
-	}
-
-	public static bool IsLocked()
-	{
-		return CustomMapsTerminal.localDriverID != -2;
-	}
-
-	public static int GetDriverID()
-	{
-		return CustomMapsTerminal.localDriverID;
-	}
-
-	public static string GetDriverNickname()
-	{
-		if (!CustomMapsTerminal.hasInstance)
-		{
-			return "";
-		}
-		return CustomMapsTerminal.instance.terminalControllerText.text;
+		Invalid = -1,
+		TerminalControlPrompt,
+		AvailableMods,
+		InstalledMods,
+		FavoriteMods,
+		SubscribedMods,
+		SearchMods,
+		ModDetails
 	}
 
 	[SerializeField]
@@ -584,21 +63,504 @@ public class CustomMapsTerminal : MonoBehaviour
 
 	private static int cachedLocalPlayerID = -1;
 
-	private static CustomMapsTerminal.ScreenType localCurrentScreen = CustomMapsTerminal.ScreenType.Invalid;
+	private static ScreenType localCurrentScreen = ScreenType.Invalid;
 
-	private static CustomMapsTerminal.ScreenType cachedCurrentScreen = CustomMapsTerminal.ScreenType.Invalid;
+	private static ScreenType cachedCurrentScreen = ScreenType.Invalid;
 
-	private static CustomMapsTerminal.ScreenType previousScreen = CustomMapsTerminal.ScreenType.Invalid;
+	private static ScreenType previousScreen = ScreenType.Invalid;
 
-	public enum ScreenType
+	public static int LocalPlayerID => NetworkSystem.Instance.LocalPlayer.ActorNumber;
+
+	public static long LocalModDetailsID => localModDetailsID;
+
+	public static int CurrentScreen => (int)localCurrentScreen;
+
+	public static bool IsDriver => localDriverID == LocalPlayerID;
+
+	private void Awake()
 	{
-		Invalid = -1,
-		TerminalControlPrompt,
-		AvailableMods,
-		InstalledMods,
-		FavoriteMods,
-		SubscribedMods,
-		SearchMods,
-		ModDetails
+		instance = this;
+		hasInstance = true;
+	}
+
+	private void Start()
+	{
+		localDriverID = -2;
+		localCurrentScreen = ScreenType.TerminalControlPrompt;
+		previousScreen = ScreenType.TerminalControlPrompt;
+		controlAccessScreen.Show();
+		detailsAccessScreen.Show();
+		modListScreen.Hide();
+		modDetailsScreen.Hide();
+		ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.AddListener(OnModIOLoggedOut);
+		NetworkSystem.Instance.OnMultiplayerStarted += new Action(OnJoinedRoom);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(OnReturnedToSinglePlayer);
+	}
+
+	private void OnDestroy()
+	{
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		NetworkSystem.Instance.OnMultiplayerStarted -= new Action(OnJoinedRoom);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(OnReturnedToSinglePlayer);
+	}
+
+	public static void ShowDetailsScreen(Mod mod)
+	{
+		previousScreen = localCurrentScreen;
+		localCurrentScreen = ScreenType.ModDetails;
+		localModDetailsID = mod.Id;
+		instance.modListScreen.Hide();
+		instance.controlAccessScreen.Hide();
+		instance.detailsAccessScreen.Hide();
+		instance.modDetailsScreen.Show();
+		instance.modDetailsScreen.SetModProfile(mod);
+		instance.modDisplayScreen.Show();
+		instance.modDisplayScreen.SetModProfile(mod);
+		instance.modSearchScreen.Hide();
+		SendTerminalStatus();
+	}
+
+	public static void ReturnFromDetailsScreen()
+	{
+		ScreenType screenType = previousScreen;
+		if (screenType == ScreenType.ModDetails || screenType == ScreenType.Invalid || screenType == ScreenType.TerminalControlPrompt)
+		{
+			localCurrentScreen = ScreenType.AvailableMods;
+			previousScreen = ScreenType.AvailableMods;
+		}
+		else
+		{
+			localCurrentScreen = previousScreen;
+		}
+		switch (localCurrentScreen)
+		{
+		case ScreenType.TerminalControlPrompt:
+			instance.modListScreen.Hide();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.modSearchScreen.Hide();
+			instance.controlAccessScreen.Show();
+			instance.detailsAccessScreen.Show();
+			break;
+		case ScreenType.AvailableMods:
+		case ScreenType.InstalledMods:
+		case ScreenType.FavoriteMods:
+		case ScreenType.SubscribedMods:
+			instance.modListScreen.Show();
+			instance.modSearchScreen.Hide();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.controlAccessScreen.Hide();
+			instance.detailsAccessScreen.Show();
+			break;
+		case ScreenType.SearchMods:
+			instance.modListScreen.Hide();
+			instance.modSearchScreen.ReturnFromDetailsScreen();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.controlAccessScreen.Hide();
+			instance.detailsAccessScreen.Show();
+			break;
+		}
+		SendTerminalStatus();
+	}
+
+	public static void ShowSearchScreen()
+	{
+		previousScreen = localCurrentScreen;
+		localCurrentScreen = ScreenType.SearchMods;
+		instance.modListScreen.Hide();
+		instance.controlAccessScreen.Hide();
+		instance.detailsAccessScreen.SetDetailsScreenForDriver();
+		instance.detailsAccessScreen.Show();
+		instance.modDetailsScreen.Hide();
+		instance.modDisplayScreen.Hide();
+		instance.modSearchScreen.Show();
+		SendTerminalStatus();
+	}
+
+	public static void ReturnFromSearchScreen()
+	{
+		ScreenType screenType = previousScreen;
+		if (screenType == ScreenType.ModDetails || screenType == ScreenType.Invalid || screenType == ScreenType.TerminalControlPrompt || screenType == ScreenType.SearchMods)
+		{
+			localCurrentScreen = ScreenType.AvailableMods;
+			previousScreen = ScreenType.AvailableMods;
+		}
+		else
+		{
+			localCurrentScreen = previousScreen;
+		}
+		switch (localCurrentScreen)
+		{
+		case ScreenType.TerminalControlPrompt:
+			instance.modListScreen.Hide();
+			instance.modSearchScreen.Hide();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.controlAccessScreen.Show();
+			instance.detailsAccessScreen.Show();
+			break;
+		case ScreenType.AvailableMods:
+		case ScreenType.InstalledMods:
+		case ScreenType.FavoriteMods:
+		case ScreenType.SubscribedMods:
+			instance.modListScreen.Show();
+			instance.modSearchScreen.Hide();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.controlAccessScreen.Hide();
+			instance.detailsAccessScreen.Show();
+			break;
+		}
+		SendTerminalStatus();
+	}
+
+	public static void SendTerminalStatus()
+	{
+		if (hasInstance)
+		{
+			instance.mapTerminalNetworkObject.SendTerminalStatus();
+		}
+	}
+
+	public static void ResetTerminalControl()
+	{
+		localDriverID = -2;
+		instance.terminalControlButton.UnlockTerminalControl();
+		ShowTerminalControlScreen();
+	}
+
+	public static void HandleTerminalControlStatusChangeRequest(bool lockedStatus, int playerID)
+	{
+		if (lockedStatus && playerID == -2)
+		{
+			return;
+		}
+		if (localDriverID == -2)
+		{
+			if (!lockedStatus)
+			{
+				return;
+			}
+		}
+		else if (localDriverID != playerID)
+		{
+			return;
+		}
+		SetTerminalControlStatus(lockedStatus, playerID, sendRPC: true);
+	}
+
+	public static void SetTerminalControlStatus(bool isLocked, int driverID = -2, bool sendRPC = false)
+	{
+		GTDev.Log($"[CustomMapsTerminal::SetTerminalControlStatus] isLocked: {isLocked} | driverID: {driverID} | playerId {LocalPlayerID} | sendRPC: {sendRPC}");
+		if (isLocked)
+		{
+			localDriverID = driverID;
+			instance.terminalControlButton.LockTerminalControl();
+			if (IsDriver)
+			{
+				HideTerminalControlScreens();
+			}
+			else
+			{
+				ShowTerminalControlScreen();
+			}
+		}
+		else
+		{
+			localDriverID = -2;
+			instance.terminalControlButton.UnlockTerminalControl();
+			ShowTerminalControlScreen();
+		}
+		if (sendRPC && NetworkSystem.Instance.IsMasterClient)
+		{
+			instance.mapTerminalNetworkObject.SetTerminalControlStatus(isLocked, localDriverID);
+		}
+	}
+
+	public static void UpdateFromDriver(int currentScreen, long modDetailsID, int driverID)
+	{
+		if (!hasInstance)
+		{
+			return;
+		}
+		localDriverID = driverID;
+		cachedModDetailsID = modDetailsID;
+		localModDetailsID = modDetailsID;
+		cachedCurrentScreen = (ScreenType)currentScreen;
+		localCurrentScreen = (ScreenType)currentScreen;
+		Debug.Log($"[CustomMapsTerminal::UpdateFromDriver] currentScreen {localCurrentScreen} modDetailsID {localModDetailsID}");
+		if (localDriverID != -2)
+		{
+			RefreshDriverNickName();
+		}
+		switch (localCurrentScreen)
+		{
+		case ScreenType.TerminalControlPrompt:
+		case ScreenType.AvailableMods:
+		case ScreenType.InstalledMods:
+		case ScreenType.FavoriteMods:
+		case ScreenType.SubscribedMods:
+		case ScreenType.SearchMods:
+			ShowTerminalControlScreen();
+			break;
+		case ScreenType.ModDetails:
+			ShowTerminalControlScreen();
+			if (localModDetailsID > 0)
+			{
+				instance.detailsAccessScreen.Hide();
+				instance.modDisplayScreen.Show();
+				instance.modDisplayScreen.RetrieveModFromModIO(localModDetailsID);
+			}
+			break;
+		}
+	}
+
+	private void UpdateControlScreenForDriver()
+	{
+		GTDev.Log($"[CustomMapsTerminal::UpdateScreenToMatchStatus] driverID: {localDriverID} " + $"| currentScreen: {localCurrentScreen} " + $"| previousScreen: {previousScreen} ");
+		switch (localCurrentScreen)
+		{
+		case ScreenType.TerminalControlPrompt:
+			break;
+		case ScreenType.AvailableMods:
+		case ScreenType.InstalledMods:
+		case ScreenType.FavoriteMods:
+		case ScreenType.SubscribedMods:
+			controlAccessScreen.Hide();
+			modSearchScreen.Hide();
+			detailsAccessScreen.SetDetailsScreenForDriver();
+			detailsAccessScreen.Show();
+			modListScreen.Show();
+			modDetailsScreen.Hide();
+			modDisplayScreen.Hide();
+			break;
+		case ScreenType.ModDetails:
+			controlAccessScreen.Hide();
+			modSearchScreen.Hide();
+			detailsAccessScreen.Hide();
+			modListScreen.Hide();
+			modDetailsScreen.Show();
+			modDetailsScreen.RetrieveModFromModIO(localModDetailsID);
+			modDisplayScreen.Show();
+			modDisplayScreen.RetrieveModFromModIO(localModDetailsID);
+			break;
+		case ScreenType.SearchMods:
+			controlAccessScreen.Hide();
+			modSearchScreen.Show();
+			detailsAccessScreen.SetDetailsScreenForDriver();
+			detailsAccessScreen.Show();
+			modListScreen.Hide();
+			modDetailsScreen.Hide();
+			modDisplayScreen.Hide();
+			break;
+		}
+	}
+
+	private void ValidateLocalStatus()
+	{
+		if (localDriverID != -2)
+		{
+			if (CustomMapLoader.IsMapLoaded())
+			{
+				localCurrentScreen = ScreenType.ModDetails;
+				localModDetailsID = CustomMapLoader.LoadedMapModId;
+				SendTerminalStatus();
+			}
+			else if (CustomMapManager.IsLoading())
+			{
+				localCurrentScreen = ScreenType.ModDetails;
+				localModDetailsID = CustomMapManager.LoadingMapId;
+				SendTerminalStatus();
+			}
+			else if (CustomMapManager.GetRoomMapId() != ModId.Null)
+			{
+				localCurrentScreen = ScreenType.ModDetails;
+				localModDetailsID = CustomMapManager.GetRoomMapId()._id;
+				SendTerminalStatus();
+			}
+		}
+	}
+
+	private void OnModIOLoggedIn()
+	{
+	}
+
+	private void OnModIOLoggedOut()
+	{
+		if (localCurrentScreen == ScreenType.SubscribedMods)
+		{
+			if (modListScreen.isActiveAndEnabled)
+			{
+				modListScreen.SwapListDisplay(CustomMapsListScreen.ListScreenState.AvailableMods);
+			}
+			else
+			{
+				localCurrentScreen = ScreenType.AvailableMods;
+			}
+		}
+		if (previousScreen == ScreenType.SubscribedMods)
+		{
+			previousScreen = ScreenType.AvailableMods;
+		}
+	}
+
+	public void HandleTerminalControlButtonPressed()
+	{
+		if (NetworkSystem.Instance.InRoom)
+		{
+			if (localDriverID == -2 || IsDriver)
+			{
+				if (mapTerminalNetworkObject.HasAuthority)
+				{
+					HandleTerminalControlStatusChangeRequest(!terminalControlButton.IsLocked, LocalPlayerID);
+				}
+				else
+				{
+					mapTerminalNetworkObject.RequestTerminalControlStatusChange(!terminalControlButton.IsLocked);
+				}
+			}
+		}
+		else
+		{
+			SetTerminalControlStatus(!terminalControlButton.IsLocked, LocalPlayerID);
+		}
+	}
+
+	private static void ShowTerminalControlScreen()
+	{
+		if (hasInstance)
+		{
+			if (localDriverID == -2)
+			{
+				instance.controlAccessScreen.Reset();
+				instance.detailsAccessScreen.Reset();
+			}
+			else
+			{
+				instance.controlAccessScreen.SetDriverName();
+				instance.detailsAccessScreen.SetDriverName();
+			}
+			instance.modListScreen.Hide();
+			instance.modDetailsScreen.Hide();
+			instance.modDisplayScreen.Hide();
+			instance.controlAccessScreen.Show();
+			instance.detailsAccessScreen.Show();
+			instance.modSearchScreen.Hide();
+			previousScreen = localCurrentScreen;
+			localCurrentScreen = ScreenType.TerminalControlPrompt;
+		}
+	}
+
+	private static void HideTerminalControlScreens()
+	{
+		if (!hasInstance || localCurrentScreen != ScreenType.TerminalControlPrompt)
+		{
+			return;
+		}
+		if (previousScreen > ScreenType.TerminalControlPrompt)
+		{
+			localCurrentScreen = previousScreen;
+			if ((localCurrentScreen == ScreenType.SubscribedMods || localCurrentScreen == ScreenType.FavoriteMods) && !ModIOManager.IsLoggedIn())
+			{
+				localCurrentScreen = ScreenType.AvailableMods;
+			}
+		}
+		else if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.GetRoomMapId() != ModId.Null)
+		{
+			localCurrentScreen = ScreenType.ModDetails;
+		}
+		else
+		{
+			localCurrentScreen = ScreenType.AvailableMods;
+		}
+		instance.UpdateControlScreenForDriver();
+	}
+
+	public static void RequestDriverNickNameRefresh()
+	{
+		if (hasInstance && IsDriver)
+		{
+			RefreshDriverNickName();
+			instance.mapTerminalNetworkObject.RefreshDriverNickName();
+		}
+	}
+
+	public static void RefreshDriverNickName()
+	{
+		if (!hasInstance)
+		{
+			return;
+		}
+		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
+		instance.terminalControllerLabelText.gameObject.SetActive(value: true);
+		if (NetworkSystem.Instance.InRoom)
+		{
+			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID(localDriverID);
+			instance.terminalControllerText.text = netPlayerByID.DefaultName;
+			if (GorillaComputer.instance.NametagsEnabled && flag)
+			{
+				RigContainer playerRig;
+				if (netPlayerByID.IsLocal)
+				{
+					instance.terminalControllerText.text = netPlayerByID.NickName;
+				}
+				else if (VRRigCache.Instance.TryGetVrrig(netPlayerByID, out playerRig))
+				{
+					instance.terminalControllerText.text = playerRig.Rig.playerNameVisible;
+				}
+			}
+		}
+		else
+		{
+			instance.terminalControllerText.text = ((GorillaComputer.instance.NametagsEnabled && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
+		}
+		instance.terminalControllerText.gameObject.SetActive(value: true);
+		instance.modListScreen.RefreshDriverNickname(instance.terminalControllerText.text);
+	}
+
+	private void OnReturnedToSinglePlayer()
+	{
+		if (localDriverID != cachedLocalPlayerID)
+		{
+			ResetTerminalControl();
+		}
+		else
+		{
+			localDriverID = LocalPlayerID;
+		}
+		cachedLocalPlayerID = -1;
+	}
+
+	private void OnJoinedRoom()
+	{
+		cachedLocalPlayerID = LocalPlayerID;
+		ResetTerminalControl();
+	}
+
+	public static bool IsLocked()
+	{
+		if (localDriverID == -2)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static int GetDriverID()
+	{
+		return localDriverID;
+	}
+
+	public static string GetDriverNickname()
+	{
+		if (!hasInstance)
+		{
+			return "";
+		}
+		return instance.terminalControllerText.text;
 	}
 }

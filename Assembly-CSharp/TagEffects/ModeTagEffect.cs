@@ -1,36 +1,35 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaGameModes;
 using UnityEngine;
 
-namespace TagEffects
+namespace TagEffects;
+
+[Serializable]
+public class ModeTagEffect
 {
-	[Serializable]
-	public class ModeTagEffect
+	[SerializeField]
+	private GameModeType[] modes;
+
+	private HashSet<GameModeType> modesHash;
+
+	public TagEffectPack tagEffect;
+
+	public bool blockTagOverride;
+
+	public bool blockFistBumpOverride;
+
+	public bool blockHiveFiveOverride;
+
+	public HashSet<GameModeType> Modes
 	{
-		public HashSet<GameModeType> Modes
+		get
 		{
-			get
+			if (modesHash == null)
 			{
-				if (this.modesHash == null)
-				{
-					this.modesHash = new HashSet<GameModeType>(this.modes);
-				}
-				return this.modesHash;
+				modesHash = new HashSet<GameModeType>(modes);
 			}
+			return modesHash;
 		}
-
-		[SerializeField]
-		private GameModeType[] modes;
-
-		private HashSet<GameModeType> modesHash;
-
-		public TagEffectPack tagEffect;
-
-		public bool blockTagOverride;
-
-		public bool blockFistBumpOverride;
-
-		public bool blockHiveFiveOverride;
 	}
 }

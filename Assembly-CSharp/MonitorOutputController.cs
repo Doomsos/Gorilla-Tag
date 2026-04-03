@@ -1,4 +1,3 @@
-﻿using System;
 using Liv.Lck;
 using Liv.Lck.GorillaTag;
 using Unity.Cinemachine;
@@ -6,97 +5,6 @@ using UnityEngine;
 
 public class MonitorOutputController : MonoBehaviour
 {
-	private void Awake()
-	{
-		this._lckCamera = this._gtLckController.GetActiveCamera();
-	}
-
-	private void OnEnable()
-	{
-		this._gtLckController.OnCameraModeChanged += this.OnCameraModeChanged;
-		LckBodyCameraSpawner.OnCameraStateChange += this.CameraStateChanged;
-	}
-
-	private void Update()
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			Object.Destroy(this);
-		}
-		if (this._shoulderCamera == null)
-		{
-			this.FindShoulderCamera();
-		}
-		if (this._lckCamera != null)
-		{
-			this._shoulderCamera.transform.position = this._lckCamera.transform.position;
-			this._shoulderCamera.transform.rotation = this._lckCamera.transform.rotation;
-			this._shoulderCamera.fieldOfView = this._lckCamera.fieldOfView;
-			return;
-		}
-		this._lckCamera = this._gtLckController.GetActiveCamera();
-	}
-
-	private void CameraStateChanged(LckBodyCameraSpawner.CameraState state)
-	{
-		switch (state)
-		{
-		case LckBodyCameraSpawner.CameraState.CameraDisabled:
-			this.RestoreShoulderCamera();
-			return;
-		case LckBodyCameraSpawner.CameraState.CameraOnNeck:
-			this.TakeOverShoulderCamera();
-			return;
-		case LckBodyCameraSpawner.CameraState.CameraSpawned:
-			this.TakeOverShoulderCamera();
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void OnDisable()
-	{
-		this._gtLckController.OnCameraModeChanged -= this.OnCameraModeChanged;
-		this._shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = true;
-		LckBodyCameraSpawner.OnCameraStateChange -= this.CameraStateChanged;
-	}
-
-	private void OnCameraModeChanged(CameraMode mode, ILckCamera lckCamera)
-	{
-		this._lckCamera = lckCamera.GetCameraComponent();
-		this._lckActiveCameraMode = mode;
-	}
-
-	private void TakeOverShoulderCamera()
-	{
-		this.FindShoulderCamera();
-		this._shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = false;
-		this._shoulderCamera.cullingMask &= ~(1 << LayerMask.NameToLayer("LCKHide"));
-	}
-
-	private void RestoreShoulderCamera()
-	{
-		this.FindShoulderCamera();
-		this._shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = true;
-		this._shoulderCamera.cullingMask |= 1 << LayerMask.NameToLayer("LCKHide");
-		this._shoulderCamera.fieldOfView = this._shoulderCameraFov;
-	}
-
-	private void FindShoulderCamera()
-	{
-		if (this._shoulderCamera != null)
-		{
-			return;
-		}
-		if (!GorillaTagger.hasInstance || !base.isActiveAndEnabled)
-		{
-			return;
-		}
-		this._shoulderCamera = GorillaTagger.Instance.thirdPersonCamera.GetComponentInChildren<Camera>();
-		this._shoulderCameraFov = this._shoulderCamera.fieldOfView;
-	}
-
 	[SerializeField]
 	private GTLckController _gtLckController;
 
@@ -107,4 +15,90 @@ public class MonitorOutputController : MonoBehaviour
 	private Camera _shoulderCamera;
 
 	private float _shoulderCameraFov;
+
+	private void Awake()
+	{
+		_lckCamera = _gtLckController.GetActiveCamera();
+	}
+
+	private void OnEnable()
+	{
+		_gtLckController.OnCameraModeChanged += OnCameraModeChanged;
+		LckBodyCameraSpawner.OnCameraStateChange += CameraStateChanged;
+	}
+
+	private void Update()
+	{
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			Object.Destroy(this);
+		}
+		if (_shoulderCamera == null)
+		{
+			FindShoulderCamera();
+		}
+		if (_lckCamera != null)
+		{
+			_shoulderCamera.transform.position = _lckCamera.transform.position;
+			_shoulderCamera.transform.rotation = _lckCamera.transform.rotation;
+			_shoulderCamera.fieldOfView = _lckCamera.fieldOfView;
+		}
+		else
+		{
+			_lckCamera = _gtLckController.GetActiveCamera();
+		}
+	}
+
+	private void CameraStateChanged(LckBodyCameraSpawner.CameraState state)
+	{
+		switch (state)
+		{
+		case LckBodyCameraSpawner.CameraState.CameraDisabled:
+			RestoreShoulderCamera();
+			break;
+		case LckBodyCameraSpawner.CameraState.CameraOnNeck:
+			TakeOverShoulderCamera();
+			break;
+		case LckBodyCameraSpawner.CameraState.CameraSpawned:
+			TakeOverShoulderCamera();
+			break;
+		}
+	}
+
+	private void OnDisable()
+	{
+		_gtLckController.OnCameraModeChanged -= OnCameraModeChanged;
+		_shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = true;
+		LckBodyCameraSpawner.OnCameraStateChange -= CameraStateChanged;
+	}
+
+	private void OnCameraModeChanged(CameraMode mode, ILckCamera lckCamera)
+	{
+		_lckCamera = lckCamera.GetCameraComponent();
+		_lckActiveCameraMode = mode;
+	}
+
+	private void TakeOverShoulderCamera()
+	{
+		FindShoulderCamera();
+		_shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = false;
+		_shoulderCamera.cullingMask &= ~(1 << LayerMask.NameToLayer("LCKHide"));
+	}
+
+	private void RestoreShoulderCamera()
+	{
+		FindShoulderCamera();
+		_shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = true;
+		_shoulderCamera.cullingMask |= 1 << LayerMask.NameToLayer("LCKHide");
+		_shoulderCamera.fieldOfView = _shoulderCameraFov;
+	}
+
+	private void FindShoulderCamera()
+	{
+		if (!(_shoulderCamera != null) && GorillaTagger.hasInstance && base.isActiveAndEnabled)
+		{
+			_shoulderCamera = GorillaTagger.Instance.thirdPersonCamera.GetComponentInChildren<Camera>();
+			_shoulderCameraFov = _shoulderCamera.fieldOfView;
+		}
+	}
 }

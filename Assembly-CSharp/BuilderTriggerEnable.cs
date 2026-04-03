@@ -1,9 +1,16 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BuilderTriggerEnable : MonoBehaviour
 {
+	public List<GameObject> activateOnEnter;
+
+	public List<GameObject> deactivateOnEnter;
+
+	public List<GameObject> activateOnExit;
+
+	public List<GameObject> deactivateOnExit;
+
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other.attachedRigidbody == null)
@@ -11,32 +18,29 @@ public class BuilderTriggerEnable : MonoBehaviour
 			return;
 		}
 		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null || component.OwningNetPlayer == null)
+		if (component == null || component.OwningNetPlayer == null || !component.OwningNetPlayer.IsLocal)
 		{
 			return;
 		}
-		if (!component.OwningNetPlayer.IsLocal)
+		if (activateOnEnter != null)
 		{
-			return;
-		}
-		if (this.activateOnEnter != null)
-		{
-			for (int i = 0; i < this.activateOnEnter.Count; i++)
+			for (int i = 0; i < activateOnEnter.Count; i++)
 			{
-				if (this.activateOnEnter[i] != null)
+				if (activateOnEnter[i] != null)
 				{
-					this.activateOnEnter[i].SetActive(true);
+					activateOnEnter[i].SetActive(value: true);
 				}
 			}
 		}
-		if (this.deactivateOnEnter != null)
+		if (deactivateOnEnter == null)
 		{
-			for (int j = 0; j < this.deactivateOnEnter.Count; j++)
+			return;
+		}
+		for (int j = 0; j < deactivateOnEnter.Count; j++)
+		{
+			if (deactivateOnEnter[j] != null)
 			{
-				if (this.deactivateOnEnter[j] != null)
-				{
-					this.deactivateOnEnter[j].SetActive(false);
-				}
+				deactivateOnEnter[j].SetActive(value: false);
 			}
 		}
 	}
@@ -48,41 +52,30 @@ public class BuilderTriggerEnable : MonoBehaviour
 			return;
 		}
 		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null || component.OwningNetPlayer == null)
+		if (component == null || component.OwningNetPlayer == null || !component.OwningNetPlayer.IsLocal)
 		{
 			return;
 		}
-		if (!component.OwningNetPlayer.IsLocal)
+		if (activateOnExit != null)
 		{
-			return;
-		}
-		if (this.activateOnExit != null)
-		{
-			for (int i = 0; i < this.activateOnExit.Count; i++)
+			for (int i = 0; i < activateOnExit.Count; i++)
 			{
-				if (this.activateOnExit[i] != null)
+				if (activateOnExit[i] != null)
 				{
-					this.activateOnExit[i].SetActive(true);
+					activateOnExit[i].SetActive(value: true);
 				}
 			}
 		}
-		if (this.deactivateOnExit != null)
+		if (deactivateOnExit == null)
 		{
-			for (int j = 0; j < this.deactivateOnExit.Count; j++)
+			return;
+		}
+		for (int j = 0; j < deactivateOnExit.Count; j++)
+		{
+			if (deactivateOnExit[j] != null)
 			{
-				if (this.deactivateOnExit[j] != null)
-				{
-					this.deactivateOnExit[j].SetActive(false);
-				}
+				deactivateOnExit[j].SetActive(value: false);
 			}
 		}
 	}
-
-	public List<GameObject> activateOnEnter;
-
-	public List<GameObject> deactivateOnEnter;
-
-	public List<GameObject> activateOnExit;
-
-	public List<GameObject> deactivateOnExit;
 }

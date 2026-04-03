@@ -1,17 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class LerpScale : LerpComponent
 {
-	protected override void OnLerp(float t)
-	{
-		this.current = Vector3.Lerp(this.start, this.end, this.scaleCurve.Evaluate(t));
-		if (this.target)
-		{
-			this.target.localScale = this.current;
-		}
-	}
-
 	[Space]
 	public Transform target;
 
@@ -24,4 +14,13 @@ public class LerpScale : LerpComponent
 
 	[SerializeField]
 	private AnimationCurve scaleCurve = AnimationCurves.EaseInOutBounce;
+
+	protected override void OnLerp(float t)
+	{
+		current = Vector3.Lerp(start, end, scaleCurve.Evaluate(t));
+		if ((bool)target)
+		{
+			target.localScale = current;
+		}
+	}
 }

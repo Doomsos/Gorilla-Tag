@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum ArcadeButtons
@@ -7,8 +7,8 @@ public enum ArcadeButtons
 	UP = 2,
 	DOWN = 4,
 	LEFT = 8,
-	RIGHT = 16,
-	B0 = 32,
-	B1 = 64,
-	TRIGGER = 128
+	RIGHT = 0x10,
+	B0 = 0x20,
+	B1 = 0x40,
+	TRIGGER = 0x80
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaNetworking;
 using GorillaTagScripts.Builder;
 using UnityEngine;

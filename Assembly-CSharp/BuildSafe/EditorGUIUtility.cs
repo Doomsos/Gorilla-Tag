@@ -1,14 +1,12 @@
-﻿using System;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public static class EditorGUIUtility
 {
-	public static class EditorGUIUtility
+	[Conditional("UNITY_EDITOR")]
+	public static void PingObject(Object obj)
 	{
-		[Conditional("UNITY_EDITOR")]
-		public static void PingObject(Object obj)
-		{
-		}
 	}
 }

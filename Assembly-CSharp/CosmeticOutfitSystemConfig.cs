@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CosmeticOutfitSystemConfig", menuName = "Gorilla Tag/Cosmetics/OutfitSystem", order = 0)]

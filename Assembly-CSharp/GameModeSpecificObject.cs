@@ -1,38 +1,44 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using GorillaGameModes;
 using UnityEngine;
 
 public class GameModeSpecificObject : MonoBehaviour
 {
-	public static event GameModeSpecificObject.GameModeSpecificObjectDelegate OnAwake;
+	public delegate void GameModeSpecificObjectDelegate(GameModeSpecificObject gameModeSpecificObject);
 
-	public static event GameModeSpecificObject.GameModeSpecificObjectDelegate OnDestroyed;
-
-	public GameModeSpecificObject.ValidationMethod Validation
+	[Serializable]
+	public enum ValidationMethod
 	{
-		get
-		{
-			return this.validationMethod;
-		}
+		Inclusion,
+		Exclusion
 	}
 
-	public List<GameModeType> GameModes
-	{
-		get
-		{
-			return this.gameModes;
-		}
-	}
+	[SerializeField]
+	private ValidationMethod validationMethod;
 
-	private void Awake()
+	[SerializeField]
+	private GameModeType[] _gameModes;
+
+	private List<GameModeType> gameModes;
+
+	public ValidationMethod Validation => validationMethod;
+
+	public List<GameModeType> GameModes => gameModes;
+
+	public static event GameModeSpecificObjectDelegate OnAwake;
+
+	public static event GameModeSpecificObjectDelegate OnDestroyed;
+
+	private async void Awake()
 	{
-		GameModeSpecificObject.<Awake>d__15 <Awake>d__;
-		<Awake>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Awake>d__.<>4__this = this;
-		<Awake>d__.<>1__state = -1;
-		<Awake>d__.<>t__builder.Start<GameModeSpecificObject.<Awake>d__15>(ref <Awake>d__);
+		gameModes = new List<GameModeType>(_gameModes);
+		await Task.Yield();
+		if (GameModeSpecificObject.OnAwake != null)
+		{
+			GameModeSpecificObject.OnAwake(this);
+		}
 	}
 
 	private void OnDestroy()
@@ -45,27 +51,10 @@ public class GameModeSpecificObject : MonoBehaviour
 
 	public bool CheckValid(GameModeType gameMode)
 	{
-		if (this.validationMethod == GameModeSpecificObject.ValidationMethod.Exclusion)
+		if (validationMethod == ValidationMethod.Exclusion)
 		{
-			return !this.gameModes.Contains(gameMode);
+			return !gameModes.Contains(gameMode);
 		}
-		return this.gameModes.Contains(gameMode);
-	}
-
-	[SerializeField]
-	private GameModeSpecificObject.ValidationMethod validationMethod;
-
-	[SerializeField]
-	private GameModeType[] _gameModes;
-
-	private List<GameModeType> gameModes;
-
-	public delegate void GameModeSpecificObjectDelegate(GameModeSpecificObject gameModeSpecificObject);
-
-	[Serializable]
-	public enum ValidationMethod
-	{
-		Inclusion,
-		Exclusion
+		return gameModes.Contains(gameMode);
 	}
 }

@@ -1,13 +1,17 @@
-﻿using System;
+using System;
 
 public struct TimeSince
 {
+	private DateTime _dt;
+
+	private const double INT32_MAX = 2147483647.0;
+
 	public double secondsElapsed
 	{
 		get
 		{
-			double totalSeconds = (DateTime.UtcNow - this._dt).TotalSeconds;
-			if (totalSeconds <= 2147483647.0)
+			double totalSeconds = (DateTime.UtcNow - _dt).TotalSeconds;
+			if (!(totalSeconds > 2147483647.0))
 			{
 				return totalSeconds;
 			}
@@ -15,127 +19,97 @@ public struct TimeSince
 		}
 	}
 
-	public float secondsElapsedFloat
-	{
-		get
-		{
-			return (float)this.secondsElapsed;
-		}
-	}
+	public float secondsElapsedFloat => (float)secondsElapsed;
 
-	public int secondsElapsedInt
-	{
-		get
-		{
-			return (int)this.secondsElapsed;
-		}
-	}
+	public int secondsElapsedInt => (int)secondsElapsed;
 
-	public uint secondsElapsedUint
-	{
-		get
-		{
-			return (uint)this.secondsElapsed;
-		}
-	}
+	public uint secondsElapsedUint => (uint)secondsElapsed;
 
-	public long secondsElapsedLong
-	{
-		get
-		{
-			return (long)this.secondsElapsed;
-		}
-	}
+	public long secondsElapsedLong => (long)secondsElapsed;
 
-	public TimeSpan secondsElapsedSpan
-	{
-		get
-		{
-			return TimeSpan.FromSeconds(this.secondsElapsed);
-		}
-	}
+	public TimeSpan secondsElapsedSpan => TimeSpan.FromSeconds(secondsElapsed);
 
 	public TimeSince(DateTime dt)
 	{
-		this._dt = dt;
+		_dt = dt;
 	}
 
 	public TimeSince(int elapsed)
 	{
-		this._dt = DateTime.UtcNow.AddSeconds((double)(-(double)elapsed));
+		_dt = DateTime.UtcNow.AddSeconds(-elapsed);
 	}
 
 	public TimeSince(uint elapsed)
 	{
-		this._dt = DateTime.UtcNow.AddSeconds(-1.0 * elapsed);
+		_dt = DateTime.UtcNow.AddSeconds(-1.0 * (double)elapsed);
 	}
 
 	public TimeSince(float elapsed)
 	{
-		this._dt = DateTime.UtcNow.AddSeconds((double)(-(double)elapsed));
+		_dt = DateTime.UtcNow.AddSeconds(0f - elapsed);
 	}
 
 	public TimeSince(double elapsed)
 	{
-		this._dt = DateTime.UtcNow.AddSeconds(-elapsed);
+		_dt = DateTime.UtcNow.AddSeconds(0.0 - elapsed);
 	}
 
 	public TimeSince(long elapsed)
 	{
-		this._dt = DateTime.UtcNow.AddSeconds((double)(-(double)elapsed));
+		_dt = DateTime.UtcNow.AddSeconds(-elapsed);
 	}
 
 	public TimeSince(TimeSpan elapsed)
 	{
-		this._dt = DateTime.UtcNow.Add(-elapsed);
+		_dt = DateTime.UtcNow.Add(-elapsed);
 	}
 
 	public bool HasElapsed(int seconds)
 	{
-		return this.secondsElapsedInt >= seconds;
+		return secondsElapsedInt >= seconds;
 	}
 
 	public bool HasElapsed(uint seconds)
 	{
-		return this.secondsElapsedUint >= seconds;
+		return secondsElapsedUint >= seconds;
 	}
 
 	public bool HasElapsed(float seconds)
 	{
-		return this.secondsElapsedFloat >= seconds;
+		return secondsElapsedFloat >= seconds;
 	}
 
 	public bool HasElapsed(double seconds)
 	{
-		return this.secondsElapsed >= seconds;
+		return secondsElapsed >= seconds;
 	}
 
 	public bool HasElapsed(long seconds)
 	{
-		return this.secondsElapsedLong >= seconds;
+		return secondsElapsedLong >= seconds;
 	}
 
 	public bool HasElapsed(TimeSpan seconds)
 	{
-		return this.secondsElapsedSpan >= seconds;
+		return secondsElapsedSpan >= seconds;
 	}
 
 	public void Reset()
 	{
-		this._dt = DateTime.UtcNow;
+		_dt = DateTime.UtcNow;
 	}
 
 	public bool HasElapsed(int seconds, bool resetOnElapsed)
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsedInt >= seconds;
+			return secondsElapsedInt >= seconds;
 		}
-		if (this.secondsElapsedInt < seconds)
+		if (secondsElapsedInt < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
@@ -143,13 +117,13 @@ public struct TimeSince
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsedUint >= seconds;
+			return secondsElapsedUint >= seconds;
 		}
-		if (this.secondsElapsedUint < seconds)
+		if (secondsElapsedUint < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
@@ -157,13 +131,13 @@ public struct TimeSince
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsedFloat >= seconds;
+			return secondsElapsedFloat >= seconds;
 		}
-		if (this.secondsElapsedFloat < seconds)
+		if (secondsElapsedFloat < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
@@ -171,13 +145,13 @@ public struct TimeSince
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsed >= seconds;
+			return secondsElapsed >= seconds;
 		}
-		if (this.secondsElapsed < seconds)
+		if (secondsElapsed < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
@@ -185,13 +159,13 @@ public struct TimeSince
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsedLong >= seconds;
+			return secondsElapsedLong >= seconds;
 		}
-		if (this.secondsElapsedLong < seconds)
+		if (secondsElapsedLong < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
@@ -199,24 +173,24 @@ public struct TimeSince
 	{
 		if (!resetOnElapsed)
 		{
-			return this.secondsElapsedSpan >= seconds;
+			return secondsElapsedSpan >= seconds;
 		}
-		if (this.secondsElapsedSpan < seconds)
+		if (secondsElapsedSpan < seconds)
 		{
 			return false;
 		}
-		this.Reset();
+		Reset();
 		return true;
 	}
 
 	public override string ToString()
 	{
-		return string.Format("{0:F3} seconds since {{{1:s}", this.secondsElapsed, this._dt);
+		return $"{secondsElapsed:F3} seconds since {{{_dt:s}";
 	}
 
 	public override int GetHashCode()
 	{
-		return StaticHash.Compute(this._dt);
+		return StaticHash.Compute(_dt);
 	}
 
 	public static TimeSince Now()
@@ -288,8 +262,4 @@ public struct TimeSince
 	{
 		return new TimeSince(dt);
 	}
-
-	private DateTime _dt;
-
-	private const double INT32_MAX = 2147483647.0;
 }

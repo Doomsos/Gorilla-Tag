@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaLocomotion;
 using GorillaLocomotion.Gameplay;
 using UnityEngine;
@@ -6,154 +5,6 @@ using UnityEngine.XR;
 
 public class GorillaGrabber : MonoBehaviour
 {
-	public bool isGrabbing
-	{
-		get
-		{
-			return this.currentGrabbable != null;
-		}
-	}
-
-	public XRNode XrNode
-	{
-		get
-		{
-			return this.xrNode;
-		}
-	}
-
-	public bool IsLeftHand
-	{
-		get
-		{
-			return this.XrNode == XRNode.LeftHand;
-		}
-	}
-
-	public bool IsRightHand
-	{
-		get
-		{
-			return this.XrNode == XRNode.RightHand;
-		}
-	}
-
-	public GTPlayer Player
-	{
-		get
-		{
-			return this.player;
-		}
-	}
-
-	private void Start()
-	{
-		this.hapticStrengthActual = this.hapticStrength;
-		this.audioSource = base.GetComponent<AudioSource>();
-		this.player = base.GetComponentInParent<GTPlayer>();
-		if (!this.player)
-		{
-			Debug.LogWarning("Gorilla Grabber Component has no player in hierarchy. Disabling this Gorilla Grabber");
-			base.GetComponent<GorillaGrabber>().enabled = false;
-		}
-	}
-
-	public void CheckGrabber(bool initiateGrab)
-	{
-		bool grabMomentary = ControllerInputPoller.GetGrabMomentary(this.xrNode);
-		bool grabRelease = ControllerInputPoller.GetGrabRelease(this.xrNode);
-		if (this.currentGrabbable != null && (grabRelease || this.GrabDistanceOverCheck()))
-		{
-			this.Ungrab(null);
-		}
-		if (grabMomentary)
-		{
-			this.grabTimeStamp = Time.time;
-		}
-		if (initiateGrab && this.currentGrabbable == null)
-		{
-			this.currentGrabbable = this.TryGrab(Time.time - this.grabTimeStamp < this.coyoteTimeDuration);
-		}
-		if (this.currentGrabbable != null && this.hapticStrengthActual > 0f)
-		{
-			GorillaTagger.Instance.DoVibration(this.xrNode, this.hapticStrengthActual, Time.deltaTime);
-			this.hapticStrengthActual -= this.hapticDecay * Time.deltaTime;
-		}
-	}
-
-	private bool GrabDistanceOverCheck()
-	{
-		return this.currentGrabbedTransform == null || Vector3.Distance(base.transform.position, this.currentGrabbedTransform.TransformPoint(this.localGrabbedPosition)) > this.breakDistance;
-	}
-
-	internal void Ungrab(IGorillaGrabable specificGrabbable = null)
-	{
-		if (specificGrabbable != null && specificGrabbable != this.currentGrabbable)
-		{
-			return;
-		}
-		this.currentGrabbable.OnGrabReleased(this);
-		PlayerGameEvents.DroppedObject(this.currentGrabbable.name);
-		this.currentGrabbable = null;
-		this.gripEffects.Stop();
-		this.hapticStrengthActual = this.hapticStrength;
-	}
-
-	private IGorillaGrabable TryGrab(bool momentary)
-	{
-		IGorillaGrabable gorillaGrabable = null;
-		Debug.DrawRay(base.transform.position, base.transform.forward * (this.grabRadius * this.player.scale), Color.blue, 1f);
-		int num = Physics.OverlapSphereNonAlloc(base.transform.position, this.grabRadius * this.player.scale, this.grabCastResults);
-		float num2 = float.MaxValue;
-		for (int i = 0; i < num; i++)
-		{
-			IGorillaGrabable gorillaGrabable2;
-			if (this.grabCastResults[i].TryGetComponent<IGorillaGrabable>(out gorillaGrabable2))
-			{
-				float num3 = Vector3.Distance(base.transform.position, this.FindClosestPoint(this.grabCastResults[i], base.transform.position));
-				if (num3 < num2)
-				{
-					num2 = num3;
-					gorillaGrabable = gorillaGrabable2;
-				}
-			}
-		}
-		if (gorillaGrabable != null && (!gorillaGrabable.MomentaryGrabOnly() || momentary) && gorillaGrabable.CanBeGrabbed(this))
-		{
-			gorillaGrabable.OnGrabbed(this, out this.currentGrabbedTransform, out this.localGrabbedPosition);
-			PlayerGameEvents.GrabbedObject(gorillaGrabable.name);
-		}
-		if (gorillaGrabable != null && !gorillaGrabable.CanBeGrabbed(this))
-		{
-			gorillaGrabable = null;
-		}
-		return gorillaGrabable;
-	}
-
-	private Vector3 FindClosestPoint(Collider collider, Vector3 position)
-	{
-		if (collider is MeshCollider && !(collider as MeshCollider).convex)
-		{
-			return position;
-		}
-		return collider.ClosestPoint(position);
-	}
-
-	public void Inject(Transform currentGrabbableTransform, Vector3 localGrabbedPosition)
-	{
-		if (this.currentGrabbable != null)
-		{
-			this.Ungrab(null);
-		}
-		if (currentGrabbableTransform != null)
-		{
-			this.currentGrabbable = currentGrabbableTransform.GetComponent<IGorillaGrabable>();
-			this.currentGrabbedTransform = currentGrabbableTransform;
-			this.localGrabbedPosition = localGrabbedPosition;
-			this.currentGrabbable.OnGrabbed(this, out this.currentGrabbedTransform, out localGrabbedPosition);
-		}
-	}
-
 	private GTPlayer player;
 
 	[SerializeField]
@@ -190,4 +41,124 @@ public class GorillaGrabber : MonoBehaviour
 
 	[SerializeField]
 	private float coyoteTimeDuration = 0.25f;
+
+	public bool isGrabbing => currentGrabbable != null;
+
+	public XRNode XrNode => xrNode;
+
+	public bool IsLeftHand => XrNode == XRNode.LeftHand;
+
+	public bool IsRightHand => XrNode == XRNode.RightHand;
+
+	public GTPlayer Player => player;
+
+	private void Start()
+	{
+		hapticStrengthActual = hapticStrength;
+		audioSource = GetComponent<AudioSource>();
+		player = GetComponentInParent<GTPlayer>();
+		if (!player)
+		{
+			Debug.LogWarning("Gorilla Grabber Component has no player in hierarchy. Disabling this Gorilla Grabber");
+			GetComponent<GorillaGrabber>().enabled = false;
+		}
+	}
+
+	public void CheckGrabber(bool initiateGrab)
+	{
+		bool grabMomentary = ControllerInputPoller.GetGrabMomentary(xrNode);
+		bool grabRelease = ControllerInputPoller.GetGrabRelease(xrNode);
+		if (currentGrabbable != null && (grabRelease || GrabDistanceOverCheck()))
+		{
+			Ungrab();
+		}
+		if (grabMomentary)
+		{
+			grabTimeStamp = Time.time;
+		}
+		if (initiateGrab && currentGrabbable == null)
+		{
+			currentGrabbable = TryGrab(Time.time - grabTimeStamp < coyoteTimeDuration);
+		}
+		if (currentGrabbable != null && hapticStrengthActual > 0f)
+		{
+			GorillaTagger.Instance.DoVibration(xrNode, hapticStrengthActual, Time.deltaTime);
+			hapticStrengthActual -= hapticDecay * Time.deltaTime;
+		}
+	}
+
+	private bool GrabDistanceOverCheck()
+	{
+		if (!(currentGrabbedTransform == null))
+		{
+			return Vector3.Distance(base.transform.position, currentGrabbedTransform.TransformPoint(localGrabbedPosition)) > breakDistance;
+		}
+		return true;
+	}
+
+	internal void Ungrab(IGorillaGrabable specificGrabbable = null)
+	{
+		if (specificGrabbable == null || specificGrabbable == currentGrabbable)
+		{
+			currentGrabbable.OnGrabReleased(this);
+			PlayerGameEvents.DroppedObject(currentGrabbable.name);
+			currentGrabbable = null;
+			gripEffects.Stop();
+			hapticStrengthActual = hapticStrength;
+		}
+	}
+
+	private IGorillaGrabable TryGrab(bool momentary)
+	{
+		IGorillaGrabable gorillaGrabable = null;
+		Debug.DrawRay(base.transform.position, base.transform.forward * (grabRadius * player.scale), Color.blue, 1f);
+		int num = Physics.OverlapSphereNonAlloc(base.transform.position, grabRadius * player.scale, grabCastResults);
+		float num2 = float.MaxValue;
+		for (int i = 0; i < num; i++)
+		{
+			if (grabCastResults[i].TryGetComponent<IGorillaGrabable>(out var component))
+			{
+				float num3 = Vector3.Distance(base.transform.position, FindClosestPoint(grabCastResults[i], base.transform.position));
+				if (num3 < num2)
+				{
+					num2 = num3;
+					gorillaGrabable = component;
+				}
+			}
+		}
+		if (gorillaGrabable != null && (!gorillaGrabable.MomentaryGrabOnly() || momentary) && gorillaGrabable.CanBeGrabbed(this))
+		{
+			gorillaGrabable.OnGrabbed(this, out currentGrabbedTransform, out localGrabbedPosition);
+			PlayerGameEvents.GrabbedObject(gorillaGrabable.name);
+		}
+		if (gorillaGrabable != null && !gorillaGrabable.CanBeGrabbed(this))
+		{
+			gorillaGrabable = null;
+		}
+		return gorillaGrabable;
+	}
+
+	private Vector3 FindClosestPoint(Collider collider, Vector3 position)
+	{
+		if (collider is MeshCollider && !(collider as MeshCollider).convex)
+		{
+			return position;
+		}
+		return collider.ClosestPoint(position);
+	}
+
+	public void Inject(Transform currentGrabbableTransform, Vector3 localGrabbedPosition)
+	{
+		if (currentGrabbable != null)
+		{
+			Ungrab();
+		}
+		if (currentGrabbableTransform != null)
+		{
+			currentGrabbable = currentGrabbableTransform.GetComponent<IGorillaGrabable>();
+			currentGrabbedTransform = currentGrabbableTransform;
+			this.localGrabbedPosition = localGrabbedPosition;
+			currentGrabbable.OnGrabbed(this, out currentGrabbedTransform, out localGrabbedPosition);
+		}
+	}
 }

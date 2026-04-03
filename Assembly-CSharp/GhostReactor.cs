@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Fusion;
@@ -10,778 +10,113 @@ using UnityEngine.Serialization;
 
 public class GhostReactor : MonoBehaviourTick, IBuildValidation
 {
-	public static GhostReactor Get(GameEntity gameEntity)
+	[Serializable]
+	public class TempEnemySpawnInfo
 	{
-		GhostReactorManager ghostReactorManager = GhostReactorManager.Get(gameEntity);
-		if (ghostReactorManager == null)
-		{
-			return null;
-		}
-		return ghostReactorManager.reactor;
+		public GameEntity prefab;
+
+		public Transform spawnMarker;
+
+		public int patrolPath;
 	}
 
-	private void Awake()
+	public class EntityTypeRespawnTracker
 	{
-		GhostReactor.instance = this;
-		this.reviveStations = new List<GRReviveStation>();
-		base.GetComponentsInChildren<GRReviveStation>(this.reviveStations);
-		for (int i = 0; i < this.reviveStations.Count; i++)
-		{
-			this.reviveStations[i].Init(this, i);
-		}
-		this.vrRigs = new List<VRRig>();
-		for (int j = 0; j < this.itemPurchaseStands.Count; j++)
-		{
-			if (this.itemPurchaseStands[j] == null)
-			{
-				Debug.LogErrorFormat("Null Item Purchase Stand {0}", new object[]
-				{
-					j
-				});
-			}
-			else
-			{
-				this.itemPurchaseStands[j].Setup(j);
-			}
-		}
-		for (int k = 0; k < this.toolPurchasingStations.Count; k++)
-		{
-			if (this.toolPurchasingStations[k] == null)
-			{
-				Debug.LogErrorFormat("Null Tool Purchasing Station {0}", new object[]
-				{
-					k
-				});
-			}
-			else
-			{
-				this.toolPurchasingStations[k].PurchaseStationId = k;
-			}
-		}
-		if (this.promotionBot != null)
-		{
-			this.promotionBot.Init(this);
-		}
-		this.randomGenerator = new SRand(Random.Range(0, int.MaxValue));
-		this.handPrintMPB = new MaterialPropertyBlock();
-		this.handPrintMPB.SetFloatArray("_HandPrintData", new float[1024]);
-		this.bays = new List<GRBay>(32);
-		base.GetComponentsInChildren<GRBay>(false, this.bays);
-		this.storeDisplays = new List<GRUIStoreDisplay>();
-		base.GetComponentsInChildren<GRUIStoreDisplay>(false, this.storeDisplays);
+		public int entityTypeID;
+
+		public long entityCreateData;
+
+		public float entityNextRespawnTime;
 	}
 
-	private new void OnEnable()
+	public enum EntityGroupTypes
 	{
-		base.OnEnable();
-		if (this.zone == GTZone.customMaps)
+		EnemyChaser,
+		EnemyChaserArmored,
+		EnemyRanged,
+		EnemyRangedArmored,
+		CollectibleFlower,
+		BarrierEnergyCostGate,
+		BarrierSpectralWall,
+		HazardSpectralLiquid
+	}
+
+	public enum EnemyType
+	{
+		Chaser,
+		Ranged,
+		Phantom,
+		Environment,
+		CustomMapsEnemy
+	}
+
+	public struct EnemyEntityCreateData
+	{
+		public int respawnCount;
+
+		public int sectionIndex;
+
+		public int patrolIndex;
+
+		private static long PackData(int value, int nbits, int shift)
 		{
-			return;
+			return (long)(((ulong)value & (ulong)((1 << nbits) - 1)) << shift);
 		}
-		GTDev.Log<string>(string.Format("GhostReactor::OnEnable getting manager for zone {0}", this.zone), null);
-		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
-		if (managerForZone == null)
+
+		private static int UnpackData(long createData, int nbits, int shift)
 		{
-			Debug.LogErrorFormat("No GameEntityManager found for zone {0}", new object[]
+			return (int)((createData >> shift) & ((1 << nbits) - 1));
+		}
+
+		public static EnemyEntityCreateData Unpack(long bits)
+		{
+			return new EnemyEntityCreateData
 			{
-				this.zone
-			});
-			return;
-		}
-		this.grManager = managerForZone.ghostReactorManager;
-		if (this.grManager == null)
-		{
-			Debug.LogErrorFormat("No GhostReactorManager found for zone {0}", new object[]
-			{
-				this.zone
-			});
-			return;
-		}
-		this.grManager.reactor = this;
-		this.grManager.gameEntityManager.boundsBoxCollider = this.boundsBoxCollider;
-		if (GameLightingManager.instance != null && this.zone != GTZone.customMaps)
-		{
-			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(true);
-		}
-		VRRigCache.OnRigActivated += this.OnVRRigsChanged;
-		VRRigCache.OnRigDeactivated += this.OnVRRigsChanged;
-		VRRigCache.OnRigNameChanged += this.OnVRRigsChanged;
-		if (NetworkSystem.Instance != null)
-		{
-			NetworkSystem.Instance.OnMultiplayerStarted += this.OnLocalPlayerConnectedToRoom;
-		}
-		for (int i = 0; i < this.toolPurchasingStations.Count; i++)
-		{
-			this.toolPurchasingStations[i].Init(this.grManager, this);
-		}
-		if (this.debugUpgradeKiosk != null)
-		{
-			this.debugUpgradeKiosk.Init(this.grManager, this);
-		}
-		if (this.currencyDepositor != null)
-		{
-			this.currencyDepositor.Init(this);
-		}
-		if (this.distillery != null)
-		{
-			this.distillery.Init(this);
-		}
-		if (this.seedExtractor != null)
-		{
-			this.seedExtractor.Init(this.toolProgression, this);
-		}
-		if (this.levelGenerator != null)
-		{
-			this.levelGenerator.Init(this);
-		}
-		if (this.employeeBadges != null)
-		{
-			this.employeeBadges.Init(this);
-		}
-		if (this.toolProgression != null)
-		{
-			this.toolProgression.Init(this);
-			this.toolProgression.OnProgressionUpdated += this.OnProgressionUpdated;
-		}
-		if (this.shiftManager != null)
-		{
-			this.shiftManager.Init(this.grManager);
-		}
-		for (int j = 0; j < this.toolUpgradePurchaseStationsFull.Count; j++)
-		{
-			this.toolUpgradePurchaseStationsFull[j].Init(this.toolProgression, this);
-		}
-		GRElevatorManager._instance.InitShuttles(this);
-		if (this.recycler != null)
-		{
-			this.recycler.Init(this);
-		}
-		if (this.zoneShaderSettings != null)
-		{
-			this.zoneShaderSettings.BecomeActiveInstance(true);
-		}
-		for (int k = 0; k < this.bays.Count; k++)
-		{
-			this.bays[k].Setup(this);
-		}
-		for (int l = 0; l < this.storeDisplays.Count; l++)
-		{
-			this.storeDisplays[l].Setup(-1, this);
-		}
-		this.RefreshDepth();
-	}
-
-	public void EnableGhostReactorForVirtualStump()
-	{
-		GhostReactor.instance = this;
-		this.RefreshReviveStations(false);
-		this.OnEnable();
-	}
-
-	public void RefreshReviveStations(bool searchScene = false)
-	{
-		this.reviveStations = new List<GRReviveStation>();
-		base.GetComponentsInChildren<GRReviveStation>(this.reviveStations);
-		if (searchScene)
-		{
-			this.reviveStations.AddRange(Object.FindObjectsByType<GRReviveStation>(FindObjectsInactive.Include, FindObjectsSortMode.None));
-		}
-		for (int i = 0; i < this.reviveStations.Count; i++)
-		{
-			this.reviveStations[i].Init(this, i);
-		}
-	}
-
-	private new void OnDisable()
-	{
-		base.OnDisable();
-		if (this.zone == GTZone.customMaps)
-		{
-			return;
-		}
-		GameLightingManager.instance.ZoneEnableCustomDynamicLighting(false);
-		VRRigCache.OnRigActivated -= this.OnVRRigsChanged;
-		VRRigCache.OnRigDeactivated -= this.OnVRRigsChanged;
-		VRRigCache.OnRigNameChanged -= this.OnVRRigsChanged;
-		if (this.toolProgression != null)
-		{
-			this.toolProgression.OnProgressionUpdated -= this.OnProgressionUpdated;
-		}
-		if (NetworkSystem.Instance != null)
-		{
-			NetworkSystem.Instance.OnMultiplayerStarted -= this.OnLocalPlayerConnectedToRoom;
-		}
-	}
-
-	private void OnProgressionUpdated()
-	{
-		if (this.toolProgression != null)
-		{
-			this.UpdateLocalPlayerFromProgression();
-		}
-	}
-
-	public void UpdateLocalPlayerFromProgression()
-	{
-		GRPlayer local = GRPlayer.GetLocal();
-		if (local != null)
-		{
-			int dropPodLevel = this.toolProgression.GetDropPodLevel();
-			if (local.dropPodLevel != dropPodLevel)
-			{
-				local.dropPodLevel = dropPodLevel;
-				Debug.LogFormat("Drop Pod UpdateLocalPlayerFromProgression Level {0} {1} {2}", new object[]
-				{
-					this.grManager.IsZoneActive(),
-					local.dropPodLevel,
-					local.dropPodChasisLevel
-				});
-				if (this.grManager.IsZoneActive())
-				{
-					this.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SetPodLevel, dropPodLevel);
-				}
-			}
-			int dropPodChasisLevel = this.toolProgression.GetDropPodChasisLevel();
-			if (local.dropPodChasisLevel != dropPodChasisLevel)
-			{
-				local.dropPodChasisLevel = dropPodChasisLevel;
-				Debug.LogFormat("Drop Pod UpdateLocalPlayerFromProgression Level {0} {1} {2}", new object[]
-				{
-					this.grManager.IsZoneActive(),
-					local.dropPodLevel,
-					local.dropPodChasisLevel
-				});
-				if (this.grManager.IsZoneActive())
-				{
-					this.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SetPodChassisLevel, dropPodChasisLevel);
-				}
-			}
-			if (local.badge)
-			{
-				local.badge.RefreshText(PhotonNetwork.LocalPlayer);
-			}
-			this.RefreshStore();
-		}
-	}
-
-	public GRPatrolPath GetPatrolPath(long createData)
-	{
-		if (this.levelGenerator == null)
-		{
-			return null;
-		}
-		return this.levelGenerator.GetPatrolPath(createData);
-	}
-
-	public override void Tick()
-	{
-		if (this.grManager == null)
-		{
-			return;
-		}
-		float deltaTime = Time.deltaTime;
-		if (this.grManager.gameEntityManager.IsAuthority())
-		{
-			if (Time.timeAsDouble - this.lastCollectibleDispenserUpdateTime > (double)this.collectibleDispenserUpdateFrequency)
-			{
-				this.lastCollectibleDispenserUpdateTime = Time.timeAsDouble;
-				for (int i = 0; i < this.collectibleDispensers.Count; i++)
-				{
-					if (this.collectibleDispensers[i] != null && this.collectibleDispensers[i].ReadyToDispenseNewCollectible)
-					{
-						this.collectibleDispensers[i].RequestDispenseCollectible();
-					}
-				}
-			}
-			if (this.sleepableEntities.Count > 0)
-			{
-				this.sentientCoreUpdateIndex = Mathf.Max(0, this.sentientCoreUpdateIndex % this.sleepableEntities.Count);
-				if (this.sentientCoreUpdateIndex < this.sleepableEntities.Count)
-				{
-					IGRSleepableEntity igrsleepableEntity = this.sleepableEntities[this.sentientCoreUpdateIndex];
-					float num = igrsleepableEntity.WakeUpRadius * igrsleepableEntity.WakeUpRadius;
-					float num2 = (igrsleepableEntity.WakeUpRadius + 0.5f) * (igrsleepableEntity.WakeUpRadius + 0.5f);
-					bool flag = false;
-					bool flag2 = false;
-					for (int j = 0; j < this.vrRigs.Count; j++)
-					{
-						GRPlayer component = this.vrRigs[j].GetComponent<GRPlayer>();
-						if (!(component == null) && component.State != GRPlayer.GRPlayerState.Ghost)
-						{
-							float sqrMagnitude = (igrsleepableEntity.Position - this.vrRigs[j].bodyTransform.position).sqrMagnitude;
-							if (sqrMagnitude < num2)
-							{
-								flag = true;
-							}
-							if (sqrMagnitude < num)
-							{
-								flag2 = true;
-								break;
-							}
-						}
-					}
-					bool flag3 = igrsleepableEntity.IsSleeping();
-					if (flag3 && flag2)
-					{
-						igrsleepableEntity.WakeUp();
-					}
-					else if (!flag3 && !flag)
-					{
-						igrsleepableEntity.Sleep();
-					}
-					this.sentientCoreUpdateIndex++;
-				}
-			}
-		}
-		bool flag4 = false;
-		foreach (GhostReactor.EntityTypeRespawnTracker entityTypeRespawnTracker in this.respawnQueue)
-		{
-			entityTypeRespawnTracker.entityNextRespawnTime -= Time.deltaTime;
-			if (entityTypeRespawnTracker.entityNextRespawnTime < 0f)
-			{
-				entityTypeRespawnTracker.entityNextRespawnTime = 0f;
-				flag4 = true;
-				if (this.grManager.gameEntityManager.IsAuthority())
-				{
-					this.levelGenerator.RespawnEntity(entityTypeRespawnTracker.entityTypeID, entityTypeRespawnTracker.entityCreateData, GameEntityId.Invalid);
-				}
-			}
-		}
-		if (flag4)
-		{
-			this.respawnQueue.RemoveAll((GhostReactor.EntityTypeRespawnTracker e) => e.entityNextRespawnTime <= 0f);
-		}
-		this.UpdateHandprints(Time.deltaTime);
-	}
-
-	private void OnLocalPlayerConnectedToRoom()
-	{
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		if (grplayer != null)
-		{
-			grplayer.Reset();
-		}
-		if (this.shiftManager != null)
-		{
-			this.shiftManager.shiftStats.ResetShiftStats();
-			this.shiftManager.RefreshShiftStatsDisplay();
-		}
-	}
-
-	private void OnVRRigsChanged(RigContainer container)
-	{
-		this.VRRigRefresh();
-	}
-
-	public void VRRigRefresh()
-	{
-		if (this.isRefreshing)
-		{
-			return;
-		}
-		this.isRefreshing = true;
-		this.vrRigs.Clear();
-		this.vrRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(this.vrRigs);
-		this.vrRigs.Sort(delegate(VRRig a, VRRig b)
-		{
-			if (a == null || a.OwningNetPlayer == null)
-			{
-				return 1;
-			}
-			if (b == null || b.OwningNetPlayer == null)
-			{
-				return -1;
-			}
-			return a.OwningNetPlayer.ActorNumber.CompareTo(b.OwningNetPlayer.ActorNumber);
-		});
-		if (this.promotionBot != null)
-		{
-			this.promotionBot.Refresh();
-		}
-		this.RefreshScoreboards();
-		this.RefreshDepth();
-		this.RefreshStore();
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		if (grplayer != null && this.vrRigs.Count > grplayer.maxNumberOfPlayersInShift)
-		{
-			grplayer.maxNumberOfPlayersInShift = this.vrRigs.Count;
-		}
-		this.isRefreshing = false;
-	}
-
-	public void UpdateScoreboardScreen(GRUIScoreboard.ScoreboardScreen newScreen)
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			this.scoreboards[i].SwitchToScreen(newScreen);
-		}
-		this.RefreshScoreboards();
-	}
-
-	public void RefreshScoreboards()
-	{
-		for (int i = 0; i < this.scoreboards.Count; i++)
-		{
-			if (!(this.scoreboards[i] == null))
-			{
-				this.scoreboards[i].Refresh(this.vrRigs);
-				if (this.shiftManager != null)
-				{
-					if (this.shiftManager.ShiftActive)
-					{
-						this.scoreboards[i].total.text = "-AWAITING SHIFT END-";
-					}
-					else if (this.shiftManager.ShiftTotalEarned < 0)
-					{
-						this.scoreboards[i].total.text = "-SHIFT NOT ACTIVE-";
-					}
-					else
-					{
-						this.scoreboards[i].total.text = this.shiftManager.ShiftTotalEarned.ToString();
-					}
-				}
-			}
-		}
-	}
-
-	public int GetItemCost(int entityTypeId)
-	{
-		int result;
-		if (!this.grManager.gameEntityManager.PriceLookup(entityTypeId, out result))
-		{
-			return 100;
-		}
-		return result;
-	}
-
-	public void UpdateRemoteScoreboardScreen(GRUIScoreboard.ScoreboardScreen scoreboardPage)
-	{
-		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
-		if (managerForZone != null && managerForZone.ghostReactorManager != null)
-		{
-			managerForZone.ghostReactorManager.photonView.RPC("BroadcastScoreboardPage", RpcTarget.Others, new object[]
-			{
-				scoreboardPage
-			});
-		}
-	}
-
-	public void SetNextDelveDepth(int newLevel, int newDepthConfigIndex)
-	{
-		this.depthLevel = newLevel;
-		this.depthLevel = Mathf.Clamp(this.depthLevel, 0, this.levelGenerator.depthConfigs.Count);
-		if (this.depthLevel >= 0 && this.zone == GTZone.ghostReactorDrill && PhotonNetwork.InRoom && !NetworkSystem.Instance.SessionIsPrivate && this.grManager.IsAuthority())
-		{
-			int joinDepthSectionFromLevel = GhostReactor.GetJoinDepthSectionFromLevel(this.depthLevel);
-			Hashtable hashtable = new Hashtable
-			{
-				{
-					"ghostReactorDepth",
-					joinDepthSectionFromLevel.ToString()
-				}
+				respawnCount = UnpackData(bits, 8, 16),
+				sectionIndex = UnpackData(bits, 8, 8),
+				patrolIndex = UnpackData(bits, 8, 0)
 			};
-			Debug.LogFormat("GR Room Param Set {0} {1}", new object[]
+		}
+
+		public long Pack()
+		{
+			return PackData(respawnCount, 8, 16) | PackData(sectionIndex, 8, 8) | PackData(patrolIndex, 8, 0);
+		}
+	}
+
+	public struct ToolEntityCreateData
+	{
+		public int stationIndex;
+
+		public float decayTime;
+
+		private static long PackData(int value, int nbits, int shift)
+		{
+			return (long)(((ulong)value & (ulong)((1 << nbits) - 1)) << shift);
+		}
+
+		private static int UnpackData(long createData, int nbits, int shift)
+		{
+			return (int)((createData >> shift) & ((1 << nbits) - 1));
+		}
+
+		public static ToolEntityCreateData Unpack(long bits)
+		{
+			ToolEntityCreateData result = new ToolEntityCreateData
 			{
-				"ghostReactorDepth",
-				hashtable["ghostReactorDepth"]
-			});
-			PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable, null, null);
-		}
-		this.depthConfigIndex = newDepthConfigIndex;
-	}
-
-	public static int GetJoinDepthSectionFromLevel(int depthLevel)
-	{
-		if (depthLevel < 4)
-		{
-			return 0;
-		}
-		if (depthLevel < 10)
-		{
-			return 1;
-		}
-		if (depthLevel < 15)
-		{
-			return 2;
-		}
-		if (depthLevel < 20)
-		{
-			return 3;
-		}
-		if (depthLevel < 25)
-		{
-			return 5;
-		}
-		return 6;
-	}
-
-	public void DelveToNextDepth()
-	{
-		if (this.shiftManager != null)
-		{
-			this.shiftManager.authorizedToDelveDeeper = false;
-		}
-		this.RefreshDepth();
-	}
-
-	public int PickLevelConfigForDepth(int depthLevel)
-	{
-		if (this.zone == GTZone.customMaps)
-		{
-			return 0;
-		}
-		GhostReactorLevelDepthConfig depthLevelConfig = this.GetDepthLevelConfig(depthLevel);
-		int num = 0;
-		for (int i = 0; i < depthLevelConfig.options.Count; i++)
-		{
-			num += depthLevelConfig.options[i].weight;
-		}
-		int num2 = Random.Range(0, num + 1);
-		for (int j = 0; j < depthLevelConfig.options.Count; j++)
-		{
-			if (depthLevelConfig.options[j].weight >= num2)
-			{
-				return j;
-			}
-			num2 -= depthLevelConfig.options[j].weight;
-		}
-		return 0;
-	}
-
-	public void RefreshDepth()
-	{
-		if (this.shiftManager != null)
-		{
-			this.shiftManager.RefreshDepthDisplay();
-		}
-		this.RefreshBays();
-	}
-
-	public int GetDepthLevel()
-	{
-		return this.depthLevel;
-	}
-
-	public int GetDepthConfigIndex()
-	{
-		return this.depthConfigIndex;
-	}
-
-	public GhostReactorLevelDepthConfig GetDepthLevelConfig(int level)
-	{
-		if (this.levelGenerator == null)
-		{
-			return null;
-		}
-		level = Mathf.Clamp(level, 0, this.levelGenerator.depthConfigs.Count - 1);
-		return this.levelGenerator.depthConfigs[level];
-	}
-
-	public GhostReactorLevelGenConfig GetCurrLevelGenConfig()
-	{
-		if (this.levelGenerator == null)
-		{
-			return null;
-		}
-		int num = this.GetDepthLevel();
-		num = Mathf.Clamp(num, 0, this.levelGenerator.depthConfigs.Count - 1);
-		this.depthConfigIndex = Mathf.Clamp(this.depthConfigIndex, 0, this.levelGenerator.depthConfigs[num].options.Count - 1);
-		return this.levelGenerator.depthConfigs[num].options[this.depthConfigIndex].levelConfig;
-	}
-
-	public void RefreshStore()
-	{
-		for (int i = 0; i < this.storeDisplays.Count; i++)
-		{
-			this.storeDisplays[i].Setup(PhotonNetwork.LocalPlayer.ActorNumber, this);
-		}
-	}
-
-	public void RefreshBays()
-	{
-		for (int i = 0; i < this.bays.Count; i++)
-		{
-			this.bays[i].Refresh();
-		}
-	}
-
-	public void UpdateHandprints(float deltaTime)
-	{
-		int num = this.handPrintData.Count - 1000;
-		if (num > 0)
-		{
-			this.handPrintData.RemoveRange(0, num);
-			this.handPrintLocations.RemoveRange(0, num);
-		}
-		float time = Time.time;
-		int i = this.handPrintData.Count - 1;
-		while (i >= 0)
-		{
-			this.handPrintData[i] = this.handPrintData[i] - deltaTime;
-			if (i + this.handPrintCombineTestDelta >= this.handPrintData.Count)
-			{
-				goto IL_13E;
-			}
-			if (this.handPrintData[i + this.handPrintCombineTestDelta] <= this.handPrintFadeTime - 3f)
-			{
-				Matrix4x4 matrix4x = this.handPrintLocations[i];
-				Matrix4x4 matrix4x2 = this.handPrintLocations[i + this.handPrintCombineTestDelta];
-				Vector3 vector = new Vector3(matrix4x.m03 - matrix4x2.m03, matrix4x.m13 - matrix4x2.m13, matrix4x.m23 - matrix4x2.m23);
-				if (vector.sqrMagnitude < this.handPrintScale * this.handPrintScale)
-				{
-					List<float> list = this.handPrintData;
-					int index = i;
-					list[index] -= deltaTime * (float)this.handPrintData.Count * 50f;
-					goto IL_13E;
-				}
-				goto IL_13E;
-			}
-			IL_169:
-			i--;
-			continue;
-			IL_13E:
-			if (this.handPrintData[i] < 0f)
-			{
-				this.handPrintData.RemoveAt(i);
-				this.handPrintLocations.RemoveAt(i);
-				goto IL_169;
-			}
-			goto IL_169;
-		}
-		if (this.handPrintData.Count > 0)
-		{
-			this.handPrintCombineTestDelta = (this.handPrintCombineTestDelta + 1) % this.handPrintData.Count;
-			if (this.handPrintCombineTestDelta == 0)
-			{
-				this.handPrintCombineTestDelta = 1;
-			}
-		}
-		else
-		{
-			this.handPrintCombineTestDelta = 1;
-		}
-		if (this.handPrintMaterial != null)
-		{
-			this.handPrintMaterial.SetFloat("_FadeDuration", this.handPrintFadeTime);
-			this.handPrintMaterial.enableInstancing = true;
-		}
-		int num2 = Mathf.Min(Math.Min(1000, 1023), this.handPrintLocations.Count);
-		if (num2 > 0)
-		{
-			this.handPrintMPB.Clear();
-			this.handPrintMPB.SetFloatArray("_HandPrintData", this.handPrintData.GetRange(0, num2));
-			this.handPrintMPB.SetFloat("_FadeDuration", this.handPrintFadeTime);
-			RenderParams renderParams = new RenderParams(this.handPrintMaterial)
-			{
-				shadowCastingMode = ShadowCastingMode.Off,
-				receiveShadows = false,
-				layer = base.gameObject.layer,
-				matProps = this.handPrintMPB,
-				worldBounds = new Bounds(Vector3.zero, Vector3.one * 2000f)
+				stationIndex = UnpackData(bits, 8, 0) - 1
 			};
-			Graphics.RenderMeshInstanced<Matrix4x4>(renderParams, this.handPrintMesh, 0, this.handPrintLocations.GetRange(0, num2), -1, 0);
+			int num = UnpackData(bits, 8, 8);
+			result.decayTime = 5f * (float)num;
+			return result;
 		}
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		if (grplayer != null)
-		{
-			if (Time.time - this.handPrintTimeLeft >= this.handPrintInkTime)
-			{
-				grplayer.SetGooParticleSystemEnabled(true, false);
-			}
-			if (Time.time - this.handPrintTimeRight >= this.handPrintInkTime)
-			{
-				grplayer.SetGooParticleSystemEnabled(false, false);
-			}
-		}
-	}
 
-	public void OnTapLocal(bool isLeftHand, Vector3 pos, Quaternion orient, GorillaSurfaceOverride surfaceOverride)
-	{
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		if (grplayer == null)
+		public long Pack()
 		{
-			return;
+			long result = PackData(stationIndex + 1, 8, 0);
+			PackData((int)(decayTime / 5f), 8, 8);
+			return result;
 		}
-		if (!(surfaceOverride != null) || surfaceOverride.overrideIndex != 79)
-		{
-			float num = isLeftHand ? this.handPrintTimeLeft : this.handPrintTimeRight;
-			if (Time.time - num < this.handPrintInkTime && (Time.time < this.lastBroadcastHandTapTime || Time.time > this.lastBroadcastHandTapTime + this.broadcastHandTapDelay))
-			{
-				GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
-				if (managerForZone != null && managerForZone.ghostReactorManager != null)
-				{
-					managerForZone.ghostReactorManager.photonView.RPC("BroadcastHandprint", RpcTarget.All, new object[]
-					{
-						pos,
-						orient
-					});
-				}
-				this.lastBroadcastHandTapTime = Time.time;
-			}
-			return;
-		}
-		grplayer.SetGooParticleSystemEnabled(isLeftHand, true);
-		if (isLeftHand)
-		{
-			this.handPrintTimeLeft = Time.time;
-			return;
-		}
-		this.handPrintTimeRight = Time.time;
-	}
-
-	public void AddHandprint(Vector3 pos, Quaternion orient)
-	{
-		Matrix4x4 item = default(Matrix4x4);
-		item.SetTRS(pos, orient * Quaternion.Euler(90f, 0f, 180f), Vector3.one * this.handPrintScale);
-		this.handPrintLocations.Add(item);
-		this.handPrintData.Add(this.handPrintFadeTime);
-	}
-
-	public void ClearAllHandprints()
-	{
-		this.handPrintData.Clear();
-		this.handPrintLocations.Clear();
-	}
-
-	public int NumActivePlayers
-	{
-		get
-		{
-			return this.vrRigs.Count;
-		}
-	}
-
-	public void OnAbilityDie(GameEntity entity, float forcedRespawn = -1f)
-	{
-		GhostReactor.EnemyEntityCreateData enemyEntityCreateData = GhostReactor.EnemyEntityCreateData.Unpack(entity.createData);
-		if (enemyEntityCreateData.respawnCount == 0)
-		{
-			return;
-		}
-		if (this.grManager.GetBossEntity() != null)
-		{
-			GREnemyBossMoon component = this.grManager.GetBossEntity().GetComponent<GREnemyBossMoon>();
-			if (component != null && component.BossHasRevealed)
-			{
-				return;
-			}
-		}
-		GhostReactor.EntityTypeRespawnTracker entityTypeRespawnTracker = new GhostReactor.EntityTypeRespawnTracker();
-		entityTypeRespawnTracker.entityTypeID = entity.typeId;
-		entityTypeRespawnTracker.entityCreateData = enemyEntityCreateData.Pack();
-		entityTypeRespawnTracker.entityNextRespawnTime = ((forcedRespawn < 0f) ? this.respawnTime : forcedRespawn);
-		this.respawnQueue.Add(entityTypeRespawnTracker);
-	}
-
-	public void ClearAllRespawns()
-	{
-		this.respawnQueue.Clear();
-	}
-
-	bool IBuildValidation.BuildValidationCheck()
-	{
-		return true;
 	}
 
 	public static GhostReactor instance;
@@ -801,7 +136,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 
 	public BoxCollider safeZoneLimit;
 
-	public List<GhostReactor.TempEnemySpawnInfo> tempSpawnEnemies;
+	public List<TempEnemySpawnInfo> tempSpawnEnemies;
 
 	public GameEntity overrideEnemySpawn;
 
@@ -847,7 +182,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 
 	public GRRecycler recycler;
 
-	public List<GhostReactor.EntityTypeRespawnTracker> respawnQueue = new List<GhostReactor.EntityTypeRespawnTracker>();
+	public List<EntityTypeRespawnTracker> respawnQueue = new List<EntityTypeRespawnTracker>();
 
 	public List<float> difficultyScalingPerPlayer = new List<float>(10);
 
@@ -922,110 +257,721 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 
 	private float broadcastHandTapDelay = 0.3f;
 
-	[Serializable]
-	public class TempEnemySpawnInfo
+	public int NumActivePlayers => vrRigs.Count;
+
+	public static GhostReactor Get(GameEntity gameEntity)
 	{
-		public GameEntity prefab;
-
-		public Transform spawnMarker;
-
-		public int patrolPath;
-	}
-
-	public class EntityTypeRespawnTracker
-	{
-		public int entityTypeID;
-
-		public long entityCreateData;
-
-		public float entityNextRespawnTime;
-	}
-
-	public enum EntityGroupTypes
-	{
-		EnemyChaser,
-		EnemyChaserArmored,
-		EnemyRanged,
-		EnemyRangedArmored,
-		CollectibleFlower,
-		BarrierEnergyCostGate,
-		BarrierSpectralWall,
-		HazardSpectralLiquid
-	}
-
-	public enum EnemyType
-	{
-		Chaser,
-		Ranged,
-		Phantom,
-		Environment,
-		CustomMapsEnemy
-	}
-
-	public struct EnemyEntityCreateData
-	{
-		private static long PackData(int value, int nbits, int shift)
+		GhostReactorManager ghostReactorManager = GhostReactorManager.Get(gameEntity);
+		if (ghostReactorManager == null)
 		{
-			return ((long)value & (long)((1 << nbits) - 1)) << shift;
+			return null;
 		}
+		return ghostReactorManager.reactor;
+	}
 
-		private static int UnpackData(long createData, int nbits, int shift)
+	private void Awake()
+	{
+		instance = this;
+		reviveStations = new List<GRReviveStation>();
+		GetComponentsInChildren(reviveStations);
+		for (int i = 0; i < reviveStations.Count; i++)
 		{
-			return (int)(createData >> shift & (long)((1 << nbits) - 1));
+			reviveStations[i].Init(this, i);
 		}
-
-		public static GhostReactor.EnemyEntityCreateData Unpack(long bits)
+		vrRigs = new List<VRRig>();
+		for (int j = 0; j < itemPurchaseStands.Count; j++)
 		{
-			return new GhostReactor.EnemyEntityCreateData
+			if (itemPurchaseStands[j] == null)
 			{
-				respawnCount = GhostReactor.EnemyEntityCreateData.UnpackData(bits, 8, 16),
-				sectionIndex = GhostReactor.EnemyEntityCreateData.UnpackData(bits, 8, 8),
-				patrolIndex = GhostReactor.EnemyEntityCreateData.UnpackData(bits, 8, 0)
-			};
+				Debug.LogErrorFormat("Null Item Purchase Stand {0}", j);
+			}
+			else
+			{
+				itemPurchaseStands[j].Setup(j);
+			}
 		}
-
-		public long Pack()
+		for (int k = 0; k < toolPurchasingStations.Count; k++)
 		{
-			return GhostReactor.EnemyEntityCreateData.PackData(this.respawnCount, 8, 16) | GhostReactor.EnemyEntityCreateData.PackData(this.sectionIndex, 8, 8) | GhostReactor.EnemyEntityCreateData.PackData(this.patrolIndex, 8, 0);
+			if (toolPurchasingStations[k] == null)
+			{
+				Debug.LogErrorFormat("Null Tool Purchasing Station {0}", k);
+			}
+			else
+			{
+				toolPurchasingStations[k].PurchaseStationId = k;
+			}
 		}
-
-		public int respawnCount;
-
-		public int sectionIndex;
-
-		public int patrolIndex;
+		if (promotionBot != null)
+		{
+			promotionBot.Init(this);
+		}
+		randomGenerator = new SRand(UnityEngine.Random.Range(0, int.MaxValue));
+		handPrintMPB = new MaterialPropertyBlock();
+		handPrintMPB.SetFloatArray("_HandPrintData", new float[1024]);
+		bays = new List<GRBay>(32);
+		GetComponentsInChildren(includeInactive: false, bays);
+		storeDisplays = new List<GRUIStoreDisplay>();
+		GetComponentsInChildren(includeInactive: false, storeDisplays);
 	}
 
-	public struct ToolEntityCreateData
+	private new void OnEnable()
 	{
-		private static long PackData(int value, int nbits, int shift)
+		base.OnEnable();
+		if (zone == GTZone.customMaps)
 		{
-			return ((long)value & (long)((1 << nbits) - 1)) << shift;
+			return;
 		}
-
-		private static int UnpackData(long createData, int nbits, int shift)
+		GTDev.Log($"GhostReactor::OnEnable getting manager for zone {zone}");
+		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(zone);
+		if (managerForZone == null)
 		{
-			return (int)(createData >> shift & (long)((1 << nbits) - 1));
+			Debug.LogErrorFormat("No GameEntityManager found for zone {0}", zone);
+			return;
 		}
-
-		public static GhostReactor.ToolEntityCreateData Unpack(long bits)
+		grManager = managerForZone.ghostReactorManager;
+		if (grManager == null)
 		{
-			GhostReactor.ToolEntityCreateData result = default(GhostReactor.ToolEntityCreateData);
-			result.stationIndex = GhostReactor.ToolEntityCreateData.UnpackData(bits, 8, 0) - 1;
-			int num = GhostReactor.ToolEntityCreateData.UnpackData(bits, 8, 8);
-			result.decayTime = 5f * (float)num;
-			return result;
+			Debug.LogErrorFormat("No GhostReactorManager found for zone {0}", zone);
+			return;
 		}
-
-		public long Pack()
+		grManager.reactor = this;
+		grManager.gameEntityManager.boundsBoxCollider = boundsBoxCollider;
+		if (GameLightingManager.instance != null && zone != GTZone.customMaps)
 		{
-			long result = GhostReactor.ToolEntityCreateData.PackData(this.stationIndex + 1, 8, 0);
-			GhostReactor.ToolEntityCreateData.PackData((int)(this.decayTime / 5f), 8, 8);
-			return result;
+			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(enable: true);
 		}
+		VRRigCache.OnRigActivated += OnVRRigsChanged;
+		VRRigCache.OnRigDeactivated += OnVRRigsChanged;
+		VRRigCache.OnRigNameChanged += OnVRRigsChanged;
+		if (NetworkSystem.Instance != null)
+		{
+			NetworkSystem.Instance.OnMultiplayerStarted += new Action(OnLocalPlayerConnectedToRoom);
+		}
+		for (int i = 0; i < toolPurchasingStations.Count; i++)
+		{
+			toolPurchasingStations[i].Init(grManager, this);
+		}
+		if (debugUpgradeKiosk != null)
+		{
+			debugUpgradeKiosk.Init(grManager, this);
+		}
+		if (currencyDepositor != null)
+		{
+			currencyDepositor.Init(this);
+		}
+		if (distillery != null)
+		{
+			distillery.Init(this);
+		}
+		if (seedExtractor != null)
+		{
+			seedExtractor.Init(toolProgression, this);
+		}
+		if (levelGenerator != null)
+		{
+			levelGenerator.Init(this);
+		}
+		if (employeeBadges != null)
+		{
+			employeeBadges.Init(this);
+		}
+		if (toolProgression != null)
+		{
+			toolProgression.Init(this);
+			toolProgression.OnProgressionUpdated += OnProgressionUpdated;
+		}
+		if (shiftManager != null)
+		{
+			shiftManager.Init(grManager);
+		}
+		for (int j = 0; j < toolUpgradePurchaseStationsFull.Count; j++)
+		{
+			toolUpgradePurchaseStationsFull[j].Init(toolProgression, this);
+		}
+		GRElevatorManager._instance.InitShuttles(this);
+		if (recycler != null)
+		{
+			recycler.Init(this);
+		}
+		if (zoneShaderSettings != null)
+		{
+			zoneShaderSettings.BecomeActiveInstance(force: true);
+		}
+		for (int k = 0; k < bays.Count; k++)
+		{
+			bays[k].Setup(this);
+		}
+		for (int l = 0; l < storeDisplays.Count; l++)
+		{
+			storeDisplays[l].Setup(-1, this);
+		}
+		RefreshDepth();
+	}
 
-		public int stationIndex;
+	public void EnableGhostReactorForVirtualStump()
+	{
+		instance = this;
+		RefreshReviveStations();
+		OnEnable();
+	}
 
-		public float decayTime;
+	public void RefreshReviveStations(bool searchScene = false)
+	{
+		reviveStations = new List<GRReviveStation>();
+		GetComponentsInChildren(reviveStations);
+		if (searchScene)
+		{
+			reviveStations.AddRange(UnityEngine.Object.FindObjectsByType<GRReviveStation>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+		}
+		for (int i = 0; i < reviveStations.Count; i++)
+		{
+			reviveStations[i].Init(this, i);
+		}
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		if (zone != GTZone.customMaps)
+		{
+			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(enable: false);
+			VRRigCache.OnRigActivated -= OnVRRigsChanged;
+			VRRigCache.OnRigDeactivated -= OnVRRigsChanged;
+			VRRigCache.OnRigNameChanged -= OnVRRigsChanged;
+			if (toolProgression != null)
+			{
+				toolProgression.OnProgressionUpdated -= OnProgressionUpdated;
+			}
+			if (NetworkSystem.Instance != null)
+			{
+				NetworkSystem.Instance.OnMultiplayerStarted -= new Action(OnLocalPlayerConnectedToRoom);
+			}
+		}
+	}
+
+	private void OnProgressionUpdated()
+	{
+		if (toolProgression != null)
+		{
+			UpdateLocalPlayerFromProgression();
+		}
+	}
+
+	public void UpdateLocalPlayerFromProgression()
+	{
+		GRPlayer local = GRPlayer.GetLocal();
+		if (!(local != null))
+		{
+			return;
+		}
+		int dropPodLevel = toolProgression.GetDropPodLevel();
+		if (local.dropPodLevel != dropPodLevel)
+		{
+			local.dropPodLevel = dropPodLevel;
+			Debug.LogFormat("Drop Pod UpdateLocalPlayerFromProgression Level {0} {1} {2}", grManager.IsZoneActive(), local.dropPodLevel, local.dropPodChasisLevel);
+			if (grManager.IsZoneActive())
+			{
+				grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SetPodLevel, dropPodLevel);
+			}
+		}
+		int dropPodChasisLevel = toolProgression.GetDropPodChasisLevel();
+		if (local.dropPodChasisLevel != dropPodChasisLevel)
+		{
+			local.dropPodChasisLevel = dropPodChasisLevel;
+			Debug.LogFormat("Drop Pod UpdateLocalPlayerFromProgression Level {0} {1} {2}", grManager.IsZoneActive(), local.dropPodLevel, local.dropPodChasisLevel);
+			if (grManager.IsZoneActive())
+			{
+				grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SetPodChassisLevel, dropPodChasisLevel);
+			}
+		}
+		if ((bool)local.badge)
+		{
+			local.badge.RefreshText(PhotonNetwork.LocalPlayer);
+		}
+		RefreshStore();
+	}
+
+	public GRPatrolPath GetPatrolPath(long createData)
+	{
+		if (levelGenerator == null)
+		{
+			return null;
+		}
+		return levelGenerator.GetPatrolPath(createData);
+	}
+
+	public override void Tick()
+	{
+		if (grManager == null)
+		{
+			return;
+		}
+		_ = Time.deltaTime;
+		if (grManager.gameEntityManager.IsAuthority())
+		{
+			if (Time.timeAsDouble - lastCollectibleDispenserUpdateTime > (double)collectibleDispenserUpdateFrequency)
+			{
+				lastCollectibleDispenserUpdateTime = Time.timeAsDouble;
+				for (int i = 0; i < collectibleDispensers.Count; i++)
+				{
+					if (collectibleDispensers[i] != null && collectibleDispensers[i].ReadyToDispenseNewCollectible)
+					{
+						collectibleDispensers[i].RequestDispenseCollectible();
+					}
+				}
+			}
+			if (sleepableEntities.Count > 0)
+			{
+				sentientCoreUpdateIndex = Mathf.Max(0, sentientCoreUpdateIndex % sleepableEntities.Count);
+				if (sentientCoreUpdateIndex < sleepableEntities.Count)
+				{
+					IGRSleepableEntity iGRSleepableEntity = sleepableEntities[sentientCoreUpdateIndex];
+					float num = iGRSleepableEntity.WakeUpRadius * iGRSleepableEntity.WakeUpRadius;
+					float num2 = (iGRSleepableEntity.WakeUpRadius + 0.5f) * (iGRSleepableEntity.WakeUpRadius + 0.5f);
+					bool flag = false;
+					bool flag2 = false;
+					for (int j = 0; j < vrRigs.Count; j++)
+					{
+						GRPlayer component = vrRigs[j].GetComponent<GRPlayer>();
+						if (!(component == null) && component.State != GRPlayer.GRPlayerState.Ghost)
+						{
+							float sqrMagnitude = (iGRSleepableEntity.Position - vrRigs[j].bodyTransform.position).sqrMagnitude;
+							if (sqrMagnitude < num2)
+							{
+								flag = true;
+							}
+							if (sqrMagnitude < num)
+							{
+								flag2 = true;
+								break;
+							}
+						}
+					}
+					bool flag3 = iGRSleepableEntity.IsSleeping();
+					if (flag3 && flag2)
+					{
+						iGRSleepableEntity.WakeUp();
+					}
+					else if (!flag3 && !flag)
+					{
+						iGRSleepableEntity.Sleep();
+					}
+					sentientCoreUpdateIndex++;
+				}
+			}
+		}
+		bool flag4 = false;
+		foreach (EntityTypeRespawnTracker item in respawnQueue)
+		{
+			item.entityNextRespawnTime -= Time.deltaTime;
+			if (item.entityNextRespawnTime < 0f)
+			{
+				item.entityNextRespawnTime = 0f;
+				flag4 = true;
+				if (grManager.gameEntityManager.IsAuthority())
+				{
+					levelGenerator.RespawnEntity(item.entityTypeID, item.entityCreateData, GameEntityId.Invalid);
+				}
+			}
+		}
+		if (flag4)
+		{
+			respawnQueue.RemoveAll((EntityTypeRespawnTracker e) => e.entityNextRespawnTime <= 0f);
+		}
+		UpdateHandprints(Time.deltaTime);
+	}
+
+	private void OnLocalPlayerConnectedToRoom()
+	{
+		GRPlayer gRPlayer = GRPlayer.Get(VRRig.LocalRig);
+		if (gRPlayer != null)
+		{
+			gRPlayer.Reset();
+		}
+		if (shiftManager != null)
+		{
+			shiftManager.shiftStats.ResetShiftStats();
+			shiftManager.RefreshShiftStatsDisplay();
+		}
+	}
+
+	private void OnVRRigsChanged(RigContainer container)
+	{
+		VRRigRefresh();
+	}
+
+	public void VRRigRefresh()
+	{
+		if (isRefreshing)
+		{
+			return;
+		}
+		isRefreshing = true;
+		vrRigs.Clear();
+		vrRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(vrRigs);
+		vrRigs.Sort(delegate(VRRig a, VRRig b)
+		{
+			if (a == null || a.OwningNetPlayer == null)
+			{
+				return 1;
+			}
+			return (b == null || b.OwningNetPlayer == null) ? (-1) : a.OwningNetPlayer.ActorNumber.CompareTo(b.OwningNetPlayer.ActorNumber);
+		});
+		if (promotionBot != null)
+		{
+			promotionBot.Refresh();
+		}
+		RefreshScoreboards();
+		RefreshDepth();
+		RefreshStore();
+		GRPlayer gRPlayer = GRPlayer.Get(VRRig.LocalRig);
+		if (gRPlayer != null && vrRigs.Count > gRPlayer.maxNumberOfPlayersInShift)
+		{
+			gRPlayer.maxNumberOfPlayersInShift = vrRigs.Count;
+		}
+		isRefreshing = false;
+	}
+
+	public void UpdateScoreboardScreen(GRUIScoreboard.ScoreboardScreen newScreen)
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			scoreboards[i].SwitchToScreen(newScreen);
+		}
+		RefreshScoreboards();
+	}
+
+	public void RefreshScoreboards()
+	{
+		for (int i = 0; i < scoreboards.Count; i++)
+		{
+			if (scoreboards[i] == null)
+			{
+				continue;
+			}
+			scoreboards[i].Refresh(vrRigs);
+			if (shiftManager != null)
+			{
+				if (shiftManager.ShiftActive)
+				{
+					scoreboards[i].total.text = "-AWAITING SHIFT END-";
+				}
+				else if (shiftManager.ShiftTotalEarned < 0)
+				{
+					scoreboards[i].total.text = "-SHIFT NOT ACTIVE-";
+				}
+				else
+				{
+					scoreboards[i].total.text = shiftManager.ShiftTotalEarned.ToString();
+				}
+			}
+		}
+	}
+
+	public int GetItemCost(int entityTypeId)
+	{
+		if (!grManager.gameEntityManager.PriceLookup(entityTypeId, out var price))
+		{
+			return 100;
+		}
+		return price;
+	}
+
+	public void UpdateRemoteScoreboardScreen(GRUIScoreboard.ScoreboardScreen scoreboardPage)
+	{
+		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(zone);
+		if (managerForZone != null && managerForZone.ghostReactorManager != null)
+		{
+			managerForZone.ghostReactorManager.photonView.RPC("BroadcastScoreboardPage", RpcTarget.Others, scoreboardPage);
+		}
+	}
+
+	public void SetNextDelveDepth(int newLevel, int newDepthConfigIndex)
+	{
+		depthLevel = newLevel;
+		depthLevel = Mathf.Clamp(depthLevel, 0, levelGenerator.depthConfigs.Count);
+		if (depthLevel >= 0 && zone == GTZone.ghostReactorDrill && PhotonNetwork.InRoom && !NetworkSystem.Instance.SessionIsPrivate && grManager.IsAuthority())
+		{
+			int joinDepthSectionFromLevel = GetJoinDepthSectionFromLevel(depthLevel);
+			Hashtable hashtable = new Hashtable { 
+			{
+				"ghostReactorDepth",
+				joinDepthSectionFromLevel.ToString()
+			} };
+			Debug.LogFormat("GR Room Param Set {0} {1}", "ghostReactorDepth", hashtable["ghostReactorDepth"]);
+			PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
+		}
+		depthConfigIndex = newDepthConfigIndex;
+	}
+
+	public static int GetJoinDepthSectionFromLevel(int depthLevel)
+	{
+		if (depthLevel < 4)
+		{
+			return 0;
+		}
+		if (depthLevel < 10)
+		{
+			return 1;
+		}
+		if (depthLevel < 15)
+		{
+			return 2;
+		}
+		if (depthLevel < 20)
+		{
+			return 3;
+		}
+		if (depthLevel < 25)
+		{
+			return 5;
+		}
+		return 6;
+	}
+
+	public void DelveToNextDepth()
+	{
+		if (shiftManager != null)
+		{
+			shiftManager.authorizedToDelveDeeper = false;
+		}
+		RefreshDepth();
+	}
+
+	public int PickLevelConfigForDepth(int depthLevel)
+	{
+		if (zone == GTZone.customMaps)
+		{
+			return 0;
+		}
+		GhostReactorLevelDepthConfig depthLevelConfig = GetDepthLevelConfig(depthLevel);
+		int num = 0;
+		for (int i = 0; i < depthLevelConfig.options.Count; i++)
+		{
+			num += depthLevelConfig.options[i].weight;
+		}
+		int num2 = UnityEngine.Random.Range(0, num + 1);
+		for (int j = 0; j < depthLevelConfig.options.Count; j++)
+		{
+			if (depthLevelConfig.options[j].weight >= num2)
+			{
+				return j;
+			}
+			num2 -= depthLevelConfig.options[j].weight;
+		}
+		return 0;
+	}
+
+	public void RefreshDepth()
+	{
+		if (shiftManager != null)
+		{
+			shiftManager.RefreshDepthDisplay();
+		}
+		RefreshBays();
+	}
+
+	public int GetDepthLevel()
+	{
+		return depthLevel;
+	}
+
+	public int GetDepthConfigIndex()
+	{
+		return depthConfigIndex;
+	}
+
+	public GhostReactorLevelDepthConfig GetDepthLevelConfig(int level)
+	{
+		if (levelGenerator == null)
+		{
+			return null;
+		}
+		level = Mathf.Clamp(level, 0, levelGenerator.depthConfigs.Count - 1);
+		return levelGenerator.depthConfigs[level];
+	}
+
+	public GhostReactorLevelGenConfig GetCurrLevelGenConfig()
+	{
+		if (levelGenerator == null)
+		{
+			return null;
+		}
+		int value = GetDepthLevel();
+		value = Mathf.Clamp(value, 0, levelGenerator.depthConfigs.Count - 1);
+		depthConfigIndex = Mathf.Clamp(depthConfigIndex, 0, levelGenerator.depthConfigs[value].options.Count - 1);
+		return levelGenerator.depthConfigs[value].options[depthConfigIndex].levelConfig;
+	}
+
+	public void RefreshStore()
+	{
+		for (int i = 0; i < storeDisplays.Count; i++)
+		{
+			storeDisplays[i].Setup(PhotonNetwork.LocalPlayer.ActorNumber, this);
+		}
+	}
+
+	public void RefreshBays()
+	{
+		for (int i = 0; i < bays.Count; i++)
+		{
+			bays[i].Refresh();
+		}
+	}
+
+	public void UpdateHandprints(float deltaTime)
+	{
+		int num = handPrintData.Count - 1000;
+		if (num > 0)
+		{
+			handPrintData.RemoveRange(0, num);
+			handPrintLocations.RemoveRange(0, num);
+		}
+		_ = Time.time;
+		for (int num2 = handPrintData.Count - 1; num2 >= 0; num2--)
+		{
+			handPrintData[num2] -= deltaTime;
+			if (num2 + handPrintCombineTestDelta < handPrintData.Count)
+			{
+				if (handPrintData[num2 + handPrintCombineTestDelta] > handPrintFadeTime - 3f)
+				{
+					continue;
+				}
+				Matrix4x4 matrix4x = handPrintLocations[num2];
+				Matrix4x4 matrix4x2 = handPrintLocations[num2 + handPrintCombineTestDelta];
+				if (new Vector3(matrix4x.m03 - matrix4x2.m03, matrix4x.m13 - matrix4x2.m13, matrix4x.m23 - matrix4x2.m23).sqrMagnitude < handPrintScale * handPrintScale)
+				{
+					handPrintData[num2] -= deltaTime * (float)handPrintData.Count * 50f;
+				}
+			}
+			if (handPrintData[num2] < 0f)
+			{
+				handPrintData.RemoveAt(num2);
+				handPrintLocations.RemoveAt(num2);
+			}
+		}
+		if (handPrintData.Count > 0)
+		{
+			handPrintCombineTestDelta = (handPrintCombineTestDelta + 1) % handPrintData.Count;
+			if (handPrintCombineTestDelta == 0)
+			{
+				handPrintCombineTestDelta = 1;
+			}
+		}
+		else
+		{
+			handPrintCombineTestDelta = 1;
+		}
+		if (handPrintMaterial != null)
+		{
+			handPrintMaterial.SetFloat("_FadeDuration", handPrintFadeTime);
+			handPrintMaterial.enableInstancing = true;
+		}
+		int num3 = Mathf.Min(Math.Min(1000, 1023), handPrintLocations.Count);
+		if (num3 > 0)
+		{
+			handPrintMPB.Clear();
+			handPrintMPB.SetFloatArray("_HandPrintData", handPrintData.GetRange(0, num3));
+			handPrintMPB.SetFloat("_FadeDuration", handPrintFadeTime);
+			RenderParams renderParams = new RenderParams(handPrintMaterial);
+			renderParams.shadowCastingMode = ShadowCastingMode.Off;
+			renderParams.receiveShadows = false;
+			renderParams.layer = base.gameObject.layer;
+			renderParams.matProps = handPrintMPB;
+			renderParams.worldBounds = new Bounds(Vector3.zero, Vector3.one * 2000f);
+			RenderParams rparams = renderParams;
+			Graphics.RenderMeshInstanced(in rparams, handPrintMesh, 0, handPrintLocations.GetRange(0, num3));
+		}
+		GRPlayer gRPlayer = GRPlayer.Get(VRRig.LocalRig);
+		if (gRPlayer != null)
+		{
+			if (Time.time - handPrintTimeLeft >= handPrintInkTime)
+			{
+				gRPlayer.SetGooParticleSystemEnabled(bIsLeftHand: true, newEnableState: false);
+			}
+			if (Time.time - handPrintTimeRight >= handPrintInkTime)
+			{
+				gRPlayer.SetGooParticleSystemEnabled(bIsLeftHand: false, newEnableState: false);
+			}
+		}
+	}
+
+	public void OnTapLocal(bool isLeftHand, Vector3 pos, Quaternion orient, GorillaSurfaceOverride surfaceOverride)
+	{
+		GRPlayer gRPlayer = GRPlayer.Get(VRRig.LocalRig);
+		if (gRPlayer == null)
+		{
+			return;
+		}
+		if (surfaceOverride != null && surfaceOverride.overrideIndex == 79)
+		{
+			gRPlayer.SetGooParticleSystemEnabled(isLeftHand, newEnableState: true);
+			if (isLeftHand)
+			{
+				handPrintTimeLeft = Time.time;
+			}
+			else
+			{
+				handPrintTimeRight = Time.time;
+			}
+			return;
+		}
+		float num = (isLeftHand ? handPrintTimeLeft : handPrintTimeRight);
+		if (Time.time - num < handPrintInkTime && (Time.time < lastBroadcastHandTapTime || Time.time > lastBroadcastHandTapTime + broadcastHandTapDelay))
+		{
+			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(zone);
+			if (managerForZone != null && managerForZone.ghostReactorManager != null)
+			{
+				managerForZone.ghostReactorManager.photonView.RPC("BroadcastHandprint", RpcTarget.All, pos, orient);
+			}
+			lastBroadcastHandTapTime = Time.time;
+		}
+	}
+
+	public void AddHandprint(Vector3 pos, Quaternion orient)
+	{
+		Matrix4x4 item = default(Matrix4x4);
+		item.SetTRS(pos, orient * Quaternion.Euler(90f, 0f, 180f), Vector3.one * handPrintScale);
+		handPrintLocations.Add(item);
+		handPrintData.Add(handPrintFadeTime);
+	}
+
+	public void ClearAllHandprints()
+	{
+		handPrintData.Clear();
+		handPrintLocations.Clear();
+	}
+
+	public void OnAbilityDie(GameEntity entity, float forcedRespawn = -1f)
+	{
+		EnemyEntityCreateData enemyEntityCreateData = EnemyEntityCreateData.Unpack(entity.createData);
+		if (enemyEntityCreateData.respawnCount == 0)
+		{
+			return;
+		}
+		if (grManager.GetBossEntity() != null)
+		{
+			GREnemyBossMoon component = grManager.GetBossEntity().GetComponent<GREnemyBossMoon>();
+			if (component != null && component.BossHasRevealed)
+			{
+				return;
+			}
+		}
+		EntityTypeRespawnTracker entityTypeRespawnTracker = new EntityTypeRespawnTracker();
+		entityTypeRespawnTracker.entityTypeID = entity.typeId;
+		entityTypeRespawnTracker.entityCreateData = enemyEntityCreateData.Pack();
+		entityTypeRespawnTracker.entityNextRespawnTime = ((forcedRespawn < 0f) ? respawnTime : forcedRespawn);
+		respawnQueue.Add(entityTypeRespawnTracker);
+	}
+
+	public void ClearAllRespawns()
+	{
+		respawnQueue.Clear();
+	}
+
+	bool IBuildValidation.BuildValidationCheck()
+	{
+		return true;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using XNode;
 
 public abstract class TechTreeNodeBase : Node

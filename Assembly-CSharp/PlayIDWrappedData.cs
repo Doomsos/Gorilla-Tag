@@ -1,34 +1,25 @@
-﻿using System;
-
-internal struct PlayIDWrappedData<T>
+internal struct PlayIDWrappedData<T>(T initialValue)
 {
-	public PlayIDWrappedData(T initialValue)
-	{
-		this.currentValue = initialValue;
-		this.initialValue = initialValue;
-		this.id = EnterPlayID.GetCurrent();
-	}
+	private T currentValue = initialValue;
+
+	private T initialValue = initialValue;
+
+	private EnterPlayID id = EnterPlayID.GetCurrent();
 
 	public T Value
 	{
 		get
 		{
-			if (!this.id.IsCurrent)
+			if (!id.IsCurrent)
 			{
-				return this.initialValue;
+				return initialValue;
 			}
-			return this.currentValue;
+			return currentValue;
 		}
 		set
 		{
-			this.currentValue = value;
-			this.id = EnterPlayID.GetCurrent();
+			currentValue = value;
+			id = EnterPlayID.GetCurrent();
 		}
 	}
-
-	private T currentValue;
-
-	private T initialValue;
-
-	private EnterPlayID id;
 }

@@ -1,64 +1,62 @@
-﻿using System;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace BuildSafe
+namespace BuildSafe;
+
+public abstract class SceneBakeTask : MonoBehaviour
 {
-	public abstract class SceneBakeTask : MonoBehaviour
+	[SerializeField]
+	private SceneBakeMode m_bakeMode;
+
+	[SerializeField]
+	private int m_callbackOrder;
+
+	[Space]
+	[SerializeField]
+	private bool m_runIfInactive = true;
+
+	public SceneBakeMode bakeMode
 	{
-		public SceneBakeMode bakeMode
+		get
 		{
-			get
-			{
-				return this.m_bakeMode;
-			}
-			set
-			{
-				this.m_bakeMode = value;
-			}
+			return m_bakeMode;
 		}
-
-		public virtual int callbackOrder
+		set
 		{
-			get
-			{
-				return this.m_callbackOrder;
-			}
-			set
-			{
-				this.m_callbackOrder = value;
-			}
+			m_bakeMode = value;
 		}
+	}
 
-		public bool runIfInactive
+	public virtual int callbackOrder
+	{
+		get
 		{
-			get
-			{
-				return this.m_runIfInactive;
-			}
-			set
-			{
-				this.m_runIfInactive = value;
-			}
+			return m_callbackOrder;
 		}
-
-		[Conditional("UNITY_EDITOR")]
-		public abstract void OnSceneBake(Scene scene, SceneBakeMode mode);
-
-		[Conditional("UNITY_EDITOR")]
-		private void ForceRun()
+		set
 		{
+			m_callbackOrder = value;
 		}
+	}
 
-		[SerializeField]
-		private SceneBakeMode m_bakeMode;
+	public bool runIfInactive
+	{
+		get
+		{
+			return m_runIfInactive;
+		}
+		set
+		{
+			m_runIfInactive = value;
+		}
+	}
 
-		[SerializeField]
-		private int m_callbackOrder;
+	[Conditional("UNITY_EDITOR")]
+	public abstract void OnSceneBake(Scene scene, SceneBakeMode mode);
 
-		[Space]
-		[SerializeField]
-		private bool m_runIfInactive = true;
+	[Conditional("UNITY_EDITOR")]
+	private void ForceRun()
+	{
 	}
 }

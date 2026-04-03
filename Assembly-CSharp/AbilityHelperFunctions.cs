@@ -1,9 +1,10 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 public static class AbilityHelperFunctions
 {
+	private static int navMeshWalkableArea = -1;
+
 	public static float EaseOutPower(float t, float power)
 	{
 		return 1f - Mathf.Pow(1f - t, power);
@@ -26,27 +27,19 @@ public static class AbilityHelperFunctions
 
 	public static int GetNavMeshWalkableArea()
 	{
-		if (AbilityHelperFunctions.navMeshWalkableArea == -1)
+		if (navMeshWalkableArea == -1)
 		{
-			AbilityHelperFunctions.navMeshWalkableArea = NavMesh.GetAreaFromName("walkable");
+			navMeshWalkableArea = NavMesh.GetAreaFromName("walkable");
 		}
-		return AbilityHelperFunctions.navMeshWalkableArea;
+		return navMeshWalkableArea;
 	}
 
 	public static Vector3? GetLocationToInvestigate(Vector3 listenerLocation, float hearingRadius, Vector3? currentInvestigationLocation)
 	{
-		GameNoiseEvent gameNoiseEvent;
-		NavMeshHit navMeshHit;
-		if (GRNoiseEventManager.instance.GetMostRecentNoiseEventInRadius(listenerLocation, hearingRadius, out gameNoiseEvent) && NavMesh.SamplePosition(gameNoiseEvent.position, out navMeshHit, 1f, AbilityHelperFunctions.GetNavMeshWalkableArea()))
+		if (GRNoiseEventManager.instance.GetMostRecentNoiseEventInRadius(listenerLocation, hearingRadius, out var outEvent) && NavMesh.SamplePosition(outEvent.position, out var hit, 1f, GetNavMeshWalkableArea()))
 		{
-			return new Vector3?(navMeshHit.position);
+			return hit.position;
 		}
-		if (currentInvestigationLocation != null)
-		{
-			return currentInvestigationLocation;
-		}
-		return null;
+		return currentInvestigationLocation ?? ((Vector3?)null);
 	}
-
-	private static int navMeshWalkableArea = -1;
 }

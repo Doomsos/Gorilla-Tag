@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using Photon.Pun;
@@ -10,240 +10,10 @@ using UnityEngine;
 [RequireComponent(typeof(SIGadgetBlasterType))]
 public class SIGadgetBlaster : SIGadget, ITickSystemTick
 {
-	public bool LocalEquippedOrActivated
+	public enum RPCCalls
 	{
-		get
-		{
-			return this.IsEquippedLocal() || this.activatedLocally;
-		}
-	}
-
-	public bool TickRunning { get; set; }
-
-	protected override void OnEnable()
-	{
-		base.OnEnable();
-		this.blasterType = base.GetComponent<SIGadgetBlasterType>();
-		this.lastFired = 0f;
-		this.environmentLayerMask = GTPlayer.Instance.locomotionEnabledLayers;
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this.StartGrabbing));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnSnapped = (Action)Delegate.Combine(gameEntity2.OnSnapped, new Action(this.StartGrabbing));
-		GameEntity gameEntity3 = this.gameEntity;
-		gameEntity3.OnReleased = (Action)Delegate.Combine(gameEntity3.OnReleased, new Action(this.StopGrabbing));
-		GameEntity gameEntity4 = this.gameEntity;
-		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this.StopGrabbing));
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private new void OnDisable()
-	{
-		base.OnDisable();
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public void Tick()
-	{
-		if (this.projectilesToDespawn.Count <= 0)
-		{
-			return;
-		}
-		if (Time.time < this.projectilesToDespawnTimes.Peek() + 1f)
-		{
-			return;
-		}
-		SIGadgetBlasterProjectile sigadgetBlasterProjectile = this.projectilesToDespawn.Dequeue();
-		this.activeProjectiles.RemoveIfContains(sigadgetBlasterProjectile);
-		if (sigadgetBlasterProjectile == null || sigadgetBlasterProjectile.gameObject == null)
-		{
-			return;
-		}
-		SIGadgetBlaster.blasterProjectilePools[sigadgetBlasterProjectile.poolId].Add(sigadgetBlasterProjectile.gameObject);
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		base.OnUpdateAuthority(dt);
-		this.blasterType.OnUpdateAuthority(dt);
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		base.OnUpdateRemote(dt);
-		SIGadgetBlasterState sigadgetBlasterState = (SIGadgetBlasterState)this.gameEntity.GetState();
-		if (sigadgetBlasterState != this.currentState)
-		{
-			this.SetStateShared(sigadgetBlasterState);
-		}
-		this.blasterType.OnUpdateRemote(dt);
-	}
-
-	public void SetStateAuthority(SIGadgetBlasterState newState)
-	{
-		this.SetStateShared(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void SetStateShared(SIGadgetBlasterState newState)
-	{
-		if (newState == this.currentState || !SIGadgetBlaster.CanChangeState((long)newState))
-		{
-			return;
-		}
-		SIGadgetBlasterState sigadgetBlasterState = this.currentState;
-		this.currentState = newState;
-		this.blasterType.SetStateShared();
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this.blasterType.ApplyUpgradeNodes(withUpgrades);
-	}
-
-	public static bool CanChangeState(long newStateIndex)
-	{
-		return newStateIndex >= 0L && newStateIndex < 4L;
-	}
-
-	public bool CheckInput()
-	{
-		float sensitivity = this.wasActivated ? this.inputActivateThreshold : this.inputDeactivateThreshold;
-		this.wasActivated = this.buttonActivatable.CheckInput(sensitivity);
-		return this.wasActivated;
-	}
-
-	public int NextFireId()
-	{
-		int num = this.projectileId;
-		this.projectileId = num + 1;
-		return num;
-	}
-
-	public override void ProcessClientToClientRPC(PhotonMessageInfo info, int rpcID, object[] data)
-	{
-		if (rpcID != 0)
-		{
-			if (rpcID != 1)
-			{
-				return;
-			}
-			if (data == null || data.Length < 2)
-			{
-				return;
-			}
-			int num;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out num))
-			{
-				return;
-			}
-			SIGadgetBlasterProjectile sigadgetBlasterProjectile = null;
-			for (int i = 0; i < this.activeProjectiles.Count; i++)
-			{
-				if (this.activeProjectiles[i].projectileId == num)
-				{
-					sigadgetBlasterProjectile = this.activeProjectiles[i];
-					break;
-				}
-			}
-			if (sigadgetBlasterProjectile == null)
-			{
-				return;
-			}
-			if (sigadgetBlasterProjectile.firedByPlayer != SIPlayer.Get(info.Sender.ActorNumber))
-			{
-				return;
-			}
-			sigadgetBlasterProjectile.GetComponent<SIGadgetProjectileType>().NetworkedProjectileHit(data);
-			return;
-		}
-		else
-		{
-			if (data == null || data.Length == 0)
-			{
-				return;
-			}
-			if (!this.gameEntity.IsAttachedToPlayer(NetPlayer.Get(info.Sender)))
-			{
-				return;
-			}
-			this.blasterType.NetworkFireProjectile(data);
-			return;
-		}
-	}
-
-	public void StartGrabbing()
-	{
-		if (this.IsEquippedLocal() || this.activatedLocally)
-		{
-			this.SetStateAuthority(SIGadgetBlasterState.Idle);
-		}
-	}
-
-	public void StopGrabbing()
-	{
-		this.SetStateShared(SIGadgetBlasterState.Idle);
-	}
-
-	public void DespawnProjectile(SIGadgetBlasterProjectile projectile)
-	{
-		projectile.gameObject.SetActive(false);
-		if (!this.projectilesToDespawn.Contains(projectile))
-		{
-			this.projectilesToDespawn.Enqueue(projectile);
-			this.projectilesToDespawnTimes.Enqueue(Time.time);
-		}
-	}
-
-	public GameObject InstantiateProjectile(SIGadgetBlasterProjectile projectilePrefab, Vector3 position, Quaternion rotation, int thisFireId)
-	{
-		if (SIGadgetBlaster.blasterProjectilePools == null)
-		{
-			SIGadgetBlaster.blasterProjectilePools = new Dictionary<int, List<GameObject>>();
-		}
-		int instanceID = projectilePrefab.GetInstanceID();
-		if (!SIGadgetBlaster.blasterProjectilePools.ContainsKey(instanceID))
-		{
-			SIGadgetBlaster.blasterProjectilePools.Add(instanceID, new List<GameObject>());
-		}
-		List<GameObject> list = SIGadgetBlaster.blasterProjectilePools[instanceID];
-		GameObject gameObject;
-		if (list.Count <= 0)
-		{
-			gameObject = Object.Instantiate<GameObject>(projectilePrefab.gameObject, position, rotation);
-		}
-		else
-		{
-			gameObject = list[list.Count - 1];
-			list.RemoveAt(list.Count - 1);
-			gameObject.SetActive(true);
-		}
-		SIGadgetBlasterProjectile component = gameObject.GetComponent<SIGadgetBlasterProjectile>();
-		component.transform.position = position;
-		component.transform.rotation = rotation;
-		component.parentBlaster = this;
-		component.projectileId = thisFireId;
-		component.firedByPlayer = (this.gameEntity.IsHeld() ? SIPlayer.Get(this.gameEntity.heldByActorNumber) : SIPlayer.Get(this.gameEntity.snappedByActorNumber));
-		component.poolId = instanceID;
-		this.activeProjectiles.Add(component);
-		this.lastFired = Time.time;
-		component.InitializeProjectile();
-		return gameObject;
-	}
-
-	public void FireProjectileHaptics(float strength, float duration)
-	{
-		GorillaTagger.Instance.StartVibration(this.gameEntity.EquippedHandedness == EHandedness.Left, strength, duration);
-	}
-
-	public float CurrentFireRate()
-	{
-		int count = this.activeProjectiles.Count;
-		if (count <= 1)
-		{
-			return 0f;
-		}
-		return (float)(count - 1) / (this.activeProjectiles[count - 1].timeSpawned - this.activeProjectiles[0].timeSpawned);
+		FireProjectile,
+		ProjectileHitPlayer
 	}
 
 	[OnEnterPlay_SetNull]
@@ -298,9 +68,220 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 	[NonSerialized]
 	public LayerMask environmentLayerMask;
 
-	public enum RPCCalls
+	public bool LocalEquippedOrActivated
 	{
-		FireProjectile,
-		ProjectileHitPlayer
+		get
+		{
+			if (!IsEquippedLocal())
+			{
+				return activatedLocally;
+			}
+			return true;
+		}
+	}
+
+	public bool TickRunning { get; set; }
+
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		blasterType = GetComponent<SIGadgetBlasterType>();
+		lastFired = 0f;
+		environmentLayerMask = GTPlayer.Instance.locomotionEnabledLayers;
+		GameEntity obj = gameEntity;
+		obj.OnGrabbed = (Action)Delegate.Combine(obj.OnGrabbed, new Action(StartGrabbing));
+		GameEntity obj2 = gameEntity;
+		obj2.OnSnapped = (Action)Delegate.Combine(obj2.OnSnapped, new Action(StartGrabbing));
+		GameEntity obj3 = gameEntity;
+		obj3.OnReleased = (Action)Delegate.Combine(obj3.OnReleased, new Action(StopGrabbing));
+		GameEntity obj4 = gameEntity;
+		obj4.OnUnsnapped = (Action)Delegate.Combine(obj4.OnUnsnapped, new Action(StopGrabbing));
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void Tick()
+	{
+		if (projectilesToDespawn.Count > 0 && !(Time.time < projectilesToDespawnTimes.Peek() + 1f))
+		{
+			SIGadgetBlasterProjectile sIGadgetBlasterProjectile = projectilesToDespawn.Dequeue();
+			activeProjectiles.RemoveIfContains(sIGadgetBlasterProjectile);
+			if (!(sIGadgetBlasterProjectile == null) && !(sIGadgetBlasterProjectile.gameObject == null))
+			{
+				blasterProjectilePools[sIGadgetBlasterProjectile.poolId].Add(sIGadgetBlasterProjectile.gameObject);
+			}
+		}
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		base.OnUpdateAuthority(dt);
+		blasterType.OnUpdateAuthority(dt);
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		base.OnUpdateRemote(dt);
+		SIGadgetBlasterState sIGadgetBlasterState = (SIGadgetBlasterState)gameEntity.GetState();
+		if (sIGadgetBlasterState != currentState)
+		{
+			SetStateShared(sIGadgetBlasterState);
+		}
+		blasterType.OnUpdateRemote(dt);
+	}
+
+	public void SetStateAuthority(SIGadgetBlasterState newState)
+	{
+		SetStateShared(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void SetStateShared(SIGadgetBlasterState newState)
+	{
+		if (newState != currentState && CanChangeState((long)newState))
+		{
+			_ = currentState;
+			currentState = newState;
+			blasterType.SetStateShared();
+		}
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		blasterType.ApplyUpgradeNodes(withUpgrades);
+	}
+
+	public static bool CanChangeState(long newStateIndex)
+	{
+		if (newStateIndex >= 0)
+		{
+			return newStateIndex < 4;
+		}
+		return false;
+	}
+
+	public bool CheckInput()
+	{
+		float sensitivity = (wasActivated ? inputActivateThreshold : inputDeactivateThreshold);
+		wasActivated = buttonActivatable.CheckInput(sensitivity);
+		return wasActivated;
+	}
+
+	public int NextFireId()
+	{
+		return projectileId++;
+	}
+
+	public override void ProcessClientToClientRPC(PhotonMessageInfo info, int rpcID, object[] data)
+	{
+		switch ((RPCCalls)rpcID)
+		{
+		case RPCCalls.FireProjectile:
+			if (data != null && data.Length != 0 && gameEntity.IsAttachedToPlayer(NetPlayer.Get(info.Sender)))
+			{
+				blasterType.NetworkFireProjectile(data);
+			}
+			break;
+		case RPCCalls.ProjectileHitPlayer:
+		{
+			if (data == null || data.Length < 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType))
+			{
+				break;
+			}
+			SIGadgetBlasterProjectile sIGadgetBlasterProjectile = null;
+			for (int i = 0; i < activeProjectiles.Count; i++)
+			{
+				if (activeProjectiles[i].projectileId == dataAsType)
+				{
+					sIGadgetBlasterProjectile = activeProjectiles[i];
+					break;
+				}
+			}
+			if (!(sIGadgetBlasterProjectile == null) && !(sIGadgetBlasterProjectile.firedByPlayer != SIPlayer.Get(info.Sender.ActorNumber)))
+			{
+				sIGadgetBlasterProjectile.GetComponent<SIGadgetProjectileType>().NetworkedProjectileHit(data);
+			}
+			break;
+		}
+		}
+	}
+
+	public void StartGrabbing()
+	{
+		if (IsEquippedLocal() || activatedLocally)
+		{
+			SetStateAuthority(SIGadgetBlasterState.Idle);
+		}
+	}
+
+	public void StopGrabbing()
+	{
+		SetStateShared(SIGadgetBlasterState.Idle);
+	}
+
+	public void DespawnProjectile(SIGadgetBlasterProjectile projectile)
+	{
+		projectile.gameObject.SetActive(value: false);
+		if (!projectilesToDespawn.Contains(projectile))
+		{
+			projectilesToDespawn.Enqueue(projectile);
+			projectilesToDespawnTimes.Enqueue(Time.time);
+		}
+	}
+
+	public GameObject InstantiateProjectile(SIGadgetBlasterProjectile projectilePrefab, Vector3 position, Quaternion rotation, int thisFireId)
+	{
+		if (blasterProjectilePools == null)
+		{
+			blasterProjectilePools = new Dictionary<int, List<GameObject>>();
+		}
+		int instanceID = projectilePrefab.GetInstanceID();
+		if (!blasterProjectilePools.ContainsKey(instanceID))
+		{
+			blasterProjectilePools.Add(instanceID, new List<GameObject>());
+		}
+		List<GameObject> list = blasterProjectilePools[instanceID];
+		GameObject gameObject;
+		if (list.Count <= 0)
+		{
+			gameObject = UnityEngine.Object.Instantiate(projectilePrefab.gameObject, position, rotation);
+		}
+		else
+		{
+			gameObject = list[list.Count - 1];
+			list.RemoveAt(list.Count - 1);
+			gameObject.SetActive(value: true);
+		}
+		SIGadgetBlasterProjectile component = gameObject.GetComponent<SIGadgetBlasterProjectile>();
+		component.transform.position = position;
+		component.transform.rotation = rotation;
+		component.parentBlaster = this;
+		component.projectileId = thisFireId;
+		component.firedByPlayer = (gameEntity.IsHeld() ? SIPlayer.Get(gameEntity.heldByActorNumber) : SIPlayer.Get(gameEntity.snappedByActorNumber));
+		component.poolId = instanceID;
+		activeProjectiles.Add(component);
+		lastFired = Time.time;
+		component.InitializeProjectile();
+		return gameObject;
+	}
+
+	public void FireProjectileHaptics(float strength, float duration)
+	{
+		GorillaTagger.Instance.StartVibration(gameEntity.EquippedHandedness == EHandedness.Left, strength, duration);
+	}
+
+	public float CurrentFireRate()
+	{
+		int count = activeProjectiles.Count;
+		if (count <= 1)
+		{
+			return 0f;
+		}
+		return (float)(count - 1) / (activeProjectiles[count - 1].timeSpawned - activeProjectiles[0].timeSpawned);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public static class DelegateExtensions
@@ -8,11 +8,11 @@ public static class DelegateExtensions
 		List<string> list = new List<string>();
 		if (invocationList != null)
 		{
-			foreach (Delegate @delegate in invocationList)
+			foreach (Delegate obj in invocationList)
 			{
-				string name = @delegate.Method.Name;
-				string str = (@delegate.Target != null) ? @delegate.Target.GetType().FullName : "Static Method";
-				list.Add(str + "." + name);
+				string name = obj.Method.Name;
+				string text = ((obj.Target != null) ? obj.Target.GetType().FullName : "Static Method");
+				list.Add(text + "." + name);
 			}
 		}
 		return list;

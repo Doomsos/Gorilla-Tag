@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using AA;
 using BoingKit;
 using GorillaExtensions;
@@ -13,4392 +13,4133 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace GorillaLocomotion
+namespace GorillaLocomotion;
+
+public class GTPlayer : MonoBehaviour
 {
-	public class GTPlayer : MonoBehaviour
+	[Serializable]
+	public struct HandState
 	{
-		public static GTPlayer Instance
+		[NonSerialized]
+		public Vector3 lastPosition;
+
+		[NonSerialized]
+		public Quaternion lastRotation;
+
+		[NonSerialized]
+		public bool isLeftHand;
+
+		[NonSerialized]
+		public bool wasColliding;
+
+		[NonSerialized]
+		public bool isColliding;
+
+		[NonSerialized]
+		public bool wasSliding;
+
+		[NonSerialized]
+		public bool isSliding;
+
+		[NonSerialized]
+		public bool isHolding;
+
+		[NonSerialized]
+		public Vector3 slideNormal;
+
+		[NonSerialized]
+		public float slipPercentage;
+
+		[NonSerialized]
+		public Vector3 hitPoint;
+
+		[NonSerialized]
+		private Vector3 boostVectorThisFrame;
+
+		[NonSerialized]
+		public Vector3 finalPositionThisFrame;
+
+		[NonSerialized]
+		public int slipSetToMaxFrameIdx;
+
+		[NonSerialized]
+		public int materialTouchIndex;
+
+		[NonSerialized]
+		public GorillaSurfaceOverride surfaceOverride;
+
+		[NonSerialized]
+		public RaycastHit hitInfo;
+
+		[NonSerialized]
+		public RaycastHit lastHitInfo;
+
+		[NonSerialized]
+		private GTPlayer gtPlayer;
+
+		[SerializeField]
+		public Transform handFollower;
+
+		[SerializeField]
+		public Transform controllerTransform;
+
+		[SerializeField]
+		public GorillaVelocityTracker velocityTracker;
+
+		[SerializeField]
+		public GorillaVelocityTracker interactPointVelocityTracker;
+
+		[SerializeField]
+		public Vector3 handOffset;
+
+		[SerializeField]
+		public Quaternion handRotOffset;
+
+		[NonSerialized]
+		public float tempFreezeUntilTimestamp;
+
+		[NonSerialized]
+		public bool canTag;
+
+		[NonSerialized]
+		public bool canStun;
+
+		private float maxArmLength;
+
+		[NonSerialized]
+		public bool isActive;
+
+		[NonSerialized]
+		public float customBoostFactor;
+
+		[NonSerialized]
+		public bool hasCustomBoost;
+
+		public void Init(GTPlayer gtPlayer, bool isLeftHand, float maxArmLength)
 		{
-			get
+			this.gtPlayer = gtPlayer;
+			this.isLeftHand = isLeftHand;
+			this.maxArmLength = maxArmLength;
+			lastPosition = controllerTransform.position;
+			lastRotation = controllerTransform.rotation;
+			if (handFollower != null)
 			{
-				return GTPlayer._instance;
+				handFollower.transform.position = lastPosition;
+				handFollower.transform.rotation = lastRotation;
 			}
+			wasColliding = false;
+			slipSetToMaxFrameIdx = -1;
 		}
 
-		private float bodyInitialHeight
+		public void OnTeleport()
 		{
-			get
+			wasColliding = false;
+			isColliding = false;
+			isSliding = false;
+			wasSliding = false;
+			if (handFollower != null)
 			{
-				if (GorillaIK.playerIK == null || !GorillaIK.playerIK.usingUpdatedIK)
-				{
-					return this._bodyInitialHeight;
-				}
-				return Mathf.Max(0.2f, Vector3.Dot(GorillaIK.playerIK.bodyBone.up, GTPlayerTransform.Up)) * this._bodyInitialHeight;
+				handFollower.position = controllerTransform.position;
+				handFollower.rotation = controllerTransform.rotation;
 			}
+			lastPosition = controllerTransform.position;
+			lastRotation = controllerTransform.rotation;
 		}
 
-		public GTPlayer.HandState LeftHand
+		public Vector3 GetLastPosition()
 		{
-			get
+			return lastPosition + gtPlayer.MovingSurfaceMovement();
+		}
+
+		public bool SlipOverriddenToMax()
+		{
+			return slipSetToMaxFrameIdx == Time.frameCount;
+		}
+
+		public void FirstIteration(ref Vector3 totalMove, ref int divisor, float paddleBoostFactor)
+		{
+			if (hasCustomBoost)
 			{
-				return this.leftHand;
-			}
-		}
-
-		public ref readonly GTPlayer.HandState LeftHandRef
-		{
-			get
-			{
-				return ref this.leftHand;
-			}
-		}
-
-		public GTPlayer.HandState RightHand
-		{
-			get
-			{
-				return this.rightHand;
-			}
-		}
-
-		public ref readonly GTPlayer.HandState RightHandRef
-		{
-			get
-			{
-				return ref this.rightHand;
-			}
-		}
-
-		public int GetMaterialTouchIndex(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).materialTouchIndex;
-		}
-
-		public GorillaSurfaceOverride GetSurfaceOverride(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).surfaceOverride;
-		}
-
-		public RaycastHit GetTouchHitInfo(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).hitInfo;
-		}
-
-		public bool IsHandTouching(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).wasColliding;
-		}
-
-		public GorillaVelocityTracker GetHandVelocityTracker(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).velocityTracker;
-		}
-
-		public GorillaVelocityTracker GetInteractPointVelocityTracker(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).interactPointVelocityTracker;
-		}
-
-		public Transform GetControllerTransform(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).controllerTransform;
-		}
-
-		public Transform GetHandFollower(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).handFollower;
-		}
-
-		public Vector3 GetHandOffset(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).handOffset;
-		}
-
-		public Quaternion GetHandRotOffset(bool isLeftHand)
-		{
-			return (isLeftHand ? this.leftHand : this.rightHand).handRotOffset;
-		}
-
-		public Vector3 GetHandPosition(bool isLeftHand, StiltID stiltID = StiltID.None)
-		{
-			return ((stiltID != StiltID.None) ? this.stiltStates[(int)stiltID] : (isLeftHand ? this.leftHand : this.rightHand)).lastPosition;
-		}
-
-		public void GetHandTapData(bool isLeftHand, StiltID stiltID, out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
-		{
-			((stiltID != StiltID.None) ? this.stiltStates[(int)stiltID] : (isLeftHand ? this.leftHand : this.rightHand)).GetHandTapData(out wasHandTouching, out wasSliding, out handMatIndex, out surfaceOverride, out handHitInfo, out handPosition, out handVelocityTracker);
-		}
-
-		public void SetHandOffsets(bool isLeftHand, Vector3 handOffset, Quaternion handRotOffset)
-		{
-			if (isLeftHand)
-			{
-				this.leftHand.handOffset = handOffset;
-				this.leftHand.handRotOffset = handRotOffset;
-				return;
-			}
-			this.rightHand.handOffset = handOffset;
-			this.rightHand.handRotOffset = handRotOffset;
-		}
-
-		public Vector3 LastPosition
-		{
-			get
-			{
-				return this.lastPosition;
-			}
-		}
-
-		public Vector3 InstantaneousVelocity
-		{
-			get
-			{
-				return this.currentVelocity;
-			}
-		}
-
-		public Vector3 AveragedVelocity
-		{
-			get
-			{
-				return this.averagedVelocity;
-			}
-		}
-
-		public Transform CosmeticsHeadTarget
-		{
-			get
-			{
-				return this.cosmeticsHeadTarget;
-			}
-		}
-
-		public float scale
-		{
-			get
-			{
-				return this.scaleMultiplier * this.nativeScale;
-			}
-		}
-
-		public float NativeScale
-		{
-			get
-			{
-				return this.nativeScale;
-			}
-		}
-
-		public float ScaleMultiplier
-		{
-			get
-			{
-				return this.scaleMultiplier;
-			}
-		}
-
-		public void SetScaleMultiplier(float s)
-		{
-			this.scaleMultiplier = s;
-		}
-
-		public void SetNativeScale(NativeSizeChangerSettings s)
-		{
-			float num = this.nativeScale;
-			if (s != null && s.playerSizeScale > 0f && s.playerSizeScale != 1f)
-			{
-				this.activeSizeChangerSettings = s;
+				boostVectorThisFrame = gtPlayer.turnParent.transform.rotation * -velocityTracker.GetAverageVelocity() * customBoostFactor;
 			}
 			else
 			{
-				this.activeSizeChangerSettings = null;
+				boostVectorThisFrame = (gtPlayer.enableHoverMode ? (gtPlayer.turnParent.transform.rotation * -velocityTracker.GetAverageVelocity() * paddleBoostFactor) : Vector3.zero);
 			}
-			if (this.activeSizeChangerSettings == null)
+			Vector3 vector = GetCurrentHandPosition() + gtPlayer.movingSurfaceOffset;
+			Vector3 vector2 = GetLastPosition();
+			Vector3 vector3 = vector - vector2;
+			bool num = gtPlayer.lastMovingSurfaceContact == MovingSurfaceContactPoint.LEFT;
+			if (!gtPlayer.didAJump && wasSliding && Vector3.Dot(gtPlayer.slideAverageNormal, GTPlayerTransform.PhysicsUp) > 0f)
 			{
-				this.nativeScale = 1f;
+				vector3 += Vector3.Project(-gtPlayer.slideAverageNormal * gtPlayer.stickDepth * gtPlayer.scale, GTPlayerTransform.PhysicsDown);
 			}
-			else
+			float num2 = gtPlayer.minimumRaycastDistance * gtPlayer.scale;
+			if (gtPlayer.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
 			{
-				this.nativeScale = this.activeSizeChangerSettings.playerSizeScale;
+				num2 = (gtPlayer.minimumRaycastDistance + VRRig.LocalRig.iceCubeRight.transform.localScale.y / 2f) * gtPlayer.scale;
 			}
-			if (num != this.nativeScale && NetworkSystem.Instance.InRoom)
+			Vector3 vector4 = Vector3.zero;
+			if (num && !gtPlayer.exitMovingSurface)
 			{
-				GorillaTagger.Instance.myVRRig != null;
-			}
-		}
-
-		public bool IsDefaultScale
-		{
-			get
-			{
-				return Mathf.Abs(1f - this.scale) < 0.001f;
-			}
-		}
-
-		public bool turnedThisFrame
-		{
-			get
-			{
-				return this.degreesTurnedThisFrame != 0f;
-			}
-		}
-
-		public List<GTPlayer.MaterialData> materialData
-		{
-			get
-			{
-				return this.materialDatasSO.datas;
-			}
-		}
-
-		protected bool IsFrozen { get; set; }
-
-		public bool forcedUnderwater { get; set; }
-
-		public float siJumpMultiplier { get; set; } = 1f;
-
-		public List<WaterVolume> HeadOverlappingWaterVolumes
-		{
-			get
-			{
-				return this.headOverlappingWaterVolumes;
-			}
-		}
-
-		public bool InWater
-		{
-			get
-			{
-				return this.bodyInWater;
-			}
-		}
-
-		public bool HeadInWater
-		{
-			get
-			{
-				return this.headInWater;
-			}
-		}
-
-		public WaterVolume CurrentWaterVolume
-		{
-			get
-			{
-				if (this.bodyOverlappingWaterVolumes.Count <= 0)
+				vector4 = Vector3.Project(-gtPlayer.lastMovingSurfaceHit.normal * (gtPlayer.stickDepth * gtPlayer.scale), GTPlayerTransform.PhysicsDown);
+				if (gtPlayer.scale < 0.5f)
 				{
-					return null;
-				}
-				return this.bodyOverlappingWaterVolumes[0];
-			}
-		}
-
-		public WaterVolume.SurfaceQuery WaterSurfaceForHead
-		{
-			get
-			{
-				return this.waterSurfaceForHead;
-			}
-		}
-
-		public WaterVolume LeftHandWaterVolume
-		{
-			get
-			{
-				return this.leftHandWaterVolume;
-			}
-		}
-
-		public WaterVolume RightHandWaterVolume
-		{
-			get
-			{
-				return this.rightHandWaterVolume;
-			}
-		}
-
-		public WaterVolume.SurfaceQuery LeftHandWaterSurface
-		{
-			get
-			{
-				return this.leftHandWaterSurface;
-			}
-		}
-
-		public WaterVolume.SurfaceQuery RightHandWaterSurface
-		{
-			get
-			{
-				return this.rightHandWaterSurface;
-			}
-		}
-
-		public Vector3 LastLeftHandPosition
-		{
-			get
-			{
-				return this.leftHand.lastPosition;
-			}
-		}
-
-		public Vector3 LastRightHandPosition
-		{
-			get
-			{
-				return this.rightHand.lastPosition;
-			}
-		}
-
-		public Vector3 RigidbodyVelocity
-		{
-			get
-			{
-				return this.playerRigidBody.linearVelocity;
-			}
-		}
-
-		public Vector3 HeadCenterPosition
-		{
-			get
-			{
-				return this.headCollider.transform.position + this.headCollider.transform.rotation * new Vector3(0f, 0f, -0.11f);
-			}
-		}
-
-		public bool HandContactingSurface
-		{
-			get
-			{
-				return this.leftHand.isColliding || this.rightHand.isColliding;
-			}
-		}
-
-		public bool BodyOnGround
-		{
-			get
-			{
-				return this.bodyGroundContactTime >= Time.time - 0.05f;
-			}
-		}
-
-		public bool IsGroundedHand
-		{
-			get
-			{
-				return this.HandContactingSurface || this.isClimbing || this.leftHand.isHolding || this.rightHand.isHolding;
-			}
-		}
-
-		public bool IsGroundedButt
-		{
-			get
-			{
-				return this.BodyOnGround;
-			}
-		}
-
-		public int TentacleActiveAtFrame { get; set; }
-
-		public bool IsTentacleActive
-		{
-			get
-			{
-				return this.TentacleActiveAtFrame >= Time.frameCount;
-			}
-		}
-
-		public int LaserZiplineActiveAtFrame { get; set; }
-
-		public bool IsLaserZiplineActive
-		{
-			get
-			{
-				return this.LaserZiplineActiveAtFrame >= Time.frameCount;
-			}
-		}
-
-		public int ThrusterActiveAtFrame { get; set; }
-
-		public bool IsThrusterActive
-		{
-			get
-			{
-				return this.ThrusterActiveAtFrame >= Time.frameCount;
-			}
-		}
-
-		public Quaternion PlayerRotationOverride
-		{
-			set
-			{
-				this.playerRotationOverride = value;
-				this.playerRotationOverrideFrame = Time.frameCount;
-			}
-		}
-
-		public bool IsBodySliding { get; set; }
-
-		public bool bodyGroundIsSlippery { get; private set; }
-
-		public GorillaClimbable CurrentClimbable
-		{
-			get
-			{
-				return this.currentClimbable;
-			}
-		}
-
-		public GorillaHandClimber CurrentClimber
-		{
-			get
-			{
-				return this.currentClimber;
-			}
-		}
-
-		public float jumpMultiplier
-		{
-			get
-			{
-				return this._jumpMultiplier;
-			}
-			set
-			{
-				this._jumpMultiplier = value;
-			}
-		}
-
-		public float LastTouchedGroundAtNetworkTime { get; private set; }
-
-		public float LastHandTouchedGroundAtNetworkTime { get; private set; }
-
-		public void EnableStilt(StiltID stiltID, bool isLeftHand, Vector3 currentTipWorldPos, float maxArmLength, bool canTag, bool canStun, float customBoostFactor = 0f, GorillaVelocityTracker velocityTracker = null)
-		{
-			this.stiltStates[(int)stiltID] = new GTPlayer.HandState
-			{
-				isActive = true,
-				controllerTransform = (isLeftHand ? this.leftHand : this.rightHand).controllerTransform,
-				velocityTracker = ((velocityTracker != null) ? velocityTracker : (isLeftHand ? this.leftHand : this.rightHand).velocityTracker),
-				handRotOffset = Quaternion.identity,
-				canTag = canTag,
-				canStun = canStun,
-				customBoostFactor = customBoostFactor,
-				hasCustomBoost = (customBoostFactor > 0f)
-			};
-			this.stiltStates[(int)stiltID].Init(this, isLeftHand, maxArmLength);
-			this.UpdateStiltOffset(stiltID, currentTipWorldPos);
-		}
-
-		public void DisableStilt(StiltID stiltID)
-		{
-			this.stiltStates[(int)stiltID].isActive = false;
-		}
-
-		public void UpdateStiltOffset(StiltID stiltID, Vector3 currentTipWorldPos)
-		{
-			this.stiltStates[(int)stiltID].handOffset = this.stiltStates[(int)stiltID].controllerTransform.InverseTransformPoint(currentTipWorldPos);
-		}
-
-		private void Awake()
-		{
-			if (GTPlayer._instance != null && GTPlayer._instance != this)
-			{
-				Object.Destroy(base.gameObject);
-			}
-			else
-			{
-				GTPlayer._instance = this;
-				GTPlayer.hasInstance = true;
-			}
-			this.InitializeValues();
-			this.playerRigidbodyInterpolationDefault = this.playerRigidBody.interpolation;
-			this.playerRigidBody.maxAngularVelocity = 0f;
-			this.bodyOffsetVector = new Vector3(0f, -this.bodyCollider.height / 2f, 0f);
-			this._bodyInitialHeight = this.bodyCollider.height;
-			this.bodyInitialRadius = this.bodyCollider.radius;
-			this.rayCastNonAllocColliders = new RaycastHit[5];
-			this.crazyCheckVectors = new Vector3[7];
-			this.emptyHit = default(RaycastHit);
-			this.crazyCheckVectors[0] = Vector3.up;
-			this.crazyCheckVectors[1] = Vector3.down;
-			this.crazyCheckVectors[2] = Vector3.left;
-			this.crazyCheckVectors[3] = Vector3.right;
-			this.crazyCheckVectors[4] = Vector3.forward;
-			this.crazyCheckVectors[5] = Vector3.back;
-			this.crazyCheckVectors[6] = Vector3.zero;
-			if (this.controllerState == null)
-			{
-				this.controllerState = base.GetComponent<ConnectedControllerHandler>();
-			}
-			this.layerChanger = base.GetComponent<LayerChanger>();
-			this.bodyTouchedSurfaces = new Dictionary<GameObject, PhysicsMaterial>();
-			if (Application.isPlaying)
-			{
-				Application.onBeforeRender += this.OnBeforeRenderInit;
-			}
-		}
-
-		protected void Start()
-		{
-			if (this.mainCamera == null)
-			{
-				this.mainCamera = Camera.main;
-			}
-			this.mainCamera.farClipPlane = 500f;
-			this.lastScale = this.scale;
-			this.layerChanger.InitializeLayers(base.transform);
-			float degrees = Quaternion.Angle(Quaternion.identity, GorillaTagger.Instance.offlineVRRig.transform.rotation) * Mathf.Sign(Vector3.Dot(Vector3.up, GorillaTagger.Instance.offlineVRRig.transform.right));
-			this.Turn(degrees);
-		}
-
-		protected void OnDestroy()
-		{
-			if (GTPlayer._instance == this)
-			{
-				GTPlayer._instance = null;
-				GTPlayer.hasInstance = false;
-			}
-			if (this.climbHelper)
-			{
-				Object.Destroy(this.climbHelper.gameObject);
-			}
-		}
-
-		public void InitializeValues()
-		{
-			Physics.SyncTransforms();
-			this.playerRigidBody = base.GetComponent<Rigidbody>();
-			this.velocityHistory = new Vector3[this.velocityHistorySize];
-			this.slideAverageHistory = new Vector3[this.velocityHistorySize];
-			for (int i = 0; i < this.velocityHistory.Length; i++)
-			{
-				this.velocityHistory[i] = Vector3.zero;
-				this.slideAverageHistory[i] = Vector3.zero;
-			}
-			this.leftHand.Init(this, true, this.maxArmLength);
-			this.rightHand.Init(this, false, this.maxArmLength);
-			this.lastHeadPosition = this.headCollider.transform.position;
-			this.velocityIndex = 0;
-			this.averagedVelocity = Vector3.zero;
-			this.slideVelocity = Vector3.zero;
-			this.lastPosition = base.transform.position;
-			this.lastRealTime = Time.realtimeSinceStartup;
-			this.lastOpenHeadPosition = this.headCollider.transform.position;
-			this.bodyCollider.transform.position = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + this.bodyOffsetVector;
-			this.bodyCollider.transform.eulerAngles = new Vector3(0f, this.headCollider.transform.eulerAngles.y, 0f);
-			this.ForceRigidBodySync();
-		}
-
-		public void SetHalloweenLevitation(float levitateStrength, float levitateDuration, float levitateBlendOutDuration, float levitateBonusStrength, float levitateBonusOffAtYSpeed, float levitateBonusFullAtYSpeed)
-		{
-			this.halloweenLevitationStrength = levitateStrength;
-			this.halloweenLevitationFullStrengthDuration = levitateDuration;
-			this.halloweenLevitationTotalDuration = levitateDuration + levitateBlendOutDuration;
-			this.halloweenLevitateBonusFullAtYSpeed = levitateBonusFullAtYSpeed;
-			this.halloweenLevitateBonusOffAtYSpeed = levitateBonusFullAtYSpeed;
-			this.halloweenLevitationBonusStrength = levitateBonusStrength;
-		}
-
-		public void TeleportToTrain(bool enable)
-		{
-			this.teleportToTrain = enable;
-		}
-
-		public void TeleportTo(Vector3 position, Quaternion rotation)
-		{
-			this.teleportTo(position, rotation, false, false);
-		}
-
-		public void TeleportTo(Vector3 position, Quaternion rotation, bool keepVelocity)
-		{
-			this.teleportTo(position, rotation, keepVelocity, false);
-		}
-
-		public void TeleportTo(Vector3 position, Quaternion rotation, bool keepVelocity, bool center)
-		{
-			this.teleportTo(position, rotation, keepVelocity, center);
-		}
-
-		private void teleportTo(Vector3 position, Quaternion rotation, bool keepVelocity, bool center)
-		{
-			if (center)
-			{
-				Vector3 position2 = base.transform.position;
-				Vector3 b = this.mainCamera.transform.position - position2;
-				position -= b;
-			}
-			this.ClearHandHolds();
-			if (this.playerRigidBody != null)
-			{
-				this.playerRigidBody.isKinematic = true;
-				this.playerRigidBody.position = position;
-				this.playerRigidBody.rotation = rotation;
-				this.playerRigidBody.isKinematic = false;
-			}
-			this.playerRigidBody.position = position;
-			this.playerRigidBody.rotation = rotation;
-			base.transform.position = position;
-			base.transform.rotation = rotation;
-			this.lastHeadPosition = this.headCollider.transform.position;
-			this.lastPosition = position;
-			this.lastOpenHeadPosition = this.headCollider.transform.position;
-			this.leftHand.OnTeleport();
-			this.rightHand.OnTeleport();
-			for (int i = 0; i < 12; i++)
-			{
-				if (this.stiltStates[i].isActive)
-				{
-					this.stiltStates[i].OnTeleport();
-				}
-			}
-			if (!keepVelocity)
-			{
-				this.playerRigidBody.linearVelocity = Vector3.zero;
-			}
-			this.bodyCollider.transform.position = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + this.bodyOffsetVector;
-			this.bodyCollider.transform.eulerAngles = new Vector3(0f, this.headCollider.transform.eulerAngles.y, 0f);
-			Physics.SyncTransforms();
-			GorillaTagger.Instance.offlineVRRig.transform.position = position;
-			GorillaTagger.Instance.offlineVRRig.leftHandLink.BreakLink();
-			GorillaTagger.Instance.offlineVRRig.rightHandLink.BreakLink();
-			this.ForceRigidBodySync();
-		}
-
-		public void TeleportTo(Transform destination, bool matchDestinationRotation = true, bool maintainVelocity = true)
-		{
-			Vector3 position = base.transform.position;
-			Vector3 b = this.mainCamera.transform.position - position;
-			Vector3 position2 = destination.position - b;
-			float num = destination.rotation.eulerAngles.y - this.mainCamera.transform.rotation.eulerAngles.y;
-			Vector3 playerVelocity = this.currentVelocity;
-			if (!maintainVelocity)
-			{
-				this.SetPlayerVelocity(Vector3.zero);
-			}
-			else if (matchDestinationRotation)
-			{
-				playerVelocity = Quaternion.AngleAxis(num, base.transform.up) * this.currentVelocity;
-				this.SetPlayerVelocity(playerVelocity);
-			}
-			if (matchDestinationRotation)
-			{
-				this.Turn(num);
-			}
-			this.TeleportTo(position2, base.transform.rotation);
-			if (maintainVelocity)
-			{
-				this.SetPlayerVelocity(playerVelocity);
-			}
-			this.ForceRigidBodySync();
-		}
-
-		public void AddForce(Vector3 force, ForceMode mode)
-		{
-			if (mode == ForceMode.VelocityChange)
-			{
-				this.playerRigidBody.AddForce(force * this.playerRigidBody.mass, ForceMode.Impulse);
-				return;
-			}
-			this.playerRigidBody.AddForce(force, mode);
-		}
-
-		public void SetPlayerVelocity(Vector3 newVelocity)
-		{
-			for (int i = 0; i < this.velocityHistory.Length; i++)
-			{
-				this.velocityHistory[i] = newVelocity;
-			}
-			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, ForceMode.VelocityChange);
-		}
-
-		public int GravityOverrideCount
-		{
-			get
-			{
-				return this.gravityOverrides.Count;
-			}
-		}
-
-		public void SetGravityOverride(Object caller, Action<GTPlayer> gravityFunction)
-		{
-			this.gravityOverrides[caller] = gravityFunction;
-		}
-
-		public void UnsetGravityOverride(Object caller)
-		{
-			this.gravityOverrides.Remove(caller);
-		}
-
-		private void ApplyGravityOverrides()
-		{
-			foreach (KeyValuePair<Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
-			{
-				keyValuePair.Value(this);
-			}
-		}
-
-		public void ApplyKnockback(Vector3 direction, float speed, bool forceOffTheGround = false)
-		{
-			if (forceOffTheGround)
-			{
-				if (this.leftHand.wasColliding || this.rightHand.wasColliding)
-				{
-					this.leftHand.wasColliding = false;
-					this.rightHand.wasColliding = false;
-					this.playerRigidBody.transform.position += this.minimumRaycastDistance * this.scale * Vector3.up;
-				}
-				this.didAJump = true;
-				this.SetMaximumSlipThisFrame();
-			}
-			if (speed > 0.01f)
-			{
-				float num = Vector3.Dot(this.averagedVelocity, direction);
-				float d = Mathf.InverseLerp(1.5f, 0.5f, num / speed);
-				Vector3 vector = this.averagedVelocity + direction * speed * d;
-				this.playerRigidBody.linearVelocity = vector;
-				for (int i = 0; i < this.velocityHistory.Length; i++)
-				{
-					this.velocityHistory[i] = vector;
-				}
-			}
-		}
-
-		public void ApplyClampedKnockback(Vector3 direction, float speed, float boostMultiplier, bool forceOffTheGround = false)
-		{
-			if (forceOffTheGround)
-			{
-				if (this.leftHand.wasColliding || this.rightHand.wasColliding)
-				{
-					this.leftHand.wasColliding = false;
-					this.rightHand.wasColliding = false;
-					this.playerRigidBody.transform.position += this.minimumRaycastDistance * this.scale * Vector3.up;
-				}
-				this.didAJump = true;
-				this.SetMaximumSlipThisFrame();
-			}
-			if (speed > 0.01f)
-			{
-				float num = Vector3.Dot(this.playerRigidBody.linearVelocity, direction.normalized);
-				if (num >= speed)
-				{
-					return;
-				}
-				float d = Mathf.Clamp(speed - num, 0f, speed * boostMultiplier);
-				Vector3 vector = this.playerRigidBody.linearVelocity + direction.normalized * d;
-				this.playerRigidBody.linearVelocity = vector;
-				for (int i = 0; i < this.velocityHistory.Length; i++)
-				{
-					this.velocityHistory[i] = vector;
-				}
-			}
-		}
-
-		public void FixedUpdate()
-		{
-			this.AntiTeleportTechnology();
-			this.IsFrozen = (GorillaTagger.Instance.offlineVRRig.IsFrozen || this.debugFreezeTag);
-			bool isDefaultScale = this.IsDefaultScale;
-			this.playerRigidBody.useGravity = false;
-			if (this.gravityOverrides.Count > 0)
-			{
-				this.ApplyGravityOverrides();
-			}
-			else if (this.halloweenLevitationBonusStrength > 0f || this.halloweenLevitationStrength > 0f)
-			{
-				float num = Time.time - this.lastTouchedGroundTimestamp;
-				if (num < this.halloweenLevitationTotalDuration)
-				{
-					this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationStrength * Mathf.InverseLerp(this.halloweenLevitationFullStrengthDuration, this.halloweenLevitationTotalDuration, num)), ForceMode.Acceleration);
-				}
-				float y = this.playerRigidBody.linearVelocity.y;
-				if (y <= this.halloweenLevitateBonusFullAtYSpeed)
-				{
-					this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength, ForceMode.Acceleration);
-				}
-				else if (y <= this.halloweenLevitateBonusOffAtYSpeed)
-				{
-					float num2 = Mathf.InverseLerp(this.halloweenLevitateBonusOffAtYSpeed, this.halloweenLevitateBonusFullAtYSpeed, this.playerRigidBody.linearVelocity.y);
-					this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationBonusStrength * num2), ForceMode.Acceleration);
-				}
-			}
-			if (this.enableHoverMode)
-			{
-				this.playerRigidBody.linearVelocity = this.HoverboardFixedUpdate(this.playerRigidBody.linearVelocity);
-			}
-			else
-			{
-				this.didHoverLastFrame = false;
-			}
-			float fixedDeltaTime = Time.fixedDeltaTime;
-			this.bodyInWater = false;
-			Vector3 lhs = this.swimmingVelocity;
-			this.swimmingVelocity = Vector3.MoveTowards(this.swimmingVelocity, Vector3.zero, this.swimmingParams.swimmingVelocityOutOfWaterDrainRate * fixedDeltaTime);
-			this.leftHandNonDiveHapticsAmount = 0f;
-			this.rightHandNonDiveHapticsAmount = 0f;
-			if (this.bodyOverlappingWaterVolumes.Count > 0 || this.forcedUnderwater)
-			{
-				WaterVolume waterVolume = null;
-				float num3 = float.MinValue;
-				Vector3 vector = this.headCollider.transform.position + Vector3.down * this.swimmingParams.floatingWaterLevelBelowHead * this.scale;
-				this.activeWaterCurrents.Clear();
-				for (int i = 0; i < this.bodyOverlappingWaterVolumes.Count; i++)
-				{
-					WaterVolume.SurfaceQuery surfaceQuery;
-					if (this.bodyOverlappingWaterVolumes[i].GetSurfaceQueryForPoint(vector, out surfaceQuery, false))
+					Vector3 normalized = gtPlayer.MovingSurfaceMovement().normalized;
+					if (normalized != Vector3.zero)
 					{
-						float num4 = Vector3.Dot(surfaceQuery.surfacePoint - vector, surfaceQuery.surfaceNormal);
-						if (num4 > num3)
+						float num3 = Vector3.Dot(GTPlayerTransform.PhysicsUp, normalized);
+						if ((double)num3 > 0.9 || (double)num3 < -0.9)
 						{
-							num3 = num4;
-							waterVolume = this.bodyOverlappingWaterVolumes[i];
-							this.waterSurfaceForHead = surfaceQuery;
-						}
-						WaterCurrent waterCurrent = this.bodyOverlappingWaterVolumes[i].Current;
-						if (waterCurrent != null && num4 > 0f && !this.activeWaterCurrents.Contains(waterCurrent))
-						{
-							this.activeWaterCurrents.Add(waterCurrent);
-						}
-					}
-				}
-				if (this.forcedUnderwater && waterVolume == null)
-				{
-					this.waterSurfaceForHead = new WaterVolume.SurfaceQuery
-					{
-						surfacePoint = this.headCollider.transform.position + Vector3.up * 1000f,
-						surfaceNormal = Vector3.up,
-						maxDepth = 2000f
-					};
-					num3 = 1000f;
-				}
-				if (waterVolume != null || this.forcedUnderwater)
-				{
-					Vector3 linearVelocity = this.playerRigidBody.linearVelocity;
-					float magnitude = linearVelocity.magnitude;
-					bool flag = this.headInWater;
-					this.headInWater = (this.forcedUnderwater || (this.headCollider.transform.position.y < this.waterSurfaceForHead.surfacePoint.y && this.headCollider.transform.position.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth));
-					if (this.headInWater && !flag)
-					{
-						this.audioSetToUnderwater = true;
-						this.audioManager.SetMixerSnapshot(this.audioManager.underwaterSnapshot, 0.1f);
-					}
-					else if (!this.headInWater && flag)
-					{
-						this.audioSetToUnderwater = false;
-						this.audioManager.UnsetMixerSnapshot(0.1f);
-					}
-					this.bodyInWater = (this.forcedUnderwater || (vector.y < this.waterSurfaceForHead.surfacePoint.y && vector.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth));
-					if (this.bodyInWater)
-					{
-						GTPlayer.LiquidProperties liquidProperties = this.liquidPropertiesList[(int)((waterVolume != null) ? waterVolume.LiquidType : GTPlayer.LiquidType.Water)];
-						float num6;
-						if (this.swimmingParams.extendBouyancyFromSpeed)
-						{
-							float time = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
-							float b = this.swimmingParams.speedToBouyancyExtension.Evaluate(time);
-							this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, b);
-							float num5 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
-							this.buoyancyExtension = Spring.DamperDecayExact(this.buoyancyExtension, this.swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime, 1E-05f);
-							num6 = num5;
-						}
-						else
-						{
-							num6 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
-						}
-						Vector3 vector2 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num6);
-						if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
-						{
-							vector2 *= this.frozenBodyBuoyancyFactor;
-						}
-						this.playerRigidBody.AddForce(vector2, ForceMode.Acceleration);
-						Vector3 vector3 = Vector3.zero;
-						Vector3 vector4 = Vector3.zero;
-						for (int j = 0; j < this.activeWaterCurrents.Count; j++)
-						{
-							WaterCurrent waterCurrent2 = this.activeWaterCurrents[j];
-							Vector3 startingVelocity = linearVelocity + vector3;
-							Vector3 b2;
-							Vector3 b3;
-							if (waterCurrent2.GetCurrentAtPoint(this.bodyCollider.transform.position, startingVelocity, fixedDeltaTime, out b2, out b3))
-							{
-								vector4 += b2;
-								vector3 += b3;
-							}
-						}
-						if (magnitude > Mathf.Epsilon)
-						{
-							float num7 = 0.01f;
-							Vector3 vector5 = linearVelocity / magnitude;
-							Vector3 right = this.leftHand.handFollower.right;
-							Vector3 dir = -this.rightHand.handFollower.right;
-							Vector3 forward = this.leftHand.handFollower.forward;
-							Vector3 forward2 = this.rightHand.handFollower.forward;
-							Vector3 a = vector5;
-							float num8 = 0f;
-							float num9 = 0f;
-							float num10 = 0f;
-							if (this.swimmingParams.applyDiveSteering && !this.disableMovement && isDefaultScale)
-							{
-								float value = Vector3.Dot(linearVelocity - vector4, vector5);
-								float time2 = Mathf.Clamp(value, this.swimmingParams.swimSpeedToRedirectAmountMinMax.x, this.swimmingParams.swimSpeedToRedirectAmountMinMax.y);
-								float b4 = this.swimmingParams.swimSpeedToRedirectAmount.Evaluate(time2);
-								time2 = Mathf.Clamp(value, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
-								float num11 = this.swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(time2);
-								float value2 = Mathf.Acos(Vector3.Dot(vector5, forward)) / 3.1415927f * -2f + 1f;
-								float value3 = Mathf.Acos(Vector3.Dot(vector5, forward2)) / 3.1415927f * -2f + 1f;
-								float num12 = Mathf.Clamp(value2, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
-								float num13 = Mathf.Clamp(value3, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
-								float a2 = (!float.IsNaN(num12)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num12) : 0f;
-								float a3 = (!float.IsNaN(num13)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num13) : 0f;
-								Vector3 a4 = Vector3.ProjectOnPlane(vector5, right);
-								Vector3 a5 = Vector3.ProjectOnPlane(vector5, right);
-								float num14 = Mathf.Min(a4.magnitude, 1f);
-								float num15 = Mathf.Min(a5.magnitude, 1f);
-								float magnitude2 = this.leftHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
-								float magnitude3 = this.rightHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
-								float time3 = Mathf.Clamp(magnitude2, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float time4 = Mathf.Clamp(magnitude3, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float a6 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(time3);
-								float a7 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(time4);
-								float averageSpeedChangeMagnitudeInDirection = this.leftHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(right, false, this.swimmingParams.diveVelocityAveragingWindow);
-								float averageSpeedChangeMagnitudeInDirection2 = this.rightHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(dir, false, this.swimmingParams.diveVelocityAveragingWindow);
-								float time5 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float time6 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float b5 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(time5);
-								float b6 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(time6);
-								num8 = Mathf.Min(a2, Mathf.Min(a6, b5));
-								float num16 = (Vector3.Dot(vector5, forward) > 0f) ? (Mathf.Min(num8, b4) * num14) : 0f;
-								num9 = Mathf.Min(a3, Mathf.Min(a7, b6));
-								float num17 = (Vector3.Dot(vector5, forward2) > 0f) ? (Mathf.Min(num9, b4) * num15) : 0f;
-								if (this.swimmingParams.reduceDiveSteeringBelowVelocityPlane)
-								{
-									Vector3 rhs;
-									if (Vector3.Dot(this.headCollider.transform.up, vector5) > 0.95f)
-									{
-										rhs = -this.headCollider.transform.forward;
-									}
-									else
-									{
-										rhs = Vector3.Cross(Vector3.Cross(vector5, this.headCollider.transform.up), vector5).normalized;
-									}
-									Vector3 position = this.headCollider.transform.position;
-									Vector3 lhs2 = position - this.leftHand.handFollower.position;
-									Vector3 lhs3 = position - this.rightHand.handFollower.position;
-									float reduceDiveSteeringBelowPlaneFadeStartDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeStartDist;
-									float reduceDiveSteeringBelowPlaneFadeEndDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeEndDist;
-									float f = Vector3.Dot(lhs2, Vector3.up);
-									float f2 = Vector3.Dot(lhs3, Vector3.up);
-									float f3 = Vector3.Dot(lhs2, rhs);
-									float f4 = Vector3.Dot(lhs3, rhs);
-									float num18 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f), Mathf.Abs(f3)));
-									float num19 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f2), Mathf.Abs(f4)));
-									num16 *= num18;
-									num17 *= num19;
-								}
-								float num20 = num17 + num16;
-								Vector3 vector6 = Vector3.zero;
-								if (this.swimmingParams.applyDiveSteering && num20 > num7)
-								{
-									vector6 = ((num16 * a4 + num17 * a5) / num20).normalized;
-									vector6 = Vector3.Lerp(vector5, vector6, num20);
-									a = Vector3.RotateTowards(vector5, vector6, 0.017453292f * num11 * fixedDeltaTime, 0f);
-								}
-								else
-								{
-									a = vector5;
-								}
-								num10 = Mathf.Clamp01((num8 + num9) * 0.5f);
-							}
-							float num21 = Mathf.Clamp(Vector3.Dot(lhs, vector5), 0f, magnitude);
-							float num22 = magnitude - num21;
-							if (this.swimmingParams.applyDiveSwimVelocityConversion && !this.disableMovement && num10 > num7 && num21 < this.swimmingParams.diveMaxSwimVelocityConversion)
-							{
-								float num23 = Mathf.Min(this.swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num22) * num10;
-								num21 += num23;
-								num22 -= num23;
-							}
-							float halflife = this.swimmingParams.swimUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
-							float halflife2 = this.swimmingParams.baseUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
-							float num24 = Spring.DamperDecayExact(num21 / this.scale, halflife, fixedDeltaTime, 1E-05f) * this.scale;
-							float num25 = Spring.DamperDecayExact(num22 / this.scale, halflife2, fixedDeltaTime, 1E-05f) * this.scale;
-							if (this.swimmingParams.applyDiveDampingMultiplier && !this.disableMovement)
-							{
-								float t = Mathf.Lerp(1f, this.swimmingParams.diveDampingMultiplier, num10);
-								num24 = Mathf.Lerp(num21, num24, t);
-								num25 = Mathf.Lerp(num22, num25, t);
-								float time7 = Mathf.Clamp((1f - num8) * (num21 + num22), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
-								float time8 = Mathf.Clamp((1f - num9) * (num21 + num22), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
-								this.leftHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time7);
-								this.rightHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time8);
-							}
-							this.swimmingVelocity = num24 * a + vector3 * this.scale;
-							this.playerRigidBody.linearVelocity = this.swimmingVelocity + num25 * a;
+							vector4 *= 6f;
+							num2 *= 1.1f;
 						}
 					}
 				}
 			}
-			else if (this.audioSetToUnderwater)
+			Vector3 vector5;
+			if (gtPlayer.IterativeCollisionSphereCast(vector2, num2, vector3 + vector4, boostVectorThisFrame, out var endPosition, singleHand: true, out slipPercentage, out var iterativeHitInfo, SlipOverriddenToMax()) && !isHolding && !gtPlayer.InReportMenu)
 			{
-				this.audioSetToUnderwater = false;
-				this.audioManager.UnsetMixerSnapshot(0.1f);
+				vector5 = ((!wasColliding || !(slipPercentage <= gtPlayer.defaultSlideFactor) || boostVectorThisFrame.IsLongerThan(0f)) ? (endPosition - vector) : (vector2 - vector));
+				isSliding = slipPercentage > gtPlayer.iceThreshold;
+				slideNormal = gtPlayer.tempHitInfo.normal;
+				isColliding = true;
+				materialTouchIndex = gtPlayer.currentMaterialIndex;
+				surfaceOverride = gtPlayer.currentOverride;
+				gtPlayer.lastHitInfoHand = iterativeHitInfo;
+				lastHitInfo = iterativeHitInfo;
 			}
-			this.handleClimbing(Time.fixedDeltaTime);
-			this.stuckHandsCheckFixedUpdate();
-			this.FixedUpdate_HandHolds(Time.fixedDeltaTime);
-		}
-
-		public bool isHoverAllowed { get; private set; }
-
-		public bool enableHoverMode { get; private set; }
-
-		public void SetHoverboardPosRot(Vector3 worldPos, Quaternion worldRot)
-		{
-			this.hoverboardPlayerLocalPos = this.headCollider.transform.InverseTransformPoint(worldPos);
-			this.hoverboardPlayerLocalRot = this.headCollider.transform.InverseTransformRotation(worldRot);
-		}
-
-		private void HoverboardLateUpdate()
-		{
-			Vector3 eulerAngles = this.headCollider.transform.eulerAngles;
-			bool flag = false;
-			for (int i = 0; i < this.hoverboardCasts.Length; i++)
+			else
 			{
-				GTPlayer.HoverBoardCast hoverBoardCast = this.hoverboardCasts[i];
-				RaycastHit raycastHit;
-				hoverBoardCast.didHit = Physics.SphereCast(new Ray(this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin), this.hoverboardVisual.transform.rotation * hoverBoardCast.localDirection), hoverBoardCast.sphereRadius, out raycastHit, hoverBoardCast.distance, this.locomotionEnabledLayers);
-				if (hoverBoardCast.didHit)
+				vector5 = Vector3.zero;
+				slipPercentage = 0f;
+				isSliding = false;
+				slideNormal = GTPlayerTransform.PhysicsUp;
+				isColliding = false;
+				materialTouchIndex = 0;
+				surfaceOverride = null;
+			}
+			bool flag = (isLeftHand ? gtPlayer.controllerState.LeftValid : gtPlayer.controllerState.RightValid);
+			isColliding &= flag;
+			isSliding &= flag;
+			if (isColliding)
+			{
+				gtPlayer.anyHandIsColliding = true;
+				if (isSliding)
 				{
-					HoverboardCantHover hoverboardCantHover;
-					if (raycastHit.collider.TryGetComponent<HoverboardCantHover>(out hoverboardCantHover))
+					gtPlayer.anyHandIsSliding = true;
+				}
+				else
+				{
+					gtPlayer.anyHandIsSticking = true;
+				}
+			}
+			if (isColliding || wasColliding)
+			{
+				if (!surfaceOverride || !surfaceOverride.disablePushBackEffect)
+				{
+					totalMove += vector5;
+				}
+				divisor++;
+			}
+		}
+
+		public void FinalizeHandPosition()
+		{
+			Vector3 vector = GetLastPosition();
+			if (Time.time < tempFreezeUntilTimestamp)
+			{
+				finalPositionThisFrame = vector;
+			}
+			else
+			{
+				Vector3 movementVector = GetCurrentHandPosition() - vector;
+				float sphereRadius = gtPlayer.minimumRaycastDistance * gtPlayer.scale;
+				if (gtPlayer.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
+				{
+					sphereRadius = (gtPlayer.minimumRaycastDistance + VRRig.LocalRig.iceCubeRight.transform.localScale.y / 2f) * gtPlayer.scale;
+				}
+				if (gtPlayer.IterativeCollisionSphereCast(vector, sphereRadius, movementVector, boostVectorThisFrame, out var endPosition, gtPlayer.areBothTouching, out var num, out var iterativeHitInfo, fullSlide: false) && !isHolding)
+				{
+					isColliding = true;
+					isSliding = num > gtPlayer.iceThreshold;
+					materialTouchIndex = gtPlayer.currentMaterialIndex;
+					surfaceOverride = gtPlayer.currentOverride;
+					gtPlayer.lastHitInfoHand = iterativeHitInfo;
+					lastHitInfo = iterativeHitInfo;
+					finalPositionThisFrame = endPosition;
+				}
+				else
+				{
+					finalPositionThisFrame = GetCurrentHandPosition();
+				}
+			}
+			bool flag = (isLeftHand ? gtPlayer.controllerState.LeftValid : gtPlayer.controllerState.RightValid);
+			isColliding &= flag;
+			isSliding &= flag;
+			if (isColliding)
+			{
+				gtPlayer.anyHandIsColliding = true;
+				if (isSliding)
+				{
+					gtPlayer.anyHandIsSliding = true;
+				}
+				else
+				{
+					gtPlayer.anyHandIsSticking = true;
+				}
+			}
+		}
+
+		public bool IsSlipOverriddenToMax()
+		{
+			return slipSetToMaxFrameIdx == Time.frameCount;
+		}
+
+		public Vector3 GetCurrentHandPosition()
+		{
+			Vector3 position = gtPlayer.headCollider.transform.position;
+			if (gtPlayer.inOverlay)
+			{
+				return position + gtPlayer.headCollider.transform.up * -0.5f * gtPlayer.scale;
+			}
+			Vector3 vector = gtPlayer.PositionWithOffset(controllerTransform, handOffset);
+			if ((vector - position).IsShorterThan(maxArmLength * gtPlayer.scale))
+			{
+				return vector;
+			}
+			return position + (vector - position).normalized * maxArmLength * gtPlayer.scale;
+		}
+
+		public void PositionHandFollower()
+		{
+			handFollower.position = finalPositionThisFrame;
+			handFollower.rotation = lastRotation;
+		}
+
+		public void OnEndOfFrame()
+		{
+			wasColliding = isColliding;
+			wasSliding = isSliding;
+			lastPosition = finalPositionThisFrame;
+			if (Time.time > tempFreezeUntilTimestamp)
+			{
+				lastRotation = controllerTransform.rotation * handRotOffset;
+			}
+		}
+
+		public void TempFreezeHand(float freezeDuration)
+		{
+			tempFreezeUntilTimestamp = Math.Max(tempFreezeUntilTimestamp, Time.time + freezeDuration);
+		}
+
+		public void GetHandTapData(out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
+		{
+			wasHandTouching = wasColliding;
+			wasSliding = this.wasSliding;
+			handMatIndex = materialTouchIndex;
+			surfaceOverride = this.surfaceOverride;
+			handHitInfo = lastHitInfo;
+			handPosition = finalPositionThisFrame;
+			handVelocityTracker = velocityTracker;
+		}
+	}
+
+	private enum MovingSurfaceContactPoint
+	{
+		NONE,
+		RIGHT,
+		LEFT,
+		BODY
+	}
+
+	[Serializable]
+	public struct MaterialData
+	{
+		public string matName;
+
+		public bool overrideAudio;
+
+		public AudioClip audio;
+
+		public bool overrideSlidePercent;
+
+		public float slidePercent;
+
+		public int surfaceEffectIndex;
+	}
+
+	[Serializable]
+	public struct LiquidProperties
+	{
+		[Range(0f, 2f)]
+		[Tooltip("0: no resistance just like air, 1: full resistance like solid geometry")]
+		public float resistance;
+
+		[Range(0f, 3f)]
+		[Tooltip("0: no buoyancy. 1: Fully compensates gravity. 2: net force is upwards equal to gravity")]
+		public float buoyancy;
+
+		[Range(0f, 3f)]
+		[Tooltip("Damping Half-life Multiplier")]
+		public float dampingFactor;
+
+		[Range(0f, 1f)]
+		public float surfaceJumpFactor;
+	}
+
+	public enum LiquidType
+	{
+		Water,
+		Lava
+	}
+
+	private struct HoverBoardCast
+	{
+		public Vector3 localOrigin;
+
+		public Vector3 localDirection;
+
+		public float sphereRadius;
+
+		public float distance;
+
+		public float intersectToVelocityCap;
+
+		public bool isSolid;
+
+		public bool didHit;
+
+		public Vector3 pointHit;
+
+		public Vector3 normalHit;
+	}
+
+	private struct HandHoldState
+	{
+		public GorillaGrabber grabber;
+
+		public Transform objectHeld;
+
+		public Vector3 localPositionHeld;
+
+		public float localRotationalOffset;
+
+		public bool applyRotation;
+	}
+
+	public static LayerMask LocomotionEnabledLayers = 201327105;
+
+	private static GTPlayer _instance;
+
+	public static bool hasInstance = false;
+
+	public Camera mainCamera;
+
+	public SphereCollider headCollider;
+
+	public CapsuleCollider bodyCollider;
+
+	private float bodyInitialRadius;
+
+	private float _bodyInitialHeight;
+
+	private float currentBodyHeight;
+
+	private double frameCount;
+
+	private RaycastHit bodyHitInfo;
+
+	private RaycastHit lastHitInfoHand;
+
+	public GorillaVelocityTracker bodyVelocityTracker;
+
+	public PlayerAudioManager audioManager;
+
+	[SerializeField]
+	private HandState leftHand;
+
+	[SerializeField]
+	private HandState rightHand;
+
+	private HandState[] stiltStates = new HandState[12];
+
+	private bool anyHandIsColliding;
+
+	private bool anyHandWasColliding;
+
+	private bool anyHandIsSliding;
+
+	private bool anyHandWasSliding;
+
+	private bool anyHandIsSticking;
+
+	private bool anyHandWasSticking;
+
+	private bool forceRBSync;
+
+	public Vector3 lastHeadPosition;
+
+	private Vector3 lastRigidbodyPosition;
+
+	private Rigidbody playerRigidBody;
+
+	private RigidbodyInterpolation playerRigidbodyInterpolationDefault;
+
+	public int velocityHistorySize;
+
+	public float maxArmLength = 1f;
+
+	public float unStickDistance = 1f;
+
+	public float velocityLimit;
+
+	public float slideVelocityLimit;
+
+	public float maxJumpSpeed;
+
+	private float _jumpMultiplier;
+
+	public float minimumRaycastDistance = 0.05f;
+
+	public float defaultSlideFactor = 0.03f;
+
+	public float slidingMinimum = 0.9f;
+
+	public float defaultPrecision = 0.995f;
+
+	public float teleportThresholdNoVel = 1f;
+
+	public float frictionConstant = 1f;
+
+	public float slideControl = 0.00425f;
+
+	public float stickDepth = 0.01f;
+
+	private Vector3[] velocityHistory;
+
+	private Vector3[] slideAverageHistory;
+
+	private int velocityIndex;
+
+	private Vector3 currentVelocity;
+
+	private Vector3 averagedVelocity;
+
+	private Vector3 lastPosition;
+
+	public Vector3 bodyOffset;
+
+	public LayerMask locomotionEnabledLayers;
+
+	public LayerMask waterLayer;
+
+	public bool wasHeadTouching;
+
+	public int currentMaterialIndex;
+
+	public Vector3 headSlideNormal;
+
+	public float headSlipPercentage;
+
+	[SerializeField]
+	private Transform cosmeticsHeadTarget;
+
+	[SerializeField]
+	private float nativeScale = 1f;
+
+	[SerializeField]
+	private float scaleMultiplier = 1f;
+
+	private NativeSizeChangerSettings activeSizeChangerSettings;
+
+	public bool debugMovement;
+
+	public bool disableMovement;
+
+	[NonSerialized]
+	public bool inOverlay;
+
+	[NonSerialized]
+	public bool isUserPresent;
+
+	public GameObject turnParent;
+
+	[SerializeField]
+	public GameObject RecordingRig;
+
+	public GorillaSurfaceOverride currentOverride;
+
+	public MaterialDatasSO materialDatasSO;
+
+	private float degreesTurnedThisFrame;
+
+	private Vector3 bodyOffsetVector;
+
+	private Vector3 movementToProjectedAboveCollisionPlane;
+
+	private MeshCollider meshCollider;
+
+	private Mesh collidedMesh;
+
+	private MaterialData foundMatData;
+
+	private string findMatName;
+
+	private int vertex1;
+
+	private int vertex2;
+
+	private int vertex3;
+
+	private List<int> trianglesList = new List<int>(1000000);
+
+	private Dictionary<Mesh, int[]> meshTrianglesDict = new Dictionary<Mesh, int[]>(128);
+
+	private int[] sharedMeshTris;
+
+	private float lastRealTime;
+
+	private float calcDeltaTime;
+
+	private float tempRealTime;
+
+	private Vector3 slideVelocity;
+
+	private Vector3 slideAverageNormal;
+
+	private RaycastHit tempHitInfo;
+
+	private RaycastHit junkHit;
+
+	private Vector3 firstPosition;
+
+	private RaycastHit tempIterativeHit;
+
+	private float maxSphereSize1;
+
+	private float maxSphereSize2;
+
+	private Collider[] overlapColliders = new Collider[10];
+
+	private int overlapAttempts;
+
+	private float averageSlipPercentage;
+
+	private Vector3 surfaceDirection;
+
+	public float iceThreshold = 0.9f;
+
+	private float bodyMaxRadius;
+
+	public float bodyLerp = 0.17f;
+
+	private bool areBothTouching;
+
+	private float slideFactor;
+
+	[DebugOption]
+	public bool didAJump;
+
+	private bool updateRB;
+
+	private Renderer slideRenderer;
+
+	private RaycastHit[] rayCastNonAllocColliders;
+
+	private Vector3[] crazyCheckVectors;
+
+	private RaycastHit emptyHit;
+
+	private int bufferCount;
+
+	private Vector3 lastOpenHeadPosition;
+
+	private List<Material> tempMaterialArray = new List<Material>(16);
+
+	private Vector3? antiDriftLastPosition;
+
+	private const float CameraFarClipDefault = 500f;
+
+	private const float CameraNearClipDefault = 0.01f;
+
+	private const float CameraNearClipTiny = 0.002f;
+
+	private Dictionary<GameObject, PhysicsMaterial> bodyTouchedSurfaces;
+
+	private bool primaryButtonPressed = true;
+
+	[Header("Swimming")]
+	public PlayerSwimmingParameters swimmingParams;
+
+	public WaterParameters waterParams;
+
+	public List<LiquidProperties> liquidPropertiesList = new List<LiquidProperties>(16);
+
+	public bool debugDrawSwimming;
+
+	[Header("Slam/Hit effects")]
+	public GameObject wizardStaffSlamEffects;
+
+	public GameObject geodeHitEffects;
+
+	[Header("Freeze Tag")]
+	public float freezeTagHandSlidePercent = 0.88f;
+
+	public bool debugFreezeTag;
+
+	public float frozenBodyBuoyancyFactor = 1.5f;
+
+	[Space]
+	private WaterVolume leftHandWaterVolume;
+
+	private WaterVolume rightHandWaterVolume;
+
+	private WaterVolume.SurfaceQuery leftHandWaterSurface;
+
+	private WaterVolume.SurfaceQuery rightHandWaterSurface;
+
+	private Vector3 swimmingVelocity = Vector3.zero;
+
+	private WaterVolume.SurfaceQuery waterSurfaceForHead;
+
+	private bool bodyInWater;
+
+	private bool headInWater;
+
+	private bool audioSetToUnderwater;
+
+	private float buoyancyExtension;
+
+	private float lastWaterSurfaceJumpTimeLeft = -1f;
+
+	private float lastWaterSurfaceJumpTimeRight = -1f;
+
+	private float waterSurfaceJumpCooldown = 0.1f;
+
+	private float leftHandNonDiveHapticsAmount;
+
+	private float rightHandNonDiveHapticsAmount;
+
+	private List<WaterVolume> headOverlappingWaterVolumes = new List<WaterVolume>(16);
+
+	private List<WaterVolume> bodyOverlappingWaterVolumes = new List<WaterVolume>(16);
+
+	private List<WaterCurrent> activeWaterCurrents = new List<WaterCurrent>(16);
+
+	private Quaternion playerRotationOverride = Quaternion.identity;
+
+	private int playerRotationOverrideFrame = -1;
+
+	private float playerRotationOverrideDecayRate = Mathf.Exp(1.5f);
+
+	private ContactPoint[] bodyCollisionContacts = new ContactPoint[8];
+
+	private int bodyCollisionContactsCount;
+
+	private ContactPoint bodyGroundContact;
+
+	private float bodyGroundContactTime;
+
+	private const float movingSurfaceVelocityLimit = 40f;
+
+	private bool exitMovingSurface;
+
+	private float exitMovingSurfaceThreshold = 6f;
+
+	private bool isClimbableMoving;
+
+	private Quaternion lastClimbableRotation;
+
+	private int lastAttachedToMovingSurfaceFrame;
+
+	private const int MIN_FRAMES_OFF_SURFACE_TO_DETACH = 3;
+
+	private bool isHandHoldMoving;
+
+	private Quaternion lastHandHoldRotation;
+
+	private Vector3 movingHandHoldReleaseVelocity;
+
+	private MovingSurfaceContactPoint lastMovingSurfaceContact;
+
+	private int lastMovingSurfaceID = -1;
+
+	private BuilderPiece lastMonkeBlock;
+
+	private Quaternion lastMovingSurfaceRot;
+
+	private RaycastHit lastMovingSurfaceHit;
+
+	private Vector3 lastMovingSurfaceTouchLocal;
+
+	private Vector3 lastMovingSurfaceTouchWorld;
+
+	private Vector3 movingSurfaceOffset;
+
+	private bool wasMovingSurfaceMonkeBlock;
+
+	private Vector3 lastMovingSurfaceVelocity;
+
+	private bool wasBodyOnGround;
+
+	private BasePlatform currentPlatform;
+
+	private BasePlatform lastPlatformTouched;
+
+	private Vector3 lastFrameTouchPosLocal;
+
+	private Vector3 lastFrameTouchPosWorld;
+
+	private bool lastFrameHasValidTouchPos;
+
+	private Vector3 refMovement = Vector3.zero;
+
+	private Vector3 platformTouchOffset;
+
+	private Vector3 debugLastRightHandPosition;
+
+	private Vector3 debugPlatformDeltaPosition;
+
+	public double tempFreezeRightHandEnableTime;
+
+	public double tempFreezeLeftHandEnableTime;
+
+	private const float climbingMaxThrowSpeed = 5.5f;
+
+	private const float climbHelperSmoothSnapSpeed = 12f;
+
+	[NonSerialized]
+	public bool isClimbing;
+
+	private GorillaClimbable currentClimbable;
+
+	private GorillaHandClimber currentClimber;
+
+	private Vector3 climbHelperTargetPos = Vector3.zero;
+
+	private Transform climbHelper;
+
+	private GorillaRopeSwing currentSwing;
+
+	private GorillaZipline currentZipline;
+
+	[SerializeField]
+	private ConnectedControllerHandler controllerState;
+
+	public int sizeLayerMask;
+
+	public bool InReportMenu;
+
+	private LayerChanger layerChanger;
+
+	private bool hasCorrectedForTracking;
+
+	private float halloweenLevitationStrength;
+
+	private float halloweenLevitationFullStrengthDuration;
+
+	private float halloweenLevitationTotalDuration = 1f;
+
+	private float halloweenLevitationBonusStrength;
+
+	private float halloweenLevitateBonusOffAtYSpeed;
+
+	private float halloweenLevitateBonusFullAtYSpeed = 1f;
+
+	private float lastTouchedGroundTimestamp;
+
+	private bool teleportToTrain;
+
+	public bool isAttachedToTrain;
+
+	private bool stuckLeft;
+
+	private bool stuckRight;
+
+	private float lastScale;
+
+	private Vector3 currentSlopDirection;
+
+	private Vector3 lastSlopeDirection = Vector3.zero;
+
+	private readonly Dictionary<UnityEngine.Object, Action<GTPlayer>> gravityOverrides = new Dictionary<UnityEngine.Object, Action<GTPlayer>>();
+
+	private int hoverAllowedCount;
+
+	[Header("Hoverboard")]
+	[SerializeField]
+	private float hoverIdealHeight = 0.5f;
+
+	[SerializeField]
+	private float hoverCarveSidewaysSpeedLossFactor = 1f;
+
+	[SerializeField]
+	private AnimationCurve hoverCarveAngleResponsiveness;
+
+	[SerializeField]
+	private HoverboardVisual hoverboardVisual;
+
+	[SerializeField]
+	private float sidewaysDrag = 0.1f;
+
+	[SerializeField]
+	private float hoveringSlowSpeed = 0.1f;
+
+	[SerializeField]
+	private float hoveringSlowStoppingFactor = 0.95f;
+
+	[SerializeField]
+	private float hoverboardPaddleBoostMultiplier = 0.1f;
+
+	[SerializeField]
+	private float hoverboardPaddleBoostMax = 10f;
+
+	[SerializeField]
+	private float hoverboardBoostGracePeriod = 1f;
+
+	[SerializeField]
+	private float hoverBodyHasCollisionsOutsideRadius = 0.5f;
+
+	[SerializeField]
+	private float hoverBodyCollisionRadiusUpOffset = 0.2f;
+
+	[SerializeField]
+	private float hoverGeneralUpwardForce = 8f;
+
+	[SerializeField]
+	private float hoverTiltAdjustsForwardFactor = 0.2f;
+
+	[SerializeField]
+	private float hoverMinGrindSpeed = 1f;
+
+	[SerializeField]
+	private float hoverSlamJumpStrengthFactor = 25f;
+
+	[SerializeField]
+	private float hoverMaxPaddleSpeed = 35f;
+
+	[SerializeField]
+	private HoverboardAudio hoverboardAudio;
+
+	private bool hasHoverPoint;
+
+	private float boostEnabledUntilTimestamp;
+
+	private HoverBoardCast[] hoverboardCasts = new HoverBoardCast[3]
+	{
+		new HoverBoardCast
+		{
+			localOrigin = new Vector3(0f, 1f, 0.36f),
+			localDirection = Vector3.down,
+			distance = 1f,
+			sphereRadius = 0.2f,
+			intersectToVelocityCap = 0.1f
+		},
+		new HoverBoardCast
+		{
+			localOrigin = new Vector3(0f, 0.05f, 0.36f),
+			localDirection = Vector3.forward,
+			distance = 0.25f,
+			sphereRadius = 0.01f,
+			intersectToVelocityCap = 0f,
+			isSolid = true
+		},
+		new HoverBoardCast
+		{
+			localOrigin = new Vector3(0f, 0.05f, -0.1f),
+			localDirection = -Vector3.forward,
+			distance = 0.24f,
+			sphereRadius = 0.01f,
+			intersectToVelocityCap = 0f,
+			isSolid = true
+		}
+	};
+
+	private Vector3 hoverboardPlayerLocalPos;
+
+	private Quaternion hoverboardPlayerLocalRot;
+
+	private bool didHoverLastFrame;
+
+	private bool hasLeftHandTentacleMove;
+
+	private bool hasRightHandTentacleMove;
+
+	private Vector3 leftHandTentacleMove;
+
+	private Vector3 rightHandTentacleMove;
+
+	private HandHoldState activeHandHold;
+
+	private HandHoldState secondaryHandHold;
+
+	public PhysicsMaterial slipperyMaterial;
+
+	private bool wasHoldingHandhold;
+
+	private Vector3 secondLastPreHandholdVelocity;
+
+	private Vector3 lastPreHandholdVelocity;
+
+	[Header("Native Scale Adjustment")]
+	[SerializeField]
+	private AnimationCurve nativeScaleMagnitudeAdjustmentFactor;
+
+	public static GTPlayer Instance => _instance;
+
+	private float bodyInitialHeight
+	{
+		get
+		{
+			if (GorillaIK.playerIK == null || !GorillaIK.playerIK.usingUpdatedIK)
+			{
+				return _bodyInitialHeight;
+			}
+			return Mathf.Max(0.2f, Vector3.Dot(GorillaIK.playerIK.bodyBone.up, GTPlayerTransform.Up)) * _bodyInitialHeight;
+		}
+	}
+
+	public HandState LeftHand => leftHand;
+
+	public ref readonly HandState LeftHandRef => ref leftHand;
+
+	public HandState RightHand => rightHand;
+
+	public ref readonly HandState RightHandRef => ref rightHand;
+
+	public Vector3 LastPosition => lastPosition;
+
+	public Vector3 InstantaneousVelocity => currentVelocity;
+
+	public Vector3 AveragedVelocity => averagedVelocity;
+
+	public Transform CosmeticsHeadTarget => cosmeticsHeadTarget;
+
+	public float scale => scaleMultiplier * nativeScale;
+
+	public float NativeScale => nativeScale;
+
+	public float ScaleMultiplier => scaleMultiplier;
+
+	public bool IsDefaultScale => Mathf.Abs(1f - scale) < 0.001f;
+
+	public bool turnedThisFrame => degreesTurnedThisFrame != 0f;
+
+	public List<MaterialData> materialData => materialDatasSO.datas;
+
+	protected bool IsFrozen { get; set; }
+
+	public bool forcedUnderwater { get; set; }
+
+	public float siJumpMultiplier { get; set; } = 1f;
+
+	public List<WaterVolume> HeadOverlappingWaterVolumes => headOverlappingWaterVolumes;
+
+	public bool InWater => bodyInWater;
+
+	public bool HeadInWater => headInWater;
+
+	public WaterVolume CurrentWaterVolume
+	{
+		get
+		{
+			if (bodyOverlappingWaterVolumes.Count <= 0)
+			{
+				return null;
+			}
+			return bodyOverlappingWaterVolumes[0];
+		}
+	}
+
+	public WaterVolume.SurfaceQuery WaterSurfaceForHead => waterSurfaceForHead;
+
+	public WaterVolume LeftHandWaterVolume => leftHandWaterVolume;
+
+	public WaterVolume RightHandWaterVolume => rightHandWaterVolume;
+
+	public WaterVolume.SurfaceQuery LeftHandWaterSurface => leftHandWaterSurface;
+
+	public WaterVolume.SurfaceQuery RightHandWaterSurface => rightHandWaterSurface;
+
+	public Vector3 LastLeftHandPosition => leftHand.lastPosition;
+
+	public Vector3 LastRightHandPosition => rightHand.lastPosition;
+
+	public Vector3 RigidbodyVelocity => playerRigidBody.linearVelocity;
+
+	public Vector3 HeadCenterPosition => headCollider.transform.position + headCollider.transform.rotation * new Vector3(0f, 0f, -0.11f);
+
+	public bool HandContactingSurface
+	{
+		get
+		{
+			if (!leftHand.isColliding)
+			{
+				return rightHand.isColliding;
+			}
+			return true;
+		}
+	}
+
+	public bool BodyOnGround => bodyGroundContactTime >= Time.time - 0.05f;
+
+	public bool IsGroundedHand
+	{
+		get
+		{
+			if (!HandContactingSurface && !isClimbing && !leftHand.isHolding)
+			{
+				return rightHand.isHolding;
+			}
+			return true;
+		}
+	}
+
+	public bool IsGroundedButt => BodyOnGround;
+
+	public int TentacleActiveAtFrame { get; set; }
+
+	public bool IsTentacleActive => TentacleActiveAtFrame >= Time.frameCount;
+
+	public int LaserZiplineActiveAtFrame { get; set; }
+
+	public bool IsLaserZiplineActive => LaserZiplineActiveAtFrame >= Time.frameCount;
+
+	public int ThrusterActiveAtFrame { get; set; }
+
+	public bool IsThrusterActive => ThrusterActiveAtFrame >= Time.frameCount;
+
+	public Quaternion PlayerRotationOverride
+	{
+		set
+		{
+			playerRotationOverride = value;
+			playerRotationOverrideFrame = Time.frameCount;
+		}
+	}
+
+	public bool IsBodySliding { get; set; }
+
+	public bool bodyGroundIsSlippery { get; private set; }
+
+	public GorillaClimbable CurrentClimbable => currentClimbable;
+
+	public GorillaHandClimber CurrentClimber => currentClimber;
+
+	public float jumpMultiplier
+	{
+		get
+		{
+			return _jumpMultiplier;
+		}
+		set
+		{
+			_jumpMultiplier = value;
+		}
+	}
+
+	public float LastTouchedGroundAtNetworkTime { get; private set; }
+
+	public float LastHandTouchedGroundAtNetworkTime { get; private set; }
+
+	public int GravityOverrideCount => gravityOverrides.Count;
+
+	public bool isHoverAllowed { get; private set; }
+
+	public bool enableHoverMode { get; private set; }
+
+	public RigidbodyInterpolation RigidbodyInterpolation
+	{
+		get
+		{
+			return playerRigidBody.interpolation;
+		}
+		set
+		{
+			playerRigidBody.interpolation = value;
+		}
+	}
+
+	public int GetMaterialTouchIndex(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.materialTouchIndex;
+	}
+
+	public GorillaSurfaceOverride GetSurfaceOverride(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.surfaceOverride;
+	}
+
+	public RaycastHit GetTouchHitInfo(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.hitInfo;
+	}
+
+	public bool IsHandTouching(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.wasColliding;
+	}
+
+	public GorillaVelocityTracker GetHandVelocityTracker(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.velocityTracker;
+	}
+
+	public GorillaVelocityTracker GetInteractPointVelocityTracker(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.interactPointVelocityTracker;
+	}
+
+	public Transform GetControllerTransform(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.controllerTransform;
+	}
+
+	public Transform GetHandFollower(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.handFollower;
+	}
+
+	public Vector3 GetHandOffset(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.handOffset;
+	}
+
+	public Quaternion GetHandRotOffset(bool isLeftHand)
+	{
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		return obj.handRotOffset;
+	}
+
+	public Vector3 GetHandPosition(bool isLeftHand, StiltID stiltID = StiltID.None)
+	{
+		HandState obj = ((stiltID != StiltID.None) ? stiltStates[(int)stiltID] : (isLeftHand ? leftHand : rightHand));
+		return obj.lastPosition;
+	}
+
+	public void GetHandTapData(bool isLeftHand, StiltID stiltID, out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
+	{
+		((stiltID != StiltID.None) ? stiltStates[(int)stiltID] : (isLeftHand ? leftHand : rightHand)).GetHandTapData(out wasHandTouching, out wasSliding, out handMatIndex, out surfaceOverride, out handHitInfo, out handPosition, out handVelocityTracker);
+	}
+
+	public void SetHandOffsets(bool isLeftHand, Vector3 handOffset, Quaternion handRotOffset)
+	{
+		if (isLeftHand)
+		{
+			leftHand.handOffset = handOffset;
+			leftHand.handRotOffset = handRotOffset;
+		}
+		else
+		{
+			rightHand.handOffset = handOffset;
+			rightHand.handRotOffset = handRotOffset;
+		}
+	}
+
+	public void SetScaleMultiplier(float s)
+	{
+		scaleMultiplier = s;
+	}
+
+	public void SetNativeScale(NativeSizeChangerSettings s)
+	{
+		float num = nativeScale;
+		if (s != null && s.playerSizeScale > 0f && s.playerSizeScale != 1f)
+		{
+			activeSizeChangerSettings = s;
+		}
+		else
+		{
+			activeSizeChangerSettings = null;
+		}
+		if (activeSizeChangerSettings == null)
+		{
+			nativeScale = 1f;
+		}
+		else
+		{
+			nativeScale = activeSizeChangerSettings.playerSizeScale;
+		}
+		if (num != nativeScale && NetworkSystem.Instance.InRoom)
+		{
+			_ = GorillaTagger.Instance.myVRRig != null;
+		}
+	}
+
+	public void EnableStilt(StiltID stiltID, bool isLeftHand, Vector3 currentTipWorldPos, float maxArmLength, bool canTag, bool canStun, float customBoostFactor = 0f, GorillaVelocityTracker velocityTracker = null)
+	{
+		HandState[] array = stiltStates;
+		HandState handState = new HandState
+		{
+			isActive = true
+		};
+		HandState obj = (isLeftHand ? leftHand : rightHand);
+		handState.controllerTransform = obj.controllerTransform;
+		GorillaVelocityTracker velocityTracker2;
+		if (!(velocityTracker != null))
+		{
+			HandState obj2 = (isLeftHand ? leftHand : rightHand);
+			velocityTracker2 = obj2.velocityTracker;
+		}
+		else
+		{
+			velocityTracker2 = velocityTracker;
+		}
+		handState.velocityTracker = velocityTracker2;
+		handState.handRotOffset = Quaternion.identity;
+		handState.canTag = canTag;
+		handState.canStun = canStun;
+		handState.customBoostFactor = customBoostFactor;
+		handState.hasCustomBoost = customBoostFactor > 0f;
+		array[(int)stiltID] = handState;
+		stiltStates[(int)stiltID].Init(this, isLeftHand, maxArmLength);
+		UpdateStiltOffset(stiltID, currentTipWorldPos);
+	}
+
+	public void DisableStilt(StiltID stiltID)
+	{
+		stiltStates[(int)stiltID].isActive = false;
+	}
+
+	public void UpdateStiltOffset(StiltID stiltID, Vector3 currentTipWorldPos)
+	{
+		stiltStates[(int)stiltID].handOffset = stiltStates[(int)stiltID].controllerTransform.InverseTransformPoint(currentTipWorldPos);
+	}
+
+	private void Awake()
+	{
+		if (_instance != null && _instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+		else
+		{
+			_instance = this;
+			hasInstance = true;
+		}
+		InitializeValues();
+		playerRigidbodyInterpolationDefault = playerRigidBody.interpolation;
+		playerRigidBody.maxAngularVelocity = 0f;
+		bodyOffsetVector = new Vector3(0f, (0f - bodyCollider.height) / 2f, 0f);
+		_bodyInitialHeight = bodyCollider.height;
+		bodyInitialRadius = bodyCollider.radius;
+		rayCastNonAllocColliders = new RaycastHit[5];
+		crazyCheckVectors = new Vector3[7];
+		emptyHit = default(RaycastHit);
+		crazyCheckVectors[0] = Vector3.up;
+		crazyCheckVectors[1] = Vector3.down;
+		crazyCheckVectors[2] = Vector3.left;
+		crazyCheckVectors[3] = Vector3.right;
+		crazyCheckVectors[4] = Vector3.forward;
+		crazyCheckVectors[5] = Vector3.back;
+		crazyCheckVectors[6] = Vector3.zero;
+		if (controllerState == null)
+		{
+			controllerState = GetComponent<ConnectedControllerHandler>();
+		}
+		layerChanger = GetComponent<LayerChanger>();
+		bodyTouchedSurfaces = new Dictionary<GameObject, PhysicsMaterial>();
+		if (Application.isPlaying)
+		{
+			Application.onBeforeRender += OnBeforeRenderInit;
+		}
+	}
+
+	protected void Start()
+	{
+		if (mainCamera == null)
+		{
+			mainCamera = Camera.main;
+		}
+		mainCamera.farClipPlane = 500f;
+		lastScale = scale;
+		layerChanger.InitializeLayers(base.transform);
+		float degrees = Quaternion.Angle(Quaternion.identity, GorillaTagger.Instance.offlineVRRig.transform.rotation) * Mathf.Sign(Vector3.Dot(Vector3.up, GorillaTagger.Instance.offlineVRRig.transform.right));
+		Turn(degrees);
+	}
+
+	protected void OnDestroy()
+	{
+		if (_instance == this)
+		{
+			_instance = null;
+			hasInstance = false;
+		}
+		if ((bool)climbHelper)
+		{
+			UnityEngine.Object.Destroy(climbHelper.gameObject);
+		}
+	}
+
+	public void InitializeValues()
+	{
+		Physics.SyncTransforms();
+		playerRigidBody = GetComponent<Rigidbody>();
+		velocityHistory = new Vector3[velocityHistorySize];
+		slideAverageHistory = new Vector3[velocityHistorySize];
+		for (int i = 0; i < velocityHistory.Length; i++)
+		{
+			velocityHistory[i] = Vector3.zero;
+			slideAverageHistory[i] = Vector3.zero;
+		}
+		leftHand.Init(this, isLeftHand: true, maxArmLength);
+		rightHand.Init(this, isLeftHand: false, maxArmLength);
+		lastHeadPosition = headCollider.transform.position;
+		velocityIndex = 0;
+		averagedVelocity = Vector3.zero;
+		slideVelocity = Vector3.zero;
+		lastPosition = base.transform.position;
+		lastRealTime = Time.realtimeSinceStartup;
+		lastOpenHeadPosition = headCollider.transform.position;
+		bodyCollider.transform.position = PositionWithOffset(headCollider.transform, bodyOffset) + bodyOffsetVector;
+		bodyCollider.transform.eulerAngles = new Vector3(0f, headCollider.transform.eulerAngles.y, 0f);
+		ForceRigidBodySync();
+	}
+
+	public void SetHalloweenLevitation(float levitateStrength, float levitateDuration, float levitateBlendOutDuration, float levitateBonusStrength, float levitateBonusOffAtYSpeed, float levitateBonusFullAtYSpeed)
+	{
+		halloweenLevitationStrength = levitateStrength;
+		halloweenLevitationFullStrengthDuration = levitateDuration;
+		halloweenLevitationTotalDuration = levitateDuration + levitateBlendOutDuration;
+		halloweenLevitateBonusFullAtYSpeed = levitateBonusFullAtYSpeed;
+		halloweenLevitateBonusOffAtYSpeed = levitateBonusFullAtYSpeed;
+		halloweenLevitationBonusStrength = levitateBonusStrength;
+	}
+
+	public void TeleportToTrain(bool enable)
+	{
+		teleportToTrain = enable;
+	}
+
+	public void TeleportTo(Vector3 position, Quaternion rotation)
+	{
+		teleportTo(position, rotation, keepVelocity: false, center: false);
+	}
+
+	public void TeleportTo(Vector3 position, Quaternion rotation, bool keepVelocity)
+	{
+		teleportTo(position, rotation, keepVelocity, center: false);
+	}
+
+	public void TeleportTo(Vector3 position, Quaternion rotation, bool keepVelocity, bool center)
+	{
+		teleportTo(position, rotation, keepVelocity, center);
+	}
+
+	private void teleportTo(Vector3 position, Quaternion rotation, bool keepVelocity, bool center)
+	{
+		if (center)
+		{
+			Vector3 position2 = base.transform.position;
+			Vector3 vector = mainCamera.transform.position - position2;
+			position -= vector;
+		}
+		ClearHandHolds();
+		if (playerRigidBody != null)
+		{
+			playerRigidBody.isKinematic = true;
+			playerRigidBody.position = position;
+			playerRigidBody.rotation = rotation;
+			playerRigidBody.isKinematic = false;
+		}
+		playerRigidBody.position = position;
+		playerRigidBody.rotation = rotation;
+		base.transform.position = position;
+		base.transform.rotation = rotation;
+		lastHeadPosition = headCollider.transform.position;
+		lastPosition = position;
+		lastOpenHeadPosition = headCollider.transform.position;
+		leftHand.OnTeleport();
+		rightHand.OnTeleport();
+		for (int i = 0; i < 12; i++)
+		{
+			if (stiltStates[i].isActive)
+			{
+				stiltStates[i].OnTeleport();
+			}
+		}
+		if (!keepVelocity)
+		{
+			playerRigidBody.linearVelocity = Vector3.zero;
+		}
+		bodyCollider.transform.position = PositionWithOffset(headCollider.transform, bodyOffset) + bodyOffsetVector;
+		bodyCollider.transform.eulerAngles = new Vector3(0f, headCollider.transform.eulerAngles.y, 0f);
+		Physics.SyncTransforms();
+		GorillaTagger.Instance.offlineVRRig.transform.position = position;
+		GorillaTagger.Instance.offlineVRRig.leftHandLink.BreakLink();
+		GorillaTagger.Instance.offlineVRRig.rightHandLink.BreakLink();
+		ForceRigidBodySync();
+	}
+
+	public void TeleportTo(Transform destination, bool matchDestinationRotation = true, bool maintainVelocity = true)
+	{
+		Vector3 position = base.transform.position;
+		Vector3 vector = mainCamera.transform.position - position;
+		Vector3 position2 = destination.position - vector;
+		float num = destination.rotation.eulerAngles.y - mainCamera.transform.rotation.eulerAngles.y;
+		Vector3 playerVelocity = currentVelocity;
+		if (!maintainVelocity)
+		{
+			SetPlayerVelocity(Vector3.zero);
+		}
+		else if (matchDestinationRotation)
+		{
+			playerVelocity = Quaternion.AngleAxis(num, base.transform.up) * currentVelocity;
+			SetPlayerVelocity(playerVelocity);
+		}
+		if (matchDestinationRotation)
+		{
+			Turn(num);
+		}
+		TeleportTo(position2, base.transform.rotation);
+		if (maintainVelocity)
+		{
+			SetPlayerVelocity(playerVelocity);
+		}
+		ForceRigidBodySync();
+	}
+
+	public void AddForce(Vector3 force, ForceMode mode)
+	{
+		if (mode == ForceMode.VelocityChange)
+		{
+			playerRigidBody.AddForce(force * playerRigidBody.mass, ForceMode.Impulse);
+		}
+		else
+		{
+			playerRigidBody.AddForce(force, mode);
+		}
+	}
+
+	public void SetPlayerVelocity(Vector3 newVelocity)
+	{
+		for (int i = 0; i < velocityHistory.Length; i++)
+		{
+			velocityHistory[i] = newVelocity;
+		}
+		playerRigidBody.AddForce(newVelocity - playerRigidBody.linearVelocity, ForceMode.VelocityChange);
+	}
+
+	public void SetGravityOverride(UnityEngine.Object caller, Action<GTPlayer> gravityFunction)
+	{
+		gravityOverrides[caller] = gravityFunction;
+	}
+
+	public void UnsetGravityOverride(UnityEngine.Object caller)
+	{
+		gravityOverrides.Remove(caller);
+	}
+
+	private void ApplyGravityOverrides()
+	{
+		foreach (KeyValuePair<UnityEngine.Object, Action<GTPlayer>> gravityOverride in gravityOverrides)
+		{
+			gravityOverride.Value(this);
+		}
+	}
+
+	public void ApplyKnockback(Vector3 direction, float speed, bool forceOffTheGround = false)
+	{
+		if (forceOffTheGround)
+		{
+			if (leftHand.wasColliding || rightHand.wasColliding)
+			{
+				leftHand.wasColliding = false;
+				rightHand.wasColliding = false;
+				playerRigidBody.transform.position += minimumRaycastDistance * scale * Vector3.up;
+			}
+			didAJump = true;
+			SetMaximumSlipThisFrame();
+		}
+		if (speed > 0.01f)
+		{
+			float num = Vector3.Dot(averagedVelocity, direction);
+			float num2 = Mathf.InverseLerp(1.5f, 0.5f, num / speed);
+			Vector3 vector = averagedVelocity + direction * speed * num2;
+			playerRigidBody.linearVelocity = vector;
+			for (int i = 0; i < velocityHistory.Length; i++)
+			{
+				velocityHistory[i] = vector;
+			}
+		}
+	}
+
+	public void ApplyClampedKnockback(Vector3 direction, float speed, float boostMultiplier, bool forceOffTheGround = false)
+	{
+		if (forceOffTheGround)
+		{
+			if (leftHand.wasColliding || rightHand.wasColliding)
+			{
+				leftHand.wasColliding = false;
+				rightHand.wasColliding = false;
+				playerRigidBody.transform.position += minimumRaycastDistance * scale * Vector3.up;
+			}
+			didAJump = true;
+			SetMaximumSlipThisFrame();
+		}
+		if (!(speed > 0.01f))
+		{
+			return;
+		}
+		float num = Vector3.Dot(playerRigidBody.linearVelocity, direction.normalized);
+		if (!(num >= speed))
+		{
+			float num2 = Mathf.Clamp(speed - num, 0f, speed * boostMultiplier);
+			Vector3 vector = playerRigidBody.linearVelocity + direction.normalized * num2;
+			playerRigidBody.linearVelocity = vector;
+			for (int i = 0; i < velocityHistory.Length; i++)
+			{
+				velocityHistory[i] = vector;
+			}
+		}
+	}
+
+	public void FixedUpdate()
+	{
+		AntiTeleportTechnology();
+		IsFrozen = GorillaTagger.Instance.offlineVRRig.IsFrozen || debugFreezeTag;
+		bool isDefaultScale = IsDefaultScale;
+		playerRigidBody.useGravity = false;
+		if (gravityOverrides.Count > 0)
+		{
+			ApplyGravityOverrides();
+		}
+		else if (halloweenLevitationBonusStrength > 0f || halloweenLevitationStrength > 0f)
+		{
+			float num = Time.time - lastTouchedGroundTimestamp;
+			if (num < halloweenLevitationTotalDuration)
+			{
+				playerRigidBody.AddForce(Vector3.up * (halloweenLevitationStrength * Mathf.InverseLerp(halloweenLevitationFullStrengthDuration, halloweenLevitationTotalDuration, num)), ForceMode.Acceleration);
+			}
+			float y = playerRigidBody.linearVelocity.y;
+			if (y <= halloweenLevitateBonusFullAtYSpeed)
+			{
+				playerRigidBody.AddForce(Vector3.up * halloweenLevitationBonusStrength, ForceMode.Acceleration);
+			}
+			else if (y <= halloweenLevitateBonusOffAtYSpeed)
+			{
+				float num2 = Mathf.InverseLerp(halloweenLevitateBonusOffAtYSpeed, halloweenLevitateBonusFullAtYSpeed, playerRigidBody.linearVelocity.y);
+				playerRigidBody.AddForce(Vector3.up * (halloweenLevitationBonusStrength * num2), ForceMode.Acceleration);
+			}
+		}
+		if (enableHoverMode)
+		{
+			playerRigidBody.linearVelocity = HoverboardFixedUpdate(playerRigidBody.linearVelocity);
+		}
+		else
+		{
+			didHoverLastFrame = false;
+		}
+		float fixedDeltaTime = Time.fixedDeltaTime;
+		bodyInWater = false;
+		Vector3 lhs = swimmingVelocity;
+		swimmingVelocity = Vector3.MoveTowards(swimmingVelocity, Vector3.zero, swimmingParams.swimmingVelocityOutOfWaterDrainRate * fixedDeltaTime);
+		leftHandNonDiveHapticsAmount = 0f;
+		rightHandNonDiveHapticsAmount = 0f;
+		if (bodyOverlappingWaterVolumes.Count > 0 || forcedUnderwater)
+		{
+			WaterVolume waterVolume = null;
+			float num3 = float.MinValue;
+			Vector3 vector = headCollider.transform.position + Vector3.down * swimmingParams.floatingWaterLevelBelowHead * scale;
+			activeWaterCurrents.Clear();
+			for (int i = 0; i < bodyOverlappingWaterVolumes.Count; i++)
+			{
+				if (bodyOverlappingWaterVolumes[i].GetSurfaceQueryForPoint(vector, out var result))
+				{
+					float num4 = Vector3.Dot(result.surfacePoint - vector, result.surfaceNormal);
+					if (num4 > num3)
 					{
-						hoverBoardCast.didHit = false;
+						num3 = num4;
+						waterVolume = bodyOverlappingWaterVolumes[i];
+						waterSurfaceForHead = result;
+					}
+					WaterCurrent current = bodyOverlappingWaterVolumes[i].Current;
+					if (current != null && num4 > 0f && !activeWaterCurrents.Contains(current))
+					{
+						activeWaterCurrents.Add(current);
+					}
+				}
+			}
+			if (forcedUnderwater && waterVolume == null)
+			{
+				waterSurfaceForHead = new WaterVolume.SurfaceQuery
+				{
+					surfacePoint = headCollider.transform.position + Vector3.up * 1000f,
+					surfaceNormal = Vector3.up,
+					maxDepth = 2000f
+				};
+				num3 = 1000f;
+			}
+			if (waterVolume != null || forcedUnderwater)
+			{
+				Vector3 linearVelocity = playerRigidBody.linearVelocity;
+				float magnitude = linearVelocity.magnitude;
+				bool flag = headInWater;
+				headInWater = forcedUnderwater || (headCollider.transform.position.y < waterSurfaceForHead.surfacePoint.y && headCollider.transform.position.y > waterSurfaceForHead.surfacePoint.y - waterSurfaceForHead.maxDepth);
+				if (headInWater && !flag)
+				{
+					audioSetToUnderwater = true;
+					audioManager.SetMixerSnapshot(audioManager.underwaterSnapshot);
+				}
+				else if (!headInWater && flag)
+				{
+					audioSetToUnderwater = false;
+					audioManager.UnsetMixerSnapshot();
+				}
+				bodyInWater = forcedUnderwater || (vector.y < waterSurfaceForHead.surfacePoint.y && vector.y > waterSurfaceForHead.surfacePoint.y - waterSurfaceForHead.maxDepth);
+				if (bodyInWater)
+				{
+					LiquidProperties liquidProperties = liquidPropertiesList[(int)((waterVolume != null) ? waterVolume.LiquidType : LiquidType.Water)];
+					float num6;
+					if (swimmingParams.extendBouyancyFromSpeed)
+					{
+						float time = Mathf.Clamp(Vector3.Dot(linearVelocity / scale, waterSurfaceForHead.surfaceNormal), swimmingParams.speedToBouyancyExtensionMinMax.x, swimmingParams.speedToBouyancyExtensionMinMax.y);
+						float b = swimmingParams.speedToBouyancyExtension.Evaluate(time);
+						buoyancyExtension = Mathf.Max(buoyancyExtension, b);
+						float num5 = Mathf.InverseLerp(0f, swimmingParams.buoyancyFadeDist + buoyancyExtension, num3 / scale + buoyancyExtension);
+						buoyancyExtension = Spring.DamperDecayExact(buoyancyExtension, swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime);
+						num6 = num5;
 					}
 					else
 					{
-						hoverBoardCast.pointHit = raycastHit.point;
-						hoverBoardCast.normalHit = raycastHit.normal;
+						num6 = Mathf.InverseLerp(0f, swimmingParams.buoyancyFadeDist, num3 / scale);
+					}
+					Vector3 force = -(Physics.gravity * scale) * (liquidProperties.buoyancy * num6);
+					if (IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
+					{
+						force *= frozenBodyBuoyancyFactor;
+					}
+					playerRigidBody.AddForce(force, ForceMode.Acceleration);
+					Vector3 zero = Vector3.zero;
+					Vector3 zero2 = Vector3.zero;
+					for (int j = 0; j < activeWaterCurrents.Count; j++)
+					{
+						if (activeWaterCurrents[j].GetCurrentAtPoint(startingVelocity: linearVelocity + zero, worldPoint: bodyCollider.transform.position, dt: fixedDeltaTime, currentVelocity: out var vector2, velocityChange: out var velocityChange))
+						{
+							zero2 += vector2;
+							zero += velocityChange;
+						}
+					}
+					if (magnitude > Mathf.Epsilon)
+					{
+						float num7 = 0.01f;
+						Vector3 vector3 = linearVelocity / magnitude;
+						Vector3 right = leftHand.handFollower.right;
+						Vector3 dir = -rightHand.handFollower.right;
+						Vector3 forward = leftHand.handFollower.forward;
+						Vector3 forward2 = rightHand.handFollower.forward;
+						Vector3 vector4 = vector3;
+						float num8 = 0f;
+						float num9 = 0f;
+						float num10 = 0f;
+						if (swimmingParams.applyDiveSteering && !disableMovement && isDefaultScale)
+						{
+							float value = Vector3.Dot(linearVelocity - zero2, vector3);
+							float time2 = Mathf.Clamp(value, swimmingParams.swimSpeedToRedirectAmountMinMax.x, swimmingParams.swimSpeedToRedirectAmountMinMax.y);
+							float b2 = swimmingParams.swimSpeedToRedirectAmount.Evaluate(time2);
+							time2 = Mathf.Clamp(value, swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
+							float num11 = swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(time2);
+							float value2 = Mathf.Acos(Vector3.Dot(vector3, forward)) / MathF.PI * -2f + 1f;
+							float value3 = Mathf.Acos(Vector3.Dot(vector3, forward2)) / MathF.PI * -2f + 1f;
+							float num12 = Mathf.Clamp(value2, swimmingParams.palmFacingToRedirectAmountMinMax.x, swimmingParams.palmFacingToRedirectAmountMinMax.y);
+							float num13 = Mathf.Clamp(value3, swimmingParams.palmFacingToRedirectAmountMinMax.x, swimmingParams.palmFacingToRedirectAmountMinMax.y);
+							float a = ((!float.IsNaN(num12)) ? swimmingParams.palmFacingToRedirectAmount.Evaluate(num12) : 0f);
+							float a2 = ((!float.IsNaN(num13)) ? swimmingParams.palmFacingToRedirectAmount.Evaluate(num13) : 0f);
+							Vector3 vector5 = Vector3.ProjectOnPlane(vector3, right);
+							Vector3 vector6 = Vector3.ProjectOnPlane(vector3, right);
+							float num14 = Mathf.Min(vector5.magnitude, 1f);
+							float num15 = Mathf.Min(vector6.magnitude, 1f);
+							float magnitude2 = leftHand.velocityTracker.GetAverageVelocity(worldSpace: false, swimmingParams.diveVelocityAveragingWindow).magnitude;
+							float magnitude3 = rightHand.velocityTracker.GetAverageVelocity(worldSpace: false, swimmingParams.diveVelocityAveragingWindow).magnitude;
+							float time3 = Mathf.Clamp(magnitude2, swimmingParams.handSpeedToRedirectAmountMinMax.x, swimmingParams.handSpeedToRedirectAmountMinMax.y);
+							float time4 = Mathf.Clamp(magnitude3, swimmingParams.handSpeedToRedirectAmountMinMax.x, swimmingParams.handSpeedToRedirectAmountMinMax.y);
+							float a3 = swimmingParams.handSpeedToRedirectAmount.Evaluate(time3);
+							float a4 = swimmingParams.handSpeedToRedirectAmount.Evaluate(time4);
+							float averageSpeedChangeMagnitudeInDirection = leftHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(right, worldSpace: false, swimmingParams.diveVelocityAveragingWindow);
+							float averageSpeedChangeMagnitudeInDirection2 = rightHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(dir, worldSpace: false, swimmingParams.diveVelocityAveragingWindow);
+							float time5 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, swimmingParams.handAccelToRedirectAmountMinMax.x, swimmingParams.handAccelToRedirectAmountMinMax.y);
+							float time6 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, swimmingParams.handAccelToRedirectAmountMinMax.x, swimmingParams.handAccelToRedirectAmountMinMax.y);
+							float b3 = swimmingParams.handAccelToRedirectAmount.Evaluate(time5);
+							float b4 = swimmingParams.handAccelToRedirectAmount.Evaluate(time6);
+							num8 = Mathf.Min(a, Mathf.Min(a3, b3));
+							float num16 = ((Vector3.Dot(vector3, forward) > 0f) ? (Mathf.Min(num8, b2) * num14) : 0f);
+							num9 = Mathf.Min(a2, Mathf.Min(a4, b4));
+							float num17 = ((Vector3.Dot(vector3, forward2) > 0f) ? (Mathf.Min(num9, b2) * num15) : 0f);
+							if (swimmingParams.reduceDiveSteeringBelowVelocityPlane)
+							{
+								Vector3 rhs = ((!(Vector3.Dot(headCollider.transform.up, vector3) > 0.95f)) ? Vector3.Cross(Vector3.Cross(vector3, headCollider.transform.up), vector3).normalized : (-headCollider.transform.forward));
+								Vector3 position = headCollider.transform.position;
+								Vector3 lhs2 = position - leftHand.handFollower.position;
+								Vector3 lhs3 = position - rightHand.handFollower.position;
+								float reduceDiveSteeringBelowPlaneFadeStartDist = swimmingParams.reduceDiveSteeringBelowPlaneFadeStartDist;
+								float reduceDiveSteeringBelowPlaneFadeEndDist = swimmingParams.reduceDiveSteeringBelowPlaneFadeEndDist;
+								float f = Vector3.Dot(lhs2, Vector3.up);
+								float f2 = Vector3.Dot(lhs3, Vector3.up);
+								float f3 = Vector3.Dot(lhs2, rhs);
+								float f4 = Vector3.Dot(lhs3, rhs);
+								float num18 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f), Mathf.Abs(f3)));
+								float num19 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f2), Mathf.Abs(f4)));
+								num16 *= num18;
+								num17 *= num19;
+							}
+							float num20 = num17 + num16;
+							Vector3 zero3 = Vector3.zero;
+							if (swimmingParams.applyDiveSteering && num20 > num7)
+							{
+								zero3 = ((num16 * vector5 + num17 * vector6) / num20).normalized;
+								zero3 = Vector3.Lerp(vector3, zero3, num20);
+								vector4 = Vector3.RotateTowards(vector3, zero3, MathF.PI / 180f * num11 * fixedDeltaTime, 0f);
+							}
+							else
+							{
+								vector4 = vector3;
+							}
+							num10 = Mathf.Clamp01((num8 + num9) * 0.5f);
+						}
+						float num21 = Mathf.Clamp(Vector3.Dot(lhs, vector3), 0f, magnitude);
+						float num22 = magnitude - num21;
+						if (swimmingParams.applyDiveSwimVelocityConversion && !disableMovement && num10 > num7 && num21 < swimmingParams.diveMaxSwimVelocityConversion)
+						{
+							float num23 = Mathf.Min(swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num22) * num10;
+							num21 += num23;
+							num22 -= num23;
+						}
+						float halflife = swimmingParams.swimUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
+						float halflife2 = swimmingParams.baseUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
+						float num24 = Spring.DamperDecayExact(num21 / scale, halflife, fixedDeltaTime) * scale;
+						float num25 = Spring.DamperDecayExact(num22 / scale, halflife2, fixedDeltaTime) * scale;
+						if (swimmingParams.applyDiveDampingMultiplier && !disableMovement)
+						{
+							float t = Mathf.Lerp(1f, swimmingParams.diveDampingMultiplier, num10);
+							num24 = Mathf.Lerp(num21, num24, t);
+							num25 = Mathf.Lerp(num22, num25, t);
+							float time7 = Mathf.Clamp((1f - num8) * (num21 + num22), swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
+							float time8 = Mathf.Clamp((1f - num9) * (num21 + num22), swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
+							leftHandNonDiveHapticsAmount = swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time7);
+							rightHandNonDiveHapticsAmount = swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time8);
+						}
+						swimmingVelocity = num24 * vector4 + zero * scale;
+						playerRigidBody.linearVelocity = swimmingVelocity + num25 * vector4;
 					}
 				}
-				this.hoverboardCasts[i] = hoverBoardCast;
-				if (hoverBoardCast.didHit)
-				{
-					flag = true;
-				}
 			}
-			this.hasHoverPoint = flag;
-			this.bodyCollider.enabled = (this.bodyCollider.transform.position - this.hoverboardVisual.transform.TransformPoint(GTPlayerTransform.Up * this.hoverBodyCollisionRadiusUpOffset)).IsLongerThan(this.hoverBodyHasCollisionsOutsideRadius);
 		}
-
-		private Vector3 HoverboardFixedUpdate(Vector3 velocity)
+		else if (audioSetToUnderwater)
 		{
-			this.hoverboardVisual.transform.position = this.headCollider.transform.TransformPoint(this.hoverboardPlayerLocalPos);
-			this.hoverboardVisual.transform.rotation = this.headCollider.transform.TransformRotation(this.hoverboardPlayerLocalRot);
-			if (this.didHoverLastFrame)
+			audioSetToUnderwater = false;
+			audioManager.UnsetMixerSnapshot();
+		}
+		handleClimbing(Time.fixedDeltaTime);
+		stuckHandsCheckFixedUpdate();
+		FixedUpdate_HandHolds(Time.fixedDeltaTime);
+	}
+
+	public void SetHoverboardPosRot(Vector3 worldPos, Quaternion worldRot)
+	{
+		hoverboardPlayerLocalPos = headCollider.transform.InverseTransformPoint(worldPos);
+		hoverboardPlayerLocalRot = headCollider.transform.InverseTransformRotation(worldRot);
+	}
+
+	private void HoverboardLateUpdate()
+	{
+		_ = headCollider.transform.eulerAngles;
+		bool flag = false;
+		for (int i = 0; i < hoverboardCasts.Length; i++)
+		{
+			HoverBoardCast hoverBoardCast = hoverboardCasts[i];
+			hoverBoardCast.didHit = Physics.SphereCast(new Ray(hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin), hoverboardVisual.transform.rotation * hoverBoardCast.localDirection), hoverBoardCast.sphereRadius, out var hitInfo, hoverBoardCast.distance, locomotionEnabledLayers);
+			if (hoverBoardCast.didHit)
 			{
-				velocity += Vector3.up * this.hoverGeneralUpwardForce * Time.fixedDeltaTime;
-			}
-			Vector3 position = this.hoverboardVisual.transform.position;
-			Vector3 a = position + velocity * Time.fixedDeltaTime;
-			Vector3 vector = this.hoverboardVisual.transform.forward;
-			Vector3 vector2 = this.hoverboardCasts[0].didHit ? this.hoverboardCasts[0].normalHit : Vector3.up;
-			bool flag = false;
-			for (int i = 0; i < this.hoverboardCasts.Length; i++)
-			{
-				GTPlayer.HoverBoardCast hoverBoardCast = this.hoverboardCasts[i];
-				if (hoverBoardCast.didHit)
+				if (hitInfo.collider.TryGetComponent<HoverboardCantHover>(out var _))
 				{
-					Vector3 b = position + Vector3.Project(hoverBoardCast.pointHit - position, vector);
-					Vector3 b2 = a + Vector3.Project(hoverBoardCast.pointHit - position, vector);
-					bool flag2 = hoverBoardCast.isSolid || Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - b2) + this.hoverIdealHeight > 0f;
-					float d = hoverBoardCast.isSolid ? (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin + hoverBoardCast.localDirection * hoverBoardCast.distance)) + hoverBoardCast.sphereRadius) : (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - b) + this.hoverIdealHeight);
-					if (flag2)
-					{
-						flag = true;
-						this.boostEnabledUntilTimestamp = Time.time + this.hoverboardBoostGracePeriod;
-						if (Vector3.Dot(velocity, hoverBoardCast.normalHit) < 0f)
-						{
-							velocity = Vector3.ProjectOnPlane(velocity, hoverBoardCast.normalHit);
-						}
-						this.playerRigidBody.transform.position += hoverBoardCast.normalHit * d;
-						Vector3 vector3 = this.turnParent.transform.rotation * (this.hoverboardVisual.IsLeftHanded ? this.leftHand.velocityTracker : this.rightHand.velocityTracker).GetAverageVelocity(false, 0.15f, false);
-						if (Vector3.Dot(vector3, hoverBoardCast.normalHit) < 0f)
-						{
-							velocity -= Vector3.Project(vector3, hoverBoardCast.normalHit) * this.hoverSlamJumpStrengthFactor * Time.fixedDeltaTime;
-						}
-						a = position + velocity * Time.fixedDeltaTime;
-					}
-				}
-			}
-			float time = Mathf.Abs(Mathf.DeltaAngle(0f, Mathf.Acos(Vector3.Dot(this.hoverboardVisual.transform.up, Vector3.ProjectOnPlane(vector2, vector).normalized)) * 57.29578f));
-			float num = this.hoverCarveAngleResponsiveness.Evaluate(time);
-			vector = (vector + Vector3.ProjectOnPlane(this.hoverboardVisual.transform.up, vector2) * this.hoverTiltAdjustsForwardFactor).normalized;
-			if (!flag)
-			{
-				this.didHoverLastFrame = false;
-				num = 0f;
-			}
-			Vector3 b3 = velocity;
-			if (this.enableHoverMode && this.hasHoverPoint)
-			{
-				Vector3 vector4 = Vector3.ProjectOnPlane(velocity, vector2);
-				Vector3 b4 = velocity - vector4;
-				Vector3 vector5 = Vector3.Project(vector4, vector);
-				float num2 = vector4.magnitude;
-				if (num2 <= this.hoveringSlowSpeed)
-				{
-					num2 *= this.hoveringSlowStoppingFactor;
-				}
-				Vector3 vector6 = vector4 - vector5;
-				float num3 = 0f;
-				bool flag3 = false;
-				if (num > 0f)
-				{
-					if (vector6.IsLongerThan(vector5))
-					{
-						num3 = Mathf.Min((vector6.magnitude - vector5.magnitude) * this.hoverCarveSidewaysSpeedLossFactor * num, num2);
-						if (num3 > 0f && num2 > this.hoverMinGrindSpeed)
-						{
-							flag3 = true;
-							this.hoverboardVisual.PlayGrindHaptic();
-						}
-						num2 -= num3;
-					}
-					vector6 *= 1f - num * this.sidewaysDrag;
-					if (!this.leftHand.isColliding && !this.rightHand.isColliding)
-					{
-						velocity = (vector5 + vector6).normalized * num2 + b4;
-					}
+					hoverBoardCast.didHit = false;
 				}
 				else
 				{
-					velocity = vector4.normalized * num2 + b4;
-				}
-				float magnitude = (velocity - b3).magnitude;
-				this.hoverboardAudio.UpdateAudioLoop(velocity.magnitude, this.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false).magnitude, magnitude, flag3 ? num3 : 0f);
-				if (magnitude > 0f && !flag3)
-				{
-					this.hoverboardVisual.PlayCarveHaptic(magnitude);
+					hoverBoardCast.pointHit = hitInfo.point;
+					hoverBoardCast.normalHit = hitInfo.normal;
 				}
 			}
-			else
+			hoverboardCasts[i] = hoverBoardCast;
+			if (hoverBoardCast.didHit)
 			{
-				this.hoverboardAudio.UpdateAudioLoop(0f, this.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false).magnitude, 0f, 0f);
-			}
-			return velocity;
-		}
-
-		public void GrabPersonalHoverboard(bool isLeftHand, Vector3 pos, Quaternion rot, Color col)
-		{
-			if (this.hoverboardVisual.IsHeld)
-			{
-				this.hoverboardVisual.DropFreeBoard();
-			}
-			this.hoverboardVisual.SetIsHeld(isLeftHand, pos, rot, col);
-			this.hoverboardVisual.ProxyGrabHandle(isLeftHand);
-			FreeHoverboardManager.instance.PreserveMaxHoverboardsConstraint(NetworkSystem.Instance.LocalPlayer.ActorNumber);
-		}
-
-		public void SetHoverAllowed(bool allowed, bool force = false)
-		{
-			if (allowed)
-			{
-				this.hoverAllowedCount++;
-				this.isHoverAllowed = true;
-				return;
-			}
-			this.hoverAllowedCount = ((force || this.hoverAllowedCount == 0) ? 0 : (this.hoverAllowedCount - 1));
-			if (this.hoverAllowedCount == 0 && this.isHoverAllowed)
-			{
-				this.isHoverAllowed = false;
-				if (this.enableHoverMode)
-				{
-					this.SetHoverActive(false);
-					VRRig.LocalRig.hoverboardVisual.SetNotHeld();
-				}
+				flag = true;
 			}
 		}
+		hasHoverPoint = flag;
+		bodyCollider.enabled = (bodyCollider.transform.position - hoverboardVisual.transform.TransformPoint(GTPlayerTransform.Up * hoverBodyCollisionRadiusUpOffset)).IsLongerThan(hoverBodyHasCollisionsOutsideRadius);
+	}
 
-		public void SetHoverActive(bool enable)
+	private Vector3 HoverboardFixedUpdate(Vector3 velocity)
+	{
+		hoverboardVisual.transform.position = headCollider.transform.TransformPoint(hoverboardPlayerLocalPos);
+		hoverboardVisual.transform.rotation = headCollider.transform.TransformRotation(hoverboardPlayerLocalRot);
+		if (didHoverLastFrame)
 		{
-			if (enable && !this.isHoverAllowed)
+			velocity += Vector3.up * hoverGeneralUpwardForce * Time.fixedDeltaTime;
+		}
+		Vector3 position = hoverboardVisual.transform.position;
+		Vector3 vector = position + velocity * Time.fixedDeltaTime;
+		Vector3 forward = hoverboardVisual.transform.forward;
+		Vector3 vector2 = (hoverboardCasts[0].didHit ? hoverboardCasts[0].normalHit : Vector3.up);
+		bool flag = false;
+		for (int i = 0; i < hoverboardCasts.Length; i++)
+		{
+			HoverBoardCast hoverBoardCast = hoverboardCasts[i];
+			if (!hoverBoardCast.didHit)
 			{
-				return;
+				continue;
 			}
-			this.enableHoverMode = enable;
-			if (!enable)
+			Vector3 vector3 = position + Vector3.Project(hoverBoardCast.pointHit - position, forward);
+			Vector3 vector4 = vector + Vector3.Project(hoverBoardCast.pointHit - position, forward);
+			bool num = hoverBoardCast.isSolid || Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - vector4) + hoverIdealHeight > 0f;
+			float num2 = (hoverBoardCast.isSolid ? (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin + hoverBoardCast.localDirection * hoverBoardCast.distance)) + hoverBoardCast.sphereRadius) : (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - vector3) + hoverIdealHeight));
+			if (num)
 			{
-				this.bodyCollider.enabled = true;
-				this.hasHoverPoint = false;
-				this.didHoverLastFrame = false;
-				for (int i = 0; i < this.hoverboardCasts.Length; i++)
+				flag = true;
+				boostEnabledUntilTimestamp = Time.time + hoverboardBoostGracePeriod;
+				if (Vector3.Dot(velocity, hoverBoardCast.normalHit) < 0f)
 				{
-					this.hoverboardCasts[i].didHit = false;
+					velocity = Vector3.ProjectOnPlane(velocity, hoverBoardCast.normalHit);
 				}
-				this.hoverboardAudio.Stop();
+				playerRigidBody.transform.position += hoverBoardCast.normalHit * num2;
+				Vector3 vector5 = turnParent.transform.rotation * (hoverboardVisual.IsLeftHanded ? leftHand.velocityTracker : rightHand.velocityTracker).GetAverageVelocity();
+				if (Vector3.Dot(vector5, hoverBoardCast.normalHit) < 0f)
+				{
+					velocity -= Vector3.Project(vector5, hoverBoardCast.normalHit) * hoverSlamJumpStrengthFactor * Time.fixedDeltaTime;
+				}
+				vector = position + velocity * Time.fixedDeltaTime;
 			}
 		}
-
-		private void BodyCollider()
+		float time = Mathf.Abs(Mathf.DeltaAngle(0f, Mathf.Acos(Vector3.Dot(hoverboardVisual.transform.up, Vector3.ProjectOnPlane(vector2, forward).normalized)) * 57.29578f));
+		float num3 = hoverCarveAngleResponsiveness.Evaluate(time);
+		forward = (forward + Vector3.ProjectOnPlane(hoverboardVisual.transform.up, vector2) * hoverTiltAdjustsForwardFactor).normalized;
+		if (!flag)
 		{
-			if (this.MaxSphereSizeForNoOverlap(this.bodyInitialRadius * this.scale, this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), false, out this.bodyMaxRadius))
-			{
-				if (this.scale > 0f)
-				{
-					this.bodyCollider.radius = this.bodyMaxRadius / this.scale;
-				}
-				if (Physics.SphereCast(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), this.bodyMaxRadius, GTPlayerTransform.Down, out this.bodyHitInfo, this.bodyInitialHeight * this.scale - this.bodyMaxRadius, this.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
-				{
-					this.bodyCollider.height = (this.bodyHitInfo.distance + this.bodyMaxRadius) / this.scale;
-				}
-				else
-				{
-					this.bodyHitInfo = this.emptyHit;
-					this.bodyCollider.height = this.bodyInitialHeight;
-				}
-				if (!this.bodyCollider.gameObject.activeSelf)
-				{
-					this.bodyCollider.gameObject.SetActive(true);
-				}
-			}
-			else
-			{
-				this.bodyCollider.gameObject.SetActive(false);
-			}
-			this.bodyCollider.height = Mathf.Lerp(this.bodyCollider.height, this.bodyInitialHeight, this.bodyLerp);
-			this.bodyCollider.radius = Mathf.Lerp(this.bodyCollider.radius, this.bodyInitialRadius, this.bodyLerp);
-			this.bodyOffsetVector = GTPlayerTransform.Down * this.bodyCollider.height / 2f;
-			this.bodyCollider.transform.position = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + this.bodyOffsetVector * this.scale;
-			this.bodyCollider.transform.rotation = Quaternion.FromToRotation(this.headCollider.transform.up, GTPlayerTransform.Up) * this.headCollider.transform.rotation;
+			didHoverLastFrame = false;
+			num3 = 0f;
 		}
-
-		private Vector3 PositionWithOffset(Transform transformToModify, Vector3 offsetVector)
+		Vector3 vector6 = velocity;
+		if (enableHoverMode && hasHoverPoint)
 		{
-			return transformToModify.position + transformToModify.rotation * offsetVector * this.scale;
-		}
-
-		public void ScaleAwayFromPoint(float oldScale, float newScale, Vector3 scaleCenter)
-		{
-			if (oldScale < newScale)
+			Vector3 vector7 = Vector3.ProjectOnPlane(velocity, vector2);
+			Vector3 vector8 = velocity - vector7;
+			Vector3 vector9 = Vector3.Project(vector7, forward);
+			float num4 = vector7.magnitude;
+			if (num4 <= hoveringSlowSpeed)
 			{
-				this.lastHeadPosition = GTPlayer.ScalePointAwayFromCenter(this.lastHeadPosition, this.headCollider.radius, oldScale, newScale, scaleCenter);
-				this.leftHand.lastPosition = GTPlayer.ScalePointAwayFromCenter(this.leftHand.lastPosition, this.minimumRaycastDistance, oldScale, newScale, scaleCenter);
-				this.rightHand.lastPosition = GTPlayer.ScalePointAwayFromCenter(this.rightHand.lastPosition, this.minimumRaycastDistance, oldScale, newScale, scaleCenter);
+				num4 *= hoveringSlowStoppingFactor;
 			}
-		}
-
-		private static Vector3 ScalePointAwayFromCenter(Vector3 point, float baseRadius, float oldScale, float newScale, Vector3 scaleCenter)
-		{
-			float magnitude = (point - scaleCenter).magnitude;
-			float d = magnitude + Mathf.Epsilon + baseRadius * (newScale - oldScale);
-			return scaleCenter + (point - scaleCenter) * d / magnitude;
-		}
-
-		private void OnBeforeRenderInit()
-		{
-			if (Application.isPlaying && !this.hasCorrectedForTracking && this.mainCamera != null && this.mainCamera.transform.localPosition != Vector3.zero)
-			{
-				this.ForceRigidBodySync();
-				base.transform.position -= this.mainCamera.transform.localPosition;
-				this.hasCorrectedForTracking = true;
-			}
-			Application.onBeforeRender -= this.OnBeforeRenderInit;
-		}
-
-		private void LateUpdate()
-		{
-			Vector3 value = this.antiDriftLastPosition.GetValueOrDefault();
-			if (this.antiDriftLastPosition == null)
-			{
-				value = base.transform.position;
-				this.antiDriftLastPosition = new Vector3?(value);
-			}
-			if ((double)(this.antiDriftLastPosition.Value - base.transform.position).sqrMagnitude < 1E-08)
-			{
-				base.transform.position = this.antiDriftLastPosition.Value;
-			}
-			else
-			{
-				this.antiDriftLastPosition = new Vector3?(base.transform.position);
-			}
-			if (!this.hasCorrectedForTracking && this.mainCamera.transform.localPosition != Vector3.zero)
-			{
-				base.transform.position -= this.mainCamera.transform.localPosition;
-				this.hasCorrectedForTracking = true;
-				Application.onBeforeRender -= this.OnBeforeRenderInit;
-			}
-			if (this.playerRigidBody.isKinematic)
-			{
-				return;
-			}
-			float time = Time.time;
-			Vector3 position = this.headCollider.transform.position;
-			this.turnParent.transform.localScale = VRRig.LocalRig.transform.localScale;
-			this.playerRigidBody.MovePosition(this.playerRigidBody.position + position - this.headCollider.transform.position);
-			if (Mathf.Abs(this.lastScale - this.scale) > 0.001f)
-			{
-				if (this.mainCamera == null)
-				{
-					this.mainCamera = Camera.main;
-				}
-				this.mainCamera.nearClipPlane = ((this.scale > 0.5f) ? 0.01f : 0.002f);
-			}
-			this.lastScale = this.scale;
-			this.debugLastRightHandPosition = this.rightHand.lastPosition;
-			this.debugPlatformDeltaPosition = this.MovingSurfaceMovement();
-			if (this.debugMovement)
-			{
-				this.tempRealTime = Time.time;
-				this.calcDeltaTime = Time.deltaTime;
-				this.lastRealTime = this.tempRealTime;
-			}
-			else
-			{
-				this.tempRealTime = Time.realtimeSinceStartup;
-				this.calcDeltaTime = this.tempRealTime - this.lastRealTime;
-				this.lastRealTime = this.tempRealTime;
-				if (this.calcDeltaTime > 0.1f)
-				{
-					this.calcDeltaTime = 0.05f;
-				}
-			}
-			Vector3 a;
-			if (this.lastFrameHasValidTouchPos && this.lastPlatformTouched != null && GTPlayer.ComputeWorldHitPoint(this.lastHitInfoHand, this.lastFrameTouchPosLocal, out a))
-			{
-				this.refMovement = a - this.lastFrameTouchPosWorld;
-			}
-			else
-			{
-				this.refMovement = Vector3.zero;
-			}
-			Vector3 vector = Vector3.zero;
-			Quaternion quaternion = Quaternion.identity;
-			Vector3 pivot = this.headCollider.transform.position;
-			Vector3 vector2;
-			if (this.lastMovingSurfaceContact != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeWorldHitPoint(this.lastMovingSurfaceHit, this.lastMovingSurfaceTouchLocal, out vector2))
-			{
-				if (this.wasMovingSurfaceMonkeBlock && (this.lastMonkeBlock == null || this.lastMonkeBlock.state != BuilderPiece.State.AttachedAndPlaced))
-				{
-					this.movingSurfaceOffset = Vector3.zero;
-				}
-				else
-				{
-					this.movingSurfaceOffset = vector2 - this.lastMovingSurfaceTouchWorld;
-					vector = this.movingSurfaceOffset / this.calcDeltaTime;
-					quaternion = this.lastMovingSurfaceHit.collider.transform.rotation * Quaternion.Inverse(this.lastMovingSurfaceRot);
-					pivot = vector2;
-				}
-			}
-			else
-			{
-				this.movingSurfaceOffset = Vector3.zero;
-			}
-			float num = 40f * this.scale;
-			if (vector.sqrMagnitude >= num * num)
-			{
-				this.movingSurfaceOffset = Vector3.zero;
-				vector = Vector3.zero;
-				quaternion = Quaternion.identity;
-			}
-			if (!this.didAJump && (this.leftHand.wasColliding || this.rightHand.wasColliding))
-			{
-				base.transform.position = base.transform.position + 4.9f * GTPlayerTransform.PhysicsDown * this.calcDeltaTime * this.calcDeltaTime * this.scale;
-				if (Vector3.Dot(this.averagedVelocity, this.slideAverageNormal) <= 0f && Vector3.Dot(GTPlayerTransform.PhysicsUp, this.slideAverageNormal) > 0f)
-				{
-					base.transform.position = base.transform.position - Vector3.Project(Mathf.Min(this.stickDepth * this.scale, Vector3.Project(this.averagedVelocity, this.slideAverageNormal).magnitude * this.calcDeltaTime) * this.slideAverageNormal, GTPlayerTransform.PhysicsDown);
-				}
-			}
-			if (!this.didAJump && this.anyHandWasSliding)
-			{
-				base.transform.position = base.transform.position + this.slideVelocity * this.calcDeltaTime;
-				this.slideVelocity += 9.8f * GTPlayerTransform.PhysicsDown * this.calcDeltaTime * this.scale;
-			}
-			float paddleBoostFactor = (Time.time > this.boostEnabledUntilTimestamp) ? 0f : (Time.deltaTime * Mathf.Clamp(this.playerRigidBody.linearVelocity.magnitude * this.hoverboardPaddleBoostMultiplier, 0f, this.hoverboardPaddleBoostMax));
-			int num2 = 0;
-			Vector3 vector3 = Vector3.zero;
-			this.anyHandIsColliding = false;
-			this.anyHandIsSliding = false;
-			this.anyHandIsSticking = false;
-			this.leftHand.FirstIteration(ref vector3, ref num2, paddleBoostFactor);
-			this.rightHand.FirstIteration(ref vector3, ref num2, paddleBoostFactor);
-			for (int i = 0; i < 12; i++)
-			{
-				if (this.stiltStates[i].isActive)
-				{
-					this.stiltStates[i].FirstIteration(ref vector3, ref num2, 0f);
-				}
-			}
-			if (num2 != 0)
-			{
-				vector3 /= (float)num2;
-			}
-			if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.RIGHT || this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.LEFT)
-			{
-				vector3 += this.movingSurfaceOffset;
-			}
-			else if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.BODY)
-			{
-				Vector3 b = this.lastHeadPosition + this.movingSurfaceOffset - this.headCollider.transform.position;
-				vector3 += b;
-			}
-			if (!this.MaxSphereSizeForNoOverlap(this.headCollider.radius * 0.9f * this.scale, this.lastHeadPosition, true, out this.maxSphereSize1) && !this.CrazyCheck2(this.headCollider.radius * 0.9f * 0.75f * this.scale, this.lastHeadPosition))
-			{
-				this.lastHeadPosition = this.lastOpenHeadPosition;
-			}
-			Vector3 a2;
-			float num3;
-			if (this.IterativeCollisionSphereCast(this.lastHeadPosition, this.headCollider.radius * 0.9f * this.scale, this.headCollider.transform.position + vector3 - this.lastHeadPosition, Vector3.zero, out a2, false, out num3, out this.junkHit, true))
-			{
-				vector3 = a2 - this.headCollider.transform.position;
-			}
-			if (!this.MaxSphereSizeForNoOverlap(this.headCollider.radius * 0.9f * this.scale, this.lastHeadPosition + vector3, true, out this.maxSphereSize1) || !this.CrazyCheck2(this.headCollider.radius * 0.9f * 0.75f * this.scale, this.lastHeadPosition + vector3))
-			{
-				this.lastHeadPosition = this.lastOpenHeadPosition;
-				vector3 = this.lastHeadPosition - this.headCollider.transform.position;
-			}
-			else if (this.headCollider.radius * 0.9f * 0.825f * this.scale < this.maxSphereSize1)
-			{
-				this.lastOpenHeadPosition = this.headCollider.transform.position + vector3;
-			}
-			if (vector3 != Vector3.zero)
-			{
-				base.transform.position += vector3;
-			}
-			if (this.lastMovingSurfaceContact != GTPlayer.MovingSurfaceContactPoint.NONE && quaternion != Quaternion.identity && !this.isClimbing && !this.rightHand.isHolding && !this.leftHand.isHolding)
-			{
-				this.RotateWithSurface(quaternion, pivot);
-			}
-			this.lastHeadPosition = this.headCollider.transform.position;
-			this.areBothTouching = ((!this.leftHand.isColliding && !this.leftHand.wasColliding) || (!this.rightHand.isColliding && !this.rightHand.wasColliding));
-			this.TakeMyHand_ProcessMovement();
-			this.HandleTentacleMovement();
-			this.anyHandIsColliding = false;
-			this.anyHandIsSliding = false;
-			this.anyHandIsSticking = false;
-			this.leftHand.FinalizeHandPosition();
-			this.rightHand.FinalizeHandPosition();
-			for (int j = 0; j < 12; j++)
-			{
-				if (this.stiltStates[j].isActive)
-				{
-					this.stiltStates[j].FinalizeHandPosition();
-					GTPlayer.HandState handState = this.stiltStates[j];
-					GorillaTagger.Instance.SetExtraHandPosition((StiltID)j, handState.finalPositionThisFrame, handState.canTag, handState.canStun);
-				}
-			}
-			Vector3 b2 = this.lastPosition;
-			GTPlayer.MovingSurfaceContactPoint movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.NONE;
-			int num4 = -1;
-			int num5 = -1;
-			bool flag = false;
+			Vector3 vector10 = vector7 - vector9;
+			float num5 = 0f;
 			bool flag2 = false;
+			if (num3 > 0f)
+			{
+				if (vector10.IsLongerThan(vector9))
+				{
+					num5 = Mathf.Min((vector10.magnitude - vector9.magnitude) * hoverCarveSidewaysSpeedLossFactor * num3, num4);
+					if (num5 > 0f && num4 > hoverMinGrindSpeed)
+					{
+						flag2 = true;
+						hoverboardVisual.PlayGrindHaptic();
+					}
+					num4 -= num5;
+				}
+				vector10 *= 1f - num3 * sidewaysDrag;
+				if (!leftHand.isColliding && !rightHand.isColliding)
+				{
+					velocity = (vector9 + vector10).normalized * num4 + vector8;
+				}
+			}
+			else
+			{
+				velocity = vector7.normalized * num4 + vector8;
+			}
+			float magnitude = (velocity - vector6).magnitude;
+			hoverboardAudio.UpdateAudioLoop(velocity.magnitude, bodyVelocityTracker.GetAverageVelocity(worldSpace: true).magnitude, magnitude, flag2 ? num5 : 0f);
+			if (magnitude > 0f && !flag2)
+			{
+				hoverboardVisual.PlayCarveHaptic(magnitude);
+			}
+		}
+		else
+		{
+			hoverboardAudio.UpdateAudioLoop(0f, bodyVelocityTracker.GetAverageVelocity(worldSpace: true).magnitude, 0f, 0f);
+		}
+		return velocity;
+	}
+
+	public void GrabPersonalHoverboard(bool isLeftHand, Vector3 pos, Quaternion rot, Color col)
+	{
+		if (hoverboardVisual.IsHeld)
+		{
+			hoverboardVisual.DropFreeBoard();
+		}
+		hoverboardVisual.SetIsHeld(isLeftHand, pos, rot, col);
+		hoverboardVisual.ProxyGrabHandle(isLeftHand);
+		FreeHoverboardManager.instance.PreserveMaxHoverboardsConstraint(NetworkSystem.Instance.LocalPlayer.ActorNumber);
+	}
+
+	public void SetHoverAllowed(bool allowed, bool force = false)
+	{
+		if (allowed)
+		{
+			hoverAllowedCount++;
+			isHoverAllowed = true;
+			return;
+		}
+		hoverAllowedCount = ((!force && hoverAllowedCount != 0) ? (hoverAllowedCount - 1) : 0);
+		if (hoverAllowedCount == 0 && isHoverAllowed)
+		{
+			isHoverAllowed = false;
+			if (enableHoverMode)
+			{
+				SetHoverActive(enable: false);
+				VRRig.LocalRig.hoverboardVisual.SetNotHeld();
+			}
+		}
+	}
+
+	public void SetHoverActive(bool enable)
+	{
+		if (enable && !isHoverAllowed)
+		{
+			return;
+		}
+		enableHoverMode = enable;
+		if (!enable)
+		{
+			bodyCollider.enabled = true;
+			hasHoverPoint = false;
+			didHoverLastFrame = false;
+			for (int i = 0; i < hoverboardCasts.Length; i++)
+			{
+				hoverboardCasts[i].didHit = false;
+			}
+			hoverboardAudio.Stop();
+		}
+	}
+
+	private void BodyCollider()
+	{
+		if (MaxSphereSizeForNoOverlap(bodyInitialRadius * scale, PositionWithOffset(headCollider.transform, bodyOffset), ignoreOneWay: false, out bodyMaxRadius))
+		{
+			if (scale > 0f)
+			{
+				bodyCollider.radius = bodyMaxRadius / scale;
+			}
+			if (Physics.SphereCast(PositionWithOffset(headCollider.transform, bodyOffset), bodyMaxRadius, GTPlayerTransform.Down, out bodyHitInfo, bodyInitialHeight * scale - bodyMaxRadius, locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
+			{
+				bodyCollider.height = (bodyHitInfo.distance + bodyMaxRadius) / scale;
+			}
+			else
+			{
+				bodyHitInfo = emptyHit;
+				bodyCollider.height = bodyInitialHeight;
+			}
+			if (!bodyCollider.gameObject.activeSelf)
+			{
+				bodyCollider.gameObject.SetActive(value: true);
+			}
+		}
+		else
+		{
+			bodyCollider.gameObject.SetActive(value: false);
+		}
+		bodyCollider.height = Mathf.Lerp(bodyCollider.height, bodyInitialHeight, bodyLerp);
+		bodyCollider.radius = Mathf.Lerp(bodyCollider.radius, bodyInitialRadius, bodyLerp);
+		bodyOffsetVector = GTPlayerTransform.Down * bodyCollider.height / 2f;
+		bodyCollider.transform.position = PositionWithOffset(headCollider.transform, bodyOffset) + bodyOffsetVector * scale;
+		bodyCollider.transform.rotation = Quaternion.FromToRotation(headCollider.transform.up, GTPlayerTransform.Up) * headCollider.transform.rotation;
+	}
+
+	private Vector3 PositionWithOffset(Transform transformToModify, Vector3 offsetVector)
+	{
+		return transformToModify.position + transformToModify.rotation * offsetVector * scale;
+	}
+
+	public void ScaleAwayFromPoint(float oldScale, float newScale, Vector3 scaleCenter)
+	{
+		if (oldScale < newScale)
+		{
+			lastHeadPosition = ScalePointAwayFromCenter(lastHeadPosition, headCollider.radius, oldScale, newScale, scaleCenter);
+			leftHand.lastPosition = ScalePointAwayFromCenter(leftHand.lastPosition, minimumRaycastDistance, oldScale, newScale, scaleCenter);
+			rightHand.lastPosition = ScalePointAwayFromCenter(rightHand.lastPosition, minimumRaycastDistance, oldScale, newScale, scaleCenter);
+		}
+	}
+
+	private static Vector3 ScalePointAwayFromCenter(Vector3 point, float baseRadius, float oldScale, float newScale, Vector3 scaleCenter)
+	{
+		float magnitude = (point - scaleCenter).magnitude;
+		float num = magnitude + Mathf.Epsilon + baseRadius * (newScale - oldScale);
+		return scaleCenter + (point - scaleCenter) * num / magnitude;
+	}
+
+	private void OnBeforeRenderInit()
+	{
+		if (Application.isPlaying && !hasCorrectedForTracking && mainCamera != null && mainCamera.transform.localPosition != Vector3.zero)
+		{
+			ForceRigidBodySync();
+			base.transform.position -= mainCamera.transform.localPosition;
+			hasCorrectedForTracking = true;
+		}
+		Application.onBeforeRender -= OnBeforeRenderInit;
+	}
+
+	private void LateUpdate()
+	{
+		Vector3 valueOrDefault = antiDriftLastPosition.GetValueOrDefault();
+		if (!antiDriftLastPosition.HasValue)
+		{
+			valueOrDefault = base.transform.position;
+			antiDriftLastPosition = valueOrDefault;
+		}
+		if ((double)(antiDriftLastPosition.Value - base.transform.position).sqrMagnitude < 1E-08)
+		{
+			base.transform.position = antiDriftLastPosition.Value;
+		}
+		else
+		{
+			antiDriftLastPosition = base.transform.position;
+		}
+		if (!hasCorrectedForTracking && mainCamera.transform.localPosition != Vector3.zero)
+		{
+			base.transform.position -= mainCamera.transform.localPosition;
+			hasCorrectedForTracking = true;
+			Application.onBeforeRender -= OnBeforeRenderInit;
+		}
+		if (playerRigidBody.isKinematic)
+		{
+			return;
+		}
+		float time = Time.time;
+		Vector3 position = headCollider.transform.position;
+		turnParent.transform.localScale = VRRig.LocalRig.transform.localScale;
+		playerRigidBody.MovePosition(playerRigidBody.position + position - headCollider.transform.position);
+		if (Mathf.Abs(lastScale - scale) > 0.001f)
+		{
+			if ((object)mainCamera == null)
+			{
+				mainCamera = Camera.main;
+			}
+			mainCamera.nearClipPlane = ((scale > 0.5f) ? 0.01f : 0.002f);
+		}
+		lastScale = scale;
+		debugLastRightHandPosition = rightHand.lastPosition;
+		debugPlatformDeltaPosition = MovingSurfaceMovement();
+		if (debugMovement)
+		{
+			tempRealTime = Time.time;
+			calcDeltaTime = Time.deltaTime;
+			lastRealTime = tempRealTime;
+		}
+		else
+		{
+			tempRealTime = Time.realtimeSinceStartup;
+			calcDeltaTime = tempRealTime - lastRealTime;
+			lastRealTime = tempRealTime;
+			if (calcDeltaTime > 0.1f)
+			{
+				calcDeltaTime = 0.05f;
+			}
+		}
+		if (lastFrameHasValidTouchPos && lastPlatformTouched != null && ComputeWorldHitPoint(lastHitInfoHand, lastFrameTouchPosLocal, out var worldHitPoint))
+		{
+			refMovement = worldHitPoint - lastFrameTouchPosWorld;
+		}
+		else
+		{
+			refMovement = Vector3.zero;
+		}
+		Vector3 vector = Vector3.zero;
+		Quaternion quaternion = Quaternion.identity;
+		Vector3 pivot = headCollider.transform.position;
+		if (lastMovingSurfaceContact != MovingSurfaceContactPoint.NONE && ComputeWorldHitPoint(lastMovingSurfaceHit, lastMovingSurfaceTouchLocal, out var worldHitPoint2))
+		{
+			if (wasMovingSurfaceMonkeBlock && (lastMonkeBlock == null || lastMonkeBlock.state != BuilderPiece.State.AttachedAndPlaced))
+			{
+				movingSurfaceOffset = Vector3.zero;
+			}
+			else
+			{
+				movingSurfaceOffset = worldHitPoint2 - lastMovingSurfaceTouchWorld;
+				vector = movingSurfaceOffset / calcDeltaTime;
+				quaternion = lastMovingSurfaceHit.collider.transform.rotation * Quaternion.Inverse(lastMovingSurfaceRot);
+				pivot = worldHitPoint2;
+			}
+		}
+		else
+		{
+			movingSurfaceOffset = Vector3.zero;
+		}
+		float num = 40f * scale;
+		if (vector.sqrMagnitude >= num * num)
+		{
+			movingSurfaceOffset = Vector3.zero;
+			vector = Vector3.zero;
+			quaternion = Quaternion.identity;
+		}
+		if (!didAJump && (leftHand.wasColliding || rightHand.wasColliding))
+		{
+			base.transform.position = base.transform.position + 4.9f * GTPlayerTransform.PhysicsDown * calcDeltaTime * calcDeltaTime * scale;
+			if (Vector3.Dot(averagedVelocity, slideAverageNormal) <= 0f && Vector3.Dot(GTPlayerTransform.PhysicsUp, slideAverageNormal) > 0f)
+			{
+				base.transform.position = base.transform.position - Vector3.Project(Mathf.Min(stickDepth * scale, Vector3.Project(averagedVelocity, slideAverageNormal).magnitude * calcDeltaTime) * slideAverageNormal, GTPlayerTransform.PhysicsDown);
+			}
+		}
+		if (!didAJump && anyHandWasSliding)
+		{
+			base.transform.position = base.transform.position + slideVelocity * calcDeltaTime;
+			slideVelocity += 9.8f * GTPlayerTransform.PhysicsDown * calcDeltaTime * scale;
+		}
+		float paddleBoostFactor = ((Time.time > boostEnabledUntilTimestamp) ? 0f : (Time.deltaTime * Mathf.Clamp(playerRigidBody.linearVelocity.magnitude * hoverboardPaddleBoostMultiplier, 0f, hoverboardPaddleBoostMax)));
+		int divisor = 0;
+		Vector3 totalMove = Vector3.zero;
+		anyHandIsColliding = false;
+		anyHandIsSliding = false;
+		anyHandIsSticking = false;
+		leftHand.FirstIteration(ref totalMove, ref divisor, paddleBoostFactor);
+		rightHand.FirstIteration(ref totalMove, ref divisor, paddleBoostFactor);
+		for (int i = 0; i < 12; i++)
+		{
+			if (stiltStates[i].isActive)
+			{
+				stiltStates[i].FirstIteration(ref totalMove, ref divisor, 0f);
+			}
+		}
+		if (divisor != 0)
+		{
+			totalMove /= (float)divisor;
+		}
+		if (lastMovingSurfaceContact == MovingSurfaceContactPoint.RIGHT || lastMovingSurfaceContact == MovingSurfaceContactPoint.LEFT)
+		{
+			totalMove += movingSurfaceOffset;
+		}
+		else if (lastMovingSurfaceContact == MovingSurfaceContactPoint.BODY)
+		{
+			Vector3 vector2 = lastHeadPosition + movingSurfaceOffset - headCollider.transform.position;
+			totalMove += vector2;
+		}
+		if (!MaxSphereSizeForNoOverlap(headCollider.radius * 0.9f * scale, lastHeadPosition, ignoreOneWay: true, out maxSphereSize1) && !CrazyCheck2(headCollider.radius * 0.9f * 0.75f * scale, lastHeadPosition))
+		{
+			lastHeadPosition = lastOpenHeadPosition;
+		}
+		if (IterativeCollisionSphereCast(lastHeadPosition, headCollider.radius * 0.9f * scale, headCollider.transform.position + totalMove - lastHeadPosition, Vector3.zero, out var endPosition, singleHand: false, out var _, out junkHit, fullSlide: true))
+		{
+			totalMove = endPosition - headCollider.transform.position;
+		}
+		if (!MaxSphereSizeForNoOverlap(headCollider.radius * 0.9f * scale, lastHeadPosition + totalMove, ignoreOneWay: true, out maxSphereSize1) || !CrazyCheck2(headCollider.radius * 0.9f * 0.75f * scale, lastHeadPosition + totalMove))
+		{
+			lastHeadPosition = lastOpenHeadPosition;
+			totalMove = lastHeadPosition - headCollider.transform.position;
+		}
+		else if (headCollider.radius * 0.9f * 0.825f * scale < maxSphereSize1)
+		{
+			lastOpenHeadPosition = headCollider.transform.position + totalMove;
+		}
+		if (totalMove != Vector3.zero)
+		{
+			base.transform.position += totalMove;
+		}
+		if (lastMovingSurfaceContact != MovingSurfaceContactPoint.NONE && quaternion != Quaternion.identity && !isClimbing && !rightHand.isHolding && !leftHand.isHolding)
+		{
+			RotateWithSurface(quaternion, pivot);
+		}
+		lastHeadPosition = headCollider.transform.position;
+		areBothTouching = (!leftHand.isColliding && !leftHand.wasColliding) || (!rightHand.isColliding && !rightHand.wasColliding);
+		TakeMyHand_ProcessMovement();
+		HandleTentacleMovement();
+		anyHandIsColliding = false;
+		anyHandIsSliding = false;
+		anyHandIsSticking = false;
+		leftHand.FinalizeHandPosition();
+		rightHand.FinalizeHandPosition();
+		for (int j = 0; j < 12; j++)
+		{
+			if (stiltStates[j].isActive)
+			{
+				stiltStates[j].FinalizeHandPosition();
+				HandState handState = stiltStates[j];
+				GorillaTagger.Instance.SetExtraHandPosition((StiltID)j, handState.finalPositionThisFrame, handState.canTag, handState.canStun);
+			}
+		}
+		Vector3 vector3 = lastPosition;
+		MovingSurfaceContactPoint movingSurfaceContactPoint = MovingSurfaceContactPoint.NONE;
+		int movingSurfaceId = -1;
+		int movingSurfaceId2 = -1;
+		bool sideTouch = false;
+		bool isMonkeBlock = false;
+		bool isMonkeBlock2 = false;
+		bool flag = rightHand.isColliding && IsTouchingMovingSurface(rightHand.GetLastPosition(), rightHand.lastHitInfo, out movingSurfaceId, out sideTouch, out isMonkeBlock);
+		if (flag && !sideTouch)
+		{
+			movingSurfaceContactPoint = MovingSurfaceContactPoint.RIGHT;
+			lastMovingSurfaceHit = rightHand.lastHitInfo;
+		}
+		else
+		{
+			bool sideTouch2 = false;
+			BuilderPiece builderPiece = (flag ? lastMonkeBlock : null);
+			if (leftHand.isColliding && IsTouchingMovingSurface(leftHand.GetLastPosition(), leftHand.lastHitInfo, out movingSurfaceId2, out sideTouch2, out isMonkeBlock2))
+			{
+				if (sideTouch2 && isMonkeBlock == isMonkeBlock2)
+				{
+					if (sideTouch && movingSurfaceId2.Equals(movingSurfaceId) && (double)Vector3.Dot(leftHand.lastHitInfo.point - leftHand.GetLastPosition(), rightHand.lastHitInfo.point - rightHand.GetLastPosition()) < 0.3)
+					{
+						movingSurfaceContactPoint = MovingSurfaceContactPoint.RIGHT;
+						lastMovingSurfaceHit = rightHand.lastHitInfo;
+						lastMonkeBlock = builderPiece;
+					}
+				}
+				else
+				{
+					movingSurfaceContactPoint = MovingSurfaceContactPoint.LEFT;
+					lastMovingSurfaceHit = leftHand.lastHitInfo;
+				}
+			}
+		}
+		StoreVelocities();
+		if (InWater)
+		{
+			PlayerGameEvents.PlayerSwam((lastPosition - vector3).magnitude, currentVelocity.magnitude);
+		}
+		else
+		{
+			PlayerGameEvents.PlayerMoved((lastPosition - vector3).magnitude, currentVelocity.magnitude);
+		}
+		didAJump = false;
+		bool flag2 = exitMovingSurface;
+		exitMovingSurface = false;
+		if (leftHand.IsSlipOverriddenToMax() && rightHand.IsSlipOverriddenToMax())
+		{
+			didAJump = true;
+			exitMovingSurface = true;
+		}
+		else if (anyHandIsSliding)
+		{
+			slideAverageNormal = Vector3.zero;
+			int num2 = 0;
+			averageSlipPercentage = 0f;
 			bool flag3 = false;
-			bool flag4 = this.rightHand.isColliding && this.IsTouchingMovingSurface(this.rightHand.GetLastPosition(), this.rightHand.lastHitInfo, out num4, out flag, out flag2);
-			if (flag4 && !flag)
+			if (leftHand.isSliding)
 			{
-				movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.RIGHT;
-				this.lastMovingSurfaceHit = this.rightHand.lastHitInfo;
+				slideAverageNormal += leftHand.slideNormal.normalized;
+				averageSlipPercentage += leftHand.slipPercentage;
+				num2++;
 			}
-			else
+			if (rightHand.isSliding)
 			{
-				bool flag5 = false;
-				BuilderPiece builderPiece = flag4 ? this.lastMonkeBlock : null;
-				if (this.leftHand.isColliding && this.IsTouchingMovingSurface(this.leftHand.GetLastPosition(), this.leftHand.lastHitInfo, out num5, out flag5, out flag3))
+				flag3 = true;
+				slideAverageNormal += rightHand.slideNormal.normalized;
+				averageSlipPercentage += rightHand.slipPercentage;
+				num2++;
+			}
+			for (int k = 0; k < stiltStates.Length; k++)
+			{
+				if (stiltStates[k].isActive && stiltStates[k].isSliding)
 				{
-					if (flag5 && flag2 == flag3)
+					if (!stiltStates[k].isLeftHand)
 					{
-						if (flag && num5.Equals(num4) && (double)Vector3.Dot(this.leftHand.lastHitInfo.point - this.leftHand.GetLastPosition(), this.rightHand.lastHitInfo.point - this.rightHand.GetLastPosition()) < 0.3)
-						{
-							movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.RIGHT;
-							this.lastMovingSurfaceHit = this.rightHand.lastHitInfo;
-							this.lastMonkeBlock = builderPiece;
-						}
+						flag3 = true;
 					}
-					else
-					{
-						movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.LEFT;
-						this.lastMovingSurfaceHit = this.leftHand.lastHitInfo;
-					}
+					slideAverageNormal += stiltStates[k].slideNormal.normalized;
+					averageSlipPercentage += stiltStates[k].slipPercentage;
+					num2++;
 				}
 			}
-			this.StoreVelocities();
-			if (this.InWater)
+			slideAverageNormal = slideAverageNormal.normalized;
+			averageSlipPercentage /= num2;
+			if (num2 == 1)
 			{
-				PlayerGameEvents.PlayerSwam((this.lastPosition - b2).magnitude, this.currentVelocity.magnitude);
-			}
-			else
-			{
-				PlayerGameEvents.PlayerMoved((this.lastPosition - b2).magnitude, this.currentVelocity.magnitude);
-			}
-			this.didAJump = false;
-			bool flag6 = this.exitMovingSurface;
-			this.exitMovingSurface = false;
-			if (this.leftHand.IsSlipOverriddenToMax() && this.rightHand.IsSlipOverriddenToMax())
-			{
-				this.didAJump = true;
-				this.exitMovingSurface = true;
-			}
-			else if (this.anyHandIsSliding)
-			{
-				this.slideAverageNormal = Vector3.zero;
-				int num6 = 0;
-				this.averageSlipPercentage = 0f;
-				bool flag7 = false;
-				if (this.leftHand.isSliding)
+				surfaceDirection = (flag3 ? Vector3.ProjectOnPlane(rightHand.handFollower.forward, rightHand.slideNormal) : Vector3.ProjectOnPlane(leftHand.handFollower.forward, leftHand.slideNormal));
+				if (Vector3.Dot(slideVelocity, surfaceDirection) > 0f)
 				{
-					this.slideAverageNormal += this.leftHand.slideNormal.normalized;
-					this.averageSlipPercentage += this.leftHand.slipPercentage;
-					num6++;
-				}
-				if (this.rightHand.isSliding)
-				{
-					flag7 = true;
-					this.slideAverageNormal += this.rightHand.slideNormal.normalized;
-					this.averageSlipPercentage += this.rightHand.slipPercentage;
-					num6++;
-				}
-				for (int k = 0; k < this.stiltStates.Length; k++)
-				{
-					if (this.stiltStates[k].isActive && this.stiltStates[k].isSliding)
-					{
-						if (!this.stiltStates[k].isLeftHand)
-						{
-							flag7 = true;
-						}
-						this.slideAverageNormal += this.stiltStates[k].slideNormal.normalized;
-						this.averageSlipPercentage += this.stiltStates[k].slipPercentage;
-						num6++;
-					}
-				}
-				this.slideAverageNormal = this.slideAverageNormal.normalized;
-				this.averageSlipPercentage /= (float)num6;
-				if (num6 == 1)
-				{
-					this.surfaceDirection = (flag7 ? Vector3.ProjectOnPlane(this.rightHand.handFollower.forward, this.rightHand.slideNormal) : Vector3.ProjectOnPlane(this.leftHand.handFollower.forward, this.leftHand.slideNormal));
-					if (Vector3.Dot(this.slideVelocity, this.surfaceDirection) > 0f)
-					{
-						this.slideVelocity = Vector3.Project(this.slideVelocity, Vector3.Slerp(this.slideVelocity, this.surfaceDirection.normalized * this.slideVelocity.magnitude, this.slideControl));
-					}
-					else
-					{
-						this.slideVelocity = Vector3.Project(this.slideVelocity, Vector3.Slerp(this.slideVelocity, -this.surfaceDirection.normalized * this.slideVelocity.magnitude, this.slideControl));
-					}
-				}
-				if (!this.anyHandWasSliding)
-				{
-					this.slideVelocity = ((Vector3.Dot(this.playerRigidBody.linearVelocity, this.slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(this.playerRigidBody.linearVelocity, this.slideAverageNormal) : this.playerRigidBody.linearVelocity);
+					slideVelocity = Vector3.Project(slideVelocity, Vector3.Slerp(slideVelocity, surfaceDirection.normalized * slideVelocity.magnitude, slideControl));
 				}
 				else
 				{
-					this.slideVelocity = ((Vector3.Dot(this.slideVelocity, this.slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(this.slideVelocity, this.slideAverageNormal) : this.slideVelocity);
-				}
-				this.slideVelocity = this.slideVelocity.normalized * Mathf.Min(this.slideVelocity.magnitude, Mathf.Max(0.5f, this.averagedVelocity.magnitude * 2f));
-				this.playerRigidBody.linearVelocity = Vector3.zero;
-			}
-			else if (this.anyHandIsColliding)
-			{
-				if (!this.turnedThisFrame)
-				{
-					this.playerRigidBody.linearVelocity = Vector3.zero;
-				}
-				else
-				{
-					this.playerRigidBody.linearVelocity = this.playerRigidBody.linearVelocity.normalized * Mathf.Min(2f, this.playerRigidBody.linearVelocity.magnitude);
+					slideVelocity = Vector3.Project(slideVelocity, Vector3.Slerp(slideVelocity, -surfaceDirection.normalized * slideVelocity.magnitude, slideControl));
 				}
 			}
-			else if (this.anyHandWasSliding)
+			if (!anyHandWasSliding)
 			{
-				this.playerRigidBody.linearVelocity = ((Vector3.Dot(this.slideVelocity, this.slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(this.slideVelocity, this.slideAverageNormal) : this.slideVelocity);
-			}
-			if (this.anyHandIsColliding && !this.disableMovement && !this.turnedThisFrame && !this.didAJump)
-			{
-				if (this.anyHandIsSliding)
-				{
-					if (Vector3.Project(this.averagedVelocity, this.slideAverageNormal).magnitude > this.slideVelocityLimit * this.scale && Vector3.Dot(this.averagedVelocity, this.slideAverageNormal) > 0f && Vector3.Project(this.averagedVelocity, this.slideAverageNormal).magnitude > Vector3.Project(this.slideVelocity, this.slideAverageNormal).magnitude)
-					{
-						this.leftHand.isSliding = false;
-						this.rightHand.isSliding = false;
-						for (int l = 0; l < this.stiltStates.Length; l++)
-						{
-							this.stiltStates[l].isSliding = false;
-						}
-						this.anyHandIsSliding = false;
-						this.didAJump = true;
-						float num7 = this.ApplyNativeScaleAdjustment(Mathf.Min(this.maxJumpSpeed * this.ExtraVelMaxMultiplier(), this.jumpMultiplier * this.ExtraVelMultiplier() * Vector3.Project(this.averagedVelocity, this.slideAverageNormal).magnitude));
-						this.playerRigidBody.linearVelocity = num7 * this.siJumpMultiplier * this.slideAverageNormal.normalized + Vector3.ProjectOnPlane(this.slideVelocity, this.slideAverageNormal);
-						if (num7 > this.slideVelocityLimit * this.scale * this.exitMovingSurfaceThreshold)
-						{
-							this.exitMovingSurface = true;
-						}
-					}
-				}
-				else if (this.averagedVelocity.magnitude > this.velocityLimit * this.scale)
-				{
-					float num8 = (this.InWater && this.CurrentWaterVolume != null) ? this.liquidPropertiesList[(int)this.CurrentWaterVolume.LiquidType].surfaceJumpFactor : 1f;
-					float num9 = this.ApplyNativeScaleAdjustment(this.enableHoverMode ? Mathf.Min(this.hoverMaxPaddleSpeed, this.averagedVelocity.magnitude) : Mathf.Min(this.maxJumpSpeed * this.ExtraVelMaxMultiplier(), this.jumpMultiplier * this.ExtraVelMultiplier() * num8 * this.averagedVelocity.magnitude));
-					Vector3 vector4 = num9 * this.siJumpMultiplier * this.averagedVelocity.normalized;
-					this.didAJump = true;
-					this.playerRigidBody.linearVelocity = vector4;
-					if (this.InWater)
-					{
-						this.swimmingVelocity += vector4 * this.swimmingParams.underwaterJumpsAsSwimVelocityFactor;
-					}
-					if (num9 > this.velocityLimit * this.scale * this.exitMovingSurfaceThreshold)
-					{
-						this.exitMovingSurface = true;
-					}
-				}
-			}
-			this.stuckHandsCheckLateUpdate(ref this.leftHand.finalPositionThisFrame, ref this.rightHand.finalPositionThisFrame);
-			if (this.lastPlatformTouched != null && this.currentPlatform == null)
-			{
-				if (!this.playerRigidBody.isKinematic)
-				{
-					this.playerRigidBody.linearVelocity += this.refMovement / this.calcDeltaTime;
-				}
-				this.refMovement = Vector3.zero;
-			}
-			if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.NONE)
-			{
-				if (!this.playerRigidBody.isKinematic)
-				{
-					this.playerRigidBody.linearVelocity += this.lastMovingSurfaceVelocity;
-				}
-				this.lastMovingSurfaceVelocity = Vector3.zero;
-			}
-			if (this.enableHoverMode)
-			{
-				this.HoverboardLateUpdate();
+				slideVelocity = ((Vector3.Dot(playerRigidBody.linearVelocity, slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(playerRigidBody.linearVelocity, slideAverageNormal) : playerRigidBody.linearVelocity);
 			}
 			else
 			{
-				this.hasHoverPoint = false;
+				slideVelocity = ((Vector3.Dot(slideVelocity, slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(slideVelocity, slideAverageNormal) : slideVelocity);
 			}
-			Vector3 vector5 = Vector3.zero;
-			float a3 = 0f;
-			float a4 = 0f;
-			if (this.bodyInWater)
+			slideVelocity = slideVelocity.normalized * Mathf.Min(slideVelocity.magnitude, Mathf.Max(0.5f, averagedVelocity.magnitude * 2f));
+			playerRigidBody.linearVelocity = Vector3.zero;
+		}
+		else if (anyHandIsColliding)
+		{
+			if (!turnedThisFrame)
 			{
-				Vector3 b3;
-				if (this.GetSwimmingVelocityForHand(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.calcDeltaTime, ref this.leftHandWaterVolume, ref this.leftHandWaterSurface, out b3) && !this.turnedThisFrame)
-				{
-					a3 = Mathf.InverseLerp(0f, 0.2f, b3.magnitude) * this.swimmingParams.swimmingHapticsStrength;
-					vector5 += b3;
-				}
-				Vector3 b4;
-				if (this.GetSwimmingVelocityForHand(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.calcDeltaTime, ref this.rightHandWaterVolume, ref this.rightHandWaterSurface, out b4) && !this.turnedThisFrame)
-				{
-					a4 = Mathf.InverseLerp(0f, 0.15f, b4.magnitude) * this.swimmingParams.swimmingHapticsStrength;
-					vector5 += b4;
-				}
-			}
-			Vector3 vector6 = Vector3.zero;
-			Vector3 b5;
-			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeLeft > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.leftHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.leftHandWaterVolume, this.leftHandWaterSurface, out b5))
-			{
-				if (time - this.lastWaterSurfaceJumpTimeRight > this.waterSurfaceJumpCooldown)
-				{
-					vector6 += b5;
-				}
-				this.lastWaterSurfaceJumpTimeLeft = Time.time;
-				GorillaTagger.Instance.StartVibration(true, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
-			}
-			Vector3 b6;
-			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeRight > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.rightHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.rightHandWaterVolume, this.rightHandWaterSurface, out b6))
-			{
-				if (time - this.lastWaterSurfaceJumpTimeLeft > this.waterSurfaceJumpCooldown)
-				{
-					vector6 += b6;
-				}
-				this.lastWaterSurfaceJumpTimeRight = Time.time;
-				GorillaTagger.Instance.StartVibration(false, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
-			}
-			vector6 = Vector3.ClampMagnitude(vector6, this.swimmingParams.waterSurfaceJumpMaxSpeed * this.scale);
-			float num10 = Mathf.Max(a3, this.leftHandNonDiveHapticsAmount);
-			if (num10 > 0.001f && time - this.lastWaterSurfaceJumpTimeLeft > GorillaTagger.Instance.tapHapticDuration)
-			{
-				GorillaTagger.Instance.DoVibration(XRNode.LeftHand, num10, this.calcDeltaTime);
-			}
-			float num11 = Mathf.Max(a4, this.rightHandNonDiveHapticsAmount);
-			if (num11 > 0.001f && time - this.lastWaterSurfaceJumpTimeRight > GorillaTagger.Instance.tapHapticDuration)
-			{
-				GorillaTagger.Instance.DoVibration(XRNode.RightHand, num11, this.calcDeltaTime);
-			}
-			if (!this.disableMovement)
-			{
-				this.swimmingVelocity += vector5;
-				if (!this.playerRigidBody.isKinematic)
-				{
-					this.playerRigidBody.linearVelocity += vector5 + vector6;
-				}
+				playerRigidBody.linearVelocity = Vector3.zero;
 			}
 			else
 			{
-				this.swimmingVelocity = Vector3.zero;
+				playerRigidBody.linearVelocity = playerRigidBody.linearVelocity.normalized * Mathf.Min(2f, playerRigidBody.linearVelocity.magnitude);
 			}
-			if (GorillaGameManager.instance is GorillaFreezeTagManager)
+		}
+		else if (anyHandWasSliding)
+		{
+			playerRigidBody.linearVelocity = ((Vector3.Dot(slideVelocity, slideAverageNormal) <= 0f) ? Vector3.ProjectOnPlane(slideVelocity, slideAverageNormal) : slideVelocity);
+		}
+		if (anyHandIsColliding && !disableMovement && !turnedThisFrame && !didAJump)
+		{
+			if (anyHandIsSliding)
 			{
-				if (!this.IsFrozen || !this.primaryButtonPressed)
+				if (Vector3.Project(averagedVelocity, slideAverageNormal).magnitude > slideVelocityLimit * scale && Vector3.Dot(averagedVelocity, slideAverageNormal) > 0f && Vector3.Project(averagedVelocity, slideAverageNormal).magnitude > Vector3.Project(slideVelocity, slideAverageNormal).magnitude)
 				{
-					this.IsBodySliding = false;
-					this.lastSlopeDirection = Vector3.zero;
-					if (this.bodyTouchedSurfaces.Count > 0)
+					leftHand.isSliding = false;
+					rightHand.isSliding = false;
+					for (int l = 0; l < stiltStates.Length; l++)
 					{
-						foreach (KeyValuePair<GameObject, PhysicsMaterial> keyValuePair in this.bodyTouchedSurfaces)
-						{
-							MeshCollider meshCollider;
-							if (keyValuePair.Key.TryGetComponent<MeshCollider>(out meshCollider))
-							{
-								meshCollider.material = keyValuePair.Value;
-							}
-						}
-						this.bodyTouchedSurfaces.Clear();
+						stiltStates[l].isSliding = false;
+					}
+					anyHandIsSliding = false;
+					didAJump = true;
+					float num3 = ApplyNativeScaleAdjustment(Mathf.Min(maxJumpSpeed * ExtraVelMaxMultiplier(), jumpMultiplier * ExtraVelMultiplier() * Vector3.Project(averagedVelocity, slideAverageNormal).magnitude));
+					playerRigidBody.linearVelocity = num3 * siJumpMultiplier * slideAverageNormal.normalized + Vector3.ProjectOnPlane(slideVelocity, slideAverageNormal);
+					if (num3 > slideVelocityLimit * scale * exitMovingSurfaceThreshold)
+					{
+						exitMovingSurface = true;
 					}
 				}
-				else if (this.BodyOnGround && this.primaryButtonPressed)
+			}
+			else if (averagedVelocity.magnitude > velocityLimit * scale)
+			{
+				float num4 = ((InWater && CurrentWaterVolume != null) ? liquidPropertiesList[(int)CurrentWaterVolume.LiquidType].surfaceJumpFactor : 1f);
+				float num5 = ApplyNativeScaleAdjustment(enableHoverMode ? Mathf.Min(hoverMaxPaddleSpeed, averagedVelocity.magnitude) : Mathf.Min(maxJumpSpeed * ExtraVelMaxMultiplier(), jumpMultiplier * ExtraVelMultiplier() * num4 * averagedVelocity.magnitude));
+				Vector3 vector4 = num5 * siJumpMultiplier * averagedVelocity.normalized;
+				didAJump = true;
+				playerRigidBody.linearVelocity = vector4;
+				if (InWater)
 				{
-					float y = this.bodyInitialHeight / 2f - this.bodyInitialRadius;
-					RaycastHit raycastHit;
-					if (Physics.SphereCast(this.bodyCollider.transform.position - new Vector3(0f, y, 0f), this.bodyInitialRadius - 0.01f, Vector3.down, out raycastHit, 1f, ~LayerMask.GetMask(new string[]
+					swimmingVelocity += vector4 * swimmingParams.underwaterJumpsAsSwimVelocityFactor;
+				}
+				if (num5 > velocityLimit * scale * exitMovingSurfaceThreshold)
+				{
+					exitMovingSurface = true;
+				}
+			}
+		}
+		stuckHandsCheckLateUpdate(ref leftHand.finalPositionThisFrame, ref rightHand.finalPositionThisFrame);
+		if (lastPlatformTouched != null && currentPlatform == null)
+		{
+			if (!playerRigidBody.isKinematic)
+			{
+				playerRigidBody.linearVelocity += refMovement / calcDeltaTime;
+			}
+			refMovement = Vector3.zero;
+		}
+		if (lastMovingSurfaceContact == MovingSurfaceContactPoint.NONE)
+		{
+			if (!playerRigidBody.isKinematic)
+			{
+				playerRigidBody.linearVelocity += lastMovingSurfaceVelocity;
+			}
+			lastMovingSurfaceVelocity = Vector3.zero;
+		}
+		if (enableHoverMode)
+		{
+			HoverboardLateUpdate();
+		}
+		else
+		{
+			hasHoverPoint = false;
+		}
+		Vector3 zero = Vector3.zero;
+		float a = 0f;
+		float a2 = 0f;
+		if (bodyInWater)
+		{
+			if (GetSwimmingVelocityForHand(leftHand.lastPosition, leftHand.finalPositionThisFrame, leftHand.controllerTransform.right, calcDeltaTime, ref leftHandWaterVolume, ref leftHandWaterSurface, out var swimmingVelocityChange) && !turnedThisFrame)
+			{
+				a = Mathf.InverseLerp(0f, 0.2f, swimmingVelocityChange.magnitude) * swimmingParams.swimmingHapticsStrength;
+				zero += swimmingVelocityChange;
+			}
+			if (GetSwimmingVelocityForHand(rightHand.lastPosition, rightHand.finalPositionThisFrame, -rightHand.controllerTransform.right, calcDeltaTime, ref rightHandWaterVolume, ref rightHandWaterSurface, out var swimmingVelocityChange2) && !turnedThisFrame)
+			{
+				a2 = Mathf.InverseLerp(0f, 0.15f, swimmingVelocityChange2.magnitude) * swimmingParams.swimmingHapticsStrength;
+				zero += swimmingVelocityChange2;
+			}
+		}
+		Vector3 zero2 = Vector3.zero;
+		if (swimmingParams.allowWaterSurfaceJumps && time - lastWaterSurfaceJumpTimeLeft > waterSurfaceJumpCooldown && CheckWaterSurfaceJump(leftHand.lastPosition, leftHand.finalPositionThisFrame, leftHand.controllerTransform.right, leftHand.velocityTracker.GetAverageVelocity(worldSpace: false, 0.1f) * scale, swimmingParams, leftHandWaterVolume, leftHandWaterSurface, out var jumpVelocity))
+		{
+			if (time - lastWaterSurfaceJumpTimeRight > waterSurfaceJumpCooldown)
+			{
+				zero2 += jumpVelocity;
+			}
+			lastWaterSurfaceJumpTimeLeft = Time.time;
+			GorillaTagger.Instance.StartVibration(forLeftController: true, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
+		}
+		if (swimmingParams.allowWaterSurfaceJumps && time - lastWaterSurfaceJumpTimeRight > waterSurfaceJumpCooldown && CheckWaterSurfaceJump(rightHand.lastPosition, rightHand.finalPositionThisFrame, -rightHand.controllerTransform.right, rightHand.velocityTracker.GetAverageVelocity(worldSpace: false, 0.1f) * scale, swimmingParams, rightHandWaterVolume, rightHandWaterSurface, out var jumpVelocity2))
+		{
+			if (time - lastWaterSurfaceJumpTimeLeft > waterSurfaceJumpCooldown)
+			{
+				zero2 += jumpVelocity2;
+			}
+			lastWaterSurfaceJumpTimeRight = Time.time;
+			GorillaTagger.Instance.StartVibration(forLeftController: false, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
+		}
+		zero2 = Vector3.ClampMagnitude(zero2, swimmingParams.waterSurfaceJumpMaxSpeed * scale);
+		float num6 = Mathf.Max(a, leftHandNonDiveHapticsAmount);
+		if (num6 > 0.001f && time - lastWaterSurfaceJumpTimeLeft > GorillaTagger.Instance.tapHapticDuration)
+		{
+			GorillaTagger.Instance.DoVibration(XRNode.LeftHand, num6, calcDeltaTime);
+		}
+		float num7 = Mathf.Max(a2, rightHandNonDiveHapticsAmount);
+		if (num7 > 0.001f && time - lastWaterSurfaceJumpTimeRight > GorillaTagger.Instance.tapHapticDuration)
+		{
+			GorillaTagger.Instance.DoVibration(XRNode.RightHand, num7, calcDeltaTime);
+		}
+		if (!disableMovement)
+		{
+			swimmingVelocity += zero;
+			if (!playerRigidBody.isKinematic)
+			{
+				playerRigidBody.linearVelocity += zero + zero2;
+			}
+		}
+		else
+		{
+			swimmingVelocity = Vector3.zero;
+		}
+		if (GorillaGameManager.instance is GorillaFreezeTagManager)
+		{
+			if (!IsFrozen || !primaryButtonPressed)
+			{
+				IsBodySliding = false;
+				lastSlopeDirection = Vector3.zero;
+				if (bodyTouchedSurfaces.Count > 0)
+				{
+					foreach (KeyValuePair<GameObject, PhysicsMaterial> bodyTouchedSurface in bodyTouchedSurfaces)
 					{
-						"Gorilla Body Collider",
-						"GorillaInteractable"
-					}), QueryTriggerInteraction.Ignore))
-					{
-						this.IsBodySliding = true;
-						MeshCollider meshCollider2;
-						if (!this.bodyTouchedSurfaces.ContainsKey(raycastHit.transform.gameObject) && raycastHit.transform.gameObject.TryGetComponent<MeshCollider>(out meshCollider2))
+						if (bodyTouchedSurface.Key.TryGetComponent<MeshCollider>(out var component))
 						{
-							this.bodyTouchedSurfaces.Add(raycastHit.transform.gameObject, meshCollider2.material);
-							raycastHit.transform.gameObject.GetComponent<MeshCollider>().material = this.slipperyMaterial;
+							component.material = bodyTouchedSurface.Value;
 						}
 					}
+					bodyTouchedSurfaces.Clear();
 				}
-				else
+			}
+			else if (BodyOnGround && primaryButtonPressed)
+			{
+				float y = bodyInitialHeight / 2f - bodyInitialRadius;
+				if (Physics.SphereCast(bodyCollider.transform.position - new Vector3(0f, y, 0f), bodyInitialRadius - 0.01f, Vector3.down, out var hitInfo, 1f, ~LayerMask.GetMask("Gorilla Body Collider", "GorillaInteractable"), QueryTriggerInteraction.Ignore))
 				{
-					this.IsBodySliding = false;
-					this.lastSlopeDirection = Vector3.zero;
+					IsBodySliding = true;
+					if (!bodyTouchedSurfaces.ContainsKey(hitInfo.transform.gameObject) && hitInfo.transform.gameObject.TryGetComponent<MeshCollider>(out var component2))
+					{
+						bodyTouchedSurfaces.Add(hitInfo.transform.gameObject, component2.material);
+						hitInfo.transform.gameObject.GetComponent<MeshCollider>().material = slipperyMaterial;
+					}
 				}
 			}
 			else
 			{
-				this.IsBodySliding = false;
-				if (this.bodyTouchedSurfaces.Count > 0)
+				IsBodySliding = false;
+				lastSlopeDirection = Vector3.zero;
+			}
+		}
+		else
+		{
+			IsBodySliding = false;
+			if (bodyTouchedSurfaces.Count > 0)
+			{
+				foreach (KeyValuePair<GameObject, PhysicsMaterial> bodyTouchedSurface2 in bodyTouchedSurfaces)
 				{
-					foreach (KeyValuePair<GameObject, PhysicsMaterial> keyValuePair2 in this.bodyTouchedSurfaces)
+					if (bodyTouchedSurface2.Key.TryGetComponent<MeshCollider>(out var component3))
 					{
-						MeshCollider meshCollider3;
-						if (keyValuePair2.Key.TryGetComponent<MeshCollider>(out meshCollider3))
-						{
-							meshCollider3.material = keyValuePair2.Value;
-						}
-					}
-					this.bodyTouchedSurfaces.Clear();
-				}
-			}
-			this.leftHand.OnEndOfFrame();
-			this.rightHand.OnEndOfFrame();
-			for (int m = 0; m < 12; m++)
-			{
-				if (this.stiltStates[m].isActive)
-				{
-					this.stiltStates[m].OnEndOfFrame();
-				}
-			}
-			this.leftHand.PositionHandFollower();
-			this.rightHand.PositionHandFollower();
-			this.anyHandWasSliding = this.anyHandIsSliding;
-			this.anyHandWasColliding = this.anyHandIsColliding;
-			this.anyHandWasSticking = this.anyHandIsSticking;
-			if (this.anyHandIsSticking)
-			{
-				this.lastTouchedGroundTimestamp = Time.time;
-			}
-			if (PhotonNetwork.InRoom)
-			{
-				if (this.IsGroundedHand || this.IsTentacleActive || this.IsThrusterActive)
-				{
-					this.LastHandTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
-					this.LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
-				}
-				else if (this.IsGroundedButt || this.IsLaserZiplineActive)
-				{
-					this.LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
-				}
-			}
-			else
-			{
-				this.LastHandTouchedGroundAtNetworkTime = 0f;
-				this.LastTouchedGroundAtNetworkTime = 0f;
-			}
-			this.degreesTurnedThisFrame = 0f;
-			this.lastPlatformTouched = this.currentPlatform;
-			this.currentPlatform = null;
-			this.lastMovingSurfaceVelocity = vector;
-			Vector3 vector7;
-			if (GTPlayer.ComputeLocalHitPoint(this.lastHitInfoHand, out vector7))
-			{
-				this.lastFrameHasValidTouchPos = true;
-				this.lastFrameTouchPosLocal = vector7;
-				this.lastFrameTouchPosWorld = this.lastHitInfoHand.point;
-			}
-			else
-			{
-				this.lastFrameHasValidTouchPos = false;
-				this.lastFrameTouchPosLocal = Vector3.zero;
-				this.lastFrameTouchPosWorld = Vector3.zero;
-			}
-			this.lastRigidbodyPosition = this.playerRigidBody.transform.position;
-			RaycastHit raycastHit2 = this.emptyHit;
-			this.BodyCollider();
-			if (this.bodyHitInfo.collider != null)
-			{
-				this.wasBodyOnGround = true;
-				raycastHit2 = this.bodyHitInfo;
-			}
-			else if (movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.NONE && this.bodyCollider.gameObject.activeSelf)
-			{
-				bool flag8 = false;
-				this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-				Vector3 origin = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + (this.bodyInitialHeight * this.scale - this.bodyMaxRadius) * GTPlayerTransform.Down;
-				this.bufferCount = Physics.SphereCastNonAlloc(origin, this.bodyMaxRadius, GTPlayerTransform.Down, this.rayCastNonAllocColliders, this.minimumRaycastDistance * this.scale, this.locomotionEnabledLayers.value);
-				if (this.bufferCount > 0)
-				{
-					this.tempHitInfo = this.rayCastNonAllocColliders[0];
-					for (int n = 0; n < this.bufferCount; n++)
-					{
-						if (this.tempHitInfo.distance > 0f && (!flag8 || this.rayCastNonAllocColliders[n].distance < this.tempHitInfo.distance))
-						{
-							flag8 = true;
-							raycastHit2 = this.rayCastNonAllocColliders[n];
-						}
+						component3.material = bodyTouchedSurface2.Value;
 					}
 				}
-				this.wasBodyOnGround = flag8;
+				bodyTouchedSurfaces.Clear();
 			}
-			int num12 = -1;
-			bool flag9 = false;
-			bool flag10;
-			if (this.wasBodyOnGround && movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.NONE && this.IsTouchingMovingSurface(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), raycastHit2, out num12, out flag10, out flag9) && !flag10)
+		}
+		leftHand.OnEndOfFrame();
+		rightHand.OnEndOfFrame();
+		for (int m = 0; m < 12; m++)
+		{
+			if (stiltStates[m].isActive)
 			{
-				movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.BODY;
-				this.lastMovingSurfaceHit = raycastHit2;
+				stiltStates[m].OnEndOfFrame();
 			}
-			Vector3 vector8;
-			if (movingSurfaceContactPoint != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeLocalHitPoint(this.lastMovingSurfaceHit, out vector8))
+		}
+		leftHand.PositionHandFollower();
+		rightHand.PositionHandFollower();
+		anyHandWasSliding = anyHandIsSliding;
+		anyHandWasColliding = anyHandIsColliding;
+		anyHandWasSticking = anyHandIsSticking;
+		if (anyHandIsSticking)
+		{
+			lastTouchedGroundTimestamp = Time.time;
+		}
+		if (PhotonNetwork.InRoom)
+		{
+			if (IsGroundedHand || IsTentacleActive || IsThrusterActive)
 			{
-				this.lastMovingSurfaceTouchLocal = vector8;
-				this.lastMovingSurfaceTouchWorld = this.lastMovingSurfaceHit.point;
-				this.lastMovingSurfaceRot = this.lastMovingSurfaceHit.collider.transform.rotation;
-				this.lastAttachedToMovingSurfaceFrame = Time.frameCount;
+				LastHandTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
+				LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
 			}
-			else
+			else if (IsGroundedButt || IsLaserZiplineActive)
 			{
-				movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.NONE;
-				this.lastMovingSurfaceTouchLocal = Vector3.zero;
-				this.lastMovingSurfaceTouchWorld = Vector3.zero;
-				this.lastMovingSurfaceRot = Quaternion.identity;
+				LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
 			}
-			Vector3 position2 = this.lastMovingSurfaceTouchWorld;
-			int num13 = -1;
-			bool flag11 = false;
-			switch (movingSurfaceContactPoint)
+		}
+		else
+		{
+			LastHandTouchedGroundAtNetworkTime = 0f;
+			LastTouchedGroundAtNetworkTime = 0f;
+		}
+		degreesTurnedThisFrame = 0f;
+		lastPlatformTouched = currentPlatform;
+		currentPlatform = null;
+		lastMovingSurfaceVelocity = vector;
+		if (ComputeLocalHitPoint(lastHitInfoHand, out var localHitPoint))
+		{
+			lastFrameHasValidTouchPos = true;
+			lastFrameTouchPosLocal = localHitPoint;
+			lastFrameTouchPosWorld = lastHitInfoHand.point;
+		}
+		else
+		{
+			lastFrameHasValidTouchPos = false;
+			lastFrameTouchPosLocal = Vector3.zero;
+			lastFrameTouchPosWorld = Vector3.zero;
+		}
+		lastRigidbodyPosition = playerRigidBody.transform.position;
+		RaycastHit raycastHit = emptyHit;
+		BodyCollider();
+		if (bodyHitInfo.collider != null)
+		{
+			wasBodyOnGround = true;
+			raycastHit = bodyHitInfo;
+		}
+		else if (movingSurfaceContactPoint == MovingSurfaceContactPoint.NONE && bodyCollider.gameObject.activeSelf)
+		{
+			bool flag4 = false;
+			ClearRaycasthitBuffer(ref rayCastNonAllocColliders);
+			Vector3 origin = PositionWithOffset(headCollider.transform, bodyOffset) + (bodyInitialHeight * scale - bodyMaxRadius) * GTPlayerTransform.Down;
+			bufferCount = Physics.SphereCastNonAlloc(origin, bodyMaxRadius, GTPlayerTransform.Down, rayCastNonAllocColliders, minimumRaycastDistance * scale, locomotionEnabledLayers.value);
+			if (bufferCount > 0)
 			{
-			case GTPlayer.MovingSurfaceContactPoint.NONE:
-				if (flag6)
+				tempHitInfo = rayCastNonAllocColliders[0];
+				for (int n = 0; n < bufferCount; n++)
 				{
-					this.exitMovingSurface = true;
+					if (!(tempHitInfo.distance <= 0f) && (!flag4 || rayCastNonAllocColliders[n].distance < tempHitInfo.distance))
+					{
+						flag4 = true;
+						raycastHit = rayCastNonAllocColliders[n];
+					}
 				}
-				num13 = -1;
-				break;
-			case GTPlayer.MovingSurfaceContactPoint.RIGHT:
-				num13 = num4;
-				flag11 = flag2;
-				position2 = GorillaTagger.Instance.offlineVRRig.rightHandTransform.position;
-				break;
-			case GTPlayer.MovingSurfaceContactPoint.LEFT:
-				num13 = num5;
-				flag11 = flag3;
-				position2 = GorillaTagger.Instance.offlineVRRig.leftHandTransform.position;
-				break;
-			case GTPlayer.MovingSurfaceContactPoint.BODY:
-				num13 = num12;
-				flag11 = flag9;
-				position2 = GorillaTagger.Instance.offlineVRRig.bodyTransform.position;
-				break;
 			}
-			if (!flag11)
+			wasBodyOnGround = flag4;
+		}
+		int movingSurfaceId3 = -1;
+		bool isMonkeBlock3 = false;
+		if (wasBodyOnGround && movingSurfaceContactPoint == MovingSurfaceContactPoint.NONE && IsTouchingMovingSurface(PositionWithOffset(headCollider.transform, bodyOffset), raycastHit, out movingSurfaceId3, out var sideTouch3, out isMonkeBlock3) && !sideTouch3)
+		{
+			movingSurfaceContactPoint = MovingSurfaceContactPoint.BODY;
+			lastMovingSurfaceHit = raycastHit;
+		}
+		if (movingSurfaceContactPoint != MovingSurfaceContactPoint.NONE && ComputeLocalHitPoint(lastMovingSurfaceHit, out var localHitPoint2))
+		{
+			lastMovingSurfaceTouchLocal = localHitPoint2;
+			lastMovingSurfaceTouchWorld = lastMovingSurfaceHit.point;
+			lastMovingSurfaceRot = lastMovingSurfaceHit.collider.transform.rotation;
+			lastAttachedToMovingSurfaceFrame = Time.frameCount;
+		}
+		else
+		{
+			movingSurfaceContactPoint = MovingSurfaceContactPoint.NONE;
+			lastMovingSurfaceTouchLocal = Vector3.zero;
+			lastMovingSurfaceTouchWorld = Vector3.zero;
+			lastMovingSurfaceRot = Quaternion.identity;
+		}
+		Vector3 position2 = lastMovingSurfaceTouchWorld;
+		int num8 = -1;
+		bool flag5 = false;
+		switch (movingSurfaceContactPoint)
+		{
+		case MovingSurfaceContactPoint.RIGHT:
+			num8 = movingSurfaceId;
+			flag5 = isMonkeBlock;
+			position2 = GorillaTagger.Instance.offlineVRRig.rightHandTransform.position;
+			break;
+		case MovingSurfaceContactPoint.LEFT:
+			num8 = movingSurfaceId2;
+			flag5 = isMonkeBlock2;
+			position2 = GorillaTagger.Instance.offlineVRRig.leftHandTransform.position;
+			break;
+		case MovingSurfaceContactPoint.BODY:
+			num8 = movingSurfaceId3;
+			flag5 = isMonkeBlock3;
+			position2 = GorillaTagger.Instance.offlineVRRig.bodyTransform.position;
+			break;
+		case MovingSurfaceContactPoint.NONE:
+			if (flag2)
 			{
-				this.lastMonkeBlock = null;
+				exitMovingSurface = true;
 			}
-			if (num13 != this.lastMovingSurfaceID || this.lastMovingSurfaceContact != movingSurfaceContactPoint || flag11 != this.wasMovingSurfaceMonkeBlock)
+			num8 = -1;
+			break;
+		}
+		if (!flag5)
+		{
+			lastMonkeBlock = null;
+		}
+		if (num8 != lastMovingSurfaceID || lastMovingSurfaceContact != movingSurfaceContactPoint || flag5 != wasMovingSurfaceMonkeBlock)
+		{
+			if (num8 == -1)
 			{
-				if (num13 == -1)
+				if (Time.frameCount - lastAttachedToMovingSurfaceFrame > 3)
 				{
-					if (Time.frameCount - this.lastAttachedToMovingSurfaceFrame > 3)
-					{
-						VRRig.DetachLocalPlayerFromMovingSurface();
-						this.lastMovingSurfaceID = -1;
-					}
+					VRRig.DetachLocalPlayerFromMovingSurface();
+					lastMovingSurfaceID = -1;
 				}
-				else if (flag11)
+			}
+			else if (flag5)
+			{
+				if (lastMonkeBlock != null)
 				{
-					if (this.lastMonkeBlock != null)
-					{
-						VRRig.AttachLocalPlayerToMovingSurface(num13, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, this.lastMonkeBlock.transform.InverseTransformPoint(position2), flag11);
-						this.lastMovingSurfaceID = num13;
-					}
-					else
-					{
-						VRRig.DetachLocalPlayerFromMovingSurface();
-						this.lastMovingSurfaceID = -1;
-					}
-				}
-				else if (MovingSurfaceManager.instance != null)
-				{
-					MovingSurface movingSurface;
-					if (MovingSurfaceManager.instance.TryGetMovingSurface(num13, out movingSurface))
-					{
-						VRRig.AttachLocalPlayerToMovingSurface(num13, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, movingSurface.transform.InverseTransformPoint(position2), flag11);
-						this.lastMovingSurfaceID = num13;
-					}
-					else
-					{
-						VRRig.DetachLocalPlayerFromMovingSurface();
-						this.lastMovingSurfaceID = -1;
-					}
+					VRRig.AttachLocalPlayerToMovingSurface(num8, movingSurfaceContactPoint == MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == MovingSurfaceContactPoint.BODY, lastMonkeBlock.transform.InverseTransformPoint(position2), flag5);
+					lastMovingSurfaceID = num8;
 				}
 				else
 				{
 					VRRig.DetachLocalPlayerFromMovingSurface();
-					this.lastMovingSurfaceID = -1;
+					lastMovingSurfaceID = -1;
 				}
 			}
-			if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.NONE && movingSurfaceContactPoint != GTPlayer.MovingSurfaceContactPoint.NONE)
+			else if (MovingSurfaceManager.instance != null)
 			{
-				this.SetPlayerVelocity(Vector3.zero);
-			}
-			this.lastMovingSurfaceContact = movingSurfaceContactPoint;
-			this.wasMovingSurfaceMonkeBlock = flag11;
-			if (this.activeSizeChangerSettings != null)
-			{
-				if (this.activeSizeChangerSettings.ExpireOnDistance > 0f && Vector3.Distance(base.transform.position, this.activeSizeChangerSettings.WorldPosition) > this.activeSizeChangerSettings.ExpireOnDistance)
+				if (MovingSurfaceManager.instance.TryGetMovingSurface(num8, out var result))
 				{
-					this.SetNativeScale(null);
-				}
-				if (this.activeSizeChangerSettings.ExpireAfterSeconds > 0f && Time.time - this.activeSizeChangerSettings.ActivationTime > this.activeSizeChangerSettings.ExpireAfterSeconds)
-				{
-					this.SetNativeScale(null);
-				}
-			}
-			TakeMyHand_HandLink grabbedLink = VRRig.LocalRig.leftHandLink.grabbedLink;
-			if (grabbedLink != null)
-			{
-				double time2 = PhotonNetwork.Time;
-				float lastHandTouchedGroundAtNetworkTime = this.LastHandTouchedGroundAtNetworkTime;
-				double time3 = PhotonNetwork.Time;
-				float lastHandTouchedGroundAtNetworkTime2 = grabbedLink.myRig.LastHandTouchedGroundAtNetworkTime;
-			}
-			if (this.didAJump || this.anyHandIsColliding || this.anyHandIsSliding || this.anyHandIsSticking || this.IsGroundedHand || this.forceRBSync)
-			{
-				this.playerRigidBody.position = base.transform.position;
-				this.playerRigidBody.rotation = base.transform.rotation;
-				this.forceRBSync = false;
-			}
-		}
-
-		private float ApplyNativeScaleAdjustment(float adjustedMagnitude)
-		{
-			if (this.nativeScale > 0f && this.nativeScale != 1f)
-			{
-				return adjustedMagnitude *= this.nativeScaleMagnitudeAdjustmentFactor.Evaluate(this.nativeScale);
-			}
-			return adjustedMagnitude;
-		}
-
-		private float RotateWithSurface(Quaternion rotationDelta, Vector3 pivot)
-		{
-			Quaternion quaternion;
-			Quaternion quaternion2;
-			QuaternionUtil.DecomposeSwingTwist(rotationDelta, GTPlayerTransform.PhysicsUp, out quaternion, out quaternion2);
-			float num = quaternion2.eulerAngles.y;
-			if (num > 270f)
-			{
-				num -= 360f;
-			}
-			else if (num > 90f)
-			{
-				num -= 180f;
-			}
-			if (Mathf.Abs(num) < 90f * this.calcDeltaTime)
-			{
-				this.turnParent.transform.RotateAround(pivot, base.transform.up, num);
-				return num;
-			}
-			return 0f;
-		}
-
-		private void stuckHandsCheckFixedUpdate()
-		{
-			Vector3 currentHandPosition = this.leftHand.GetCurrentHandPosition();
-			this.stuckLeft = (!this.controllerState.LeftValid || (this.leftHand.isColliding && (currentHandPosition - this.leftHand.GetLastPosition()).magnitude > this.unStickDistance * this.scale && !Physics.Raycast(this.headCollider.transform.position, (currentHandPosition - this.headCollider.transform.position).normalized, (currentHandPosition - this.headCollider.transform.position).magnitude, this.locomotionEnabledLayers.value)));
-			Vector3 currentHandPosition2 = this.rightHand.GetCurrentHandPosition();
-			this.stuckRight = (!this.controllerState.RightValid || (this.rightHand.isColliding && (currentHandPosition2 - this.rightHand.GetLastPosition()).magnitude > this.unStickDistance * this.scale && !Physics.Raycast(this.headCollider.transform.position, (currentHandPosition2 - this.headCollider.transform.position).normalized, (currentHandPosition2 - this.headCollider.transform.position).magnitude, this.locomotionEnabledLayers.value)));
-		}
-
-		private void stuckHandsCheckLateUpdate(ref Vector3 finalLeftHandPosition, ref Vector3 finalRightHandPosition)
-		{
-			if (this.stuckLeft)
-			{
-				finalLeftHandPosition = this.leftHand.GetCurrentHandPosition();
-				this.stuckLeft = (this.leftHand.isColliding = false);
-			}
-			if (this.stuckRight)
-			{
-				finalRightHandPosition = this.rightHand.GetCurrentHandPosition();
-				this.stuckRight = (this.rightHand.isColliding = false);
-			}
-		}
-
-		private void handleClimbing(float deltaTime)
-		{
-			if (this.isClimbing && (this.inOverlay || this.climbHelper == null || this.currentClimbable == null || !this.currentClimbable.isActiveAndEnabled))
-			{
-				this.EndClimbing(this.currentClimber, false, false);
-			}
-			Vector3 vector = Vector3.zero;
-			if (this.isClimbing && (this.currentClimber.transform.position - this.climbHelper.position).magnitude > 1f)
-			{
-				this.EndClimbing(this.currentClimber, false, false);
-			}
-			if (this.isClimbing)
-			{
-				this.playerRigidBody.linearVelocity = Vector3.zero;
-				this.climbHelper.localPosition = Vector3.MoveTowards(this.climbHelper.localPosition, this.climbHelperTargetPos, deltaTime * 12f);
-				vector = this.currentClimber.transform.position - this.climbHelper.position;
-				vector = ((vector.sqrMagnitude > this.maxArmLength * this.maxArmLength) ? (vector.normalized * this.maxArmLength) : vector);
-				if (this.isClimbableMoving)
-				{
-					Quaternion rotationDelta = this.currentClimbable.transform.rotation * Quaternion.Inverse(this.lastClimbableRotation);
-					this.RotateWithSurface(rotationDelta, this.currentClimber.handRoot.position);
-					this.lastClimbableRotation = this.currentClimbable.transform.rotation;
-				}
-				this.playerRigidBody.MovePosition(this.playerRigidBody.position - vector);
-				if (this.currentSwing)
-				{
-					this.currentSwing.lastGrabTime = Time.time;
-				}
-			}
-		}
-
-		public void RequestTentacleMove(bool isLeftHand, Vector3 move)
-		{
-			if (isLeftHand)
-			{
-				this.hasLeftHandTentacleMove = true;
-				this.leftHandTentacleMove = move;
-				return;
-			}
-			this.hasRightHandTentacleMove = true;
-			this.rightHandTentacleMove = move;
-		}
-
-		public void HandleTentacleMovement()
-		{
-			Vector3 b;
-			if (this.hasLeftHandTentacleMove)
-			{
-				if (this.hasRightHandTentacleMove)
-				{
-					b = (this.leftHandTentacleMove + this.rightHandTentacleMove) * 0.5f;
-					this.hasRightHandTentacleMove = (this.hasLeftHandTentacleMove = false);
+					VRRig.AttachLocalPlayerToMovingSurface(num8, movingSurfaceContactPoint == MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == MovingSurfaceContactPoint.BODY, result.transform.InverseTransformPoint(position2), flag5);
+					lastMovingSurfaceID = num8;
 				}
 				else
 				{
-					b = this.leftHandTentacleMove;
-					this.hasLeftHandTentacleMove = false;
+					VRRig.DetachLocalPlayerFromMovingSurface();
+					lastMovingSurfaceID = -1;
 				}
 			}
 			else
 			{
-				if (!this.hasRightHandTentacleMove)
-				{
-					return;
-				}
-				b = this.rightHandTentacleMove;
-				this.hasRightHandTentacleMove = false;
+				VRRig.DetachLocalPlayerFromMovingSurface();
+				lastMovingSurfaceID = -1;
 			}
-			this.playerRigidBody.transform.position += b;
-			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
-
-		public HandLinkAuthorityStatus TakeMyHand_GetSelfHandLinkAuthority()
+		if (lastMovingSurfaceContact == MovingSurfaceContactPoint.NONE && movingSurfaceContactPoint != MovingSurfaceContactPoint.NONE)
 		{
-			int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-			if (this.IsGroundedHand)
-			{
-				return new HandLinkAuthorityStatus(HandLinkAuthorityType.HandGrounded);
-			}
-			if ((double)(this.LastHandTouchedGroundAtNetworkTime + 1f) > PhotonNetwork.Time)
-			{
-				return new HandLinkAuthorityStatus(HandLinkAuthorityType.ResidualHandGrounded, this.LastHandTouchedGroundAtNetworkTime, actorNumber);
-			}
-			if (this.IsGroundedButt)
-			{
-				return new HandLinkAuthorityStatus(HandLinkAuthorityType.ButtGrounded);
-			}
-			return new HandLinkAuthorityStatus(HandLinkAuthorityType.None, this.LastTouchedGroundAtNetworkTime, actorNumber);
+			SetPlayerVelocity(Vector3.zero);
 		}
-
-		private void TakeMyHand_ProcessMovement()
+		lastMovingSurfaceContact = movingSurfaceContactPoint;
+		wasMovingSurfaceMonkeBlock = flag5;
+		if (activeSizeChangerSettings != null)
 		{
-			TakeMyHand_HandLink leftHandLink = VRRig.LocalRig.leftHandLink;
-			TakeMyHand_HandLink rightHandLink = VRRig.LocalRig.rightHandLink;
-			bool flag = leftHandLink.grabbedLink != null;
-			bool flag2 = rightHandLink.grabbedLink != null;
-			if (!flag && !flag2)
+			if (activeSizeChangerSettings.ExpireOnDistance > 0f && Vector3.Distance(base.transform.position, activeSizeChangerSettings.WorldPosition) > activeSizeChangerSettings.ExpireOnDistance)
+			{
+				SetNativeScale(null);
+			}
+			if (activeSizeChangerSettings.ExpireAfterSeconds > 0f && Time.time - activeSizeChangerSettings.ActivationTime > activeSizeChangerSettings.ExpireAfterSeconds)
+			{
+				SetNativeScale(null);
+			}
+		}
+		TakeMyHand_HandLink grabbedLink = VRRig.LocalRig.leftHandLink.grabbedLink;
+		if (grabbedLink != null)
+		{
+			_ = PhotonNetwork.Time;
+			_ = LastHandTouchedGroundAtNetworkTime;
+			_ = PhotonNetwork.Time;
+			_ = grabbedLink.myRig.LastHandTouchedGroundAtNetworkTime;
+		}
+		if (didAJump || anyHandIsColliding || anyHandIsSliding || anyHandIsSticking || IsGroundedHand || forceRBSync)
+		{
+			playerRigidBody.position = base.transform.position;
+			playerRigidBody.rotation = base.transform.rotation;
+			forceRBSync = false;
+		}
+	}
+
+	private float ApplyNativeScaleAdjustment(float adjustedMagnitude)
+	{
+		if (nativeScale > 0f && nativeScale != 1f)
+		{
+			return adjustedMagnitude *= nativeScaleMagnitudeAdjustmentFactor.Evaluate(nativeScale);
+		}
+		return adjustedMagnitude;
+	}
+
+	private float RotateWithSurface(Quaternion rotationDelta, Vector3 pivot)
+	{
+		QuaternionUtil.DecomposeSwingTwist(rotationDelta, GTPlayerTransform.PhysicsUp, out var _, out var twist);
+		float num = twist.eulerAngles.y;
+		if (num > 270f)
+		{
+			num -= 360f;
+		}
+		else if (num > 90f)
+		{
+			num -= 180f;
+		}
+		if (Mathf.Abs(num) < 90f * calcDeltaTime)
+		{
+			turnParent.transform.RotateAround(pivot, base.transform.up, num);
+			return num;
+		}
+		return 0f;
+	}
+
+	private void stuckHandsCheckFixedUpdate()
+	{
+		Vector3 currentHandPosition = leftHand.GetCurrentHandPosition();
+		stuckLeft = !controllerState.LeftValid || (leftHand.isColliding && (currentHandPosition - leftHand.GetLastPosition()).magnitude > unStickDistance * scale && !Physics.Raycast(headCollider.transform.position, (currentHandPosition - headCollider.transform.position).normalized, (currentHandPosition - headCollider.transform.position).magnitude, locomotionEnabledLayers.value));
+		Vector3 currentHandPosition2 = rightHand.GetCurrentHandPosition();
+		stuckRight = !controllerState.RightValid || (rightHand.isColliding && (currentHandPosition2 - rightHand.GetLastPosition()).magnitude > unStickDistance * scale && !Physics.Raycast(headCollider.transform.position, (currentHandPosition2 - headCollider.transform.position).normalized, (currentHandPosition2 - headCollider.transform.position).magnitude, locomotionEnabledLayers.value));
+	}
+
+	private void stuckHandsCheckLateUpdate(ref Vector3 finalLeftHandPosition, ref Vector3 finalRightHandPosition)
+	{
+		if (stuckLeft)
+		{
+			finalLeftHandPosition = leftHand.GetCurrentHandPosition();
+			stuckLeft = (leftHand.isColliding = false);
+		}
+		if (stuckRight)
+		{
+			finalRightHandPosition = rightHand.GetCurrentHandPosition();
+			stuckRight = (rightHand.isColliding = false);
+		}
+	}
+
+	private void handleClimbing(float deltaTime)
+	{
+		if (isClimbing && (inOverlay || climbHelper == null || currentClimbable == null || !currentClimbable.isActiveAndEnabled))
+		{
+			EndClimbing(currentClimber, startingNewClimb: false);
+		}
+		Vector3 zero = Vector3.zero;
+		if (isClimbing && (currentClimber.transform.position - climbHelper.position).magnitude > 1f)
+		{
+			EndClimbing(currentClimber, startingNewClimb: false);
+		}
+		if (isClimbing)
+		{
+			playerRigidBody.linearVelocity = Vector3.zero;
+			climbHelper.localPosition = Vector3.MoveTowards(climbHelper.localPosition, climbHelperTargetPos, deltaTime * 12f);
+			zero = currentClimber.transform.position - climbHelper.position;
+			zero = ((zero.sqrMagnitude > maxArmLength * maxArmLength) ? (zero.normalized * maxArmLength) : zero);
+			if (isClimbableMoving)
+			{
+				Quaternion rotationDelta = currentClimbable.transform.rotation * Quaternion.Inverse(lastClimbableRotation);
+				RotateWithSurface(rotationDelta, currentClimber.handRoot.position);
+				lastClimbableRotation = currentClimbable.transform.rotation;
+			}
+			playerRigidBody.MovePosition(playerRigidBody.position - zero);
+			if ((bool)currentSwing)
+			{
+				currentSwing.lastGrabTime = Time.time;
+			}
+		}
+	}
+
+	public void RequestTentacleMove(bool isLeftHand, Vector3 move)
+	{
+		if (isLeftHand)
+		{
+			hasLeftHandTentacleMove = true;
+			leftHandTentacleMove = move;
+		}
+		else
+		{
+			hasRightHandTentacleMove = true;
+			rightHandTentacleMove = move;
+		}
+	}
+
+	public void HandleTentacleMovement()
+	{
+		Vector3 vector;
+		if (hasLeftHandTentacleMove)
+		{
+			if (hasRightHandTentacleMove)
+			{
+				vector = (leftHandTentacleMove + rightHandTentacleMove) * 0.5f;
+				hasRightHandTentacleMove = (hasLeftHandTentacleMove = false);
+			}
+			else
+			{
+				vector = leftHandTentacleMove;
+				hasLeftHandTentacleMove = false;
+			}
+		}
+		else
+		{
+			if (!hasRightHandTentacleMove)
 			{
 				return;
 			}
-			HandLinkAuthorityStatus handLinkAuthorityStatus = this.TakeMyHand_GetSelfHandLinkAuthority();
-			int num = -1;
-			HandLinkAuthorityStatus chainAuthority = new HandLinkAuthorityStatus(HandLinkAuthorityType.None);
-			if (flag)
+			vector = rightHandTentacleMove;
+			hasRightHandTentacleMove = false;
+		}
+		playerRigidBody.transform.position += vector;
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	public HandLinkAuthorityStatus TakeMyHand_GetSelfHandLinkAuthority()
+	{
+		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+		if (IsGroundedHand)
+		{
+			return new HandLinkAuthorityStatus(HandLinkAuthorityType.HandGrounded);
+		}
+		if ((double)(LastHandTouchedGroundAtNetworkTime + 1f) > PhotonNetwork.Time)
+		{
+			return new HandLinkAuthorityStatus(HandLinkAuthorityType.ResidualHandGrounded, LastHandTouchedGroundAtNetworkTime, actorNumber);
+		}
+		if (IsGroundedButt)
+		{
+			return new HandLinkAuthorityStatus(HandLinkAuthorityType.ButtGrounded);
+		}
+		return new HandLinkAuthorityStatus(HandLinkAuthorityType.None, LastTouchedGroundAtNetworkTime, actorNumber);
+	}
+
+	private void TakeMyHand_ProcessMovement()
+	{
+		TakeMyHand_HandLink leftHandLink = VRRig.LocalRig.leftHandLink;
+		TakeMyHand_HandLink rightHandLink = VRRig.LocalRig.rightHandLink;
+		bool flag = leftHandLink.grabbedLink != null;
+		bool flag2 = rightHandLink.grabbedLink != null;
+		if (!flag && !flag2)
+		{
+			return;
+		}
+		HandLinkAuthorityStatus handLinkAuthorityStatus = TakeMyHand_GetSelfHandLinkAuthority();
+		int stepsToAuth = -1;
+		HandLinkAuthorityStatus b = new HandLinkAuthorityStatus(HandLinkAuthorityType.None);
+		if (flag)
+		{
+			b = leftHandLink.GetChainAuthority(out stepsToAuth);
+		}
+		int stepsToAuth2 = -1;
+		HandLinkAuthorityStatus b2 = new HandLinkAuthorityStatus(HandLinkAuthorityType.None);
+		if (flag2)
+		{
+			b2 = rightHandLink.GetChainAuthority(out stepsToAuth2);
+		}
+		if (flag && flag2)
+		{
+			if (leftHandLink.grabbedPlayer == rightHandLink.grabbedPlayer)
 			{
-				chainAuthority = leftHandLink.GetChainAuthority(out num);
-			}
-			int num2 = -1;
-			HandLinkAuthorityStatus chainAuthority2 = new HandLinkAuthorityStatus(HandLinkAuthorityType.None);
-			if (flag2)
-			{
-				chainAuthority2 = rightHandLink.GetChainAuthority(out num2);
-			}
-			if (flag && flag2)
-			{
-				if (leftHandLink.grabbedPlayer == rightHandLink.grabbedPlayer)
+				switch (handLinkAuthorityStatus.CompareTo(b))
 				{
-					switch (handLinkAuthorityStatus.CompareTo(chainAuthority))
-					{
-					case -1:
-						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
-						return;
-					case 0:
-						this.TakeMyHand_PositionBoth_BothHands(leftHandLink, rightHandLink);
-						return;
-					case 1:
-						this.TakeMyHand_PositionChild_RemotePlayer_BothHands(leftHandLink, rightHandLink);
-						return;
-					default:
-						return;
-					}
+				case 1:
+					TakeMyHand_PositionChild_RemotePlayer_BothHands(leftHandLink, rightHandLink);
+					break;
+				case -1:
+					TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
+					break;
+				case 0:
+					TakeMyHand_PositionBoth_BothHands(leftHandLink, rightHandLink);
+					break;
+				}
+				return;
+			}
+			int num = handLinkAuthorityStatus.CompareTo(b);
+			int num2 = handLinkAuthorityStatus.CompareTo(b2);
+			switch (num * 3 + num2)
+			{
+			case 4:
+				TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
+				return;
+			case 3:
+				TakeMyHand_PositionBoth(rightHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				return;
+			case 1:
+				TakeMyHand_PositionBoth(leftHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
+				return;
+			case 0:
+				TakeMyHand_PositionTriple(leftHandLink, rightHandLink);
+				return;
+			case -1:
+			case 2:
+				TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				return;
+			case -3:
+			case -2:
+				TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
+				return;
+			}
+			switch (b.CompareTo(b2))
+			{
+			case 1:
+				TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
+				break;
+			case -1:
+				TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+				TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				break;
+			case 0:
+				if (stepsToAuth > stepsToAuth2)
+				{
+					TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+					TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				}
+				else if (stepsToAuth < stepsToAuth2)
+				{
+					TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+					TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 				}
 				else
 				{
-					int num3 = handLinkAuthorityStatus.CompareTo(chainAuthority);
-					int num4 = handLinkAuthorityStatus.CompareTo(chainAuthority2);
-					switch (num3 * 3 + num4)
-					{
-					case -3:
-					case -2:
-						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-						return;
-					case -1:
-					case 2:
-						this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-						return;
-					case 0:
-						this.TakeMyHand_PositionTriple(leftHandLink, rightHandLink);
-						return;
-					case 1:
-						this.TakeMyHand_PositionBoth(leftHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-						return;
-					case 3:
-						this.TakeMyHand_PositionBoth(rightHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-						return;
-					case 4:
-						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-						return;
-					}
-					switch (chainAuthority.CompareTo(chainAuthority2))
-					{
-					case -1:
-						this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-						return;
-					case 0:
-						if (num > num2)
-						{
-							this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
-							this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-							return;
-						}
-						if (num < num2)
-						{
-							this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
-							this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-							return;
-						}
-						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
-						return;
-					case 1:
-						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
-						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-						return;
-					default:
-						return;
-					}
+					TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
 				}
-			}
-			else if (flag)
-			{
-				switch (handLinkAuthorityStatus.CompareTo(chainAuthority))
-				{
-				case -1:
-					this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
-					return;
-				case 0:
-					this.TakeMyHand_PositionBoth(leftHandLink);
-					return;
-				case 1:
-					this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
-					return;
-				default:
-					return;
-				}
-			}
-			else
-			{
-				switch (handLinkAuthorityStatus.CompareTo(chainAuthority2))
-				{
-				case -1:
-					this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
-					return;
-				case 0:
-					this.TakeMyHand_PositionBoth(rightHandLink);
-					return;
-				case 1:
-					this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
-					return;
-				default:
-					return;
-				}
+				break;
 			}
 		}
-
-		private void TakeMyHand_PositionTriple(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
+		else if (flag)
 		{
-			Vector3 a = linkA.LinkPosition - linkA.grabbedLink.LinkPosition;
-			Vector3 vector = linkB.LinkPosition - linkB.grabbedLink.LinkPosition;
-			Vector3 b = (a + vector) * 0.33f;
-			bool flag;
-			bool flag2;
-			linkA.grabbedLink.myRig.TrySweptOffsetMove(a - b, out flag, out flag2);
-			bool flag3;
-			bool flag4;
-			linkB.grabbedLink.myRig.TrySweptOffsetMove(vector - b, out flag3, out flag4);
-			this.playerRigidBody.MovePosition(this.playerRigidBody.position - b);
-			this.playerRigidBody.linearVelocity = Vector3.zero;
-		}
-
-		private void TakeMyHand_PositionBoth(TakeMyHand_HandLink link)
-		{
-			Vector3 vector = (link.grabbedLink.LinkPosition - link.LinkPosition) * 0.5f;
-			bool flag;
-			bool flag2;
-			link.grabbedLink.myRig.TrySweptOffsetMove(-vector, out flag, out flag2);
-			if (flag || flag2)
+			switch (handLinkAuthorityStatus.CompareTo(b))
 			{
-				this.TakeMyHand_PositionChild_LocalPlayer(link);
-			}
-			else
-			{
-				this.playerRigidBody.transform.position += vector;
-			}
-			this.playerRigidBody.linearVelocity = Vector3.zero;
-		}
-
-		private void TakeMyHand_PositionBoth_BothHands(TakeMyHand_HandLink link1, TakeMyHand_HandLink link2)
-		{
-			Vector3 a = (link1.grabbedLink.LinkPosition - link1.LinkPosition) * 0.5f;
-			Vector3 b = (link2.grabbedLink.LinkPosition - link2.LinkPosition) * 0.5f;
-			Vector3 vector = (a + b) * 0.5f;
-			bool flag;
-			bool flag2;
-			link1.grabbedLink.myRig.TrySweptOffsetMove(-vector, out flag, out flag2);
-			if (flag || flag2)
-			{
-				this.TakeMyHand_PositionChild_LocalPlayer(link1, link2);
-			}
-			else
-			{
-				this.playerRigidBody.transform.position += vector;
-			}
-			this.playerRigidBody.linearVelocity = Vector3.zero;
-		}
-
-		private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink parentLink)
-		{
-			Vector3 b = parentLink.grabbedLink.LinkPosition - parentLink.LinkPosition;
-			this.playerRigidBody.transform.position += b;
-			this.playerRigidBody.linearVelocity = Vector3.zero;
-		}
-
-		private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
-		{
-			Vector3 a = linkA.grabbedLink.LinkPosition - linkA.LinkPosition;
-			Vector3 b = linkB.grabbedLink.LinkPosition - linkB.LinkPosition;
-			this.playerRigidBody.transform.position += (a + b) * 0.5f;
-			this.playerRigidBody.linearVelocity = Vector3.zero;
-		}
-
-		private void TakeMyHand_PositionChild_RemotePlayer(TakeMyHand_HandLink childLink)
-		{
-			Vector3 movement = childLink.LinkPosition - childLink.grabbedLink.LinkPosition;
-			bool flag;
-			bool flag2;
-			childLink.grabbedLink.myRig.TrySweptOffsetMove(movement, out flag, out flag2);
-			if (flag || flag2)
-			{
-				this.TakeMyHand_PositionChild_LocalPlayer(childLink);
+			case 1:
+				TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+				break;
+			case -1:
+				TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+				break;
+			case 0:
+				TakeMyHand_PositionBoth(leftHandLink);
+				break;
 			}
 		}
-
-		private void TakeMyHand_PositionChild_RemotePlayer_BothHands(TakeMyHand_HandLink childLink1, TakeMyHand_HandLink childLink2)
+		else
 		{
-			Vector3 a = childLink1.LinkPosition - childLink1.grabbedLink.LinkPosition;
-			Vector3 b = childLink2.LinkPosition - childLink2.grabbedLink.LinkPosition;
-			Vector3 movement = (a + b) * 0.5f;
-			bool flag;
-			bool flag2;
-			childLink1.grabbedLink.myRig.TrySweptOffsetMove(movement, out flag, out flag2);
-			if (flag || flag2)
+			switch (handLinkAuthorityStatus.CompareTo(b2))
 			{
-				this.TakeMyHand_PositionChild_LocalPlayer(childLink1, childLink2);
+			case 1:
+				TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
+				break;
+			case -1:
+				TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+				break;
+			case 0:
+				TakeMyHand_PositionBoth(rightHandLink);
+				break;
 			}
 		}
+	}
 
-		private bool IterativeCollisionSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, Vector3 boostVector, out Vector3 endPosition, bool singleHand, out float slipPercentage, out RaycastHit iterativeHitInfo, bool fullSlide)
+	private void TakeMyHand_PositionTriple(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
+	{
+		Vector3 vector = linkA.LinkPosition - linkA.grabbedLink.LinkPosition;
+		Vector3 vector2 = linkB.LinkPosition - linkB.grabbedLink.LinkPosition;
+		Vector3 vector3 = (vector + vector2) * 0.33f;
+		linkA.grabbedLink.myRig.TrySweptOffsetMove(vector - vector3, out var _, out var _);
+		linkB.grabbedLink.myRig.TrySweptOffsetMove(vector2 - vector3, out var _, out var _);
+		playerRigidBody.MovePosition(playerRigidBody.position - vector3);
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	private void TakeMyHand_PositionBoth(TakeMyHand_HandLink link)
+	{
+		Vector3 vector = (link.grabbedLink.LinkPosition - link.LinkPosition) * 0.5f;
+		link.grabbedLink.myRig.TrySweptOffsetMove(-vector, out var handCollided, out var buttCollided);
+		if (handCollided || buttCollided)
 		{
-			slipPercentage = this.defaultSlideFactor;
-			if (!this.CollisionsSphereCast(startPosition, sphereRadius, movementVector, out endPosition, out this.tempIterativeHit))
-			{
-				iterativeHitInfo = this.tempIterativeHit;
-				endPosition = Vector3.zero;
-				return false;
-			}
-			this.firstPosition = endPosition;
-			iterativeHitInfo = this.tempIterativeHit;
-			this.slideFactor = this.GetSlidePercentage(iterativeHitInfo);
-			slipPercentage = ((this.slideFactor != this.defaultSlideFactor) ? this.slideFactor : ((!singleHand) ? this.defaultSlideFactor : 0.001f));
+			TakeMyHand_PositionChild_LocalPlayer(link);
+		}
+		else
+		{
+			playerRigidBody.transform.position += vector;
+		}
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	private void TakeMyHand_PositionBoth_BothHands(TakeMyHand_HandLink link1, TakeMyHand_HandLink link2)
+	{
+		Vector3 vector = (link1.grabbedLink.LinkPosition - link1.LinkPosition) * 0.5f;
+		Vector3 vector2 = (link2.grabbedLink.LinkPosition - link2.LinkPosition) * 0.5f;
+		Vector3 vector3 = (vector + vector2) * 0.5f;
+		link1.grabbedLink.myRig.TrySweptOffsetMove(-vector3, out var handCollided, out var buttCollided);
+		if (handCollided || buttCollided)
+		{
+			TakeMyHand_PositionChild_LocalPlayer(link1, link2);
+		}
+		else
+		{
+			playerRigidBody.transform.position += vector3;
+		}
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink parentLink)
+	{
+		Vector3 vector = parentLink.grabbedLink.LinkPosition - parentLink.LinkPosition;
+		playerRigidBody.transform.position += vector;
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
+	{
+		Vector3 vector = linkA.grabbedLink.LinkPosition - linkA.LinkPosition;
+		Vector3 vector2 = linkB.grabbedLink.LinkPosition - linkB.LinkPosition;
+		playerRigidBody.transform.position += (vector + vector2) * 0.5f;
+		playerRigidBody.linearVelocity = Vector3.zero;
+	}
+
+	private void TakeMyHand_PositionChild_RemotePlayer(TakeMyHand_HandLink childLink)
+	{
+		Vector3 movement = childLink.LinkPosition - childLink.grabbedLink.LinkPosition;
+		childLink.grabbedLink.myRig.TrySweptOffsetMove(movement, out var handCollided, out var buttCollided);
+		if (handCollided || buttCollided)
+		{
+			TakeMyHand_PositionChild_LocalPlayer(childLink);
+		}
+	}
+
+	private void TakeMyHand_PositionChild_RemotePlayer_BothHands(TakeMyHand_HandLink childLink1, TakeMyHand_HandLink childLink2)
+	{
+		Vector3 vector = childLink1.LinkPosition - childLink1.grabbedLink.LinkPosition;
+		Vector3 vector2 = childLink2.LinkPosition - childLink2.grabbedLink.LinkPosition;
+		Vector3 movement = (vector + vector2) * 0.5f;
+		childLink1.grabbedLink.myRig.TrySweptOffsetMove(movement, out var handCollided, out var buttCollided);
+		if (handCollided || buttCollided)
+		{
+			TakeMyHand_PositionChild_LocalPlayer(childLink1, childLink2);
+		}
+	}
+
+	private bool IterativeCollisionSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, Vector3 boostVector, out Vector3 endPosition, bool singleHand, out float slipPercentage, out RaycastHit iterativeHitInfo, bool fullSlide)
+	{
+		slipPercentage = defaultSlideFactor;
+		if (CollisionsSphereCast(startPosition, sphereRadius, movementVector, out endPosition, out tempIterativeHit))
+		{
+			firstPosition = endPosition;
+			iterativeHitInfo = tempIterativeHit;
+			slideFactor = GetSlidePercentage(iterativeHitInfo);
+			slipPercentage = ((slideFactor != defaultSlideFactor) ? slideFactor : ((!singleHand) ? defaultSlideFactor : 0.001f));
 			if (fullSlide)
 			{
 				slipPercentage = 1f;
 			}
-			this.movementToProjectedAboveCollisionPlane = Vector3.ProjectOnPlane(startPosition + movementVector - this.firstPosition, iterativeHitInfo.normal) * slipPercentage;
+			movementToProjectedAboveCollisionPlane = Vector3.ProjectOnPlane(startPosition + movementVector - firstPosition, iterativeHitInfo.normal) * slipPercentage;
 			Vector3 vector = Vector3.zero;
 			if (boostVector.IsLongerThan(0f))
 			{
 				vector = Vector3.ProjectOnPlane(boostVector, iterativeHitInfo.normal);
-				this.movementToProjectedAboveCollisionPlane += vector;
-				this.CollisionsSphereCast(this.firstPosition, sphereRadius, vector, out endPosition, out this.tempIterativeHit);
-				this.firstPosition = endPosition;
+				movementToProjectedAboveCollisionPlane += vector;
+				CollisionsSphereCast(firstPosition, sphereRadius, vector, out endPosition, out tempIterativeHit);
+				firstPosition = endPosition;
 			}
-			if (this.CollisionsSphereCast(this.firstPosition, sphereRadius, this.movementToProjectedAboveCollisionPlane, out endPosition, out this.tempIterativeHit))
+			if (CollisionsSphereCast(firstPosition, sphereRadius, movementToProjectedAboveCollisionPlane, out endPosition, out tempIterativeHit))
 			{
-				iterativeHitInfo = this.tempIterativeHit;
+				iterativeHitInfo = tempIterativeHit;
 				return true;
 			}
-			if (this.CollisionsSphereCast(this.movementToProjectedAboveCollisionPlane + this.firstPosition, sphereRadius, startPosition + movementVector + vector - (this.movementToProjectedAboveCollisionPlane + this.firstPosition), out endPosition, out this.tempIterativeHit))
+			if (CollisionsSphereCast(movementToProjectedAboveCollisionPlane + firstPosition, sphereRadius, startPosition + movementVector + vector - (movementToProjectedAboveCollisionPlane + firstPosition), out endPosition, out tempIterativeHit))
 			{
-				iterativeHitInfo = this.tempIterativeHit;
+				iterativeHitInfo = tempIterativeHit;
 				return true;
 			}
 			endPosition = Vector3.zero;
 			return false;
 		}
+		iterativeHitInfo = tempIterativeHit;
+		endPosition = Vector3.zero;
+		return false;
+	}
 
-		private bool CollisionsSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, out Vector3 finalPosition, out RaycastHit collisionsHitInfo)
+	private bool CollisionsSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, out Vector3 finalPosition, out RaycastHit collisionsHitInfo)
+	{
+		MaxSphereSizeForNoOverlap(sphereRadius, startPosition, ignoreOneWay: false, out maxSphereSize1);
+		bool flag = false;
+		ClearRaycasthitBuffer(ref rayCastNonAllocColliders);
+		bufferCount = Physics.SphereCastNonAlloc(startPosition, maxSphereSize1, movementVector.normalized, rayCastNonAllocColliders, movementVector.magnitude, locomotionEnabledLayers.value);
+		if (bufferCount > 0)
 		{
-			this.MaxSphereSizeForNoOverlap(sphereRadius, startPosition, false, out this.maxSphereSize1);
-			bool flag = false;
-			this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-			this.bufferCount = Physics.SphereCastNonAlloc(startPosition, this.maxSphereSize1, movementVector.normalized, this.rayCastNonAllocColliders, movementVector.magnitude, this.locomotionEnabledLayers.value);
-			if (this.bufferCount > 0)
+			tempHitInfo = rayCastNonAllocColliders[0];
+			for (int i = 0; i < bufferCount; i++)
 			{
-				this.tempHitInfo = this.rayCastNonAllocColliders[0];
-				for (int i = 0; i < this.bufferCount; i++)
+				if (!(tempHitInfo.distance <= 0f) && (!flag || rayCastNonAllocColliders[i].distance < tempHitInfo.distance))
 				{
-					if (this.tempHitInfo.distance > 0f && (!flag || this.rayCastNonAllocColliders[i].distance < this.tempHitInfo.distance))
-					{
-						flag = true;
-						this.tempHitInfo = this.rayCastNonAllocColliders[i];
-					}
+					flag = true;
+					tempHitInfo = rayCastNonAllocColliders[i];
 				}
 			}
-			if (flag)
+		}
+		if (flag)
+		{
+			collisionsHitInfo = tempHitInfo;
+			finalPosition = collisionsHitInfo.point + collisionsHitInfo.normal * sphereRadius;
+			ClearRaycasthitBuffer(ref rayCastNonAllocColliders);
+			bufferCount = Physics.RaycastNonAlloc(startPosition, (finalPosition - startPosition).normalized, rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
+			if (bufferCount > 0)
 			{
-				collisionsHitInfo = this.tempHitInfo;
-				finalPosition = collisionsHitInfo.point + collisionsHitInfo.normal * sphereRadius;
-				this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-				this.bufferCount = Physics.RaycastNonAlloc(startPosition, (finalPosition - startPosition).normalized, this.rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
-				if (this.bufferCount > 0)
+				tempHitInfo = rayCastNonAllocColliders[0];
+				for (int j = 0; j < bufferCount; j++)
 				{
-					this.tempHitInfo = this.rayCastNonAllocColliders[0];
-					for (int j = 0; j < this.bufferCount; j++)
+					if ((bool)rayCastNonAllocColliders[j].collider && rayCastNonAllocColliders[j].distance < tempHitInfo.distance)
 					{
-						if (this.rayCastNonAllocColliders[j].collider && this.rayCastNonAllocColliders[j].distance < this.tempHitInfo.distance)
+						tempHitInfo = rayCastNonAllocColliders[j];
+					}
+				}
+				finalPosition = startPosition + movementVector.normalized * tempHitInfo.distance;
+			}
+			MaxSphereSizeForNoOverlap(sphereRadius, finalPosition, ignoreOneWay: false, out maxSphereSize2);
+			ClearRaycasthitBuffer(ref rayCastNonAllocColliders);
+			bufferCount = Physics.SphereCastNonAlloc(startPosition, Mathf.Min(maxSphereSize1, maxSphereSize2), (finalPosition - startPosition).normalized, rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, locomotionEnabledLayers.value);
+			if (bufferCount > 0)
+			{
+				tempHitInfo = rayCastNonAllocColliders[0];
+				for (int k = 0; k < bufferCount; k++)
+				{
+					if (rayCastNonAllocColliders[k].collider != null && rayCastNonAllocColliders[k].distance < tempHitInfo.distance)
+					{
+						tempHitInfo = rayCastNonAllocColliders[k];
+					}
+				}
+				finalPosition = startPosition + tempHitInfo.distance * (finalPosition - startPosition).normalized;
+				collisionsHitInfo = tempHitInfo;
+			}
+			return true;
+		}
+		ClearRaycasthitBuffer(ref rayCastNonAllocColliders);
+		bufferCount = Physics.RaycastNonAlloc(startPosition, movementVector.normalized, rayCastNonAllocColliders, movementVector.magnitude, locomotionEnabledLayers.value);
+		if (bufferCount > 0)
+		{
+			tempHitInfo = rayCastNonAllocColliders[0];
+			for (int l = 0; l < bufferCount; l++)
+			{
+				if (rayCastNonAllocColliders[l].collider != null && rayCastNonAllocColliders[l].distance < tempHitInfo.distance)
+				{
+					tempHitInfo = rayCastNonAllocColliders[l];
+				}
+			}
+			collisionsHitInfo = tempHitInfo;
+			finalPosition = startPosition;
+			return true;
+		}
+		finalPosition = startPosition + movementVector;
+		collisionsHitInfo = default(RaycastHit);
+		return false;
+	}
+
+	public float GetSlidePercentage(RaycastHit raycastHit)
+	{
+		if (IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
+		{
+			return FreezeTagSlidePercentage();
+		}
+		currentOverride = raycastHit.collider.gameObject.GetComponent<GorillaSurfaceOverride>();
+		BasePlatform component = raycastHit.collider.gameObject.GetComponent<BasePlatform>();
+		if (component != null)
+		{
+			currentPlatform = component;
+		}
+		if (currentOverride != null)
+		{
+			if (currentOverride.slidePercentageOverride >= 0f)
+			{
+				return currentOverride.slidePercentageOverride;
+			}
+			currentMaterialIndex = currentOverride.overrideIndex;
+			if (currentMaterialIndex >= 0 && currentMaterialIndex < materialData.Count)
+			{
+				if (!materialData[currentMaterialIndex].overrideSlidePercent)
+				{
+					return defaultSlideFactor;
+				}
+				return materialData[currentMaterialIndex].slidePercent;
+			}
+			return defaultSlideFactor;
+		}
+		meshCollider = raycastHit.collider as MeshCollider;
+		if (meshCollider == null || meshCollider.sharedMesh == null || meshCollider.convex)
+		{
+			return defaultSlideFactor;
+		}
+		collidedMesh = meshCollider.sharedMesh;
+		if (!meshTrianglesDict.TryGetValue(collidedMesh, out sharedMeshTris))
+		{
+			sharedMeshTris = collidedMesh.triangles;
+			meshTrianglesDict.Add(collidedMesh, (int[])sharedMeshTris.Clone());
+		}
+		vertex1 = sharedMeshTris[raycastHit.triangleIndex * 3];
+		vertex2 = sharedMeshTris[raycastHit.triangleIndex * 3 + 1];
+		vertex3 = sharedMeshTris[raycastHit.triangleIndex * 3 + 2];
+		slideRenderer = raycastHit.collider.GetComponent<Renderer>();
+		if (slideRenderer != null)
+		{
+			slideRenderer.GetSharedMaterials(tempMaterialArray);
+		}
+		else
+		{
+			tempMaterialArray.Clear();
+		}
+		if (tempMaterialArray.Count > 1)
+		{
+			for (int i = 0; i < tempMaterialArray.Count; i++)
+			{
+				collidedMesh.GetTriangles(trianglesList, i);
+				for (int j = 0; j < trianglesList.Count; j += 3)
+				{
+					if (trianglesList[j] == vertex1 && trianglesList[j + 1] == vertex2 && trianglesList[j + 2] == vertex3)
+					{
+						findMatName = tempMaterialArray[i].name;
+						if (findMatName.EndsWith("Uber"))
 						{
-							this.tempHitInfo = this.rayCastNonAllocColliders[j];
+							string text = findMatName;
+							findMatName = text.Substring(0, text.Length - 4);
 						}
-					}
-					finalPosition = startPosition + movementVector.normalized * this.tempHitInfo.distance;
-				}
-				this.MaxSphereSizeForNoOverlap(sphereRadius, finalPosition, false, out this.maxSphereSize2);
-				this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-				this.bufferCount = Physics.SphereCastNonAlloc(startPosition, Mathf.Min(this.maxSphereSize1, this.maxSphereSize2), (finalPosition - startPosition).normalized, this.rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, this.locomotionEnabledLayers.value);
-				if (this.bufferCount > 0)
-				{
-					this.tempHitInfo = this.rayCastNonAllocColliders[0];
-					for (int k = 0; k < this.bufferCount; k++)
-					{
-						if (this.rayCastNonAllocColliders[k].collider != null && this.rayCastNonAllocColliders[k].distance < this.tempHitInfo.distance)
+						foundMatData = materialData.Find((MaterialData matData) => matData.matName == findMatName);
+						currentMaterialIndex = materialData.FindIndex((MaterialData matData) => matData.matName == findMatName);
+						if (currentMaterialIndex == -1)
 						{
-							this.tempHitInfo = this.rayCastNonAllocColliders[k];
+							currentMaterialIndex = 0;
 						}
-					}
-					finalPosition = startPosition + this.tempHitInfo.distance * (finalPosition - startPosition).normalized;
-					collisionsHitInfo = this.tempHitInfo;
-				}
-				return true;
-			}
-			this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-			this.bufferCount = Physics.RaycastNonAlloc(startPosition, movementVector.normalized, this.rayCastNonAllocColliders, movementVector.magnitude, this.locomotionEnabledLayers.value);
-			if (this.bufferCount > 0)
-			{
-				this.tempHitInfo = this.rayCastNonAllocColliders[0];
-				for (int l = 0; l < this.bufferCount; l++)
-				{
-					if (this.rayCastNonAllocColliders[l].collider != null && this.rayCastNonAllocColliders[l].distance < this.tempHitInfo.distance)
-					{
-						this.tempHitInfo = this.rayCastNonAllocColliders[l];
+						if (!foundMatData.overrideSlidePercent)
+						{
+							return defaultSlideFactor;
+						}
+						return foundMatData.slidePercent;
 					}
 				}
-				collisionsHitInfo = this.tempHitInfo;
-				finalPosition = startPosition;
-				return true;
 			}
-			finalPosition = startPosition + movementVector;
-			collisionsHitInfo = default(RaycastHit);
+		}
+		else if (tempMaterialArray.Count > 0)
+		{
+			return defaultSlideFactor;
+		}
+		currentMaterialIndex = 0;
+		return defaultSlideFactor;
+	}
+
+	public bool IsTouchingMovingSurface(Vector3 rayOrigin, RaycastHit raycastHit, out int movingSurfaceId, out bool sideTouch, out bool isMonkeBlock)
+	{
+		movingSurfaceId = -1;
+		sideTouch = false;
+		isMonkeBlock = false;
+		float num = Vector3.Dot(rayOrigin - raycastHit.point, Vector3.up);
+		if (num < -0.3f)
+		{
 			return false;
 		}
-
-		public float GetSlidePercentage(RaycastHit raycastHit)
+		if (num < 0f)
 		{
-			if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
-			{
-				return this.FreezeTagSlidePercentage();
-			}
-			this.currentOverride = raycastHit.collider.gameObject.GetComponent<GorillaSurfaceOverride>();
-			BasePlatform component = raycastHit.collider.gameObject.GetComponent<BasePlatform>();
-			if (component != null)
-			{
-				this.currentPlatform = component;
-			}
-			if (this.currentOverride != null)
-			{
-				if (this.currentOverride.slidePercentageOverride >= 0f)
-				{
-					return this.currentOverride.slidePercentageOverride;
-				}
-				this.currentMaterialIndex = this.currentOverride.overrideIndex;
-				if (this.currentMaterialIndex < 0 || this.currentMaterialIndex >= this.materialData.Count)
-				{
-					return this.defaultSlideFactor;
-				}
-				if (!this.materialData[this.currentMaterialIndex].overrideSlidePercent)
-				{
-					return this.defaultSlideFactor;
-				}
-				return this.materialData[this.currentMaterialIndex].slidePercent;
-			}
-			else
-			{
-				this.meshCollider = (raycastHit.collider as MeshCollider);
-				if (this.meshCollider == null || this.meshCollider.sharedMesh == null || this.meshCollider.convex)
-				{
-					return this.defaultSlideFactor;
-				}
-				this.collidedMesh = this.meshCollider.sharedMesh;
-				if (!this.meshTrianglesDict.TryGetValue(this.collidedMesh, out this.sharedMeshTris))
-				{
-					this.sharedMeshTris = this.collidedMesh.triangles;
-					this.meshTrianglesDict.Add(this.collidedMesh, (int[])this.sharedMeshTris.Clone());
-				}
-				this.vertex1 = this.sharedMeshTris[raycastHit.triangleIndex * 3];
-				this.vertex2 = this.sharedMeshTris[raycastHit.triangleIndex * 3 + 1];
-				this.vertex3 = this.sharedMeshTris[raycastHit.triangleIndex * 3 + 2];
-				this.slideRenderer = raycastHit.collider.GetComponent<Renderer>();
-				if (this.slideRenderer != null)
-				{
-					this.slideRenderer.GetSharedMaterials(this.tempMaterialArray);
-				}
-				else
-				{
-					this.tempMaterialArray.Clear();
-				}
-				if (this.tempMaterialArray.Count > 1)
-				{
-					for (int i = 0; i < this.tempMaterialArray.Count; i++)
-					{
-						this.collidedMesh.GetTriangles(this.trianglesList, i);
-						int j = 0;
-						while (j < this.trianglesList.Count)
-						{
-							if (this.trianglesList[j] == this.vertex1 && this.trianglesList[j + 1] == this.vertex2 && this.trianglesList[j + 2] == this.vertex3)
-							{
-								this.findMatName = this.tempMaterialArray[i].name;
-								if (this.findMatName.EndsWith("Uber"))
-								{
-									string text = this.findMatName;
-									this.findMatName = text.Substring(0, text.Length - 4);
-								}
-								this.foundMatData = this.materialData.Find((GTPlayer.MaterialData matData) => matData.matName == this.findMatName);
-								this.currentMaterialIndex = this.materialData.FindIndex((GTPlayer.MaterialData matData) => matData.matName == this.findMatName);
-								if (this.currentMaterialIndex == -1)
-								{
-									this.currentMaterialIndex = 0;
-								}
-								if (!this.foundMatData.overrideSlidePercent)
-								{
-									return this.defaultSlideFactor;
-								}
-								return this.foundMatData.slidePercent;
-							}
-							else
-							{
-								j += 3;
-							}
-						}
-					}
-				}
-				else if (this.tempMaterialArray.Count > 0)
-				{
-					return this.defaultSlideFactor;
-				}
-				this.currentMaterialIndex = 0;
-				return this.defaultSlideFactor;
-			}
+			sideTouch = true;
 		}
-
-		public bool IsTouchingMovingSurface(Vector3 rayOrigin, RaycastHit raycastHit, out int movingSurfaceId, out bool sideTouch, out bool isMonkeBlock)
+		if (raycastHit.collider == null)
 		{
-			movingSurfaceId = -1;
-			sideTouch = false;
+			return false;
+		}
+		MovingSurface component = raycastHit.collider.GetComponent<MovingSurface>();
+		if (component != null)
+		{
 			isMonkeBlock = false;
-			float num = Vector3.Dot(rayOrigin - raycastHit.point, Vector3.up);
-			if (num < -0.3f)
-			{
-				return false;
-			}
-			if (num < 0f)
-			{
-				sideTouch = true;
-			}
-			if (raycastHit.collider == null)
-			{
-				return false;
-			}
-			MovingSurface component = raycastHit.collider.GetComponent<MovingSurface>();
-			if (component != null)
-			{
-				isMonkeBlock = false;
-				movingSurfaceId = component.GetID();
-				return true;
-			}
-			if (!BuilderTable.IsLocalPlayerInBuilderZone())
-			{
-				return false;
-			}
-			BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(raycastHit.collider);
-			if (builderPieceFromCollider != null && builderPieceFromCollider.IsPieceMoving())
-			{
-				isMonkeBlock = true;
-				movingSurfaceId = builderPieceFromCollider.pieceId;
-				this.lastMonkeBlock = builderPieceFromCollider;
-				return true;
-			}
-			sideTouch = false;
-			return false;
-		}
-
-		public void Turn(float degrees)
-		{
-			Vector3 position = this.headCollider.transform.position;
-			bool flag = this.rightHand.isColliding || this.rightHand.isHolding;
-			bool flag2 = this.leftHand.isColliding || this.leftHand.isHolding;
-			if (flag != flag2 && flag)
-			{
-				position = this.rightHand.controllerTransform.position;
-			}
-			if (flag != flag2 && flag2)
-			{
-				position = this.leftHand.controllerTransform.position;
-			}
-			this.turnParent.transform.RotateAround(position, GTPlayerTransform.Up, degrees);
-			this.degreesTurnedThisFrame = degrees;
-			this.averagedVelocity = Vector3.zero;
-			Quaternion rotation = Quaternion.AngleAxis(degrees, GTPlayerTransform.Up);
-			for (int i = 0; i < this.velocityHistory.Length; i++)
-			{
-				this.velocityHistory[i] = rotation * this.velocityHistory[i];
-				this.averagedVelocity += this.velocityHistory[i];
-			}
-			this.averagedVelocity /= (float)this.velocityHistorySize;
-		}
-
-		public void BeginClimbing(GorillaClimbable climbable, GorillaHandClimber hand, GorillaClimbableRef climbableRef = null)
-		{
-			if (this.currentClimber != null)
-			{
-				this.EndClimbing(this.currentClimber, true, false);
-			}
-			try
-			{
-				Action<GorillaHandClimber, GorillaClimbableRef> onBeforeClimb = climbable.onBeforeClimb;
-				if (onBeforeClimb != null)
-				{
-					onBeforeClimb(hand, climbableRef);
-				}
-			}
-			catch (Exception message)
-			{
-				Debug.LogError(message);
-			}
-			Rigidbody rigidbody;
-			climbable.TryGetComponent<Rigidbody>(out rigidbody);
-			this.VerifyClimbHelper();
-			this.climbHelper.SetParent(climbable.transform);
-			this.climbHelper.position = hand.transform.position;
-			Vector3 localPosition = this.climbHelper.localPosition;
-			if (climbable.snapX)
-			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|447_0(ref localPosition.x, climbable.maxDistanceSnap);
-			}
-			if (climbable.snapY)
-			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|447_0(ref localPosition.y, climbable.maxDistanceSnap);
-			}
-			if (climbable.snapZ)
-			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|447_0(ref localPosition.z, climbable.maxDistanceSnap);
-			}
-			this.climbHelperTargetPos = localPosition;
-			climbable.isBeingClimbed = true;
-			hand.isClimbing = true;
-			this.currentClimbable = climbable;
-			this.currentClimber = hand;
-			this.isClimbing = true;
-			if (climbable.climbOnlyWhileSmall)
-			{
-				BuilderPiece componentInParent = climbable.GetComponentInParent<BuilderPiece>();
-				if (componentInParent != null && componentInParent.IsPieceMoving())
-				{
-					this.isClimbableMoving = true;
-					this.lastClimbableRotation = climbable.transform.rotation;
-				}
-				else
-				{
-					this.isClimbableMoving = false;
-				}
-			}
-			else
-			{
-				this.isClimbableMoving = false;
-			}
-			GorillaRopeSegment gorillaRopeSegment;
-			GorillaZipline gorillaZipline;
-			PhotonView view;
-			PhotonViewXSceneRef photonViewXSceneRef;
-			if (climbable.TryGetComponent<GorillaRopeSegment>(out gorillaRopeSegment) && gorillaRopeSegment.swing)
-			{
-				this.currentSwing = gorillaRopeSegment.swing;
-				this.currentSwing.AttachLocalPlayer(hand.xrNode, climbable.transform, this.climbHelperTargetPos, this.averagedVelocity);
-			}
-			else if (climbable.transform.parent && climbable.transform.parent.TryGetComponent<GorillaZipline>(out gorillaZipline))
-			{
-				this.currentZipline = gorillaZipline;
-			}
-			else if (climbable.TryGetComponent<PhotonView>(out view))
-			{
-				VRRig.AttachLocalPlayerToPhotonView(view, hand.xrNode, this.climbHelperTargetPos, this.averagedVelocity);
-			}
-			else if (climbable.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef))
-			{
-				VRRig.AttachLocalPlayerToPhotonView(photonViewXSceneRef.photonView, hand.xrNode, this.climbHelperTargetPos, this.averagedVelocity);
-			}
-			GorillaTagger.Instance.StartVibration(this.currentClimber.xrNode == XRNode.LeftHand, 0.6f, 0.06f);
-			if (climbable.clip)
-			{
-				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(climbable.clip, hand.xrNode == XRNode.LeftHand);
-			}
-		}
-
-		private void VerifyClimbHelper()
-		{
-			if (this.climbHelper == null || this.climbHelper.gameObject == null)
-			{
-				this.climbHelper = new GameObject("Climb Helper").transform;
-			}
-		}
-
-		public void EndClimbing(GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb = false)
-		{
-			if (hand != this.currentClimber)
-			{
-				return;
-			}
-			hand.SetCanRelease(true);
-			if (!startingNewClimb)
-			{
-				this.enablePlayerGravity(true);
-			}
-			Rigidbody rigidbody = null;
-			if (this.currentClimbable)
-			{
-				this.currentClimbable.TryGetComponent<Rigidbody>(out rigidbody);
-				this.currentClimbable.isBeingClimbed = false;
-			}
-			Vector3 vector = Vector3.zero;
-			if (this.currentClimber)
-			{
-				this.currentClimber.isClimbing = false;
-				if (doDontReclimb)
-				{
-					this.currentClimber.dontReclimbLast = this.currentClimbable;
-				}
-				else
-				{
-					this.currentClimber.dontReclimbLast = null;
-				}
-				this.currentClimber.queuedToBecomeValidToGrabAgain = true;
-				this.currentClimber.lastAutoReleasePos = this.currentClimber.handRoot.localPosition;
-				if (!startingNewClimb && this.currentClimbable)
-				{
-					GorillaVelocityTracker interactPointVelocityTracker = this.GetInteractPointVelocityTracker(this.currentClimber.xrNode == XRNode.LeftHand);
-					if (rigidbody)
-					{
-						this.playerRigidBody.linearVelocity = rigidbody.linearVelocity;
-					}
-					else if (this.currentSwing)
-					{
-						this.playerRigidBody.linearVelocity = this.currentSwing.velocityTracker.GetAverageVelocity(true, 0.25f, false);
-					}
-					else if (this.currentZipline)
-					{
-						this.playerRigidBody.linearVelocity = this.currentZipline.GetCurrentDirection() * this.currentZipline.currentSpeed;
-					}
-					else
-					{
-						this.playerRigidBody.linearVelocity = Vector3.zero;
-					}
-					vector = this.turnParent.transform.rotation * -interactPointVelocityTracker.GetAverageVelocity(false, 0.1f, true) * this.scale;
-					vector = Vector3.ClampMagnitude(vector, 5.5f * this.scale);
-					this.playerRigidBody.AddForce(vector, ForceMode.VelocityChange);
-				}
-			}
-			if (this.currentSwing)
-			{
-				this.currentSwing.DetachLocalPlayer();
-			}
-			PhotonView photonView;
-			PhotonViewXSceneRef photonViewXSceneRef;
-			if (this.currentClimbable.TryGetComponent<PhotonView>(out photonView) || this.currentClimbable.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef) || this.currentClimbable.IsPlayerAttached)
-			{
-				VRRig.DetachLocalPlayerFromPhotonView();
-			}
-			if (!startingNewClimb && vector.magnitude > 2f && this.currentClimbable && this.currentClimbable.clipOnFullRelease)
-			{
-				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(this.currentClimbable.clipOnFullRelease, hand.xrNode == XRNode.LeftHand);
-			}
-			this.currentClimbable = null;
-			this.currentClimber = null;
-			this.currentSwing = null;
-			this.currentZipline = null;
-			this.isClimbing = false;
-		}
-
-		public void ResetRigidbodyInterpolation()
-		{
-			this.playerRigidBody.interpolation = this.playerRigidbodyInterpolationDefault;
-		}
-
-		public RigidbodyInterpolation RigidbodyInterpolation
-		{
-			get
-			{
-				return this.playerRigidBody.interpolation;
-			}
-			set
-			{
-				this.playerRigidBody.interpolation = value;
-			}
-		}
-
-		private void enablePlayerGravity(bool useGravity)
-		{
-			this.playerRigidBody.useGravity = useGravity;
-		}
-
-		public void SetVelocity(Vector3 velocity)
-		{
-			this.playerRigidBody.linearVelocity = velocity;
-		}
-
-		internal void RigidbodyMovePosition(Vector3 pos)
-		{
-			this.playerRigidBody.MovePosition(pos);
-		}
-
-		public void TempFreezeHand(bool isLeft, float freezeDuration)
-		{
-			(isLeft ? this.leftHand : this.rightHand).TempFreezeHand(freezeDuration);
-		}
-
-		private void StoreVelocities()
-		{
-			this.velocityIndex = (this.velocityIndex + 1) % this.velocityHistorySize;
-			this.currentVelocity = (base.transform.position - this.lastPosition - GTPlayerTransform.RotationPosOffsetChange - this.MovingSurfaceMovement()) / this.calcDeltaTime;
-			this.velocityHistory[this.velocityIndex] = this.currentVelocity;
-			this.averagedVelocity = this.velocityHistory.Average();
-			this.lastPosition = base.transform.position;
-			GTPlayerTransform.ResetRotationPositionOffset();
-		}
-
-		private void AntiTeleportTechnology()
-		{
-			if ((this.headCollider.transform.position - this.lastHeadPosition).magnitude >= this.teleportThresholdNoVel + this.playerRigidBody.linearVelocity.magnitude * this.calcDeltaTime)
-			{
-				this.ForceRigidBodySync();
-				base.transform.position = base.transform.position + this.lastHeadPosition - this.headCollider.transform.position;
-			}
-		}
-
-		private bool MaxSphereSizeForNoOverlap(float testRadius, Vector3 checkPosition, bool ignoreOneWay, out float overlapRadiusTest)
-		{
-			overlapRadiusTest = testRadius;
-			this.overlapAttempts = 0;
-			int num = 100;
-			while (this.overlapAttempts < num && overlapRadiusTest > testRadius * 0.75f)
-			{
-				this.ClearColliderBuffer(ref this.overlapColliders);
-				this.bufferCount = Physics.OverlapSphereNonAlloc(checkPosition, overlapRadiusTest, this.overlapColliders, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
-				if (ignoreOneWay)
-				{
-					int num2 = 0;
-					for (int i = 0; i < this.bufferCount; i++)
-					{
-						if (this.overlapColliders[i].CompareTag("NoCrazyCheck"))
-						{
-							num2++;
-						}
-					}
-					if (num2 == this.bufferCount)
-					{
-						return true;
-					}
-				}
-				if (this.bufferCount <= 0)
-				{
-					overlapRadiusTest *= 0.995f;
-					return true;
-				}
-				overlapRadiusTest = Mathf.Lerp(testRadius, 0f, (float)this.overlapAttempts / (float)num);
-				this.overlapAttempts++;
-			}
-			return false;
-		}
-
-		private bool CrazyCheck2(float sphereSize, Vector3 startPosition)
-		{
-			for (int i = 0; i < this.crazyCheckVectors.Length; i++)
-			{
-				if (this.NonAllocRaycast(startPosition, startPosition + this.crazyCheckVectors[i] * sphereSize) > 0)
-				{
-					return false;
-				}
-			}
+			movingSurfaceId = component.GetID();
 			return true;
 		}
-
-		private int NonAllocRaycast(Vector3 startPosition, Vector3 endPosition)
+		if (!BuilderTable.IsLocalPlayerInBuilderZone())
 		{
-			Vector3 direction = endPosition - startPosition;
-			int num = Physics.RaycastNonAlloc(startPosition, direction, this.rayCastNonAllocColliders, direction.magnitude, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
-			int num2 = 0;
-			for (int i = 0; i < num; i++)
-			{
-				if (!this.rayCastNonAllocColliders[i].collider.gameObject.CompareTag("NoCrazyCheck"))
-				{
-					num2++;
-				}
-			}
-			return num2;
+			return false;
 		}
-
-		private void ClearColliderBuffer(ref Collider[] colliders)
+		BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(raycastHit.collider);
+		if (builderPieceFromCollider != null && builderPieceFromCollider.IsPieceMoving())
 		{
-			for (int i = 0; i < colliders.Length; i++)
-			{
-				colliders[i] = null;
-			}
-		}
-
-		private void ClearRaycasthitBuffer(ref RaycastHit[] raycastHits)
-		{
-			for (int i = 0; i < raycastHits.Length; i++)
-			{
-				raycastHits[i] = this.emptyHit;
-			}
-		}
-
-		private Vector3 MovingSurfaceMovement()
-		{
-			return this.refMovement + this.movingSurfaceOffset;
-		}
-
-		private static bool ComputeLocalHitPoint(RaycastHit hit, out Vector3 localHitPoint)
-		{
-			if (hit.collider == null || hit.point.sqrMagnitude < 0.001f)
-			{
-				localHitPoint = Vector3.zero;
-				return false;
-			}
-			localHitPoint = hit.collider.transform.InverseTransformPoint(hit.point);
+			isMonkeBlock = true;
+			movingSurfaceId = builderPieceFromCollider.pieceId;
+			lastMonkeBlock = builderPieceFromCollider;
 			return true;
 		}
+		sideTouch = false;
+		return false;
+	}
 
-		private static bool ComputeWorldHitPoint(RaycastHit hit, Vector3 localPoint, out Vector3 worldHitPoint)
+	public void Turn(float degrees)
+	{
+		Vector3 position = headCollider.transform.position;
+		bool flag = rightHand.isColliding || rightHand.isHolding;
+		bool flag2 = leftHand.isColliding || leftHand.isHolding;
+		if (flag != flag2 && flag)
 		{
-			if (hit.collider == null)
-			{
-				worldHitPoint = Vector3.zero;
-				return false;
-			}
-			worldHitPoint = hit.collider.transform.TransformPoint(localPoint);
-			return true;
+			position = rightHand.controllerTransform.position;
 		}
-
-		private float ExtraVelMultiplier()
+		if (flag != flag2 && flag2)
 		{
-			float num = 1f;
-			if (this.leftHand.surfaceOverride != null)
-			{
-				num = Mathf.Max(num, this.leftHand.surfaceOverride.extraVelMultiplier);
-			}
-			if (this.rightHand.surfaceOverride != null)
-			{
-				num = Mathf.Max(num, this.rightHand.surfaceOverride.extraVelMultiplier);
-			}
-			return num;
+			position = leftHand.controllerTransform.position;
 		}
-
-		private float ExtraVelMaxMultiplier()
+		turnParent.transform.RotateAround(position, GTPlayerTransform.Up, degrees);
+		degreesTurnedThisFrame = degrees;
+		averagedVelocity = Vector3.zero;
+		Quaternion quaternion = Quaternion.AngleAxis(degrees, GTPlayerTransform.Up);
+		for (int i = 0; i < velocityHistory.Length; i++)
 		{
-			float num = 1f;
-			if (this.leftHand.surfaceOverride != null)
-			{
-				num = Mathf.Max(num, this.leftHand.surfaceOverride.extraVelMaxMultiplier);
-			}
-			if (this.rightHand.surfaceOverride != null)
-			{
-				num = Mathf.Max(num, this.rightHand.surfaceOverride.extraVelMaxMultiplier);
-			}
-			return num * this.scale;
+			velocityHistory[i] = quaternion * velocityHistory[i];
+			averagedVelocity += velocityHistory[i];
 		}
+		averagedVelocity /= (float)velocityHistorySize;
+	}
 
-		public void SetMaximumSlipThisFrame()
+	public void BeginClimbing(GorillaClimbable climbable, GorillaHandClimber hand, GorillaClimbableRef climbableRef = null)
+	{
+		if (currentClimber != null)
 		{
-			this.leftHand.slipSetToMaxFrameIdx = Time.frameCount;
-			this.rightHand.slipSetToMaxFrameIdx = Time.frameCount;
+			EndClimbing(currentClimber, startingNewClimb: true);
 		}
-
-		public void SetLeftMaximumSlipThisFrame()
+		try
 		{
-			this.leftHand.slipSetToMaxFrameIdx = Time.frameCount;
+			climbable.onBeforeClimb?.Invoke(hand, climbableRef);
 		}
-
-		public void SetRightMaximumSlipThisFrame()
+		catch (Exception message)
 		{
-			this.rightHand.slipSetToMaxFrameIdx = Time.frameCount;
+			Debug.LogError(message);
 		}
-
-		public void ChangeLayer(string layerName)
+		climbable.TryGetComponent<Rigidbody>(out var _);
+		VerifyClimbHelper();
+		climbHelper.SetParent(climbable.transform);
+		climbHelper.position = hand.transform.position;
+		Vector3 localPosition = climbHelper.localPosition;
+		if (climbable.snapX)
 		{
-			if (this.layerChanger != null)
+			SnapAxis(ref localPosition.x, climbable.maxDistanceSnap);
+		}
+		if (climbable.snapY)
+		{
+			SnapAxis(ref localPosition.y, climbable.maxDistanceSnap);
+		}
+		if (climbable.snapZ)
+		{
+			SnapAxis(ref localPosition.z, climbable.maxDistanceSnap);
+		}
+		climbHelperTargetPos = localPosition;
+		climbable.isBeingClimbed = true;
+		hand.isClimbing = true;
+		currentClimbable = climbable;
+		currentClimber = hand;
+		isClimbing = true;
+		if (climbable.climbOnlyWhileSmall)
+		{
+			BuilderPiece componentInParent = climbable.GetComponentInParent<BuilderPiece>();
+			if (componentInParent != null && componentInParent.IsPieceMoving())
 			{
-				this.layerChanger.ChangeLayer(base.transform.parent, layerName);
-			}
-		}
-
-		public void RestoreLayer()
-		{
-			if (this.layerChanger != null)
-			{
-				this.layerChanger.RestoreOriginalLayers();
-			}
-		}
-
-		public void OnEnterWaterVolume(Collider playerCollider, WaterVolume volume)
-		{
-			if (this.activeSizeChangerSettings != null && this.activeSizeChangerSettings.ExpireInWater)
-			{
-				this.SetNativeScale(null);
-			}
-			if (playerCollider == this.headCollider)
-			{
-				if (!this.headOverlappingWaterVolumes.Contains(volume))
-				{
-					this.headOverlappingWaterVolumes.Add(volume);
-					return;
-				}
-			}
-			else if (playerCollider == this.bodyCollider && !this.bodyOverlappingWaterVolumes.Contains(volume))
-			{
-				this.bodyOverlappingWaterVolumes.Add(volume);
-			}
-		}
-
-		public void OnExitWaterVolume(Collider playerCollider, WaterVolume volume)
-		{
-			if (playerCollider == this.headCollider)
-			{
-				this.headOverlappingWaterVolumes.Remove(volume);
-				return;
-			}
-			if (playerCollider == this.bodyCollider)
-			{
-				this.bodyOverlappingWaterVolumes.Remove(volume);
-			}
-		}
-
-		private bool GetSwimmingVelocityForHand(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, float dt, ref WaterVolume contactingWaterVolume, ref WaterVolume.SurfaceQuery waterSurface, out Vector3 swimmingVelocityChange)
-		{
-			contactingWaterVolume = null;
-			this.bufferCount = Physics.OverlapSphereNonAlloc(endingHandPosition, this.minimumRaycastDistance, this.overlapColliders, this.waterLayer.value, QueryTriggerInteraction.Collide);
-			if (this.bufferCount > 0)
-			{
-				float num = float.MinValue;
-				for (int i = 0; i < this.bufferCount; i++)
-				{
-					WaterVolume component = this.overlapColliders[i].GetComponent<WaterVolume>();
-					WaterVolume.SurfaceQuery surfaceQuery;
-					if (component != null && component.GetSurfaceQueryForPoint(endingHandPosition, out surfaceQuery, false) && surfaceQuery.surfacePoint.y > num)
-					{
-						num = surfaceQuery.surfacePoint.y;
-						contactingWaterVolume = component;
-						waterSurface = surfaceQuery;
-					}
-				}
-			}
-			if (this.forcedUnderwater || contactingWaterVolume != null)
-			{
-				Vector3 a = endingHandPosition - startingHandPosition;
-				Vector3 b = Vector3.zero;
-				Vector3 b2 = this.playerRigidBody.transform.position - this.lastRigidbodyPosition;
-				if (this.turnedThisFrame)
-				{
-					Vector3 vector = startingHandPosition - this.headCollider.transform.position;
-					b = Quaternion.AngleAxis(this.degreesTurnedThisFrame, Vector3.up) * vector - vector;
-				}
-				float num2 = Vector3.Dot(a - b - b2, palmForwardDirection);
-				float num3 = 0f;
-				if (num2 > 0f)
-				{
-					float num4 = -1f;
-					float num5 = -1f;
-					if (!this.forcedUnderwater)
-					{
-						Plane surfacePlane = waterSurface.surfacePlane;
-						num4 = (this.forcedUnderwater ? -1f : surfacePlane.GetDistanceToPoint(startingHandPosition));
-						num5 = (this.forcedUnderwater ? -1f : surfacePlane.GetDistanceToPoint(endingHandPosition));
-					}
-					if (num4 <= 0f && num5 <= 0f)
-					{
-						num3 = 1f;
-					}
-					else if (num4 > 0f && num5 <= 0f)
-					{
-						num3 = -num5 / (num4 - num5);
-					}
-					else if (num4 <= 0f && num5 > 0f)
-					{
-						num3 = -num4 / (num5 - num4);
-					}
-					if (num3 > Mathf.Epsilon)
-					{
-						float resistance = this.liquidPropertiesList[(int)(this.forcedUnderwater ? GTPlayer.LiquidType.Water : contactingWaterVolume.LiquidType)].resistance;
-						swimmingVelocityChange = -palmForwardDirection * num2 * 2f * resistance * num3;
-						Vector3 forward = this.mainCamera.transform.forward;
-						if (forward.y < 0f)
-						{
-							Vector3 vector2 = forward.x0z();
-							float magnitude = vector2.magnitude;
-							vector2 /= magnitude;
-							float num6 = Vector3.Dot(swimmingVelocityChange, vector2);
-							if (num6 > 0f)
-							{
-								Vector3 vector3 = vector2 * num6;
-								swimmingVelocityChange = swimmingVelocityChange - vector3 + vector3 * magnitude + Vector3.up * forward.y * num6;
-							}
-						}
-						return true;
-					}
-				}
-			}
-			swimmingVelocityChange = Vector3.zero;
-			return false;
-		}
-
-		private bool CheckWaterSurfaceJump(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, Vector3 handAvgVelocity, PlayerSwimmingParameters parameters, WaterVolume contactingWaterVolume, WaterVolume.SurfaceQuery waterSurface, out Vector3 jumpVelocity)
-		{
-			if (contactingWaterVolume != null)
-			{
-				Plane surfacePlane = waterSurface.surfacePlane;
-				bool flag = handAvgVelocity.sqrMagnitude > parameters.waterSurfaceJumpHandSpeedThreshold * parameters.waterSurfaceJumpHandSpeedThreshold;
-				if (surfacePlane.GetSide(startingHandPosition) && !surfacePlane.GetSide(endingHandPosition) && flag)
-				{
-					float value = Vector3.Dot(palmForwardDirection, -waterSurface.surfaceNormal);
-					float value2 = Vector3.Dot(handAvgVelocity.normalized, -waterSurface.surfaceNormal);
-					float d = parameters.waterSurfaceJumpPalmFacingCurve.Evaluate(Mathf.Clamp(value, 0.01f, 0.99f));
-					float d2 = parameters.waterSurfaceJumpHandVelocityFacingCurve.Evaluate(Mathf.Clamp(value2, 0.01f, 0.99f));
-					jumpVelocity = -handAvgVelocity * parameters.waterSurfaceJumpAmount * d * d2;
-					return true;
-				}
-			}
-			jumpVelocity = Vector3.zero;
-			return false;
-		}
-
-		private bool TryNormalize(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
-		{
-			magnitude = input.magnitude;
-			if (magnitude > eps)
-			{
-				normalized = input / magnitude;
-				return true;
-			}
-			normalized = Vector3.zero;
-			return false;
-		}
-
-		private bool TryNormalizeDown(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
-		{
-			magnitude = input.magnitude;
-			if (magnitude > 1f)
-			{
-				normalized = input / magnitude;
-				return true;
-			}
-			if (magnitude >= eps)
-			{
-				normalized = input;
-				return true;
-			}
-			normalized = Vector3.zero;
-			return false;
-		}
-
-		private float FreezeTagSlidePercentage()
-		{
-			if (this.materialData[this.currentMaterialIndex].overrideSlidePercent && this.materialData[this.currentMaterialIndex].slidePercent > this.freezeTagHandSlidePercent)
-			{
-				return this.materialData[this.currentMaterialIndex].slidePercent;
-			}
-			return this.freezeTagHandSlidePercent;
-		}
-
-		private void OnCollisionStay(UnityEngine.Collision collision)
-		{
-			this.bodyCollisionContactsCount = collision.GetContacts(this.bodyCollisionContacts);
-			float num = -1f;
-			for (int i = 0; i < this.bodyCollisionContactsCount; i++)
-			{
-				float num2 = Vector3.Dot(this.bodyCollisionContacts[i].normal, Vector3.up);
-				if (num2 > num)
-				{
-					this.bodyGroundContact = this.bodyCollisionContacts[i];
-					num = num2;
-				}
-			}
-			float num3 = 0.5f;
-			if (num > num3)
-			{
-				this.bodyGroundContactTime = Time.time;
-				Collider otherCollider = this.bodyGroundContact.otherCollider;
-				this.bodyGroundIsSlippery = (otherCollider != null && otherCollider.sharedMaterial != null && otherCollider.sharedMaterial.staticFriction <= 0.0001f && otherCollider.sharedMaterial.dynamicFriction <= 0.0001f);
-			}
-		}
-
-		public void DoLaunch(Vector3 velocity)
-		{
-			GTPlayer.<DoLaunch>d__483 <DoLaunch>d__;
-			<DoLaunch>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-			<DoLaunch>d__.<>4__this = this;
-			<DoLaunch>d__.velocity = velocity;
-			<DoLaunch>d__.<>1__state = -1;
-			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__483>(ref <DoLaunch>d__);
-		}
-
-		private void OnEnable()
-		{
-			RoomSystem.JoinedRoomEvent += new Action(this.OnJoinedRoom);
-		}
-
-		private void OnJoinedRoom()
-		{
-			if (this.activeSizeChangerSettings != null && this.activeSizeChangerSettings.ExpireOnRoomJoin)
-			{
-				this.SetNativeScale(null);
-			}
-		}
-
-		private void OnDisable()
-		{
-			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
-		}
-
-		public void ForceRigidBodySync()
-		{
-			this.forceRBSync = true;
-		}
-
-		internal void ClearHandHolds()
-		{
-			this.leftHand.isHolding = false;
-			this.rightHand.isHolding = false;
-			this.wasHoldingHandhold = false;
-			this.activeHandHold = default(GTPlayer.HandHoldState);
-			this.secondaryHandHold = default(GTPlayer.HandHoldState);
-			this.OnChangeActiveHandhold();
-		}
-
-		internal void AddHandHold(Transform objectHeld, Vector3 localPositionHeld, GorillaGrabber grabber, bool forLeftHand, bool rotatePlayerWhenHeld, out Vector3 grabbedVelocity)
-		{
-			if (!this.leftHand.isHolding && !this.rightHand.isHolding)
-			{
-				grabbedVelocity = -this.bodyCollider.attachedRigidbody.linearVelocity;
-				this.playerRigidBody.AddForce(grabbedVelocity, ForceMode.VelocityChange);
+				isClimbableMoving = true;
+				lastClimbableRotation = climbable.transform.rotation;
 			}
 			else
 			{
-				grabbedVelocity = Vector3.zero;
+				isClimbableMoving = false;
 			}
-			this.secondaryHandHold = this.activeHandHold;
-			Vector3 position = grabber.transform.position;
-			this.activeHandHold = new GTPlayer.HandHoldState
-			{
-				grabber = grabber,
-				objectHeld = objectHeld,
-				localPositionHeld = localPositionHeld,
-				localRotationalOffset = grabber.transform.rotation.eulerAngles.y - objectHeld.rotation.eulerAngles.y,
-				applyRotation = rotatePlayerWhenHeld
-			};
-			if (forLeftHand)
-			{
-				this.leftHand.isHolding = true;
-			}
-			else
-			{
-				this.rightHand.isHolding = true;
-			}
-			this.OnChangeActiveHandhold();
 		}
-
-		internal void RemoveHandHold(GorillaGrabber grabber, bool forLeftHand)
+		else
 		{
-			this.activeHandHold.objectHeld == grabber;
-			if (this.activeHandHold.grabber == grabber)
-			{
-				this.activeHandHold = this.secondaryHandHold;
-			}
-			this.secondaryHandHold = default(GTPlayer.HandHoldState);
-			if (forLeftHand)
-			{
-				this.leftHand.isHolding = false;
-			}
-			else
-			{
-				this.rightHand.isHolding = false;
-			}
-			this.OnChangeActiveHandhold();
+			isClimbableMoving = false;
 		}
-
-		private void OnChangeActiveHandhold()
+		GorillaZipline component3;
+		PhotonView component4;
+		PhotonViewXSceneRef component5;
+		if (climbable.TryGetComponent<GorillaRopeSegment>(out var component2) && (bool)component2.swing)
 		{
-			if (this.activeHandHold.objectHeld != null)
-			{
-				PhotonView view;
-				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonView>(out view))
-				{
-					VRRig.AttachLocalPlayerToPhotonView(view, this.activeHandHold.grabber.XrNode, this.activeHandHold.localPositionHeld, this.averagedVelocity);
-					return;
-				}
-				PhotonViewXSceneRef photonViewXSceneRef;
-				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef))
-				{
-					PhotonView photonView = photonViewXSceneRef.photonView;
-					if (photonView != null)
-					{
-						VRRig.AttachLocalPlayerToPhotonView(photonView, this.activeHandHold.grabber.XrNode, this.activeHandHold.localPositionHeld, this.averagedVelocity);
-						return;
-					}
-				}
-				BuilderPieceHandHold builderPieceHandHold;
-				if (this.activeHandHold.objectHeld.TryGetComponent<BuilderPieceHandHold>(out builderPieceHandHold) && builderPieceHandHold.IsHandHoldMoving())
-				{
-					this.isHandHoldMoving = true;
-					this.lastHandHoldRotation = builderPieceHandHold.transform.rotation;
-					this.movingHandHoldReleaseVelocity = this.playerRigidBody.linearVelocity;
-				}
-				else
-				{
-					this.isHandHoldMoving = false;
-					this.lastHandHoldRotation = Quaternion.identity;
-					this.movingHandHoldReleaseVelocity = Vector3.zero;
-				}
-			}
-			VRRig.DetachLocalPlayerFromPhotonView();
+			currentSwing = component2.swing;
+			currentSwing.AttachLocalPlayer(hand.xrNode, climbable.transform, climbHelperTargetPos, averagedVelocity);
 		}
-
-		private void FixedUpdate_HandHolds(float timeDelta)
+		else if ((bool)climbable.transform.parent && climbable.transform.parent.TryGetComponent<GorillaZipline>(out component3))
 		{
-			if (this.activeHandHold.objectHeld == null)
-			{
-				if (this.wasHoldingHandhold)
-				{
-					this.playerRigidBody.linearVelocity = Vector3.ClampMagnitude(this.secondLastPreHandholdVelocity, 5.5f * this.scale);
-				}
-				this.wasHoldingHandhold = false;
-				return;
-			}
-			Vector3 vector = this.activeHandHold.objectHeld.TransformPoint(this.activeHandHold.localPositionHeld);
-			Vector3 position = this.activeHandHold.grabber.transform.position;
-			this.secondLastPreHandholdVelocity = this.lastPreHandholdVelocity;
-			this.lastPreHandholdVelocity = this.playerRigidBody.linearVelocity;
-			this.wasHoldingHandhold = true;
-			if (this.isHandHoldMoving)
-			{
-				this.lastPreHandholdVelocity = this.movingHandHoldReleaseVelocity;
-				this.playerRigidBody.linearVelocity = Vector3.zero;
-				Vector3 vector2 = vector - position;
-				this.playerRigidBody.transform.position += vector2;
-				this.movingHandHoldReleaseVelocity = vector2 / timeDelta;
-				Quaternion rotationDelta = this.activeHandHold.objectHeld.rotation * Quaternion.Inverse(this.lastHandHoldRotation);
-				this.RotateWithSurface(rotationDelta, vector);
-				this.lastHandHoldRotation = this.activeHandHold.objectHeld.rotation;
-				return;
-			}
-			this.playerRigidBody.linearVelocity = (vector - position) / timeDelta;
-			if (this.activeHandHold.applyRotation)
-			{
-				this.turnParent.transform.RotateAround(vector, base.transform.up, this.activeHandHold.localRotationalOffset - (this.activeHandHold.grabber.transform.rotation.eulerAngles.y - this.activeHandHold.objectHeld.rotation.eulerAngles.y));
-			}
+			currentZipline = component3;
 		}
-
-		[CompilerGenerated]
-		internal static void <BeginClimbing>g__SnapAxis|447_0(ref float val, float maxDist)
+		else if (climbable.TryGetComponent<PhotonView>(out component4))
+		{
+			VRRig.AttachLocalPlayerToPhotonView(component4, hand.xrNode, climbHelperTargetPos, averagedVelocity);
+		}
+		else if (climbable.TryGetComponent<PhotonViewXSceneRef>(out component5))
+		{
+			VRRig.AttachLocalPlayerToPhotonView(component5.photonView, hand.xrNode, climbHelperTargetPos, averagedVelocity);
+		}
+		GorillaTagger.Instance.StartVibration(currentClimber.xrNode == XRNode.LeftHand, 0.6f, 0.06f);
+		if ((bool)climbable.clip)
+		{
+			GorillaTagger.Instance.offlineVRRig.PlayClimbSound(climbable.clip, hand.xrNode == XRNode.LeftHand);
+		}
+		static void SnapAxis(ref float val, float maxDist)
 		{
 			if (val > maxDist)
 			{
 				val = maxDist;
-				return;
 			}
-			if (val < -maxDist)
+			else if (val < 0f - maxDist)
 			{
-				val = -maxDist;
+				val = 0f - maxDist;
 			}
 		}
-
-		public static LayerMask LocomotionEnabledLayers = 201327105;
-
-		private static GTPlayer _instance;
-
-		public static bool hasInstance = false;
-
-		public Camera mainCamera;
-
-		public SphereCollider headCollider;
-
-		public CapsuleCollider bodyCollider;
-
-		private float bodyInitialRadius;
-
-		private float _bodyInitialHeight;
-
-		private float currentBodyHeight;
-
-		private double frameCount;
-
-		private RaycastHit bodyHitInfo;
-
-		private RaycastHit lastHitInfoHand;
-
-		public GorillaVelocityTracker bodyVelocityTracker;
-
-		public PlayerAudioManager audioManager;
-
-		[SerializeField]
-		private GTPlayer.HandState leftHand;
-
-		[SerializeField]
-		private GTPlayer.HandState rightHand;
-
-		private GTPlayer.HandState[] stiltStates = new GTPlayer.HandState[12];
-
-		private bool anyHandIsColliding;
-
-		private bool anyHandWasColliding;
-
-		private bool anyHandIsSliding;
-
-		private bool anyHandWasSliding;
-
-		private bool anyHandIsSticking;
-
-		private bool anyHandWasSticking;
-
-		private bool forceRBSync;
-
-		public Vector3 lastHeadPosition;
-
-		private Vector3 lastRigidbodyPosition;
-
-		private Rigidbody playerRigidBody;
-
-		private RigidbodyInterpolation playerRigidbodyInterpolationDefault;
-
-		public int velocityHistorySize;
-
-		public float maxArmLength = 1f;
-
-		public float unStickDistance = 1f;
-
-		public float velocityLimit;
-
-		public float slideVelocityLimit;
-
-		public float maxJumpSpeed;
-
-		private float _jumpMultiplier;
-
-		public float minimumRaycastDistance = 0.05f;
-
-		public float defaultSlideFactor = 0.03f;
-
-		public float slidingMinimum = 0.9f;
-
-		public float defaultPrecision = 0.995f;
-
-		public float teleportThresholdNoVel = 1f;
-
-		public float frictionConstant = 1f;
-
-		public float slideControl = 0.00425f;
-
-		public float stickDepth = 0.01f;
-
-		private Vector3[] velocityHistory;
-
-		private Vector3[] slideAverageHistory;
-
-		private int velocityIndex;
-
-		private Vector3 currentVelocity;
-
-		private Vector3 averagedVelocity;
-
-		private Vector3 lastPosition;
-
-		public Vector3 bodyOffset;
-
-		public LayerMask locomotionEnabledLayers;
-
-		public LayerMask waterLayer;
-
-		public bool wasHeadTouching;
-
-		public int currentMaterialIndex;
-
-		public Vector3 headSlideNormal;
-
-		public float headSlipPercentage;
-
-		[SerializeField]
-		private Transform cosmeticsHeadTarget;
-
-		[SerializeField]
-		private float nativeScale = 1f;
-
-		[SerializeField]
-		private float scaleMultiplier = 1f;
-
-		private NativeSizeChangerSettings activeSizeChangerSettings;
-
-		public bool debugMovement;
-
-		public bool disableMovement;
-
-		[NonSerialized]
-		public bool inOverlay;
-
-		[NonSerialized]
-		public bool isUserPresent;
-
-		public GameObject turnParent;
-
-		[SerializeField]
-		public GameObject RecordingRig;
-
-		public GorillaSurfaceOverride currentOverride;
-
-		public MaterialDatasSO materialDatasSO;
-
-		private float degreesTurnedThisFrame;
-
-		private Vector3 bodyOffsetVector;
-
-		private Vector3 movementToProjectedAboveCollisionPlane;
-
-		private MeshCollider meshCollider;
-
-		private Mesh collidedMesh;
-
-		private GTPlayer.MaterialData foundMatData;
-
-		private string findMatName;
-
-		private int vertex1;
-
-		private int vertex2;
-
-		private int vertex3;
-
-		private List<int> trianglesList = new List<int>(1000000);
-
-		private Dictionary<Mesh, int[]> meshTrianglesDict = new Dictionary<Mesh, int[]>(128);
-
-		private int[] sharedMeshTris;
-
-		private float lastRealTime;
-
-		private float calcDeltaTime;
-
-		private float tempRealTime;
-
-		private Vector3 slideVelocity;
-
-		private Vector3 slideAverageNormal;
-
-		private RaycastHit tempHitInfo;
-
-		private RaycastHit junkHit;
-
-		private Vector3 firstPosition;
-
-		private RaycastHit tempIterativeHit;
-
-		private float maxSphereSize1;
-
-		private float maxSphereSize2;
-
-		private Collider[] overlapColliders = new Collider[10];
-
-		private int overlapAttempts;
-
-		private float averageSlipPercentage;
-
-		private Vector3 surfaceDirection;
-
-		public float iceThreshold = 0.9f;
-
-		private float bodyMaxRadius;
-
-		public float bodyLerp = 0.17f;
-
-		private bool areBothTouching;
-
-		private float slideFactor;
-
-		[DebugOption]
-		public bool didAJump;
-
-		private bool updateRB;
-
-		private Renderer slideRenderer;
-
-		private RaycastHit[] rayCastNonAllocColliders;
-
-		private Vector3[] crazyCheckVectors;
-
-		private RaycastHit emptyHit;
-
-		private int bufferCount;
-
-		private Vector3 lastOpenHeadPosition;
-
-		private List<Material> tempMaterialArray = new List<Material>(16);
-
-		private Vector3? antiDriftLastPosition;
-
-		private const float CameraFarClipDefault = 500f;
-
-		private const float CameraNearClipDefault = 0.01f;
-
-		private const float CameraNearClipTiny = 0.002f;
-
-		private Dictionary<GameObject, PhysicsMaterial> bodyTouchedSurfaces;
-
-		private bool primaryButtonPressed = true;
-
-		[Header("Swimming")]
-		public PlayerSwimmingParameters swimmingParams;
-
-		public WaterParameters waterParams;
-
-		public List<GTPlayer.LiquidProperties> liquidPropertiesList = new List<GTPlayer.LiquidProperties>(16);
-
-		public bool debugDrawSwimming;
-
-		[Header("Slam/Hit effects")]
-		public GameObject wizardStaffSlamEffects;
-
-		public GameObject geodeHitEffects;
-
-		[Header("Freeze Tag")]
-		public float freezeTagHandSlidePercent = 0.88f;
-
-		public bool debugFreezeTag;
-
-		public float frozenBodyBuoyancyFactor = 1.5f;
-
-		[Space]
-		private WaterVolume leftHandWaterVolume;
-
-		private WaterVolume rightHandWaterVolume;
-
-		private WaterVolume.SurfaceQuery leftHandWaterSurface;
-
-		private WaterVolume.SurfaceQuery rightHandWaterSurface;
-
-		private Vector3 swimmingVelocity = Vector3.zero;
-
-		private WaterVolume.SurfaceQuery waterSurfaceForHead;
-
-		private bool bodyInWater;
-
-		private bool headInWater;
-
-		private bool audioSetToUnderwater;
-
-		private float buoyancyExtension;
-
-		private float lastWaterSurfaceJumpTimeLeft = -1f;
-
-		private float lastWaterSurfaceJumpTimeRight = -1f;
-
-		private float waterSurfaceJumpCooldown = 0.1f;
-
-		private float leftHandNonDiveHapticsAmount;
-
-		private float rightHandNonDiveHapticsAmount;
-
-		private List<WaterVolume> headOverlappingWaterVolumes = new List<WaterVolume>(16);
-
-		private List<WaterVolume> bodyOverlappingWaterVolumes = new List<WaterVolume>(16);
-
-		private List<WaterCurrent> activeWaterCurrents = new List<WaterCurrent>(16);
-
-		private Quaternion playerRotationOverride = Quaternion.identity;
-
-		private int playerRotationOverrideFrame = -1;
-
-		private float playerRotationOverrideDecayRate = Mathf.Exp(1.5f);
-
-		private ContactPoint[] bodyCollisionContacts = new ContactPoint[8];
-
-		private int bodyCollisionContactsCount;
-
-		private ContactPoint bodyGroundContact;
-
-		private float bodyGroundContactTime;
-
-		private const float movingSurfaceVelocityLimit = 40f;
-
-		private bool exitMovingSurface;
-
-		private float exitMovingSurfaceThreshold = 6f;
-
-		private bool isClimbableMoving;
-
-		private Quaternion lastClimbableRotation;
-
-		private int lastAttachedToMovingSurfaceFrame;
-
-		private const int MIN_FRAMES_OFF_SURFACE_TO_DETACH = 3;
-
-		private bool isHandHoldMoving;
-
-		private Quaternion lastHandHoldRotation;
-
-		private Vector3 movingHandHoldReleaseVelocity;
-
-		private GTPlayer.MovingSurfaceContactPoint lastMovingSurfaceContact;
-
-		private int lastMovingSurfaceID = -1;
-
-		private BuilderPiece lastMonkeBlock;
-
-		private Quaternion lastMovingSurfaceRot;
-
-		private RaycastHit lastMovingSurfaceHit;
-
-		private Vector3 lastMovingSurfaceTouchLocal;
-
-		private Vector3 lastMovingSurfaceTouchWorld;
-
-		private Vector3 movingSurfaceOffset;
-
-		private bool wasMovingSurfaceMonkeBlock;
-
-		private Vector3 lastMovingSurfaceVelocity;
-
-		private bool wasBodyOnGround;
-
-		private BasePlatform currentPlatform;
-
-		private BasePlatform lastPlatformTouched;
-
-		private Vector3 lastFrameTouchPosLocal;
-
-		private Vector3 lastFrameTouchPosWorld;
-
-		private bool lastFrameHasValidTouchPos;
-
-		private Vector3 refMovement = Vector3.zero;
-
-		private Vector3 platformTouchOffset;
-
-		private Vector3 debugLastRightHandPosition;
-
-		private Vector3 debugPlatformDeltaPosition;
-
-		public double tempFreezeRightHandEnableTime;
-
-		public double tempFreezeLeftHandEnableTime;
-
-		private const float climbingMaxThrowSpeed = 5.5f;
-
-		private const float climbHelperSmoothSnapSpeed = 12f;
-
-		[NonSerialized]
-		public bool isClimbing;
-
-		private GorillaClimbable currentClimbable;
-
-		private GorillaHandClimber currentClimber;
-
-		private Vector3 climbHelperTargetPos = Vector3.zero;
-
-		private Transform climbHelper;
-
-		private GorillaRopeSwing currentSwing;
-
-		private GorillaZipline currentZipline;
-
-		[SerializeField]
-		private ConnectedControllerHandler controllerState;
-
-		public int sizeLayerMask;
-
-		public bool InReportMenu;
-
-		private LayerChanger layerChanger;
-
-		private bool hasCorrectedForTracking;
-
-		private float halloweenLevitationStrength;
-
-		private float halloweenLevitationFullStrengthDuration;
-
-		private float halloweenLevitationTotalDuration = 1f;
-
-		private float halloweenLevitationBonusStrength;
-
-		private float halloweenLevitateBonusOffAtYSpeed;
-
-		private float halloweenLevitateBonusFullAtYSpeed = 1f;
-
-		private float lastTouchedGroundTimestamp;
-
-		private bool teleportToTrain;
-
-		public bool isAttachedToTrain;
-
-		private bool stuckLeft;
-
-		private bool stuckRight;
-
-		private float lastScale;
-
-		private Vector3 currentSlopDirection;
-
-		private Vector3 lastSlopeDirection = Vector3.zero;
-
-		private readonly Dictionary<Object, Action<GTPlayer>> gravityOverrides = new Dictionary<Object, Action<GTPlayer>>();
-
-		private int hoverAllowedCount;
-
-		[Header("Hoverboard")]
-		[SerializeField]
-		private float hoverIdealHeight = 0.5f;
-
-		[SerializeField]
-		private float hoverCarveSidewaysSpeedLossFactor = 1f;
-
-		[SerializeField]
-		private AnimationCurve hoverCarveAngleResponsiveness;
-
-		[SerializeField]
-		private HoverboardVisual hoverboardVisual;
-
-		[SerializeField]
-		private float sidewaysDrag = 0.1f;
-
-		[SerializeField]
-		private float hoveringSlowSpeed = 0.1f;
-
-		[SerializeField]
-		private float hoveringSlowStoppingFactor = 0.95f;
-
-		[SerializeField]
-		private float hoverboardPaddleBoostMultiplier = 0.1f;
-
-		[SerializeField]
-		private float hoverboardPaddleBoostMax = 10f;
-
-		[SerializeField]
-		private float hoverboardBoostGracePeriod = 1f;
-
-		[SerializeField]
-		private float hoverBodyHasCollisionsOutsideRadius = 0.5f;
-
-		[SerializeField]
-		private float hoverBodyCollisionRadiusUpOffset = 0.2f;
-
-		[SerializeField]
-		private float hoverGeneralUpwardForce = 8f;
-
-		[SerializeField]
-		private float hoverTiltAdjustsForwardFactor = 0.2f;
-
-		[SerializeField]
-		private float hoverMinGrindSpeed = 1f;
-
-		[SerializeField]
-		private float hoverSlamJumpStrengthFactor = 25f;
-
-		[SerializeField]
-		private float hoverMaxPaddleSpeed = 35f;
-
-		[SerializeField]
-		private HoverboardAudio hoverboardAudio;
-
-		private bool hasHoverPoint;
-
-		private float boostEnabledUntilTimestamp;
-
-		private GTPlayer.HoverBoardCast[] hoverboardCasts = new GTPlayer.HoverBoardCast[]
+	}
+
+	private void VerifyClimbHelper()
+	{
+		if (climbHelper == null || climbHelper.gameObject == null)
 		{
-			new GTPlayer.HoverBoardCast
-			{
-				localOrigin = new Vector3(0f, 1f, 0.36f),
-				localDirection = Vector3.down,
-				distance = 1f,
-				sphereRadius = 0.2f,
-				intersectToVelocityCap = 0.1f
-			},
-			new GTPlayer.HoverBoardCast
-			{
-				localOrigin = new Vector3(0f, 0.05f, 0.36f),
-				localDirection = Vector3.forward,
-				distance = 0.25f,
-				sphereRadius = 0.01f,
-				intersectToVelocityCap = 0f,
-				isSolid = true
-			},
-			new GTPlayer.HoverBoardCast
-			{
-				localOrigin = new Vector3(0f, 0.05f, -0.1f),
-				localDirection = -Vector3.forward,
-				distance = 0.24f,
-				sphereRadius = 0.01f,
-				intersectToVelocityCap = 0f,
-				isSolid = true
-			}
-		};
+			climbHelper = new GameObject("Climb Helper").transform;
+		}
+	}
 
-		private Vector3 hoverboardPlayerLocalPos;
-
-		private Quaternion hoverboardPlayerLocalRot;
-
-		private bool didHoverLastFrame;
-
-		private bool hasLeftHandTentacleMove;
-
-		private bool hasRightHandTentacleMove;
-
-		private Vector3 leftHandTentacleMove;
-
-		private Vector3 rightHandTentacleMove;
-
-		private GTPlayer.HandHoldState activeHandHold;
-
-		private GTPlayer.HandHoldState secondaryHandHold;
-
-		public PhysicsMaterial slipperyMaterial;
-
-		private bool wasHoldingHandhold;
-
-		private Vector3 secondLastPreHandholdVelocity;
-
-		private Vector3 lastPreHandholdVelocity;
-
-		[Header("Native Scale Adjustment")]
-		[SerializeField]
-		private AnimationCurve nativeScaleMagnitudeAdjustmentFactor;
-
-		[Serializable]
-		public struct HandState
+	public void EndClimbing(GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb = false)
+	{
+		if (hand != currentClimber)
 		{
-			public void Init(GTPlayer gtPlayer, bool isLeftHand, float maxArmLength)
+			return;
+		}
+		hand.SetCanRelease(canRelease: true);
+		if (!startingNewClimb)
+		{
+			enablePlayerGravity(useGravity: true);
+		}
+		Rigidbody component = null;
+		if ((bool)currentClimbable)
+		{
+			currentClimbable.TryGetComponent<Rigidbody>(out component);
+			currentClimbable.isBeingClimbed = false;
+		}
+		Vector3 force = Vector3.zero;
+		if ((bool)currentClimber)
+		{
+			currentClimber.isClimbing = false;
+			if (doDontReclimb)
 			{
-				this.gtPlayer = gtPlayer;
-				this.isLeftHand = isLeftHand;
-				this.maxArmLength = maxArmLength;
-				this.lastPosition = this.controllerTransform.position;
-				this.lastRotation = this.controllerTransform.rotation;
-				if (this.handFollower != null)
+				currentClimber.dontReclimbLast = currentClimbable;
+			}
+			else
+			{
+				currentClimber.dontReclimbLast = null;
+			}
+			currentClimber.queuedToBecomeValidToGrabAgain = true;
+			currentClimber.lastAutoReleasePos = currentClimber.handRoot.localPosition;
+			if (!startingNewClimb && (bool)currentClimbable)
+			{
+				GorillaVelocityTracker interactPointVelocityTracker = GetInteractPointVelocityTracker(currentClimber.xrNode == XRNode.LeftHand);
+				if ((bool)component)
 				{
-					this.handFollower.transform.position = this.lastPosition;
-					this.handFollower.transform.rotation = this.lastRotation;
+					playerRigidBody.linearVelocity = component.linearVelocity;
 				}
-				this.wasColliding = false;
-				this.slipSetToMaxFrameIdx = -1;
-			}
-
-			public void OnTeleport()
-			{
-				this.wasColliding = false;
-				this.isColliding = false;
-				this.isSliding = false;
-				this.wasSliding = false;
-				if (this.handFollower != null)
+				else if ((bool)currentSwing)
 				{
-					this.handFollower.position = this.controllerTransform.position;
-					this.handFollower.rotation = this.controllerTransform.rotation;
+					playerRigidBody.linearVelocity = currentSwing.velocityTracker.GetAverageVelocity(worldSpace: true, 0.25f);
 				}
-				this.lastPosition = this.controllerTransform.position;
-				this.lastRotation = this.controllerTransform.rotation;
-			}
-
-			public Vector3 GetLastPosition()
-			{
-				return this.lastPosition + this.gtPlayer.MovingSurfaceMovement();
-			}
-
-			public bool SlipOverriddenToMax()
-			{
-				return this.slipSetToMaxFrameIdx == Time.frameCount;
-			}
-
-			public void FirstIteration(ref Vector3 totalMove, ref int divisor, float paddleBoostFactor)
-			{
-				if (this.hasCustomBoost)
+				else if ((bool)currentZipline)
 				{
-					this.boostVectorThisFrame = this.gtPlayer.turnParent.transform.rotation * -this.velocityTracker.GetAverageVelocity(false, 0.15f, false) * this.customBoostFactor;
+					playerRigidBody.linearVelocity = currentZipline.GetCurrentDirection() * currentZipline.currentSpeed;
 				}
 				else
 				{
-					this.boostVectorThisFrame = (this.gtPlayer.enableHoverMode ? (this.gtPlayer.turnParent.transform.rotation * -this.velocityTracker.GetAverageVelocity(false, 0.15f, false) * paddleBoostFactor) : Vector3.zero);
+					playerRigidBody.linearVelocity = Vector3.zero;
 				}
-				Vector3 vector = this.GetCurrentHandPosition() + this.gtPlayer.movingSurfaceOffset;
-				Vector3 vector2 = this.GetLastPosition();
-				Vector3 a = vector - vector2;
-				bool flag = this.gtPlayer.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.LEFT;
-				if (!this.gtPlayer.didAJump && this.wasSliding && Vector3.Dot(this.gtPlayer.slideAverageNormal, GTPlayerTransform.PhysicsUp) > 0f)
+				force = turnParent.transform.rotation * -interactPointVelocityTracker.GetAverageVelocity(worldSpace: false, 0.1f, doMagnitudeCheck: true) * scale;
+				force = Vector3.ClampMagnitude(force, 5.5f * scale);
+				playerRigidBody.AddForce(force, ForceMode.VelocityChange);
+			}
+		}
+		if ((bool)currentSwing)
+		{
+			currentSwing.DetachLocalPlayer();
+		}
+		if (currentClimbable.TryGetComponent<PhotonView>(out var _) || currentClimbable.TryGetComponent<PhotonViewXSceneRef>(out var _) || currentClimbable.IsPlayerAttached)
+		{
+			VRRig.DetachLocalPlayerFromPhotonView();
+		}
+		if (!startingNewClimb && force.magnitude > 2f && (bool)currentClimbable && (bool)currentClimbable.clipOnFullRelease)
+		{
+			GorillaTagger.Instance.offlineVRRig.PlayClimbSound(currentClimbable.clipOnFullRelease, hand.xrNode == XRNode.LeftHand);
+		}
+		currentClimbable = null;
+		currentClimber = null;
+		currentSwing = null;
+		currentZipline = null;
+		isClimbing = false;
+	}
+
+	public void ResetRigidbodyInterpolation()
+	{
+		playerRigidBody.interpolation = playerRigidbodyInterpolationDefault;
+	}
+
+	private void enablePlayerGravity(bool useGravity)
+	{
+		playerRigidBody.useGravity = useGravity;
+	}
+
+	public void SetVelocity(Vector3 velocity)
+	{
+		playerRigidBody.linearVelocity = velocity;
+	}
+
+	internal void RigidbodyMovePosition(Vector3 pos)
+	{
+		playerRigidBody.MovePosition(pos);
+	}
+
+	public void TempFreezeHand(bool isLeft, float freezeDuration)
+	{
+		(isLeft ? leftHand : rightHand).TempFreezeHand(freezeDuration);
+	}
+
+	private void StoreVelocities()
+	{
+		velocityIndex = (velocityIndex + 1) % velocityHistorySize;
+		currentVelocity = (base.transform.position - lastPosition - GTPlayerTransform.RotationPosOffsetChange - MovingSurfaceMovement()) / calcDeltaTime;
+		velocityHistory[velocityIndex] = currentVelocity;
+		averagedVelocity = velocityHistory.Average();
+		lastPosition = base.transform.position;
+		GTPlayerTransform.ResetRotationPositionOffset();
+	}
+
+	private void AntiTeleportTechnology()
+	{
+		if ((headCollider.transform.position - lastHeadPosition).magnitude >= teleportThresholdNoVel + playerRigidBody.linearVelocity.magnitude * calcDeltaTime)
+		{
+			ForceRigidBodySync();
+			base.transform.position = base.transform.position + lastHeadPosition - headCollider.transform.position;
+		}
+	}
+
+	private bool MaxSphereSizeForNoOverlap(float testRadius, Vector3 checkPosition, bool ignoreOneWay, out float overlapRadiusTest)
+	{
+		overlapRadiusTest = testRadius;
+		overlapAttempts = 0;
+		int num = 100;
+		while (overlapAttempts < num && overlapRadiusTest > testRadius * 0.75f)
+		{
+			ClearColliderBuffer(ref overlapColliders);
+			bufferCount = Physics.OverlapSphereNonAlloc(checkPosition, overlapRadiusTest, overlapColliders, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
+			if (ignoreOneWay)
+			{
+				int num2 = 0;
+				for (int i = 0; i < bufferCount; i++)
 				{
-					a += Vector3.Project(-this.gtPlayer.slideAverageNormal * this.gtPlayer.stickDepth * this.gtPlayer.scale, GTPlayerTransform.PhysicsDown);
-				}
-				float num = this.gtPlayer.minimumRaycastDistance * this.gtPlayer.scale;
-				if (this.gtPlayer.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
-				{
-					num = (this.gtPlayer.minimumRaycastDistance + VRRig.LocalRig.iceCubeRight.transform.localScale.y / 2f) * this.gtPlayer.scale;
-				}
-				Vector3 vector3 = Vector3.zero;
-				if (flag && !this.gtPlayer.exitMovingSurface)
-				{
-					vector3 = Vector3.Project(-this.gtPlayer.lastMovingSurfaceHit.normal * (this.gtPlayer.stickDepth * this.gtPlayer.scale), GTPlayerTransform.PhysicsDown);
-					if (this.gtPlayer.scale < 0.5f)
+					if (overlapColliders[i].CompareTag("NoCrazyCheck"))
 					{
-						Vector3 normalized = this.gtPlayer.MovingSurfaceMovement().normalized;
-						if (normalized != Vector3.zero)
+						num2++;
+					}
+				}
+				if (num2 == bufferCount)
+				{
+					return true;
+				}
+			}
+			if (bufferCount > 0)
+			{
+				overlapRadiusTest = Mathf.Lerp(testRadius, 0f, (float)overlapAttempts / (float)num);
+				overlapAttempts++;
+				continue;
+			}
+			overlapRadiusTest *= 0.995f;
+			return true;
+		}
+		return false;
+	}
+
+	private bool CrazyCheck2(float sphereSize, Vector3 startPosition)
+	{
+		for (int i = 0; i < crazyCheckVectors.Length; i++)
+		{
+			if (NonAllocRaycast(startPosition, startPosition + crazyCheckVectors[i] * sphereSize) > 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private int NonAllocRaycast(Vector3 startPosition, Vector3 endPosition)
+	{
+		Vector3 direction = endPosition - startPosition;
+		int num = Physics.RaycastNonAlloc(startPosition, direction, rayCastNonAllocColliders, direction.magnitude, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
+		int num2 = 0;
+		for (int i = 0; i < num; i++)
+		{
+			if (!rayCastNonAllocColliders[i].collider.gameObject.CompareTag("NoCrazyCheck"))
+			{
+				num2++;
+			}
+		}
+		return num2;
+	}
+
+	private void ClearColliderBuffer(ref Collider[] colliders)
+	{
+		for (int i = 0; i < colliders.Length; i++)
+		{
+			colliders[i] = null;
+		}
+	}
+
+	private void ClearRaycasthitBuffer(ref RaycastHit[] raycastHits)
+	{
+		for (int i = 0; i < raycastHits.Length; i++)
+		{
+			raycastHits[i] = emptyHit;
+		}
+	}
+
+	private Vector3 MovingSurfaceMovement()
+	{
+		return refMovement + movingSurfaceOffset;
+	}
+
+	private static bool ComputeLocalHitPoint(RaycastHit hit, out Vector3 localHitPoint)
+	{
+		if (hit.collider == null || hit.point.sqrMagnitude < 0.001f)
+		{
+			localHitPoint = Vector3.zero;
+			return false;
+		}
+		localHitPoint = hit.collider.transform.InverseTransformPoint(hit.point);
+		return true;
+	}
+
+	private static bool ComputeWorldHitPoint(RaycastHit hit, Vector3 localPoint, out Vector3 worldHitPoint)
+	{
+		if (hit.collider == null)
+		{
+			worldHitPoint = Vector3.zero;
+			return false;
+		}
+		worldHitPoint = hit.collider.transform.TransformPoint(localPoint);
+		return true;
+	}
+
+	private float ExtraVelMultiplier()
+	{
+		float num = 1f;
+		if (leftHand.surfaceOverride != null)
+		{
+			num = Mathf.Max(num, leftHand.surfaceOverride.extraVelMultiplier);
+		}
+		if (rightHand.surfaceOverride != null)
+		{
+			num = Mathf.Max(num, rightHand.surfaceOverride.extraVelMultiplier);
+		}
+		return num;
+	}
+
+	private float ExtraVelMaxMultiplier()
+	{
+		float num = 1f;
+		if (leftHand.surfaceOverride != null)
+		{
+			num = Mathf.Max(num, leftHand.surfaceOverride.extraVelMaxMultiplier);
+		}
+		if (rightHand.surfaceOverride != null)
+		{
+			num = Mathf.Max(num, rightHand.surfaceOverride.extraVelMaxMultiplier);
+		}
+		return num * scale;
+	}
+
+	public void SetMaximumSlipThisFrame()
+	{
+		leftHand.slipSetToMaxFrameIdx = Time.frameCount;
+		rightHand.slipSetToMaxFrameIdx = Time.frameCount;
+	}
+
+	public void SetLeftMaximumSlipThisFrame()
+	{
+		leftHand.slipSetToMaxFrameIdx = Time.frameCount;
+	}
+
+	public void SetRightMaximumSlipThisFrame()
+	{
+		rightHand.slipSetToMaxFrameIdx = Time.frameCount;
+	}
+
+	public void ChangeLayer(string layerName)
+	{
+		if (layerChanger != null)
+		{
+			layerChanger.ChangeLayer(base.transform.parent, layerName);
+		}
+	}
+
+	public void RestoreLayer()
+	{
+		if (layerChanger != null)
+		{
+			layerChanger.RestoreOriginalLayers();
+		}
+	}
+
+	public void OnEnterWaterVolume(Collider playerCollider, WaterVolume volume)
+	{
+		if (activeSizeChangerSettings != null && activeSizeChangerSettings.ExpireInWater)
+		{
+			SetNativeScale(null);
+		}
+		if (playerCollider == headCollider)
+		{
+			if (!headOverlappingWaterVolumes.Contains(volume))
+			{
+				headOverlappingWaterVolumes.Add(volume);
+			}
+		}
+		else if (playerCollider == bodyCollider && !bodyOverlappingWaterVolumes.Contains(volume))
+		{
+			bodyOverlappingWaterVolumes.Add(volume);
+		}
+	}
+
+	public void OnExitWaterVolume(Collider playerCollider, WaterVolume volume)
+	{
+		if (playerCollider == headCollider)
+		{
+			headOverlappingWaterVolumes.Remove(volume);
+		}
+		else if (playerCollider == bodyCollider)
+		{
+			bodyOverlappingWaterVolumes.Remove(volume);
+		}
+	}
+
+	private bool GetSwimmingVelocityForHand(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, float dt, ref WaterVolume contactingWaterVolume, ref WaterVolume.SurfaceQuery waterSurface, out Vector3 swimmingVelocityChange)
+	{
+		contactingWaterVolume = null;
+		bufferCount = Physics.OverlapSphereNonAlloc(endingHandPosition, minimumRaycastDistance, overlapColliders, waterLayer.value, QueryTriggerInteraction.Collide);
+		if (bufferCount > 0)
+		{
+			float num = float.MinValue;
+			for (int i = 0; i < bufferCount; i++)
+			{
+				WaterVolume component = overlapColliders[i].GetComponent<WaterVolume>();
+				if (component != null && component.GetSurfaceQueryForPoint(endingHandPosition, out var result) && result.surfacePoint.y > num)
+				{
+					num = result.surfacePoint.y;
+					contactingWaterVolume = component;
+					waterSurface = result;
+				}
+			}
+		}
+		if (forcedUnderwater || contactingWaterVolume != null)
+		{
+			Vector3 vector = endingHandPosition - startingHandPosition;
+			Vector3 vector2 = Vector3.zero;
+			Vector3 vector3 = playerRigidBody.transform.position - lastRigidbodyPosition;
+			if (turnedThisFrame)
+			{
+				Vector3 vector4 = startingHandPosition - headCollider.transform.position;
+				vector2 = Quaternion.AngleAxis(degreesTurnedThisFrame, Vector3.up) * vector4 - vector4;
+			}
+			float num2 = Vector3.Dot(vector - vector2 - vector3, palmForwardDirection);
+			float num3 = 0f;
+			if (num2 > 0f)
+			{
+				float num4 = -1f;
+				float num5 = -1f;
+				if (!forcedUnderwater)
+				{
+					Plane surfacePlane = waterSurface.surfacePlane;
+					num4 = (forcedUnderwater ? (-1f) : surfacePlane.GetDistanceToPoint(startingHandPosition));
+					num5 = (forcedUnderwater ? (-1f) : surfacePlane.GetDistanceToPoint(endingHandPosition));
+				}
+				if (num4 <= 0f && num5 <= 0f)
+				{
+					num3 = 1f;
+				}
+				else if (num4 > 0f && num5 <= 0f)
+				{
+					num3 = (0f - num5) / (num4 - num5);
+				}
+				else if (num4 <= 0f && num5 > 0f)
+				{
+					num3 = (0f - num4) / (num5 - num4);
+				}
+				if (num3 > Mathf.Epsilon)
+				{
+					float resistance = liquidPropertiesList[(int)((!forcedUnderwater) ? contactingWaterVolume.LiquidType : LiquidType.Water)].resistance;
+					swimmingVelocityChange = -palmForwardDirection * num2 * 2f * resistance * num3;
+					Vector3 forward = mainCamera.transform.forward;
+					if (forward.y < 0f)
+					{
+						Vector3 vector5 = forward.x0z();
+						float magnitude = vector5.magnitude;
+						vector5 /= magnitude;
+						float num6 = Vector3.Dot(swimmingVelocityChange, vector5);
+						if (num6 > 0f)
 						{
-							float num2 = Vector3.Dot(GTPlayerTransform.PhysicsUp, normalized);
-							if ((double)num2 > 0.9 || (double)num2 < -0.9)
-							{
-								vector3 *= 6f;
-								num *= 1.1f;
-							}
+							Vector3 vector6 = vector5 * num6;
+							swimmingVelocityChange = swimmingVelocityChange - vector6 + vector6 * magnitude + Vector3.up * forward.y * num6;
 						}
 					}
-				}
-				Vector3 a2;
-				RaycastHit lastHitInfoHand;
-				Vector3 b;
-				if (this.gtPlayer.IterativeCollisionSphereCast(vector2, num, a + vector3, this.boostVectorThisFrame, out a2, true, out this.slipPercentage, out lastHitInfoHand, this.SlipOverriddenToMax()) && !this.isHolding && !this.gtPlayer.InReportMenu)
-				{
-					if (this.wasColliding && this.slipPercentage <= this.gtPlayer.defaultSlideFactor && !this.boostVectorThisFrame.IsLongerThan(0f))
-					{
-						b = vector2 - vector;
-					}
-					else
-					{
-						b = a2 - vector;
-					}
-					this.isSliding = (this.slipPercentage > this.gtPlayer.iceThreshold);
-					this.slideNormal = this.gtPlayer.tempHitInfo.normal;
-					this.isColliding = true;
-					this.materialTouchIndex = this.gtPlayer.currentMaterialIndex;
-					this.surfaceOverride = this.gtPlayer.currentOverride;
-					this.gtPlayer.lastHitInfoHand = lastHitInfoHand;
-					this.lastHitInfo = lastHitInfoHand;
-				}
-				else
-				{
-					b = Vector3.zero;
-					this.slipPercentage = 0f;
-					this.isSliding = false;
-					this.slideNormal = GTPlayerTransform.PhysicsUp;
-					this.isColliding = false;
-					this.materialTouchIndex = 0;
-					this.surfaceOverride = null;
-				}
-				bool flag2 = this.isLeftHand ? this.gtPlayer.controllerState.LeftValid : this.gtPlayer.controllerState.RightValid;
-				this.isColliding = (this.isColliding && flag2);
-				this.isSliding = (this.isSliding && flag2);
-				if (this.isColliding)
-				{
-					this.gtPlayer.anyHandIsColliding = true;
-					if (this.isSliding)
-					{
-						this.gtPlayer.anyHandIsSliding = true;
-					}
-					else
-					{
-						this.gtPlayer.anyHandIsSticking = true;
-					}
-				}
-				if (this.isColliding || this.wasColliding)
-				{
-					if (!this.surfaceOverride || !this.surfaceOverride.disablePushBackEffect)
-					{
-						totalMove += b;
-					}
-					divisor++;
+					return true;
 				}
 			}
-
-			public void FinalizeHandPosition()
-			{
-				Vector3 vector = this.GetLastPosition();
-				if (Time.time < this.tempFreezeUntilTimestamp)
-				{
-					this.finalPositionThisFrame = vector;
-				}
-				else
-				{
-					Vector3 movementVector = this.GetCurrentHandPosition() - vector;
-					float sphereRadius = this.gtPlayer.minimumRaycastDistance * this.gtPlayer.scale;
-					if (this.gtPlayer.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
-					{
-						sphereRadius = (this.gtPlayer.minimumRaycastDistance + VRRig.LocalRig.iceCubeRight.transform.localScale.y / 2f) * this.gtPlayer.scale;
-					}
-					Vector3 vector2;
-					float num;
-					RaycastHit lastHitInfoHand;
-					if (this.gtPlayer.IterativeCollisionSphereCast(vector, sphereRadius, movementVector, this.boostVectorThisFrame, out vector2, this.gtPlayer.areBothTouching, out num, out lastHitInfoHand, false) && !this.isHolding)
-					{
-						this.isColliding = true;
-						this.isSliding = (num > this.gtPlayer.iceThreshold);
-						this.materialTouchIndex = this.gtPlayer.currentMaterialIndex;
-						this.surfaceOverride = this.gtPlayer.currentOverride;
-						this.gtPlayer.lastHitInfoHand = lastHitInfoHand;
-						this.lastHitInfo = lastHitInfoHand;
-						this.finalPositionThisFrame = vector2;
-					}
-					else
-					{
-						this.finalPositionThisFrame = this.GetCurrentHandPosition();
-					}
-				}
-				bool flag = this.isLeftHand ? this.gtPlayer.controllerState.LeftValid : this.gtPlayer.controllerState.RightValid;
-				this.isColliding = (this.isColliding && flag);
-				this.isSliding = (this.isSliding && flag);
-				if (this.isColliding)
-				{
-					this.gtPlayer.anyHandIsColliding = true;
-					if (this.isSliding)
-					{
-						this.gtPlayer.anyHandIsSliding = true;
-						return;
-					}
-					this.gtPlayer.anyHandIsSticking = true;
-				}
-			}
-
-			public bool IsSlipOverriddenToMax()
-			{
-				return this.slipSetToMaxFrameIdx == Time.frameCount;
-			}
-
-			public Vector3 GetCurrentHandPosition()
-			{
-				Vector3 position = this.gtPlayer.headCollider.transform.position;
-				if (this.gtPlayer.inOverlay)
-				{
-					return position + this.gtPlayer.headCollider.transform.up * -0.5f * this.gtPlayer.scale;
-				}
-				Vector3 vector = this.gtPlayer.PositionWithOffset(this.controllerTransform, this.handOffset);
-				if ((vector - position).IsShorterThan(this.maxArmLength * this.gtPlayer.scale))
-				{
-					return vector;
-				}
-				return position + (vector - position).normalized * this.maxArmLength * this.gtPlayer.scale;
-			}
-
-			public void PositionHandFollower()
-			{
-				this.handFollower.position = this.finalPositionThisFrame;
-				this.handFollower.rotation = this.lastRotation;
-			}
-
-			public void OnEndOfFrame()
-			{
-				this.wasColliding = this.isColliding;
-				this.wasSliding = this.isSliding;
-				this.lastPosition = this.finalPositionThisFrame;
-				if (Time.time > this.tempFreezeUntilTimestamp)
-				{
-					this.lastRotation = this.controllerTransform.rotation * this.handRotOffset;
-				}
-			}
-
-			public void TempFreezeHand(float freezeDuration)
-			{
-				this.tempFreezeUntilTimestamp = Math.Max(this.tempFreezeUntilTimestamp, Time.time + freezeDuration);
-			}
-
-			public void GetHandTapData(out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
-			{
-				wasHandTouching = this.wasColliding;
-				wasSliding = this.wasSliding;
-				handMatIndex = this.materialTouchIndex;
-				surfaceOverride = this.surfaceOverride;
-				handHitInfo = this.lastHitInfo;
-				handPosition = this.finalPositionThisFrame;
-				handVelocityTracker = this.velocityTracker;
-			}
-
-			[NonSerialized]
-			public Vector3 lastPosition;
-
-			[NonSerialized]
-			public Quaternion lastRotation;
-
-			[NonSerialized]
-			public bool isLeftHand;
-
-			[NonSerialized]
-			public bool wasColliding;
-
-			[NonSerialized]
-			public bool isColliding;
-
-			[NonSerialized]
-			public bool wasSliding;
-
-			[NonSerialized]
-			public bool isSliding;
-
-			[NonSerialized]
-			public bool isHolding;
-
-			[NonSerialized]
-			public Vector3 slideNormal;
-
-			[NonSerialized]
-			public float slipPercentage;
-
-			[NonSerialized]
-			public Vector3 hitPoint;
-
-			[NonSerialized]
-			private Vector3 boostVectorThisFrame;
-
-			[NonSerialized]
-			public Vector3 finalPositionThisFrame;
-
-			[NonSerialized]
-			public int slipSetToMaxFrameIdx;
-
-			[NonSerialized]
-			public int materialTouchIndex;
-
-			[NonSerialized]
-			public GorillaSurfaceOverride surfaceOverride;
-
-			[NonSerialized]
-			public RaycastHit hitInfo;
-
-			[NonSerialized]
-			public RaycastHit lastHitInfo;
-
-			[NonSerialized]
-			private GTPlayer gtPlayer;
-
-			[SerializeField]
-			public Transform handFollower;
-
-			[SerializeField]
-			public Transform controllerTransform;
-
-			[SerializeField]
-			public GorillaVelocityTracker velocityTracker;
-
-			[SerializeField]
-			public GorillaVelocityTracker interactPointVelocityTracker;
-
-			[SerializeField]
-			public Vector3 handOffset;
-
-			[SerializeField]
-			public Quaternion handRotOffset;
-
-			[NonSerialized]
-			public float tempFreezeUntilTimestamp;
-
-			[NonSerialized]
-			public bool canTag;
-
-			[NonSerialized]
-			public bool canStun;
-
-			private float maxArmLength;
-
-			[NonSerialized]
-			public bool isActive;
-
-			[NonSerialized]
-			public float customBoostFactor;
-
-			[NonSerialized]
-			public bool hasCustomBoost;
 		}
+		swimmingVelocityChange = Vector3.zero;
+		return false;
+	}
 
-		private enum MovingSurfaceContactPoint
+	private bool CheckWaterSurfaceJump(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, Vector3 handAvgVelocity, PlayerSwimmingParameters parameters, WaterVolume contactingWaterVolume, WaterVolume.SurfaceQuery waterSurface, out Vector3 jumpVelocity)
+	{
+		if (contactingWaterVolume != null)
 		{
-			NONE,
-			RIGHT,
-			LEFT,
-			BODY
+			Plane surfacePlane = waterSurface.surfacePlane;
+			bool flag = handAvgVelocity.sqrMagnitude > parameters.waterSurfaceJumpHandSpeedThreshold * parameters.waterSurfaceJumpHandSpeedThreshold;
+			if (surfacePlane.GetSide(startingHandPosition) && !surfacePlane.GetSide(endingHandPosition) && flag)
+			{
+				float value = Vector3.Dot(palmForwardDirection, -waterSurface.surfaceNormal);
+				float value2 = Vector3.Dot(handAvgVelocity.normalized, -waterSurface.surfaceNormal);
+				float num = parameters.waterSurfaceJumpPalmFacingCurve.Evaluate(Mathf.Clamp(value, 0.01f, 0.99f));
+				float num2 = parameters.waterSurfaceJumpHandVelocityFacingCurve.Evaluate(Mathf.Clamp(value2, 0.01f, 0.99f));
+				jumpVelocity = -handAvgVelocity * parameters.waterSurfaceJumpAmount * num * num2;
+				return true;
+			}
 		}
+		jumpVelocity = Vector3.zero;
+		return false;
+	}
 
-		[Serializable]
-		public struct MaterialData
+	private bool TryNormalize(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
+	{
+		magnitude = input.magnitude;
+		if (magnitude > eps)
 		{
-			public string matName;
-
-			public bool overrideAudio;
-
-			public AudioClip audio;
-
-			public bool overrideSlidePercent;
-
-			public float slidePercent;
-
-			public int surfaceEffectIndex;
+			normalized = input / magnitude;
+			return true;
 		}
+		normalized = Vector3.zero;
+		return false;
+	}
 
-		[Serializable]
-		public struct LiquidProperties
+	private bool TryNormalizeDown(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
+	{
+		magnitude = input.magnitude;
+		if (magnitude > 1f)
 		{
-			[Range(0f, 2f)]
-			[Tooltip("0: no resistance just like air, 1: full resistance like solid geometry")]
-			public float resistance;
-
-			[Range(0f, 3f)]
-			[Tooltip("0: no buoyancy. 1: Fully compensates gravity. 2: net force is upwards equal to gravity")]
-			public float buoyancy;
-
-			[Range(0f, 3f)]
-			[Tooltip("Damping Half-life Multiplier")]
-			public float dampingFactor;
-
-			[Range(0f, 1f)]
-			public float surfaceJumpFactor;
+			normalized = input / magnitude;
+			return true;
 		}
-
-		public enum LiquidType
+		if (magnitude >= eps)
 		{
-			Water,
-			Lava
+			normalized = input;
+			return true;
 		}
+		normalized = Vector3.zero;
+		return false;
+	}
 
-		private struct HoverBoardCast
+	private float FreezeTagSlidePercentage()
+	{
+		if (materialData[currentMaterialIndex].overrideSlidePercent && materialData[currentMaterialIndex].slidePercent > freezeTagHandSlidePercent)
 		{
-			public Vector3 localOrigin;
-
-			public Vector3 localDirection;
-
-			public float sphereRadius;
-
-			public float distance;
-
-			public float intersectToVelocityCap;
-
-			public bool isSolid;
-
-			public bool didHit;
-
-			public Vector3 pointHit;
-
-			public Vector3 normalHit;
+			return materialData[currentMaterialIndex].slidePercent;
 		}
+		return freezeTagHandSlidePercent;
+	}
 
-		private struct HandHoldState
+	private void OnCollisionStay(UnityEngine.Collision collision)
+	{
+		bodyCollisionContactsCount = collision.GetContacts(bodyCollisionContacts);
+		float num = -1f;
+		for (int i = 0; i < bodyCollisionContactsCount; i++)
 		{
-			public GorillaGrabber grabber;
+			float num2 = Vector3.Dot(bodyCollisionContacts[i].normal, Vector3.up);
+			if (num2 > num)
+			{
+				bodyGroundContact = bodyCollisionContacts[i];
+				num = num2;
+			}
+		}
+		_ = -1f;
+		float num3 = 0.5f;
+		if (num > num3)
+		{
+			bodyGroundContactTime = Time.time;
+			Collider otherCollider = bodyGroundContact.otherCollider;
+			bodyGroundIsSlippery = otherCollider != null && otherCollider.sharedMaterial != null && otherCollider.sharedMaterial.staticFriction <= 0.0001f && otherCollider.sharedMaterial.dynamicFriction <= 0.0001f;
+		}
+	}
 
-			public Transform objectHeld;
+	public async void DoLaunch(Vector3 velocity)
+	{
+		if (isClimbing)
+		{
+			EndClimbing(CurrentClimber, startingNewClimb: false);
+		}
+		playerRigidBody.linearVelocity = velocity;
+		disableMovement = true;
+		await Task.Delay(1);
+		disableMovement = false;
+	}
 
-			public Vector3 localPositionHeld;
+	private void OnEnable()
+	{
+		RoomSystem.JoinedRoomEvent += new Action(OnJoinedRoom);
+	}
 
-			public float localRotationalOffset;
+	private void OnJoinedRoom()
+	{
+		if (activeSizeChangerSettings != null && activeSizeChangerSettings.ExpireOnRoomJoin)
+		{
+			SetNativeScale(null);
+		}
+	}
 
-			public bool applyRotation;
+	private void OnDisable()
+	{
+		RoomSystem.JoinedRoomEvent -= new Action(OnJoinedRoom);
+	}
+
+	public void ForceRigidBodySync()
+	{
+		forceRBSync = true;
+	}
+
+	internal void ClearHandHolds()
+	{
+		leftHand.isHolding = false;
+		rightHand.isHolding = false;
+		wasHoldingHandhold = false;
+		activeHandHold = default(HandHoldState);
+		secondaryHandHold = default(HandHoldState);
+		OnChangeActiveHandhold();
+	}
+
+	internal void AddHandHold(Transform objectHeld, Vector3 localPositionHeld, GorillaGrabber grabber, bool forLeftHand, bool rotatePlayerWhenHeld, out Vector3 grabbedVelocity)
+	{
+		if (!leftHand.isHolding && !rightHand.isHolding)
+		{
+			grabbedVelocity = -bodyCollider.attachedRigidbody.linearVelocity;
+			playerRigidBody.AddForce(grabbedVelocity, ForceMode.VelocityChange);
+		}
+		else
+		{
+			grabbedVelocity = Vector3.zero;
+		}
+		secondaryHandHold = activeHandHold;
+		_ = grabber.transform.position;
+		activeHandHold = new HandHoldState
+		{
+			grabber = grabber,
+			objectHeld = objectHeld,
+			localPositionHeld = localPositionHeld,
+			localRotationalOffset = grabber.transform.rotation.eulerAngles.y - objectHeld.rotation.eulerAngles.y,
+			applyRotation = rotatePlayerWhenHeld
+		};
+		if (forLeftHand)
+		{
+			leftHand.isHolding = true;
+		}
+		else
+		{
+			rightHand.isHolding = true;
+		}
+		OnChangeActiveHandhold();
+	}
+
+	internal void RemoveHandHold(GorillaGrabber grabber, bool forLeftHand)
+	{
+		_ = activeHandHold.objectHeld == grabber;
+		if (activeHandHold.grabber == grabber)
+		{
+			activeHandHold = secondaryHandHold;
+		}
+		secondaryHandHold = default(HandHoldState);
+		if (forLeftHand)
+		{
+			leftHand.isHolding = false;
+		}
+		else
+		{
+			rightHand.isHolding = false;
+		}
+		OnChangeActiveHandhold();
+	}
+
+	private void OnChangeActiveHandhold()
+	{
+		if (activeHandHold.objectHeld != null)
+		{
+			if (activeHandHold.objectHeld.TryGetComponent<PhotonView>(out var component))
+			{
+				VRRig.AttachLocalPlayerToPhotonView(component, activeHandHold.grabber.XrNode, activeHandHold.localPositionHeld, averagedVelocity);
+				return;
+			}
+			if (activeHandHold.objectHeld.TryGetComponent<PhotonViewXSceneRef>(out var component2))
+			{
+				PhotonView photonView = component2.photonView;
+				if ((object)photonView != null)
+				{
+					VRRig.AttachLocalPlayerToPhotonView(photonView, activeHandHold.grabber.XrNode, activeHandHold.localPositionHeld, averagedVelocity);
+					return;
+				}
+			}
+			if (activeHandHold.objectHeld.TryGetComponent<BuilderPieceHandHold>(out var component3) && component3.IsHandHoldMoving())
+			{
+				isHandHoldMoving = true;
+				lastHandHoldRotation = component3.transform.rotation;
+				movingHandHoldReleaseVelocity = playerRigidBody.linearVelocity;
+			}
+			else
+			{
+				isHandHoldMoving = false;
+				lastHandHoldRotation = Quaternion.identity;
+				movingHandHoldReleaseVelocity = Vector3.zero;
+			}
+		}
+		VRRig.DetachLocalPlayerFromPhotonView();
+	}
+
+	private void FixedUpdate_HandHolds(float timeDelta)
+	{
+		if (activeHandHold.objectHeld == null)
+		{
+			if (wasHoldingHandhold)
+			{
+				playerRigidBody.linearVelocity = Vector3.ClampMagnitude(secondLastPreHandholdVelocity, 5.5f * scale);
+			}
+			wasHoldingHandhold = false;
+			return;
+		}
+		Vector3 vector = activeHandHold.objectHeld.TransformPoint(activeHandHold.localPositionHeld);
+		Vector3 position = activeHandHold.grabber.transform.position;
+		secondLastPreHandholdVelocity = lastPreHandholdVelocity;
+		lastPreHandholdVelocity = playerRigidBody.linearVelocity;
+		wasHoldingHandhold = true;
+		if (isHandHoldMoving)
+		{
+			lastPreHandholdVelocity = movingHandHoldReleaseVelocity;
+			playerRigidBody.linearVelocity = Vector3.zero;
+			Vector3 vector2 = vector - position;
+			playerRigidBody.transform.position += vector2;
+			movingHandHoldReleaseVelocity = vector2 / timeDelta;
+			Quaternion rotationDelta = activeHandHold.objectHeld.rotation * Quaternion.Inverse(lastHandHoldRotation);
+			RotateWithSurface(rotationDelta, vector);
+			lastHandHoldRotation = activeHandHold.objectHeld.rotation;
+		}
+		else
+		{
+			playerRigidBody.linearVelocity = (vector - position) / timeDelta;
+			if (activeHandHold.applyRotation)
+			{
+				turnParent.transform.RotateAround(vector, base.transform.up, activeHandHold.localRotationalOffset - (activeHandHold.grabber.transform.rotation.eulerAngles.y - activeHandHold.objectHeld.rotation.eulerAngles.y));
+			}
 		}
 	}
 }

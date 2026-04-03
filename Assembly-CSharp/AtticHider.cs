@@ -1,44 +1,51 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class AtticHider : MonoBehaviour
 {
+	[SerializeField]
+	private MeshRenderer AtticRenderer;
+
+	private Coroutine _coroutine;
+
 	private void Start()
 	{
-		this.OnZoneChanged();
+		OnZoneChanged();
 		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
+		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(OnZoneChanged));
 	}
 
 	private void OnDestroy()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
-		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.OnZoneChanged));
+		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(OnZoneChanged));
 	}
 
 	private void OnZoneChanged()
 	{
-		if (this.AtticRenderer == null)
+		if (AtticRenderer == null)
 		{
 			return;
 		}
 		if (ZoneManagement.instance.IsZoneActive(GTZone.attic))
 		{
-			if (this._coroutine != null)
+			if (_coroutine != null)
 			{
-				base.StopCoroutine(this._coroutine);
-				this._coroutine = null;
+				StopCoroutine(_coroutine);
+				_coroutine = null;
 			}
-			this._coroutine = base.StartCoroutine(this.WaitForAtticLoad());
-			return;
+			_coroutine = StartCoroutine(WaitForAtticLoad());
 		}
-		if (this._coroutine != null)
+		else
 		{
-			base.StopCoroutine(this._coroutine);
-			this._coroutine = null;
+			if (_coroutine != null)
+			{
+				StopCoroutine(_coroutine);
+				_coroutine = null;
+			}
+			AtticRenderer.enabled = true;
 		}
-		this.AtticRenderer.enabled = true;
 	}
 
 	private IEnumerator WaitForAtticLoad()
@@ -48,13 +55,7 @@ public class AtticHider : MonoBehaviour
 			yield return new WaitForSeconds(0.2f);
 		}
 		yield return null;
-		this.AtticRenderer.enabled = false;
-		this._coroutine = null;
-		yield break;
+		AtticRenderer.enabled = false;
+		_coroutine = null;
 	}
-
-	[SerializeField]
-	private MeshRenderer AtticRenderer;
-
-	private Coroutine _coroutine;
 }

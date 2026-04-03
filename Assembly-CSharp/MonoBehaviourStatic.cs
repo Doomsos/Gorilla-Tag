@@ -1,29 +1,22 @@
-﻿using System;
 using UnityEngine;
 
 public class MonoBehaviourStatic<T> : MonoBehaviour where T : MonoBehaviour
 {
-	public static T Instance
-	{
-		get
-		{
-			return MonoBehaviourStatic<T>.gInstance;
-		}
-	}
+	protected static T gInstance;
+
+	public static T Instance => gInstance;
 
 	protected void Awake()
 	{
-		if (MonoBehaviourStatic<T>.gInstance && MonoBehaviourStatic<T>.gInstance != this)
+		if ((bool)gInstance && gInstance != this)
 		{
 			Object.Destroy(this);
 		}
-		MonoBehaviourStatic<T>.gInstance = (this as T);
-		this.OnAwake();
+		gInstance = this as T;
+		OnAwake();
 	}
 
 	protected virtual void OnAwake()
 	{
 	}
-
-	protected static T gInstance;
 }

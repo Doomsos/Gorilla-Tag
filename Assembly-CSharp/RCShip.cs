@@ -1,210 +1,9 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class RCShip : RCHoverboard
 {
-	private byte GetDataB()
-	{
-		if (!this.hasNetworkSync)
-		{
-			return 0;
-		}
-		return this.networkSync.syncedState.dataB;
-	}
-
-	private void SetDataB(byte b)
-	{
-		if (this.hasNetworkSync)
-		{
-			this.networkSync.syncedState.dataB = b;
-		}
-	}
-
-	private void WriteCannonBit(bool toLeft)
-	{
-		if (!this.hasNetworkSync)
-		{
-			return;
-		}
-		byte b = this.GetDataB();
-		b = (toLeft ? (b | 1) : ((byte)((int)b & -2)));
-		this.SetDataB(b);
-	}
-
-	private bool ReadCannonBit()
-	{
-		if (!this.hasNetworkSync)
-		{
-			return this.cannonToLeft;
-		}
-		return (this.GetDataB() & 1) > 0;
-	}
-
-	private bool ReadFireFlip()
-	{
-		return (this.GetDataB() & 2) > 0;
-	}
-
-	protected override void AuthorityUpdate(float dt)
-	{
-		base.AuthorityUpdate(dt);
-		float trigger = this.activeInput.trigger;
-		float num = (float)this.activeInput.buttons;
-		if (this.localState == RCVehicle.State.Mobilized && this.localStatePrev != RCVehicle.State.Mobilized)
-		{
-			this.armedAfterMobilize = false;
-			if (trigger >= this.triggerReleaseThreshold)
-			{
-				this.triggerIsDown = true;
-			}
-		}
-		if (this.localState == RCVehicle.State.Mobilized)
-		{
-			if (!this.armedAfterMobilize && trigger <= this.triggerReleaseThreshold)
-			{
-				this.armedAfterMobilize = true;
-				this.triggerIsDown = false;
-			}
-			if (this.armedAfterMobilize)
-			{
-				if (!this.triggerIsDown && trigger >= this.triggerPressThreshold)
-				{
-					this.triggerIsDown = true;
-					UnityEvent onFire = this.OnFire;
-					if (onFire != null)
-					{
-						onFire.Invoke();
-					}
-					if (this.hasNetworkSync)
-					{
-						byte b = this.GetDataB();
-						b ^= 2;
-						this.SetDataB(b);
-						this.lastFireFlip = ((b & 2) > 0);
-					}
-				}
-				else if (this.triggerIsDown && trigger <= this.triggerReleaseThreshold)
-				{
-					this.triggerIsDown = false;
-				}
-			}
-			if (!this.faceIsDown && num >= this.facePressThreshold)
-			{
-				this.faceIsDown = true;
-				this.cannonToLeft = !this.cannonToLeft;
-				this.WriteCannonBit(this.cannonToLeft);
-			}
-			else if (this.faceIsDown && num <= this.faceReleaseThreshold)
-			{
-				this.faceIsDown = false;
-			}
-		}
-		else
-		{
-			if (this.faceIsDown && num <= this.faceReleaseThreshold)
-			{
-				this.faceIsDown = false;
-			}
-			this.armedAfterMobilize = false;
-			if (this.triggerIsDown && trigger <= this.triggerReleaseThreshold)
-			{
-				this.triggerIsDown = false;
-			}
-		}
-		if (this.hasNetworkSync)
-		{
-			byte b2 = this.GetDataB();
-			if (this.localState == RCVehicle.State.Mobilized && this.rb != null && this.rb.linearVelocity.sqrMagnitude >= this.movingSpeedThreshold * this.movingSpeedThreshold)
-			{
-				b2 |= 4;
-				this.isMovingShared = true;
-			}
-			else
-			{
-				b2 = (byte)((int)b2 & -5);
-				this.isMovingShared = false;
-			}
-			this.SetDataB(b2);
-			return;
-		}
-		this.isMovingShared = (this.localState == RCVehicle.State.Mobilized && this.rb != null && this.rb.linearVelocity.sqrMagnitude >= this.movingSpeedThreshold * this.movingSpeedThreshold);
-	}
-
-	protected override void RemoteUpdate(float dt)
-	{
-		base.RemoteUpdate(dt);
-		if (!this.hasNetworkSync)
-		{
-			return;
-		}
-		this.cannonToLeft = this.ReadCannonBit();
-		bool flag = this.ReadFireFlip();
-		if (!base.HasLocalAuthority)
-		{
-			if (flag != this.lastFireFlip)
-			{
-				this.lastFireFlip = flag;
-				UnityEvent onFire = this.OnFire;
-				if (onFire != null)
-				{
-					onFire.Invoke();
-				}
-			}
-			byte dataB = this.GetDataB();
-			this.isMovingShared = ((dataB & 4) > 0);
-			return;
-		}
-		this.lastFireFlip = flag;
-		this.isMovingShared = (this.localState == RCVehicle.State.Mobilized && this.rb != null && this.rb.linearVelocity.sqrMagnitude >= this.movingSpeedThreshold * this.movingSpeedThreshold);
-	}
-
-	protected override void SharedUpdate(float dt)
-	{
-		base.SharedUpdate(dt);
-		if (this.cannonTransform != null)
-		{
-			float target = this.cannonToLeft ? this.leftYaw : this.rightYaw;
-			Vector3 localEulerAngles = this.cannonTransform.localEulerAngles;
-			localEulerAngles.z = Mathf.MoveTowardsAngle(localEulerAngles.z, target, this.cannonYawSpeed * dt);
-			this.cannonTransform.localEulerAngles = localEulerAngles;
-		}
-		if (this.cannonToLeft != this.lastCannonToLeft)
-		{
-			this.lastCannonToLeft = this.cannonToLeft;
-			UnityEvent<bool> onCannonSideChanged = this.OnCannonSideChanged;
-			if (onCannonSideChanged != null)
-			{
-				onCannonSideChanged.Invoke(this.cannonToLeft);
-			}
-		}
-		bool flag = this.localState == RCVehicle.State.Mobilized && this.isMovingShared;
-		if (flag != this.lastIsMoving)
-		{
-			this.lastIsMoving = flag;
-			if (flag)
-			{
-				UnityEvent onMoveStarted = this.OnMoveStarted;
-				if (onMoveStarted == null)
-				{
-					return;
-				}
-				onMoveStarted.Invoke();
-				return;
-			}
-			else
-			{
-				UnityEvent onMoveStopped = this.OnMoveStopped;
-				if (onMoveStopped == null)
-				{
-					return;
-				}
-				onMoveStopped.Invoke();
-			}
-		}
-	}
-
 	[Header("RCShip - Events")]
 	public UnityEvent OnFire;
 
@@ -274,4 +73,184 @@ public class RCShip : RCHoverboard
 	private bool lastIsMoving;
 
 	private bool isMovingShared;
+
+	private byte GetDataB()
+	{
+		if (!hasNetworkSync)
+		{
+			return 0;
+		}
+		return networkSync.syncedState.dataB;
+	}
+
+	private void SetDataB(byte b)
+	{
+		if (hasNetworkSync)
+		{
+			networkSync.syncedState.dataB = b;
+		}
+	}
+
+	private void WriteCannonBit(bool toLeft)
+	{
+		if (hasNetworkSync)
+		{
+			byte dataB = GetDataB();
+			dataB = (toLeft ? ((byte)(dataB | 1)) : ((byte)(dataB & -2)));
+			SetDataB(dataB);
+		}
+	}
+
+	private bool ReadCannonBit()
+	{
+		if (!hasNetworkSync)
+		{
+			return cannonToLeft;
+		}
+		return (GetDataB() & 1) != 0;
+	}
+
+	private bool ReadFireFlip()
+	{
+		return (GetDataB() & 2) != 0;
+	}
+
+	protected override void AuthorityUpdate(float dt)
+	{
+		base.AuthorityUpdate(dt);
+		float trigger = activeInput.trigger;
+		float num = (int)activeInput.buttons;
+		if (localState == State.Mobilized && localStatePrev != State.Mobilized)
+		{
+			armedAfterMobilize = false;
+			if (trigger >= triggerReleaseThreshold)
+			{
+				triggerIsDown = true;
+			}
+		}
+		if (localState == State.Mobilized)
+		{
+			if (!armedAfterMobilize && trigger <= triggerReleaseThreshold)
+			{
+				armedAfterMobilize = true;
+				triggerIsDown = false;
+			}
+			if (armedAfterMobilize)
+			{
+				if (!triggerIsDown && trigger >= triggerPressThreshold)
+				{
+					triggerIsDown = true;
+					OnFire?.Invoke();
+					if (hasNetworkSync)
+					{
+						byte dataB = GetDataB();
+						dataB ^= 2;
+						SetDataB(dataB);
+						lastFireFlip = (dataB & 2) != 0;
+					}
+				}
+				else if (triggerIsDown && trigger <= triggerReleaseThreshold)
+				{
+					triggerIsDown = false;
+				}
+			}
+			if (!faceIsDown && num >= facePressThreshold)
+			{
+				faceIsDown = true;
+				cannonToLeft = !cannonToLeft;
+				WriteCannonBit(cannonToLeft);
+			}
+			else if (faceIsDown && num <= faceReleaseThreshold)
+			{
+				faceIsDown = false;
+			}
+		}
+		else
+		{
+			if (faceIsDown && num <= faceReleaseThreshold)
+			{
+				faceIsDown = false;
+			}
+			armedAfterMobilize = false;
+			if (triggerIsDown && trigger <= triggerReleaseThreshold)
+			{
+				triggerIsDown = false;
+			}
+		}
+		if (hasNetworkSync)
+		{
+			byte dataB2 = GetDataB();
+			if (localState == State.Mobilized && rb != null && rb.linearVelocity.sqrMagnitude >= movingSpeedThreshold * movingSpeedThreshold)
+			{
+				dataB2 |= 4;
+				isMovingShared = true;
+			}
+			else
+			{
+				dataB2 = (byte)(dataB2 & -5);
+				isMovingShared = false;
+			}
+			SetDataB(dataB2);
+		}
+		else
+		{
+			isMovingShared = localState == State.Mobilized && rb != null && rb.linearVelocity.sqrMagnitude >= movingSpeedThreshold * movingSpeedThreshold;
+		}
+	}
+
+	protected override void RemoteUpdate(float dt)
+	{
+		base.RemoteUpdate(dt);
+		if (!hasNetworkSync)
+		{
+			return;
+		}
+		cannonToLeft = ReadCannonBit();
+		bool flag = ReadFireFlip();
+		if (!base.HasLocalAuthority)
+		{
+			if (flag != lastFireFlip)
+			{
+				lastFireFlip = flag;
+				OnFire?.Invoke();
+			}
+			byte dataB = GetDataB();
+			isMovingShared = (dataB & 4) != 0;
+		}
+		else
+		{
+			lastFireFlip = flag;
+			isMovingShared = localState == State.Mobilized && rb != null && rb.linearVelocity.sqrMagnitude >= movingSpeedThreshold * movingSpeedThreshold;
+		}
+	}
+
+	protected override void SharedUpdate(float dt)
+	{
+		base.SharedUpdate(dt);
+		if (cannonTransform != null)
+		{
+			float target = (cannonToLeft ? leftYaw : rightYaw);
+			Vector3 localEulerAngles = cannonTransform.localEulerAngles;
+			localEulerAngles.z = Mathf.MoveTowardsAngle(localEulerAngles.z, target, cannonYawSpeed * dt);
+			cannonTransform.localEulerAngles = localEulerAngles;
+		}
+		if (cannonToLeft != lastCannonToLeft)
+		{
+			lastCannonToLeft = cannonToLeft;
+			OnCannonSideChanged?.Invoke(cannonToLeft);
+		}
+		bool flag = localState == State.Mobilized && isMovingShared;
+		if (flag != lastIsMoving)
+		{
+			lastIsMoving = flag;
+			if (flag)
+			{
+				OnMoveStarted?.Invoke();
+			}
+			else
+			{
+				OnMoveStopped?.Invoke();
+			}
+		}
+	}
 }

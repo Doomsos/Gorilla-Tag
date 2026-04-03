@@ -1,97 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class Monkeye_LazerFX : MonoBehaviour
 {
-	private void Awake()
-	{
-		base.enabled = false;
-		foreach (LineRenderer lineRenderer in this.lines)
-		{
-			lineRenderer.positionCount = 2;
-			lineRenderer.enabled = false;
-		}
-		if (this.targetFx != null)
-		{
-			this.targetFx.SetActive(false);
-		}
-	}
-
-	public void EnableLazer(Transform[] eyes_, VRRig rig_, float maxDist = 10000f)
-	{
-		if (rig_ == this.targetRig)
-		{
-			return;
-		}
-		this.eyeBones = eyes_;
-		this.targetRig = rig_;
-		this.targetPos = this.targetRig.transform.position;
-		base.enabled = true;
-		LineRenderer[] array = this.lines;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = true;
-		}
-		if (this.targetFx != null)
-		{
-			this.targetFx.transform.position = this.targetPos;
-			this.targetFx.SetActive(true);
-		}
-	}
-
-	public void EnableLazer(Transform[] eyes_, Vector3 targetPos_)
-	{
-		this.eyeBones = eyes_;
-		this.targetRig = null;
-		this.targetPos = targetPos_;
-		base.enabled = true;
-		LineRenderer[] array = this.lines;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = true;
-		}
-		if (this.targetFx != null)
-		{
-			this.targetFx.transform.position = this.targetPos;
-			this.targetFx.SetActive(true);
-		}
-	}
-
-	public void DisableLazer()
-	{
-		this.targetRig = null;
-		if (base.enabled)
-		{
-			base.enabled = false;
-			LineRenderer[] array = this.lines;
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].enabled = false;
-			}
-			if (this.targetFx != null)
-			{
-				this.targetFx.SetActive(false);
-			}
-		}
-	}
-
-	private void Update()
-	{
-		if (this.targetRig != null)
-		{
-			this.targetPos = this.targetRig.transform.position;
-		}
-		for (int i = 0; i < this.lines.Length; i++)
-		{
-			this.lines[i].SetPosition(0, this.eyeBones[i].transform.position);
-			this.lines[i].SetPosition(1, this.targetPos);
-		}
-		if (this.targetFx != null)
-		{
-			this.targetFx.transform.position = this.targetPos;
-		}
-	}
-
 	private Transform[] eyeBones;
 
 	private VRRig targetRig;
@@ -101,4 +11,93 @@ public class Monkeye_LazerFX : MonoBehaviour
 	public LineRenderer[] lines;
 
 	public GameObject targetFx;
+
+	private void Awake()
+	{
+		base.enabled = false;
+		LineRenderer[] array = lines;
+		foreach (LineRenderer obj in array)
+		{
+			obj.positionCount = 2;
+			obj.enabled = false;
+		}
+		if (targetFx != null)
+		{
+			targetFx.SetActive(value: false);
+		}
+	}
+
+	public void EnableLazer(Transform[] eyes_, VRRig rig_, float maxDist = 10000f)
+	{
+		if (!(rig_ == targetRig))
+		{
+			eyeBones = eyes_;
+			targetRig = rig_;
+			targetPos = targetRig.transform.position;
+			base.enabled = true;
+			LineRenderer[] array = lines;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].enabled = true;
+			}
+			if (targetFx != null)
+			{
+				targetFx.transform.position = targetPos;
+				targetFx.SetActive(value: true);
+			}
+		}
+	}
+
+	public void EnableLazer(Transform[] eyes_, Vector3 targetPos_)
+	{
+		eyeBones = eyes_;
+		targetRig = null;
+		targetPos = targetPos_;
+		base.enabled = true;
+		LineRenderer[] array = lines;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].enabled = true;
+		}
+		if (targetFx != null)
+		{
+			targetFx.transform.position = targetPos;
+			targetFx.SetActive(value: true);
+		}
+	}
+
+	public void DisableLazer()
+	{
+		targetRig = null;
+		if (base.enabled)
+		{
+			base.enabled = false;
+			LineRenderer[] array = lines;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].enabled = false;
+			}
+			if (targetFx != null)
+			{
+				targetFx.SetActive(value: false);
+			}
+		}
+	}
+
+	private void Update()
+	{
+		if (targetRig != null)
+		{
+			targetPos = targetRig.transform.position;
+		}
+		for (int i = 0; i < lines.Length; i++)
+		{
+			lines[i].SetPosition(0, eyeBones[i].transform.position);
+			lines[i].SetPosition(1, targetPos);
+		}
+		if (targetFx != null)
+		{
+			targetFx.transform.position = targetPos;
+		}
+	}
 }

@@ -1,13 +1,15 @@
-﻿using System;
+using System;
 using Fusion;
 using Photon.Pun;
 
 [NetworkBehaviourWeaved(0)]
 public class ArcadeMachineJoystickNetworkState : NetworkComponent
 {
+	private ArcadeMachineJoystick joystick;
+
 	private new void Awake()
 	{
-		this.joystick = base.GetComponent<ArcadeMachineJoystick>();
+		joystick = GetComponent<ArcadeMachineJoystick>();
 	}
 
 	public override void ReadDataFusion()
@@ -29,9 +31,9 @@ public class ArcadeMachineJoystickNetworkState : NetworkComponent
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]
@@ -39,6 +41,4 @@ public class ArcadeMachineJoystickNetworkState : NetworkComponent
 	{
 		base.CopyStateToBackingFields();
 	}
-
-	private ArcadeMachineJoystick joystick;
 }

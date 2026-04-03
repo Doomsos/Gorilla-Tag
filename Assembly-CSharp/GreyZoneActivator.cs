@@ -1,39 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GreyZoneActivator : MonoBehaviour
 {
-	private void OnEnable()
-	{
-		if (this.activateOnEnable)
-		{
-			this.Activate();
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.deactivateOnDisable)
-		{
-			this.Deactivate();
-		}
-	}
-
-	public void Activate()
-	{
-		GreyZoneManager.Instance.LocalSimpleActivation(true, this.gMultiplier);
-	}
-
-	public void ActivateWithG(float g)
-	{
-		GreyZoneManager.Instance.LocalSimpleActivation(true, g);
-	}
-
-	public void Deactivate()
-	{
-		GreyZoneManager.Instance.LocalSimpleActivation(false, 1f);
-	}
-
 	[SerializeField]
 	private bool activateOnEnable;
 
@@ -43,4 +11,35 @@ public class GreyZoneActivator : MonoBehaviour
 	[Range(-5f, 5f)]
 	[SerializeField]
 	private float gMultiplier = 1f;
+
+	private void OnEnable()
+	{
+		if (activateOnEnable)
+		{
+			Activate();
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (deactivateOnDisable)
+		{
+			Deactivate();
+		}
+	}
+
+	public void Activate()
+	{
+		GreyZoneManager.Instance.LocalSimpleActivation(onOff: true, gMultiplier);
+	}
+
+	public void ActivateWithG(float g)
+	{
+		GreyZoneManager.Instance.LocalSimpleActivation(onOff: true, g);
+	}
+
+	public void Deactivate()
+	{
+		GreyZoneManager.Instance.LocalSimpleActivation(onOff: false, 1f);
+	}
 }

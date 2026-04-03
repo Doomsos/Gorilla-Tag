@@ -1,50 +1,56 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [DefaultExecutionOrder(1549)]
 public class TransferrableObjectManager : MonoBehaviour
 {
+	public static TransferrableObjectManager instance;
+
+	public static bool hasInstance = false;
+
+	public static readonly List<TransferrableObject> transObs = new List<TransferrableObject>(1024);
+
 	protected void Awake()
 	{
-		if (TransferrableObjectManager.hasInstance && TransferrableObjectManager.instance != this)
+		if (hasInstance && instance != this)
 		{
 			Object.Destroy(this);
-			return;
 		}
-		TransferrableObjectManager.SetInstance(this);
+		else
+		{
+			SetInstance(this);
+		}
 	}
 
 	protected void OnDestroy()
 	{
-		if (TransferrableObjectManager.instance == this)
+		if (instance == this)
 		{
-			TransferrableObjectManager.hasInstance = false;
-			TransferrableObjectManager.instance = null;
+			hasInstance = false;
+			instance = null;
 		}
 	}
 
 	protected void LateUpdate()
 	{
-		for (int i = 0; i < TransferrableObjectManager.transObs.Count; i++)
+		for (int i = 0; i < transObs.Count; i++)
 		{
-			TransferrableObjectManager.transObs[i].TriggeredLateUpdate();
+			transObs[i].TriggeredLateUpdate();
 		}
 	}
 
 	private static void CreateManager()
 	{
-		if (ApplicationQuittingState.IsQuitting)
+		if (!ApplicationQuittingState.IsQuitting)
 		{
-			return;
+			SetInstance(new GameObject("TransferrableObjectManager").AddComponent<TransferrableObjectManager>());
 		}
-		TransferrableObjectManager.SetInstance(new GameObject("TransferrableObjectManager").AddComponent<TransferrableObjectManager>());
 	}
 
 	private static void SetInstance(TransferrableObjectManager manager)
 	{
-		TransferrableObjectManager.instance = manager;
-		TransferrableObjectManager.hasInstance = true;
+		instance = manager;
+		hasInstance = true;
 		if (Application.isPlaying)
 		{
 			Object.DontDestroyOnLoad(manager);
@@ -53,31 +59,25 @@ public class TransferrableObjectManager : MonoBehaviour
 
 	public static void Register(TransferrableObject transOb)
 	{
-		if (!TransferrableObjectManager.hasInstance)
+		if (!hasInstance)
 		{
-			TransferrableObjectManager.CreateManager();
+			CreateManager();
 		}
-		if (!TransferrableObjectManager.transObs.Contains(transOb))
+		if (!transObs.Contains(transOb))
 		{
-			TransferrableObjectManager.transObs.Add(transOb);
+			transObs.Add(transOb);
 		}
 	}
 
 	public static void Unregister(TransferrableObject transOb)
 	{
-		if (!TransferrableObjectManager.hasInstance)
+		if (!hasInstance)
 		{
-			TransferrableObjectManager.CreateManager();
+			CreateManager();
 		}
-		if (TransferrableObjectManager.transObs.Contains(transOb))
+		if (transObs.Contains(transOb))
 		{
-			TransferrableObjectManager.transObs.Remove(transOb);
+			transObs.Remove(transOb);
 		}
 	}
-
-	public static TransferrableObjectManager instance;
-
-	public static bool hasInstance = false;
-
-	public static readonly List<TransferrableObject> transObs = new List<TransferrableObject>(1024);
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using Photon.Pun;
 using UnityEngine;
@@ -6,13 +5,7 @@ using UnityEngine;
 [NetworkBehaviourWeaved(0)]
 public abstract class NetworkHoldableObject : NetworkComponent, IHoldableObject
 {
-	public virtual bool TwoHanded
-	{
-		get
-		{
-			return false;
-		}
-	}
+	public virtual bool TwoHanded => false;
 
 	public abstract void OnHover(InteractionPoint pointHovered, GameObject hoveringHand);
 
@@ -22,7 +15,15 @@ public abstract class NetworkHoldableObject : NetworkComponent, IHoldableObject
 
 	public virtual bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
-		return (EquipmentInteractor.instance.rightHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.rightHand)) && (EquipmentInteractor.instance.leftHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.leftHand));
+		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)
+		{
+			return false;
+		}
+		if (EquipmentInteractor.instance.leftHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.leftHand)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public override void ReadDataFusion()
@@ -41,25 +42,10 @@ public abstract class NetworkHoldableObject : NetworkComponent, IHoldableObject
 	{
 	}
 
-	GameObject IHoldableObject.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	string IHoldableObject.get_name()
-	{
-		return base.name;
-	}
-
-	void IHoldableObject.set_name(string value)
-	{
-		base.name = value;
-	}
-
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]

@@ -1,147 +1,9 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class ToggleableWearable : MonoBehaviour
 {
-	protected void Awake()
-	{
-		this.ownerRig = base.GetComponentInParent<VRRig>();
-		if (this.ownerRig == null)
-		{
-			GorillaTagger componentInParent = base.GetComponentInParent<GorillaTagger>();
-			if (componentInParent != null)
-			{
-				this.ownerRig = componentInParent.offlineVRRig;
-				this.ownerIsLocal = (this.ownerRig != null);
-			}
-		}
-		if (this.ownerRig == null)
-		{
-			Debug.LogError("TriggerToggler: Disabling cannot find VRRig.");
-			base.enabled = false;
-			return;
-		}
-		foreach (Renderer renderer in this.renderers)
-		{
-			if (renderer == null)
-			{
-				Debug.LogError("TriggerToggler: Disabling because a renderer is null.");
-				base.enabled = false;
-				break;
-			}
-			renderer.enabled = this.startOn;
-		}
-		this.hasAudioSource = (this.audioSource != null);
-		this.assignedSlotBitIndex = (int)this.assignedSlot;
-		if (this.oneShot)
-		{
-			this.toggleCooldownRange.x = this.toggleCooldownRange.x + this.animationTransitionDuration;
-			this.toggleCooldownRange.y = this.toggleCooldownRange.y + this.animationTransitionDuration;
-		}
-	}
-
-	protected void LateUpdate()
-	{
-		if (this.ownerIsLocal)
-		{
-			this.toggleCooldownTimer -= Time.deltaTime;
-			Transform transform = base.transform;
-			if (Physics.OverlapSphereNonAlloc(transform.TransformPoint(this.triggerOffset), this.triggerRadius * transform.lossyScale.x, this.colliders, this.layerMask) > 0 && this.toggleCooldownTimer < 0f)
-			{
-				XRController componentInParent = this.colliders[0].GetComponentInParent<XRController>();
-				if (componentInParent != null)
-				{
-					this.LocalToggle(componentInParent.controllerNode == XRNode.LeftHand, true, true);
-				}
-				this.toggleCooldownTimer = Random.Range(this.toggleCooldownRange.x, this.toggleCooldownRange.y);
-				this.toggleTimer = 0f;
-			}
-			if (this.resetTimer > 0f)
-			{
-				this.toggleTimer += Time.deltaTime;
-				if (this.toggleTimer > this.resetTimer && this.startOn != this.isOn)
-				{
-					this.LocalToggle(false, true, false);
-					this.toggleTimer = 0f;
-				}
-			}
-		}
-		else
-		{
-			bool flag = (this.ownerRig.WearablePackedStates & 1 << this.assignedSlotBitIndex) != 0;
-			if (this.isOn != flag)
-			{
-				this.SharedSetState(flag, true);
-			}
-		}
-		if (this.oneShot)
-		{
-			if (this.isOn)
-			{
-				this.progress = Mathf.MoveTowards(this.progress, 1f, Time.deltaTime / this.animationTransitionDuration);
-				if (this.progress == 1f)
-				{
-					if (this.ownerIsLocal)
-					{
-						this.LocalToggle(false, false, false);
-					}
-					else
-					{
-						this.SharedSetState(false, false);
-					}
-					this.progress = 0f;
-				}
-			}
-		}
-		else
-		{
-			this.progress = Mathf.MoveTowards(this.progress, this.isOn ? 1f : 0f, Time.deltaTime / this.animationTransitionDuration);
-		}
-		Animator[] array = this.animators;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetFloat(ToggleableWearable.animParam_Progress, this.progress);
-		}
-	}
-
-	private void LocalToggle(bool isLeftHand, bool playAudio, bool playHaptics)
-	{
-		this.ownerRig.WearablePackedStates ^= 1 << this.assignedSlotBitIndex;
-		this.SharedSetState((this.ownerRig.WearablePackedStates & 1 << this.assignedSlotBitIndex) != 0, playAudio);
-		if (playHaptics && GorillaTagger.Instance)
-		{
-			GorillaTagger.Instance.StartVibration(isLeftHand, this.isOn ? this.turnOnVibrationDuration : this.turnOffVibrationDuration, this.isOn ? this.turnOnVibrationStrength : this.turnOffVibrationStrength);
-		}
-	}
-
-	private void SharedSetState(bool state, bool playAudio)
-	{
-		this.isOn = state;
-		Renderer[] array = this.renderers;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = this.isOn;
-		}
-		if (!playAudio || !this.hasAudioSource)
-		{
-			return;
-		}
-		AudioClip audioClip = this.isOn ? this.toggleOnSound : this.toggleOffSound;
-		if (audioClip == null)
-		{
-			return;
-		}
-		if (this.oneShot)
-		{
-			this.audioSource.clip = audioClip;
-			this.audioSource.GTPlay();
-			return;
-		}
-		this.audioSource.GTPlayOneShot(audioClip, 1f);
-	}
-
 	public Renderer[] renderers;
 
 	public Animator[] animators;
@@ -212,4 +74,143 @@ public class ToggleableWearable : MonoBehaviour
 	private float resetTimer;
 
 	private float toggleTimer;
+
+	protected void Awake()
+	{
+		ownerRig = GetComponentInParent<VRRig>();
+		if (ownerRig == null)
+		{
+			GorillaTagger componentInParent = GetComponentInParent<GorillaTagger>();
+			if (componentInParent != null)
+			{
+				ownerRig = componentInParent.offlineVRRig;
+				ownerIsLocal = ownerRig != null;
+			}
+		}
+		if (ownerRig == null)
+		{
+			Debug.LogError("TriggerToggler: Disabling cannot find VRRig.");
+			base.enabled = false;
+			return;
+		}
+		Renderer[] array = renderers;
+		foreach (Renderer renderer in array)
+		{
+			if (renderer == null)
+			{
+				Debug.LogError("TriggerToggler: Disabling because a renderer is null.");
+				base.enabled = false;
+				break;
+			}
+			renderer.enabled = startOn;
+		}
+		hasAudioSource = audioSource != null;
+		assignedSlotBitIndex = (int)assignedSlot;
+		if (oneShot)
+		{
+			toggleCooldownRange.x += animationTransitionDuration;
+			toggleCooldownRange.y += animationTransitionDuration;
+		}
+	}
+
+	protected void LateUpdate()
+	{
+		if (ownerIsLocal)
+		{
+			toggleCooldownTimer -= Time.deltaTime;
+			Transform transform = base.transform;
+			if (Physics.OverlapSphereNonAlloc(transform.TransformPoint(triggerOffset), triggerRadius * transform.lossyScale.x, colliders, layerMask) > 0 && toggleCooldownTimer < 0f)
+			{
+				XRController componentInParent = colliders[0].GetComponentInParent<XRController>();
+				if (componentInParent != null)
+				{
+					LocalToggle(componentInParent.controllerNode == XRNode.LeftHand, playAudio: true, playHaptics: true);
+				}
+				toggleCooldownTimer = Random.Range(toggleCooldownRange.x, toggleCooldownRange.y);
+				toggleTimer = 0f;
+			}
+			if (resetTimer > 0f)
+			{
+				toggleTimer += Time.deltaTime;
+				if (toggleTimer > resetTimer && startOn != isOn)
+				{
+					LocalToggle(isLeftHand: false, playAudio: true, playHaptics: false);
+					toggleTimer = 0f;
+				}
+			}
+		}
+		else
+		{
+			bool flag = (ownerRig.WearablePackedStates & (1 << assignedSlotBitIndex)) != 0;
+			if (isOn != flag)
+			{
+				SharedSetState(flag, playAudio: true);
+			}
+		}
+		if (oneShot)
+		{
+			if (isOn)
+			{
+				progress = Mathf.MoveTowards(progress, 1f, Time.deltaTime / animationTransitionDuration);
+				if (progress == 1f)
+				{
+					if (ownerIsLocal)
+					{
+						LocalToggle(isLeftHand: false, playAudio: false, playHaptics: false);
+					}
+					else
+					{
+						SharedSetState(state: false, playAudio: false);
+					}
+					progress = 0f;
+				}
+			}
+		}
+		else
+		{
+			progress = Mathf.MoveTowards(progress, isOn ? 1f : 0f, Time.deltaTime / animationTransitionDuration);
+		}
+		Animator[] array = animators;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetFloat(animParam_Progress, progress);
+		}
+	}
+
+	private void LocalToggle(bool isLeftHand, bool playAudio, bool playHaptics)
+	{
+		ownerRig.WearablePackedStates ^= 1 << assignedSlotBitIndex;
+		SharedSetState((ownerRig.WearablePackedStates & (1 << assignedSlotBitIndex)) != 0, playAudio);
+		if (playHaptics && (bool)GorillaTagger.Instance)
+		{
+			GorillaTagger.Instance.StartVibration(isLeftHand, isOn ? turnOnVibrationDuration : turnOffVibrationDuration, isOn ? turnOnVibrationStrength : turnOffVibrationStrength);
+		}
+	}
+
+	private void SharedSetState(bool state, bool playAudio)
+	{
+		isOn = state;
+		Renderer[] array = renderers;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].enabled = isOn;
+		}
+		if (!playAudio || !hasAudioSource)
+		{
+			return;
+		}
+		AudioClip audioClip = (isOn ? toggleOnSound : toggleOffSound);
+		if (!(audioClip == null))
+		{
+			if (oneShot)
+			{
+				audioSource.clip = audioClip;
+				audioSource.GTPlay();
+			}
+			else
+			{
+				audioSource.GTPlayOneShot(audioClip);
+			}
+		}
+	}
 }

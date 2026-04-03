@@ -1,31 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GRScannable : MonoBehaviour
 {
-	public virtual void Start()
-	{
-		if (this.gameEntity == null)
-		{
-			this.gameEntity = base.GetComponent<GameEntity>();
-		}
-	}
-
-	public virtual string GetTitleText(GhostReactor reactor)
-	{
-		return this.titleText;
-	}
-
-	public virtual string GetBodyText(GhostReactor reactor)
-	{
-		return this.bodyText;
-	}
-
-	public virtual string GetAnnotationText(GhostReactor reactor)
-	{
-		return this.annotationText;
-	}
-
 	public GameEntity gameEntity;
 
 	[SerializeField]
@@ -36,4 +12,27 @@ public class GRScannable : MonoBehaviour
 
 	[SerializeField]
 	protected string annotationText;
+
+	public virtual void Start()
+	{
+		if (gameEntity == null)
+		{
+			gameEntity = GetComponent<GameEntity>();
+		}
+	}
+
+	public virtual string GetTitleText(GhostReactor reactor)
+	{
+		return titleText;
+	}
+
+	public virtual string GetBodyText(GhostReactor reactor)
+	{
+		return bodyText;
+	}
+
+	public virtual string GetAnnotationText(GhostReactor reactor)
+	{
+		return annotationText;
+	}
 }

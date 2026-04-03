@@ -1,14 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
-public struct SerializableVector2
+public struct SerializableVector2(float x, float y)
 {
-	public SerializableVector2(float x, float y)
-	{
-		this.x = x;
-		this.y = y;
-	}
+	public float x = x;
+
+	public float y = y;
 
 	public static implicit operator SerializableVector2(Vector2 v)
 	{
@@ -19,8 +17,4 @@ public struct SerializableVector2
 	{
 		return new Vector2(v.x, v.y);
 	}
-
-	public float x;
-
-	public float y;
 }

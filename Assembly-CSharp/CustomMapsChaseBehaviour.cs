@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GT_CustomMapSupportRuntime;
 using UnityEngine;
@@ -6,107 +5,6 @@ using UnityEngine.AI;
 
 public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 {
-	public CustomMapsChaseBehaviour(CustomMapsAIBehaviourController AIController, AIAgent agentSettings)
-	{
-		this.sightOffset = agentSettings.sightOffset;
-		this.rememberLoseSightPos = agentSettings.rememberLoseSightPosition;
-		this.loseSightDist = agentSettings.loseSightDist;
-		this.loseSightDistSq = this.loseSightDist * this.loseSightDist;
-		this.stopDistSq = agentSettings.stopDist * agentSettings.stopDist;
-		this.controller = AIController;
-	}
-
-	public override bool CanExecute()
-	{
-		return !this.controller.IsNull() && !this.controller.TargetPlayer.IsNull();
-	}
-
-	public override bool CanContinueExecuting()
-	{
-		if (!this.CanExecute())
-		{
-			return false;
-		}
-		bool flag;
-		if (this.IsTargetInChaseRange(out flag))
-		{
-			return !flag;
-		}
-		if (!this.controller.IsTargetable(this.controller.TargetPlayer))
-		{
-			this.controller.StopMoving();
-		}
-		this.controller.ClearTarget();
-		return false;
-	}
-
-	public override void Execute()
-	{
-		bool flag;
-		if (!this.IsTargetInChaseRange(out flag))
-		{
-			this.controller.ClearTarget();
-			this.isChasing = false;
-			if (!this.rememberLoseSightPos)
-			{
-				this.controller.StopMoving();
-			}
-			return;
-		}
-		if (!this.IsTargetVisible())
-		{
-			this.controller.ClearTarget();
-			this.isChasing = false;
-			if (!this.rememberLoseSightPos)
-			{
-				this.controller.StopMoving();
-			}
-			return;
-		}
-		if (flag && this.isChasing)
-		{
-			this.isChasing = false;
-			this.controller.StopMoving();
-			return;
-		}
-		this.isChasing = true;
-		this.controller.RequestDestination(this.controller.TargetPlayer.transform.position);
-	}
-
-	private bool IsTargetVisible()
-	{
-		Vector3 startPos = this.controller.transform.position + this.controller.transform.TransformVector(this.sightOffset);
-		return this.controller.IsTargetVisible(startPos, this.controller.TargetPlayer, this.loseSightDist);
-	}
-
-	private bool IsTargetInChaseRange(out bool withinStopDist)
-	{
-		withinStopDist = false;
-		Vector3 vector;
-		if (!this.controller.IsTargetInRange(this.controller.transform.position, this.controller.TargetPlayer, this.loseSightDistSq, out vector))
-		{
-			return false;
-		}
-		if (vector.sqrMagnitude < this.stopDistSq)
-		{
-			withinStopDist = true;
-		}
-		return true;
-	}
-
-	public override void NetExecute()
-	{
-	}
-
-	public override void ResetBehavior()
-	{
-		this.isChasing = false;
-	}
-
-	public override void OnTriggerEnter(Collider otherCollider)
-	{
-	}
-
 	private NavMeshAgent navMeshAgent;
 
 	private CustomMapsAIBehaviourController controller;
@@ -122,4 +20,114 @@ public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 	private float stopDistSq;
 
 	private bool isChasing;
+
+	public CustomMapsChaseBehaviour(CustomMapsAIBehaviourController AIController, AIAgent agentSettings)
+	{
+		sightOffset = agentSettings.sightOffset;
+		rememberLoseSightPos = agentSettings.rememberLoseSightPosition;
+		loseSightDist = agentSettings.loseSightDist;
+		loseSightDistSq = loseSightDist * loseSightDist;
+		stopDistSq = agentSettings.stopDist * agentSettings.stopDist;
+		controller = AIController;
+	}
+
+	public override bool CanExecute()
+	{
+		if (controller.IsNull())
+		{
+			return false;
+		}
+		if (controller.TargetPlayer.IsNull())
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override bool CanContinueExecuting()
+	{
+		if (!CanExecute())
+		{
+			return false;
+		}
+		if (IsTargetInChaseRange(out var withinStopDist))
+		{
+			if (withinStopDist)
+			{
+				return false;
+			}
+			return true;
+		}
+		if (!controller.IsTargetable(controller.TargetPlayer))
+		{
+			controller.StopMoving();
+		}
+		controller.ClearTarget();
+		return false;
+	}
+
+	public override void Execute()
+	{
+		if (!IsTargetInChaseRange(out var withinStopDist))
+		{
+			controller.ClearTarget();
+			isChasing = false;
+			if (!rememberLoseSightPos)
+			{
+				controller.StopMoving();
+			}
+		}
+		else if (!IsTargetVisible())
+		{
+			controller.ClearTarget();
+			isChasing = false;
+			if (!rememberLoseSightPos)
+			{
+				controller.StopMoving();
+			}
+		}
+		else if (withinStopDist && isChasing)
+		{
+			isChasing = false;
+			controller.StopMoving();
+		}
+		else
+		{
+			isChasing = true;
+			controller.RequestDestination(controller.TargetPlayer.transform.position);
+		}
+	}
+
+	private bool IsTargetVisible()
+	{
+		Vector3 startPos = controller.transform.position + controller.transform.TransformVector(sightOffset);
+		return controller.IsTargetVisible(startPos, controller.TargetPlayer, loseSightDist);
+	}
+
+	private bool IsTargetInChaseRange(out bool withinStopDist)
+	{
+		withinStopDist = false;
+		if (!controller.IsTargetInRange(controller.transform.position, controller.TargetPlayer, loseSightDistSq, out var toTarget))
+		{
+			return false;
+		}
+		if (toTarget.sqrMagnitude < stopDistSq)
+		{
+			withinStopDist = true;
+		}
+		return true;
+	}
+
+	public override void NetExecute()
+	{
+	}
+
+	public override void ResetBehavior()
+	{
+		isChasing = false;
+	}
+
+	public override void OnTriggerEnter(Collider otherCollider)
+	{
+	}
 }

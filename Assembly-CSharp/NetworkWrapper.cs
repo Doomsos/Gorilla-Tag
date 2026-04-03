@@ -1,55 +1,10 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class NetworkWrapper : MonoBehaviour
 {
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-	public static void AutoInstantiate()
-	{
-		Object.DontDestroyOnLoad(Object.Instantiate<GameObject>(Resources.Load<GameObject>("P_NetworkWrapper")));
-	}
-
-	private void Awake()
-	{
-		if (this.titleRef != null)
-		{
-			this.titleRef.text = "PUN";
-		}
-		this.activeNetworkSystem = base.gameObject.AddComponent<NetworkSystemPUN>();
-		this.activeNetworkSystem.AddVoiceSettings(this.VoiceSettings);
-		this.activeNetworkSystem.config = this.netSysConfig;
-		this.activeNetworkSystem.regionNames = this.networkRegionNames;
-		this.activeNetworkSystem.OnPlayerJoined += this.UpdatePlayerCountWrapper;
-		this.activeNetworkSystem.OnPlayerLeft += this.UpdatePlayerCountWrapper;
-		this.activeNetworkSystem.OnMultiplayerStarted += this.UpdatePlayerCount;
-		this.activeNetworkSystem.OnReturnedToSinglePlayer += this.UpdatePlayerCount;
-		Debug.Log("<color=green>initialize Network System</color>");
-		this.activeNetworkSystem.Initialise();
-	}
-
-	private void UpdatePlayerCountWrapper(NetPlayer player)
-	{
-		this.UpdatePlayerCount();
-	}
-
-	private void UpdatePlayerCount()
-	{
-		if (this.playerCountTextRef == null)
-		{
-			return;
-		}
-		if (!this.activeNetworkSystem.IsOnline)
-		{
-			this.playerCountTextRef.text = string.Format("0/{0}", this.netSysConfig.MaxPlayerCount);
-			Debug.Log("Player count updated");
-			return;
-		}
-		Debug.Log("Player count not updated");
-		this.playerCountTextRef.text = string.Format("{0}/{1}", this.activeNetworkSystem.AllNetPlayers.Length, this.netSysConfig.MaxPlayerCount);
-	}
-
 	[HideInInspector]
 	public NetworkSystem activeNetworkSystem;
 
@@ -71,4 +26,50 @@ public class NetworkWrapper : MonoBehaviour
 	private SO_NetworkVoiceSettings VoiceSettings;
 
 	private const string WrapperResourcePath = "P_NetworkWrapper";
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+	public static void AutoInstantiate()
+	{
+		UnityEngine.Object.DontDestroyOnLoad(UnityEngine.Object.Instantiate(Resources.Load<GameObject>("P_NetworkWrapper")));
+	}
+
+	private void Awake()
+	{
+		if (titleRef != null)
+		{
+			titleRef.text = "PUN";
+		}
+		activeNetworkSystem = base.gameObject.AddComponent<NetworkSystemPUN>();
+		activeNetworkSystem.AddVoiceSettings(VoiceSettings);
+		activeNetworkSystem.config = netSysConfig;
+		activeNetworkSystem.regionNames = networkRegionNames;
+		activeNetworkSystem.OnPlayerJoined += new Action<NetPlayer>(UpdatePlayerCountWrapper);
+		activeNetworkSystem.OnPlayerLeft += new Action<NetPlayer>(UpdatePlayerCountWrapper);
+		activeNetworkSystem.OnMultiplayerStarted += new Action(UpdatePlayerCount);
+		activeNetworkSystem.OnReturnedToSinglePlayer += new Action(UpdatePlayerCount);
+		Debug.Log("<color=green>initialize Network System</color>");
+		activeNetworkSystem.Initialise();
+	}
+
+	private void UpdatePlayerCountWrapper(NetPlayer player)
+	{
+		UpdatePlayerCount();
+	}
+
+	private void UpdatePlayerCount()
+	{
+		if (!(playerCountTextRef == null))
+		{
+			if (!activeNetworkSystem.IsOnline)
+			{
+				playerCountTextRef.text = $"0/{netSysConfig.MaxPlayerCount}";
+				Debug.Log("Player count updated");
+			}
+			else
+			{
+				Debug.Log("Player count not updated");
+				playerCountTextRef.text = $"{activeNetworkSystem.AllNetPlayers.Length}/{netSysConfig.MaxPlayerCount}";
+			}
+		}
+	}
 }

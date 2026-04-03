@@ -1,26 +1,25 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 
 public class TextWatcherTMPro : MonoBehaviour
 {
+	public WatchableStringSO textToCopy;
+
+	private TextMeshPro myText;
+
 	private void Start()
 	{
-		this.myText = base.GetComponent<TextMeshPro>();
-		this.textToCopy.AddCallback(new Action<string>(this.OnTextChanged), true);
+		myText = GetComponent<TextMeshPro>();
+		textToCopy.AddCallback(OnTextChanged, shouldCallbackNow: true);
 	}
 
 	private void OnDestroy()
 	{
-		this.textToCopy.RemoveCallback(new Action<string>(this.OnTextChanged));
+		textToCopy.RemoveCallback(OnTextChanged);
 	}
 
 	private void OnTextChanged(string newText)
 	{
-		this.myText.text = newText;
+		myText.text = newText;
 	}
-
-	public WatchableStringSO textToCopy;
-
-	private TextMeshPro myText;
 }

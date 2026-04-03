@@ -1,33 +1,27 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
 using UnityEngine;
 
-[NetworkStructWeaved(22)]
 [StructLayout(LayoutKind.Explicit, Size = 88)]
+[NetworkStructWeaved(22)]
 public struct TagData : INetworkStruct
 {
-	[Networked]
-	[Capacity(20)]
-	[NetworkedWeavedArray(20, 1, typeof(ElementReaderWriterInt32))]
-	[NetworkedWeaved(2, 20)]
-	public NetworkArray<int> infectedPlayerList
-	{
-		get
-		{
-			return new NetworkArray<int>(Native.ReferenceToPointer<FixedStorage@20>(ref this._infectedPlayerList), 20, ElementReaderWriterInt32.GetInstance());
-		}
-	}
-
-	public int currentItID { readonly get; set; }
-
 	[FieldOffset(4)]
 	public NetworkBool isCurrentlyTag;
 
-	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate@ElementReaderWriterInt32), 20, order = -2147483647)]
+	[FieldOffset(8)]
+	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate_0040ElementReaderWriterInt32), 20, order = -2147483647)]
 	[WeaverGenerated]
 	[SerializeField]
-	[FieldOffset(8)]
-	private FixedStorage@20 _infectedPlayerList;
+	private FixedStorage_004020 _infectedPlayerList;
+
+	[Networked]
+	[Capacity(20)]
+	[NetworkedWeavedArray(20, 1, typeof(Fusion.ElementReaderWriterInt32))]
+	[NetworkedWeaved(2, 20)]
+	public unsafe NetworkArray<int> infectedPlayerList => new NetworkArray<int>(Native.ReferenceToPointer(ref _infectedPlayerList), 20, Fusion.ElementReaderWriterInt32.GetInstance());
+
+	[field: FieldOffset(0)]
+	public int currentItID { get; set; }
 }

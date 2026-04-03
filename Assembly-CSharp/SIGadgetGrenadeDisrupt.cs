@@ -1,71 +1,72 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 
 public class SIGadgetGrenadeDisrupt : SIGadgetGrenade
 {
+	private enum State
+	{
+		Idle,
+		Thrown,
+		Triggered
+	}
+
+	public float disruptTime;
+
+	[SerializeField]
+	private float explosionRadius;
+
+	private State state;
+
 	protected override void OnEnable()
 	{
 		base.OnEnable();
-		this.state = SIGadgetGrenadeDisrupt.State.Idle;
+		state = State.Idle;
 	}
 
 	protected override void OnUpdateRemote(float dt)
 	{
-		SIGadgetGrenadeDisrupt.State state = (SIGadgetGrenadeDisrupt.State)this.gameEntity.GetState();
+		State state = (State)gameEntity.GetState();
 		if (state != this.state)
 		{
-			this.SetState(state);
+			SetState(state);
 		}
 	}
 
-	private void SetStateAuthority(SIGadgetGrenadeDisrupt.State newState)
+	private void SetStateAuthority(State newState)
 	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
 	}
 
-	private void SetState(SIGadgetGrenadeDisrupt.State newState)
+	private void SetState(State newState)
 	{
-		if (newState == this.state)
+		if (newState != state)
 		{
-			return;
-		}
-		this.state = newState;
-		switch (this.state)
-		{
-		case SIGadgetGrenadeDisrupt.State.Idle:
-		case SIGadgetGrenadeDisrupt.State.Thrown:
-			break;
-		case SIGadgetGrenadeDisrupt.State.Triggered:
-			this.TriggerExplosion();
-			break;
-		default:
-			return;
+			state = newState;
+			switch (state)
+			{
+			case State.Triggered:
+				TriggerExplosion();
+				break;
+			case State.Idle:
+			case State.Thrown:
+				break;
+			}
 		}
 	}
 
 	private void TriggerExplosion()
 	{
-		Collider[] array = Physics.OverlapSphere(base.transform.position, this.explosionRadius);
+		Collider[] array = Physics.OverlapSphere(base.transform.position, explosionRadius);
 		for (int i = 0; i < array.Length; i++)
 		{
-			I_SIDisruptable componentInParent = array[i].GetComponentInParent<I_SIDisruptable>();
-			if (componentInParent != null)
-			{
-				componentInParent.Disrupt(this.disruptTime);
-			}
+			array[i].GetComponentInParent<I_SIDisruptable>()?.Disrupt(disruptTime);
 		}
-		if (this.gameEntity.lastHeldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+		if (gameEntity.lastHeldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeDisrupt.State.Idle);
+			SetStateAuthority(State.Idle);
 		}
-		Action grenadeFinished = this.GrenadeFinished;
-		if (grenadeFinished == null)
-		{
-			return;
-		}
-		grenadeFinished();
+		GrenadeFinished?.Invoke();
 	}
 
 	protected override void HandleActivated()
@@ -74,31 +75,17 @@ public class SIGadgetGrenadeDisrupt : SIGadgetGrenade
 
 	protected override void HandleHitSurface()
 	{
-		if (this.state == SIGadgetGrenadeDisrupt.State.Thrown)
+		if (state == State.Thrown)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeDisrupt.State.Triggered);
+			SetStateAuthority(State.Triggered);
 		}
 	}
 
 	protected override void HandleThrown()
 	{
-		if (this.state == SIGadgetGrenadeDisrupt.State.Idle)
+		if (state == State.Idle)
 		{
-			this.SetStateAuthority(SIGadgetGrenadeDisrupt.State.Thrown);
+			SetStateAuthority(State.Thrown);
 		}
-	}
-
-	public float disruptTime;
-
-	[SerializeField]
-	private float explosionRadius;
-
-	private SIGadgetGrenadeDisrupt.State state;
-
-	private enum State
-	{
-		Idle,
-		Thrown,
-		Triggered
 	}
 }

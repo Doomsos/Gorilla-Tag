@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
@@ -11,990 +10,984 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[NetworkBehaviourWeaved(210)]
+public class WhackAMole : NetworkComponent
 {
-	[NetworkBehaviourWeaved(210)]
-	public class WhackAMole : NetworkComponent
+	public enum GameState
 	{
-		private void UpdateMeshRendererList()
+		Off,
+		ContinuePressed,
+		Ongoing,
+		PickMoles,
+		TimesUp,
+		LevelStarted
+	}
+
+	private enum GameResult
+	{
+		GameOver,
+		Win,
+		LevelComplete,
+		Unknown
+	}
+
+	[StructLayout(LayoutKind.Explicit, Size = 840)]
+	[NetworkStructWeaved(210)]
+	public struct WhackAMoleData : INetworkStruct
+	{
+		[FieldOffset(24)]
+		[FixedBufferProperty(typeof(NetworkString<_128>), typeof(UnityValueSurrogate_0040ReaderWriter_0040Fusion_NetworkString_00601_003CFusion__128_003E), 0, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_0040129 _HighScorePlayerName;
+
+		[FieldOffset(556)]
+		[FixedBufferProperty(typeof(NetworkDictionary<int, int>), typeof(UnityDictionarySurrogate_0040ElementReaderWriterInt32_0040ElementReaderWriterInt32), 17, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_004071 _PickedMolesIndex;
+
+		[field: FieldOffset(0)]
+		public GameState CurrentState { get; set; }
+
+		[field: FieldOffset(4)]
+		public int CurrentLevelIndex { get; set; }
+
+		[field: FieldOffset(8)]
+		public int CurrentScore { get; set; }
+
+		[field: FieldOffset(12)]
+		public int TotalScore { get; set; }
+
+		[field: FieldOffset(16)]
+		public int BestScore { get; set; }
+
+		[field: FieldOffset(20)]
+		public int RightPlayerScore { get; set; }
+
+		[Networked]
+		[NetworkedWeaved(6, 129)]
+		public unsafe NetworkString<_128> HighScorePlayerName
 		{
-			List<MeshRenderer> list = new List<MeshRenderer>();
-			ZoneBasedObject[] array = this.zoneBasedVisuals;
+			readonly get
+			{
+				return *(NetworkString<_128>*)Native.ReferenceToPointer(ref _HighScorePlayerName);
+			}
+			set
+			{
+				*(NetworkString<_128>*)Native.ReferenceToPointer(ref _HighScorePlayerName) = value;
+			}
+		}
+
+		[field: FieldOffset(540)]
+		public float RemainingTime { get; set; }
+
+		[field: FieldOffset(544)]
+		public float GameEndedTime { get; set; }
+
+		[field: FieldOffset(548)]
+		public int GameId { get; set; }
+
+		[field: FieldOffset(552)]
+		public int PickedMolesIndexCount { get; set; }
+
+		[Networked]
+		[Capacity(10)]
+		[NetworkedWeavedDictionary(17, 1, 1, typeof(Fusion.ElementReaderWriterInt32), typeof(Fusion.ElementReaderWriterInt32))]
+		[NetworkedWeaved(139, 71)]
+		public unsafe NetworkDictionary<int, int> PickedMolesIndex => new NetworkDictionary<int, int>((int*)Native.ReferenceToPointer(ref _PickedMolesIndex), 17, Fusion.ElementReaderWriterInt32.GetInstance(), Fusion.ElementReaderWriterInt32.GetInstance());
+
+		public WhackAMoleData(GameState state, int currentLevelIndex, int cScore, int tScore, int bScore, int rPScore, string hScorePName, float remainingTime, float endedTime, int gameId, Dictionary<int, int> moleIndexs)
+		{
+			CurrentState = state;
+			CurrentLevelIndex = currentLevelIndex;
+			CurrentScore = cScore;
+			TotalScore = tScore;
+			BestScore = bScore;
+			RightPlayerScore = rPScore;
+			HighScorePlayerName = hScorePName;
+			RemainingTime = remainingTime;
+			GameEndedTime = endedTime;
+			GameId = gameId;
+			PickedMolesIndexCount = moleIndexs.Count;
+			foreach (KeyValuePair<int, int> moleIndex in moleIndexs)
+			{
+				PickedMolesIndex.Set(moleIndex.Key, moleIndex.Value);
+			}
+		}
+	}
+
+	public string machineId = "default";
+
+	public GameObject molesContainerRight;
+
+	[Tooltip("Only for co-op version")]
+	public GameObject molesContainerLeft;
+
+	public int betweenLevelPauseDuration = 3;
+
+	public int countdownDuration = 5;
+
+	public WhackAMoleLevelSO[] allLevels;
+
+	[SerializeField]
+	private GorillaTimer timer;
+
+	[SerializeField]
+	private AudioSource audioSource;
+
+	public GameObject levelArrow;
+
+	public GameObject victoryFX;
+
+	public ZoneBasedObject[] zoneBasedVisuals;
+
+	[SerializeField]
+	private MeshRenderer[] zoneBasedMeshRenderers;
+
+	[Space]
+	public AudioClip backgroundLoop;
+
+	public AudioClip errorClip;
+
+	public AudioClip counterClip;
+
+	public AudioClip levelCompleteClip;
+
+	public AudioClip winClip;
+
+	public AudioClip gameOverClip;
+
+	public AudioClip[] whackHazardClips;
+
+	public AudioClip[] whackMonkeClips;
+
+	[Space]
+	public GameObject welcomeUI;
+
+	public GameObject ongoingGameUI;
+
+	public GameObject levelEndedUI;
+
+	public GameObject ContinuePressedUI;
+
+	public GameObject multiplyareScoresUI;
+
+	[Space]
+	public TextMeshPro scoreText;
+
+	public TextMeshPro bestScoreText;
+
+	[Tooltip("Only for co-op version")]
+	public TextMeshPro rightPlayerScoreText;
+
+	[Tooltip("Only for co-op version")]
+	public TextMeshPro leftPlayerScoreText;
+
+	public TextMeshPro timeText;
+
+	public TextMeshPro counterText;
+
+	public TextMeshPro resultText;
+
+	public TextMeshPro levelEndedOptionsText;
+
+	public TextMeshPro levelEndedCountdownText;
+
+	public TextMeshPro levelEndedTotalScoreText;
+
+	public TextMeshPro levelEndedCurrentScoreText;
+
+	private List<Mole> rightMolesList;
+
+	private List<Mole> leftMolesList;
+
+	private List<Mole> molesList = new List<Mole>();
+
+	private WhackAMoleLevelSO currentLevel;
+
+	private int currentScore;
+
+	private int totalScore;
+
+	private int leftPlayerScore;
+
+	private int rightPlayerScore;
+
+	private int bestScore;
+
+	private float curentTime;
+
+	private int currentLevelIndex;
+
+	private float continuePressedTime;
+
+	private bool resetToFirstLevel;
+
+	private Quaternion arrowTargetRotation;
+
+	private bool arrowRotationNeedsUpdate;
+
+	private List<Mole> potentialMoles = new List<Mole>();
+
+	private Dictionary<int, int> pickedMolesIndex = new Dictionary<int, int>();
+
+	private GameState currentState;
+
+	private GameState lastState;
+
+	private float remainingTime;
+
+	private int previousTime = -1;
+
+	private bool isMultiplayer;
+
+	private float gameEndedTime;
+
+	private GameResult curentGameResult;
+
+	private string playerName = string.Empty;
+
+	private string highScorePlayerName = string.Empty;
+
+	private ParticleSystem[] victoryParticles;
+
+	private int levelHazardMolesPicked;
+
+	private int levelGoodMolesPicked;
+
+	private string playerId;
+
+	private int gameId;
+
+	private int levelHazardMolesHit;
+
+	private static DateTime epoch = new DateTime(2024, 1, 1);
+
+	private static int lastAssignedID;
+
+	private bool wasMasterClient;
+
+	private bool wasLocalPlayerInZone = true;
+
+	[WeaverGenerated]
+	[SerializeField]
+	[DefaultForProperty("Data", 0, 210)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private WhackAMoleData _Data;
+
+	[Networked]
+	[NetworkedWeaved(0, 210)]
+	public unsafe WhackAMoleData Data
+	{
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing WhackAMole.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(WhackAMoleData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing WhackAMole.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(WhackAMoleData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	private void UpdateMeshRendererList()
+	{
+		List<MeshRenderer> list = new List<MeshRenderer>();
+		ZoneBasedObject[] array = zoneBasedVisuals;
+		for (int i = 0; i < array.Length; i++)
+		{
+			MeshRenderer[] componentsInChildren = array[i].GetComponentsInChildren<MeshRenderer>(includeInactive: true);
+			foreach (MeshRenderer meshRenderer in componentsInChildren)
+			{
+				if (meshRenderer.enabled)
+				{
+					list.Add(meshRenderer);
+				}
+			}
+		}
+		zoneBasedMeshRenderers = list.ToArray();
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		if (molesContainerRight != null)
+		{
+			rightMolesList = new List<Mole>(molesContainerRight.GetComponentsInChildren<Mole>());
+			if (rightMolesList.Count > 0)
+			{
+				molesList.AddRange(rightMolesList);
+			}
+		}
+		if (molesContainerLeft != null)
+		{
+			leftMolesList = new List<Mole>(molesContainerLeft.GetComponentsInChildren<Mole>());
+			if (leftMolesList.Count > 0)
+			{
+				molesList.AddRange(leftMolesList);
+				foreach (Mole leftMoles in leftMolesList)
+				{
+					leftMoles.IsLeftSideMole = true;
+				}
+			}
+		}
+		currentLevelIndex = -1;
+		foreach (Mole moles in molesList)
+		{
+			moles.OnTapped += OnMoleTapped;
+		}
+		List<Mole> list = leftMolesList;
+		int num;
+		if (list != null && list.Count > 0)
+		{
+			list = rightMolesList;
+			num = ((list != null && list.Count > 0) ? 1 : 0);
+		}
+		else
+		{
+			num = 0;
+		}
+		isMultiplayer = (byte)num != 0;
+		welcomeUI.SetActive(value: false);
+		ongoingGameUI.SetActive(value: false);
+		levelEndedUI.SetActive(value: false);
+		ContinuePressedUI.SetActive(value: false);
+		multiplyareScoresUI.SetActive(value: false);
+		bestScore = 0;
+		bestScoreText.text = string.Empty;
+		highScorePlayerName = string.Empty;
+		victoryParticles = victoryFX.GetComponentsInChildren<ParticleSystem>();
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		SwitchState(GameState.Off);
+		if ((bool)WhackAMoleManager.instance)
+		{
+			WhackAMoleManager.instance.Register(this);
+		}
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		foreach (Mole moles in molesList)
+		{
+			moles.OnTapped -= OnMoleTapped;
+		}
+		if ((bool)WhackAMoleManager.instance)
+		{
+			WhackAMoleManager.instance.Unregister(this);
+		}
+		molesList.Clear();
+	}
+
+	public void InvokeUpdate()
+	{
+		bool isMasterClient = NetworkSystem.Instance.IsMasterClient;
+		bool flag = zoneBasedVisuals[0].IsLocalPlayerInZone();
+		if (isMasterClient != wasMasterClient || flag != wasLocalPlayerInZone)
+		{
+			MeshRenderer[] array = zoneBasedMeshRenderers;
 			for (int i = 0; i < array.Length; i++)
 			{
-				foreach (MeshRenderer meshRenderer in array[i].GetComponentsInChildren<MeshRenderer>(true))
-				{
-					if (meshRenderer.enabled)
-					{
-						list.Add(meshRenderer);
-					}
-				}
+				array[i].enabled = flag;
 			}
-			this.zoneBasedMeshRenderers = list.ToArray();
+			bool active = isMasterClient || flag;
+			ZoneBasedObject[] array2 = zoneBasedVisuals;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].gameObject.SetActive(active);
+			}
+			wasMasterClient = isMasterClient;
+			wasLocalPlayerInZone = flag;
 		}
+	}
 
-		protected override void Awake()
+	private void SwitchState(GameState state)
+	{
+		lastState = currentState;
+		currentState = state;
+		switch (currentState)
 		{
-			base.Awake();
-			if (this.molesContainerRight != null)
-			{
-				this.rightMolesList = new List<Mole>(this.molesContainerRight.GetComponentsInChildren<Mole>());
-				if (this.rightMolesList.Count > 0)
-				{
-					this.molesList.AddRange(this.rightMolesList);
-				}
-			}
-			if (this.molesContainerLeft != null)
-			{
-				this.leftMolesList = new List<Mole>(this.molesContainerLeft.GetComponentsInChildren<Mole>());
-				if (this.leftMolesList.Count > 0)
-				{
-					this.molesList.AddRange(this.leftMolesList);
-					foreach (Mole mole in this.leftMolesList)
-					{
-						mole.IsLeftSideMole = true;
-					}
-				}
-			}
-			this.currentLevelIndex = -1;
-			foreach (Mole mole2 in this.molesList)
-			{
-				mole2.OnTapped += this.OnMoleTapped;
-			}
-			List<Mole> list = this.leftMolesList;
-			bool flag;
-			if (list != null && list.Count > 0)
-			{
-				list = this.rightMolesList;
-				flag = (list != null && list.Count > 0);
-			}
-			else
-			{
-				flag = false;
-			}
-			this.isMultiplayer = flag;
-			this.welcomeUI.SetActive(false);
-			this.ongoingGameUI.SetActive(false);
-			this.levelEndedUI.SetActive(false);
-			this.ContinuePressedUI.SetActive(false);
-			this.multiplyareScoresUI.SetActive(false);
-			this.bestScore = 0;
-			this.bestScoreText.text = string.Empty;
-			this.highScorePlayerName = string.Empty;
-			this.victoryParticles = this.victoryFX.GetComponentsInChildren<ParticleSystem>();
-		}
-
-		protected override void Start()
+		case GameState.Off:
+			ResetGame();
+			currentLevelIndex = -1;
+			currentLevel = null;
+			UpdateLevelUI(1);
+			break;
+		case GameState.Ongoing:
+			UpdateScoreUI(currentScore, leftPlayerScore, rightPlayerScore);
+			break;
+		case GameState.TimesUp:
 		{
-			base.Start();
-			this.SwitchState(WhackAMole.GameState.Off);
-			if (WhackAMoleManager.instance)
+			if (!(currentLevel != null))
 			{
-				WhackAMoleManager.instance.Register(this);
-			}
-		}
-
-		private void OnDestroy()
-		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			foreach (Mole mole in this.molesList)
-			{
-				mole.OnTapped -= this.OnMoleTapped;
-			}
-			if (WhackAMoleManager.instance)
-			{
-				WhackAMoleManager.instance.Unregister(this);
-			}
-			this.molesList.Clear();
-		}
-
-		public void InvokeUpdate()
-		{
-			bool isMasterClient = NetworkSystem.Instance.IsMasterClient;
-			bool flag = this.zoneBasedVisuals[0].IsLocalPlayerInZone();
-			if (isMasterClient != this.wasMasterClient || flag != this.wasLocalPlayerInZone)
-			{
-				MeshRenderer[] array = this.zoneBasedMeshRenderers;
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i].enabled = flag;
-				}
-				bool active = isMasterClient || flag;
-				ZoneBasedObject[] array2 = this.zoneBasedVisuals;
-				for (int i = 0; i < array2.Length; i++)
-				{
-					array2[i].gameObject.SetActive(active);
-				}
-				this.wasMasterClient = isMasterClient;
-				this.wasLocalPlayerInZone = flag;
-			}
-		}
-
-		private void SwitchState(WhackAMole.GameState state)
-		{
-			this.lastState = this.currentState;
-			this.currentState = state;
-			switch (this.currentState)
-			{
-			case WhackAMole.GameState.Off:
-				this.ResetGame();
-				this.currentLevelIndex = -1;
-				this.currentLevel = null;
-				this.UpdateLevelUI(1);
-				break;
-			case WhackAMole.GameState.ContinuePressed:
-				this.continuePressedTime = Time.time;
-				this.audioSource.GTStop();
-				this.audioSource.GTPlayOneShot(this.counterClip, 1f);
-				if (base.IsMine)
-				{
-					this.pickedMolesIndex.Clear();
-				}
-				this.ResetGame();
-				if (base.IsMine)
-				{
-					this.LoadNextLevel();
-				}
-				break;
-			case WhackAMole.GameState.Ongoing:
-				this.UpdateScoreUI(this.currentScore, this.leftPlayerScore, this.rightPlayerScore);
-				break;
-			case WhackAMole.GameState.TimesUp:
-				if (this.currentLevel != null)
-				{
-					foreach (Mole mole in this.molesList)
-					{
-						mole.HideMole(false);
-					}
-					this.curentGameResult = this.GetGameResult();
-					this.UpdateResultUI(this.curentGameResult);
-					this.levelEndedTotalScoreText.text = "SCORE " + this.totalScore.ToString();
-					this.levelEndedCurrentScoreText.text = string.Format("{0}/{1}", this.currentScore, this.currentLevel.GetMinScore(this.isMultiplayer));
-					if (this.totalScore > this.bestScore)
-					{
-						this.bestScore = this.totalScore;
-						this.highScorePlayerName = this.playerName;
-					}
-					this.bestScoreText.text = (this.isMultiplayer ? this.bestScore.ToString() : (this.highScorePlayerName + "  " + this.bestScore.ToString()));
-					this.audioSource.GTStop();
-					if (this.curentGameResult == WhackAMole.GameResult.LevelComplete)
-					{
-						this.audioSource.GTPlayOneShot(this.levelCompleteClip, 1f);
-						if (NetworkSystem.Instance.LocalPlayer.UserId == this.playerId)
-						{
-							PlayerGameEvents.MiscEvent("WhackComplete" + this.currentLevel.levelNumber.ToString(), 1);
-						}
-					}
-					else if (this.curentGameResult == WhackAMole.GameResult.GameOver)
-					{
-						this.audioSource.GTPlayOneShot(this.gameOverClip, 1f);
-					}
-					else if (this.curentGameResult == WhackAMole.GameResult.Win)
-					{
-						this.audioSource.GTPlayOneShot(this.winClip, 1f);
-						if (this.victoryFX)
-						{
-							ParticleSystem[] array = this.victoryParticles;
-							for (int i = 0; i < array.Length; i++)
-							{
-								array[i].Play();
-							}
-						}
-						if (NetworkSystem.Instance.LocalPlayer.UserId == this.playerId)
-						{
-							PlayerGameEvents.MiscEvent("WhackComplete" + this.currentLevel.levelNumber.ToString(), 1);
-						}
-					}
-					int minScore = this.currentLevel.GetMinScore(this.isMultiplayer);
-					if (this.levelGoodMolesPicked < minScore)
-					{
-						GTDev.LogError<string>(string.Format("[WAM] Lvl:{0} Only Picked {1}/{2} good moles!", this.currentLevel.levelNumber, this.levelGoodMolesPicked, minScore), null);
-					}
-					if (base.IsMine)
-					{
-						GorillaTelemetry.WamLevelEnd(this.playerId, this.gameId, this.machineId, this.currentLevel.levelNumber, this.levelGoodMolesPicked, this.levelHazardMolesPicked, minScore, this.currentScore, this.levelHazardMolesHit, this.curentGameResult.ToString());
-					}
-				}
 				break;
 			}
-			this.UpdateScreenData();
-		}
-
-		private void UpdateScreenData()
-		{
-			switch (this.currentState)
+			foreach (Mole moles in molesList)
 			{
-			case WhackAMole.GameState.Off:
-				this.welcomeUI.SetActive(true);
-				this.ContinuePressedUI.SetActive(false);
-				this.ongoingGameUI.SetActive(false);
-				this.levelEndedUI.SetActive(false);
-				this.multiplyareScoresUI.SetActive(false);
-				return;
-			case WhackAMole.GameState.ContinuePressed:
-				this.levelEndedUI.SetActive(false);
-				this.welcomeUI.SetActive(false);
-				this.ongoingGameUI.SetActive(false);
-				this.multiplyareScoresUI.SetActive(false);
-				this.ContinuePressedUI.SetActive(true);
-				break;
-			case WhackAMole.GameState.Ongoing:
-				this.ContinuePressedUI.SetActive(false);
-				this.welcomeUI.SetActive(false);
-				this.ongoingGameUI.SetActive(true);
-				this.levelEndedUI.SetActive(false);
-				if (this.isMultiplayer)
+				moles.HideMole();
+			}
+			curentGameResult = GetGameResult();
+			UpdateResultUI(curentGameResult);
+			levelEndedTotalScoreText.text = "SCORE " + totalScore;
+			levelEndedCurrentScoreText.text = $"{currentScore}/{currentLevel.GetMinScore(isMultiplayer)}";
+			if (totalScore > bestScore)
+			{
+				bestScore = totalScore;
+				highScorePlayerName = playerName;
+			}
+			bestScoreText.text = (isMultiplayer ? bestScore.ToString() : (highScorePlayerName + "  " + bestScore));
+			audioSource.GTStop();
+			if (curentGameResult == GameResult.LevelComplete)
+			{
+				audioSource.GTPlayOneShot(levelCompleteClip);
+				if (NetworkSystem.Instance.LocalPlayer.UserId == playerId)
 				{
-					this.multiplyareScoresUI.SetActive(true);
-					return;
+					PlayerGameEvents.MiscEvent("WhackComplete" + currentLevel.levelNumber);
 				}
-				break;
-			case WhackAMole.GameState.PickMoles:
-				break;
-			case WhackAMole.GameState.TimesUp:
-				this.welcomeUI.SetActive(false);
-				this.ongoingGameUI.SetActive(false);
-				this.ContinuePressedUI.SetActive(false);
-				if (this.isMultiplayer)
+			}
+			else if (curentGameResult == GameResult.GameOver)
+			{
+				audioSource.GTPlayOneShot(gameOverClip);
+			}
+			else if (curentGameResult == GameResult.Win)
+			{
+				audioSource.GTPlayOneShot(winClip);
+				if ((bool)victoryFX)
 				{
-					this.multiplyareScoresUI.SetActive(true);
+					ParticleSystem[] array = victoryParticles;
+					for (int i = 0; i < array.Length; i++)
+					{
+						array[i].Play();
+					}
 				}
-				this.levelEndedUI.SetActive(true);
-				return;
-			default:
-				return;
+				if (NetworkSystem.Instance.LocalPlayer.UserId == playerId)
+				{
+					PlayerGameEvents.MiscEvent("WhackComplete" + currentLevel.levelNumber);
+				}
 			}
-		}
-
-		public static int CreateNewGameID()
-		{
-			int num = (int)((DateTime.Now - WhackAMole.epoch).TotalSeconds * 8.0 % 2147483646.0) + 1;
-			if (num <= WhackAMole.lastAssignedID)
+			int minScore = currentLevel.GetMinScore(isMultiplayer);
+			if (levelGoodMolesPicked < minScore)
 			{
-				WhackAMole.lastAssignedID++;
-				return WhackAMole.lastAssignedID;
+				GTDev.LogError($"[WAM] Lvl:{currentLevel.levelNumber} Only Picked {levelGoodMolesPicked}/{minScore} good moles!");
 			}
-			WhackAMole.lastAssignedID = num;
-			return num;
-		}
-
-		private void OnMoleTapped(MoleTypes moleType, Vector3 position, bool isLocalTap, bool isLeftHand)
-		{
-			WhackAMole.GameState gameState = this.currentState;
-			if (gameState == WhackAMole.GameState.Off || gameState == WhackAMole.GameState.TimesUp)
+			if (base.IsMine)
 			{
-				return;
+				GorillaTelemetry.WamLevelEnd(playerId, gameId, machineId, currentLevel.levelNumber, levelGoodMolesPicked, levelHazardMolesPicked, minScore, currentScore, levelHazardMolesHit, curentGameResult.ToString());
 			}
-			AudioClip clip = moleType.isHazard ? this.whackHazardClips[Random.Range(0, this.whackHazardClips.Length)] : this.whackMonkeClips[Random.Range(0, this.whackMonkeClips.Length)];
+			break;
+		}
+		case GameState.ContinuePressed:
+			continuePressedTime = Time.time;
+			audioSource.GTStop();
+			audioSource.GTPlayOneShot(counterClip);
+			if (base.IsMine)
+			{
+				pickedMolesIndex.Clear();
+			}
+			ResetGame();
+			if (base.IsMine)
+			{
+				LoadNextLevel();
+			}
+			break;
+		}
+		UpdateScreenData();
+	}
+
+	private void UpdateScreenData()
+	{
+		switch (currentState)
+		{
+		case GameState.Off:
+			welcomeUI.SetActive(value: true);
+			ContinuePressedUI.SetActive(value: false);
+			ongoingGameUI.SetActive(value: false);
+			levelEndedUI.SetActive(value: false);
+			multiplyareScoresUI.SetActive(value: false);
+			break;
+		case GameState.Ongoing:
+			ContinuePressedUI.SetActive(value: false);
+			welcomeUI.SetActive(value: false);
+			ongoingGameUI.SetActive(value: true);
+			levelEndedUI.SetActive(value: false);
+			if (isMultiplayer)
+			{
+				multiplyareScoresUI.SetActive(value: true);
+			}
+			break;
+		case GameState.TimesUp:
+			welcomeUI.SetActive(value: false);
+			ongoingGameUI.SetActive(value: false);
+			ContinuePressedUI.SetActive(value: false);
+			if (isMultiplayer)
+			{
+				multiplyareScoresUI.SetActive(value: true);
+			}
+			levelEndedUI.SetActive(value: true);
+			break;
+		case GameState.ContinuePressed:
+			levelEndedUI.SetActive(value: false);
+			welcomeUI.SetActive(value: false);
+			ongoingGameUI.SetActive(value: false);
+			multiplyareScoresUI.SetActive(value: false);
+			ContinuePressedUI.SetActive(value: true);
+			break;
+		case GameState.PickMoles:
+			break;
+		}
+	}
+
+	public static int CreateNewGameID()
+	{
+		int num = (int)((DateTime.Now - epoch).TotalSeconds * 8.0 % 2147483646.0) + 1;
+		if (num <= lastAssignedID)
+		{
+			lastAssignedID++;
+			return lastAssignedID;
+		}
+		lastAssignedID = num;
+		return num;
+	}
+
+	private void OnMoleTapped(MoleTypes moleType, Vector3 position, bool isLocalTap, bool isLeftHand)
+	{
+		GameState gameState = currentState;
+		if (gameState != GameState.Off && gameState != GameState.TimesUp)
+		{
+			AudioClip clip = (moleType.isHazard ? whackHazardClips[UnityEngine.Random.Range(0, whackHazardClips.Length)] : whackMonkeClips[UnityEngine.Random.Range(0, whackMonkeClips.Length)]);
 			if (moleType.isHazard)
 			{
-				this.audioSource.GTPlayOneShot(clip, 1f);
-				this.levelHazardMolesHit++;
+				audioSource.GTPlayOneShot(clip);
+				levelHazardMolesHit++;
 			}
 			else
 			{
-				this.audioSource.GTPlayOneShot(clip, 1f);
+				audioSource.GTPlayOneShot(clip);
 			}
 			if (moleType.monkeMoleHitMaterial != null)
 			{
 				moleType.MeshRenderer.material = moleType.monkeMoleHitMaterial;
 			}
-			this.currentScore += moleType.scorePoint;
-			this.totalScore += moleType.scorePoint;
+			currentScore += moleType.scorePoint;
+			totalScore += moleType.scorePoint;
 			if (moleType.IsLeftSideMoleType)
 			{
-				this.leftPlayerScore += moleType.scorePoint;
+				leftPlayerScore += moleType.scorePoint;
 			}
 			else
 			{
-				this.rightPlayerScore += moleType.scorePoint;
+				rightPlayerScore += moleType.scorePoint;
 			}
-			this.UpdateScoreUI(this.currentScore, this.leftPlayerScore, this.rightPlayerScore);
-			moleType.MoleContainerParent.HideMole(true);
+			UpdateScoreUI(currentScore, leftPlayerScore, rightPlayerScore);
+			moleType.MoleContainerParent.HideMole(isHit: true);
 		}
+	}
 
-		public void HandleOnTimerStopped()
+	public void HandleOnTimerStopped()
+	{
+		gameEndedTime = Time.time;
+		SwitchState(GameState.TimesUp);
+	}
+
+	private IEnumerator PlayHazardAudio(AudioClip clip)
+	{
+		audioSource.clip = clip;
+		audioSource.GTPlay();
+		yield return new WaitForSeconds(audioSource.clip.length);
+		audioSource.clip = errorClip;
+		audioSource.GTPlay();
+	}
+
+	private bool PickMoles()
+	{
+		pickedMolesIndex.Clear();
+		float passedTime = timer.GetPassedTime();
+		if (passedTime > currentLevel.levelDuration - currentLevel.showMoleDuration)
 		{
-			this.gameEndedTime = Time.time;
-			this.SwitchState(WhackAMole.GameState.TimesUp);
+			return true;
 		}
-
-		private IEnumerator PlayHazardAudio(AudioClip clip)
+		float t = passedTime / currentLevel.levelDuration;
+		float minMoleCount = Mathf.Lerp(currentLevel.minimumMoleCount.x, currentLevel.minimumMoleCount.y, t);
+		float maxMoleCount = Mathf.Lerp(currentLevel.maximumMoleCount.x, currentLevel.maximumMoleCount.y, t);
+		curentTime = Time.time;
+		float hazardMoleChance = Mathf.Lerp(currentLevel.hazardMoleChance.x, currentLevel.hazardMoleChance.y, t);
+		if (isMultiplayer)
 		{
-			this.audioSource.clip = clip;
-			this.audioSource.GTPlay();
-			yield return new WaitForSeconds(this.audioSource.clip.length);
-			this.audioSource.clip = this.errorClip;
-			this.audioSource.GTPlay();
-			yield break;
+			PickMolesFrom(rightMolesList);
+			PickMolesFrom(leftMolesList);
 		}
-
-		private bool PickMoles()
+		else
 		{
-			WhackAMole.<>c__DisplayClass85_0 CS$<>8__locals1;
-			CS$<>8__locals1.<>4__this = this;
-			this.pickedMolesIndex.Clear();
-			float passedTime = this.timer.GetPassedTime();
-			if (passedTime > this.currentLevel.levelDuration - this.currentLevel.showMoleDuration)
-			{
-				return true;
-			}
-			float t = passedTime / this.currentLevel.levelDuration;
-			CS$<>8__locals1.minMoleCount = Mathf.Lerp(this.currentLevel.minimumMoleCount.x, this.currentLevel.minimumMoleCount.y, t);
-			CS$<>8__locals1.maxMoleCount = Mathf.Lerp(this.currentLevel.maximumMoleCount.x, this.currentLevel.maximumMoleCount.y, t);
-			this.curentTime = Time.time;
-			CS$<>8__locals1.hazardMoleChance = Mathf.Lerp(this.currentLevel.hazardMoleChance.x, this.currentLevel.hazardMoleChance.y, t);
-			if (this.isMultiplayer)
-			{
-				this.<PickMoles>g__PickMolesFrom|85_0(this.rightMolesList, ref CS$<>8__locals1);
-				this.<PickMoles>g__PickMolesFrom|85_0(this.leftMolesList, ref CS$<>8__locals1);
-			}
-			else
-			{
-				this.<PickMoles>g__PickMolesFrom|85_0(this.molesList, ref CS$<>8__locals1);
-			}
-			return this.pickedMolesIndex.Count != 0;
+			PickMolesFrom(molesList);
 		}
-
-		private void LoadNextLevel()
+		return pickedMolesIndex.Count != 0;
+		void PickMolesFrom(List<Mole> moles)
 		{
-			if (this.currentLevel != null)
-			{
-				this.resetToFirstLevel = (this.currentScore < this.currentLevel.GetMinScore(this.isMultiplayer));
-				if (this.resetToFirstLevel)
-				{
-					this.currentLevelIndex = 0;
-				}
-				else
-				{
-					this.currentLevelIndex++;
-				}
-				if (this.currentLevelIndex >= this.allLevels.Length)
-				{
-					this.currentLevelIndex = 0;
-				}
-			}
-			else
-			{
-				this.currentLevelIndex++;
-			}
-			this.currentLevel = this.allLevels[this.currentLevelIndex];
-			this.timer.SetTimerDuration(this.currentLevel.levelDuration);
-			this.timer.RestartTimer();
-			this.curentTime = Time.time;
-			this.currentScore = 0;
-			this.leftPlayerScore = 0;
-			this.rightPlayerScore = 0;
-			this.levelGoodMolesPicked = (this.levelHazardMolesPicked = 0);
-			this.levelHazardMolesHit = 0;
-			if (this.currentLevelIndex == 0)
-			{
-				this.totalScore = 0;
-			}
-			if (this.currentLevelIndex == 0 && base.IsMine)
-			{
-				this.gameId = WhackAMole.CreateNewGameID();
-				Debug.LogWarning("GAME ID" + this.gameId.ToString());
-			}
-		}
-
-		private bool PickSingleMole(int randomMoleIndex, float hazardMoleChance)
-		{
-			bool flag = hazardMoleChance > 0f && Random.value <= hazardMoleChance;
-			int moleTypeIndex = this.molesList[randomMoleIndex].GetMoleTypeIndex(flag);
-			this.molesList[randomMoleIndex].ShowMole(this.currentLevel.showMoleDuration, moleTypeIndex);
-			this.pickedMolesIndex.Add(randomMoleIndex, moleTypeIndex);
-			if (flag)
-			{
-				this.levelHazardMolesPicked++;
-			}
-			else
-			{
-				this.levelGoodMolesPicked++;
-			}
-			return flag;
-		}
-
-		private void ResetGame()
-		{
-			foreach (Mole mole in this.molesList)
-			{
-				mole.ResetPosition();
-			}
-		}
-
-		private void UpdateScoreUI(int totalScore, int _leftPlayerScore, int _rightPlayerScore)
-		{
-			if (this.currentLevel != null)
-			{
-				this.scoreText.text = string.Format("SCORE\n{0}/{1}", totalScore, this.currentLevel.GetMinScore(this.isMultiplayer));
-				this.leftPlayerScoreText.text = _leftPlayerScore.ToString();
-				this.rightPlayerScoreText.text = _rightPlayerScore.ToString();
-			}
-		}
-
-		private void UpdateLevelUI(int levelNumber)
-		{
-			this.arrowTargetRotation = Quaternion.Euler(0f, 0f, (float)(18 * (levelNumber - 1)));
-			this.arrowRotationNeedsUpdate = true;
-		}
-
-		private void UpdateArrowRotation()
-		{
-			Quaternion quaternion = Quaternion.Slerp(this.levelArrow.transform.localRotation, this.arrowTargetRotation, Time.deltaTime * 5f);
-			if (Quaternion.Angle(quaternion, this.arrowTargetRotation) < 0.1f)
-			{
-				quaternion = this.arrowTargetRotation;
-				this.arrowRotationNeedsUpdate = false;
-			}
-			this.levelArrow.transform.localRotation = quaternion;
-		}
-
-		private void UpdateTimerUI(int time)
-		{
-			if (time == this.previousTime)
-			{
-				return;
-			}
-			this.timeText.text = "TIME " + time.ToString();
-			this.previousTime = time;
-		}
-
-		private void UpdateResultUI(WhackAMole.GameResult gameResult)
-		{
-			if (gameResult == WhackAMole.GameResult.LevelComplete)
-			{
-				this.resultText.text = "LEVEL COMPLETE";
-				return;
-			}
-			if (gameResult == WhackAMole.GameResult.Win)
-			{
-				this.resultText.text = "YOU WIN!";
-				return;
-			}
-			if (gameResult == WhackAMole.GameResult.GameOver)
-			{
-				this.resultText.text = "GAME OVER";
-			}
-		}
-
-		public void OnStartButtonPressed()
-		{
-			WhackAMole.GameState gameState = this.currentState;
-			if (gameState == WhackAMole.GameState.TimesUp || gameState == WhackAMole.GameState.Off)
-			{
-				base.GetView.RPC("WhackAMoleButtonPressed", RpcTarget.All, Array.Empty<object>());
-			}
-		}
-
-		[PunRPC]
-		private void WhackAMoleButtonPressed(PhotonMessageInfo info)
-		{
-			this.WhackAMoleButtonPressedShared(info);
-		}
-
-		[Rpc]
-		private unsafe void RPC_WhackAMoleButtonPressed(RpcInfo info = default(RpcInfo))
-		{
-			if (!this.InvokeRpc)
-			{
-				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
-				{
-					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-					if ((localAuthorityMask & 7) == 0)
-					{
-						NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTagScripts.WhackAMole::RPC_WhackAMoleButtonPressed(Fusion.RpcInfo)", base.Object, 7);
-					}
-					else
-					{
-						int num = 8;
-						if (!SimulationMessage.CanAllocateUserPayload(num))
-						{
-							NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTagScripts.WhackAMole::RPC_WhackAMoleButtonPressed(Fusion.RpcInfo)", num);
-						}
-						else
-						{
-							if (base.Runner.HasAnyActiveConnections())
-							{
-								SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
-								int num2 = 8;
-								ptr->Offset = num2 * 8;
-								base.Runner.SendRpc(ptr);
-							}
-							if ((localAuthorityMask & 7) != 0)
-							{
-								info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-								goto IL_12;
-							}
-						}
-					}
-				}
-				return;
-			}
-			this.InvokeRpc = false;
-			IL_12:
-			this.WhackAMoleButtonPressedShared(info);
-		}
-
-		private void WhackAMoleButtonPressedShared(PhotonMessageInfoWrapped info)
-		{
-			MonkeAgent.IncrementRPCCall(info, "WhackAMoleButtonPressedShared");
-			VRRig vrrig = GorillaGameManager.StaticFindRigForPlayer(info.Sender);
-			if (vrrig)
-			{
-				this.playerName = vrrig.playerNameVisible;
-				if (this.currentState == WhackAMole.GameState.Off)
-				{
-					this.playerId = info.Sender.UserId;
-					if (NetworkSystem.Instance.LocalPlayer.UserId == this.playerId)
-					{
-						PlayerGameEvents.MiscEvent("PlayArcadeGame", 1);
-					}
-				}
-			}
-			this.SwitchState(WhackAMole.GameState.ContinuePressed);
-		}
-
-		private WhackAMole.GameResult GetGameResult()
-		{
-			if (this.currentScore < this.currentLevel.GetMinScore(this.isMultiplayer))
-			{
-				return WhackAMole.GameResult.GameOver;
-			}
-			if (this.currentLevelIndex >= this.allLevels.Length - 1)
-			{
-				return WhackAMole.GameResult.Win;
-			}
-			return WhackAMole.GameResult.LevelComplete;
-		}
-
-		public int GetCurrentLevel()
-		{
-			if (this.currentLevel != null)
-			{
-				return this.currentLevel.levelNumber;
-			}
-			return 0;
-		}
-
-		public int GetTotalLevelNumbers()
-		{
-			if (this.allLevels != null)
-			{
-				return this.allLevels.Length;
-			}
-			return 0;
-		}
-
-		[Networked]
-		[NetworkedWeaved(0, 210)]
-		public unsafe WhackAMole.WhackAMoleData Data
-		{
-			get
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing WhackAMole.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				return *(WhackAMole.WhackAMoleData*)(this.Ptr + 0);
-			}
-			set
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing WhackAMole.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				*(WhackAMole.WhackAMoleData*)(this.Ptr + 0) = value;
-			}
-		}
-
-		public override void WriteDataFusion()
-		{
-			this.Data = new WhackAMole.WhackAMoleData(this.currentState, this.currentLevelIndex, this.currentScore, this.totalScore, this.bestScore, this.rightPlayerScore, this.highScorePlayerName, this.timer.GetRemainingTime(), this.gameEndedTime, this.gameId, this.pickedMolesIndex);
-			this.pickedMolesIndex.Clear();
-		}
-
-		public override void ReadDataFusion()
-		{
-			this.ReadDataShared(this.Data.CurrentState, this.Data.CurrentLevelIndex, this.Data.CurrentScore, this.Data.TotalScore, this.Data.BestScore, this.Data.RightPlayerScore, this.Data.HighScorePlayerName.Value, this.Data.RemainingTime, this.Data.GameEndedTime, this.Data.GameId);
-			for (int i = 0; i < this.Data.PickedMolesIndexCount; i++)
-			{
-				int randomMoleTypeIndex = this.Data.PickedMolesIndex[i];
-				if (i >= 0 && i < this.molesList.Count && this.currentLevel)
-				{
-					this.molesList[i].ShowMole(this.currentLevel.showMoleDuration, randomMoleTypeIndex);
-				}
-			}
-		}
-
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-		}
-
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-		}
-
-		private void ReadDataShared(WhackAMole.GameState _currentState, int _currentLevelIndex, int cScore, int tScore, int bScore, int rPScore, string hScorePName, float _remainingTime, float endedTime, int _gameId)
-		{
-			WhackAMole.GameState gameState = this.currentState;
-			if (_currentState != gameState)
-			{
-				this.SwitchState(_currentState);
-			}
-			this.currentLevelIndex = _currentLevelIndex;
-			if (this.currentLevelIndex >= 0 && this.currentLevelIndex < this.allLevels.Length)
-			{
-				this.currentLevel = this.allLevels[this.currentLevelIndex];
-				this.UpdateLevelUI(this.currentLevel.levelNumber);
-			}
-			this.currentScore = cScore;
-			this.totalScore = tScore;
-			this.bestScore = bScore;
-			this.rightPlayerScore = rPScore;
-			this.leftPlayerScore = this.currentScore - this.rightPlayerScore;
-			this.highScorePlayerName = hScorePName;
-			this.bestScoreText.text = (this.isMultiplayer ? this.bestScore.ToString() : (this.highScorePlayerName + "  " + this.bestScore.ToString()));
-			this.remainingTime = _remainingTime;
-			if (float.IsFinite(this.remainingTime) && this.currentLevel)
-			{
-				this.remainingTime = this.remainingTime.ClampSafe(0f, this.currentLevel.levelDuration);
-				this.UpdateTimerUI((int)this.remainingTime);
-			}
-			if (float.IsFinite(endedTime))
-			{
-				this.gameEndedTime = endedTime.ClampSafe(0f, Time.time);
-			}
-			this.gameId = _gameId;
-		}
-
-		protected override void OnOwnerSwitched(NetPlayer newOwningPlayer)
-		{
-			base.OnOwnerSwitched(newOwningPlayer);
-			if (NetworkSystem.Instance.IsMasterClient)
-			{
-				this.timer.RestartTimer();
-				this.timer.SetTimerDuration(this.remainingTime);
-				this.curentTime = Time.time;
-				if (this.currentLevelIndex >= 0 && this.currentLevelIndex < this.allLevels.Length)
-				{
-					this.currentLevel = this.allLevels[this.currentLevelIndex];
-				}
-				this.SwitchState(this.currentState);
-			}
-		}
-
-		[CompilerGenerated]
-		private void <PickMoles>g__PickMolesFrom|85_0(List<Mole> moles, ref WhackAMole.<>c__DisplayClass85_0 A_2)
-		{
-			int a = Mathf.RoundToInt(Random.Range(A_2.minMoleCount, A_2.maxMoleCount));
-			this.potentialMoles.Clear();
+			int a = Mathf.RoundToInt(UnityEngine.Random.Range(minMoleCount, maxMoleCount));
+			potentialMoles.Clear();
 			foreach (Mole mole in moles)
 			{
 				if (mole.CanPickMole())
 				{
-					this.potentialMoles.Add(mole);
+					potentialMoles.Add(mole);
 				}
 			}
-			int num = Mathf.Min(a, this.potentialMoles.Count);
-			int num2 = Mathf.CeilToInt((float)num * A_2.hazardMoleChance);
+			int num = Mathf.Min(a, potentialMoles.Count);
+			int num2 = Mathf.CeilToInt((float)num * hazardMoleChance);
 			int num3 = 0;
 			for (int i = 0; i < num; i++)
 			{
-				int index = Random.Range(0, this.potentialMoles.Count);
-				if (this.PickSingleMole(this.molesList.IndexOf(this.potentialMoles[index]), (num3 < num2) ? A_2.hazardMoleChance : 0f))
+				int index = UnityEngine.Random.Range(0, potentialMoles.Count);
+				if (PickSingleMole(molesList.IndexOf(potentialMoles[index]), (num3 < num2) ? hazardMoleChance : 0f))
 				{
 					num3++;
 				}
-				this.potentialMoles.RemoveAt(index);
+				potentialMoles.RemoveAt(index);
 			}
 		}
+	}
 
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
+	private void LoadNextLevel()
+	{
+		if (currentLevel != null)
 		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
-		}
-
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
-		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
-		}
-
-		[NetworkRpcWeavedInvoker(1, 7, 7)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_WhackAMoleButtonPressed@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((WhackAMole)behaviour).RPC_WhackAMoleButtonPressed(info);
-		}
-
-		public string machineId = "default";
-
-		public GameObject molesContainerRight;
-
-		[Tooltip("Only for co-op version")]
-		public GameObject molesContainerLeft;
-
-		public int betweenLevelPauseDuration = 3;
-
-		public int countdownDuration = 5;
-
-		public WhackAMoleLevelSO[] allLevels;
-
-		[SerializeField]
-		private GorillaTimer timer;
-
-		[SerializeField]
-		private AudioSource audioSource;
-
-		public GameObject levelArrow;
-
-		public GameObject victoryFX;
-
-		public ZoneBasedObject[] zoneBasedVisuals;
-
-		[SerializeField]
-		private MeshRenderer[] zoneBasedMeshRenderers;
-
-		[Space]
-		public AudioClip backgroundLoop;
-
-		public AudioClip errorClip;
-
-		public AudioClip counterClip;
-
-		public AudioClip levelCompleteClip;
-
-		public AudioClip winClip;
-
-		public AudioClip gameOverClip;
-
-		public AudioClip[] whackHazardClips;
-
-		public AudioClip[] whackMonkeClips;
-
-		[Space]
-		public GameObject welcomeUI;
-
-		public GameObject ongoingGameUI;
-
-		public GameObject levelEndedUI;
-
-		public GameObject ContinuePressedUI;
-
-		public GameObject multiplyareScoresUI;
-
-		[Space]
-		public TextMeshPro scoreText;
-
-		public TextMeshPro bestScoreText;
-
-		[Tooltip("Only for co-op version")]
-		public TextMeshPro rightPlayerScoreText;
-
-		[Tooltip("Only for co-op version")]
-		public TextMeshPro leftPlayerScoreText;
-
-		public TextMeshPro timeText;
-
-		public TextMeshPro counterText;
-
-		public TextMeshPro resultText;
-
-		public TextMeshPro levelEndedOptionsText;
-
-		public TextMeshPro levelEndedCountdownText;
-
-		public TextMeshPro levelEndedTotalScoreText;
-
-		public TextMeshPro levelEndedCurrentScoreText;
-
-		private List<Mole> rightMolesList;
-
-		private List<Mole> leftMolesList;
-
-		private List<Mole> molesList = new List<Mole>();
-
-		private WhackAMoleLevelSO currentLevel;
-
-		private int currentScore;
-
-		private int totalScore;
-
-		private int leftPlayerScore;
-
-		private int rightPlayerScore;
-
-		private int bestScore;
-
-		private float curentTime;
-
-		private int currentLevelIndex;
-
-		private float continuePressedTime;
-
-		private bool resetToFirstLevel;
-
-		private Quaternion arrowTargetRotation;
-
-		private bool arrowRotationNeedsUpdate;
-
-		private List<Mole> potentialMoles = new List<Mole>();
-
-		private Dictionary<int, int> pickedMolesIndex = new Dictionary<int, int>();
-
-		private WhackAMole.GameState currentState;
-
-		private WhackAMole.GameState lastState;
-
-		private float remainingTime;
-
-		private int previousTime = -1;
-
-		private bool isMultiplayer;
-
-		private float gameEndedTime;
-
-		private WhackAMole.GameResult curentGameResult;
-
-		private string playerName = string.Empty;
-
-		private string highScorePlayerName = string.Empty;
-
-		private ParticleSystem[] victoryParticles;
-
-		private int levelHazardMolesPicked;
-
-		private int levelGoodMolesPicked;
-
-		private string playerId;
-
-		private int gameId;
-
-		private int levelHazardMolesHit;
-
-		private static DateTime epoch = new DateTime(2024, 1, 1);
-
-		private static int lastAssignedID;
-
-		private bool wasMasterClient;
-
-		private bool wasLocalPlayerInZone = true;
-
-		[WeaverGenerated]
-		[SerializeField]
-		[DefaultForProperty("Data", 0, 210)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private WhackAMole.WhackAMoleData _Data;
-
-		public enum GameState
-		{
-			Off,
-			ContinuePressed,
-			Ongoing,
-			PickMoles,
-			TimesUp,
-			LevelStarted
-		}
-
-		private enum GameResult
-		{
-			GameOver,
-			Win,
-			LevelComplete,
-			Unknown
-		}
-
-		[NetworkStructWeaved(210)]
-		[StructLayout(LayoutKind.Explicit, Size = 840)]
-		public struct WhackAMoleData : INetworkStruct
-		{
-			public WhackAMole.GameState CurrentState { readonly get; set; }
-
-			public int CurrentLevelIndex { readonly get; set; }
-
-			public int CurrentScore { readonly get; set; }
-
-			public int TotalScore { readonly get; set; }
-
-			public int BestScore { readonly get; set; }
-
-			public int RightPlayerScore { readonly get; set; }
-
-			[Networked]
-			[NetworkedWeaved(6, 129)]
-			public unsafe NetworkString<_128> HighScorePlayerName
+			resetToFirstLevel = currentScore < currentLevel.GetMinScore(isMultiplayer);
+			if (resetToFirstLevel)
 			{
-				readonly get
-				{
-					return *(NetworkString<_128>*)Native.ReferenceToPointer<FixedStorage@129>(ref this._HighScorePlayerName);
-				}
-				set
-				{
-					*(NetworkString<_128>*)Native.ReferenceToPointer<FixedStorage@129>(ref this._HighScorePlayerName) = value;
-				}
+				currentLevelIndex = 0;
 			}
-
-			public float RemainingTime { readonly get; set; }
-
-			public float GameEndedTime { readonly get; set; }
-
-			public int GameId { readonly get; set; }
-
-			public int PickedMolesIndexCount { readonly get; set; }
-
-			[Networked]
-			[Capacity(10)]
-			[NetworkedWeavedDictionary(17, 1, 1, typeof(ElementReaderWriterInt32), typeof(ElementReaderWriterInt32))]
-			[NetworkedWeaved(139, 71)]
-			public unsafe NetworkDictionary<int, int> PickedMolesIndex
+			else
 			{
-				get
-				{
-					return new NetworkDictionary<int, int>((int*)Native.ReferenceToPointer<FixedStorage@71>(ref this._PickedMolesIndex), 17, ElementReaderWriterInt32.GetInstance(), ElementReaderWriterInt32.GetInstance());
-				}
+				currentLevelIndex++;
 			}
-
-			public WhackAMoleData(WhackAMole.GameState state, int currentLevelIndex, int cScore, int tScore, int bScore, int rPScore, string hScorePName, float remainingTime, float endedTime, int gameId, Dictionary<int, int> moleIndexs)
+			if (currentLevelIndex >= allLevels.Length)
 			{
-				this.CurrentState = state;
-				this.CurrentLevelIndex = currentLevelIndex;
-				this.CurrentScore = cScore;
-				this.TotalScore = tScore;
-				this.BestScore = bScore;
-				this.RightPlayerScore = rPScore;
-				this.HighScorePlayerName = hScorePName;
-				this.RemainingTime = remainingTime;
-				this.GameEndedTime = endedTime;
-				this.GameId = gameId;
-				this.PickedMolesIndexCount = moleIndexs.Count;
-				foreach (KeyValuePair<int, int> keyValuePair in moleIndexs)
-				{
-					this.PickedMolesIndex.Set(keyValuePair.Key, keyValuePair.Value);
-				}
+				currentLevelIndex = 0;
 			}
-
-			[FixedBufferProperty(typeof(NetworkString<_128>), typeof(UnityValueSurrogate@ReaderWriter@Fusion_NetworkString), 0, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(24)]
-			private FixedStorage@129 _HighScorePlayerName;
-
-			[FixedBufferProperty(typeof(NetworkDictionary<int, int>), typeof(UnityDictionarySurrogate@ElementReaderWriterInt32@ElementReaderWriterInt32), 17, order = -2147483647)]
-			[WeaverGenerated]
-			[SerializeField]
-			[FieldOffset(556)]
-			private FixedStorage@71 _PickedMolesIndex;
 		}
+		else
+		{
+			currentLevelIndex++;
+		}
+		currentLevel = allLevels[currentLevelIndex];
+		timer.SetTimerDuration(currentLevel.levelDuration);
+		timer.RestartTimer();
+		curentTime = Time.time;
+		currentScore = 0;
+		leftPlayerScore = 0;
+		rightPlayerScore = 0;
+		levelGoodMolesPicked = (levelHazardMolesPicked = 0);
+		levelHazardMolesHit = 0;
+		if (currentLevelIndex == 0)
+		{
+			totalScore = 0;
+		}
+		if (currentLevelIndex == 0 && base.IsMine)
+		{
+			gameId = CreateNewGameID();
+			Debug.LogWarning("GAME ID" + gameId);
+		}
+	}
+
+	private bool PickSingleMole(int randomMoleIndex, float hazardMoleChance)
+	{
+		bool flag = hazardMoleChance > 0f && UnityEngine.Random.value <= hazardMoleChance;
+		int moleTypeIndex = molesList[randomMoleIndex].GetMoleTypeIndex(flag);
+		molesList[randomMoleIndex].ShowMole(currentLevel.showMoleDuration, moleTypeIndex);
+		pickedMolesIndex.Add(randomMoleIndex, moleTypeIndex);
+		if (flag)
+		{
+			levelHazardMolesPicked++;
+		}
+		else
+		{
+			levelGoodMolesPicked++;
+		}
+		return flag;
+	}
+
+	private void ResetGame()
+	{
+		foreach (Mole moles in molesList)
+		{
+			moles.ResetPosition();
+		}
+	}
+
+	private void UpdateScoreUI(int totalScore, int _leftPlayerScore, int _rightPlayerScore)
+	{
+		if (currentLevel != null)
+		{
+			scoreText.text = $"SCORE\n{totalScore}/{currentLevel.GetMinScore(isMultiplayer)}";
+			leftPlayerScoreText.text = _leftPlayerScore.ToString();
+			rightPlayerScoreText.text = _rightPlayerScore.ToString();
+		}
+	}
+
+	private void UpdateLevelUI(int levelNumber)
+	{
+		arrowTargetRotation = Quaternion.Euler(0f, 0f, 18 * (levelNumber - 1));
+		arrowRotationNeedsUpdate = true;
+	}
+
+	private void UpdateArrowRotation()
+	{
+		Quaternion quaternion = Quaternion.Slerp(levelArrow.transform.localRotation, arrowTargetRotation, Time.deltaTime * 5f);
+		if (Quaternion.Angle(quaternion, arrowTargetRotation) < 0.1f)
+		{
+			quaternion = arrowTargetRotation;
+			arrowRotationNeedsUpdate = false;
+		}
+		levelArrow.transform.localRotation = quaternion;
+	}
+
+	private void UpdateTimerUI(int time)
+	{
+		if (time != previousTime)
+		{
+			timeText.text = "TIME " + time;
+			previousTime = time;
+		}
+	}
+
+	private void UpdateResultUI(GameResult gameResult)
+	{
+		switch (gameResult)
+		{
+		case GameResult.LevelComplete:
+			resultText.text = "LEVEL COMPLETE";
+			break;
+		case GameResult.Win:
+			resultText.text = "YOU WIN!";
+			break;
+		case GameResult.GameOver:
+			resultText.text = "GAME OVER";
+			break;
+		}
+	}
+
+	public void OnStartButtonPressed()
+	{
+		GameState gameState = currentState;
+		if (gameState == GameState.TimesUp || gameState == GameState.Off)
+		{
+			base.GetView.RPC("WhackAMoleButtonPressed", RpcTarget.All);
+		}
+	}
+
+	[PunRPC]
+	private void WhackAMoleButtonPressed(PhotonMessageInfo info)
+	{
+		WhackAMoleButtonPressedShared(info);
+	}
+
+	[Rpc]
+	private unsafe void RPC_WhackAMoleButtonPressed(RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
+		{
+			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+			if (base.Runner.Stage == SimulationStages.Resimulate)
+			{
+				return;
+			}
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
+			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTagScripts.WhackAMole::RPC_WhackAMoleButtonPressed(Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			int num = 8;
+			if (!SimulationMessage.CanAllocateUserPayload(num))
+			{
+				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTagScripts.WhackAMole::RPC_WhackAMoleButtonPressed(Fusion.RpcInfo)", num);
+				return;
+			}
+			if (base.Runner.HasAnyActiveConnections())
+			{
+				SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+				byte* ptr2 = (byte*)ptr + 28;
+				*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 1);
+				int num2 = 8;
+				ptr->Offset = num2 * 8;
+				base.Runner.SendRpc(ptr);
+			}
+			if ((localAuthorityMask & 7) == 0)
+			{
+				return;
+			}
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+		}
+		WhackAMoleButtonPressedShared(info);
+	}
+
+	private void WhackAMoleButtonPressedShared(PhotonMessageInfoWrapped info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "WhackAMoleButtonPressedShared");
+		VRRig vRRig = GorillaGameManager.StaticFindRigForPlayer(info.Sender);
+		if ((bool)vRRig)
+		{
+			playerName = vRRig.playerNameVisible;
+			if (currentState == GameState.Off)
+			{
+				playerId = info.Sender.UserId;
+				if (NetworkSystem.Instance.LocalPlayer.UserId == playerId)
+				{
+					PlayerGameEvents.MiscEvent("PlayArcadeGame");
+				}
+			}
+		}
+		SwitchState(GameState.ContinuePressed);
+	}
+
+	private GameResult GetGameResult()
+	{
+		if (currentScore >= currentLevel.GetMinScore(isMultiplayer))
+		{
+			if (currentLevelIndex >= allLevels.Length - 1)
+			{
+				return GameResult.Win;
+			}
+			return GameResult.LevelComplete;
+		}
+		return GameResult.GameOver;
+	}
+
+	public int GetCurrentLevel()
+	{
+		if (currentLevel != null)
+		{
+			return currentLevel.levelNumber;
+		}
+		return 0;
+	}
+
+	public int GetTotalLevelNumbers()
+	{
+		if (allLevels != null)
+		{
+			return allLevels.Length;
+		}
+		return 0;
+	}
+
+	public override void WriteDataFusion()
+	{
+		Data = new WhackAMoleData(currentState, currentLevelIndex, currentScore, totalScore, bestScore, rightPlayerScore, highScorePlayerName, timer.GetRemainingTime(), gameEndedTime, gameId, pickedMolesIndex);
+		pickedMolesIndex.Clear();
+	}
+
+	public override void ReadDataFusion()
+	{
+		ReadDataShared(Data.CurrentState, Data.CurrentLevelIndex, Data.CurrentScore, Data.TotalScore, Data.BestScore, Data.RightPlayerScore, Data.HighScorePlayerName.Value, Data.RemainingTime, Data.GameEndedTime, Data.GameId);
+		for (int i = 0; i < Data.PickedMolesIndexCount; i++)
+		{
+			int randomMoleTypeIndex = Data.PickedMolesIndex[i];
+			if (i >= 0 && i < molesList.Count && (bool)currentLevel)
+			{
+				molesList[i].ShowMole(currentLevel.showMoleDuration, randomMoleTypeIndex);
+			}
+		}
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+	}
+
+	private void ReadDataShared(GameState _currentState, int _currentLevelIndex, int cScore, int tScore, int bScore, int rPScore, string hScorePName, float _remainingTime, float endedTime, int _gameId)
+	{
+		GameState gameState = currentState;
+		if (_currentState != gameState)
+		{
+			SwitchState(_currentState);
+		}
+		currentLevelIndex = _currentLevelIndex;
+		if (currentLevelIndex >= 0 && currentLevelIndex < allLevels.Length)
+		{
+			currentLevel = allLevels[currentLevelIndex];
+			UpdateLevelUI(currentLevel.levelNumber);
+		}
+		currentScore = cScore;
+		totalScore = tScore;
+		bestScore = bScore;
+		rightPlayerScore = rPScore;
+		leftPlayerScore = currentScore - rightPlayerScore;
+		highScorePlayerName = hScorePName;
+		bestScoreText.text = (isMultiplayer ? bestScore.ToString() : (highScorePlayerName + "  " + bestScore));
+		remainingTime = _remainingTime;
+		if (float.IsFinite(remainingTime) && (bool)currentLevel)
+		{
+			remainingTime = remainingTime.ClampSafe(0f, currentLevel.levelDuration);
+			UpdateTimerUI((int)remainingTime);
+		}
+		if (float.IsFinite(endedTime))
+		{
+			gameEndedTime = endedTime.ClampSafe(0f, Time.time);
+		}
+		gameId = _gameId;
+	}
+
+	protected override void OnOwnerSwitched(NetPlayer newOwningPlayer)
+	{
+		base.OnOwnerSwitched(newOwningPlayer);
+		if (NetworkSystem.Instance.IsMasterClient)
+		{
+			timer.RestartTimer();
+			timer.SetTimerDuration(remainingTime);
+			curentTime = Time.time;
+			if (currentLevelIndex >= 0 && currentLevelIndex < allLevels.Length)
+			{
+				currentLevel = allLevels[currentLevelIndex];
+			}
+			SwitchState(currentState);
+		}
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
+	}
+
+	[NetworkRpcWeavedInvoker(1, 7, 7)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_WhackAMoleButtonPressed_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((WhackAMole)behaviour).RPC_WhackAMoleButtonPressed(info);
 	}
 }

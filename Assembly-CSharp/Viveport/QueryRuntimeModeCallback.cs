@@ -1,6 +1,3 @@
-﻿using System;
+namespace Viveport;
 
-namespace Viveport
-{
-	public delegate void QueryRuntimeModeCallback(int nResult, int emu);
-}
+public delegate void QueryRuntimeModeCallback(int nResult, int emu);

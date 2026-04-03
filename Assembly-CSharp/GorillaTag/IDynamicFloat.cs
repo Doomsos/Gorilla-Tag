@@ -1,9 +1,6 @@
-﻿using System;
+namespace GorillaTag;
 
-namespace GorillaTag
+public interface IDynamicFloat
 {
-	public interface IDynamicFloat
-	{
-		float floatValue { get; }
-	}
+	float floatValue { get; }
 }

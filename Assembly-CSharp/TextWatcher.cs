@@ -1,26 +1,25 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TextWatcher : MonoBehaviour
 {
+	public WatchableStringSO textToCopy;
+
+	private Text myText;
+
 	private void Start()
 	{
-		this.myText = base.GetComponent<Text>();
-		this.textToCopy.AddCallback(new Action<string>(this.OnTextChanged), true);
+		myText = GetComponent<Text>();
+		textToCopy.AddCallback(OnTextChanged, shouldCallbackNow: true);
 	}
 
 	private void OnDestroy()
 	{
-		this.textToCopy.RemoveCallback(new Action<string>(this.OnTextChanged));
+		textToCopy.RemoveCallback(OnTextChanged);
 	}
 
 	private void OnTextChanged(string newText)
 	{
-		this.myText.text = newText;
+		myText.text = newText;
 	}
-
-	public WatchableStringSO textToCopy;
-
-	private Text myText;
 }

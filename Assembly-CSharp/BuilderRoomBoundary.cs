@@ -1,65 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaTagScripts;
 using UnityEngine;
 
 public class BuilderRoomBoundary : GorillaTriggerBox
 {
-	private void Awake()
-	{
-		foreach (SizeChangerTrigger sizeChangerTrigger in this.enableOnEnterTrigger)
-		{
-			sizeChangerTrigger.OnEnter += this.OnEnteredBoundary;
-		}
-		this.disableOnExitTrigger.OnExit += this.OnExitedBoundary;
-	}
-
-	private void OnDestroy()
-	{
-		foreach (SizeChangerTrigger sizeChangerTrigger in this.enableOnEnterTrigger)
-		{
-			sizeChangerTrigger.OnEnter -= this.OnEnteredBoundary;
-		}
-		this.disableOnExitTrigger.OnExit -= this.OnExitedBoundary;
-	}
-
-	public void OnEnteredBoundary(Collider other)
-	{
-		if (other.attachedRigidbody == null)
-		{
-			return;
-		}
-		this.rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (this.rigRef == null || !this.rigRef.isOfflineVRRig)
-		{
-			return;
-		}
-		BuilderTable builderTable;
-		if (!BuilderTable.TryGetBuilderTableForZone(this.rigRef.zoneEntity.currentZone, out builderTable))
-		{
-			return;
-		}
-		if (!ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks))
-		{
-			return;
-		}
-		this.rigRef.EnableBuilderResizeWatch(true);
-	}
-
-	public void OnExitedBoundary(Collider other)
-	{
-		if (other.attachedRigidbody == null)
-		{
-			return;
-		}
-		this.rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (this.rigRef == null || !this.rigRef.isOfflineVRRig)
-		{
-			return;
-		}
-		this.rigRef.EnableBuilderResizeWatch(false);
-	}
-
 	[SerializeField]
 	private List<SizeChangerTrigger> enableOnEnterTrigger;
 
@@ -67,4 +11,46 @@ public class BuilderRoomBoundary : GorillaTriggerBox
 	private SizeChangerTrigger disableOnExitTrigger;
 
 	private VRRig rigRef;
+
+	private void Awake()
+	{
+		foreach (SizeChangerTrigger item in enableOnEnterTrigger)
+		{
+			item.OnEnter += OnEnteredBoundary;
+		}
+		disableOnExitTrigger.OnExit += OnExitedBoundary;
+	}
+
+	private void OnDestroy()
+	{
+		foreach (SizeChangerTrigger item in enableOnEnterTrigger)
+		{
+			item.OnEnter -= OnEnteredBoundary;
+		}
+		disableOnExitTrigger.OnExit -= OnExitedBoundary;
+	}
+
+	public void OnEnteredBoundary(Collider other)
+	{
+		if (!(other.attachedRigidbody == null))
+		{
+			rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(rigRef == null) && rigRef.isOfflineVRRig && BuilderTable.TryGetBuilderTableForZone(rigRef.zoneEntity.currentZone, out var _) && ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks))
+			{
+				rigRef.EnableBuilderResizeWatch(on: true);
+			}
+		}
+	}
+
+	public void OnExitedBoundary(Collider other)
+	{
+		if (!(other.attachedRigidbody == null))
+		{
+			rigRef = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(rigRef == null) && rigRef.isOfflineVRRig)
+			{
+				rigRef.EnableBuilderResizeWatch(on: false);
+			}
+		}
+	}
 }

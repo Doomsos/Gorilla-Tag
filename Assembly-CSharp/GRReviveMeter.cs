@@ -1,27 +1,26 @@
-﻿using System;
 using UnityEngine;
 
 public class GRReviveMeter : MonoBehaviourTick
 {
+	[SerializeField]
+	private GRReviveStation reviveStation;
+
+	[SerializeField]
+	private Transform meter;
+
 	public void Awake()
 	{
 	}
 
 	public override void Tick()
 	{
-		float num = 0f;
-		if (this.reviveStation != null && VRRig.LocalRig.OwningNetPlayer != null && this.reviveStation.GetReviveCooldownSeconds() > 0.0)
+		float value = 0f;
+		if (reviveStation != null && VRRig.LocalRig.OwningNetPlayer != null && reviveStation.GetReviveCooldownSeconds() > 0.0)
 		{
-			num = (float)this.reviveStation.CalculateRemainingReviveCooldownSeconds(VRRig.LocalRig.OwningNetPlayer.ActorNumber) / (float)this.reviveStation.GetReviveCooldownSeconds();
+			value = (float)reviveStation.CalculateRemainingReviveCooldownSeconds(VRRig.LocalRig.OwningNetPlayer.ActorNumber) / (float)reviveStation.GetReviveCooldownSeconds();
 		}
-		num = Mathf.Clamp(num, 0f, 1f);
-		num = 1f - num;
-		this.meter.localScale = new Vector3(1f, num, 1f);
+		value = Mathf.Clamp(value, 0f, 1f);
+		value = 1f - value;
+		meter.localScale = new Vector3(1f, value, 1f);
 	}
-
-	[SerializeField]
-	private GRReviveStation reviveStation;
-
-	[SerializeField]
-	private Transform meter;
 }

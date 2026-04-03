@@ -1,10 +1,9 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using UnityEngine;
 
-[NetworkInputWeaved(35)]
 [StructLayout(LayoutKind.Explicit, Size = 140)]
+[NetworkInputWeaved(35)]
 public struct NetworkedInput : INetworkInput
 {
 	[FieldOffset(0)]

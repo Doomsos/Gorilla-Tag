@@ -1,20 +1,11 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine;
 
 public class NonCosmeticItemProvider : MonoBehaviour
 {
-	private void OnTriggerEnter(Collider other)
+	public enum ItemType
 	{
-		GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();
-		if (component != null)
-		{
-			GorillaGameManager.instance.FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer).netView.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, new object[]
-			{
-				true,
-				component.isLeftHand
-			});
-		}
+		honeycomb
 	}
 
 	public GTZone zone;
@@ -24,10 +15,14 @@ public class NonCosmeticItemProvider : MonoBehaviour
 
 	public int conditionThreshold;
 
-	public NonCosmeticItemProvider.ItemType itemType;
+	public ItemType itemType;
 
-	public enum ItemType
+	private void OnTriggerEnter(Collider other)
 	{
-		honeycomb
+		GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();
+		if (component != null)
+		{
+			GorillaGameManager.instance.FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer).netView.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, true, component.isLeftHand);
+		}
 	}
 }

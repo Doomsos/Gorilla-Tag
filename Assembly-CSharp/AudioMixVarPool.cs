@@ -1,17 +1,19 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New AudioMixVarPool", menuName = "ScriptableObjects/AudioMixVarPool", order = 0)]
 public class AudioMixVarPool : ScriptableObject
 {
+	[SerializeField]
+	private AudioMixVar[] _vars = new AudioMixVar[0];
+
 	public bool Rent(out AudioMixVar mixVar)
 	{
-		for (int i = 0; i < this._vars.Length; i++)
+		for (int i = 0; i < _vars.Length; i++)
 		{
-			if (!this._vars[i].taken)
+			if (!_vars[i].taken)
 			{
-				this._vars[i].taken = true;
-				mixVar = this._vars[i];
+				_vars[i].taken = true;
+				mixVar = _vars[i];
 				return true;
 			}
 		}
@@ -21,18 +23,13 @@ public class AudioMixVarPool : ScriptableObject
 
 	public void Return(AudioMixVar mixVar)
 	{
-		if (mixVar == null)
+		if (mixVar != null)
 		{
-			return;
+			int num = _vars.IndexOfRef(mixVar);
+			if (num != -1)
+			{
+				_vars[num].taken = false;
+			}
 		}
-		int num = this._vars.IndexOfRef(mixVar);
-		if (num == -1)
-		{
-			return;
-		}
-		this._vars[num].taken = false;
 	}
-
-	[SerializeField]
-	private AudioMixVar[] _vars = new AudioMixVar[0];
 }

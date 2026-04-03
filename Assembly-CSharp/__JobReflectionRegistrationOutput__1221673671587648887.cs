@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BoingKit;
 using FastSurfaceNets;
 using GorillaLocomotion.Gameplay;
@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Jobs;
 using Voxels;
 
-[DOTSCompilerGenerated]
+[Unity.Jobs.DOTSCompilerGenerated]
 internal class __JobReflectionRegistrationOutput__1221673671587648887
 {
 	public static void CreateJobReflectionData()
@@ -60,6 +60,6 @@ internal class __JobReflectionRegistrationOutput__1221673671587648887
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 	public static void EarlyInit()
 	{
-		__JobReflectionRegistrationOutput__1221673671587648887.CreateJobReflectionData();
+		CreateJobReflectionData();
 	}
 }

@@ -1,62 +1,54 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaNetworking;
 using UnityEngine;
 
-namespace CosmeticRoom
+namespace CosmeticRoom;
+
+public class FittingRoom : MonoBehaviour
 {
-	public class FittingRoom : MonoBehaviour
+	public FittingRoomButton[] fittingRoomButtons;
+
+	public GameObject consoleMesh;
+
+	private int iterator;
+
+	public bool addOnEnable;
+
+	public void InitializeForCustomMap(bool useCustomConsoleMesh = true)
 	{
-		public void InitializeForCustomMap(bool useCustomConsoleMesh = true)
+		consoleMesh?.SetActive(!useCustomConsoleMesh);
+		CosmeticsController.instance.AddFittingRoom(this);
+	}
+
+	private void OnEnable()
+	{
+		if (addOnEnable)
 		{
-			GameObject gameObject = this.consoleMesh;
-			if (gameObject != null)
-			{
-				gameObject.SetActive(!useCustomConsoleMesh);
-			}
 			CosmeticsController.instance.AddFittingRoom(this);
 		}
+	}
 
-		private void OnEnable()
+	private void OnDisable()
+	{
+		if (addOnEnable)
 		{
-			if (this.addOnEnable)
+			CosmeticsController.instance.RemoveFittingRoom(this);
+		}
+	}
+
+	public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticSet tryOnSet)
+	{
+		for (iterator = 0; iterator < fittingRoomButtons.Length; iterator++)
+		{
+			if (iterator < currentCart.Count)
 			{
-				CosmeticsController.instance.AddFittingRoom(this);
+				bool isInTryOnSet = CosmeticsController.instance.AnyMatch(tryOnSet, currentCart[iterator]);
+				fittingRoomButtons[iterator].SetItem(currentCart[iterator], isInTryOnSet);
+			}
+			else
+			{
+				fittingRoomButtons[iterator].ClearItem();
 			}
 		}
-
-		private void OnDisable()
-		{
-			if (this.addOnEnable)
-			{
-				CosmeticsController.instance.RemoveFittingRoom(this);
-			}
-		}
-
-		public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticSet tryOnSet)
-		{
-			this.iterator = 0;
-			while (this.iterator < this.fittingRoomButtons.Length)
-			{
-				if (this.iterator < currentCart.Count)
-				{
-					bool isInTryOnSet = CosmeticsController.instance.AnyMatch(tryOnSet, currentCart[this.iterator]);
-					this.fittingRoomButtons[this.iterator].SetItem(currentCart[this.iterator], isInTryOnSet);
-				}
-				else
-				{
-					this.fittingRoomButtons[this.iterator].ClearItem();
-				}
-				this.iterator++;
-			}
-		}
-
-		public FittingRoomButton[] fittingRoomButtons;
-
-		public GameObject consoleMesh;
-
-		private int iterator;
-
-		public bool addOnEnable;
 	}
 }

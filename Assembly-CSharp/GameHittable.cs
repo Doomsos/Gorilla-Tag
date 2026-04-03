@@ -1,99 +1,113 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameHittable : MonoBehaviour
 {
+	[Serializable]
+	public class HittablePoint
+	{
+		public List<Collider> colliders;
+
+		public GRDamageFlash damageFlash;
+	}
+
+	public GameEntity gameEntity;
+
+	public List<HittablePoint> hittablePoints;
+
+	private List<IGameHittable> components;
+
 	private void Awake()
 	{
-		this.components = new List<IGameHittable>(1);
-		base.GetComponentsInChildren<IGameHittable>(this.components);
-		for (int i = 0; i < this.hittablePoints.Count; i++)
+		components = new List<IGameHittable>(1);
+		GetComponentsInChildren(components);
+		for (int i = 0; i < hittablePoints.Count; i++)
 		{
-			this.hittablePoints[i].damageFlash.Setup();
+			hittablePoints[i].damageFlash.Setup();
 		}
 	}
 
 	private void OnEnable()
 	{
-		if (this.gameEntity != null)
+		if (gameEntity != null)
 		{
-			GameEntity gameEntity = this.gameEntity;
-			gameEntity.OnTick = (Action)Delegate.Combine(gameEntity.OnTick, new Action(this.OnUpdate));
+			GameEntity obj = gameEntity;
+			obj.OnTick = (Action)Delegate.Combine(obj.OnTick, new Action(OnUpdate));
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (this.gameEntity != null)
+		if (gameEntity != null)
 		{
-			GameEntity gameEntity = this.gameEntity;
-			gameEntity.OnTick = (Action)Delegate.Remove(gameEntity.OnTick, new Action(this.OnUpdate));
+			GameEntity obj = gameEntity;
+			obj.OnTick = (Action)Delegate.Remove(obj.OnTick, new Action(OnUpdate));
 		}
 	}
 
 	public void OnUpdate()
 	{
-		for (int i = 0; i < this.hittablePoints.Count; i++)
+		for (int i = 0; i < hittablePoints.Count; i++)
 		{
-			this.hittablePoints[i].damageFlash.Update();
+			hittablePoints[i].damageFlash.Update();
 		}
 	}
 
 	public void RequestHit(GameHitData hitData)
 	{
-		hitData.hitEntityId = this.gameEntity.id;
-		this.gameEntity.manager.RequestHit(hitData);
+		hitData.hitEntityId = gameEntity.id;
+		gameEntity.manager.RequestHit(hitData);
 	}
 
 	public void ApplyHit(GameHitData hitData)
 	{
-		for (int i = 0; i < this.components.Count; i++)
+		for (int i = 0; i < components.Count; i++)
 		{
-			this.components[i].OnHit(hitData);
+			components[i].OnHit(hitData);
 		}
-		GameHitter component = this.gameEntity.manager.GetGameEntity(hitData.hitByEntityId).GetComponent<GameHitter>();
+		GameHitter component = gameEntity.manager.GetGameEntity(hitData.hitByEntityId).GetComponent<GameHitter>();
 		if (component != null)
 		{
 			component.ApplyHit(hitData);
 		}
-		GameHittable.HittablePoint hittablePoint = this.GetHittablePoint(hitData.hittablePoint);
-		if (hittablePoint != null)
-		{
-			hittablePoint.damageFlash.Play();
-		}
+		GetHittablePoint(hitData.hittablePoint)?.damageFlash.Play();
 	}
 
-	private GameHittable.HittablePoint GetHittablePoint(int hittablePoint)
+	private HittablePoint GetHittablePoint(int hittablePoint)
 	{
-		if (hittablePoint < 0 || hittablePoint >= this.hittablePoints.Count)
+		if (hittablePoint < 0 || hittablePoint >= hittablePoints.Count)
 		{
 			return null;
 		}
-		return this.hittablePoints[hittablePoint];
+		return hittablePoints[hittablePoint];
 	}
 
 	public bool IsHitValid(GameHitData hitData)
 	{
-		for (int i = 0; i < this.components.Count; i++)
+		for (int i = 0; i < components.Count; i++)
 		{
-			if (!this.components[i].IsHitValid(hitData))
+			if (!components[i].IsHitValid(hitData))
 			{
 				return false;
 			}
 		}
-		return this.hittablePoints.Count <= 0 || (hitData.hittablePoint >= 0 && hitData.hittablePoint < this.hittablePoints.Count);
+		if (hittablePoints.Count > 0 && (hitData.hittablePoint < 0 || hitData.hittablePoint >= hittablePoints.Count))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public int FindHittablePoint(Collider collider)
 	{
-		if (this.hittablePoints == null || this.hittablePoints.Count == 0)
+		if (hittablePoints == null || hittablePoints.Count == 0)
 		{
 			return 0;
 		}
-		for (int i = 0; i < this.hittablePoints.Count; i++)
+		for (int i = 0; i < hittablePoints.Count; i++)
 		{
-			if (this.hittablePoints[i].colliders.Contains(collider))
+			if (hittablePoints[i].colliders.Contains(collider))
 			{
 				return i;
 			}
@@ -103,31 +117,17 @@ public class GameHittable : MonoBehaviour
 
 	public bool IsColliderValid(Collider collider)
 	{
-		if (this.hittablePoints == null || this.hittablePoints.Count == 0)
+		if (hittablePoints == null || hittablePoints.Count == 0)
 		{
 			return true;
 		}
-		for (int i = 0; i < this.hittablePoints.Count; i++)
+		for (int i = 0; i < hittablePoints.Count; i++)
 		{
-			if (this.hittablePoints[i].colliders.Contains(collider))
+			if (hittablePoints[i].colliders.Contains(collider))
 			{
 				return true;
 			}
 		}
 		return false;
-	}
-
-	public GameEntity gameEntity;
-
-	public List<GameHittable.HittablePoint> hittablePoints;
-
-	private List<IGameHittable> components;
-
-	[Serializable]
-	public class HittablePoint
-	{
-		public List<Collider> colliders;
-
-		public GRDamageFlash damageFlash;
 	}
 }

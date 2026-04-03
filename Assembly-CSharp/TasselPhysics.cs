@@ -1,43 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class TasselPhysics : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.centerOfMassLength = this.localCenterOfMass.magnitude;
-		if (this.LockXAxis)
-		{
-			this.rotCorrection = Quaternion.Inverse(Quaternion.LookRotation(Vector3.right, this.localCenterOfMass));
-			return;
-		}
-		this.rotCorrection = Quaternion.Inverse(Quaternion.LookRotation(this.localCenterOfMass));
-	}
-
-	private void Update()
-	{
-		float y = base.transform.lossyScale.y;
-		this.velocity *= this.drag;
-		this.velocity.y = this.velocity.y - this.gravityStrength * y * Time.deltaTime;
-		Vector3 position = base.transform.position;
-		Vector3 a = this.lastCenterPos + this.velocity * Time.deltaTime;
-		Vector3 a2 = position + (a - position).normalized * this.centerOfMassLength * y;
-		this.velocity = (a2 - this.lastCenterPos) / Time.deltaTime;
-		this.lastCenterPos = a2;
-		if (this.LockXAxis)
-		{
-			foreach (GameObject gameObject in this.tasselInstances)
-			{
-				gameObject.transform.rotation = Quaternion.LookRotation(gameObject.transform.right, a2 - position) * this.rotCorrection;
-			}
-			return;
-		}
-		foreach (GameObject gameObject2 in this.tasselInstances)
-		{
-			gameObject2.transform.rotation = Quaternion.LookRotation(a2 - position, gameObject2.transform.position - position) * this.rotCorrection;
-		}
-	}
-
 	[SerializeField]
 	private GameObject[] tasselInstances;
 
@@ -60,4 +24,45 @@ public class TasselPhysics : MonoBehaviour
 	private float centerOfMassLength;
 
 	private Quaternion rotCorrection;
+
+	private void Awake()
+	{
+		centerOfMassLength = localCenterOfMass.magnitude;
+		if (LockXAxis)
+		{
+			rotCorrection = Quaternion.Inverse(Quaternion.LookRotation(Vector3.right, localCenterOfMass));
+		}
+		else
+		{
+			rotCorrection = Quaternion.Inverse(Quaternion.LookRotation(localCenterOfMass));
+		}
+	}
+
+	private void Update()
+	{
+		float y = base.transform.lossyScale.y;
+		velocity *= drag;
+		velocity.y -= gravityStrength * y * Time.deltaTime;
+		Vector3 position = base.transform.position;
+		Vector3 vector = lastCenterPos + velocity * Time.deltaTime;
+		Vector3 vector2 = position + (vector - position).normalized * centerOfMassLength * y;
+		velocity = (vector2 - lastCenterPos) / Time.deltaTime;
+		lastCenterPos = vector2;
+		if (LockXAxis)
+		{
+			GameObject[] array = tasselInstances;
+			foreach (GameObject gameObject in array)
+			{
+				gameObject.transform.rotation = Quaternion.LookRotation(gameObject.transform.right, vector2 - position) * rotCorrection;
+			}
+		}
+		else
+		{
+			GameObject[] array = tasselInstances;
+			foreach (GameObject gameObject2 in array)
+			{
+				gameObject2.transform.rotation = Quaternion.LookRotation(vector2 - position, gameObject2.transform.position - position) * rotCorrection;
+			}
+		}
+	}
 }

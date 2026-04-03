@@ -1,41 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class DJDeckEqualizer : MonoBehaviour
 {
-	private void Start()
-	{
-		this.inputColorHash = this.inputColorProperty;
-		this.material = this.display.material;
-	}
-
-	private void Update()
-	{
-		Color value = default(Color);
-		value.r = 0.25f;
-		value.g = 0.25f;
-		value.b = 0.5f;
-		for (int i = 0; i < this.redTracks.Length; i++)
-		{
-			AudioSource audioSource = this.redTracks[i];
-			if (audioSource.isPlaying)
-			{
-				value.r = Mathf.Lerp(0.25f, 1f, this.redTrackCurves[i].Evaluate(audioSource.time));
-				break;
-			}
-		}
-		for (int j = 0; j < this.greenTracks.Length; j++)
-		{
-			AudioSource audioSource2 = this.greenTracks[j];
-			if (audioSource2.isPlaying)
-			{
-				value.g = Mathf.Lerp(0.25f, 1f, this.greenTrackCurves[j].Evaluate(audioSource2.time));
-				break;
-			}
-		}
-		this.material.SetColor(this.inputColorHash, value);
-	}
-
 	[SerializeField]
 	private MeshRenderer display;
 
@@ -57,4 +23,39 @@ public class DJDeckEqualizer : MonoBehaviour
 	private string inputColorProperty;
 
 	private ShaderHashId inputColorHash;
+
+	private void Start()
+	{
+		inputColorHash = inputColorProperty;
+		material = display.material;
+	}
+
+	private void Update()
+	{
+		Color value = new Color
+		{
+			r = 0.25f,
+			g = 0.25f,
+			b = 0.5f
+		};
+		for (int i = 0; i < redTracks.Length; i++)
+		{
+			AudioSource audioSource = redTracks[i];
+			if (audioSource.isPlaying)
+			{
+				value.r = Mathf.Lerp(0.25f, 1f, redTrackCurves[i].Evaluate(audioSource.time));
+				break;
+			}
+		}
+		for (int j = 0; j < greenTracks.Length; j++)
+		{
+			AudioSource audioSource2 = greenTracks[j];
+			if (audioSource2.isPlaying)
+			{
+				value.g = Mathf.Lerp(0.25f, 1f, greenTrackCurves[j].Evaluate(audioSource2.time));
+				break;
+			}
+		}
+		material.SetColor(inputColorHash, value);
+	}
 }

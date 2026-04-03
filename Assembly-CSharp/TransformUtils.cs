@@ -1,9 +1,10 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class TransformUtils
 {
+	private const string kFwdSlash = "/";
+
 	public static int ComputePathHashByInstance(Transform t)
 	{
 		if (t == null)
@@ -26,15 +27,15 @@ public static class TransformUtils
 		{
 			return default(Hash128);
 		}
-		Hash128 result = default(Hash128);
+		Hash128 outHash = default(Hash128);
 		Transform transform = t;
 		while (transform != null)
 		{
-			Hash128 hash = Hash128.Compute(transform.name);
-			HashUtilities.AppendHash(ref hash, ref result);
+			Hash128 inHash = Hash128.Compute(transform.name);
+			HashUtilities.AppendHash(ref inHash, ref outHash);
 			transform = transform.parent;
 		}
-		return result;
+		return outHash;
 	}
 
 	public static string GetScenePath(Transform t)
@@ -73,6 +74,4 @@ public static class TransformUtils
 		}
 		return text;
 	}
-
-	private const string kFwdSlash = "/";
 }

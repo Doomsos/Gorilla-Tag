@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,305 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class ZoneManagement : MonoBehaviour
 {
-	public static event ZoneManagement.ZoneChangeEvent OnZoneChange;
-
-	public bool hasInstance { get; private set; }
-
-	private void Awake()
-	{
-		if (ZoneManagement.instance == null)
-		{
-			this.Initialize();
-			return;
-		}
-		if (ZoneManagement.instance != this)
-		{
-			Object.Destroy(base.gameObject);
-		}
-	}
-
-	public static void SetActiveZone(GTZone zone)
-	{
-		ZoneManagement.SetActiveZones(new GTZone[]
-		{
-			zone
-		});
-	}
-
-	public static void SetActiveZones(GTZone[] zones)
-	{
-		if (ZoneManagement.instance == null)
-		{
-			ZoneManagement.FindInstance();
-		}
-		if (zones == null || zones.Length == 0)
-		{
-			return;
-		}
-		ZoneManagement.instance.SetZones(zones);
-		Action action = ZoneManagement.instance.onZoneChanged;
-		if (action != null)
-		{
-			action();
-		}
-		if (ZoneManagement.OnZoneChange != null)
-		{
-			ZoneManagement.OnZoneChange(ZoneManagement.instance.zones);
-		}
-	}
-
-	public static bool IsInZone(GTZone zone)
-	{
-		if (ZoneManagement.instance == null)
-		{
-			ZoneManagement.FindInstance();
-		}
-		ZoneData zoneData = ZoneManagement.instance.GetZoneData(zone);
-		return zoneData != null && zoneData.active;
-	}
-
-	public GameObject GetPrimaryGameObject(GTZone zone)
-	{
-		return this.GetZoneData(zone).rootGameObjects[0];
-	}
-
-	public static void AddSceneToForceStayLoaded(string sceneName)
-	{
-		if (ZoneManagement.instance == null)
-		{
-			ZoneManagement.FindInstance();
-		}
-		ZoneManagement.instance.sceneForceStayLoaded.Add(sceneName);
-	}
-
-	public static void RemoveSceneFromForceStayLoaded(string sceneName)
-	{
-		if (ZoneManagement.instance == null)
-		{
-			ZoneManagement.FindInstance();
-		}
-		ZoneManagement.instance.sceneForceStayLoaded.Remove(sceneName);
-	}
-
-	public static void FindInstance()
-	{
-		ZoneManagement zoneManagement = Object.FindAnyObjectByType<ZoneManagement>();
-		if (zoneManagement == null)
-		{
-			throw new NullReferenceException("Unable to find ZoneManagement object in scene.");
-		}
-		Debug.LogWarning("ZoneManagement accessed before MonoBehaviour awake function called; consider delaying zone management functions to avoid FindObject lookup.");
-		zoneManagement.Initialize();
-	}
-
-	public bool IsSceneLoaded(GTZone gtZone)
-	{
-		foreach (ZoneData zoneData in this.zones)
-		{
-			if (zoneData.zone == gtZone && this.scenesLoaded.Contains(zoneData.sceneName))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public bool IsZoneActive(GTZone zone)
-	{
-		ZoneData zoneData = this.GetZoneData(zone);
-		return zoneData != null && zoneData.active;
-	}
-
-	public HashSet<string> GetAllLoadedScenes()
-	{
-		return this.scenesLoaded;
-	}
-
-	public bool IsSceneLoaded(string sceneName)
-	{
-		return this.scenesLoaded.Contains(sceneName);
-	}
-
-	private void Initialize()
-	{
-		ZoneManagement.instance = this;
-		this.hasInstance = true;
-		HashSet<GameObject> hashSet = new HashSet<GameObject>();
-		List<GameObject> list = new List<GameObject>(8);
-		for (int i = 0; i < this.zones.Length; i++)
-		{
-			list.Clear();
-			ZoneData zoneData = this.zones[i];
-			if (zoneData != null && zoneData.rootGameObjects != null)
-			{
-				hashSet.UnionWith(zoneData.rootGameObjects);
-				for (int j = 0; j < zoneData.rootGameObjects.Length; j++)
-				{
-					GameObject gameObject = zoneData.rootGameObjects[j];
-					if (!(gameObject == null))
-					{
-						list.Add(gameObject);
-					}
-				}
-				hashSet.UnionWith(list);
-			}
-		}
-		this.allObjects = hashSet.ToArray<GameObject>();
-		this.objectActivationState = new bool[this.allObjects.Length];
-		ZoneManagement.AddSceneToForceStayLoaded("City");
-	}
-
-	public bool ZonesSetting { get; private set; }
-
-	private void SetZones(GTZone[] newActiveZones)
-	{
-		this.ZonesSetting = true;
-		for (int i = 0; i < this.objectActivationState.Length; i++)
-		{
-			this.objectActivationState[i] = false;
-		}
-		this.activeZones.Clear();
-		for (int j = 0; j < newActiveZones.Length; j++)
-		{
-			this.activeZones.Add(newActiveZones[j]);
-		}
-		this.scenesRequested.Clear();
-		this.scenesRequested.Add("GorillaTag");
-		float num = 0f;
-		for (int k = 0; k < this.zones.Length; k++)
-		{
-			ZoneData zoneData = this.zones[k];
-			if (zoneData != null)
-			{
-				if (zoneData.rootGameObjects == null || !newActiveZones.Contains(zoneData.zone))
-				{
-					zoneData.active = false;
-				}
-				else
-				{
-					zoneData.active = true;
-					num = Mathf.Max(num, zoneData.CameraFarClipPlane);
-					if (!string.IsNullOrEmpty(zoneData.sceneName))
-					{
-						this.scenesRequested.Add(zoneData.sceneName);
-					}
-					foreach (GameObject x in zoneData.rootGameObjects)
-					{
-						if (!(x == null))
-						{
-							for (int m = 0; m < this.allObjects.Length; m++)
-							{
-								if (x == this.allObjects[m])
-								{
-									this.objectActivationState[m] = true;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (this.mainCamera == null)
-		{
-			this.mainCamera = Camera.main;
-		}
-		this.mainCamera.farClipPlane = num;
-		int loadedSceneCount = SceneManager.loadedSceneCount;
-		for (int n = 0; n < loadedSceneCount; n++)
-		{
-			this.scenesLoaded.Add(SceneManager.GetSceneAt(n).name);
-		}
-		foreach (string text in this.scenesRequested)
-		{
-			if (this.scenesLoaded.Add(text))
-			{
-				AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(text, LoadSceneMode.Additive);
-				this._scenes_to_loadOps[text] = asyncOperation;
-				asyncOperation.completed += this.HandleOnSceneLoadCompleted;
-			}
-		}
-		this.scenesToUnload.Clear();
-		foreach (string item in this.scenesLoaded)
-		{
-			if (!this.scenesRequested.Contains(item) && !this.sceneForceStayLoaded.Contains(item))
-			{
-				this.scenesToUnload.Add(item);
-			}
-		}
-		foreach (string text2 in this.scenesToUnload)
-		{
-			this.scenesLoaded.Remove(text2);
-			AsyncOperation value = SceneManager.UnloadSceneAsync(text2);
-			this._scenes_to_unloadOps[text2] = value;
-		}
-		for (int num2 = 0; num2 < this.objectActivationState.Length; num2++)
-		{
-			if (!(this.allObjects[num2] == null))
-			{
-				this.allObjects[num2].SetActive(this.objectActivationState[num2]);
-			}
-		}
-	}
-
-	private void HandleOnSceneLoadCompleted(AsyncOperation thisLoadOp)
-	{
-		foreach (KeyValuePair<string, AsyncOperation> keyValuePair in this._scenes_to_loadOps)
-		{
-			string text;
-			AsyncOperation asyncOperation;
-			keyValuePair.Deconstruct(out text, out asyncOperation);
-			string str = text;
-			AsyncOperation asyncOperation2 = asyncOperation;
-			if (asyncOperation2 == null)
-			{
-				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `loadOp` null in `_scenes_to_loadOps` for scene \"" + str + "\"?????");
-			}
-			else if (!asyncOperation2.isDone)
-			{
-				return;
-			}
-		}
-		foreach (KeyValuePair<string, AsyncOperation> keyValuePair in this._scenes_to_unloadOps)
-		{
-			string text;
-			AsyncOperation asyncOperation;
-			keyValuePair.Deconstruct(out text, out asyncOperation);
-			string str2 = text;
-			AsyncOperation asyncOperation3 = asyncOperation;
-			if (asyncOperation3 == null)
-			{
-				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `unloadOps` null in `_scenes_to_unloadOps` for scene \"" + str2 + "\"?????");
-			}
-			else if (!asyncOperation3.isDone)
-			{
-				return;
-			}
-		}
-		Action onSceneLoadsCompleted = this.OnSceneLoadsCompleted;
-		if (onSceneLoadsCompleted != null)
-		{
-			onSceneLoadsCompleted();
-		}
-		this.ZonesSetting = false;
-	}
-
-	private ZoneData GetZoneData(GTZone zone)
-	{
-		for (int i = 0; i < this.zones.Length; i++)
-		{
-			if (this.zones[i].zone == zone)
-			{
-				return this.zones[i];
-			}
-		}
-		return null;
-	}
-
-	public static bool IsValidZoneInt(int zoneInt)
-	{
-		return zoneInt >= 11 && zoneInt <= 24;
-	}
+	public delegate void ZoneChangeEvent(ZoneData[] zones);
 
 	private const string preLog = "[GT/ZoneManagement]  ";
 
@@ -341,5 +43,293 @@ public class ZoneManagement : MonoBehaviour
 
 	private Camera mainCamera;
 
-	public delegate void ZoneChangeEvent(ZoneData[] zones);
+	public bool hasInstance { get; private set; }
+
+	public bool ZonesSetting { get; private set; }
+
+	public static event ZoneChangeEvent OnZoneChange;
+
+	private void Awake()
+	{
+		if (instance == null)
+		{
+			Initialize();
+		}
+		else if (instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
+
+	public static void SetActiveZone(GTZone zone)
+	{
+		SetActiveZones(new GTZone[1] { zone });
+	}
+
+	public static void SetActiveZones(GTZone[] zones)
+	{
+		if (instance == null)
+		{
+			FindInstance();
+		}
+		if (zones != null && zones.Length != 0)
+		{
+			instance.SetZones(zones);
+			instance.onZoneChanged?.Invoke();
+			if (ZoneManagement.OnZoneChange != null)
+			{
+				ZoneManagement.OnZoneChange(instance.zones);
+			}
+		}
+	}
+
+	public static bool IsInZone(GTZone zone)
+	{
+		if (instance == null)
+		{
+			FindInstance();
+		}
+		return instance.GetZoneData(zone)?.active ?? false;
+	}
+
+	public GameObject GetPrimaryGameObject(GTZone zone)
+	{
+		return GetZoneData(zone).rootGameObjects[0];
+	}
+
+	public static void AddSceneToForceStayLoaded(string sceneName)
+	{
+		if (instance == null)
+		{
+			FindInstance();
+		}
+		instance.sceneForceStayLoaded.Add(sceneName);
+	}
+
+	public static void RemoveSceneFromForceStayLoaded(string sceneName)
+	{
+		if (instance == null)
+		{
+			FindInstance();
+		}
+		instance.sceneForceStayLoaded.Remove(sceneName);
+	}
+
+	public static void FindInstance()
+	{
+		ZoneManagement zoneManagement = UnityEngine.Object.FindAnyObjectByType<ZoneManagement>();
+		if (zoneManagement == null)
+		{
+			throw new NullReferenceException("Unable to find ZoneManagement object in scene.");
+		}
+		Debug.LogWarning("ZoneManagement accessed before MonoBehaviour awake function called; consider delaying zone management functions to avoid FindObject lookup.");
+		zoneManagement.Initialize();
+	}
+
+	public bool IsSceneLoaded(GTZone gtZone)
+	{
+		ZoneData[] array = zones;
+		foreach (ZoneData zoneData in array)
+		{
+			if (zoneData.zone == gtZone && scenesLoaded.Contains(zoneData.sceneName))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool IsZoneActive(GTZone zone)
+	{
+		return GetZoneData(zone)?.active ?? false;
+	}
+
+	public HashSet<string> GetAllLoadedScenes()
+	{
+		return scenesLoaded;
+	}
+
+	public bool IsSceneLoaded(string sceneName)
+	{
+		return scenesLoaded.Contains(sceneName);
+	}
+
+	private void Initialize()
+	{
+		instance = this;
+		hasInstance = true;
+		HashSet<GameObject> hashSet = new HashSet<GameObject>();
+		List<GameObject> list = new List<GameObject>(8);
+		for (int i = 0; i < zones.Length; i++)
+		{
+			list.Clear();
+			ZoneData zoneData = zones[i];
+			if (zoneData == null || zoneData.rootGameObjects == null)
+			{
+				continue;
+			}
+			hashSet.UnionWith(zoneData.rootGameObjects);
+			for (int j = 0; j < zoneData.rootGameObjects.Length; j++)
+			{
+				GameObject gameObject = zoneData.rootGameObjects[j];
+				if (!(gameObject == null))
+				{
+					list.Add(gameObject);
+				}
+			}
+			hashSet.UnionWith(list);
+		}
+		allObjects = hashSet.ToArray();
+		objectActivationState = new bool[allObjects.Length];
+		AddSceneToForceStayLoaded("City");
+	}
+
+	private void SetZones(GTZone[] newActiveZones)
+	{
+		ZonesSetting = true;
+		for (int i = 0; i < objectActivationState.Length; i++)
+		{
+			objectActivationState[i] = false;
+		}
+		activeZones.Clear();
+		for (int j = 0; j < newActiveZones.Length; j++)
+		{
+			activeZones.Add(newActiveZones[j]);
+		}
+		scenesRequested.Clear();
+		scenesRequested.Add("GorillaTag");
+		float num = 0f;
+		for (int k = 0; k < zones.Length; k++)
+		{
+			ZoneData zoneData = zones[k];
+			if (zoneData == null)
+			{
+				continue;
+			}
+			if (zoneData.rootGameObjects == null || !Enumerable.Contains(newActiveZones, zoneData.zone))
+			{
+				zoneData.active = false;
+				continue;
+			}
+			zoneData.active = true;
+			num = Mathf.Max(num, zoneData.CameraFarClipPlane);
+			if (!string.IsNullOrEmpty(zoneData.sceneName))
+			{
+				scenesRequested.Add(zoneData.sceneName);
+			}
+			GameObject[] rootGameObjects = zoneData.rootGameObjects;
+			foreach (GameObject gameObject in rootGameObjects)
+			{
+				if (gameObject == null)
+				{
+					continue;
+				}
+				for (int m = 0; m < allObjects.Length; m++)
+				{
+					if (gameObject == allObjects[m])
+					{
+						objectActivationState[m] = true;
+						break;
+					}
+				}
+			}
+		}
+		if (mainCamera == null)
+		{
+			mainCamera = Camera.main;
+		}
+		mainCamera.farClipPlane = num;
+		int loadedSceneCount = SceneManager.loadedSceneCount;
+		for (int n = 0; n < loadedSceneCount; n++)
+		{
+			scenesLoaded.Add(SceneManager.GetSceneAt(n).name);
+		}
+		foreach (string item in scenesRequested)
+		{
+			if (scenesLoaded.Add(item))
+			{
+				AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(item, LoadSceneMode.Additive);
+				_scenes_to_loadOps[item] = asyncOperation;
+				asyncOperation.completed += HandleOnSceneLoadCompleted;
+			}
+		}
+		scenesToUnload.Clear();
+		foreach (string item2 in scenesLoaded)
+		{
+			if (!scenesRequested.Contains(item2) && !sceneForceStayLoaded.Contains(item2))
+			{
+				scenesToUnload.Add(item2);
+			}
+		}
+		foreach (string item3 in scenesToUnload)
+		{
+			scenesLoaded.Remove(item3);
+			AsyncOperation value = SceneManager.UnloadSceneAsync(item3);
+			_scenes_to_unloadOps[item3] = value;
+		}
+		for (int num2 = 0; num2 < objectActivationState.Length; num2++)
+		{
+			if (!(allObjects[num2] == null))
+			{
+				allObjects[num2].SetActive(objectActivationState[num2]);
+			}
+		}
+	}
+
+	private void HandleOnSceneLoadCompleted(AsyncOperation thisLoadOp)
+	{
+		string key;
+		AsyncOperation value;
+		foreach (KeyValuePair<string, AsyncOperation> scenes_to_loadOp in _scenes_to_loadOps)
+		{
+			scenes_to_loadOp.Deconstruct(out key, out value);
+			string text = key;
+			AsyncOperation asyncOperation = value;
+			if (asyncOperation == null)
+			{
+				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `loadOp` null in `_scenes_to_loadOps` for scene \"" + text + "\"?????");
+			}
+			else if (!asyncOperation.isDone)
+			{
+				return;
+			}
+		}
+		foreach (KeyValuePair<string, AsyncOperation> scenes_to_unloadOp in _scenes_to_unloadOps)
+		{
+			scenes_to_unloadOp.Deconstruct(out key, out value);
+			string text2 = key;
+			AsyncOperation asyncOperation2 = value;
+			if (asyncOperation2 == null)
+			{
+				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `unloadOps` null in `_scenes_to_unloadOps` for scene \"" + text2 + "\"?????");
+			}
+			else if (!asyncOperation2.isDone)
+			{
+				return;
+			}
+		}
+		OnSceneLoadsCompleted?.Invoke();
+		ZonesSetting = false;
+	}
+
+	private ZoneData GetZoneData(GTZone zone)
+	{
+		for (int i = 0; i < zones.Length; i++)
+		{
+			if (zones[i].zone == zone)
+			{
+				return zones[i];
+			}
+		}
+		return null;
+	}
+
+	public static bool IsValidZoneInt(int zoneInt)
+	{
+		if (zoneInt >= 11)
+		{
+			return zoneInt <= 24;
+		}
+		return false;
+	}
 }

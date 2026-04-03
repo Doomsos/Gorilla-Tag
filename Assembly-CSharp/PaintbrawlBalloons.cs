@@ -1,111 +1,8 @@
-﻿using System;
 using Photon.Realtime;
 using UnityEngine;
 
 public class PaintbrawlBalloons : MonoBehaviour
 {
-	protected void Awake()
-	{
-		this.matPropBlock = new MaterialPropertyBlock();
-		this.renderers = new Renderer[this.balloons.Length];
-		this.balloonsCachedActiveState = new bool[this.balloons.Length];
-		for (int i = 0; i < this.balloons.Length; i++)
-		{
-			this.renderers[i] = this.balloons[i].GetComponentInChildren<Renderer>();
-			this.balloonsCachedActiveState[i] = this.balloons[i].activeSelf;
-		}
-		this.colorShaderPropID = ShaderProps._Color;
-	}
-
-	protected void OnEnable()
-	{
-		this.UpdateBalloonColors();
-	}
-
-	protected void LateUpdate()
-	{
-		if (GorillaGameManager.instance != null && (this.bMgr != null || GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>() != null))
-		{
-			if (this.bMgr == null)
-			{
-				this.bMgr = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
-			}
-			int playerLives = this.bMgr.GetPlayerLives(this.myRig.creator);
-			for (int i = 0; i < this.balloons.Length; i++)
-			{
-				bool flag = playerLives >= i + 1;
-				if (flag != this.balloonsCachedActiveState[i])
-				{
-					this.balloonsCachedActiveState[i] = flag;
-					this.balloons[i].SetActive(flag);
-					if (!flag)
-					{
-						this.PopBalloon(i);
-					}
-				}
-			}
-		}
-		else if (GorillaGameManager.instance != null)
-		{
-			base.gameObject.SetActive(false);
-		}
-		this.UpdateBalloonColors();
-	}
-
-	private void PopBalloon(int i)
-	{
-		GameObject gameObject = ObjectPools.instance.Instantiate(this.balloonPopFXPrefab, true);
-		gameObject.transform.position = this.balloons[i].transform.position;
-		GorillaColorizableBase componentInChildren = gameObject.GetComponentInChildren<GorillaColorizableBase>();
-		if (componentInChildren != null)
-		{
-			componentInChildren.SetColor(this.teamColor);
-		}
-	}
-
-	public void UpdateBalloonColors()
-	{
-		if (this.bMgr != null && this.myRig.creator != null)
-		{
-			if (this.bMgr.OnRedTeam(this.myRig.creator))
-			{
-				this.teamColor = this.orangeColor;
-			}
-			else if (this.bMgr.OnBlueTeam(this.myRig.creator))
-			{
-				this.teamColor = this.blueColor;
-			}
-			else
-			{
-				this.teamColor = (this.myRig ? this.myRig.playerColor : this.defaultColor);
-			}
-		}
-		if (this.teamColor != this.lastColor)
-		{
-			this.lastColor = this.teamColor;
-			foreach (Renderer renderer in this.renderers)
-			{
-				if (renderer)
-				{
-					foreach (Material material in renderer.materials)
-					{
-						if (!(material == null))
-						{
-							if (material.HasProperty(ShaderProps._BaseColor))
-							{
-								material.SetColor(ShaderProps._BaseColor, this.teamColor);
-							}
-							if (material.HasProperty(ShaderProps._Color))
-							{
-								material.SetColor(ShaderProps._Color, this.teamColor);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	public VRRig myRig;
 
 	public GameObject[] balloons;
@@ -134,4 +31,110 @@ public class PaintbrawlBalloons : MonoBehaviour
 	private Renderer[] renderers;
 
 	private Color teamColor;
+
+	protected void Awake()
+	{
+		matPropBlock = new MaterialPropertyBlock();
+		renderers = new Renderer[balloons.Length];
+		balloonsCachedActiveState = new bool[balloons.Length];
+		for (int i = 0; i < balloons.Length; i++)
+		{
+			renderers[i] = balloons[i].GetComponentInChildren<Renderer>();
+			balloonsCachedActiveState[i] = balloons[i].activeSelf;
+		}
+		colorShaderPropID = ShaderProps._Color;
+	}
+
+	protected void OnEnable()
+	{
+		UpdateBalloonColors();
+	}
+
+	protected void LateUpdate()
+	{
+		if (GorillaGameManager.instance != null && (bMgr != null || GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>() != null))
+		{
+			if (bMgr == null)
+			{
+				bMgr = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
+			}
+			int playerLives = bMgr.GetPlayerLives(myRig.creator);
+			for (int i = 0; i < balloons.Length; i++)
+			{
+				bool flag = playerLives >= i + 1;
+				if (flag != balloonsCachedActiveState[i])
+				{
+					balloonsCachedActiveState[i] = flag;
+					balloons[i].SetActive(flag);
+					if (!flag)
+					{
+						PopBalloon(i);
+					}
+				}
+			}
+		}
+		else if (GorillaGameManager.instance != null)
+		{
+			base.gameObject.SetActive(value: false);
+		}
+		UpdateBalloonColors();
+	}
+
+	private void PopBalloon(int i)
+	{
+		GameObject obj = ObjectPools.instance.Instantiate(balloonPopFXPrefab);
+		obj.transform.position = balloons[i].transform.position;
+		GorillaColorizableBase componentInChildren = obj.GetComponentInChildren<GorillaColorizableBase>();
+		if (componentInChildren != null)
+		{
+			componentInChildren.SetColor(teamColor);
+		}
+	}
+
+	public void UpdateBalloonColors()
+	{
+		if (bMgr != null && myRig.creator != null)
+		{
+			if (bMgr.OnRedTeam(myRig.creator))
+			{
+				teamColor = orangeColor;
+			}
+			else if (bMgr.OnBlueTeam(myRig.creator))
+			{
+				teamColor = blueColor;
+			}
+			else
+			{
+				teamColor = (myRig ? myRig.playerColor : defaultColor);
+			}
+		}
+		if (!(teamColor != lastColor))
+		{
+			return;
+		}
+		lastColor = teamColor;
+		Renderer[] array = renderers;
+		foreach (Renderer renderer in array)
+		{
+			if (!renderer)
+			{
+				continue;
+			}
+			Material[] materials = renderer.materials;
+			foreach (Material material in materials)
+			{
+				if (!(material == null))
+				{
+					if (material.HasProperty(ShaderProps._BaseColor))
+					{
+						material.SetColor(ShaderProps._BaseColor, teamColor);
+					}
+					if (material.HasProperty(ShaderProps._Color))
+					{
+						material.SetColor(ShaderProps._Color, teamColor);
+					}
+				}
+			}
+		}
+	}
 }

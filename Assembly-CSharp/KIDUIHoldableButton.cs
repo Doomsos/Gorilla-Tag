@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -6,230 +6,19 @@ using UnityEngine.UI;
 
 public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSystemHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
-	public KIDUIHoldableButton.ButtonHoldCompleteEvent onHoldComplete
+	[Serializable]
+	public class ButtonHoldCompleteEvent : UnityEvent
 	{
-		get
-		{
-			return this.m_OnHoldComplete;
-		}
-		set
-		{
-			this.m_OnHoldComplete = value;
-		}
 	}
 
-	public float HoldPercentage
+	[Serializable]
+	public class ButtonHoldStartEvent : UnityEvent
 	{
-		get
-		{
-			return this._elapsedTime / this._holdDuration;
-		}
 	}
 
-	private void OnEnable()
+	[Serializable]
+	public class ButtonHoldReleaseEvent : UnityEvent
 	{
-		this._holdProgressFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-		}
-	}
-
-	private void Update()
-	{
-		this.ManageButtonInteraction(false);
-	}
-
-	public void OnPointerDown(PointerEventData eventData)
-	{
-		this._isHoldingMouse = true;
-		this.ToggleHoldingButton(true);
-	}
-
-	public void OnPointerUp(PointerEventData eventData)
-	{
-		this._isHoldingMouse = false;
-		this.ManageButtonInteraction(true);
-		this.ToggleHoldingButton(false);
-	}
-
-	private void ToggleHoldingButton(bool isPointerDown)
-	{
-		this._isHoldingButton = (isPointerDown && this._button.interactable);
-		this._holdProgressFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
-		if (isPointerDown)
-		{
-			this._elapsedTime = 0f;
-			KIDUIHoldableButton.ButtonHoldStartEvent onHoldStart = this.m_OnHoldStart;
-			if (onHoldStart != null)
-			{
-				onHoldStart.Invoke();
-			}
-			KIDAudioManager.Instance.StartButtonHeldSound();
-			return;
-		}
-		KIDUIHoldableButton.ButtonHoldReleaseEvent onHoldRelease = this.m_OnHoldRelease;
-		if (onHoldRelease != null)
-		{
-			onHoldRelease.Invoke();
-		}
-		KIDAudioManager.Instance.StopButtonHeldSound();
-	}
-
-	private void ManageButtonInteraction(bool isPointerUp = false)
-	{
-		if (!this._isHoldingButton)
-		{
-			return;
-		}
-		if (isPointerUp)
-		{
-			return;
-		}
-		if (this._holdDuration <= 0f)
-		{
-			this.HoldComplete();
-			return;
-		}
-		this._elapsedTime += Time.deltaTime;
-		bool flag = this._elapsedTime > this._holdDuration;
-		float num = this._elapsedTime / this._holdDuration;
-		this._holdProgressFill.rectTransform.localScale = new Vector3(num, 1f, 1f);
-		HandRayController.Instance.PulseActiveHandray(num, 0.1f);
-		if (flag)
-		{
-			this.HoldComplete();
-		}
-	}
-
-	private void HoldComplete()
-	{
-		this.ToggleHoldingButton(false);
-		KIDUIHoldableButton.ButtonHoldCompleteEvent onHoldComplete = this.m_OnHoldComplete;
-		if (onHoldComplete != null)
-		{
-			onHoldComplete.Invoke();
-		}
-		Debug.Log("[HOLD_BUTTON " + base.name + " ]: Hold Complete");
-		this.ResetButton();
-	}
-
-	private void ResetButton()
-	{
-		this._elapsedTime = 0f;
-		this.inside = false;
-		KIDUIHoldableButton._triggeredThisFrame = false;
-		this._button.ResetButton();
-	}
-
-	protected void Awake()
-	{
-		if (this._button != null)
-		{
-			return;
-		}
-		this._button = base.GetComponentInChildren<KIDUIButton>();
-		if (this._button == null)
-		{
-			Debug.LogError("[KID::UI_BUTTON] Could not find [KIDUIButton] in children, trying to create a new one.");
-			return;
-		}
-	}
-
-	private void PostUpdate()
-	{
-		if (!KIDUIHoldableButton._canTrigger)
-		{
-			KIDUIHoldableButton._canTrigger = !ControllerBehaviour.Instance.TriggerDown;
-		}
-		if (!this._button.interactable || !KIDUIHoldableButton._canTrigger)
-		{
-			return;
-		}
-		if (ControllerBehaviour.Instance)
-		{
-			if (ControllerBehaviour.Instance.TriggerDown && this.inside)
-			{
-				if (!this._isHoldingButton)
-				{
-					string text = string.Concat(new string[]
-					{
-						"[",
-						base.transform.parent.parent.parent.name,
-						".",
-						base.transform.parent.parent.name,
-						".",
-						base.transform.parent.name,
-						".",
-						base.transform.name,
-						"]"
-					});
-					Debug.Log(string.Concat(new string[]
-					{
-						"[KID::UIBUTTON::DEBUG] ",
-						text,
-						" - STEAM - OnClick is pressed. Time: [",
-						Time.time.ToString(),
-						"]"
-					}), this);
-					this.ToggleHoldingButton(true);
-					KIDUIHoldableButton._triggeredThisFrame = true;
-					KIDUIHoldableButton._canTrigger = false;
-					return;
-				}
-			}
-			else if (this._isHoldingButton && !this._isHoldingMouse)
-			{
-				this.ToggleHoldingButton(false);
-			}
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (KIDUIHoldableButton._triggeredThisFrame)
-		{
-			string text = string.Concat(new string[]
-			{
-				"[",
-				base.transform.parent.parent.parent.name,
-				".",
-				base.transform.parent.parent.name,
-				".",
-				base.transform.parent.name,
-				".",
-				base.transform.name,
-				"]"
-			});
-			Debug.Log(string.Concat(new string[]
-			{
-				"[KID::UIBUTTON::DEBUG] ",
-				text,
-				" - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [",
-				Time.time.ToString(),
-				"]"
-			}), this);
-		}
-		KIDUIHoldableButton._triggeredThisFrame = false;
-	}
-
-	public void OnPointerEnter(PointerEventData eventData)
-	{
-		this.inside = true;
-	}
-
-	public void OnPointerExit(PointerEventData eventData)
-	{
-		this.inside = false;
-	}
-
-	protected void OnDisable()
-	{
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-		}
-		this.inside = false;
 	}
 
 	public KIDUIButton _button;
@@ -245,13 +34,13 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 	private UXSettings _cbUXSettings;
 
 	[SerializeField]
-	private KIDUIHoldableButton.ButtonHoldCompleteEvent m_OnHoldComplete = new KIDUIHoldableButton.ButtonHoldCompleteEvent();
+	private ButtonHoldCompleteEvent m_OnHoldComplete = new ButtonHoldCompleteEvent();
 
 	[SerializeField]
-	private KIDUIHoldableButton.ButtonHoldStartEvent m_OnHoldStart = new KIDUIHoldableButton.ButtonHoldStartEvent();
+	private ButtonHoldStartEvent m_OnHoldStart = new ButtonHoldStartEvent();
 
 	[SerializeField]
-	private KIDUIHoldableButton.ButtonHoldReleaseEvent m_OnHoldRelease = new KIDUIHoldableButton.ButtonHoldReleaseEvent();
+	private ButtonHoldReleaseEvent m_OnHoldRelease = new ButtonHoldReleaseEvent();
 
 	private bool _isHoldingButton;
 
@@ -265,18 +54,167 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 
 	private static bool _canTrigger = true;
 
-	[Serializable]
-	public class ButtonHoldCompleteEvent : UnityEvent
+	public ButtonHoldCompleteEvent onHoldComplete
 	{
+		get
+		{
+			return m_OnHoldComplete;
+		}
+		set
+		{
+			m_OnHoldComplete = value;
+		}
 	}
 
-	[Serializable]
-	public class ButtonHoldStartEvent : UnityEvent
+	public float HoldPercentage => _elapsedTime / _holdDuration;
+
+	private void OnEnable()
 	{
+		_holdProgressFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction += PostUpdate;
+		}
 	}
 
-	[Serializable]
-	public class ButtonHoldReleaseEvent : UnityEvent
+	private void Update()
 	{
+		ManageButtonInteraction();
+	}
+
+	public void OnPointerDown(PointerEventData eventData)
+	{
+		_isHoldingMouse = true;
+		ToggleHoldingButton(isPointerDown: true);
+	}
+
+	public void OnPointerUp(PointerEventData eventData)
+	{
+		_isHoldingMouse = false;
+		ManageButtonInteraction(isPointerUp: true);
+		ToggleHoldingButton(isPointerDown: false);
+	}
+
+	private void ToggleHoldingButton(bool isPointerDown)
+	{
+		_isHoldingButton = isPointerDown && _button.interactable;
+		_holdProgressFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
+		if (isPointerDown)
+		{
+			_elapsedTime = 0f;
+			m_OnHoldStart?.Invoke();
+			KIDAudioManager.Instance.StartButtonHeldSound();
+		}
+		else
+		{
+			m_OnHoldRelease?.Invoke();
+			KIDAudioManager.Instance.StopButtonHeldSound();
+		}
+	}
+
+	private void ManageButtonInteraction(bool isPointerUp = false)
+	{
+		if (!_isHoldingButton || isPointerUp)
+		{
+			return;
+		}
+		if (_holdDuration <= 0f)
+		{
+			HoldComplete();
+			return;
+		}
+		_elapsedTime += Time.deltaTime;
+		bool num = _elapsedTime > _holdDuration;
+		float num2 = _elapsedTime / _holdDuration;
+		_holdProgressFill.rectTransform.localScale = new Vector3(num2, 1f, 1f);
+		HandRayController.Instance.PulseActiveHandray(num2, 0.1f);
+		if (num)
+		{
+			HoldComplete();
+		}
+	}
+
+	private void HoldComplete()
+	{
+		ToggleHoldingButton(isPointerDown: false);
+		m_OnHoldComplete?.Invoke();
+		Debug.Log("[HOLD_BUTTON " + base.name + " ]: Hold Complete");
+		ResetButton();
+	}
+
+	private void ResetButton()
+	{
+		_elapsedTime = 0f;
+		inside = false;
+		_triggeredThisFrame = false;
+		_button.ResetButton();
+	}
+
+	protected void Awake()
+	{
+		if (!(_button != null))
+		{
+			_button = GetComponentInChildren<KIDUIButton>();
+			if (_button == null)
+			{
+				Debug.LogError("[KID::UI_BUTTON] Could not find [KIDUIButton] in children, trying to create a new one.");
+			}
+		}
+	}
+
+	private void PostUpdate()
+	{
+		if (!_canTrigger)
+		{
+			_canTrigger = !ControllerBehaviour.Instance.TriggerDown;
+		}
+		if (!_button.interactable || !_canTrigger || !ControllerBehaviour.Instance)
+		{
+			return;
+		}
+		if (ControllerBehaviour.Instance.TriggerDown && inside)
+		{
+			if (!_isHoldingButton)
+			{
+				string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+				Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnClick is pressed. Time: [" + Time.time + "]", this);
+				ToggleHoldingButton(isPointerDown: true);
+				_triggeredThisFrame = true;
+				_canTrigger = false;
+			}
+		}
+		else if (_isHoldingButton && !_isHoldingMouse)
+		{
+			ToggleHoldingButton(isPointerDown: false);
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (_triggeredThisFrame)
+		{
+			string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+			Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [" + Time.time + "]", this);
+		}
+		_triggeredThisFrame = false;
+	}
+
+	public void OnPointerEnter(PointerEventData eventData)
+	{
+		inside = true;
+	}
+
+	public void OnPointerExit(PointerEventData eventData)
+	{
+		inside = false;
+	}
+
+	protected void OnDisable()
+	{
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction -= PostUpdate;
+		}
+		inside = false;
 	}
 }

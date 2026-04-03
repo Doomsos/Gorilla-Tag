@@ -1,4 +1,3 @@
-﻿using System;
 using ExitGames.Client.Photon;
 using Fusion;
 using Photon.Pun;
@@ -7,10 +6,18 @@ using Photon.Realtime;
 [NetworkBehaviourWeaved(0)]
 public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuthorityChanged, IPublicFacingInterface, IOnPhotonViewOwnerChange, IPhotonViewCallback, IInRoomCallbacks, IPunInstantiateMagicCallback
 {
+	public bool IsLocallyOwned => base.IsMine;
+
+	public bool ShouldWriteObjectData => NetworkSystem.Instance.ShouldWriteObjectData(base.gameObject);
+
+	public bool ShouldUpdateobject => NetworkSystem.Instance.ShouldUpdateObject(base.gameObject);
+
+	public int OwnerID => NetworkSystem.Instance.GetOwningPlayerID(base.gameObject);
+
 	internal virtual void OnEnable()
 	{
 		NetworkBehaviourUtils.InternalOnEnable(this);
-		this.AddToNetwork();
+		AddToNetwork();
 	}
 
 	internal virtual void OnDisable()
@@ -22,7 +29,7 @@ public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuth
 	protected override void Start()
 	{
 		base.Start();
-		this.AddToNetwork();
+		AddToNetwork();
 	}
 
 	private void AddToNetwork()
@@ -34,20 +41,20 @@ public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuth
 	{
 		if (NetworkSystem.Instance.InRoom)
 		{
-			this.OnSpawned();
+			OnSpawned();
 		}
 	}
 
 	public override void FixedUpdateNetwork()
 	{
-		this.WriteDataFusion();
+		WriteDataFusion();
 	}
 
 	public override void Render()
 	{
 		if (!base.HasStateAuthority)
 		{
-			this.ReadDataFusion();
+			ReadDataFusion();
 		}
 	}
 
@@ -57,19 +64,18 @@ public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuth
 
 	public virtual void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
-		this.OnSpawned();
+		OnSpawned();
 	}
 
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.IsWriting)
 		{
-			this.WriteDataPUN(stream, info);
-			return;
+			WriteDataPUN(stream, info);
 		}
-		if (stream.IsReading)
+		else if (stream.IsReading)
 		{
-			this.ReadDataPUN(stream, info);
+			ReadDataPUN(stream, info);
 		}
 	}
 
@@ -87,31 +93,28 @@ public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuth
 
 	void IInRoomCallbacks.OnMasterClientSwitched(Player newMasterClient)
 	{
-		this.OnOwnerSwitched(NetworkSystem.Instance.GetPlayer(newMasterClient));
+		OnOwnerSwitched(NetworkSystem.Instance.GetPlayer(newMasterClient));
 	}
 
 	public override void StateAuthorityChanged()
 	{
 		base.StateAuthorityChanged();
-		if (base.Object == null)
+		if (!(base.Object == null) && !(base.Object.StateAuthority == default(PlayerRef)))
 		{
-			return;
+			if (NetworkSystem.Instance.InRoom)
+			{
+				OnOwnerSwitched(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
+			}
+			else
+			{
+				OnOwnerSwitched(NetworkSystem.Instance.LocalPlayer);
+			}
 		}
-		if (base.Object.StateAuthority == default(PlayerRef))
-		{
-			return;
-		}
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.OnOwnerSwitched(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
-			return;
-		}
-		this.OnOwnerSwitched(NetworkSystem.Instance.LocalPlayer);
 	}
 
 	public void OnMasterClientSwitch(NetPlayer newMaster)
 	{
-		this.StateAuthorityChanged();
+		StateAuthorityChanged();
 	}
 
 	void IInRoomCallbacks.OnPlayerEnteredRoom(Player newPlayer)
@@ -134,42 +137,10 @@ public abstract class NetworkComponent : NetworkView, IPunObservable, IStateAuth
 	{
 	}
 
-	public bool IsLocallyOwned
-	{
-		get
-		{
-			return base.IsMine;
-		}
-	}
-
-	public bool ShouldWriteObjectData
-	{
-		get
-		{
-			return NetworkSystem.Instance.ShouldWriteObjectData(base.gameObject);
-		}
-	}
-
-	public bool ShouldUpdateobject
-	{
-		get
-		{
-			return NetworkSystem.Instance.ShouldUpdateObject(base.gameObject);
-		}
-	}
-
-	public int OwnerID
-	{
-		get
-		{
-			return NetworkSystem.Instance.GetOwningPlayerID(base.gameObject);
-		}
-	}
-
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]

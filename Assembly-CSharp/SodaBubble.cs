@@ -1,26 +1,8 @@
-﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class SodaBubble : MonoBehaviour
 {
-	public void Pop()
-	{
-		base.StartCoroutine(this.PopCoroutine());
-	}
-
-	private IEnumerator PopCoroutine()
-	{
-		this.audioSource.GTPlay();
-		this.bubbleMesh.gameObject.SetActive(false);
-		this.bubbleCollider.gameObject.SetActive(false);
-		yield return new WaitForSeconds(1f);
-		this.bubbleMesh.gameObject.SetActive(true);
-		this.bubbleCollider.gameObject.SetActive(true);
-		ObjectPools.instance.Destroy(base.gameObject);
-		yield break;
-	}
-
 	public MeshRenderer bubbleMesh;
 
 	public Rigidbody body;
@@ -28,4 +10,20 @@ public class SodaBubble : MonoBehaviour
 	public MeshCollider bubbleCollider;
 
 	public AudioSource audioSource;
+
+	public void Pop()
+	{
+		StartCoroutine(PopCoroutine());
+	}
+
+	private IEnumerator PopCoroutine()
+	{
+		audioSource.GTPlay();
+		bubbleMesh.gameObject.SetActive(value: false);
+		bubbleCollider.gameObject.SetActive(value: false);
+		yield return new WaitForSeconds(1f);
+		bubbleMesh.gameObject.SetActive(value: true);
+		bubbleCollider.gameObject.SetActive(value: true);
+		ObjectPools.instance.Destroy(base.gameObject);
+	}
 }

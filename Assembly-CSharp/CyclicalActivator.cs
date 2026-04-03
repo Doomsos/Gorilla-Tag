@@ -1,9 +1,48 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public class CyclicalActivator : MonoBehaviour, IGorillaSliceableSimple
 {
+	[Serializable]
+	private class CyclicalActivatorObjectScheduleNode
+	{
+		public Vector2 secondsActiveRange;
+	}
+
+	[Serializable]
+	private class CyclicalActivatorObjectSchedule
+	{
+		[Range(10f, 3599f)]
+		public int totalSeconds = 60;
+
+		public CyclicalActivatorObjectScheduleNode[] schedule;
+
+		public bool CheckTime(float nowSeconds)
+		{
+			nowSeconds %= (float)totalSeconds;
+			for (int i = 0; i < schedule.Length; i++)
+			{
+				if (schedule[i].secondsActiveRange.x <= nowSeconds && schedule[i].secondsActiveRange.y > nowSeconds)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	[Serializable]
+	private class CyclicalActivatorObject
+	{
+		public GameObject gameObject;
+
+		public CyclicalActivatorObjectSchedule schedule;
+	}
+
+	[SerializeField]
+	private CyclicalActivatorObject[] objects;
+
 	private void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
@@ -16,54 +55,14 @@ public class CyclicalActivator : MonoBehaviour, IGorillaSliceableSimple
 
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
-		if (GorillaComputer.instance == null || GorillaComputer.instance.GetServerTime().Year < 2000)
+		if (!(GorillaComputer.instance == null) && GorillaComputer.instance.GetServerTime().Year >= 2000)
 		{
-			return;
-		}
-		DateTime serverTime = GorillaComputer.instance.GetServerTime();
-		float nowSeconds = (float)(serverTime.Minute * 60) + ((float)serverTime.Second + (float)serverTime.Millisecond * 0.001f);
-		for (int i = 0; i < this.objects.Length; i++)
-		{
-			this.objects[i].gameObject.SetActive(this.objects[i].schedule.CheckTime(nowSeconds));
-		}
-	}
-
-	[SerializeField]
-	private CyclicalActivator.CyclicalActivatorObject[] objects;
-
-	[Serializable]
-	private class CyclicalActivatorObjectScheduleNode
-	{
-		public Vector2 secondsActiveRange;
-	}
-
-	[Serializable]
-	private class CyclicalActivatorObjectSchedule
-	{
-		public bool CheckTime(float nowSeconds)
-		{
-			nowSeconds %= (float)this.totalSeconds;
-			for (int i = 0; i < this.schedule.Length; i++)
+			DateTime serverTime = GorillaComputer.instance.GetServerTime();
+			float nowSeconds = (float)(serverTime.Minute * 60) + ((float)serverTime.Second + (float)serverTime.Millisecond * 0.001f);
+			for (int i = 0; i < objects.Length; i++)
 			{
-				if (this.schedule[i].secondsActiveRange.x <= nowSeconds && this.schedule[i].secondsActiveRange.y > nowSeconds)
-				{
-					return true;
-				}
+				objects[i].gameObject.SetActive(objects[i].schedule.CheckTime(nowSeconds));
 			}
-			return false;
 		}
-
-		[Range(10f, 3599f)]
-		public int totalSeconds = 60;
-
-		public CyclicalActivator.CyclicalActivatorObjectScheduleNode[] schedule;
-	}
-
-	[Serializable]
-	private class CyclicalActivatorObject
-	{
-		public GameObject gameObject;
-
-		public CyclicalActivator.CyclicalActivatorObjectSchedule schedule;
 	}
 }

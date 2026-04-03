@@ -1,70 +1,8 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class MonkeBallResetGame : MonoBehaviourTick
 {
-	private void Awake()
-	{
-		this._resetButton.onPressButton.AddListener(new UnityAction(this.OnSelect));
-		if (this._resetButton == null)
-		{
-			this._buttonOrigin = this._resetButton.transform.position;
-		}
-	}
-
-	public override void Tick()
-	{
-		if (this._cooldown)
-		{
-			this._cooldownTimer -= Time.deltaTime;
-			if (this._cooldownTimer <= 0f)
-			{
-				this.ToggleButton(false, -1);
-				this._cooldown = false;
-			}
-		}
-	}
-
-	public void ToggleReset(bool toggle, int teamId, bool force = false)
-	{
-		if (teamId < -1 || teamId >= this.teamMaterials.Length)
-		{
-			return;
-		}
-		if (toggle)
-		{
-			this.ToggleButton(true, teamId);
-			this._cooldown = false;
-			return;
-		}
-		if (force)
-		{
-			this.ToggleButton(false, -1);
-			return;
-		}
-		this._cooldown = true;
-		this._cooldownTimer = 3f;
-	}
-
-	private void ToggleButton(bool toggle, int teamId)
-	{
-		this._resetButton.enabled = toggle;
-		this.allowedTeamId = teamId;
-		if (!toggle || teamId == -1)
-		{
-			this.button.sharedMaterial = this.neutralMaterial;
-			return;
-		}
-		this.button.sharedMaterial = this.teamMaterials[teamId];
-	}
-
-	private void OnSelect()
-	{
-		MonkeBallGame.Instance.RequestResetGame();
-	}
-
 	[SerializeField]
 	private GorillaPressableButton _resetButton;
 
@@ -87,4 +25,66 @@ public class MonkeBallResetGame : MonoBehaviourTick
 	private bool _cooldown;
 
 	private float _cooldownTimer;
+
+	private void Awake()
+	{
+		_resetButton.onPressButton.AddListener(OnSelect);
+		if (_resetButton == null)
+		{
+			_buttonOrigin = _resetButton.transform.position;
+		}
+	}
+
+	public override void Tick()
+	{
+		if (_cooldown)
+		{
+			_cooldownTimer -= Time.deltaTime;
+			if (_cooldownTimer <= 0f)
+			{
+				ToggleButton(toggle: false, -1);
+				_cooldown = false;
+			}
+		}
+	}
+
+	public void ToggleReset(bool toggle, int teamId, bool force = false)
+	{
+		if (teamId >= -1 && teamId < teamMaterials.Length)
+		{
+			if (toggle)
+			{
+				ToggleButton(toggle: true, teamId);
+				_cooldown = false;
+			}
+			else if (force)
+			{
+				ToggleButton(toggle: false, -1);
+			}
+			else
+			{
+				_cooldown = true;
+				_cooldownTimer = 3f;
+			}
+		}
+	}
+
+	private void ToggleButton(bool toggle, int teamId)
+	{
+		_resetButton.enabled = toggle;
+		allowedTeamId = teamId;
+		if (!toggle || teamId == -1)
+		{
+			button.sharedMaterial = neutralMaterial;
+		}
+		else
+		{
+			button.sharedMaterial = teamMaterials[teamId];
+		}
+	}
+
+	private void OnSelect()
+	{
+		MonkeBallGame.Instance.RequestResetGame();
+	}
 }

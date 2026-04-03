@@ -1,29 +1,22 @@
-﻿using System;
 using GorillaExtensions;
 using Photon.Pun;
 
-public struct CritterAppearance
+public struct CritterAppearance(string hatName, float size = 1f)
 {
-	public CritterAppearance(string hatName, float size = 1f)
-	{
-		this.hatName = hatName;
-		this.size = size;
-	}
+	public float size = size;
+
+	public string hatName = hatName;
 
 	public object[] WriteToRPCData()
 	{
-		object[] array = new object[]
-		{
-			this.hatName,
-			this.size
-		};
-		if (this.hatName == null)
+		object[] array = new object[2] { hatName, size };
+		if (hatName == null)
 		{
 			array[0] = string.Empty;
 		}
-		if (this.size != 0f)
+		if (size != 0f)
 		{
-			array[1] = this.size;
+			array[1] = size;
 		}
 		return array;
 	}
@@ -35,38 +28,43 @@ public struct CritterAppearance
 
 	public static bool ValidateData(object[] data)
 	{
-		float num;
-		return data != null && data.Length == CritterAppearance.DataLength() && CrittersManager.ValidateDataType<float>(data[1], out num) && num >= 0f && !float.IsNaN(num) && !float.IsInfinity(num);
+		if (data == null || data.Length != DataLength())
+		{
+			return false;
+		}
+		if (!CrittersManager.ValidateDataType<float>(data[1], out var dataAsType))
+		{
+			return false;
+		}
+		if (dataAsType < 0f || float.IsNaN(dataAsType) || float.IsInfinity(dataAsType))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public static CritterAppearance ReadFromRPCData(object[] data)
 	{
-		string text;
-		if (!CrittersManager.ValidateDataType<string>(data[0], out text))
+		if (!CrittersManager.ValidateDataType<string>(data[0], out var _))
 		{
-			return new CritterAppearance(string.Empty, 1f);
+			return new CritterAppearance(string.Empty);
 		}
-		float value;
-		if (!CrittersManager.ValidateDataType<float>(data[1], out value))
+		if (!CrittersManager.ValidateDataType<float>(data[1], out var dataAsType2))
 		{
-			return new CritterAppearance(string.Empty, 1f);
+			return new CritterAppearance(string.Empty);
 		}
-		return new CritterAppearance((string)data[0], value.GetFinite());
+		return new CritterAppearance((string)data[0], dataAsType2.GetFinite());
 	}
 
 	public static CritterAppearance ReadFromPhotonStream(PhotonStream data)
 	{
-		string text = (string)data.ReceiveNext();
+		string obj = (string)data.ReceiveNext();
 		float num = (float)data.ReceiveNext();
-		return new CritterAppearance(text, num);
+		return new CritterAppearance(obj, num);
 	}
 
 	public override string ToString()
 	{
-		return string.Format("Size: {0} Hat: {1}", this.size, this.hatName);
+		return $"Size: {size} Hat: {hatName}";
 	}
-
-	public float size;
-
-	public string hatName;
 }

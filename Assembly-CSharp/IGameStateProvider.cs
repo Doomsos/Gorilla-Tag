@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface IGameStateProvider
 {
 	void GameStateReceiverRegister(IGameStateReceiver receiver);

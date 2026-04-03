@@ -1,8 +1,14 @@
-﻿using System;
+using System;
 
 [Serializable]
 public class CallLimitType<T> where T : CallLimiter
 {
+	public FXType Key;
+
+	public bool UseNetWorkTime;
+
+	public T CallLimitSettings;
+
 	public static implicit operator CallLimitType<CallLimiter>(CallLimitType<T> clt)
 	{
 		return new CallLimitType<CallLimiter>
@@ -12,10 +18,4 @@ public class CallLimitType<T> where T : CallLimiter
 			CallLimitSettings = clt.CallLimitSettings
 		};
 	}
-
-	public FXType Key;
-
-	public bool UseNetWorkTime;
-
-	public T CallLimitSettings;
 }

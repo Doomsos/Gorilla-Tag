@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum GroupJoinZoneB
@@ -7,14 +7,14 @@ public enum GroupJoinZoneB
 	Critters = 2,
 	CrittersTunnel = 4,
 	GhostReactor = 8,
-	MonkeBlocksShared = 16,
-	MonkeBlocksSharedTunnel = 32,
-	GhostReactorTunnel = 64,
-	RankedForest = 128,
-	RankedForestTunnel = 256,
-	GhostReactorDrill = 512,
-	VIMExperience1 = 1024,
-	VIMExperience2 = 2048,
-	VIMExperience3 = 4096,
-	VIMExperience4 = 8192
+	MonkeBlocksShared = 0x10,
+	MonkeBlocksSharedTunnel = 0x20,
+	GhostReactorTunnel = 0x40,
+	RankedForest = 0x80,
+	RankedForestTunnel = 0x100,
+	GhostReactorDrill = 0x200,
+	VIMExperience1 = 0x400,
+	VIMExperience2 = 0x800,
+	VIMExperience3 = 0x1000,
+	VIMExperience4 = 0x2000
 }

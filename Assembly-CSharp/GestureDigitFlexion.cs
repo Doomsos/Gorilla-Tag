@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum GestureDigitFlexion : uint
 {
-	None = 0U,
-	Open = 16U,
-	Closed = 32U,
-	Bent = 64U
+	None = 0u,
+	Open = 0x10u,
+	Closed = 0x20u,
+	Bent = 0x40u
 }

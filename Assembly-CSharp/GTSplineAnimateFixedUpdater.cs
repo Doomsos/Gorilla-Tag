@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Fusion;
 using Photon.Pun;
 using UnityEngine;
@@ -7,136 +7,6 @@ using UnityEngine.Splines;
 [NetworkBehaviourWeaved(1)]
 public class GTSplineAnimateFixedUpdater : NetworkComponent
 {
-	protected override void Awake()
-	{
-		base.Awake();
-		this.splineAnimateRef.AddCallbackOnLoad(new Action(this.InitSplineAnimate));
-		this.splineAnimateRef.AddCallbackOnUnload(new Action(this.ClearSplineAnimate));
-	}
-
-	private void InitSplineAnimate()
-	{
-		this.isSplineLoaded = this.splineAnimateRef.TryResolve<SplineAnimate>(out this.splineAnimate);
-		if (this.isSplineLoaded && this.splineAnimate != null)
-		{
-			this.splineAnimate.enabled = false;
-		}
-	}
-
-	private void ClearSplineAnimate()
-	{
-		this.splineAnimate = null;
-		this.isSplineLoaded = false;
-	}
-
-	private void FixedUpdate()
-	{
-		if (!base.IsMine && this.progressLerpStartTime + 1f > Time.time)
-		{
-			if (this.isSplineLoaded)
-			{
-				this.progress = Mathf.Lerp(this.progressLerpStart, this.progressLerpEnd, (Time.time - this.progressLerpStartTime) / 1f) % this.Duration;
-				this.splineAnimate.NormalizedTime = this.progress / this.Duration;
-				return;
-			}
-		}
-		else
-		{
-			this.progress = (this.progress + Time.fixedDeltaTime) % this.Duration;
-			if (this.isSplineLoaded)
-			{
-				this.splineAnimate.NormalizedTime = this.progress / this.Duration;
-			}
-		}
-	}
-
-	[Networked]
-	[NetworkedWeaved(0, 1)]
-	public unsafe float Netdata
-	{
-		get
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GTSplineAnimateFixedUpdater.Netdata. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			return *(float*)(this.Ptr + 0);
-		}
-		set
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing GTSplineAnimateFixedUpdater.Netdata. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			*(float*)(this.Ptr + 0) = value;
-		}
-	}
-
-	public override void WriteDataFusion()
-	{
-		this.Netdata = this.progress + 1f;
-	}
-
-	public override void ReadDataFusion()
-	{
-		this.SharedReadData(this.Netdata);
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		stream.SendNext(this.progress + 1f);
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (!info.Sender.IsMasterClient)
-		{
-			return;
-		}
-		float incomingValue = (float)stream.ReceiveNext();
-		this.SharedReadData(incomingValue);
-	}
-
-	private void SharedReadData(float incomingValue)
-	{
-		if (float.IsNaN(incomingValue) || incomingValue > this.Duration + 1f || incomingValue < 0f)
-		{
-			return;
-		}
-		this.progressLerpEnd = incomingValue;
-		if (this.progressLerpEnd < this.progress)
-		{
-			if (this.progress < this.Duration)
-			{
-				this.progressLerpEnd += this.Duration;
-			}
-			else
-			{
-				this.progress -= this.Duration;
-			}
-		}
-		this.progressLerpStart = this.progress;
-		this.progressLerpStartTime = Time.time;
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.Netdata = this._Netdata;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._Netdata = this.Netdata;
-	}
-
 	[SerializeField]
 	private XSceneRef splineAnimateRef;
 
@@ -162,4 +32,131 @@ public class GTSplineAnimateFixedUpdater : NetworkComponent
 	[DefaultForProperty("Netdata", 0, 1)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private float _Netdata;
+
+	[Networked]
+	[NetworkedWeaved(0, 1)]
+	public unsafe float Netdata
+	{
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GTSplineAnimateFixedUpdater.Netdata. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(float*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing GTSplineAnimateFixedUpdater.Netdata. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(float*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		splineAnimateRef.AddCallbackOnLoad(InitSplineAnimate);
+		splineAnimateRef.AddCallbackOnUnload(ClearSplineAnimate);
+	}
+
+	private void InitSplineAnimate()
+	{
+		isSplineLoaded = splineAnimateRef.TryResolve(out splineAnimate);
+		if (isSplineLoaded && splineAnimate != null)
+		{
+			splineAnimate.enabled = false;
+		}
+	}
+
+	private void ClearSplineAnimate()
+	{
+		splineAnimate = null;
+		isSplineLoaded = false;
+	}
+
+	private void FixedUpdate()
+	{
+		if (!base.IsMine && progressLerpStartTime + 1f > Time.time)
+		{
+			if (isSplineLoaded)
+			{
+				progress = Mathf.Lerp(progressLerpStart, progressLerpEnd, (Time.time - progressLerpStartTime) / 1f) % Duration;
+				splineAnimate.NormalizedTime = progress / Duration;
+			}
+		}
+		else
+		{
+			progress = (progress + Time.fixedDeltaTime) % Duration;
+			if (isSplineLoaded)
+			{
+				splineAnimate.NormalizedTime = progress / Duration;
+			}
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		Netdata = progress + 1f;
+	}
+
+	public override void ReadDataFusion()
+	{
+		SharedReadData(Netdata);
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender.IsMasterClient)
+		{
+			stream.SendNext(progress + 1f);
+		}
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender.IsMasterClient)
+		{
+			float incomingValue = (float)stream.ReceiveNext();
+			SharedReadData(incomingValue);
+		}
+	}
+
+	private void SharedReadData(float incomingValue)
+	{
+		if (float.IsNaN(incomingValue) || incomingValue > Duration + 1f || incomingValue < 0f)
+		{
+			return;
+		}
+		progressLerpEnd = incomingValue;
+		if (progressLerpEnd < progress)
+		{
+			if (progress < Duration)
+			{
+				progressLerpEnd += Duration;
+			}
+			else
+			{
+				progress -= Duration;
+			}
+		}
+		progressLerpStart = progress;
+		progressLerpStartTime = Time.time;
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Netdata = _Netdata;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Netdata = Netdata;
+	}
 }

@@ -1,26 +1,29 @@
-﻿using System;
 using UnityEngine;
 
 public class DayNightResetForBaking : MonoBehaviour
 {
+	public BetterDayNightManager dayNightManager;
+
 	public void SetMaterialsForBaking()
 	{
-		foreach (Material material in this.dayNightManager.dayNightSupportedMaterials)
+		Material[] dayNightSupportedMaterials = dayNightManager.dayNightSupportedMaterials;
+		foreach (Material material in dayNightSupportedMaterials)
 		{
 			if (material != null)
 			{
-				material.shader = this.dayNightManager.standard;
+				material.shader = dayNightManager.standard;
 			}
 			else
 			{
 				Debug.LogError("a material is missing from day night supported materials in the daynightmanager! something might have gotten deleted inappropriately, or an entry should be manually removed.", base.gameObject);
 			}
 		}
-		foreach (Material material2 in this.dayNightManager.dayNightSupportedMaterialsCutout)
+		dayNightSupportedMaterials = dayNightManager.dayNightSupportedMaterialsCutout;
+		foreach (Material material2 in dayNightSupportedMaterials)
 		{
 			if (material2 != null)
 			{
-				material2.shader = this.dayNightManager.standardCutout;
+				material2.shader = dayNightManager.standardCutout;
 			}
 			else
 			{
@@ -31,22 +34,24 @@ public class DayNightResetForBaking : MonoBehaviour
 
 	public void SetMaterialsForGame()
 	{
-		foreach (Material material in this.dayNightManager.dayNightSupportedMaterials)
+		Material[] dayNightSupportedMaterials = dayNightManager.dayNightSupportedMaterials;
+		foreach (Material material in dayNightSupportedMaterials)
 		{
 			if (material != null)
 			{
-				material.shader = this.dayNightManager.gorillaUnlit;
+				material.shader = dayNightManager.gorillaUnlit;
 			}
 			else
 			{
 				Debug.LogError("a material is missing from day night supported materials in the daynightmanager! something might have gotten deleted inappropriately, or an entry should be manually removed.", base.gameObject);
 			}
 		}
-		foreach (Material material2 in this.dayNightManager.dayNightSupportedMaterialsCutout)
+		dayNightSupportedMaterials = dayNightManager.dayNightSupportedMaterialsCutout;
+		foreach (Material material2 in dayNightSupportedMaterials)
 		{
 			if (material2 != null)
 			{
-				material2.shader = this.dayNightManager.gorillaUnlitCutout;
+				material2.shader = dayNightManager.gorillaUnlitCutout;
 			}
 			else
 			{
@@ -54,6 +59,4 @@ public class DayNightResetForBaking : MonoBehaviour
 			}
 		}
 	}
-
-	public BetterDayNightManager dayNightManager;
 }

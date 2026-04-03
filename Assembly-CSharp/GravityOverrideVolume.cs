@@ -1,24 +1,42 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class GravityOverrideVolume : MonoBehaviour
 {
+	public enum GravityType
+	{
+		Directional,
+		Radial
+	}
+
+	[SerializeField]
+	private GravityType gravityType;
+
+	[SerializeField]
+	private float strength = 9.8f;
+
+	[SerializeField]
+	[Tooltip("In Radial: the center point of gravity, In Directional: the forward vector of this transform defines the direction")]
+	private Transform referenceTransform;
+
+	[SerializeField]
+	private CompositeTriggerEvents triggerEvents;
+
 	private void OnEnable()
 	{
-		if (this.triggerEvents != null)
+		if (triggerEvents != null)
 		{
-			this.triggerEvents.CompositeTriggerEnter += this.OnColliderEnteredVolume;
-			this.triggerEvents.CompositeTriggerExit += this.OnColliderExitedVolume;
+			triggerEvents.CompositeTriggerEnter += OnColliderEnteredVolume;
+			triggerEvents.CompositeTriggerExit += OnColliderExitedVolume;
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (this.triggerEvents != null)
+		if (triggerEvents != null)
 		{
-			this.triggerEvents.CompositeTriggerEnter -= this.OnColliderEnteredVolume;
-			this.triggerEvents.CompositeTriggerExit -= this.OnColliderExitedVolume;
+			triggerEvents.CompositeTriggerEnter -= OnColliderEnteredVolume;
+			triggerEvents.CompositeTriggerExit -= OnColliderExitedVolume;
 		}
 	}
 
@@ -27,7 +45,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		GTPlayer instance = GTPlayer.Instance;
 		if (instance != null && collider == instance.headCollider)
 		{
-			instance.SetGravityOverride(this, new Action<GTPlayer>(this.GravityOverrideFunction));
+			instance.SetGravityOverride(this, GravityOverrideFunction);
 		}
 	}
 
@@ -42,37 +60,20 @@ public class GravityOverrideVolume : MonoBehaviour
 
 	public void GravityOverrideFunction(GTPlayer player)
 	{
-		GravityOverrideVolume.GravityType gravityType = this.gravityType;
-		if (gravityType == GravityOverrideVolume.GravityType.Directional)
+		switch (gravityType)
 		{
-			Vector3 forward = this.referenceTransform.forward;
-			player.AddForce(forward * this.strength, ForceMode.Acceleration);
-			return;
-		}
-		if (gravityType != GravityOverrideVolume.GravityType.Radial)
+		case GravityType.Directional:
 		{
-			return;
+			Vector3 forward = referenceTransform.forward;
+			player.AddForce(forward * strength, ForceMode.Acceleration);
+			break;
 		}
-		Vector3 normalized = (this.referenceTransform.position - player.headCollider.transform.position).normalized;
-		player.AddForce(normalized * this.strength, ForceMode.Acceleration);
-	}
-
-	[SerializeField]
-	private GravityOverrideVolume.GravityType gravityType;
-
-	[SerializeField]
-	private float strength = 9.8f;
-
-	[SerializeField]
-	[Tooltip("In Radial: the center point of gravity, In Directional: the forward vector of this transform defines the direction")]
-	private Transform referenceTransform;
-
-	[SerializeField]
-	private CompositeTriggerEvents triggerEvents;
-
-	public enum GravityType
-	{
-		Directional,
-		Radial
+		case GravityType.Radial:
+		{
+			Vector3 normalized = (referenceTransform.position - player.headCollider.transform.position).normalized;
+			player.AddForce(normalized * strength, ForceMode.Acceleration);
+			break;
+		}
+		}
 	}
 }

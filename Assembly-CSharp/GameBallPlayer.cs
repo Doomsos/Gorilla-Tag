@@ -1,21 +1,39 @@
-﻿using System;
 using UnityEngine;
 
 public class GameBallPlayer : MonoBehaviour
 {
+	private struct HandData
+	{
+		public GameBallId grabbedGameBallId;
+	}
+
+	public VRRig rig;
+
+	public int teamId;
+
+	private HandData[] hands;
+
+	public const int MAX_HANDS = 2;
+
+	public const int LEFT_HAND = 0;
+
+	public const int RIGHT_HAND = 1;
+
+	private int inGoalZone;
+
 	private void Awake()
 	{
-		this.hands = new GameBallPlayer.HandData[2];
+		hands = new HandData[2];
 		for (int i = 0; i < 2; i++)
 		{
-			this.ClearGrabbed(i);
+			ClearGrabbed(i);
 		}
-		this.teamId = -1;
+		teamId = -1;
 	}
 
 	public void CleanupPlayer()
 	{
-		MonkeBallPlayer component = base.GetComponent<MonkeBallPlayer>();
+		MonkeBallPlayer component = GetComponent<MonkeBallPlayer>();
 		if (component != null)
 		{
 			component.currGoalZone = null;
@@ -30,34 +48,34 @@ public class GameBallPlayer : MonoBehaviour
 	{
 		if (gameBallId.IsValid())
 		{
-			this.ClearGrabbedIfHeld(gameBallId);
+			ClearGrabbedIfHeld(gameBallId);
 		}
-		GameBallPlayer.HandData handData = this.hands[handIndex];
+		HandData handData = hands[handIndex];
 		handData.grabbedGameBallId = gameBallId;
-		this.hands[handIndex] = handData;
+		hands[handIndex] = handData;
 	}
 
 	public void ClearGrabbedIfHeld(GameBallId gameBallId)
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			if (this.hands[i].grabbedGameBallId == gameBallId)
+			if (hands[i].grabbedGameBallId == gameBallId)
 			{
-				this.ClearGrabbed(i);
+				ClearGrabbed(i);
 			}
 		}
 	}
 
 	public void ClearGrabbed(int handIndex)
 	{
-		this.SetGrabbed(GameBallId.Invalid, handIndex);
+		SetGrabbed(GameBallId.Invalid, handIndex);
 	}
 
 	public void ClearAllGrabbed()
 	{
-		for (int i = 0; i < this.hands.Length; i++)
+		for (int i = 0; i < hands.Length; i++)
 		{
-			this.ClearGrabbed(i);
+			ClearGrabbed(i);
 		}
 	}
 
@@ -65,27 +83,29 @@ public class GameBallPlayer : MonoBehaviour
 	{
 		if (inZone)
 		{
-			this.inGoalZone++;
-			return;
+			inGoalZone++;
 		}
-		this.inGoalZone--;
+		else
+		{
+			inGoalZone--;
+		}
 	}
 
 	public bool IsHoldingBall()
 	{
-		return this.GetGameBallId().IsValid();
+		return GetGameBallId().IsValid();
 	}
 
 	public GameBallId GetGameBallId(int handIndex)
 	{
-		return this.hands[handIndex].grabbedGameBallId;
+		return hands[handIndex].grabbedGameBallId;
 	}
 
 	public int FindHandIndex(GameBallId gameBallId)
 	{
-		for (int i = 0; i < this.hands.Length; i++)
+		for (int i = 0; i < hands.Length; i++)
 		{
-			if (this.hands[i].grabbedGameBallId == gameBallId)
+			if (hands[i].grabbedGameBallId == gameBallId)
 			{
 				return i;
 			}
@@ -95,11 +115,11 @@ public class GameBallPlayer : MonoBehaviour
 
 	public GameBallId GetGameBallId()
 	{
-		for (int i = 0; i < this.hands.Length; i++)
+		for (int i = 0; i < hands.Length; i++)
 		{
-			if (this.hands[i].grabbedGameBallId.IsValid())
+			if (hands[i].grabbedGameBallId.IsValid())
 			{
-				return this.hands[i].grabbedGameBallId;
+				return hands[i].grabbedGameBallId;
 			}
 		}
 		return GameBallId.Invalid;
@@ -107,7 +127,7 @@ public class GameBallPlayer : MonoBehaviour
 
 	public bool IsLocalPlayer()
 	{
-		return VRRigCache.Instance.localRig.Creator.ActorNumber == this.rig.OwningNetPlayer.ActorNumber;
+		return VRRigCache.Instance.localRig.Creator.ActorNumber == rig.OwningNetPlayer.ActorNumber;
 	}
 
 	public static bool IsLeftHand(int handIndex)
@@ -127,12 +147,11 @@ public class GameBallPlayer : MonoBehaviour
 	public static VRRig GetRig(int actorNumber)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(actorNumber);
-		RigContainer rigContainer;
-		if (player == null || player.IsNull || !VRRigCache.Instance.TryGetVrrig(player, out rigContainer))
+		if (player == null || player.IsNull || !VRRigCache.Instance.TryGetVrrig(player, out var playerRig))
 		{
 			return null;
 		}
-		return rigContainer.Rig;
+		return playerRig.Rig;
 	}
 
 	public static GameBallPlayer GetGamePlayer(int actorNumber)
@@ -141,20 +160,20 @@ public class GameBallPlayer : MonoBehaviour
 		{
 			return null;
 		}
-		VRRig vrrig = GameBallPlayer.GetRig(actorNumber);
-		if (vrrig == null)
+		VRRig vRRig = GetRig(actorNumber);
+		if (vRRig == null)
 		{
 			return null;
 		}
-		return vrrig.GetComponent<GameBallPlayer>();
+		return vRRig.GetComponent<GameBallPlayer>();
 	}
 
 	public static GameBallPlayer GetGamePlayer(Collider collider, bool bodyOnly = false)
 	{
-		Transform transform = collider.transform;
-		while (transform != null)
+		Transform parent = collider.transform;
+		while (parent != null)
 		{
-			GameBallPlayer component = transform.GetComponent<GameBallPlayer>();
+			GameBallPlayer component = parent.GetComponent<GameBallPlayer>();
 			if (component != null)
 			{
 				return component;
@@ -163,27 +182,8 @@ public class GameBallPlayer : MonoBehaviour
 			{
 				break;
 			}
-			transform = transform.parent;
+			parent = parent.parent;
 		}
 		return null;
-	}
-
-	public VRRig rig;
-
-	public int teamId;
-
-	private GameBallPlayer.HandData[] hands;
-
-	public const int MAX_HANDS = 2;
-
-	public const int LEFT_HAND = 0;
-
-	public const int RIGHT_HAND = 1;
-
-	private int inGoalZone;
-
-	private struct HandData
-	{
-		public GameBallId grabbedGameBallId;
 	}
 }

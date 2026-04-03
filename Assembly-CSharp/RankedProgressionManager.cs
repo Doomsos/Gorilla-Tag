@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using GorillaGameModes;
@@ -7,667 +7,116 @@ using UnityEngine;
 
 public class RankedProgressionManager : MonoBehaviour
 {
-	public int MaxRank { get; private set; }
-
-	public float LowTierThreshold { get; set; }
-
-	public float HighTierThreshold { get; set; }
-
-	public List<RankedProgressionManager.RankedProgressionTier> MajorTiers
+	public enum ERankedMatchmakingTier
 	{
-		get
-		{
-			return this.majorTiers;
-		}
-		private set
-		{
-		}
+		Low,
+		Medium,
+		High
 	}
 
-	private void DebugSetELO()
+	public enum ERankedProgressionEventType
 	{
+		None,
+		Progress,
+		Promotion,
+		Relegation
 	}
 
-	[ContextMenu("Reset ELO")]
-	private void DebugResetELO()
+	public class RankedProgressionEvent
 	{
-	}
+		public ERankedProgressionEventType evtType;
 
-	private void Awake()
-	{
-		if (RankedProgressionManager.Instance)
-		{
-			GTDev.LogError<string>("Duplicate RankedProgressionManager detected. Destroying self.", base.gameObject, null);
-			Object.Destroy(this);
-			return;
-		}
-		RankedProgressionManager.Instance = this;
-	}
+		public Sprite progressIconLeft;
 
-	private void Start()
-	{
-		if (this.majorTiers.Count < 3)
+		public Sprite progressIconRight;
+
+		public Sprite newTierIcon;
+
+		public string leftName;
+
+		public string rightName;
+
+		public string newTierName;
+
+		public float minVal;
+
+		public float maxVal;
+
+		public float delta;
+
+		public override string ToString()
 		{
-			GTDev.LogWarning<string>("At least 3 MMR tiers must be defined.", null);
-			return;
-		}
-		GameMode.OnStartGameMode += this.OnJoinedRoom;
-		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(this.OnPlayerJoined);
-		float minThreshold = 100f;
-		int num = 0;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			this.majorTiers[i].SetMinThreshold((i == 0) ? 100f : this.majorTiers[i - 1].thresholdMax);
-			for (int j = 0; j < this.majorTiers[i].subTiers.Count; j++)
+			string text = "Progression Info\n";
+			text += $"Event Type: {evtType.ToString()}\n";
+			text += $"Left Tier: {leftName}\n";
+			text += $"Right Tier: {rightName}\n";
+			text += string.Format("Left Value: {0}\n", minVal.ToString("N0"));
+			text += string.Format("Right Value: {0}\n", maxVal.ToString("N0"));
+			text += string.Format("Elo Delta: {0}\n", delta.ToString("N0"));
+			if (evtType == ERankedProgressionEventType.Promotion || evtType == ERankedProgressionEventType.Relegation)
 			{
-				num++;
-				this.majorTiers[i].subTiers[j].SetMinThreshold(minThreshold);
-				minThreshold = this.majorTiers[i].subTiers[j].thresholdMax;
+				text += $"Fanfare Tier: {newTierName}\n";
+			}
+			return text;
+		}
+	}
+
+	public abstract class RankedProgressionTierBase
+	{
+		public string name;
+
+		public Color color = Color.white;
+
+		public float thresholdMax;
+
+		private float thresholdMin = -1f;
+
+		public void SetMinThreshold(float val)
+		{
+			thresholdMin = val;
+		}
+
+		public float GetMinThreshold()
+		{
+			if (thresholdMin < 0f)
+			{
+				GTDev.LogError("Tier min threshold not initialized. Can only be used at runtime.");
+			}
+			return thresholdMin;
+		}
+	}
+
+	[Serializable]
+	public class RankedProgressionSubTier : RankedProgressionTierBase
+	{
+		public Sprite icon;
+	}
+
+	[Serializable]
+	public class RankedProgressionTier : RankedProgressionTierBase
+	{
+		public List<RankedProgressionSubTier> subTiers = new List<RankedProgressionSubTier>();
+
+		public void InsertSubTierAt(int idx, float tierMin)
+		{
+			RankedProgressionSubTier item = new RankedProgressionSubTier
+			{
+				name = "NewTier"
+			};
+			subTiers.Insert(idx, item);
+			EnforceSubTierValidity(tierMin);
+		}
+
+		public void EnforceSubTierValidity(float thresholdMin)
+		{
+			float num = (((thresholdMax == 0f) ? 4000f : thresholdMax) - thresholdMin) / (float)subTiers.Count;
+			for (int i = 0; i < subTiers.Count - 1; i++)
+			{
+				float num2 = thresholdMin + (float)(i + 1) * num;
+				num2 = Mathf.Round(num2 / 10f);
+				subTiers[i].thresholdMax = num2 * 10f;
 			}
 		}
-		this.MaxRank = num - 1;
-		this.LowTierThreshold = this.majorTiers[0].thresholdMax;
-		List<RankedProgressionManager.RankedProgressionTier> list = this.majorTiers;
-		this.HighTierThreshold = list[list.Count - 1].GetMinThreshold();
-		this.EloScorePC = new RankedMultiplayerStatisticFloat(RankedProgressionManager.RANKED_ELO_PC_KEY, 100f, 100f, 4000f, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
-		this.EloScoreQuest = new RankedMultiplayerStatisticFloat(RankedProgressionManager.RANKED_ELO_KEY, 100f, 100f, 4000f, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
-		this.NewTierGracePeriodIdxPC = new RankedMultiplayerStatisticInt(RankedProgressionManager.RANKED_PROGRESSION_GRACE_PERIOD_KEY, 0, -1, int.MaxValue, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
-		this.NewTierGracePeriodIdxQuest = new RankedMultiplayerStatisticInt(RankedProgressionManager.RANKED_PROGRESSION_GRACE_PERIOD_PC_KEY, 0, -1, int.MaxValue, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
-	}
-
-	private void OnDestroy()
-	{
-		GameMode.OnStartGameMode += this.OnJoinedRoom;
-		RoomSystem.PlayerJoinedEvent -= new Action<NetPlayer>(this.OnPlayerJoined);
-	}
-
-	public void RequestUnlockCompetitiveQueue(bool unlock)
-	{
-		GorillaTagCompetitiveServerApi.Instance.RequestUnlockCompetitiveQueue(unlock, delegate
-		{
-			this.AcquireLocalPlayerRankInformation();
-		});
-	}
-
-	public IEnumerator LoadStatsWhenReady()
-	{
-		yield return new WaitUntil(() => NetworkSystem.Instance.LocalPlayer.UserId != null);
-		if (this.HasUnlockedCompetitiveQueue())
-		{
-			this.RequestUnlockCompetitiveQueue(true);
-		}
-		else
-		{
-			this.AcquireLocalPlayerRankInformation();
-		}
-		yield break;
-	}
-
-	private void OnJoinedRoom(GameModeType newGameModeType)
-	{
-		if (newGameModeType == GameModeType.InfectionCompetitive)
-		{
-			this.AcquireRoomRankInformation(false);
-		}
-	}
-
-	private void OnPlayerJoined(NetPlayer player)
-	{
-		if (GorillaGameManager.instance != null && GorillaGameManager.instance.GameType() == GameModeType.InfectionCompetitive)
-		{
-			this.AcquireSinglePlayerRankInformation(player);
-		}
-	}
-
-	private void AcquireLocalPlayerRankInformation()
-	{
-		List<string> list = new List<string>();
-		list.Add(NetworkSystem.Instance.LocalPlayer.UserId);
-		GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, new Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(this.OnLocalPlayerRankedInformationAcquired));
-	}
-
-	private void AcquireSinglePlayerRankInformation(NetPlayer player)
-	{
-		if (player == null)
-		{
-			return;
-		}
-		List<string> list = new List<string>();
-		list.Add(player.UserId);
-		GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, new Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(this.OnPlayersRankedInformationAcquired));
-	}
-
-	public void AcquireRoomRankInformation(bool includeLocalPlayer = true)
-	{
-		List<string> list = new List<string>();
-		foreach (NetPlayer netPlayer in RoomSystem.PlayersInRoom)
-		{
-			if (includeLocalPlayer || !netPlayer.IsLocal)
-			{
-				list.Add(netPlayer.UserId);
-			}
-		}
-		if (list.Count > 0)
-		{
-			GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, new Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(this.OnPlayersRankedInformationAcquired));
-		}
-	}
-
-	private void OnPlayersRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
-	{
-		foreach (GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData rankedModePlayerProgressionData in rankedModeProgressionData.playerData)
-		{
-			if (rankedModePlayerProgressionData != null && rankedModePlayerProgressionData.platformData != null && rankedModePlayerProgressionData.platformData.Length >= 2)
-			{
-				int num = -1;
-				foreach (NetPlayer netPlayer in NetworkSystem.Instance.AllNetPlayers)
-				{
-					if (netPlayer.UserId == rankedModePlayerProgressionData.playfabID)
-					{
-						num = netPlayer.ActorNumber;
-						break;
-					}
-				}
-				if (num >= 0)
-				{
-					GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = rankedModePlayerProgressionData.platformData[1];
-					GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData2 = rankedModePlayerProgressionData.platformData[0];
-					GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData3 = rankedModeProgressionPlatformData2;
-					int rankFromTiers = RankedProgressionManager.Instance.GetRankFromTiers(rankedModeProgressionPlatformData3.majorTier, rankedModeProgressionPlatformData3.minorTier);
-					Action<int, float, int> onPlayerEloAcquired = this.OnPlayerEloAcquired;
-					if (onPlayerEloAcquired != null)
-					{
-						onPlayerEloAcquired(num, rankedModeProgressionPlatformData3.elo, rankFromTiers);
-					}
-					if (num == NetworkSystem.Instance.LocalPlayerID)
-					{
-						this.SetLocalProgressionData(rankedModePlayerProgressionData);
-					}
-					RigContainer rigContainer;
-					if (VRRigCache.Instance.TryGetVrrig(num, out rigContainer))
-					{
-						VRRig rig = rigContainer.Rig;
-						if (rig != null)
-						{
-							int rankFromTiers2 = this.GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
-							int rankFromTiers3 = RankedProgressionManager.Instance.GetRankFromTiers(rankedModeProgressionPlatformData2.majorTier, rankedModeProgressionPlatformData2.minorTier);
-							rig.SetRankedInfo(rankedModeProgressionPlatformData3.elo, rankFromTiers2, rankFromTiers3, false);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void OnLocalPlayerRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
-	{
-		if (rankedModeProgressionData.playerData.Count > 0)
-		{
-			this.SetLocalProgressionData(rankedModeProgressionData.playerData[0]);
-			float eloScore = this.GetEloScore();
-			int progressionRankIndexQuest = this.GetProgressionRankIndexQuest();
-			int progressionRankIndexPC = this.GetProgressionRankIndexPC();
-			int tier = progressionRankIndexPC;
-			this.HandlePlayerRankedInfoReceived(NetworkSystem.Instance.LocalPlayer.ActorNumber, eloScore, tier);
-			VRRig.LocalRig.SetRankedInfo(eloScore, progressionRankIndexQuest, progressionRankIndexPC, true);
-		}
-	}
-
-	public bool AreValuesValid(float elo, int questTier, int pcTier)
-	{
-		return elo >= 100f && elo <= 4000f && questTier >= 0 && questTier <= this.MaxRank && pcTier >= 0 && pcTier <= this.MaxRank;
-	}
-
-	public void HandlePlayerRankedInfoReceived(int actorNum, float elo, int tier)
-	{
-		Action<int, float, int> onPlayerEloAcquired = this.OnPlayerEloAcquired;
-		if (onPlayerEloAcquired == null)
-		{
-			return;
-		}
-		onPlayerEloAcquired(actorNum, elo, tier);
-	}
-
-	public void SetLocalProgressionData(GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData data)
-	{
-		this.ProgressionData = data;
-	}
-
-	public void LoadStats()
-	{
-		base.StartCoroutine(this.LoadStatsWhenReady());
-	}
-
-	public float GetEloScore()
-	{
-		return this.GetEloScorePC();
-	}
-
-	public void SetEloScore(float val)
-	{
-		GorillaTagCompetitiveServerApi.Instance.RequestSetEloValue(val, delegate
-		{
-			this.AcquireLocalPlayerRankInformation();
-		});
-	}
-
-	public float GetEloScorePC()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 100f;
-		}
-		return this.ProgressionData.platformData[0].elo;
-	}
-
-	public float GetEloScoreQuest()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 100f;
-		}
-		return this.ProgressionData.platformData[1].elo;
-	}
-
-	private int GetNewTierGracePeriodIdx()
-	{
-		return this.NewTierGracePeriodIdxPC;
-	}
-
-	private void SetNewTierGracePeriodIdx(int val)
-	{
-		this.NewTierGracePeriodIdxPC.Set(val);
-	}
-
-	private void IncrementNewTierGracePeriodIdx()
-	{
-		this.NewTierGracePeriodIdxPC.Increment();
-	}
-
-	public bool TryGetProgressionSubTier(out RankedProgressionManager.RankedProgressionSubTier subTier, out int index)
-	{
-		subTier = null;
-		index = -1;
-		return this.TryGetProgressionSubTier(this.GetEloScore(), out subTier, out index);
-	}
-
-	public bool TryGetProgressionSubTier(float elo, out RankedProgressionManager.RankedProgressionSubTier subTier, out int index)
-	{
-		int num = 0;
-		subTier = null;
-		index = -1;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			float num2 = (i < this.majorTiers.Count - 1) ? this.majorTiers[i].thresholdMax : 4000.1f;
-			if (elo < num2)
-			{
-				int j = 0;
-				while (j < this.majorTiers[i].subTiers.Count)
-				{
-					float num3 = (j < this.majorTiers[i].subTiers.Count - 1) ? this.majorTiers[i].subTiers[j].thresholdMax : num2;
-					if (elo < num3)
-					{
-						subTier = this.majorTiers[i].subTiers[j];
-						index = num;
-						return true;
-					}
-					j++;
-					num++;
-				}
-			}
-			else
-			{
-				num += this.majorTiers[i].subTiers.Count;
-			}
-		}
-		return false;
-	}
-
-	private RankedProgressionManager.RankedProgressionTier GetProgressionMajorTierBySubTierIndex(int idx)
-	{
-		int num = 0;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			int j = 0;
-			while (j < this.majorTiers[i].subTiers.Count)
-			{
-				if (num == idx)
-				{
-					return this.majorTiers[i];
-				}
-				j++;
-				num++;
-			}
-		}
-		return null;
-	}
-
-	private RankedProgressionManager.RankedProgressionSubTier GetProgressionSubTierByIndex(int idx)
-	{
-		int num = 0;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			int j = 0;
-			while (j < this.majorTiers[i].subTiers.Count)
-			{
-				if (num == idx)
-				{
-					return this.majorTiers[i].subTiers[j];
-				}
-				j++;
-				num++;
-			}
-		}
-		return null;
-	}
-
-	private RankedProgressionManager.RankedProgressionSubTier GetNextProgressionSubTierByIndex(int idx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(idx + 1);
-		if (progressionSubTierByIndex != null)
-		{
-			return progressionSubTierByIndex;
-		}
-		return this.GetProgressionSubTierByIndex(idx);
-	}
-
-	private RankedProgressionManager.RankedProgressionSubTier GetPrevProgressionSubTierByIndex(int idx)
-	{
-		if (idx > 0)
-		{
-			RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(idx - 1);
-			if (progressionSubTierByIndex != null)
-			{
-				return progressionSubTierByIndex;
-			}
-		}
-		return this.GetProgressionSubTierByIndex(idx);
-	}
-
-	public string GetProgressionRankName()
-	{
-		return this.GetProgressionRankName(this.GetEloScore());
-	}
-
-	public string GetProgressionRankName(float elo)
-	{
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
-		int num;
-		if (this.TryGetProgressionSubTier(elo, out rankedProgressionSubTier, out num))
-		{
-			return rankedProgressionSubTier.name;
-		}
-		return string.Empty;
-	}
-
-	public string GetNextProgressionRankName(int subTierIdx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier nextProgressionSubTierByIndex = this.GetNextProgressionSubTierByIndex(subTierIdx);
-		if (nextProgressionSubTierByIndex != null)
-		{
-			return nextProgressionSubTierByIndex.name;
-		}
-		return null;
-	}
-
-	public string GetPrevProgressionRankName(int subTierIdx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier prevProgressionSubTierByIndex = this.GetPrevProgressionSubTierByIndex(subTierIdx);
-		if (prevProgressionSubTierByIndex != null)
-		{
-			return prevProgressionSubTierByIndex.name;
-		}
-		return null;
-	}
-
-	public int GetProgressionRankIndex()
-	{
-		return this.GetProgressionRankIndexPC();
-	}
-
-	public RankedProgressionManager.RankedProgressionSubTier GetProgressionSubTier()
-	{
-		return this.GetProgressionSubTierByIndex(this.GetProgressionRankIndex());
-	}
-
-	public int GetProgressionRankIndexQuest()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 0;
-		}
-		GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = this.ProgressionData.platformData[1];
-		return this.GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
-	}
-
-	public int GetProgressionRankIndexPC()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 0;
-		}
-		GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = this.ProgressionData.platformData[0];
-		return this.GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
-	}
-
-	public int GetRankFromTiers(int majorTier, int minorTier)
-	{
-		int num = 0;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			for (int j = 0; j < this.majorTiers[i].subTiers.Count; j++)
-			{
-				if (i == majorTier && j == minorTier)
-				{
-					return num;
-				}
-				num++;
-			}
-		}
-		return -1;
-	}
-
-	public int GetProgressionRankIndex(float elo)
-	{
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
-		int result;
-		if (this.TryGetProgressionSubTier(elo, out rankedProgressionSubTier, out result))
-		{
-			return result;
-		}
-		return -1;
-	}
-
-	public float GetProgressionRankProgress()
-	{
-		return this.GetProgressionRankProgressPC();
-	}
-
-	public float GetProgressionRankProgressQuest()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 0f;
-		}
-		return this.ProgressionData.platformData[1].rankProgress;
-	}
-
-	public float GetProgressionRankProgressPC()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return 0f;
-		}
-		return this.ProgressionData.platformData[0].rankProgress;
-	}
-
-	public int ClampProgressionRankIndex(int subTierIdx)
-	{
-		if (subTierIdx < 0)
-		{
-			return 0;
-		}
-		int num = 0;
-		for (int i = 0; i < this.majorTiers.Count; i++)
-		{
-			int j = 0;
-			while (j < this.majorTiers[i].subTiers.Count)
-			{
-				if (num == subTierIdx)
-				{
-					return subTierIdx;
-				}
-				j++;
-				num++;
-			}
-		}
-		return num - 1;
-	}
-
-	public Sprite GetProgressionRankIcon()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return null;
-		}
-		int index = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].minorTier;
-		int index2 = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].majorTier;
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = this.majorTiers[index2].subTiers[index];
-		if (rankedProgressionSubTier == null)
-		{
-			return null;
-		}
-		return rankedProgressionSubTier.icon;
-	}
-
-	public string GetRankedProgressionTierName()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return "None";
-		}
-		int minorTier = this.ProgressionData.platformData[0].minorTier;
-		int majorTier = this.ProgressionData.platformData[0].majorTier;
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = this.majorTiers[majorTier].subTiers[minorTier];
-		if (rankedProgressionSubTier != null)
-		{
-			return rankedProgressionSubTier.name;
-		}
-		return "None";
-	}
-
-	public Sprite GetProgressionRankIcon(float elo)
-	{
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
-		int num;
-		if (this.TryGetProgressionSubTier(elo, out rankedProgressionSubTier, out num))
-		{
-			return rankedProgressionSubTier.icon;
-		}
-		return null;
-	}
-
-	public Sprite GetProgressionRankIcon(int subTierIdx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(subTierIdx);
-		if (progressionSubTierByIndex != null)
-		{
-			return progressionSubTierByIndex.icon;
-		}
-		return null;
-	}
-
-	public Sprite GetNextProgressionRankIcon(int subTierIdx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier nextProgressionSubTierByIndex = this.GetNextProgressionSubTierByIndex(subTierIdx);
-		if (nextProgressionSubTierByIndex != null)
-		{
-			return nextProgressionSubTierByIndex.icon;
-		}
-		return null;
-	}
-
-	public Sprite GetPrevProgressionRankIcon(int subTierIdx)
-	{
-		RankedProgressionManager.RankedProgressionSubTier prevProgressionSubTierByIndex = this.GetPrevProgressionSubTierByIndex(subTierIdx);
-		if (prevProgressionSubTierByIndex != null)
-		{
-			return prevProgressionSubTierByIndex.icon;
-		}
-		return null;
-	}
-
-	public float GetCurrentELO()
-	{
-		return this.GetEloScore();
-	}
-
-	public void GetSubtierRankThresholds(int subTierIdx, out float minThreshold, out float maxThreshold)
-	{
-		minThreshold = 0f;
-		maxThreshold = 1f;
-		RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(subTierIdx);
-		if (progressionSubTierByIndex != null)
-		{
-			maxThreshold = progressionSubTierByIndex.thresholdMax;
-			if (maxThreshold <= 0f)
-			{
-				RankedProgressionManager.RankedProgressionTier progressionMajorTierBySubTierIndex = this.GetProgressionMajorTierBySubTierIndex(subTierIdx);
-				if (progressionMajorTierBySubTierIndex != null)
-				{
-					maxThreshold = progressionMajorTierBySubTierIndex.thresholdMax;
-					if (maxThreshold <= 0f)
-					{
-						maxThreshold = 4000f;
-					}
-				}
-			}
-			minThreshold = progressionSubTierByIndex.GetMinThreshold();
-			if (minThreshold <= 0f)
-			{
-				RankedProgressionManager.RankedProgressionTier progressionMajorTierBySubTierIndex2 = this.GetProgressionMajorTierBySubTierIndex(subTierIdx);
-				if (progressionMajorTierBySubTierIndex2 != null)
-				{
-					minThreshold = progressionMajorTierBySubTierIndex2.GetMinThreshold();
-					if (minThreshold <= 0f)
-					{
-						minThreshold = 100f;
-					}
-				}
-			}
-		}
-	}
-
-	public static float GetEloWinProbability(float ratingPlayer1, float ratingPlayer2)
-	{
-		return 1f / (1f + Mathf.Pow(10f, (ratingPlayer1 - ratingPlayer2) / 400f));
-	}
-
-	public static float UpdateEloScore(float eloScore, float expectedResult, float actualResult, float k)
-	{
-		return Mathf.Clamp(eloScore + k * (actualResult - expectedResult), 100f, 4000f);
-	}
-
-	public RankedProgressionManager.ERankedMatchmakingTier GetRankedMatchmakingTier()
-	{
-		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
-		{
-			return RankedProgressionManager.ERankedMatchmakingTier.Low;
-		}
-		return (RankedProgressionManager.ERankedMatchmakingTier)this.ProgressionData.platformData[0].majorTier;
-	}
-
-	public float CompetitiveQueueEloFloor
-	{
-		get
-		{
-			return this.LowTierThreshold;
-		}
-	}
-
-	private bool HasUnlockedCompetitiveQueue()
-	{
-		return GorillaComputer.instance.allowedInCompetitive;
 	}
 
 	public static RankedProgressionManager Instance;
@@ -701,14 +150,14 @@ public class RankedProgressionManager : MonoBehaviour
 	private GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData ProgressionData;
 
 	[SerializeField]
-	private List<RankedProgressionManager.RankedProgressionTier> majorTiers = new List<RankedProgressionManager.RankedProgressionTier>();
+	private List<RankedProgressionTier> majorTiers = new List<RankedProgressionTier>();
 
 	[SerializeField]
 	private int newTierGracePeriod = 3;
 
 	public float MaxEloConstant = 90f;
 
-	private RankedProgressionManager.RankedProgressionEvent ProgressionEvent;
+	private RankedProgressionEvent ProgressionEvent;
 
 	public Action<int, float, int> OnPlayerEloAcquired;
 
@@ -716,115 +165,629 @@ public class RankedProgressionManager : MonoBehaviour
 	[ContextMenuItem("Set ELO", "DebugSetELO")]
 	public int debugEloPoints = 100;
 
-	public enum ERankedMatchmakingTier
-	{
-		Low,
-		Medium,
-		High
-	}
+	public int MaxRank { get; private set; }
 
-	public enum ERankedProgressionEventType
-	{
-		None,
-		Progress,
-		Promotion,
-		Relegation
-	}
+	public float LowTierThreshold { get; set; }
 
-	public class RankedProgressionEvent
+	public float HighTierThreshold { get; set; }
+
+	public List<RankedProgressionTier> MajorTiers
 	{
-		public override string ToString()
+		get
 		{
-			string text = "Progression Info\n";
-			text += string.Format("Event Type: {0}\n", this.evtType.ToString());
-			text += string.Format("Left Tier: {0}\n", this.leftName);
-			text += string.Format("Right Tier: {0}\n", this.rightName);
-			text += string.Format("Left Value: {0}\n", this.minVal.ToString("N0"));
-			text += string.Format("Right Value: {0}\n", this.maxVal.ToString("N0"));
-			text += string.Format("Elo Delta: {0}\n", this.delta.ToString("N0"));
-			if (this.evtType == RankedProgressionManager.ERankedProgressionEventType.Promotion || this.evtType == RankedProgressionManager.ERankedProgressionEventType.Relegation)
-			{
-				text += string.Format("Fanfare Tier: {0}\n", this.newTierName);
-			}
-			return text;
+			return majorTiers;
 		}
-
-		public RankedProgressionManager.ERankedProgressionEventType evtType;
-
-		public Sprite progressIconLeft;
-
-		public Sprite progressIconRight;
-
-		public Sprite newTierIcon;
-
-		public string leftName;
-
-		public string rightName;
-
-		public string newTierName;
-
-		public float minVal;
-
-		public float maxVal;
-
-		public float delta;
+		private set
+		{
+		}
 	}
 
-	public abstract class RankedProgressionTierBase
+	public float CompetitiveQueueEloFloor => LowTierThreshold;
+
+	private void DebugSetELO()
 	{
-		public void SetMinThreshold(float val)
-		{
-			this.thresholdMin = val;
-		}
-
-		public float GetMinThreshold()
-		{
-			if (this.thresholdMin < 0f)
-			{
-				GTDev.LogError<string>("Tier min threshold not initialized. Can only be used at runtime.", null);
-			}
-			return this.thresholdMin;
-		}
-
-		public string name;
-
-		public Color color = Color.white;
-
-		public float thresholdMax;
-
-		private float thresholdMin = -1f;
 	}
 
-	[Serializable]
-	public class RankedProgressionSubTier : RankedProgressionManager.RankedProgressionTierBase
+	[ContextMenu("Reset ELO")]
+	private void DebugResetELO()
 	{
-		public Sprite icon;
 	}
 
-	[Serializable]
-	public class RankedProgressionTier : RankedProgressionManager.RankedProgressionTierBase
+	private void Awake()
 	{
-		public void InsertSubTierAt(int idx, float tierMin)
+		if ((bool)Instance)
 		{
-			RankedProgressionManager.RankedProgressionSubTier item = new RankedProgressionManager.RankedProgressionSubTier
-			{
-				name = "NewTier"
-			};
-			this.subTiers.Insert(idx, item);
-			this.EnforceSubTierValidity(tierMin);
+			GTDev.LogError("Duplicate RankedProgressionManager detected. Destroying self.", base.gameObject);
+			UnityEngine.Object.Destroy(this);
 		}
-
-		public void EnforceSubTierValidity(float thresholdMin)
+		else
 		{
-			float num = (((this.thresholdMax == 0f) ? 4000f : this.thresholdMax) - thresholdMin) / (float)this.subTiers.Count;
-			for (int i = 0; i < this.subTiers.Count - 1; i++)
+			Instance = this;
+		}
+	}
+
+	private void Start()
+	{
+		if (majorTiers.Count < 3)
+		{
+			GTDev.LogWarning("At least 3 MMR tiers must be defined.");
+			return;
+		}
+		GameMode.OnStartGameMode += OnJoinedRoom;
+		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(OnPlayerJoined);
+		float minThreshold = 100f;
+		int num = 0;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			majorTiers[i].SetMinThreshold((i == 0) ? 100f : majorTiers[i - 1].thresholdMax);
+			for (int j = 0; j < majorTiers[i].subTiers.Count; j++)
 			{
-				float num2 = thresholdMin + (float)(i + 1) * num;
-				num2 = Mathf.Round(num2 / 10f);
-				this.subTiers[i].thresholdMax = num2 * 10f;
+				num++;
+				majorTiers[i].subTiers[j].SetMinThreshold(minThreshold);
+				minThreshold = majorTiers[i].subTiers[j].thresholdMax;
 			}
 		}
+		MaxRank = num - 1;
+		LowTierThreshold = majorTiers[0].thresholdMax;
+		List<RankedProgressionTier> list = majorTiers;
+		HighTierThreshold = list[list.Count - 1].GetMinThreshold();
+		EloScorePC = new RankedMultiplayerStatisticFloat(RANKED_ELO_PC_KEY, 100f, 100f, 4000f, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
+		EloScoreQuest = new RankedMultiplayerStatisticFloat(RANKED_ELO_KEY, 100f, 100f, 4000f, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
+		NewTierGracePeriodIdxPC = new RankedMultiplayerStatisticInt(RANKED_PROGRESSION_GRACE_PERIOD_KEY, 0, -1, int.MaxValue, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
+		NewTierGracePeriodIdxQuest = new RankedMultiplayerStatisticInt(RANKED_PROGRESSION_GRACE_PERIOD_PC_KEY, 0, -1, int.MaxValue, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
+	}
 
-		public List<RankedProgressionManager.RankedProgressionSubTier> subTiers = new List<RankedProgressionManager.RankedProgressionSubTier>();
+	private void OnDestroy()
+	{
+		GameMode.OnStartGameMode += OnJoinedRoom;
+		RoomSystem.PlayerJoinedEvent -= new Action<NetPlayer>(OnPlayerJoined);
+	}
+
+	public void RequestUnlockCompetitiveQueue(bool unlock)
+	{
+		GorillaTagCompetitiveServerApi.Instance.RequestUnlockCompetitiveQueue(unlock, delegate
+		{
+			AcquireLocalPlayerRankInformation();
+		});
+	}
+
+	public IEnumerator LoadStatsWhenReady()
+	{
+		yield return new WaitUntil(() => NetworkSystem.Instance.LocalPlayer.UserId != null);
+		if (HasUnlockedCompetitiveQueue())
+		{
+			RequestUnlockCompetitiveQueue(unlock: true);
+		}
+		else
+		{
+			AcquireLocalPlayerRankInformation();
+		}
+	}
+
+	private void OnJoinedRoom(GameModeType newGameModeType)
+	{
+		if (newGameModeType == GameModeType.InfectionCompetitive)
+		{
+			AcquireRoomRankInformation(includeLocalPlayer: false);
+		}
+	}
+
+	private void OnPlayerJoined(NetPlayer player)
+	{
+		if (GorillaGameManager.instance != null && GorillaGameManager.instance.GameType() == GameModeType.InfectionCompetitive)
+		{
+			AcquireSinglePlayerRankInformation(player);
+		}
+	}
+
+	private void AcquireLocalPlayerRankInformation()
+	{
+		List<string> list = new List<string>();
+		list.Add(NetworkSystem.Instance.LocalPlayer.UserId);
+		GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, OnLocalPlayerRankedInformationAcquired);
+	}
+
+	private void AcquireSinglePlayerRankInformation(NetPlayer player)
+	{
+		if (player != null)
+		{
+			List<string> list = new List<string>();
+			list.Add(player.UserId);
+			GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, OnPlayersRankedInformationAcquired);
+		}
+	}
+
+	public void AcquireRoomRankInformation(bool includeLocalPlayer = true)
+	{
+		List<string> list = new List<string>();
+		foreach (NetPlayer item in RoomSystem.PlayersInRoom)
+		{
+			if (includeLocalPlayer || !item.IsLocal)
+			{
+				list.Add(item.UserId);
+			}
+		}
+		if (list.Count > 0)
+		{
+			GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, OnPlayersRankedInformationAcquired);
+		}
+	}
+
+	private void OnPlayersRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
+	{
+		foreach (GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData playerDatum in rankedModeProgressionData.playerData)
+		{
+			if (playerDatum == null || playerDatum.platformData == null || playerDatum.platformData.Length < 2)
+			{
+				continue;
+			}
+			int num = -1;
+			NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
+			foreach (NetPlayer netPlayer in allNetPlayers)
+			{
+				if (netPlayer.UserId == playerDatum.playfabID)
+				{
+					num = netPlayer.ActorNumber;
+					break;
+				}
+			}
+			if (num < 0)
+			{
+				continue;
+			}
+			GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = playerDatum.platformData[1];
+			GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData2 = playerDatum.platformData[0];
+			GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData3 = rankedModeProgressionPlatformData;
+			rankedModeProgressionPlatformData3 = rankedModeProgressionPlatformData2;
+			int rankFromTiers = Instance.GetRankFromTiers(rankedModeProgressionPlatformData3.majorTier, rankedModeProgressionPlatformData3.minorTier);
+			OnPlayerEloAcquired?.Invoke(num, rankedModeProgressionPlatformData3.elo, rankFromTiers);
+			if (num == NetworkSystem.Instance.LocalPlayerID)
+			{
+				SetLocalProgressionData(playerDatum);
+			}
+			if (VRRigCache.Instance.TryGetVrrig(num, out var playerRig))
+			{
+				VRRig rig = playerRig.Rig;
+				if (rig != null)
+				{
+					int rankFromTiers2 = GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
+					int rankFromTiers3 = Instance.GetRankFromTiers(rankedModeProgressionPlatformData2.majorTier, rankedModeProgressionPlatformData2.minorTier);
+					rig.SetRankedInfo(rankedModeProgressionPlatformData3.elo, rankFromTiers2, rankFromTiers3, broadcastToOtherClients: false);
+				}
+			}
+		}
+	}
+
+	private void OnLocalPlayerRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
+	{
+		if (rankedModeProgressionData.playerData.Count > 0)
+		{
+			SetLocalProgressionData(rankedModeProgressionData.playerData[0]);
+			float eloScore = GetEloScore();
+			int progressionRankIndexQuest = GetProgressionRankIndexQuest();
+			int progressionRankIndexPC = GetProgressionRankIndexPC();
+			int num = progressionRankIndexQuest;
+			num = progressionRankIndexPC;
+			HandlePlayerRankedInfoReceived(NetworkSystem.Instance.LocalPlayer.ActorNumber, eloScore, num);
+			VRRig.LocalRig.SetRankedInfo(eloScore, progressionRankIndexQuest, progressionRankIndexPC);
+		}
+	}
+
+	public bool AreValuesValid(float elo, int questTier, int pcTier)
+	{
+		if (elo >= 100f && elo <= 4000f && questTier >= 0 && questTier <= MaxRank && pcTier >= 0 && pcTier <= MaxRank)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public void HandlePlayerRankedInfoReceived(int actorNum, float elo, int tier)
+	{
+		OnPlayerEloAcquired?.Invoke(actorNum, elo, tier);
+	}
+
+	public void SetLocalProgressionData(GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData data)
+	{
+		ProgressionData = data;
+	}
+
+	public void LoadStats()
+	{
+		StartCoroutine(LoadStatsWhenReady());
+	}
+
+	public float GetEloScore()
+	{
+		return GetEloScorePC();
+	}
+
+	public void SetEloScore(float val)
+	{
+		GorillaTagCompetitiveServerApi.Instance.RequestSetEloValue(val, delegate
+		{
+			AcquireLocalPlayerRankInformation();
+		});
+	}
+
+	public float GetEloScorePC()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 100f;
+		}
+		return ProgressionData.platformData[0].elo;
+	}
+
+	public float GetEloScoreQuest()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 100f;
+		}
+		return ProgressionData.platformData[1].elo;
+	}
+
+	private int GetNewTierGracePeriodIdx()
+	{
+		return NewTierGracePeriodIdxPC;
+	}
+
+	private void SetNewTierGracePeriodIdx(int val)
+	{
+		NewTierGracePeriodIdxPC.Set(val);
+	}
+
+	private void IncrementNewTierGracePeriodIdx()
+	{
+		NewTierGracePeriodIdxPC.Increment();
+	}
+
+	public bool TryGetProgressionSubTier(out RankedProgressionSubTier subTier, out int index)
+	{
+		subTier = null;
+		index = -1;
+		return TryGetProgressionSubTier(GetEloScore(), out subTier, out index);
+	}
+
+	public bool TryGetProgressionSubTier(float elo, out RankedProgressionSubTier subTier, out int index)
+	{
+		int num = 0;
+		subTier = null;
+		index = -1;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			float num2 = ((i < majorTiers.Count - 1) ? majorTiers[i].thresholdMax : 4000.1f);
+			if (elo < num2)
+			{
+				int num3 = 0;
+				while (num3 < majorTiers[i].subTiers.Count)
+				{
+					float num4 = ((num3 < majorTiers[i].subTiers.Count - 1) ? majorTiers[i].subTiers[num3].thresholdMax : num2);
+					if (elo < num4)
+					{
+						subTier = majorTiers[i].subTiers[num3];
+						index = num;
+						return true;
+					}
+					num3++;
+					num++;
+				}
+			}
+			else
+			{
+				num += majorTiers[i].subTiers.Count;
+			}
+		}
+		return false;
+	}
+
+	private RankedProgressionTier GetProgressionMajorTierBySubTierIndex(int idx)
+	{
+		int num = 0;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			int num2 = 0;
+			while (num2 < majorTiers[i].subTiers.Count)
+			{
+				if (num == idx)
+				{
+					return majorTiers[i];
+				}
+				num2++;
+				num++;
+			}
+		}
+		return null;
+	}
+
+	private RankedProgressionSubTier GetProgressionSubTierByIndex(int idx)
+	{
+		int num = 0;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			int num2 = 0;
+			while (num2 < majorTiers[i].subTiers.Count)
+			{
+				if (num == idx)
+				{
+					return majorTiers[i].subTiers[num2];
+				}
+				num2++;
+				num++;
+			}
+		}
+		return null;
+	}
+
+	private RankedProgressionSubTier GetNextProgressionSubTierByIndex(int idx)
+	{
+		RankedProgressionSubTier progressionSubTierByIndex = GetProgressionSubTierByIndex(idx + 1);
+		if (progressionSubTierByIndex != null)
+		{
+			return progressionSubTierByIndex;
+		}
+		return GetProgressionSubTierByIndex(idx);
+	}
+
+	private RankedProgressionSubTier GetPrevProgressionSubTierByIndex(int idx)
+	{
+		if (idx > 0)
+		{
+			RankedProgressionSubTier progressionSubTierByIndex = GetProgressionSubTierByIndex(idx - 1);
+			if (progressionSubTierByIndex != null)
+			{
+				return progressionSubTierByIndex;
+			}
+		}
+		return GetProgressionSubTierByIndex(idx);
+	}
+
+	public string GetProgressionRankName()
+	{
+		return GetProgressionRankName(GetEloScore());
+	}
+
+	public string GetProgressionRankName(float elo)
+	{
+		if (TryGetProgressionSubTier(elo, out var subTier, out var _))
+		{
+			return subTier.name;
+		}
+		return string.Empty;
+	}
+
+	public string GetNextProgressionRankName(int subTierIdx)
+	{
+		return GetNextProgressionSubTierByIndex(subTierIdx)?.name;
+	}
+
+	public string GetPrevProgressionRankName(int subTierIdx)
+	{
+		return GetPrevProgressionSubTierByIndex(subTierIdx)?.name;
+	}
+
+	public int GetProgressionRankIndex()
+	{
+		return GetProgressionRankIndexPC();
+	}
+
+	public RankedProgressionSubTier GetProgressionSubTier()
+	{
+		return GetProgressionSubTierByIndex(GetProgressionRankIndex());
+	}
+
+	public int GetProgressionRankIndexQuest()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 0;
+		}
+		GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = ProgressionData.platformData[1];
+		return GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
+	}
+
+	public int GetProgressionRankIndexPC()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 0;
+		}
+		GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData rankedModeProgressionPlatformData = ProgressionData.platformData[0];
+		return GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
+	}
+
+	public int GetRankFromTiers(int majorTier, int minorTier)
+	{
+		int num = 0;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			for (int j = 0; j < majorTiers[i].subTiers.Count; j++)
+			{
+				if (i == majorTier && j == minorTier)
+				{
+					return num;
+				}
+				num++;
+			}
+		}
+		return -1;
+	}
+
+	public int GetProgressionRankIndex(float elo)
+	{
+		if (TryGetProgressionSubTier(elo, out var _, out var index))
+		{
+			return index;
+		}
+		return -1;
+	}
+
+	public float GetProgressionRankProgress()
+	{
+		return GetProgressionRankProgressPC();
+	}
+
+	public float GetProgressionRankProgressQuest()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 0f;
+		}
+		return ProgressionData.platformData[1].rankProgress;
+	}
+
+	public float GetProgressionRankProgressPC()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return 0f;
+		}
+		return ProgressionData.platformData[0].rankProgress;
+	}
+
+	public int ClampProgressionRankIndex(int subTierIdx)
+	{
+		if (subTierIdx < 0)
+		{
+			return 0;
+		}
+		int num = 0;
+		for (int i = 0; i < majorTiers.Count; i++)
+		{
+			int num2 = 0;
+			while (num2 < majorTiers[i].subTiers.Count)
+			{
+				if (num == subTierIdx)
+				{
+					return subTierIdx;
+				}
+				num2++;
+				num++;
+			}
+		}
+		return num - 1;
+	}
+
+	public Sprite GetProgressionRankIcon()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return null;
+		}
+		int num = 0;
+		int num2 = 0;
+		num = ((ProgressionData != null) ? ProgressionData.platformData[0].minorTier : 0);
+		num2 = ((ProgressionData != null) ? ProgressionData.platformData[0].majorTier : 0);
+		return majorTiers[num2].subTiers[num]?.icon;
+	}
+
+	public string GetRankedProgressionTierName()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return "None";
+		}
+		int num = 0;
+		int num2 = 0;
+		num = ProgressionData.platformData[0].minorTier;
+		num2 = ProgressionData.platformData[0].majorTier;
+		RankedProgressionSubTier rankedProgressionSubTier = majorTiers[num2].subTiers[num];
+		if (rankedProgressionSubTier != null)
+		{
+			return rankedProgressionSubTier.name;
+		}
+		return "None";
+	}
+
+	public Sprite GetProgressionRankIcon(float elo)
+	{
+		if (TryGetProgressionSubTier(elo, out var subTier, out var _))
+		{
+			return subTier.icon;
+		}
+		return null;
+	}
+
+	public Sprite GetProgressionRankIcon(int subTierIdx)
+	{
+		return GetProgressionSubTierByIndex(subTierIdx)?.icon;
+	}
+
+	public Sprite GetNextProgressionRankIcon(int subTierIdx)
+	{
+		return GetNextProgressionSubTierByIndex(subTierIdx)?.icon;
+	}
+
+	public Sprite GetPrevProgressionRankIcon(int subTierIdx)
+	{
+		return GetPrevProgressionSubTierByIndex(subTierIdx)?.icon;
+	}
+
+	public float GetCurrentELO()
+	{
+		return GetEloScore();
+	}
+
+	public void GetSubtierRankThresholds(int subTierIdx, out float minThreshold, out float maxThreshold)
+	{
+		minThreshold = 0f;
+		maxThreshold = 1f;
+		RankedProgressionSubTier progressionSubTierByIndex = GetProgressionSubTierByIndex(subTierIdx);
+		if (progressionSubTierByIndex == null)
+		{
+			return;
+		}
+		maxThreshold = progressionSubTierByIndex.thresholdMax;
+		if (maxThreshold <= 0f)
+		{
+			RankedProgressionTier progressionMajorTierBySubTierIndex = GetProgressionMajorTierBySubTierIndex(subTierIdx);
+			if (progressionMajorTierBySubTierIndex != null)
+			{
+				maxThreshold = progressionMajorTierBySubTierIndex.thresholdMax;
+				if (maxThreshold <= 0f)
+				{
+					maxThreshold = 4000f;
+				}
+			}
+		}
+		minThreshold = progressionSubTierByIndex.GetMinThreshold();
+		if (!(minThreshold <= 0f))
+		{
+			return;
+		}
+		RankedProgressionTier progressionMajorTierBySubTierIndex2 = GetProgressionMajorTierBySubTierIndex(subTierIdx);
+		if (progressionMajorTierBySubTierIndex2 != null)
+		{
+			minThreshold = progressionMajorTierBySubTierIndex2.GetMinThreshold();
+			if (minThreshold <= 0f)
+			{
+				minThreshold = 100f;
+			}
+		}
+	}
+
+	public static float GetEloWinProbability(float ratingPlayer1, float ratingPlayer2)
+	{
+		return 1f / (1f + Mathf.Pow(10f, (ratingPlayer1 - ratingPlayer2) / 400f));
+	}
+
+	public static float UpdateEloScore(float eloScore, float expectedResult, float actualResult, float k)
+	{
+		return Mathf.Clamp(eloScore + k * (actualResult - expectedResult), 100f, 4000f);
+	}
+
+	public ERankedMatchmakingTier GetRankedMatchmakingTier()
+	{
+		if (ProgressionData == null || ProgressionData.platformData == null || ProgressionData.platformData.Length < 2)
+		{
+			return ERankedMatchmakingTier.Low;
+		}
+		return (ERankedMatchmakingTier)ProgressionData.platformData[0].majorTier;
+	}
+
+	private bool HasUnlockedCompetitiveQueue()
+	{
+		return GorillaComputer.instance.allowedInCompetitive;
 	}
 }

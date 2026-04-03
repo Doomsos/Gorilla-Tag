@@ -1,15 +1,21 @@
-﻿using System;
 using GorillaNetworking;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class AudioSourceClipRandomizer : MonoBehaviour
 {
+	[SerializeField]
+	private AudioClip[] clips;
+
+	private AudioSource source;
+
+	private bool playOnAwake;
+
 	private void Awake()
 	{
-		this.source = base.GetComponent<AudioSource>();
-		this.playOnAwake = this.source.playOnAwake;
-		this.source.playOnAwake = false;
+		source = GetComponent<AudioSource>();
+		playOnAwake = source.playOnAwake;
+		source.playOnAwake = false;
 	}
 
 	public void Play()
@@ -19,22 +25,15 @@ public class AudioSourceClipRandomizer : MonoBehaviour
 		{
 			num = GorillaComputer.instance.GetServerTime().Second;
 		}
-		this.source.clip = this.clips[num % this.clips.Length];
-		this.source.GTPlay();
+		source.clip = clips[num % clips.Length];
+		source.GTPlay();
 	}
 
 	private void OnEnable()
 	{
-		if (this.playOnAwake)
+		if (playOnAwake)
 		{
-			this.Play();
+			Play();
 		}
 	}
-
-	[SerializeField]
-	private AudioClip[] clips;
-
-	private AudioSource source;
-
-	private bool playOnAwake;
 }

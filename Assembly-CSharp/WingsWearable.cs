@@ -1,38 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class WingsWearable : MonoBehaviour, IGorillaSliceableSimple
 {
-	private void Awake()
-	{
-		if (this.animator == null)
-		{
-			GTDev.LogError<string>("WingsWearable on " + base.gameObject.name + " missing animator", null);
-			return;
-		}
-		this.xform = this.animator.transform;
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		this.oldPos = this.xform.localPosition;
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void SliceUpdate()
-	{
-		Vector3 position = this.xform.position;
-		float f = (position - this.oldPos).magnitude / Time.deltaTime;
-		float value = this.flapSpeedCurve.Evaluate(Mathf.Abs(f));
-		this.animator.SetFloat(this.flapSpeedParamID, value);
-		this.oldPos = position;
-	}
-
 	[Tooltip("This animator must have a parameter called 'FlapSpeed'")]
 	public Animator animator;
 
@@ -44,4 +13,36 @@ public class WingsWearable : MonoBehaviour, IGorillaSliceableSimple
 	private Vector3 oldPos;
 
 	private readonly int flapSpeedParamID = Animator.StringToHash("FlapSpeed");
+
+	private void Awake()
+	{
+		if (animator == null)
+		{
+			GTDev.LogError("WingsWearable on " + base.gameObject.name + " missing animator");
+		}
+		else
+		{
+			xform = animator.transform;
+		}
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		oldPos = xform.localPosition;
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void SliceUpdate()
+	{
+		Vector3 position = xform.position;
+		float f = (position - oldPos).magnitude / Time.deltaTime;
+		float value = flapSpeedCurve.Evaluate(Mathf.Abs(f));
+		animator.SetFloat(flapSpeedParamID, value);
+		oldPos = position;
+	}
 }

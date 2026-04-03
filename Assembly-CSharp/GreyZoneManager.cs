@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
@@ -11,528 +11,6 @@ using UnityEngine;
 
 public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 {
-	public bool GreyZoneActive
-	{
-		get
-		{
-			return this.greyZoneActive;
-		}
-	}
-
-	public bool GreyZoneAvailable
-	{
-		get
-		{
-			bool result = false;
-			if (GorillaComputer.instance != null)
-			{
-				result = (GorillaComputer.instance.GetServerTime().DayOfYear >= this.greyZoneAvailableDayOfYear);
-			}
-			return result;
-		}
-	}
-
-	public int GravityFactorSelection
-	{
-		get
-		{
-			return this.gravityFactorOptionSelection;
-		}
-	}
-
-	public bool TickRunning
-	{
-		get
-		{
-			return this._tickRunning;
-		}
-		set
-		{
-			this._tickRunning = value;
-		}
-	}
-
-	public bool HasAuthority
-	{
-		get
-		{
-			return !PhotonNetwork.InRoom || base.photonView.IsMine;
-		}
-	}
-
-	public float SummoningProgress
-	{
-		get
-		{
-			return this.summoningProgress;
-		}
-	}
-
-	public void RegisterSummoner(GreyZoneSummoner summoner)
-	{
-		if (!this.activeSummoners.Contains(summoner))
-		{
-			this.activeSummoners.Add(summoner);
-		}
-	}
-
-	public void DeregisterSummoner(GreyZoneSummoner summoner)
-	{
-		if (this.activeSummoners.Contains(summoner))
-		{
-			this.activeSummoners.Remove(summoner);
-		}
-	}
-
-	public void RegisterMoon(MoonController moon)
-	{
-		this.moonController = moon;
-	}
-
-	public void UnregisterMoon(MoonController moon)
-	{
-		if (this.moonController == moon)
-		{
-			this.moonController = null;
-		}
-	}
-
-	public void ActivateGreyZoneAuthority()
-	{
-		this.greyZoneActive = true;
-		this.photonConnectedDuringActivation = PhotonNetwork.InRoom;
-		this.greyZoneActivationTime = (this.photonConnectedDuringActivation ? PhotonNetwork.Time : ((double)Time.time));
-		this.ActivateGreyZoneLocal();
-	}
-
-	private void ActivateGreyZoneLocal()
-	{
-		Shader.SetGlobalInt(this._GreyZoneActive, 1);
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance != null)
-		{
-			instance.SetGravityOverride(this, new Action<GTPlayer>(this.GravityOverrideFunction));
-			this.gravityOverrideSet = true;
-		}
-		if (MusicManager.Instance != null)
-		{
-			MusicManager.Instance.FadeOutMusic(2f);
-		}
-		if (this.audioFadeCoroutine != null)
-		{
-			base.StopCoroutine(this.audioFadeCoroutine);
-		}
-		this.audioFadeCoroutine = base.StartCoroutine(this.FadeAudioIn(this.greyZoneAmbience, this.greyZoneAmbienceVolume, this.ambienceFadeTime));
-		if (this.greyZoneAmbience != null)
-		{
-			this.greyZoneAmbience.GTPlay();
-		}
-		this.greyZoneParticles.gameObject.SetActive(true);
-		this.summoningProgress = 1f;
-		this.UpdateSummonerVisuals();
-		for (int i = 0; i < this.activeSummoners.Count; i++)
-		{
-			this.activeSummoners[i].OnGreyZoneActivated();
-		}
-		if (this.OnGreyZoneActivated != null)
-		{
-			this.OnGreyZoneActivated();
-		}
-	}
-
-	public void LocalSimpleActivation(bool onOff, float gravityFactor)
-	{
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		if (!(PlayerPrefs.GetString("didTutorial", "nope") == "done"))
-		{
-			return;
-		}
-		this.simpleGravityFactor = Mathf.Clamp(gravityFactor, 0f, 5f);
-		Shader.SetGlobalInt(this._GreyZoneActive, onOff ? 1 : 0);
-		if (onOff)
-		{
-			instance.SetGravityOverride(this, new Action<GTPlayer>(this.SimpleGravityOverrideFunction));
-		}
-		else
-		{
-			instance.UnsetGravityOverride(this);
-		}
-		this.gravityOverrideSet = onOff;
-		this.greyZoneParticles.gameObject.SetActive(onOff);
-	}
-
-	public void DeactivateGreyZoneAuthority()
-	{
-		this.greyZoneActive = false;
-		foreach (KeyValuePair<int, ValueTuple<VRRig, GreyZoneSummoner>> keyValuePair in this.summoningPlayers)
-		{
-			this.summoningPlayerProgress[keyValuePair.Key] = 0f;
-		}
-		this.DeactivateGreyZoneLocal();
-	}
-
-	private void DeactivateGreyZoneLocal()
-	{
-		Shader.SetGlobalInt(this._GreyZoneActive, 0);
-		if (MusicManager.Instance != null)
-		{
-			MusicManager.Instance.FadeInMusic(4f);
-		}
-		if (this.audioFadeCoroutine != null)
-		{
-			base.StopCoroutine(this.audioFadeCoroutine);
-		}
-		this.audioFadeCoroutine = base.StartCoroutine(this.FadeAudioOut(this.greyZoneAmbience, this.ambienceFadeTime));
-		this.greyZoneParticles.gameObject.SetActive(false);
-		this.summoningProgress = 0f;
-		this.UpdateSummonerVisuals();
-		if (this.OnGreyZoneDeactivated != null)
-		{
-			this.OnGreyZoneDeactivated();
-		}
-	}
-
-	public void ForceStopGreyZone()
-	{
-		this.greyZoneActive = false;
-		Shader.SetGlobalInt(this._GreyZoneActive, 0);
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance != null)
-		{
-			instance.UnsetGravityOverride(this);
-		}
-		this.gravityOverrideSet = false;
-		if (this.moonController != null)
-		{
-			this.moonController.UpdateDistance(1f);
-		}
-		if (MusicManager.Instance != null)
-		{
-			MusicManager.Instance.FadeInMusic(0f);
-		}
-		if (this.greyZoneAmbience != null)
-		{
-			this.greyZoneAmbience.volume = 0f;
-			this.greyZoneAmbience.GTStop();
-		}
-		this.greyZoneParticles.gameObject.SetActive(false);
-		this.summoningProgress = 0f;
-		this.UpdateSummonerVisuals();
-		if (this.OnGreyZoneDeactivated != null)
-		{
-			this.OnGreyZoneDeactivated();
-		}
-	}
-
-	public void GravityOverrideFunction(GTPlayer player)
-	{
-		this.gravityReductionAmount = 0f;
-		if (this.moonController != null)
-		{
-			this.gravityReductionAmount = Mathf.InverseLerp(1f - this.skyMonsterDistGravityRampBuffer, this.skyMonsterDistGravityRampBuffer, this.moonController.Distance);
-		}
-		float d = Mathf.Lerp(1f, this.gravityFactorOptions[this.gravityFactorOptionSelection], this.gravityReductionAmount);
-		player.AddForce(Physics.gravity * d * player.scale, ForceMode.Acceleration);
-	}
-
-	public void SimpleGravityOverrideFunction(GTPlayer player)
-	{
-		player.AddForce(Physics.gravity * this.simpleGravityFactor * player.scale, ForceMode.Acceleration);
-	}
-
-	private IEnumerator FadeAudioIn(AudioSource source, float maxVolume, float duration)
-	{
-		if (source != null)
-		{
-			float startingVolume = source.volume;
-			float startTime = Time.time;
-			source.GTPlay();
-			for (float num = 0f; num < 1f; num = (Time.time - startTime) / duration)
-			{
-				source.volume = Mathf.Lerp(startingVolume, maxVolume, num);
-				yield return null;
-			}
-			source.volume = maxVolume;
-		}
-		yield break;
-	}
-
-	private IEnumerator FadeAudioOut(AudioSource source, float duration)
-	{
-		if (source != null)
-		{
-			float startingVolume = source.volume;
-			float startTime = Time.time;
-			for (float num = 0f; num < 1f; num = (Time.time - startTime) / duration)
-			{
-				source.volume = Mathf.Lerp(startingVolume, 0f, num);
-				yield return null;
-			}
-			source.volume = 0f;
-			source.Stop();
-		}
-		yield break;
-	}
-
-	public void VRRigEnteredSummonerProximity(VRRig rig, GreyZoneSummoner summoner)
-	{
-		if (!this.summoningPlayers.ContainsKey(rig.Creator.ActorNumber))
-		{
-			this.summoningPlayers.Add(rig.Creator.ActorNumber, new ValueTuple<VRRig, GreyZoneSummoner>(rig, summoner));
-			this.summoningPlayerProgress.Add(rig.Creator.ActorNumber, 0f);
-		}
-	}
-
-	public void VRRigExitedSummonerProximity(VRRig rig, GreyZoneSummoner summoner)
-	{
-		if (this.summoningPlayers.ContainsKey(rig.Creator.ActorNumber))
-		{
-			this.summoningPlayers.Remove(rig.Creator.ActorNumber);
-			this.summoningPlayerProgress.Remove(rig.Creator.ActorNumber);
-		}
-	}
-
-	private void UpdateSummonerVisuals()
-	{
-		bool greyZoneAvailable = this.GreyZoneAvailable;
-		for (int i = 0; i < this.activeSummoners.Count; i++)
-		{
-			this.activeSummoners[i].UpdateProgressFeedback(greyZoneAvailable);
-		}
-	}
-
-	private void ValidateSummoningPlayers()
-	{
-		this.invalidSummoners.Clear();
-		foreach (KeyValuePair<int, ValueTuple<VRRig, GreyZoneSummoner>> keyValuePair in this.summoningPlayers)
-		{
-			VRRig item = keyValuePair.Value.Item1;
-			GreyZoneSummoner item2 = keyValuePair.Value.Item2;
-			if (item.Creator.ActorNumber != keyValuePair.Key || (item.head.rigTarget.position - item2.SummoningFocusPoint).sqrMagnitude > item2.SummonerMaxDistance * item2.SummonerMaxDistance)
-			{
-				this.invalidSummoners.Add(keyValuePair.Key);
-			}
-		}
-		foreach (int key in this.invalidSummoners)
-		{
-			this.summoningPlayers.Remove(key);
-			this.summoningPlayerProgress.Remove(key);
-		}
-	}
-
-	private int DayNightOverrideFunction(int inputIndex)
-	{
-		int num = 0;
-		int num2 = 8;
-		int num3 = inputIndex - num;
-		int num4 = num2 - inputIndex;
-		if (num3 <= 0 || num4 <= 0)
-		{
-			return inputIndex;
-		}
-		if (num4 > num3)
-		{
-			return num2;
-		}
-		return num;
-	}
-
-	private void Awake()
-	{
-		if (GreyZoneManager.Instance == null)
-		{
-			GreyZoneManager.Instance = this;
-			this.greyZoneAmbienceVolume = this.greyZoneAmbience.volume;
-			return;
-		}
-		Object.Destroy(this);
-	}
-
-	private void OnEnable()
-	{
-		if (this.forceTimeOfDayToNight)
-		{
-			BetterDayNightManager instance = BetterDayNightManager.instance;
-			if (instance != null)
-			{
-				instance.SetTimeIndexOverrideFunction(new Func<int, int>(this.DayNightOverrideFunction));
-			}
-		}
-	}
-
-	private void OnDisable()
-	{
-		this.ForceStopGreyZone();
-		if (this.forceTimeOfDayToNight)
-		{
-			BetterDayNightManager instance = BetterDayNightManager.instance;
-			if (instance != null)
-			{
-				instance.UnsetTimeIndexOverrideFunction();
-			}
-		}
-	}
-
-	private void Update()
-	{
-		if (this.HasAuthority)
-		{
-			this.AuthorityUpdate();
-		}
-		this.SharedUpdate();
-	}
-
-	private void AuthorityUpdate()
-	{
-		float deltaTime = Time.deltaTime;
-		if (this.greyZoneActive)
-		{
-			this.summoningProgress = 1f;
-			double num;
-			if (this.photonConnectedDuringActivation && PhotonNetwork.InRoom)
-			{
-				num = PhotonNetwork.Time;
-			}
-			else if (!this.photonConnectedDuringActivation && !PhotonNetwork.InRoom)
-			{
-				num = (double)Time.time;
-			}
-			else
-			{
-				num = -100.0;
-			}
-			if (num > this.greyZoneActivationTime + (double)this.greyZoneActiveDuration || num < this.greyZoneActivationTime - 10.0)
-			{
-				this.DeactivateGreyZoneAuthority();
-				return;
-			}
-		}
-		else if (this.GreyZoneAvailable)
-		{
-			this.roomPlayerList = PhotonNetwork.PlayerList;
-			int num2 = 1;
-			if (this.roomPlayerList != null && this.roomPlayerList.Length != 0)
-			{
-				num2 = Mathf.Max((this.roomPlayerList.Length + 1) / 2, 1);
-			}
-			float num3 = 0f;
-			float num4 = 1f / this.summoningActivationTime;
-			foreach (KeyValuePair<int, ValueTuple<VRRig, GreyZoneSummoner>> keyValuePair in this.summoningPlayers)
-			{
-				VRRig item = keyValuePair.Value.Item1;
-				GreyZoneSummoner item2 = keyValuePair.Value.Item2;
-				float num5 = this.summoningPlayerProgress[keyValuePair.Key];
-				Vector3 lhs = item2.SummoningFocusPoint - item.leftHand.rigTarget.position;
-				Vector3 rhs = -item.leftHand.rigTarget.right;
-				bool flag = Vector3.Dot(lhs, rhs) > 0f;
-				Vector3 lhs2 = item2.SummoningFocusPoint - item.rightHand.rigTarget.position;
-				Vector3 right = item.rightHand.rigTarget.right;
-				bool flag2 = Vector3.Dot(lhs2, right) > 0f;
-				if (flag && flag2)
-				{
-					num5 = Mathf.MoveTowards(num5, 1f, num4 * deltaTime);
-				}
-				else
-				{
-					num5 = Mathf.MoveTowards(num5, 0f, num4 * deltaTime);
-				}
-				num3 += num5;
-				this.summoningPlayerProgress[keyValuePair.Key] = num5;
-			}
-			float num6 = 0.95f;
-			this.summoningProgress = Mathf.Clamp01(num3 / num6 / (float)num2);
-			this.UpdateSummonerVisuals();
-			if (this.summoningProgress > 0.99f)
-			{
-				this.ActivateGreyZoneAuthority();
-			}
-		}
-	}
-
-	private void SharedUpdate()
-	{
-		GTPlayer instance = GTPlayer.Instance;
-		if (this.greyZoneActive)
-		{
-			Vector3 b = Vector3.ClampMagnitude(instance.InstantaneousVelocity * this.particlePredictiveSpawnVelocityFactor, this.particlePredictiveSpawnMaxDist);
-			this.greyZoneParticles.transform.position = instance.HeadCenterPosition + Vector3.down * 0.5f + b;
-		}
-		else if (this.gravityOverrideSet && this.gravityReductionAmount < 0.01f)
-		{
-			instance.UnsetGravityOverride(this);
-			this.gravityOverrideSet = false;
-		}
-		float num = this.greyZoneActive ? 0f : 1f;
-		float smoothTime = this.greyZoneActive ? this.skyMonsterMovementEnterTime : this.skyMonsterMovementExitTime;
-		if (this.moonController != null && this.moonController.Distance != num)
-		{
-			float num2 = Mathf.SmoothDamp(this.moonController.Distance, num, ref this.skyMonsterMovementVelocity, smoothTime);
-			if ((double)Mathf.Abs(num2 - num) < 0.001)
-			{
-				num2 = num;
-			}
-			this.moonController.UpdateDistance(num2);
-		}
-	}
-
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.IsWriting)
-		{
-			stream.SendNext(this.greyZoneActive);
-			stream.SendNext(this.greyZoneActivationTime);
-			stream.SendNext(this.photonConnectedDuringActivation);
-			stream.SendNext(this.gravityFactorOptionSelection);
-			stream.SendNext(this.summoningProgress);
-			return;
-		}
-		if (stream.IsReading && info.Sender.IsMasterClient)
-		{
-			bool flag = this.greyZoneActive;
-			this.greyZoneActive = (bool)stream.ReceiveNext();
-			this.greyZoneActivationTime = ((double)stream.ReceiveNext()).GetFinite();
-			this.photonConnectedDuringActivation = (bool)stream.ReceiveNext();
-			this.gravityFactorOptionSelection = (int)stream.ReceiveNext();
-			this.summoningProgress = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
-			this.UpdateSummonerVisuals();
-			if (this.greyZoneActive && !flag)
-			{
-				this.ActivateGreyZoneLocal();
-				return;
-			}
-			if (!this.greyZoneActive && flag)
-			{
-				this.DeactivateGreyZoneLocal();
-			}
-		}
-	}
-
-	public void OnPlayerEnteredRoom(Player newPlayer)
-	{
-	}
-
-	public void OnPlayerLeftRoom(Player otherPlayer)
-	{
-		this.ValidateSummoningPlayers();
-	}
-
-	public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
-	{
-	}
-
-	public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
-	{
-	}
-
-	public void OnMasterClientSwitched(Player newMasterClient)
-	{
-		this.ValidateSummoningPlayers();
-	}
-
 	[OnEnterPlay_SetNull]
 	public static volatile GreyZoneManager Instance;
 
@@ -540,12 +18,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 	private float greyZoneActiveDuration = 90f;
 
 	[SerializeField]
-	private float[] gravityFactorOptions = new float[]
-	{
-		0.25f,
-		0.5f,
-		0.75f
-	};
+	private float[] gravityFactorOptions = new float[3] { 0.25f, 0.5f, 0.75f };
 
 	[SerializeField]
 	private int gravityFactorOptionSelection = 1;
@@ -598,7 +71,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 
 	private List<GreyZoneSummoner> activeSummoners = new List<GreyZoneSummoner>();
 
-	private Dictionary<int, ValueTuple<VRRig, GreyZoneSummoner>> summoningPlayers = new Dictionary<int, ValueTuple<VRRig, GreyZoneSummoner>>();
+	private Dictionary<int, (VRRig, GreyZoneSummoner)> summoningPlayers = new Dictionary<int, (VRRig, GreyZoneSummoner)>();
 
 	private Dictionary<int, float> summoningPlayerProgress = new Dictionary<int, float>();
 
@@ -623,4 +96,489 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 	public Action OnGreyZoneActivated;
 
 	public Action OnGreyZoneDeactivated;
+
+	public bool GreyZoneActive => greyZoneActive;
+
+	public bool GreyZoneAvailable
+	{
+		get
+		{
+			bool result = false;
+			if (GorillaComputer.instance != null)
+			{
+				result = GorillaComputer.instance.GetServerTime().DayOfYear >= greyZoneAvailableDayOfYear;
+			}
+			return result;
+		}
+	}
+
+	public int GravityFactorSelection => gravityFactorOptionSelection;
+
+	public bool TickRunning
+	{
+		get
+		{
+			return _tickRunning;
+		}
+		set
+		{
+			_tickRunning = value;
+		}
+	}
+
+	public bool HasAuthority
+	{
+		get
+		{
+			if (PhotonNetwork.InRoom)
+			{
+				return base.photonView.IsMine;
+			}
+			return true;
+		}
+	}
+
+	public float SummoningProgress => summoningProgress;
+
+	public void RegisterSummoner(GreyZoneSummoner summoner)
+	{
+		if (!activeSummoners.Contains(summoner))
+		{
+			activeSummoners.Add(summoner);
+		}
+	}
+
+	public void DeregisterSummoner(GreyZoneSummoner summoner)
+	{
+		if (activeSummoners.Contains(summoner))
+		{
+			activeSummoners.Remove(summoner);
+		}
+	}
+
+	public void RegisterMoon(MoonController moon)
+	{
+		moonController = moon;
+	}
+
+	public void UnregisterMoon(MoonController moon)
+	{
+		if (moonController == moon)
+		{
+			moonController = null;
+		}
+	}
+
+	public void ActivateGreyZoneAuthority()
+	{
+		greyZoneActive = true;
+		photonConnectedDuringActivation = PhotonNetwork.InRoom;
+		greyZoneActivationTime = (photonConnectedDuringActivation ? PhotonNetwork.Time : ((double)Time.time));
+		ActivateGreyZoneLocal();
+	}
+
+	private void ActivateGreyZoneLocal()
+	{
+		Shader.SetGlobalInt(_GreyZoneActive, 1);
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance != null)
+		{
+			instance.SetGravityOverride(this, GravityOverrideFunction);
+			gravityOverrideSet = true;
+		}
+		if (MusicManager.Instance != null)
+		{
+			MusicManager.Instance.FadeOutMusic(2f);
+		}
+		if (audioFadeCoroutine != null)
+		{
+			StopCoroutine(audioFadeCoroutine);
+		}
+		audioFadeCoroutine = StartCoroutine(FadeAudioIn(greyZoneAmbience, greyZoneAmbienceVolume, ambienceFadeTime));
+		if (greyZoneAmbience != null)
+		{
+			greyZoneAmbience.GTPlay();
+		}
+		greyZoneParticles.gameObject.SetActive(value: true);
+		summoningProgress = 1f;
+		UpdateSummonerVisuals();
+		for (int i = 0; i < activeSummoners.Count; i++)
+		{
+			activeSummoners[i].OnGreyZoneActivated();
+		}
+		if (OnGreyZoneActivated != null)
+		{
+			OnGreyZoneActivated();
+		}
+	}
+
+	public void LocalSimpleActivation(bool onOff, float gravityFactor)
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (!(instance == null) && PlayerPrefs.GetString("didTutorial", "nope") == "done")
+		{
+			simpleGravityFactor = Mathf.Clamp(gravityFactor, 0f, 5f);
+			Shader.SetGlobalInt(_GreyZoneActive, onOff ? 1 : 0);
+			if (onOff)
+			{
+				instance.SetGravityOverride(this, SimpleGravityOverrideFunction);
+			}
+			else
+			{
+				instance.UnsetGravityOverride(this);
+			}
+			gravityOverrideSet = onOff;
+			greyZoneParticles.gameObject.SetActive(onOff);
+		}
+	}
+
+	public void DeactivateGreyZoneAuthority()
+	{
+		greyZoneActive = false;
+		foreach (KeyValuePair<int, (VRRig, GreyZoneSummoner)> summoningPlayer in summoningPlayers)
+		{
+			summoningPlayerProgress[summoningPlayer.Key] = 0f;
+		}
+		DeactivateGreyZoneLocal();
+	}
+
+	private void DeactivateGreyZoneLocal()
+	{
+		Shader.SetGlobalInt(_GreyZoneActive, 0);
+		if (MusicManager.Instance != null)
+		{
+			MusicManager.Instance.FadeInMusic(4f);
+		}
+		if (audioFadeCoroutine != null)
+		{
+			StopCoroutine(audioFadeCoroutine);
+		}
+		audioFadeCoroutine = StartCoroutine(FadeAudioOut(greyZoneAmbience, ambienceFadeTime));
+		greyZoneParticles.gameObject.SetActive(value: false);
+		summoningProgress = 0f;
+		UpdateSummonerVisuals();
+		if (OnGreyZoneDeactivated != null)
+		{
+			OnGreyZoneDeactivated();
+		}
+	}
+
+	public void ForceStopGreyZone()
+	{
+		greyZoneActive = false;
+		Shader.SetGlobalInt(_GreyZoneActive, 0);
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance != null)
+		{
+			instance.UnsetGravityOverride(this);
+		}
+		gravityOverrideSet = false;
+		if (moonController != null)
+		{
+			moonController.UpdateDistance(1f);
+		}
+		if (MusicManager.Instance != null)
+		{
+			MusicManager.Instance.FadeInMusic(0f);
+		}
+		if (greyZoneAmbience != null)
+		{
+			greyZoneAmbience.volume = 0f;
+			greyZoneAmbience.GTStop();
+		}
+		greyZoneParticles.gameObject.SetActive(value: false);
+		summoningProgress = 0f;
+		UpdateSummonerVisuals();
+		if (OnGreyZoneDeactivated != null)
+		{
+			OnGreyZoneDeactivated();
+		}
+	}
+
+	public void GravityOverrideFunction(GTPlayer player)
+	{
+		gravityReductionAmount = 0f;
+		if (moonController != null)
+		{
+			gravityReductionAmount = Mathf.InverseLerp(1f - skyMonsterDistGravityRampBuffer, skyMonsterDistGravityRampBuffer, moonController.Distance);
+		}
+		float num = Mathf.Lerp(1f, gravityFactorOptions[gravityFactorOptionSelection], gravityReductionAmount);
+		player.AddForce(Physics.gravity * num * player.scale, ForceMode.Acceleration);
+	}
+
+	public void SimpleGravityOverrideFunction(GTPlayer player)
+	{
+		player.AddForce(Physics.gravity * simpleGravityFactor * player.scale, ForceMode.Acceleration);
+	}
+
+	private IEnumerator FadeAudioIn(AudioSource source, float maxVolume, float duration)
+	{
+		if (source != null)
+		{
+			float startingVolume = source.volume;
+			float startTime = Time.time;
+			source.GTPlay();
+			for (float num = 0f; num < 1f; num = (Time.time - startTime) / duration)
+			{
+				source.volume = Mathf.Lerp(startingVolume, maxVolume, num);
+				yield return null;
+			}
+			source.volume = maxVolume;
+		}
+	}
+
+	private IEnumerator FadeAudioOut(AudioSource source, float duration)
+	{
+		if (source != null)
+		{
+			float startingVolume = source.volume;
+			float startTime = Time.time;
+			for (float num = 0f; num < 1f; num = (Time.time - startTime) / duration)
+			{
+				source.volume = Mathf.Lerp(startingVolume, 0f, num);
+				yield return null;
+			}
+			source.volume = 0f;
+			source.Stop();
+		}
+	}
+
+	public void VRRigEnteredSummonerProximity(VRRig rig, GreyZoneSummoner summoner)
+	{
+		if (!summoningPlayers.ContainsKey(rig.Creator.ActorNumber))
+		{
+			summoningPlayers.Add(rig.Creator.ActorNumber, (rig, summoner));
+			summoningPlayerProgress.Add(rig.Creator.ActorNumber, 0f);
+		}
+	}
+
+	public void VRRigExitedSummonerProximity(VRRig rig, GreyZoneSummoner summoner)
+	{
+		if (summoningPlayers.ContainsKey(rig.Creator.ActorNumber))
+		{
+			summoningPlayers.Remove(rig.Creator.ActorNumber);
+			summoningPlayerProgress.Remove(rig.Creator.ActorNumber);
+		}
+	}
+
+	private void UpdateSummonerVisuals()
+	{
+		bool greyZoneAvailable = GreyZoneAvailable;
+		for (int i = 0; i < activeSummoners.Count; i++)
+		{
+			activeSummoners[i].UpdateProgressFeedback(greyZoneAvailable);
+		}
+	}
+
+	private void ValidateSummoningPlayers()
+	{
+		invalidSummoners.Clear();
+		foreach (KeyValuePair<int, (VRRig, GreyZoneSummoner)> summoningPlayer in summoningPlayers)
+		{
+			VRRig item = summoningPlayer.Value.Item1;
+			GreyZoneSummoner item2 = summoningPlayer.Value.Item2;
+			if (item.Creator.ActorNumber != summoningPlayer.Key || (item.head.rigTarget.position - item2.SummoningFocusPoint).sqrMagnitude > item2.SummonerMaxDistance * item2.SummonerMaxDistance)
+			{
+				invalidSummoners.Add(summoningPlayer.Key);
+			}
+		}
+		foreach (int invalidSummoner in invalidSummoners)
+		{
+			summoningPlayers.Remove(invalidSummoner);
+			summoningPlayerProgress.Remove(invalidSummoner);
+		}
+	}
+
+	private int DayNightOverrideFunction(int inputIndex)
+	{
+		int num = 0;
+		int num2 = 8;
+		int num3 = inputIndex - num;
+		int num4 = num2 - inputIndex;
+		if (num3 <= 0 || num4 <= 0)
+		{
+			return inputIndex;
+		}
+		if (num4 > num3)
+		{
+			return num2;
+		}
+		return num;
+	}
+
+	private void Awake()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			greyZoneAmbienceVolume = greyZoneAmbience.volume;
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(this);
+		}
+	}
+
+	private void OnEnable()
+	{
+		if (forceTimeOfDayToNight)
+		{
+			BetterDayNightManager instance = BetterDayNightManager.instance;
+			if (instance != null)
+			{
+				instance.SetTimeIndexOverrideFunction(DayNightOverrideFunction);
+			}
+		}
+	}
+
+	private void OnDisable()
+	{
+		ForceStopGreyZone();
+		if (forceTimeOfDayToNight)
+		{
+			BetterDayNightManager instance = BetterDayNightManager.instance;
+			if (instance != null)
+			{
+				instance.UnsetTimeIndexOverrideFunction();
+			}
+		}
+	}
+
+	private void Update()
+	{
+		if (HasAuthority)
+		{
+			AuthorityUpdate();
+		}
+		SharedUpdate();
+	}
+
+	private void AuthorityUpdate()
+	{
+		float deltaTime = Time.deltaTime;
+		if (greyZoneActive)
+		{
+			summoningProgress = 1f;
+			double num = ((photonConnectedDuringActivation && PhotonNetwork.InRoom) ? PhotonNetwork.Time : ((photonConnectedDuringActivation || PhotonNetwork.InRoom) ? (-100.0) : ((double)Time.time)));
+			if (num > greyZoneActivationTime + (double)greyZoneActiveDuration || num < greyZoneActivationTime - 10.0)
+			{
+				DeactivateGreyZoneAuthority();
+			}
+		}
+		else
+		{
+			if (!GreyZoneAvailable)
+			{
+				return;
+			}
+			roomPlayerList = PhotonNetwork.PlayerList;
+			int num2 = 1;
+			if (roomPlayerList != null && roomPlayerList.Length != 0)
+			{
+				num2 = Mathf.Max((roomPlayerList.Length + 1) / 2, 1);
+			}
+			float num3 = 0f;
+			float num4 = 1f / summoningActivationTime;
+			foreach (KeyValuePair<int, (VRRig, GreyZoneSummoner)> summoningPlayer in summoningPlayers)
+			{
+				VRRig item = summoningPlayer.Value.Item1;
+				GreyZoneSummoner item2 = summoningPlayer.Value.Item2;
+				float current2 = summoningPlayerProgress[summoningPlayer.Key];
+				Vector3 lhs = item2.SummoningFocusPoint - item.leftHand.rigTarget.position;
+				Vector3 rhs = -item.leftHand.rigTarget.right;
+				bool flag = Vector3.Dot(lhs, rhs) > 0f;
+				Vector3 lhs2 = item2.SummoningFocusPoint - item.rightHand.rigTarget.position;
+				Vector3 right = item.rightHand.rigTarget.right;
+				bool flag2 = Vector3.Dot(lhs2, right) > 0f;
+				current2 = ((!(flag && flag2)) ? Mathf.MoveTowards(current2, 0f, num4 * deltaTime) : Mathf.MoveTowards(current2, 1f, num4 * deltaTime));
+				num3 += current2;
+				summoningPlayerProgress[summoningPlayer.Key] = current2;
+			}
+			float num5 = 0.95f;
+			summoningProgress = Mathf.Clamp01(num3 / num5 / (float)num2);
+			UpdateSummonerVisuals();
+			if (summoningProgress > 0.99f)
+			{
+				ActivateGreyZoneAuthority();
+			}
+		}
+	}
+
+	private void SharedUpdate()
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (greyZoneActive)
+		{
+			Vector3 vector = Vector3.ClampMagnitude(instance.InstantaneousVelocity * particlePredictiveSpawnVelocityFactor, particlePredictiveSpawnMaxDist);
+			greyZoneParticles.transform.position = instance.HeadCenterPosition + Vector3.down * 0.5f + vector;
+		}
+		else if (gravityOverrideSet && gravityReductionAmount < 0.01f)
+		{
+			instance.UnsetGravityOverride(this);
+			gravityOverrideSet = false;
+		}
+		float num = (greyZoneActive ? 0f : 1f);
+		float smoothTime = (greyZoneActive ? skyMonsterMovementEnterTime : skyMonsterMovementExitTime);
+		if (moonController != null && moonController.Distance != num)
+		{
+			float num2 = Mathf.SmoothDamp(moonController.Distance, num, ref skyMonsterMovementVelocity, smoothTime);
+			if ((double)Mathf.Abs(num2 - num) < 0.001)
+			{
+				num2 = num;
+			}
+			moonController.UpdateDistance(num2);
+		}
+	}
+
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (stream.IsWriting)
+		{
+			stream.SendNext(greyZoneActive);
+			stream.SendNext(greyZoneActivationTime);
+			stream.SendNext(photonConnectedDuringActivation);
+			stream.SendNext(gravityFactorOptionSelection);
+			stream.SendNext(summoningProgress);
+		}
+		else if (stream.IsReading && info.Sender.IsMasterClient)
+		{
+			bool flag = greyZoneActive;
+			greyZoneActive = (bool)stream.ReceiveNext();
+			greyZoneActivationTime = ((double)stream.ReceiveNext()).GetFinite();
+			photonConnectedDuringActivation = (bool)stream.ReceiveNext();
+			gravityFactorOptionSelection = (int)stream.ReceiveNext();
+			summoningProgress = ((float)stream.ReceiveNext()).ClampSafe(0f, 1f);
+			UpdateSummonerVisuals();
+			if (greyZoneActive && !flag)
+			{
+				ActivateGreyZoneLocal();
+			}
+			else if (!greyZoneActive && flag)
+			{
+				DeactivateGreyZoneLocal();
+			}
+		}
+	}
+
+	public void OnPlayerEnteredRoom(Player newPlayer)
+	{
+	}
+
+	public void OnPlayerLeftRoom(Player otherPlayer)
+	{
+		ValidateSummoningPlayers();
+	}
+
+	public void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+	{
+	}
+
+	public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+	{
+	}
+
+	public void OnMasterClientSwitched(Player newMasterClient)
+	{
+		ValidateSummoningPlayers();
+	}
 }

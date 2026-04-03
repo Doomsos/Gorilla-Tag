@@ -1,21 +1,20 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BuilderMaterialResourceColors", menuName = "Gorilla Tag/Builder/ResourceColors", order = 0)]
 public class BuilderResourceColors : ScriptableObject
 {
+	public List<BuilderResourceColor> colors;
+
 	public Color GetColorForType(BuilderResourceType type)
 	{
-		foreach (BuilderResourceColor builderResourceColor in this.colors)
+		foreach (BuilderResourceColor color in colors)
 		{
-			if (builderResourceColor.type == type)
+			if (color.type == type)
 			{
-				return builderResourceColor.color;
+				return color.color;
 			}
 		}
 		return Color.black;
 	}
-
-	public List<BuilderResourceColor> colors;
 }

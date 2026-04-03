@@ -1,132 +1,10 @@
-﻿using System;
+using System;
 using GorillaLocomotion;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
 
 public class LckTabletSizeManager : MonoBehaviour
 {
-	private void Start()
-	{
-		GTLckController controller = this._controller;
-		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Combine(controller.OnFOVUpdated, new Action<CameraMode>(this.UpdateCustomNearClip));
-		this._controller.OnHorizontalModeChanged += this.OnHorizontalModeChanged;
-	}
-
-	private void OnDestroy()
-	{
-		this._controller.OnHorizontalModeChanged -= this.OnHorizontalModeChanged;
-		GTLckController controller = this._controller;
-		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Remove(controller.OnFOVUpdated, new Action<CameraMode>(this.UpdateCustomNearClip));
-	}
-
-	private void OnHorizontalModeChanged(bool mode)
-	{
-		this.UpdateCustomNearClip(CameraMode.Selfie);
-		this.UpdateCustomNearClip(CameraMode.FirstPerson);
-	}
-
-	private void UpdateCustomNearClip(CameraMode mode)
-	{
-		if (GTPlayer.Instance.IsDefaultScale)
-		{
-			return;
-		}
-		switch (mode)
-		{
-		case CameraMode.Selfie:
-			this.SetCustomNearClip(this._selfieCamera);
-			return;
-		case CameraMode.FirstPerson:
-			this.SetCustomNearClip(this._firstPersonCamera);
-			break;
-		case CameraMode.ThirdPerson:
-		case CameraMode.Drone:
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void SetCustomNearClip(Camera cam)
-	{
-		if (GTPlayer.Instance.IsDefaultScale)
-		{
-			return;
-		}
-		Matrix4x4 projectionMatrix;
-		if (this._controller.HorizontalMode)
-		{
-			projectionMatrix = Matrix4x4.Perspective(cam.fieldOfView, 1.777778f, this._customNearClip, cam.farClipPlane);
-		}
-		else
-		{
-			projectionMatrix = Matrix4x4.Perspective(cam.fieldOfView, 0.5625f, this._customNearClip, cam.farClipPlane);
-		}
-		cam.projectionMatrix = projectionMatrix;
-	}
-
-	private void ClearCustomNearClip()
-	{
-		this._selfieCamera.ResetProjectionMatrix();
-		this._firstPersonCamera.ResetProjectionMatrix();
-	}
-
-	private void PlayerBecameSmall()
-	{
-		this._firstPersonCamera.transform.localPosition = this._firstPersonCamShrinkPosition;
-		this._tabletFollower.SetPlayerSizeModifier(false, this._shrinkSize);
-		if (!this._lckDirectGrabbable.isGrabbed)
-		{
-			this.SetCameraOnNeck();
-		}
-		this.SetCustomNearClip(this._selfieCamera);
-		this.SetCustomNearClip(this._firstPersonCamera);
-	}
-
-	private void PlayerBecameDefaultSize()
-	{
-		this._firstPersonCamera.transform.localPosition = this._firstPersonCamDefaultPosition;
-		this._tabletFollower.SetPlayerSizeModifier(true, 1f);
-		if (!this._lckDirectGrabbable.isGrabbed)
-		{
-			this.SetCameraOnNeck();
-			base.transform.localScale = Vector3.one;
-		}
-		this.ClearCustomNearClip();
-	}
-
-	private void SetCameraOnNeck()
-	{
-		GTPlayer instance = GTPlayer.Instance;
-		if (instance == null)
-		{
-			Debug.LogError("Unable to find playerInstance!");
-			return;
-		}
-		LckBodyCameraSpawner componentInChildren = instance.GetComponentInChildren<LckBodyCameraSpawner>(true);
-		if (componentInChildren == null)
-		{
-			Debug.LogError("Unable to find bodyCameraSpawner!");
-			return;
-		}
-		componentInChildren.ManuallySetCameraOnNeck();
-	}
-
-	private void Update()
-	{
-		if (!GTPlayer.Instance.IsDefaultScale && this._isDefaultScale != GTPlayer.Instance.IsDefaultScale)
-		{
-			this._isDefaultScale = false;
-			this.PlayerBecameSmall();
-			return;
-		}
-		if (GTPlayer.Instance.IsDefaultScale && this._isDefaultScale != GTPlayer.Instance.IsDefaultScale)
-		{
-			this._isDefaultScale = true;
-			this.PlayerBecameDefaultSize();
-		}
-	}
-
 	[SerializeField]
 	private GTLckController _controller;
 
@@ -153,4 +31,115 @@ public class LckTabletSizeManager : MonoBehaviour
 	private float _customNearClip = 0.0006f;
 
 	private bool _isDefaultScale = true;
+
+	private void Start()
+	{
+		GTLckController controller = _controller;
+		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Combine(controller.OnFOVUpdated, new Action<CameraMode>(UpdateCustomNearClip));
+		_controller.OnHorizontalModeChanged += OnHorizontalModeChanged;
+	}
+
+	private void OnDestroy()
+	{
+		_controller.OnHorizontalModeChanged -= OnHorizontalModeChanged;
+		GTLckController controller = _controller;
+		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Remove(controller.OnFOVUpdated, new Action<CameraMode>(UpdateCustomNearClip));
+	}
+
+	private void OnHorizontalModeChanged(bool mode)
+	{
+		UpdateCustomNearClip(CameraMode.Selfie);
+		UpdateCustomNearClip(CameraMode.FirstPerson);
+	}
+
+	private void UpdateCustomNearClip(CameraMode mode)
+	{
+		if (!GTPlayer.Instance.IsDefaultScale)
+		{
+			switch (mode)
+			{
+			case CameraMode.Selfie:
+				SetCustomNearClip(_selfieCamera);
+				break;
+			case CameraMode.FirstPerson:
+				SetCustomNearClip(_firstPersonCamera);
+				break;
+			case CameraMode.ThirdPerson:
+			case CameraMode.Drone:
+				break;
+			}
+		}
+	}
+
+	private void SetCustomNearClip(Camera cam)
+	{
+		if (!GTPlayer.Instance.IsDefaultScale)
+		{
+			Matrix4x4 projectionMatrix = ((!_controller.HorizontalMode) ? Matrix4x4.Perspective(cam.fieldOfView, 0.5625f, _customNearClip, cam.farClipPlane) : Matrix4x4.Perspective(cam.fieldOfView, 1.777778f, _customNearClip, cam.farClipPlane));
+			cam.projectionMatrix = projectionMatrix;
+		}
+	}
+
+	private void ClearCustomNearClip()
+	{
+		_selfieCamera.ResetProjectionMatrix();
+		_firstPersonCamera.ResetProjectionMatrix();
+	}
+
+	private void PlayerBecameSmall()
+	{
+		_firstPersonCamera.transform.localPosition = _firstPersonCamShrinkPosition;
+		_tabletFollower.SetPlayerSizeModifier(isDefaultScale: false, _shrinkSize);
+		if (!_lckDirectGrabbable.isGrabbed)
+		{
+			SetCameraOnNeck();
+		}
+		SetCustomNearClip(_selfieCamera);
+		SetCustomNearClip(_firstPersonCamera);
+	}
+
+	private void PlayerBecameDefaultSize()
+	{
+		_firstPersonCamera.transform.localPosition = _firstPersonCamDefaultPosition;
+		_tabletFollower.SetPlayerSizeModifier(isDefaultScale: true, 1f);
+		if (!_lckDirectGrabbable.isGrabbed)
+		{
+			SetCameraOnNeck();
+			base.transform.localScale = Vector3.one;
+		}
+		ClearCustomNearClip();
+	}
+
+	private void SetCameraOnNeck()
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance == null)
+		{
+			Debug.LogError("Unable to find playerInstance!");
+			return;
+		}
+		LckBodyCameraSpawner componentInChildren = instance.GetComponentInChildren<LckBodyCameraSpawner>(includeInactive: true);
+		if (componentInChildren == null)
+		{
+			Debug.LogError("Unable to find bodyCameraSpawner!");
+		}
+		else
+		{
+			componentInChildren.ManuallySetCameraOnNeck();
+		}
+	}
+
+	private void Update()
+	{
+		if (!GTPlayer.Instance.IsDefaultScale && _isDefaultScale != GTPlayer.Instance.IsDefaultScale)
+		{
+			_isDefaultScale = false;
+			PlayerBecameSmall();
+		}
+		else if (GTPlayer.Instance.IsDefaultScale && _isDefaultScale != GTPlayer.Instance.IsDefaultScale)
+		{
+			_isDefaultScale = true;
+			PlayerBecameDefaultSize();
+		}
+	}
 }

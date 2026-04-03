@@ -1,13 +1,19 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GameLightPulse : GameLight, IGorillaSliceableSimple
 {
+	private float startingIntensity;
+
+	public float frequency;
+
+	private float offsetTime;
+
 	public new void Awake()
 	{
 		base.Awake();
-		this.startingIntensity = this.light.intensity;
-		this.offsetTime = Random.value / this.frequency;
+		startingIntensity = light.intensity;
+		offsetTime = UnityEngine.Random.value / frequency;
 	}
 
 	protected new void OnEnable()
@@ -24,12 +30,6 @@ public class GameLightPulse : GameLight, IGorillaSliceableSimple
 
 	public void SliceUpdate()
 	{
-		this.light.intensity = this.startingIntensity / 2f * Mathf.Sin((Time.time + this.offsetTime) * this.frequency * 2f * 3.1415927f % 6.2831855f) + this.startingIntensity / 2f;
+		light.intensity = startingIntensity / 2f * Mathf.Sin((Time.time + offsetTime) * frequency * 2f * MathF.PI % (MathF.PI * 2f)) + startingIntensity / 2f;
 	}
-
-	private float startingIntensity;
-
-	public float frequency;
-
-	private float offsetTime;
 }

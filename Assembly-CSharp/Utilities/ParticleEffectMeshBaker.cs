@@ -1,9 +1,7 @@
-﻿using System;
 using UnityEngine;
 
-namespace Utilities
+namespace Utilities;
+
+public class ParticleEffectMeshBaker : MonoBehaviour
 {
-	public class ParticleEffectMeshBaker : MonoBehaviour
-	{
-	}
 }

@@ -1,21 +1,19 @@
-﻿using System;
 using UnityEngine;
 
 public class ForceRecalculateBounds : MonoBehaviourTick
 {
+	private SkinnedMeshRenderer skinnedMesh;
+
 	private void Awake()
 	{
-		this.skinnedMesh = base.GetComponent<SkinnedMeshRenderer>();
+		skinnedMesh = GetComponent<SkinnedMeshRenderer>();
 	}
 
 	public override void Tick()
 	{
-		if (this.skinnedMesh == null)
+		if (!(skinnedMesh == null))
 		{
-			return;
+			skinnedMesh.bounds = new Bounds(base.transform.position, Vector3.one * 1000f);
 		}
-		this.skinnedMesh.bounds = new Bounds(base.transform.position, Vector3.one * 1000f);
 	}
-
-	private SkinnedMeshRenderer skinnedMesh;
 }

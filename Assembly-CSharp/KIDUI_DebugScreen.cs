@@ -1,8 +1,9 @@
-﻿using System;
 using UnityEngine;
 
 public class KIDUI_DebugScreen : MonoBehaviour
 {
+	public const string KID_ENABLED_KEY = "dbg-kid-enabled";
+
 	private void Awake()
 	{
 		Object.DestroyImmediate(base.gameObject);
@@ -24,6 +25,4 @@ public class KIDUI_DebugScreen : MonoBehaviour
 	public void ResetAll()
 	{
 	}
-
-	public const string KID_ENABLED_KEY = "dbg-kid-enabled";
 }

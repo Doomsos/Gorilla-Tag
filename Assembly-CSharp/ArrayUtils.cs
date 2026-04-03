@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -8,37 +8,45 @@ public static class ArrayUtils
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int BinarySearch<T>(this T[] array, T value) where T : IComparable<T>
 	{
-		return Array.BinarySearch<T>(array, 0, array.Length, value);
+		return Array.BinarySearch(array, 0, array.Length, value);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNullOrEmpty<T>(this T[] array)
 	{
-		return array == null || array.Length == 0;
+		if (array != null)
+		{
+			return array.Length == 0;
+		}
+		return true;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNullOrEmpty<T>(this List<T> list)
 	{
-		return list == null || list.Count == 0;
+		if (list != null)
+		{
+			return list.Count == 0;
+		}
+		return true;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void Swap<T>(this T[] array, int from, int to)
 	{
-		T t = array[from];
-		T t2 = array[to];
-		array[to] = t;
-		array[from] = t2;
+		T val = array[from];
+		T val2 = array[to];
+		array[to] = val;
+		array[from] = val2;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void Swap<T>(this List<T> list, int from, int to)
 	{
-		T value = list[from];
-		T value2 = list[to];
-		list[to] = value;
-		list[from] = value2;
+		T val = list[from];
+		T val2 = list[to];
+		T val3 = (list[to] = val);
+		val3 = (list[from] = val2);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,7 +116,7 @@ public static class ArrayUtils
 		return -1;
 	}
 
-	public static bool GTEnsureNoNulls<T>(ref T[] unityObjs) where T : Object
+	public static bool GTEnsureNoNulls<T>(ref T[] unityObjs) where T : UnityEngine.Object
 	{
 		if (unityObjs == null)
 		{
@@ -123,11 +131,11 @@ public static class ArrayUtils
 				num++;
 			}
 		}
-		bool flag = num != unityObjs.Length;
-		if (flag)
+		bool num2 = num != unityObjs.Length;
+		if (num2)
 		{
-			Array.Resize<T>(ref unityObjs, num);
+			Array.Resize(ref unityObjs, num);
 		}
-		return flag;
+		return num2;
 	}
 }

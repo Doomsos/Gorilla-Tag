@@ -1,147 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void Init(GhostReactor reactor)
-	{
-		this.reactor = reactor;
-		for (int i = 0; i < this.badgeDispensers.Count; i++)
-		{
-			this.badgeDispensers[i].Setup(reactor, i);
-		}
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		this.registeredBadges = new List<GRBadge>();
-		for (int i = 0; i < this.badgeDispensers.Count; i++)
-		{
-			this.badgeDispensers[i].index = i;
-			this.badgeDispensers[i].actorNr = -1;
-		}
-		this.dispenserForActorNr = new Dictionary<int, int>();
-		VRRigCache.OnRigActivated += this.UpdateRigs;
-		VRRigCache.OnRigDeactivated += this.UpdateRigs;
-		RoomSystem.JoinedRoomEvent += new Action(this.UpdateRigs);
-		this.UpdateRigs();
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		VRRigCache.OnRigActivated -= this.UpdateRigs;
-		VRRigCache.OnRigDeactivated -= this.UpdateRigs;
-		RoomSystem.JoinedRoomEvent -= new Action(this.UpdateRigs);
-	}
-
-	public void UpdateRigs(RigContainer container)
-	{
-		this.UpdateRigs();
-	}
-
-	public void UpdateRigs()
-	{
-		GRUIStationEmployeeBadges.tempRigs.Clear();
-		GRUIStationEmployeeBadges.tempRigs.Add(VRRig.LocalRig);
-		if (VRRigCache.Instance != null)
-		{
-			VRRigCache.Instance.GetAllUsedRigs(GRUIStationEmployeeBadges.tempRigs);
-		}
-	}
-
-	public void RefreshBadgesAuthority()
-	{
-		for (int i = 0; i < GRUIStationEmployeeBadges.tempRigs.Count; i++)
-		{
-			NetPlayer netPlayer = GRUIStationEmployeeBadges.tempRigs[i].isOfflineVRRig ? NetworkSystem.Instance.LocalPlayer : GRUIStationEmployeeBadges.tempRigs[i].OwningNetPlayer;
-			int num;
-			if (netPlayer != null && netPlayer.ActorNumber != -1 && !this.dispenserForActorNr.TryGetValue(netPlayer.ActorNumber, out num))
-			{
-				for (int j = 0; j < this.badgeDispensers.Count; j++)
-				{
-					if (this.badgeDispensers[j].actorNr == -1)
-					{
-						this.badgeDispensers[j].CreateBadge(netPlayer, this.reactor.grManager.gameEntityManager);
-						break;
-					}
-				}
-			}
-		}
-		for (int k = this.registeredBadges.Count - 1; k >= 0; k--)
-		{
-			int num2;
-			if (NetworkSystem.Instance.GetNetPlayerByID(this.registeredBadges[k].actorNr) == null || !this.dispenserForActorNr.TryGetValue(this.registeredBadges[k].actorNr, out num2) || num2 != this.registeredBadges[k].dispenserIndex)
-			{
-				this.reactor.grManager.gameEntityManager.RequestDestroyItem(this.registeredBadges[k].GetComponent<GameEntity>().id);
-			}
-		}
-	}
-
-	public void SliceUpdate()
-	{
-		if (this.reactor == null || this.reactor.grManager == null)
-		{
-			return;
-		}
-		if (!this.reactor.grManager.IsZoneActive())
-		{
-			return;
-		}
-		if (this.reactor.grManager.gameEntityManager.IsAuthority())
-		{
-			this.RefreshBadgesAuthority();
-		}
-		for (int i = 0; i < this.badgeDispensers.Count; i++)
-		{
-			this.badgeDispensers[i].Refresh();
-		}
-	}
-
-	public void RemoveBadge(GRBadge badge)
-	{
-		if (this.registeredBadges.Contains(badge))
-		{
-			this.registeredBadges.Remove(badge);
-		}
-		if (this.badgeDispensers[badge.dispenserIndex].idBadge == badge)
-		{
-			this.dispenserForActorNr.Remove(badge.actorNr);
-			this.badgeDispensers[badge.dispenserIndex].ClearBadge();
-		}
-	}
-
-	public void LinkBadgeToDispenser(GRBadge badge, long createData)
-	{
-		if (!this.registeredBadges.Contains(badge))
-		{
-			this.registeredBadges.Add(badge);
-		}
-		int num = (int)(createData % 100L);
-		if (num > this.badgeDispensers.Count)
-		{
-			return;
-		}
-		NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID((int)(createData / 100L));
-		if (netPlayerByID != null)
-		{
-			this.dispenserForActorNr[netPlayerByID.ActorNumber] = num;
-			this.badgeDispensers[num].AttachIDBadge(badge, netPlayerByID);
-		}
-	}
-
-	public GRUIEmployeeBadgeDispenser GetDispenserForPlayer(int actorNumber)
-	{
-		int index;
-		if (!this.dispenserForActorNr.TryGetValue(actorNumber, out index))
-		{
-			return null;
-		}
-		return this.badgeDispensers[index];
-	}
-
 	[SerializeField]
 	public List<GRUIEmployeeBadgeDispenser> badgeDispensers;
 
@@ -152,4 +14,134 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 	public List<GRBadge> registeredBadges;
 
 	private GhostReactor reactor;
+
+	public void Init(GhostReactor reactor)
+	{
+		this.reactor = reactor;
+		for (int i = 0; i < badgeDispensers.Count; i++)
+		{
+			badgeDispensers[i].Setup(reactor, i);
+		}
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		registeredBadges = new List<GRBadge>();
+		for (int i = 0; i < badgeDispensers.Count; i++)
+		{
+			badgeDispensers[i].index = i;
+			badgeDispensers[i].actorNr = -1;
+		}
+		dispenserForActorNr = new Dictionary<int, int>();
+		VRRigCache.OnRigActivated += UpdateRigs;
+		VRRigCache.OnRigDeactivated += UpdateRigs;
+		RoomSystem.JoinedRoomEvent += new Action(UpdateRigs);
+		UpdateRigs();
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		VRRigCache.OnRigActivated -= UpdateRigs;
+		VRRigCache.OnRigDeactivated -= UpdateRigs;
+		RoomSystem.JoinedRoomEvent -= new Action(UpdateRigs);
+	}
+
+	public void UpdateRigs(RigContainer container)
+	{
+		UpdateRigs();
+	}
+
+	public void UpdateRigs()
+	{
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		if (VRRigCache.Instance != null)
+		{
+			VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		}
+	}
+
+	public void RefreshBadgesAuthority()
+	{
+		for (int i = 0; i < tempRigs.Count; i++)
+		{
+			NetPlayer netPlayer = (tempRigs[i].isOfflineVRRig ? NetworkSystem.Instance.LocalPlayer : tempRigs[i].OwningNetPlayer);
+			if (netPlayer == null || netPlayer.ActorNumber == -1 || dispenserForActorNr.TryGetValue(netPlayer.ActorNumber, out var _))
+			{
+				continue;
+			}
+			for (int j = 0; j < badgeDispensers.Count; j++)
+			{
+				if (badgeDispensers[j].actorNr == -1)
+				{
+					badgeDispensers[j].CreateBadge(netPlayer, reactor.grManager.gameEntityManager);
+					break;
+				}
+			}
+		}
+		for (int num = registeredBadges.Count - 1; num >= 0; num--)
+		{
+			if (NetworkSystem.Instance.GetNetPlayerByID(registeredBadges[num].actorNr) == null || !dispenserForActorNr.TryGetValue(registeredBadges[num].actorNr, out var value2) || value2 != registeredBadges[num].dispenserIndex)
+			{
+				reactor.grManager.gameEntityManager.RequestDestroyItem(registeredBadges[num].GetComponent<GameEntity>().id);
+			}
+		}
+	}
+
+	public void SliceUpdate()
+	{
+		if (!(reactor == null) && !(reactor.grManager == null) && reactor.grManager.IsZoneActive())
+		{
+			if (reactor.grManager.gameEntityManager.IsAuthority())
+			{
+				RefreshBadgesAuthority();
+			}
+			for (int i = 0; i < badgeDispensers.Count; i++)
+			{
+				badgeDispensers[i].Refresh();
+			}
+		}
+	}
+
+	public void RemoveBadge(GRBadge badge)
+	{
+		if (registeredBadges.Contains(badge))
+		{
+			registeredBadges.Remove(badge);
+		}
+		if (badgeDispensers[badge.dispenserIndex].idBadge == badge)
+		{
+			dispenserForActorNr.Remove(badge.actorNr);
+			badgeDispensers[badge.dispenserIndex].ClearBadge();
+		}
+	}
+
+	public void LinkBadgeToDispenser(GRBadge badge, long createData)
+	{
+		if (!registeredBadges.Contains(badge))
+		{
+			registeredBadges.Add(badge);
+		}
+		int num = (int)(createData % 100);
+		if (num <= badgeDispensers.Count)
+		{
+			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID((int)(createData / 100));
+			if (netPlayerByID != null)
+			{
+				dispenserForActorNr[netPlayerByID.ActorNumber] = num;
+				badgeDispensers[num].AttachIDBadge(badge, netPlayerByID);
+			}
+		}
+	}
+
+	public GRUIEmployeeBadgeDispenser GetDispenserForPlayer(int actorNumber)
+	{
+		if (!dispenserForActorNr.TryGetValue(actorNumber, out var value))
+		{
+			return null;
+		}
+		return badgeDispensers[value];
+	}
 }

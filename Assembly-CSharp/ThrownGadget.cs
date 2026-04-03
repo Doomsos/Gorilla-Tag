@@ -1,10 +1,18 @@
-﻿using System;
+using System;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class ThrownGadget : MonoBehaviour
 {
+	public GameEntity gameEntity;
+
+	private bool isHeldLocal;
+
+	private bool lastThrowerLocal;
+
+	private bool activationButtonLastInput;
+
 	public event Action OnActivated;
 
 	public event Action OnThrown;
@@ -13,99 +21,85 @@ public class ThrownGadget : MonoBehaviour
 
 	private void OnEnable()
 	{
-		this.isHeldLocal = false;
-		this.lastThrowerLocal = false;
+		isHeldLocal = false;
+		lastThrowerLocal = false;
 	}
 
 	public bool IsHeld()
 	{
-		return this.gameEntity.heldByActorNumber != -1;
+		return gameEntity.heldByActorNumber != -1;
 	}
 
 	public bool IsHeldLocal()
 	{
-		return this.gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+		return gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 	}
 
 	public bool IsHeldByAnother()
 	{
-		return this.IsHeld() && !this.IsHeldLocal();
+		if (IsHeld())
+		{
+			return !IsHeldLocal();
+		}
+		return false;
 	}
 
 	private bool IsButtonHeld()
 	{
-		if (!this.IsHeldLocal())
+		if (!IsHeldLocal())
 		{
 			return false;
 		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out gamePlayer))
+		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
 		{
-			return false;
+			if (out_gamePlayer == null)
+			{
+				return false;
+			}
+			int num = out_gamePlayer.FindHandIndex(gameEntity.id);
+			if (num == -1)
+			{
+				return false;
+			}
+			return ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
 		}
-		if (gamePlayer == null)
-		{
-			return false;
-		}
-		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+		return false;
 	}
 
 	public void Update()
 	{
-		bool flag = this.IsHeldLocal();
+		bool flag = IsHeldLocal();
 		if (flag)
 		{
-			this.lastThrowerLocal = true;
-			this.UpdateActivation();
+			lastThrowerLocal = true;
+			UpdateActivation();
 		}
-		else if (this.isHeldLocal)
+		else if (isHeldLocal)
 		{
-			Action onThrown = this.OnThrown;
-			if (onThrown != null)
-			{
-				onThrown();
-			}
+			this.OnThrown?.Invoke();
 		}
-		else if (this.IsHeldByAnother())
+		else if (IsHeldByAnother())
 		{
-			this.lastThrowerLocal = false;
+			lastThrowerLocal = false;
 		}
-		this.isHeldLocal = flag;
+		isHeldLocal = flag;
 	}
 
 	private void UpdateActivation()
 	{
-		bool flag = this.IsButtonHeld();
-		if (!this.activationButtonLastInput && flag)
+		bool flag = IsButtonHeld();
+		if (!activationButtonLastInput && flag)
 		{
-			Action onActivated = this.OnActivated;
-			if (onActivated != null)
-			{
-				onActivated();
-			}
+			this.OnActivated?.Invoke();
 		}
-		this.activationButtonLastInput = flag;
+		activationButtonLastInput = flag;
 	}
 
 	public void OnCollisionEnter(Collision collision)
 	{
-		if (this.lastThrowerLocal)
+		if (lastThrowerLocal)
 		{
-			Action onHitSurface = this.OnHitSurface;
-			if (onHitSurface == null)
-			{
-				return;
-			}
-			onHitSurface();
+			this.OnHitSurface?.Invoke();
 		}
 	}
-
-	public GameEntity gameEntity;
-
-	private bool isHeldLocal;
-
-	private bool lastThrowerLocal;
-
-	private bool activationButtonLastInput;
 }

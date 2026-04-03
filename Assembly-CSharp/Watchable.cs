@@ -1,21 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public class Watchable<T>
 {
+	private T _value;
+
+	private List<Action<T>> callbacks = new List<Action<T>>();
+
 	public T value
 	{
 		get
 		{
-			return this._value;
+			return _value;
 		}
 		set
 		{
-			T value2 = this._value;
-			this._value = value;
-			foreach (Action<T> action in this.callbacks)
+			_ = _value;
+			_value = value;
+			foreach (Action<T> callback in callbacks)
 			{
-				action(value);
+				callback(value);
 			}
 		}
 	}
@@ -26,27 +30,24 @@ public class Watchable<T>
 
 	public Watchable(T initial)
 	{
-		this._value = initial;
+		_value = initial;
 	}
 
 	public void AddCallback(Action<T> callback, bool shouldCallbackNow = false)
 	{
-		this.callbacks.Add(callback);
-		if (shouldCallbackNow)
+		callbacks.Add(callback);
+		if (!shouldCallbackNow)
 		{
-			foreach (Action<T> action in this.callbacks)
-			{
-				action(this._value);
-			}
+			return;
+		}
+		foreach (Action<T> callback2 in callbacks)
+		{
+			callback2(_value);
 		}
 	}
 
 	public void RemoveCallback(Action<T> callback)
 	{
-		this.callbacks.Remove(callback);
+		callbacks.Remove(callback);
 	}
-
-	private T _value;
-
-	private List<Action<T>> callbacks = new List<Action<T>>();
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,151 +24,21 @@ using UnityEngine.XR;
 [BurstCompile]
 public static class Bindings
 {
-	public unsafe static void GameObjectBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.LuauGameObject>("GameObject").AddField("position", "Position").AddField("rotation", "Rotation").AddField("scale", "Scale").AddStaticFunction("findGameObject", new lua_CFunction(Bindings.GameObjectFunctions.FindGameObject)).AddFunction("setCollision", new lua_CFunction(Bindings.GameObjectFunctions.SetCollision)).AddFunction("setVisibility", new lua_CFunction(Bindings.GameObjectFunctions.SetVisibility)).AddFunction("setActive", new lua_CFunction(Bindings.GameObjectFunctions.SetActive)).AddFunction("setText", new lua_CFunction(Bindings.GameObjectFunctions.SetText)).AddFunction("onTouched", new lua_CFunction(Bindings.GameObjectFunctions.OnTouched)).AddFunction("setVelocity", new lua_CFunction(Bindings.GameObjectFunctions.SetVelocity)).AddFunction("getVelocity", new lua_CFunction(Bindings.GameObjectFunctions.GetVelocity)).AddFunction("setColor", new lua_CFunction(Bindings.GameObjectFunctions.SetColor)).AddFunction("findChild", new lua_CFunction(Bindings.GameObjectFunctions.FindChildGameObject)).AddFunction("clone", new lua_CFunction(Bindings.GameObjectFunctions.CloneGameObject)).AddFunction("destroy", new lua_CFunction(Bindings.GameObjectFunctions.DestroyGameObject)).AddFunction("findComponent", new lua_CFunction(Bindings.GameObjectFunctions.FindComponent)).AddFunction("equals", new lua_CFunction(Bindings.GameObjectFunctions.Equals)).Build(L, true));
-	}
-
-	public unsafe static void GorillaLocomotionSettingsBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.GorillaLocomotionSettings>("PSettings").AddField("velocityLimit", null).AddField("slideVelocityLimit", null).AddField("maxJumpSpeed", null).AddField("jumpMultiplier", null).Build(L, false));
-		Bindings.LocomotionSettings = Luau.lua_class_push<Bindings.GorillaLocomotionSettings>(L);
-		Bindings.LocomotionSettings->velocityLimit = GTPlayer.Instance.velocityLimit;
-		Bindings.LocomotionSettings->slideVelocityLimit = GTPlayer.Instance.slideVelocityLimit;
-		Bindings.LocomotionSettings->maxJumpSpeed = 6.5f;
-		Bindings.LocomotionSettings->jumpMultiplier = 1.1f;
-		Luau.lua_setglobal(L, "PlayerSettings");
-	}
-
-	public unsafe static void PlayerInputBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.PlayerInput>("PInput").AddField("leftXAxis", null).AddField("rightXAxis", null).AddField("leftYAxis", null).AddField("rightYAxis", null).AddField("leftTrigger", null).AddField("rightTrigger", null).AddField("leftGrip", null).AddField("rightGrip", null).AddField("leftPrimaryButton", null).AddField("rightPrimaryButton", null).AddField("leftSecondaryButton", null).AddField("rightSecondaryButton", null).Build(L, false));
-		Bindings.LocalPlayerInput = Luau.lua_class_push<Bindings.PlayerInput>(L);
-		Bindings.UpdateInputs();
-		Luau.lua_setglobal(L, "PlayerInput");
-	}
-
-	public unsafe static void UpdateInputs()
-	{
-		if (Bindings.LocalPlayerInput != null)
-		{
-			Bindings.LocalPlayerInput->leftPrimaryButton = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
-			Bindings.LocalPlayerInput->rightPrimaryButton = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
-			Bindings.LocalPlayerInput->leftSecondaryButton = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
-			Bindings.LocalPlayerInput->rightSecondaryButton = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
-			Bindings.LocalPlayerInput->leftGrip = ControllerInputPoller.GripFloat(XRNode.LeftHand);
-			Bindings.LocalPlayerInput->rightGrip = ControllerInputPoller.GripFloat(XRNode.RightHand);
-			Bindings.LocalPlayerInput->leftTrigger = ControllerInputPoller.TriggerFloat(XRNode.LeftHand);
-			Bindings.LocalPlayerInput->rightTrigger = ControllerInputPoller.TriggerFloat(XRNode.RightHand);
-			Vector2 vector = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand);
-			Vector2 vector2 = ControllerInputPoller.Primary2DAxis(XRNode.RightHand);
-			Bindings.LocalPlayerInput->leftXAxis = vector.x;
-			Bindings.LocalPlayerInput->leftYAxis = vector.y;
-			Bindings.LocalPlayerInput->rightXAxis = vector2.x;
-			Bindings.LocalPlayerInput->rightYAxis = vector2.y;
-		}
-	}
-
-	public unsafe static void Vec3Builder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Vector3>("Vec3").AddField("x", null).AddField("y", null).AddField("z", null).AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.New))).AddFunction("__add", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Add))).AddFunction("__sub", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Sub))).AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Mul))).AddFunction("__div", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Div))).AddFunction("__unm", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Unm))).AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Eq))).AddFunction("__tostring", new lua_CFunction(Bindings.Vec3Functions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.Vec3Functions.ToString)).AddFunction("dot", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Dot))).AddFunction("cross", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Cross))).AddFunction("projectOnTo", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Project))).AddFunction("length", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Length))).AddFunction("normalize", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Normalize))).AddFunction("getSafeNormal", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.SafeNormal))).AddStaticFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Rotate))).AddFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Rotate))).AddStaticFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Distance))).AddFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Distance))).AddStaticFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Lerp))).AddFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Lerp))).AddProperty("zeroVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.ZeroVector))).AddProperty("oneVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.OneVector))).AddStaticFunction("nearlyEqual", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.NearlyEqual))).Build(L, true));
-	}
-
-	public unsafe static void QuatBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Quaternion>("Quat").AddField("x", null).AddField("y", null).AddField("z", null).AddField("w", null).AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.New))).AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Mul))).AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Eq))).AddFunction("__tostring", new lua_CFunction(Bindings.QuatFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.QuatFunctions.ToString)).AddStaticFunction("fromEuler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.FromEuler))).AddStaticFunction("fromDirection", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.FromDirection))).AddFunction("getUpVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.GetUpVector))).AddFunction("euler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Euler))).Build(L, true));
-	}
-
-	public unsafe static void PlayerBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.LuauPlayer>("Player").AddField("playerID", "PlayerID").AddField("playerName", "PlayerName").AddField("playerMaterial", "PlayerMaterial").AddField("isMasterClient", "IsMasterClient").AddField("bodyPosition", "BodyPosition").AddField("velocity", "Velocity").AddField("isPCVR", "IsPCVR").AddField("leftHandPosition", "LeftHandPosition").AddField("rightHandPosition", "RightHandPosition").AddField("headRotation", "HeadRotation").AddField("leftHandRotation", "LeftHandRotation").AddField("rightHandRotation", "RightHandRotation").AddField("isInVStump", "IsInVStump").AddField("isEntityAuthority", "IsEntityAuthority").AddStaticFunction("getPlayerByID", new lua_CFunction(Bindings.PlayerFunctions.GetPlayerByID)).Build(L, true));
-	}
-
-	public unsafe static void AIAgentBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.LuauAIAgent>("AIAgent").AddField("entityID", "EntityID").AddField("agentPosition", "EntityPosition").AddField("agentRotation", "EntityRotation").AddFunction("__tostring", new lua_CFunction(Bindings.AIAgentFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.AIAgentFunctions.ToString)).AddFunction("setDestination", new lua_CFunction(Bindings.AIAgentFunctions.SetDestination)).AddFunction("destroyAgent", new lua_CFunction(Bindings.AIAgentFunctions.DestroyEntity)).AddFunction("playAgentAnimation", new lua_CFunction(Bindings.AIAgentFunctions.PlayAgentAnimation)).AddFunction("getTargetPlayer", new lua_CFunction(Bindings.AIAgentFunctions.GetTarget)).AddFunction("setTargetPlayer", new lua_CFunction(Bindings.AIAgentFunctions.SetTarget)).AddStaticFunction("findPrePlacedAIAgentByID", new lua_CFunction(Bindings.AIAgentFunctions.FindPrePlacedAIAgentByID)).AddStaticFunction("getAIAgentByEntityID", new lua_CFunction(Bindings.AIAgentFunctions.GetAIAgentByEntityID)).AddStaticFunction("spawnAIAgent", new lua_CFunction(Bindings.AIAgentFunctions.SpawnAIAgent)).Build(L, true));
-	}
-
-	public unsafe static void GrabbableEntityBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.LuauGrabbableEntity>("GrabbableEntity").AddField("entityID", "EntityID").AddField("entityPosition", "EntityPosition").AddField("entityRotation", "EntityRotation").AddFunction("__tostring", new lua_CFunction(Bindings.GrabbableEntityFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.GrabbableEntityFunctions.ToString)).AddFunction("destroyGrabbable", new lua_CFunction(Bindings.GrabbableEntityFunctions.DestroyEntity)).AddStaticFunction("findPrePlacedGrabbableEntityByID", new lua_CFunction(Bindings.GrabbableEntityFunctions.FindPrePlacedGrabbableEntityByID)).AddStaticFunction("getGrabbableEntityByEntityID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetGrabbableEntityByEntityID)).AddStaticFunction("getHoldingActorNumberByEntityID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetHoldingActorNumberByEntityID)).AddStaticFunction("getHoldingActorNumberByLuauID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetHoldingActorNumberByLuauID)).AddStaticFunction("spawnGrabbableEntity", new lua_CFunction(Bindings.GrabbableEntityFunctions.SpawnGrabbableEntity)).Build(L, true));
-	}
-
-	[MonoPInvokeCallback(typeof(lua_CFunction))]
-	public unsafe static int LuaStartVibration(lua_State* L)
-	{
-		bool forLeftController = Luau.lua_toboolean(L, 1) == 1;
-		float amplitude = (float)Luau.luaL_checknumber(L, 2);
-		float duration = (float)Luau.luaL_checknumber(L, 3);
-		GorillaTagger.Instance.StartVibration(forLeftController, amplitude, duration);
-		return 0;
-	}
-
-	[MonoPInvokeCallback(typeof(lua_CFunction))]
-	public unsafe static int LuaPlaySound(lua_State* L)
-	{
-		int num = (int)Luau.luaL_checknumber(L, 1);
-		Vector3 position = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-		float volume = (float)Luau.luaL_checknumber(L, 3);
-		if (num < 0 || num >= VRRig.LocalRig.clipToPlay.Length)
-		{
-			return 0;
-		}
-		AudioSource.PlayClipAtPoint(VRRig.LocalRig.clipToPlay[num], position, volume);
-		return 0;
-	}
-
-	public unsafe static void RoomStateBuilder(lua_State* L)
-	{
-		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.LuauRoomState>("RState").AddField("isQuest", "IsQuest").AddField("fps", "FPS").AddField("isPrivate", "IsPrivate").AddField("code", "RoomCode").Build(L, false));
-		Bindings.RoomState = Luau.lua_class_push<Bindings.LuauRoomState>(L);
-		Bindings.UpdateRoomState();
-		Bindings.RoomState->IsQuest = false;
-		Bindings.RoomState->IsPrivate = !PhotonNetwork.CurrentRoom.IsVisible;
-		Bindings.RoomState->RoomCode = PhotonNetwork.CurrentRoom.Name;
-		Luau.lua_setglobal(L, "Room");
-	}
-
-	public unsafe static void UpdateRoomState()
-	{
-		Bindings.RoomState->FPS = 1f / Time.smoothDeltaTime;
-	}
-
-	public static Dictionary<GameObject, IntPtr> LuauGameObjectList = new Dictionary<GameObject, IntPtr>();
-
-	public static List<KeyValuePair<GameObject, IntPtr>> LuauGameObjectDepthList = new List<KeyValuePair<GameObject, IntPtr>>();
-
-	public static Dictionary<IntPtr, GameObject> LuauGameObjectListReverse = new Dictionary<IntPtr, GameObject>();
-
-	public static Dictionary<GameObject, Bindings.LuauGameObjectInitialState> LuauGameObjectStates = new Dictionary<GameObject, Bindings.LuauGameObjectInitialState>();
-
-	public static Dictionary<GameObject, int> LuauTriggerCallbacks = new Dictionary<GameObject, int>();
-
-	public static Dictionary<int, IntPtr> LuauPlayerList = new Dictionary<int, IntPtr>();
-
-	public static Dictionary<int, VRRig> LuauVRRigList = new Dictionary<int, VRRig>();
-
-	public unsafe static Bindings.GorillaLocomotionSettings* LocomotionSettings;
-
-	public unsafe static Bindings.PlayerInput* LocalPlayerInput;
-
-	public unsafe static Bindings.LuauRoomState* RoomState;
-
-	public static Dictionary<int, IntPtr> LuauAIAgentList = new Dictionary<int, IntPtr>();
-
-	public static Dictionary<int, IntPtr> LuauGrabbablesList = new Dictionary<int, IntPtr>();
-
 	public static class LuaEmit
 	{
+		private static float callTime = 0f;
+
+		private static float callCount = 20f;
+
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Emit(lua_State* L)
 		{
-			if (Bindings.LuaEmit.callTime < Time.time - 1f)
+			if (callTime < Time.time - 1f)
 			{
-				Bindings.LuaEmit.callTime = Time.time - 1f;
+				callTime = Time.time - 1f;
 			}
-			Bindings.LuaEmit.callTime += 1f / Bindings.LuaEmit.callCount;
-			if (Bindings.LuaEmit.callTime > Time.time)
+			callTime += 1f / callCount;
+			if (callTime > Time.time)
 			{
 				LuauHud.Instance.LuauLog("Emit rate limit reached, event not sent");
 				return 0;
@@ -179,66 +49,55 @@ public static class Bindings
 			};
 			if (Luau.lua_type(L, 2) != 6)
 			{
-				Luau.luaL_errorL(L, "Argument 2 must be a table", Array.Empty<string>());
+				Luau.luaL_errorL(L, "Argument 2 must be a table");
 				return 0;
 			}
 			Luau.lua_pushnil(L);
 			int num = 0;
 			List<object> list = new List<object>();
-			list.Add(Marshal.PtrToStringAnsi((IntPtr)((void*)Luau.luaL_checkstring(L, 1))));
+			list.Add(Marshal.PtrToStringAnsi((IntPtr)Luau.luaL_checkstring(L, 1)));
 			while (Luau.lua_next(L, 2) != 0 && num++ < 10)
 			{
-				Luau.lua_Types lua_Types = (Luau.lua_Types)Luau.lua_type(L, -1);
-				if (lua_Types <= Luau.lua_Types.LUA_TNUMBER)
+				switch ((Luau.lua_Types)Luau.lua_type(L, -1))
 				{
-					if (lua_Types == Luau.lua_Types.LUA_TBOOLEAN)
-					{
-						list.Add(Luau.lua_toboolean(L, -1) == 1);
-						Luau.lua_pop(L, 1);
-						continue;
-					}
-					if (lua_Types == Luau.lua_Types.LUA_TNUMBER)
-					{
-						list.Add(Luau.luaL_checknumber(L, -1));
-						Luau.lua_pop(L, 1);
-						continue;
-					}
-				}
-				else if (lua_Types == Luau.lua_Types.LUA_TTABLE || lua_Types == Luau.lua_Types.LUA_TUSERDATA)
+				case Luau.lua_Types.LUA_TNUMBER:
+					list.Add(Luau.luaL_checknumber(L, -1));
+					Luau.lua_pop(L, 1);
+					break;
+				case Luau.lua_Types.LUA_TBOOLEAN:
+					list.Add(Luau.lua_toboolean(L, -1) == 1);
+					Luau.lua_pop(L, 1);
+					break;
+				case Luau.lua_Types.LUA_TTABLE:
+				case Luau.lua_Types.LUA_TUSERDATA:
 				{
 					Luau.luaL_getmetafield(L, -1, "metahash");
-					BurstClassInfo.ClassInfo classInfo;
-					if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out classInfo))
+					if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out var item))
 					{
-						FixedString64Bytes fixedString64Bytes = "\"Internal Class Info Error No Metatable Found\"";
-						Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString64Bytes>(ref fixedString64Bytes) + 2));
+						FixedString64Bytes output2 = "\"Internal Class Info Error No Metatable Found\"";
+						Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output2) + 2);
 						return 0;
 					}
 					Luau.lua_pop(L, 1);
-					FixedString32Bytes fixedString32Bytes = "Vec3";
-					if (classInfo.Name == fixedString32Bytes)
+					if (item.Name == (FixedString32Bytes)"Vec3")
 					{
 						list.Add(*Luau.lua_class_get<Vector3>(L, -1));
 						Luau.lua_pop(L, 1);
-						continue;
 					}
-					fixedString32Bytes = "Quat";
-					if (classInfo.Name == fixedString32Bytes)
+					else if (item.Name == (FixedString32Bytes)"Quat")
 					{
 						list.Add(*Luau.lua_class_get<Quaternion>(L, -1));
 						Luau.lua_pop(L, 1);
-						continue;
 					}
-					fixedString32Bytes = "Player";
-					if (classInfo.Name == fixedString32Bytes)
+					else if (item.Name == (FixedString32Bytes)"Player")
 					{
-						int playerID = Luau.lua_class_get<Bindings.LuauPlayer>(L, -1)->PlayerID;
+						int playerID = Luau.lua_class_get<LuauPlayer>(L, -1)->PlayerID;
 						NetPlayer netPlayer = null;
-						foreach (NetPlayer netPlayer2 in RoomSystem.PlayersInRoom)
+						foreach (NetPlayer item2 in RoomSystem.PlayersInRoom)
 						{
-							if (netPlayer2.ActorNumber == playerID)
+							if (item2.ActorNumber == playerID)
 							{
-								netPlayer = netPlayer2;
+								netPlayer = item2;
 							}
 						}
 						if (netPlayer == null)
@@ -250,15 +109,21 @@ public static class Bindings
 							list.Add(netPlayer.GetPlayerRef());
 						}
 						Luau.lua_pop(L, 1);
-						continue;
 					}
-					FixedString32Bytes fixedString32Bytes2 = "\"Unknown Type in table\"";
-					Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes2) + 2));
-					continue;
+					else
+					{
+						FixedString32Bytes output3 = "\"Unknown Type in table\"";
+						Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output3) + 2);
+					}
+					break;
 				}
-				FixedString32Bytes fixedString32Bytes3 = "\"Unknown Type in table\"";
-				Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes3) + 2));
-				return 0;
+				default:
+				{
+					FixedString32Bytes output = "\"Unknown Type in table\"";
+					Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output) + 2);
+					return 0;
+				}
+				}
 			}
 			if (PhotonNetwork.InRoom)
 			{
@@ -266,10 +131,6 @@ public static class Bindings
 			}
 			return 0;
 		}
-
-		private static float callTime = 0f;
-
-		private static float callCount = 20f;
 	}
 
 	[BurstCompile]
@@ -315,22 +176,20 @@ public static class Bindings
 
 		public static void UpdateDepthList()
 		{
-			Bindings.LuauGameObjectDepthList.Clear();
-			Bindings.LuauGameObjectDepthList = (from kv in Bindings.LuauGameObjectList
-			orderby Bindings.GameObjectFunctions.GetDepth(kv.Key) descending
-			select kv).ToList<KeyValuePair<GameObject, IntPtr>>();
+			LuauGameObjectDepthList.Clear();
+			LuauGameObjectDepthList = LuauGameObjectList.OrderByDescending((KeyValuePair<GameObject, IntPtr> kv) => GetDepth(kv.Key)).ToList();
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
 		{
 			GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			Bindings.LuauGameObject* ptr = Luau.lua_class_push<Bindings.LuauGameObject>(L);
+			LuauGameObject* ptr = Luau.lua_class_push<LuauGameObject>(L);
 			ptr->Position = gameObject.transform.position;
 			ptr->Rotation = gameObject.transform.rotation;
 			ptr->Scale = gameObject.transform.localScale;
-			Bindings.LuauGameObjectList.TryAdd(gameObject, (IntPtr)((void*)ptr));
-			Bindings.LuauGameObjectListReverse.TryAdd((IntPtr)((void*)ptr), gameObject);
+			LuauGameObjectList.TryAdd(gameObject, (IntPtr)ptr);
+			LuauGameObjectListReverse.TryAdd((IntPtr)ptr, gameObject);
 			return 1;
 		}
 
@@ -338,60 +197,60 @@ public static class Bindings
 		public unsafe static int FindGameObject(lua_State* L)
 		{
 			GameObject gameObject = GameObject.Find(new string((sbyte*)Luau.luaL_checkstring(L, 1)));
-			if (!(gameObject != null))
+			if (gameObject != null)
 			{
-				return 0;
-			}
-			if (!CustomMapLoader.IsCustomScene(gameObject.scene.name))
-			{
-				return 0;
-			}
-			IntPtr ptr;
-			if (Bindings.LuauGameObjectList.TryGetValue(gameObject, out ptr))
-			{
-				Luau.lua_class_push(L, "GameObject", ptr);
-			}
-			else
-			{
-				Bindings.LuauGameObject* ptr2 = Luau.lua_class_push<Bindings.LuauGameObject>(L);
-				ptr2->Position = gameObject.transform.position;
-				ptr2->Rotation = gameObject.transform.rotation;
-				ptr2->Scale = gameObject.transform.localScale;
-				Bindings.LuauGameObjectInitialState value = default(Bindings.LuauGameObjectInitialState);
-				value.Position = gameObject.transform.localPosition;
-				value.Rotation = gameObject.transform.localRotation;
-				value.Scale = gameObject.transform.localScale;
-				value.Visible = true;
-				value.Collidable = true;
-				value.Created = false;
-				MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
-				Collider component2 = gameObject.GetComponent<Collider>();
-				if (component2.IsNotNull())
+				if (!CustomMapLoader.IsCustomScene(gameObject.scene.name))
 				{
-					value.Collidable = component2.enabled;
+					return 0;
 				}
-				if (component.IsNotNull())
+				if (LuauGameObjectList.TryGetValue(gameObject, out var value))
 				{
-					value.Visible = component.enabled;
+					Luau.lua_class_push(L, "GameObject", value);
 				}
-				Bindings.LuauGameObjectList.TryAdd(gameObject, (IntPtr)((void*)ptr2));
-				Bindings.LuauGameObjectListReverse.TryAdd((IntPtr)((void*)ptr2), gameObject);
-				Bindings.LuauGameObjectStates.TryAdd(gameObject, value);
-				Bindings.GameObjectFunctions.UpdateDepthList();
+				else
+				{
+					LuauGameObject* ptr = Luau.lua_class_push<LuauGameObject>(L);
+					ptr->Position = gameObject.transform.position;
+					ptr->Rotation = gameObject.transform.rotation;
+					ptr->Scale = gameObject.transform.localScale;
+					LuauGameObjectInitialState value2 = new LuauGameObjectInitialState
+					{
+						Position = gameObject.transform.localPosition,
+						Rotation = gameObject.transform.localRotation,
+						Scale = gameObject.transform.localScale,
+						Visible = true,
+						Collidable = true,
+						Created = false
+					};
+					MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
+					Collider component2 = gameObject.GetComponent<Collider>();
+					if (component2.IsNotNull())
+					{
+						value2.Collidable = component2.enabled;
+					}
+					if (component.IsNotNull())
+					{
+						value2.Visible = component.enabled;
+					}
+					LuauGameObjectList.TryAdd(gameObject, (IntPtr)ptr);
+					LuauGameObjectListReverse.TryAdd((IntPtr)ptr, gameObject);
+					LuauGameObjectStates.TryAdd(gameObject, value2);
+					UpdateDepthList();
+				}
+				return 1;
 			}
-			return 1;
+			return 0;
 		}
 
 		public static Transform FindChild(Transform parent, string name)
 		{
-			foreach (object obj in parent)
+			foreach (Transform item in parent)
 			{
-				Transform transform = (Transform)obj;
-				if (transform.name == name)
+				if (item.name == name)
 				{
-					return transform;
+					return item;
 				}
-				Transform transform2 = Bindings.GameObjectFunctions.FindChild(transform, name);
+				Transform transform2 = FindChild(item, name);
 				if (transform2 != null)
 				{
 					return transform2;
@@ -403,47 +262,46 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindChildGameObject(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
 				string name = new string((sbyte*)Luau.luaL_checkstring(L, 2));
-				Transform transform = Bindings.GameObjectFunctions.FindChild(gameObject.transform, name);
-				GameObject gameObject2 = (transform != null) ? transform.gameObject : null;
-				if (gameObject2.IsNotNull())
+				GameObject gameObject = FindChild(value.transform, name)?.gameObject;
+				if (gameObject.IsNotNull())
 				{
-					IntPtr ptr;
-					if (Bindings.LuauGameObjectList.TryGetValue(gameObject2, out ptr))
+					if (LuauGameObjectList.TryGetValue(gameObject, out var value2))
 					{
-						Luau.lua_class_push(L, "GameObject", ptr);
+						Luau.lua_class_push(L, "GameObject", value2);
 					}
 					else
 					{
-						Bindings.LuauGameObject* ptr2 = Luau.lua_class_push<Bindings.LuauGameObject>(L);
-						ptr2->Position = gameObject2.transform.position;
-						ptr2->Rotation = gameObject2.transform.rotation;
-						ptr2->Scale = gameObject2.transform.localScale;
-						Bindings.LuauGameObjectInitialState value2 = default(Bindings.LuauGameObjectInitialState);
-						value2.Position = gameObject2.transform.localPosition;
-						value2.Rotation = gameObject2.transform.localRotation;
-						value2.Scale = gameObject2.transform.localScale;
-						value2.Visible = true;
-						value2.Collidable = true;
-						value2.Created = false;
-						MeshRenderer component = gameObject2.GetComponent<MeshRenderer>();
-						Collider component2 = gameObject2.GetComponent<Collider>();
+						LuauGameObject* ptr2 = Luau.lua_class_push<LuauGameObject>(L);
+						ptr2->Position = gameObject.transform.position;
+						ptr2->Rotation = gameObject.transform.rotation;
+						ptr2->Scale = gameObject.transform.localScale;
+						LuauGameObjectInitialState value3 = new LuauGameObjectInitialState
+						{
+							Position = gameObject.transform.localPosition,
+							Rotation = gameObject.transform.localRotation,
+							Scale = gameObject.transform.localScale,
+							Visible = true,
+							Collidable = true,
+							Created = false
+						};
+						MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
+						Collider component2 = gameObject.GetComponent<Collider>();
 						if (component2.IsNotNull())
 						{
-							value2.Collidable = component2.enabled;
+							value3.Collidable = component2.enabled;
 						}
 						if (component.IsNotNull())
 						{
-							value2.Visible = component.enabled;
+							value3.Visible = component.enabled;
 						}
-						Bindings.LuauGameObjectList.TryAdd(gameObject2, (IntPtr)((void*)ptr2));
-						Bindings.LuauGameObjectListReverse.TryAdd((IntPtr)((void*)ptr2), gameObject2);
-						Bindings.LuauGameObjectStates.TryAdd(gameObject2, value2);
-						Bindings.GameObjectFunctions.UpdateDepthList();
+						LuauGameObjectList.TryAdd(gameObject, (IntPtr)ptr2);
+						LuauGameObjectListReverse.TryAdd((IntPtr)ptr2, gameObject);
+						LuauGameObjectStates.TryAdd(gameObject, value3);
+						UpdateDepthList();
 					}
 					return 1;
 				}
@@ -454,58 +312,59 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindComponent(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				if (gameObject == null)
+				if (value == null)
 				{
 					return 0;
 				}
-				string a = new string((sbyte*)Luau.luaL_checkstring(L, 2));
-				if (a == "ParticleSystem")
+				switch (new string((sbyte*)Luau.luaL_checkstring(L, 2)))
 				{
-					ParticleSystem component = gameObject.GetComponent<ParticleSystem>();
-					if (component == null)
-					{
-						return 0;
-					}
-					Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem* value2 = Luau.lua_class_push<Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem>(L);
-					Bindings.Components.ComponentList.TryAdd((IntPtr)((void*)value2), component);
-					return 1;
-				}
-				else if (a == "AudioSource")
+				case "ParticleSystem":
 				{
-					AudioSource component2 = gameObject.GetComponent<AudioSource>();
-					if (component2 == null)
-					{
-						return 0;
-					}
-					Bindings.Components.LuauAudioSourceBindings.LuauAudioSource* value3 = Luau.lua_class_push<Bindings.Components.LuauAudioSourceBindings.LuauAudioSource>(L);
-					Bindings.Components.ComponentList.TryAdd((IntPtr)((void*)value3), component2);
-					return 1;
-				}
-				else if (a == "Light")
-				{
-					Light component3 = gameObject.GetComponent<Light>();
+					ParticleSystem component3 = value.GetComponent<ParticleSystem>();
 					if (component3 == null)
 					{
 						return 0;
 					}
-					Bindings.Components.LuauLightBindings.LuauLight* value4 = Luau.lua_class_push<Bindings.Components.LuauLightBindings.LuauLight>(L);
-					Bindings.Components.ComponentList.TryAdd((IntPtr)((void*)value4), component3);
+					Components.LuauParticleSystemBindings.LuauParticleSystem* ptr4 = Luau.lua_class_push<Components.LuauParticleSystemBindings.LuauParticleSystem>(L);
+					Components.ComponentList.TryAdd((IntPtr)ptr4, component3);
 					return 1;
 				}
-				else if (a == "Animator")
+				case "AudioSource":
 				{
-					Animator component4 = gameObject.GetComponent<Animator>();
+					AudioSource component2 = value.GetComponent<AudioSource>();
+					if (component2 == null)
+					{
+						return 0;
+					}
+					Components.LuauAudioSourceBindings.LuauAudioSource* ptr3 = Luau.lua_class_push<Components.LuauAudioSourceBindings.LuauAudioSource>(L);
+					Components.ComponentList.TryAdd((IntPtr)ptr3, component2);
+					return 1;
+				}
+				case "Light":
+				{
+					Light component4 = value.GetComponent<Light>();
 					if (component4 == null)
 					{
 						return 0;
 					}
-					Bindings.Components.LuauAnimatorBindings.LuauAnimator* value5 = Luau.lua_class_push<Bindings.Components.LuauAnimatorBindings.LuauAnimator>(L);
-					Bindings.Components.ComponentList.TryAdd((IntPtr)((void*)value5), component4);
+					Components.LuauLightBindings.LuauLight* ptr5 = Luau.lua_class_push<Components.LuauLightBindings.LuauLight>(L);
+					Components.ComponentList.TryAdd((IntPtr)ptr5, component4);
 					return 1;
+				}
+				case "Animator":
+				{
+					Animator component = value.GetComponent<Animator>();
+					if (component == null)
+					{
+						return 0;
+					}
+					Components.LuauAnimatorBindings.LuauAnimator* ptr2 = Luau.lua_class_push<Components.LuauAnimatorBindings.LuauAnimator>(L);
+					Components.ComponentList.TryAdd((IntPtr)ptr2, component);
+					return 1;
+				}
 				}
 			}
 			return 0;
@@ -514,24 +373,25 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int CloneGameObject(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, gameObject.transform.parent, false);
-				Bindings.LuauGameObject* ptr = Luau.lua_class_push<Bindings.LuauGameObject>(L);
-				ptr->Position = gameObject2.transform.position;
-				ptr->Rotation = gameObject2.transform.rotation;
-				ptr->Scale = gameObject2.transform.localScale;
-				Bindings.LuauGameObjectInitialState value2 = default(Bindings.LuauGameObjectInitialState);
-				value2.Position = gameObject2.transform.localPosition;
-				value2.Rotation = gameObject2.transform.localRotation;
-				value2.Scale = gameObject2.transform.localScale;
-				value2.Visible = true;
-				value2.Collidable = true;
-				value2.Created = true;
-				MeshRenderer component = gameObject2.GetComponent<MeshRenderer>();
-				Collider component2 = gameObject2.GetComponent<Collider>();
+				GameObject gameObject = UnityEngine.Object.Instantiate(value, value.transform.parent, worldPositionStays: false);
+				LuauGameObject* ptr2 = Luau.lua_class_push<LuauGameObject>(L);
+				ptr2->Position = gameObject.transform.position;
+				ptr2->Rotation = gameObject.transform.rotation;
+				ptr2->Scale = gameObject.transform.localScale;
+				LuauGameObjectInitialState value2 = new LuauGameObjectInitialState
+				{
+					Position = gameObject.transform.localPosition,
+					Rotation = gameObject.transform.localRotation,
+					Scale = gameObject.transform.localScale,
+					Visible = true,
+					Collidable = true,
+					Created = true
+				};
+				MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
+				Collider component2 = gameObject.GetComponent<Collider>();
 				if (component2.IsNotNull())
 				{
 					value2.Collidable = component2.enabled;
@@ -540,10 +400,10 @@ public static class Bindings
 				{
 					value2.Visible = component.enabled;
 				}
-				Bindings.LuauGameObjectList.TryAdd(gameObject2, (IntPtr)((void*)ptr));
-				Bindings.LuauGameObjectListReverse.TryAdd((IntPtr)((void*)ptr), gameObject2);
-				Bindings.LuauGameObjectStates.TryAdd(gameObject2, value2);
-				Bindings.GameObjectFunctions.UpdateDepthList();
+				LuauGameObjectList.TryAdd(gameObject, (IntPtr)ptr2);
+				LuauGameObjectListReverse.TryAdd((IntPtr)ptr2, gameObject);
+				LuauGameObjectStates.TryAdd(gameObject, value2);
+				UpdateDepthList();
 				return 1;
 			}
 			return 0;
@@ -552,36 +412,33 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyGameObject(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			Bindings.LuauGameObjectInitialState luauGameObjectInitialState;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject) && Bindings.LuauGameObjectStates.TryGetValue(gameObject, out luauGameObjectInitialState))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value) && LuauGameObjectStates.TryGetValue(value, out var value2))
 			{
-				if (!luauGameObjectInitialState.Created)
+				if (!value2.Created)
 				{
-					Luau.luaL_errorL(L, "Cannot destroy a non-instantiated GameObject.", Array.Empty<string>());
+					Luau.luaL_errorL(L, "Cannot destroy a non-instantiated GameObject.");
 					return 0;
 				}
 				Queue<GameObject> queue = new Queue<GameObject>();
-				queue.Enqueue(gameObject);
+				queue.Enqueue(value);
 				while (queue.Count != 0)
 				{
-					GameObject gameObject2 = queue.Dequeue();
-					IntPtr key;
-					if (Bindings.LuauGameObjectList.TryGetValue(gameObject2, out key))
+					GameObject gameObject = queue.Dequeue();
+					if (!LuauGameObjectList.TryGetValue(gameObject, out var value3))
 					{
-						Bindings.LuauGameObjectList.Remove(gameObject2);
-						Bindings.LuauGameObjectListReverse.Remove(key);
-						Bindings.LuauGameObjectStates.Remove(gameObject2);
-						foreach (object obj in gameObject2.transform)
-						{
-							Transform transform = (Transform)obj;
-							queue.Enqueue(transform.gameObject);
-						}
+						continue;
+					}
+					LuauGameObjectList.Remove(gameObject);
+					LuauGameObjectListReverse.Remove(value3);
+					LuauGameObjectStates.Remove(gameObject);
+					foreach (Transform item in gameObject.transform)
+					{
+						queue.Enqueue(item.gameObject);
 					}
 				}
-				Bindings.GameObjectFunctions.UpdateDepthList();
-				gameObject.Destroy();
+				UpdateDepthList();
+				value.Destroy();
 			}
 			return 0;
 		}
@@ -589,14 +446,13 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetCollision(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				Collider component = gameObject.GetComponent<Collider>();
+				Collider component = value.GetComponent<Collider>();
 				if (component.IsNotNull())
 				{
-					component.enabled = (Luau.lua_toboolean(L, 2) == 1);
+					component.enabled = Luau.lua_toboolean(L, 2) == 1;
 				}
 			}
 			return 0;
@@ -605,14 +461,13 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetVisibility(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
+				MeshRenderer component = value.GetComponent<MeshRenderer>();
 				if (component.IsNotNull())
 				{
-					component.enabled = (Luau.lua_toboolean(L, 2) == 1);
+					component.enabled = Luau.lua_toboolean(L, 2) == 1;
 				}
 			}
 			return 0;
@@ -621,11 +476,10 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetActive(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				gameObject.SetActive(Luau.lua_toboolean(L, 2) == 1);
+				value.SetActive(Luau.lua_toboolean(L, 2) == 1);
 			}
 			return 0;
 		}
@@ -633,19 +487,18 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetText(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
 				string text = new string(Luau.lua_tostring(L, 2));
-				TextMeshPro component = gameObject.GetComponent<TextMeshPro>();
+				TextMeshPro component = value.GetComponent<TextMeshPro>();
 				if (component.IsNotNull())
 				{
 					component.text = text;
 				}
 				else
 				{
-					TextMesh component2 = gameObject.GetComponent<TextMesh>();
+					TextMesh component2 = value.GetComponent<TextMesh>();
 					if (component2.IsNotNull())
 					{
 						component2.text = text;
@@ -658,25 +511,23 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int OnTouched(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject key;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out key))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				int rid;
-				if (Bindings.LuauTriggerCallbacks.TryGetValue(key, out rid))
+				if (LuauTriggerCallbacks.TryGetValue(value, out var value2))
 				{
-					Luau.lua_unref(L, rid);
-					Bindings.LuauTriggerCallbacks.Remove(key);
+					Luau.lua_unref(L, value2);
+					LuauTriggerCallbacks.Remove(value);
 				}
 				if (Luau.lua_type(L, 2) == 7)
 				{
-					int value2 = Luau.lua_ref(L, 2);
-					Bindings.LuauTriggerCallbacks.TryAdd(key, value2);
+					int value3 = Luau.lua_ref(L, 2);
+					LuauTriggerCallbacks.TryAdd(value, value3);
 				}
 				else
 				{
-					FixedString32Bytes fixedString32Bytes = "Callback must be a function";
-					Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes) + 2));
+					FixedString32Bytes output = "Callback must be a function";
+					Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output) + 2);
 				}
 			}
 			return 0;
@@ -685,12 +536,11 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetVelocity(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
 				Vector3 linearVelocity = *Luau.lua_class_get<Vector3>(L, 2);
-				Rigidbody component = gameObject.GetComponent<Rigidbody>();
+				Rigidbody component = value.GetComponent<Rigidbody>();
 				if (component.IsNotNull())
 				{
 					component.linearVelocity = linearVelocity;
@@ -702,23 +552,22 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetVelocity(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				if (gameObject.IsNull())
+				if (value.IsNull())
 				{
 					return 0;
 				}
-				Rigidbody component = gameObject.GetComponent<Rigidbody>();
-				Vector3* ptr = Luau.lua_class_push<Vector3>(L, "Vec3");
+				Rigidbody component = value.GetComponent<Rigidbody>();
+				Vector3* ptr2 = Luau.lua_class_push<Vector3>(L, "Vec3");
 				if (component.IsNotNull())
 				{
-					*ptr = component.linearVelocity;
+					*ptr2 = component.linearVelocity;
 				}
 				else
 				{
-					*ptr = Vector3.zero;
+					*ptr2 = Vector3.zero;
 				}
 			}
 			return 1;
@@ -727,25 +576,24 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetColor(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
 			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 2);
-			GameObject gameObject;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
 				Color color = new Color(Mathf.Clamp01(vector.x / 255f), Mathf.Clamp01(vector.y / 255f), Mathf.Clamp01(vector.z / 255f), 1f);
-				TextMeshPro component = gameObject.GetComponent<TextMeshPro>();
+				TextMeshPro component = value.GetComponent<TextMeshPro>();
 				if (component != null)
 				{
 					component.color = color;
 					return 0;
 				}
-				TextMesh component2 = gameObject.GetComponent<TextMesh>();
+				TextMesh component2 = value.GetComponent<TextMesh>();
 				if (component2 != null)
 				{
 					component2.color = color;
 					return 0;
 				}
-				Renderer component3 = gameObject.GetComponent<Renderer>();
+				Renderer component3 = value.GetComponent<Renderer>();
 				if (component3 != null)
 				{
 					component3.material.color = color;
@@ -757,13 +605,11 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Equals(lua_State* L)
 		{
-			Bindings.LuauGameObject* value = Luau.lua_class_get<Bindings.LuauGameObject>(L, 1, "GameObject");
-			GameObject x;
-			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out x))
+			LuauGameObject* ptr = Luau.lua_class_get<LuauGameObject>(L, 1, "GameObject");
+			if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr, out var value))
 			{
-				Bindings.LuauGameObject* value2 = Luau.lua_class_get<Bindings.LuauGameObject>(L, 2, "GameObject");
-				GameObject y;
-				if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value2), out y) && x == y)
+				LuauGameObject* ptr2 = Luau.lua_class_get<LuauGameObject>(L, 2, "GameObject");
+				if (LuauGameObjectListReverse.TryGetValue((IntPtr)ptr2, out var value2) && value == value2)
 				{
 					Luau.lua_pushboolean(L, 1);
 					return 1;
@@ -817,39 +663,36 @@ public static class Bindings
 		public unsafe static int GetPlayerByID(lua_State* L)
 		{
 			int num = (int)Luau.luaL_checknumber(L, 1);
-			foreach (NetPlayer netPlayer in RoomSystem.PlayersInRoom)
+			foreach (NetPlayer item in RoomSystem.PlayersInRoom)
 			{
-				if (netPlayer.ActorNumber == num)
+				if (item.ActorNumber != num)
 				{
-					IntPtr ptr;
-					if (Bindings.LuauPlayerList.TryGetValue(netPlayer.ActorNumber, out ptr))
-					{
-						Luau.lua_class_push(L, "Player", ptr);
-					}
-					else
-					{
-						Bindings.LuauPlayer* ptr2 = Luau.lua_class_push<Bindings.LuauPlayer>(L);
-						ptr2->PlayerID = netPlayer.ActorNumber;
-						ptr2->PlayerMaterial = 0;
-						ptr2->IsMasterClient = netPlayer.IsMasterClient;
-						Bindings.LuauPlayerList[netPlayer.ActorNumber] = (IntPtr)((void*)ptr2);
-						GorillaGameManager instance = GorillaGameManager.instance;
-						VRRig vrrig = (instance != null) ? instance.FindPlayerVRRig(netPlayer) : null;
-						if (vrrig != null)
-						{
-							ptr2->PlayerName = vrrig.playerNameVisible;
-							Bindings.LuauVRRigList[netPlayer.ActorNumber] = vrrig;
-							Bindings.PlayerFunctions.UpdatePlayer(L, vrrig, ptr2);
-							Bindings.LuauPlayerList[netPlayer.ActorNumber] = (IntPtr)((void*)ptr2);
-						}
-					}
+					continue;
+				}
+				if (LuauPlayerList.TryGetValue(item.ActorNumber, out var value))
+				{
+					Luau.lua_class_push(L, "Player", value);
+					continue;
+				}
+				LuauPlayer* ptr = Luau.lua_class_push<LuauPlayer>(L);
+				ptr->PlayerID = item.ActorNumber;
+				ptr->PlayerMaterial = 0;
+				ptr->IsMasterClient = item.IsMasterClient;
+				LuauPlayerList[item.ActorNumber] = (IntPtr)ptr;
+				VRRig vRRig = GorillaGameManager.instance?.FindPlayerVRRig(item);
+				if (vRRig != null)
+				{
+					ptr->PlayerName = vRRig.playerNameVisible;
+					LuauVRRigList[item.ActorNumber] = vRRig;
+					UpdatePlayer(L, vRRig, ptr);
+					LuauPlayerList[item.ActorNumber] = (IntPtr)ptr;
 				}
 			}
 			return 0;
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
-		public unsafe static void UpdatePlayer(lua_State* L, VRRig p, Bindings.LuauPlayer* data)
+		public unsafe static void UpdatePlayer(lua_State* L, VRRig p, LuauPlayer* data)
 		{
 			data->BodyPosition = p.transform.position;
 			data->Velocity = p.LatestVelocity();
@@ -870,7 +713,7 @@ public static class Bindings
 			{
 				data->IsInVStump = false;
 			}
-			data->IsEntityAuthority = (CustomMapsGameManager.instance.IsNotNull() && CustomMapsGameManager.instance.gameEntityManager.IsNotNull() && CustomMapsGameManager.instance.gameEntityManager.IsZoneAuthority());
+			data->IsEntityAuthority = CustomMapsGameManager.instance.IsNotNull() && CustomMapsGameManager.instance.gameEntityManager.IsNotNull() && CustomMapsGameManager.instance.gameEntityManager.IsZoneAuthority();
 		}
 	}
 
@@ -901,18 +744,10 @@ public static class Bindings
 		public unsafe static int ToString(lua_State* L)
 		{
 			string s = "NULL";
-			Bindings.LuauGrabbableEntity* ptr = Luau.lua_class_get<Bindings.LuauGrabbableEntity>(L, 1);
+			LuauGrabbableEntity* ptr = Luau.lua_class_get<LuauGrabbableEntity>(L, 1);
 			if (ptr != null)
 			{
-				s = string.Concat(new string[]
-				{
-					"ID: ",
-					ptr->EntityID.ToString(),
-					" | Pos: ",
-					ptr->EntityPosition.ToString(),
-					" | Rot: ",
-					ptr->EntityRotation.ToString()
-				});
+				s = "ID: " + ptr->EntityID + " | Pos: " + ptr->EntityPosition.ToString() + " | Rot: " + ptr->EntityRotation.ToString();
 			}
 			Luau.lua_pushstring(L, s);
 			return 1;
@@ -922,7 +757,7 @@ public static class Bindings
 		public unsafe static int GetGrabbableEntityByEntityID(lua_State* L)
 		{
 			int num = (int)Luau.luaL_checknumber(L, 1);
-			Debug.Log(string.Format("[LuauBindings::GetGrabbableEntityByEntityID] ID: {0}", num));
+			Debug.Log($"[LuauBindings::GetGrabbableEntityByEntityID] ID: {num}");
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNotNull())
 			{
@@ -935,17 +770,16 @@ public static class Bindings
 						return 0;
 					}
 					Debug.Log("[LuauBindings::GetGrabbableEntityByEntityID] Found agent: " + gameEntity.gameObject.name);
-					IntPtr intPtr;
-					if (Bindings.LuauGrabbablesList.TryGetValue(num, out intPtr))
+					if (LuauGrabbablesList.TryGetValue(num, out var value))
 					{
-						Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntity, (Bindings.LuauGrabbableEntity*)((void*)intPtr));
-						Luau.lua_class_push(L, "GrabbableEntity", intPtr);
+						UpdateEntity(gameEntity, (LuauGrabbableEntity*)(void*)value);
+						Luau.lua_class_push(L, "GrabbableEntity", value);
 					}
 					else
 					{
-						Bindings.LuauGrabbableEntity* ptr = Luau.lua_class_push<Bindings.LuauGrabbableEntity>(L);
-						Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntity, ptr);
-						Bindings.LuauGrabbablesList[num] = (IntPtr)((void*)ptr);
+						LuauGrabbableEntity* ptr = Luau.lua_class_push<LuauGrabbableEntity>(L);
+						UpdateEntity(gameEntity, ptr);
+						LuauGrabbablesList[num] = (IntPtr)ptr;
 					}
 					return 1;
 				}
@@ -957,7 +791,7 @@ public static class Bindings
 		public unsafe static int GetHoldingActorNumberByLuauID(lua_State* L)
 		{
 			short num = (short)Luau.luaL_checknumber(L, 1);
-			Debug.Log(string.Format("[LuauBindings::GetHoldingActorNumberByLuauID] ID: {0}", num));
+			Debug.Log($"[LuauBindings::GetHoldingActorNumberByLuauID] ID: {num}");
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNull())
 			{
@@ -966,17 +800,18 @@ public static class Bindings
 			List<GameEntity> gameEntities = gameEntityManager.GetGameEntities();
 			for (int i = 0; i < gameEntities.Count; i++)
 			{
-				if (!gameEntities[i].gameObject.IsNull())
+				if (gameEntities[i].gameObject.IsNull())
 				{
-					CustomMapsGrabbablesController component = gameEntities[i].gameObject.GetComponent<CustomMapsGrabbablesController>();
-					if (!component.IsNull())
+					continue;
+				}
+				CustomMapsGrabbablesController component = gameEntities[i].gameObject.GetComponent<CustomMapsGrabbablesController>();
+				if (!component.IsNull())
+				{
+					Debug.Log("[LuauBindings::GetHoldingActorNumberByLuauID] checking GrabbableController on " + $"{component.gameObject.name}, id: {component.luaAgentID}");
+					if (component.luaAgentID == num)
 					{
-						Debug.Log("[LuauBindings::GetHoldingActorNumberByLuauID] checking GrabbableController on " + string.Format("{0}, id: {1}", component.gameObject.name, component.luaAgentID));
-						if (component.luaAgentID == num)
-						{
-							Luau.lua_pushnumber(L, (double)component.GetGrabbingActor());
-							return 1;
-						}
+						Luau.lua_pushnumber(L, component.GetGrabbingActor());
+						return 1;
 					}
 				}
 			}
@@ -987,7 +822,7 @@ public static class Bindings
 		public unsafe static int GetHoldingActorNumberByEntityID(lua_State* L)
 		{
 			int num = (int)Luau.luaL_checknumber(L, 1);
-			Debug.Log(string.Format("[LuauBindings::GetHoldingActorNumberByEntityID] ID: {0}", num));
+			Debug.Log($"[LuauBindings::GetHoldingActorNumberByEntityID] ID: {num}");
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNull())
 			{
@@ -1005,7 +840,7 @@ public static class Bindings
 			{
 				return 0;
 			}
-			Luau.lua_pushnumber(L, (double)component.GetGrabbingActor());
+			Luau.lua_pushnumber(L, component.GetGrabbingActor());
 			return 1;
 		}
 
@@ -1013,36 +848,37 @@ public static class Bindings
 		public unsafe static int FindPrePlacedGrabbableEntityByID(lua_State* L)
 		{
 			short num = (short)Luau.luaL_checknumber(L, 1);
-			Debug.Log(string.Format("[LuauBindings::FindPrePlacedGrabbableEntityByID] ID: {0}", num));
+			Debug.Log($"[LuauBindings::FindPrePlacedGrabbableEntityByID] ID: {num}");
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNotNull())
 			{
 				List<GameEntity> gameEntities = gameEntityManager.GetGameEntities();
 				for (int i = 0; i < gameEntities.Count; i++)
 				{
-					if (!gameEntities[i].gameObject.IsNull())
+					if (gameEntities[i].gameObject.IsNull())
 					{
-						CustomMapsGrabbablesController component = gameEntities[i].gameObject.GetComponent<CustomMapsGrabbablesController>();
-						if (!component.IsNull())
+						continue;
+					}
+					CustomMapsGrabbablesController component = gameEntities[i].gameObject.GetComponent<CustomMapsGrabbablesController>();
+					if (component.IsNull())
+					{
+						continue;
+					}
+					Debug.Log("[LuauBindings::FindPrePlacedGrabbableEntityByID] checking GrabbableController on " + $"{component.gameObject.name}, id: {component.luaAgentID}");
+					if (component.luaAgentID == num)
+					{
+						if (LuauGrabbablesList.TryGetValue(gameEntities[i].GetNetId(), out var value))
 						{
-							Debug.Log("[LuauBindings::FindPrePlacedGrabbableEntityByID] checking GrabbableController on " + string.Format("{0}, id: {1}", component.gameObject.name, component.luaAgentID));
-							if (component.luaAgentID == num)
-							{
-								IntPtr intPtr;
-								if (Bindings.LuauGrabbablesList.TryGetValue(gameEntities[i].GetNetId(), out intPtr))
-								{
-									Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntities[i], (Bindings.LuauGrabbableEntity*)((void*)intPtr));
-									Luau.lua_class_push(L, "GrabbableEntity", intPtr);
-								}
-								else
-								{
-									Bindings.LuauGrabbableEntity* ptr = Luau.lua_class_push<Bindings.LuauGrabbableEntity>(L);
-									Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntities[i], ptr);
-									Bindings.LuauGrabbablesList[gameEntities[i].GetNetId()] = (IntPtr)((void*)ptr);
-								}
-								return 1;
-							}
+							UpdateEntity(gameEntities[i], (LuauGrabbableEntity*)(void*)value);
+							Luau.lua_class_push(L, "GrabbableEntity", value);
 						}
+						else
+						{
+							LuauGrabbableEntity* ptr = Luau.lua_class_push<LuauGrabbableEntity>(L);
+							UpdateEntity(gameEntities[i], ptr);
+							LuauGrabbablesList[gameEntities[i].GetNetId()] = (IntPtr)ptr;
+						}
+						return 1;
 					}
 				}
 			}
@@ -1054,7 +890,7 @@ public static class Bindings
 		{
 			Debug.Log("[LuauBindings::SpawnGrabbableEntity]");
 			CustomMapsGameManager instance = CustomMapsGameManager.instance;
-			GameEntityManager gameEntityManager = instance.IsNotNull() ? instance.gameEntityManager : null;
+			GameEntityManager gameEntityManager = (instance.IsNotNull() ? instance.gameEntityManager : null);
 			if (gameEntityManager.IsNull())
 			{
 				LuauHud.Instance.LuauLog("SpawnGrabbableEntity failed. EntityManager is null.");
@@ -1065,9 +901,9 @@ public static class Bindings
 				LuauHud.Instance.LuauLog("SpawnGrabbableEntity failed. Local Player doesn't have Entity Authority.");
 				return 0;
 			}
-			if (Bindings.LuauAIAgentList.Count + Bindings.LuauGrabbablesList.Count == Constants.aiAgentLimit)
+			if (LuauAIAgentList.Count + LuauGrabbablesList.Count == GT_CustomMapSupportRuntime.Constants.aiAgentLimit)
 			{
-				LuauHud.Instance.LuauLog(string.Format("SpawnGrabbableEntity failed, EntityLimit of {0}", Constants.aiAgentLimit) + " has already been reached.");
+				LuauHud.Instance.LuauLog($"SpawnGrabbableEntity failed, EntityLimit of {GT_CustomMapSupportRuntime.Constants.aiAgentLimit}" + " has already been reached.");
 				return 0;
 			}
 			int enemyTypeId = (int)Luau.luaL_checknumber(L, 1);
@@ -1075,36 +911,35 @@ public static class Bindings
 			Quaternion rotation = *Luau.lua_class_get<Quaternion>(L, 3, "Quat");
 			GameEntityId id = instance.SpawnGrabbableAtLocation(enemyTypeId, position, rotation);
 			Debug.Log("[LuauBindings::SpawnGrabbableEntity] spawnedGrabbable");
-			if (!id.IsValid())
+			if (id.IsValid())
 			{
-				LuauHud.Instance.LuauLog("SpawnGrabbableEntity failed to create entity.");
-				return 0;
-			}
-			Debug.Log("[LuauBindings::SpawnGrabbableEntity] spawnedGrabbable ID valid");
-			GameEntity gameEntity = gameEntityManager.GetGameEntity(id);
-			IntPtr intPtr;
-			if (Bindings.LuauGrabbablesList.TryGetValue(gameEntity.GetNetId(), out intPtr))
-			{
-				Debug.Log("[LuauBindings::SpawnGrabbableEntity] fround grabbable");
-				Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntity, (Bindings.LuauGrabbableEntity*)((void*)intPtr));
-				Luau.lua_class_push(L, "GrabbableEntity", intPtr);
+				Debug.Log("[LuauBindings::SpawnGrabbableEntity] spawnedGrabbable ID valid");
+				GameEntity gameEntity = gameEntityManager.GetGameEntity(id);
+				if (LuauGrabbablesList.TryGetValue(gameEntity.GetNetId(), out var value))
+				{
+					Debug.Log("[LuauBindings::SpawnGrabbableEntity] fround grabbable");
+					UpdateEntity(gameEntity, (LuauGrabbableEntity*)(void*)value);
+					Luau.lua_class_push(L, "GrabbableEntity", value);
+					return 1;
+				}
+				Debug.Log("[LuauBindings::SpawnGrabbableEntity] grabbable not found");
+				Luau.lua_getglobal(L, "GrabbableEntities");
+				LuauGrabbableEntity* ptr = Luau.lua_class_push<LuauGrabbableEntity>(L);
+				UpdateEntity(gameEntity, ptr);
+				LuauGrabbablesList[gameEntity.GetNetId()] = (IntPtr)ptr;
+				Debug.Log("[LuauBindings::SpawnGrabbableEntity] created new grabbable");
+				Luau.lua_rawseti(L, -2, LuauGrabbablesList.Count);
+				Luau.lua_pop(L, 1);
+				Debug.Log("[LuauBindings::SpawnGrabbableEntity] pushing new grabbable");
+				Luau.lua_class_push(L, "GrabbableEntity", (IntPtr)ptr);
 				return 1;
 			}
-			Debug.Log("[LuauBindings::SpawnGrabbableEntity] grabbable not found");
-			Luau.lua_getglobal(L, "GrabbableEntities");
-			Bindings.LuauGrabbableEntity* ptr = Luau.lua_class_push<Bindings.LuauGrabbableEntity>(L);
-			Bindings.GrabbableEntityFunctions.UpdateEntity(gameEntity, ptr);
-			Bindings.LuauGrabbablesList[gameEntity.GetNetId()] = (IntPtr)((void*)ptr);
-			Debug.Log("[LuauBindings::SpawnGrabbableEntity] created new grabbable");
-			Luau.lua_rawseti(L, -2, Bindings.LuauGrabbablesList.Count);
-			Luau.lua_pop(L, 1);
-			Debug.Log("[LuauBindings::SpawnGrabbableEntity] pushing new grabbable");
-			Luau.lua_class_push(L, "GrabbableEntity", (IntPtr)((void*)ptr));
-			return 1;
+			LuauHud.Instance.LuauLog("SpawnGrabbableEntity failed to create entity.");
+			return 0;
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
-		public unsafe static void UpdateEntity(GameEntity entity, Bindings.LuauGrabbableEntity* luaAgent)
+		public unsafe static void UpdateEntity(GameEntity entity, LuauGrabbableEntity* luaAgent)
 		{
 			luaAgent->EntityID = entity.GetNetId();
 			luaAgent->EntityPosition = entity.transform.position;
@@ -1114,7 +949,7 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyEntity(lua_State* L)
 		{
-			Bindings.LuauGrabbableEntity* ptr = Luau.lua_class_get<Bindings.LuauGrabbableEntity>(L, 1);
+			LuauGrabbableEntity* ptr = Luau.lua_class_get<LuauGrabbableEntity>(L, 1);
 			if (ptr != null)
 			{
 				GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
@@ -1135,18 +970,10 @@ public static class Bindings
 		public unsafe static int ToString(lua_State* L)
 		{
 			string s = "NULL";
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
 			if (ptr != null)
 			{
-				s = string.Concat(new string[]
-				{
-					"ID: ",
-					ptr->EntityID.ToString(),
-					" | Pos: ",
-					ptr->EntityPosition.ToString(),
-					" | Rot: ",
-					ptr->EntityRotation.ToString()
-				});
+				s = "ID: " + ptr->EntityID + " | Pos: " + ptr->EntityPosition.ToString() + " | Rot: " + ptr->EntityRotation.ToString();
 			}
 			Luau.lua_pushstring(L, s);
 			return 1;
@@ -1156,7 +983,7 @@ public static class Bindings
 		public unsafe static int GetAIAgentByEntityID(lua_State* L)
 		{
 			int num = (int)Luau.luaL_checknumber(L, 1);
-			Debug.Log(string.Format("[LuauBindings::GetAIAgentByEntityID] ID: {0}", num));
+			Debug.Log($"[LuauBindings::GetAIAgentByEntityID] ID: {num}");
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNotNull())
 			{
@@ -1171,17 +998,16 @@ public static class Bindings
 					if (gameEntity.gameObject.GetComponent<GameAgent>().IsNotNull())
 					{
 						Debug.Log("[LuauBindings::GetAIAgentByEntityID] Found agent: " + gameEntity.gameObject.name);
-						IntPtr intPtr;
-						if (Bindings.LuauAIAgentList.TryGetValue(num, out intPtr))
+						if (LuauAIAgentList.TryGetValue(num, out var value))
 						{
-							Bindings.AIAgentFunctions.UpdateEntity(gameEntity, (Bindings.LuauAIAgent*)((void*)intPtr));
-							Luau.lua_class_push(L, "AIAgent", intPtr);
+							UpdateEntity(gameEntity, (LuauAIAgent*)(void*)value);
+							Luau.lua_class_push(L, "AIAgent", value);
 						}
 						else
 						{
-							Bindings.LuauAIAgent* ptr = Luau.lua_class_push<Bindings.LuauAIAgent>(L);
-							Bindings.AIAgentFunctions.UpdateEntity(gameEntity, ptr);
-							Bindings.LuauAIAgentList[num] = (IntPtr)((void*)ptr);
+							LuauAIAgent* ptr = Luau.lua_class_push<LuauAIAgent>(L);
+							UpdateEntity(gameEntity, ptr);
+							LuauAIAgentList[num] = (IntPtr)ptr;
 						}
 					}
 					return 1;
@@ -1200,25 +1026,25 @@ public static class Bindings
 				List<GameAgent> agents = gameAgentManager.GetAgents();
 				for (int i = 0; i < agents.Count; i++)
 				{
-					if (!agents[i].gameObject.IsNull())
+					if (agents[i].gameObject.IsNull())
 					{
-						CustomMapsAIBehaviourController component = agents[i].gameObject.GetComponent<CustomMapsAIBehaviourController>();
-						if (!component.IsNull() && component.luaAgentID == num)
+						continue;
+					}
+					CustomMapsAIBehaviourController component = agents[i].gameObject.GetComponent<CustomMapsAIBehaviourController>();
+					if (!component.IsNull() && component.luaAgentID == num)
+					{
+						if (LuauAIAgentList.TryGetValue(agents[i].entity.GetNetId(), out var value))
 						{
-							IntPtr intPtr;
-							if (Bindings.LuauAIAgentList.TryGetValue(agents[i].entity.GetNetId(), out intPtr))
-							{
-								Bindings.AIAgentFunctions.UpdateEntity(agents[i].entity, (Bindings.LuauAIAgent*)((void*)intPtr));
-								Luau.lua_class_push(L, "AIAgent", intPtr);
-							}
-							else
-							{
-								Bindings.LuauAIAgent* ptr = Luau.lua_class_push<Bindings.LuauAIAgent>(L);
-								Bindings.AIAgentFunctions.UpdateEntity(agents[i].entity, ptr);
-								Bindings.LuauAIAgentList[agents[i].entity.GetNetId()] = (IntPtr)((void*)ptr);
-							}
-							return 1;
+							UpdateEntity(agents[i].entity, (LuauAIAgent*)(void*)value);
+							Luau.lua_class_push(L, "AIAgent", value);
 						}
+						else
+						{
+							LuauAIAgent* ptr = Luau.lua_class_push<LuauAIAgent>(L);
+							UpdateEntity(agents[i].entity, ptr);
+							LuauAIAgentList[agents[i].entity.GetNetId()] = (IntPtr)ptr;
+						}
+						return 1;
 					}
 				}
 			}
@@ -1229,7 +1055,7 @@ public static class Bindings
 		public unsafe static int SpawnAIAgent(lua_State* L)
 		{
 			CustomMapsGameManager instance = CustomMapsGameManager.instance;
-			GameEntityManager gameEntityManager = instance.IsNotNull() ? instance.gameEntityManager : null;
+			GameEntityManager gameEntityManager = (instance.IsNotNull() ? instance.gameEntityManager : null);
 			if (gameEntityManager.IsNull())
 			{
 				LuauHud.Instance.LuauLog("SpawnAIAgent failed. EntityManager is null.");
@@ -1240,9 +1066,9 @@ public static class Bindings
 				LuauHud.Instance.LuauLog("SpawnAIAgent failed. Local Player doesn't have Entity Authority.");
 				return 0;
 			}
-			if (Bindings.LuauAIAgentList.Count + Bindings.LuauGrabbablesList.Count == Constants.aiAgentLimit)
+			if (LuauAIAgentList.Count + LuauGrabbablesList.Count == GT_CustomMapSupportRuntime.Constants.aiAgentLimit)
 			{
-				LuauHud.Instance.LuauLog(string.Format("SpawnAIAgent failed, AIAgentLimit of {0}", Constants.aiAgentLimit) + " has already been reached.");
+				LuauHud.Instance.LuauLog($"SpawnAIAgent failed, AIAgentLimit of {GT_CustomMapSupportRuntime.Constants.aiAgentLimit}" + " has already been reached.");
 				return 0;
 			}
 			int enemyTypeId = (int)Luau.luaL_checknumber(L, 1);
@@ -1254,20 +1080,19 @@ public static class Bindings
 				GameEntity gameEntity = gameEntityManager.GetGameEntity(id);
 				if ((gameEntity.IsNotNull() ? gameEntity.gameObject.GetComponent<GameAgent>() : null).IsNotNull())
 				{
-					IntPtr intPtr;
-					if (Bindings.LuauAIAgentList.TryGetValue(gameEntity.GetNetId(), out intPtr))
+					if (LuauAIAgentList.TryGetValue(gameEntity.GetNetId(), out var value))
 					{
-						Bindings.AIAgentFunctions.UpdateEntity(gameEntity, (Bindings.LuauAIAgent*)((void*)intPtr));
-						Luau.lua_class_push(L, "AIAgent", intPtr);
+						UpdateEntity(gameEntity, (LuauAIAgent*)(void*)value);
+						Luau.lua_class_push(L, "AIAgent", value);
 						return 1;
 					}
 					Luau.lua_getglobal(L, "AIAgents");
-					Bindings.LuauAIAgent* ptr = Luau.lua_class_push<Bindings.LuauAIAgent>(L);
-					Bindings.AIAgentFunctions.UpdateEntity(gameEntity, ptr);
-					Bindings.LuauAIAgentList[gameEntity.GetNetId()] = (IntPtr)((void*)ptr);
-					Luau.lua_rawseti(L, -2, Bindings.LuauAIAgentList.Count);
+					LuauAIAgent* ptr = Luau.lua_class_push<LuauAIAgent>(L);
+					UpdateEntity(gameEntity, ptr);
+					LuauAIAgentList[gameEntity.GetNetId()] = (IntPtr)ptr;
+					Luau.lua_rawseti(L, -2, LuauAIAgentList.Count);
 					Luau.lua_pop(L, 1);
-					Luau.lua_class_push(L, "AIAgent", (IntPtr)((void*)ptr));
+					Luau.lua_class_push(L, "AIAgent", (IntPtr)ptr);
 					return 1;
 				}
 			}
@@ -1278,7 +1103,7 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetDestination(lua_State* L)
 		{
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
 			Vector3* ptr2 = Luau.lua_class_get<Vector3>(L, 2);
 			GameEntityManager gameEntityManager = CustomMapsGameManager.instance.gameEntityManager;
 			if (gameEntityManager.IsNotNull())
@@ -1295,8 +1120,8 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int PlayAgentAnimation(lua_State* L)
 		{
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
-			string stateName = Marshal.PtrToStringAnsi((IntPtr)((void*)Luau.luaL_checkstring(L, 2)));
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
+			string stateName = Marshal.PtrToStringAnsi((IntPtr)Luau.luaL_checkstring(L, 2));
 			if (ptr != null)
 			{
 				GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
@@ -1305,7 +1130,7 @@ public static class Bindings
 					CustomMapsAIBehaviourController behaviorControllerForEntity = CustomMapsGameManager.GetBehaviorControllerForEntity(entityManager.GetEntityIdFromNetId(ptr->EntityID));
 					if (behaviorControllerForEntity.IsNotNull())
 					{
-						behaviorControllerForEntity.PlayAnimation(stateName, 0f);
+						behaviorControllerForEntity.PlayAnimation(stateName);
 					}
 				}
 			}
@@ -1315,7 +1140,7 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetTarget(lua_State* L)
 		{
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
 			if (ptr == null)
 			{
 				return 0;
@@ -1326,8 +1151,7 @@ public static class Bindings
 				return 0;
 			}
 			int num = (int)Luau.luaL_checknumber(L, 2);
-			RigContainer rigContainer;
-			if (!VRRigCache.Instance.TryGetVrrig(num, out rigContainer))
+			if (!VRRigCache.Instance.TryGetVrrig(num, out var playerRig))
 			{
 				num = -1;
 			}
@@ -1342,7 +1166,7 @@ public static class Bindings
 			}
 			else
 			{
-				GRPlayer component = rigContainer.Rig.GetComponent<GRPlayer>();
+				GRPlayer component = playerRig.Rig.GetComponent<GRPlayer>();
 				behaviorControllerForEntity.SetTarget(component);
 			}
 			return 0;
@@ -1351,7 +1175,7 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetTarget(lua_State* L)
 		{
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
 			if (ptr != null)
 			{
 				GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
@@ -1360,7 +1184,7 @@ public static class Bindings
 					CustomMapsAIBehaviourController behaviorControllerForEntity = CustomMapsGameManager.GetBehaviorControllerForEntity(entityManager.GetEntityIdFromNetId(ptr->EntityID));
 					if (behaviorControllerForEntity.IsNotNull() && behaviorControllerForEntity.TargetPlayer.IsNotNull() && behaviorControllerForEntity.TargetPlayer.MyRig.IsNotNull() && !behaviorControllerForEntity.TargetPlayer.MyRig.OwningNetPlayer.IsNull)
 					{
-						Luau.lua_pushnumber(L, (double)behaviorControllerForEntity.TargetPlayer.MyRig.OwningNetPlayer.ActorNumber);
+						Luau.lua_pushnumber(L, behaviorControllerForEntity.TargetPlayer.MyRig.OwningNetPlayer.ActorNumber);
 						return 1;
 					}
 				}
@@ -1370,7 +1194,7 @@ public static class Bindings
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
-		public unsafe static void UpdateEntity(GameEntity entity, Bindings.LuauAIAgent* luaAgent)
+		public unsafe static void UpdateEntity(GameEntity entity, LuauAIAgent* luaAgent)
 		{
 			luaAgent->EntityID = entity.GetNetId();
 			luaAgent->EntityPosition = entity.transform.position;
@@ -1380,7 +1204,7 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyEntity(lua_State* L)
 		{
-			Bindings.LuauAIAgent* ptr = Luau.lua_class_get<Bindings.LuauAIAgent>(L, 1);
+			LuauAIAgent* ptr = Luau.lua_class_get<LuauAIAgent>(L, 1);
 			if (ptr != null)
 			{
 				GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
@@ -1397,53 +1221,775 @@ public static class Bindings
 	[BurstCompile]
 	public static class Vec3Functions
 	{
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int New_00004B7D_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class New_00004B7D_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<New_00004B7D_0024PostfixBurstDelegate>(New).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return New_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Add_00004B7E_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Add_00004B7E_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Add_00004B7E_0024PostfixBurstDelegate>(Add).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Add_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Sub_00004B7F_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Sub_00004B7F_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Sub_00004B7F_0024PostfixBurstDelegate>(Sub).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Sub_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Mul_00004B80_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Mul_00004B80_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Mul_00004B80_0024PostfixBurstDelegate>(Mul).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Mul_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Div_00004B81_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Div_00004B81_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Div_00004B81_0024PostfixBurstDelegate>(Div).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Div_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Unm_00004B82_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Unm_00004B82_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Unm_00004B82_0024PostfixBurstDelegate>(Unm).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Unm_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Eq_00004B83_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Eq_00004B83_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Eq_00004B83_0024PostfixBurstDelegate>(Eq).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Eq_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Dot_00004B85_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Dot_00004B85_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Dot_00004B85_0024PostfixBurstDelegate>(Dot).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Dot_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Cross_00004B86_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Cross_00004B86_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Cross_00004B86_0024PostfixBurstDelegate>(Cross).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Cross_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Project_00004B87_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Project_00004B87_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Project_00004B87_0024PostfixBurstDelegate>(Project).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Project_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Length_00004B88_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Length_00004B88_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Length_00004B88_0024PostfixBurstDelegate>(Length).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Length_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Normalize_00004B89_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Normalize_00004B89_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Normalize_00004B89_0024PostfixBurstDelegate>(Normalize).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Normalize_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int SafeNormal_00004B8A_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class SafeNormal_00004B8A_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<SafeNormal_00004B8A_0024PostfixBurstDelegate>(SafeNormal).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return SafeNormal_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Distance_00004B8B_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Distance_00004B8B_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Distance_00004B8B_0024PostfixBurstDelegate>(Distance).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Distance_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Lerp_00004B8C_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Lerp_00004B8C_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Lerp_00004B8C_0024PostfixBurstDelegate>(Lerp).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Lerp_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Rotate_00004B8D_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Rotate_00004B8D_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Rotate_00004B8D_0024PostfixBurstDelegate>(Rotate).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Rotate_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int ZeroVector_00004B8E_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class ZeroVector_00004B8E_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<ZeroVector_00004B8E_0024PostfixBurstDelegate>(ZeroVector).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return ZeroVector_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int OneVector_00004B8F_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class OneVector_00004B8F_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<OneVector_00004B8F_0024PostfixBurstDelegate>(OneVector).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return OneVector_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int NearlyEqual_00004B90_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class NearlyEqual_00004B90_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<NearlyEqual_00004B90_0024PostfixBurstDelegate>(NearlyEqual).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return NearlyEqual_0024BurstManaged(L);
+			}
+		}
+
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
 		{
-			return Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.Invoke(L);
+			return New_00004B7D_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Add(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.Invoke(L);
+			return Add_00004B7E_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Sub(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.Invoke(L);
+			return Sub_00004B7F_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Mul(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.Invoke(L);
+			return Mul_00004B80_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Div(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.Invoke(L);
+			return Div_00004B81_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Unm(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.Invoke(L);
+			return Unm_00004B82_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Eq(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.Invoke(L);
+			return Eq_00004B83_0024BurstDirectCall.Invoke(L);
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
@@ -1458,171 +2004,171 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Dot(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.Invoke(L);
+			return Dot_00004B85_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Cross(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.Invoke(L);
+			return Cross_00004B86_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Project(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.Invoke(L);
+			return Project_00004B87_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Length(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.Invoke(L);
+			return Length_00004B88_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Normalize(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.Invoke(L);
+			return Normalize_00004B89_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SafeNormal(lua_State* L)
 		{
-			return Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.Invoke(L);
+			return SafeNormal_00004B8A_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Distance(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.Invoke(L);
+			return Distance_00004B8B_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Lerp(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.Invoke(L);
+			return Lerp_00004B8C_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Rotate(lua_State* L)
 		{
-			return Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.Invoke(L);
+			return Rotate_00004B8D_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ZeroVector(lua_State* L)
 		{
-			return Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.Invoke(L);
+			return ZeroVector_00004B8E_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int OneVector(lua_State* L)
 		{
-			return Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.Invoke(L);
+			return OneVector_00004B8F_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int NearlyEqual(lua_State* L)
 		{
-			return Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.Invoke(L);
+			return NearlyEqual_00004B90_0024BurstDirectCall.Invoke(L);
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int New$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int New_0024BurstManaged(lua_State* L)
 		{
-			Vector3* ptr = Luau.lua_class_push<Vector3>(L, "Vec3");
-			ptr->x = (float)Luau.luaL_optnumber(L, 1, 0.0);
-			ptr->y = (float)Luau.luaL_optnumber(L, 2, 0.0);
-			ptr->z = (float)Luau.luaL_optnumber(L, 3, 0.0);
+			Vector3* intPtr = Luau.lua_class_push<Vector3>(L, "Vec3");
+			intPtr->x = (float)Luau.luaL_optnumber(L, 1, 0.0);
+			intPtr->y = (float)Luau.luaL_optnumber(L, 2, 0.0);
+			intPtr->z = (float)Luau.luaL_optnumber(L, 3, 0.0);
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Add$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Add_0024BurstManaged(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			Vector3 b = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = a + b;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			Vector3 vector2 = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = vector + vector2;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Sub$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Sub_0024BurstManaged(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			Vector3 b = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = a - b;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			Vector3 vector2 = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = vector - vector2;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Mul$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Mul_0024BurstManaged(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			float d = (float)Luau.luaL_checknumber(L, 2);
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = a * d;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			float num = (float)Luau.luaL_checknumber(L, 2);
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = vector * num;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Div$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Div_0024BurstManaged(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			float d = (float)Luau.luaL_checknumber(L, 2);
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = a / d;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			float num = (float)Luau.luaL_checknumber(L, 2);
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = vector / num;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Unm$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Unm_0024BurstManaged(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = -a;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = -vector;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Eq$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Eq_0024BurstManaged(lua_State* L)
+		{
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			Vector3 vector2 = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
+			int num = ((vector == vector2) ? 1 : 0);
+			Luau.lua_pushnumber(L, num);
+			return 1;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[BurstCompile]
+		internal unsafe static int Dot_0024BurstManaged(lua_State* L)
 		{
 			Vector3 lhs = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 rhs = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			int num = (lhs == rhs) ? 1 : 0;
-			Luau.lua_pushnumber(L, (double)num);
-			return 1;
-		}
-
-		[BurstCompile]
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Dot$BurstManaged(lua_State* L)
-		{
-			Vector3 lhs = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			Vector3 rhs = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			double n = (double)Vector3.Dot(lhs, rhs);
+			double n = Vector3.Dot(lhs, rhs);
 			Luau.lua_pushnumber(L, n);
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Cross$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Cross_0024BurstManaged(lua_State* L)
 		{
 			Vector3 lhs = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 rhs = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
@@ -1630,9 +2176,9 @@ public static class Bindings
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Project$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Project_0024BurstManaged(lua_State* L)
 		{
 			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 onNormal = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
@@ -1640,45 +2186,45 @@ public static class Bindings
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Length$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Length_0024BurstManaged(lua_State* L)
 		{
 			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			Luau.lua_pushnumber(L, (double)Vector3.Magnitude(vector));
+			Luau.lua_pushnumber(L, Vector3.Magnitude(vector));
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Normalize$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Normalize_0024BurstManaged(lua_State* L)
 		{
 			Luau.lua_class_get<Vector3>(L, 1, "Vec3")->Normalize();
 			return 0;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int SafeNormal$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int SafeNormal_0024BurstManaged(lua_State* L)
 		{
 			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			*Luau.lua_class_push<Vector3>(L, "Vec3") = vector.normalized;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Distance$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Distance_0024BurstManaged(lua_State* L)
 		{
 			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 b = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			Luau.lua_pushnumber(L, (double)Vector3.Distance(a, b));
+			Luau.lua_pushnumber(L, Vector3.Distance(a, b));
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Lerp$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Lerp_0024BurstManaged(lua_State* L)
 		{
 			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 b = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
@@ -1687,46 +2233,46 @@ public static class Bindings
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Rotate$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Rotate_0024BurstManaged(lua_State* L)
 		{
-			Vector3 point = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
-			Quaternion rotation = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = rotation * point;
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			Quaternion quaternion = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = quaternion * vector;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int ZeroVector$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int ZeroVector_0024BurstManaged(lua_State* L)
 		{
-			Vector3* ptr = Luau.lua_class_push<Vector3>(L, "Vec3");
-			ptr->x = 0f;
-			ptr->y = 0f;
-			ptr->z = 0f;
+			Vector3* intPtr = Luau.lua_class_push<Vector3>(L, "Vec3");
+			intPtr->x = 0f;
+			intPtr->y = 0f;
+			intPtr->z = 0f;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int OneVector$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int OneVector_0024BurstManaged(lua_State* L)
 		{
-			Vector3* ptr = Luau.lua_class_push<Vector3>(L, "Vec3");
-			ptr->x = 1f;
-			ptr->y = 1f;
-			ptr->z = 1f;
+			Vector3* intPtr = Luau.lua_class_push<Vector3>(L, "Vec3");
+			intPtr->x = 1f;
+			intPtr->y = 1f;
+			intPtr->z = 1f;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int NearlyEqual$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int NearlyEqual_0024BurstManaged(lua_State* L)
 		{
 			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 vector2 = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
 			float num = (float)Luau.luaL_optnumber(L, 3, 0.0001);
-			bool flag = Math.Abs(vector.x - vector2.x) <= num;
+			bool flag = !(Math.Abs(vector.x - vector2.x) > num);
 			if (flag && Math.Abs(vector.y - vector2.y) > num)
 			{
 				flag = false;
@@ -1738,752 +2284,296 @@ public static class Bindings
 			Luau.lua_pushboolean(L, flag ? 1 : 0);
 			return 1;
 		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int New_00004B7D$PostfixBurstDelegate(lua_State* L);
-
-		internal static class New_00004B7D$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.New_00004B7D$PostfixBurstDelegate>(new Bindings.Vec3Functions.New_00004B7D$PostfixBurstDelegate(Bindings.Vec3Functions.New)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.New_00004B7D$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.New$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Add_00004B7E$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Add_00004B7E$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Add_00004B7E$PostfixBurstDelegate>(new Bindings.Vec3Functions.Add_00004B7E$PostfixBurstDelegate(Bindings.Vec3Functions.Add)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Add_00004B7E$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Add$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Sub_00004B7F$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Sub_00004B7F$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Sub_00004B7F$PostfixBurstDelegate>(new Bindings.Vec3Functions.Sub_00004B7F$PostfixBurstDelegate(Bindings.Vec3Functions.Sub)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Sub_00004B7F$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Sub$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Mul_00004B80$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Mul_00004B80$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Mul_00004B80$PostfixBurstDelegate>(new Bindings.Vec3Functions.Mul_00004B80$PostfixBurstDelegate(Bindings.Vec3Functions.Mul)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Mul_00004B80$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Mul$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Div_00004B81$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Div_00004B81$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Div_00004B81$PostfixBurstDelegate>(new Bindings.Vec3Functions.Div_00004B81$PostfixBurstDelegate(Bindings.Vec3Functions.Div)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Div_00004B81$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Div$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Unm_00004B82$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Unm_00004B82$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Unm_00004B82$PostfixBurstDelegate>(new Bindings.Vec3Functions.Unm_00004B82$PostfixBurstDelegate(Bindings.Vec3Functions.Unm)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Unm_00004B82$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Unm$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Eq_00004B83$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Eq_00004B83$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Eq_00004B83$PostfixBurstDelegate>(new Bindings.Vec3Functions.Eq_00004B83$PostfixBurstDelegate(Bindings.Vec3Functions.Eq)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Eq_00004B83$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Eq$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Dot_00004B85$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Dot_00004B85$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Dot_00004B85$PostfixBurstDelegate>(new Bindings.Vec3Functions.Dot_00004B85$PostfixBurstDelegate(Bindings.Vec3Functions.Dot)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Dot_00004B85$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Dot$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Cross_00004B86$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Cross_00004B86$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Cross_00004B86$PostfixBurstDelegate>(new Bindings.Vec3Functions.Cross_00004B86$PostfixBurstDelegate(Bindings.Vec3Functions.Cross)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Cross_00004B86$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Cross$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Project_00004B87$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Project_00004B87$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Project_00004B87$PostfixBurstDelegate>(new Bindings.Vec3Functions.Project_00004B87$PostfixBurstDelegate(Bindings.Vec3Functions.Project)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Project_00004B87$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Project$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Length_00004B88$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Length_00004B88$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Length_00004B88$PostfixBurstDelegate>(new Bindings.Vec3Functions.Length_00004B88$PostfixBurstDelegate(Bindings.Vec3Functions.Length)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Length_00004B88$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Length$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Normalize_00004B89$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Normalize_00004B89$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Normalize_00004B89$PostfixBurstDelegate>(new Bindings.Vec3Functions.Normalize_00004B89$PostfixBurstDelegate(Bindings.Vec3Functions.Normalize)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Normalize_00004B89$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Normalize$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int SafeNormal_00004B8A$PostfixBurstDelegate(lua_State* L);
-
-		internal static class SafeNormal_00004B8A$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.SafeNormal_00004B8A$PostfixBurstDelegate>(new Bindings.Vec3Functions.SafeNormal_00004B8A$PostfixBurstDelegate(Bindings.Vec3Functions.SafeNormal)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.SafeNormal_00004B8A$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.SafeNormal$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Distance_00004B8B$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Distance_00004B8B$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Distance_00004B8B$PostfixBurstDelegate>(new Bindings.Vec3Functions.Distance_00004B8B$PostfixBurstDelegate(Bindings.Vec3Functions.Distance)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Distance_00004B8B$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Distance$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Lerp_00004B8C$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Lerp_00004B8C$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Lerp_00004B8C$PostfixBurstDelegate>(new Bindings.Vec3Functions.Lerp_00004B8C$PostfixBurstDelegate(Bindings.Vec3Functions.Lerp)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Lerp_00004B8C$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Lerp$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Rotate_00004B8D$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Rotate_00004B8D$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.Rotate_00004B8D$PostfixBurstDelegate>(new Bindings.Vec3Functions.Rotate_00004B8D$PostfixBurstDelegate(Bindings.Vec3Functions.Rotate)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.Rotate_00004B8D$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.Rotate$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int ZeroVector_00004B8E$PostfixBurstDelegate(lua_State* L);
-
-		internal static class ZeroVector_00004B8E$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.ZeroVector_00004B8E$PostfixBurstDelegate>(new Bindings.Vec3Functions.ZeroVector_00004B8E$PostfixBurstDelegate(Bindings.Vec3Functions.ZeroVector)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.ZeroVector_00004B8E$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.ZeroVector$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int OneVector_00004B8F$PostfixBurstDelegate(lua_State* L);
-
-		internal static class OneVector_00004B8F$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.OneVector_00004B8F$PostfixBurstDelegate>(new Bindings.Vec3Functions.OneVector_00004B8F$PostfixBurstDelegate(Bindings.Vec3Functions.OneVector)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.OneVector_00004B8F$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.OneVector$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int NearlyEqual_00004B90$PostfixBurstDelegate(lua_State* L);
-
-		internal static class NearlyEqual_00004B90$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.Vec3Functions.NearlyEqual_00004B90$PostfixBurstDelegate>(new Bindings.Vec3Functions.NearlyEqual_00004B90$PostfixBurstDelegate(Bindings.Vec3Functions.NearlyEqual)).Value;
-				}
-				A_0 = Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.Vec3Functions.NearlyEqual_00004B90$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.Vec3Functions.NearlyEqual$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
 	}
 
 	[BurstCompile]
 	public static class QuatFunctions
 	{
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int New_00004B91_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class New_00004B91_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<New_00004B91_0024PostfixBurstDelegate>(New).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return New_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Mul_00004B92_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Mul_00004B92_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Mul_00004B92_0024PostfixBurstDelegate>(Mul).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Mul_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Eq_00004B93_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Eq_00004B93_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Eq_00004B93_0024PostfixBurstDelegate>(Eq).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Eq_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int FromEuler_00004B95_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class FromEuler_00004B95_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<FromEuler_00004B95_0024PostfixBurstDelegate>(FromEuler).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return FromEuler_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int FromDirection_00004B96_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class FromDirection_00004B96_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<FromDirection_00004B96_0024PostfixBurstDelegate>(FromDirection).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return FromDirection_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int GetUpVector_00004B97_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class GetUpVector_00004B97_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<GetUpVector_00004B97_0024PostfixBurstDelegate>(GetUpVector).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return GetUpVector_0024BurstManaged(L);
+			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal unsafe delegate int Euler_00004B98_0024PostfixBurstDelegate(lua_State* L);
+
+		internal static class Euler_00004B98_0024BurstDirectCall
+		{
+			private static IntPtr Pointer;
+
+			[BurstDiscard]
+			private unsafe static void GetFunctionPointerDiscard(ref IntPtr P_0)
+			{
+				if (Pointer == (IntPtr)0)
+				{
+					Pointer = BurstCompiler.CompileFunctionPointer<Euler_00004B98_0024PostfixBurstDelegate>(Euler).Value;
+				}
+				P_0 = Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				nint result = 0;
+				GetFunctionPointerDiscard(ref result);
+				return result;
+			}
+
+			public unsafe static int Invoke(lua_State* L)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = GetFunctionPointer();
+					if (functionPointer != (IntPtr)0)
+					{
+						return ((delegate* unmanaged[Cdecl]<lua_State*, int>)functionPointer)(L);
+					}
+				}
+				return Euler_0024BurstManaged(L);
+			}
+		}
+
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
 		{
-			return Bindings.QuatFunctions.New_00004B91$BurstDirectCall.Invoke(L);
+			return New_00004B91_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Mul(lua_State* L)
 		{
-			return Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.Invoke(L);
+			return Mul_00004B92_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Eq(lua_State* L)
 		{
-			return Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.Invoke(L);
+			return Eq_00004B93_0024BurstDirectCall.Invoke(L);
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
@@ -2498,66 +2588,66 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FromEuler(lua_State* L)
 		{
-			return Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.Invoke(L);
+			return FromEuler_00004B95_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FromDirection(lua_State* L)
 		{
-			return Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.Invoke(L);
+			return FromDirection_00004B96_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetUpVector(lua_State* L)
 		{
-			return Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.Invoke(L);
+			return GetUpVector_00004B97_0024BurstDirectCall.Invoke(L);
 		}
 
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Euler(lua_State* L)
 		{
-			return Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.Invoke(L);
+			return Euler_00004B98_0024BurstDirectCall.Invoke(L);
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int New$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int New_0024BurstManaged(lua_State* L)
 		{
-			Quaternion* ptr = Luau.lua_class_push<Quaternion>(L, "Quat");
-			ptr->x = (float)Luau.luaL_optnumber(L, 1, 0.0);
-			ptr->y = (float)Luau.luaL_optnumber(L, 2, 0.0);
-			ptr->z = (float)Luau.luaL_optnumber(L, 3, 0.0);
-			ptr->w = (float)Luau.luaL_optnumber(L, 4, 0.0);
+			Quaternion* intPtr = Luau.lua_class_push<Quaternion>(L, "Quat");
+			intPtr->x = (float)Luau.luaL_optnumber(L, 1, 0.0);
+			intPtr->y = (float)Luau.luaL_optnumber(L, 2, 0.0);
+			intPtr->z = (float)Luau.luaL_optnumber(L, 3, 0.0);
+			intPtr->w = (float)Luau.luaL_optnumber(L, 4, 0.0);
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Mul$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Mul_0024BurstManaged(lua_State* L)
 		{
-			Quaternion lhs = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
-			Quaternion rhs = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
-			*Luau.lua_class_push<Quaternion>(L, "Quat") = lhs * rhs;
+			Quaternion quaternion = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
+			Quaternion quaternion2 = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
+			*Luau.lua_class_push<Quaternion>(L, "Quat") = quaternion * quaternion2;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Eq$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Eq_0024BurstManaged(lua_State* L)
 		{
-			Quaternion lhs = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
-			Quaternion rhs = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
-			int num = (lhs == rhs) ? 1 : 0;
-			Luau.lua_pushnumber(L, (double)num);
+			Quaternion quaternion = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
+			Quaternion quaternion2 = *Luau.lua_class_get<Quaternion>(L, 2, "Quat");
+			int num = ((quaternion == quaternion2) ? 1 : 0);
+			Luau.lua_pushnumber(L, num);
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int FromEuler$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int FromEuler_0024BurstManaged(lua_State* L)
 		{
 			float x = (float)Luau.luaL_optnumber(L, 1, 0.0);
 			float y = (float)Luau.luaL_optnumber(L, 2, 0.0);
@@ -2566,297 +2656,31 @@ public static class Bindings
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int FromDirection$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int FromDirection_0024BurstManaged(lua_State* L)
 		{
 			Vector3 lookRotation = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Luau.lua_class_push<Quaternion>(L, "Quat")->SetLookRotation(lookRotation);
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int GetUpVector$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int GetUpVector_0024BurstManaged(lua_State* L)
 		{
-			Quaternion rotation = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = rotation * Vector3.up;
+			Quaternion quaternion = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = quaternion * Vector3.up;
 			return 1;
 		}
 
-		[BurstCompile]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal unsafe static int Euler$BurstManaged(lua_State* L)
+		[BurstCompile]
+		internal unsafe static int Euler_0024BurstManaged(lua_State* L)
 		{
 			Quaternion quaternion = *Luau.lua_class_get<Quaternion>(L, 1, "Quat");
 			*Luau.lua_class_push<Vector3>(L, "Vec3") = quaternion.eulerAngles;
 			return 1;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int New_00004B91$PostfixBurstDelegate(lua_State* L);
-
-		internal static class New_00004B91$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.New_00004B91$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.New_00004B91$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.New_00004B91$PostfixBurstDelegate>(new Bindings.QuatFunctions.New_00004B91$PostfixBurstDelegate(Bindings.QuatFunctions.New)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.New_00004B91$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.New_00004B91$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.New_00004B91$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.New$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Mul_00004B92$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Mul_00004B92$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.Mul_00004B92$PostfixBurstDelegate>(new Bindings.QuatFunctions.Mul_00004B92$PostfixBurstDelegate(Bindings.QuatFunctions.Mul)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.Mul_00004B92$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.Mul$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Eq_00004B93$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Eq_00004B93$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.Eq_00004B93$PostfixBurstDelegate>(new Bindings.QuatFunctions.Eq_00004B93$PostfixBurstDelegate(Bindings.QuatFunctions.Eq)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.Eq_00004B93$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.Eq$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int FromEuler_00004B95$PostfixBurstDelegate(lua_State* L);
-
-		internal static class FromEuler_00004B95$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.FromEuler_00004B95$PostfixBurstDelegate>(new Bindings.QuatFunctions.FromEuler_00004B95$PostfixBurstDelegate(Bindings.QuatFunctions.FromEuler)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.FromEuler_00004B95$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.FromEuler$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int FromDirection_00004B96$PostfixBurstDelegate(lua_State* L);
-
-		internal static class FromDirection_00004B96$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.FromDirection_00004B96$PostfixBurstDelegate>(new Bindings.QuatFunctions.FromDirection_00004B96$PostfixBurstDelegate(Bindings.QuatFunctions.FromDirection)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.FromDirection_00004B96$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.FromDirection$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int GetUpVector_00004B97$PostfixBurstDelegate(lua_State* L);
-
-		internal static class GetUpVector_00004B97$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.GetUpVector_00004B97$PostfixBurstDelegate>(new Bindings.QuatFunctions.GetUpVector_00004B97$PostfixBurstDelegate(Bindings.QuatFunctions.GetUpVector)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.GetUpVector_00004B97$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.GetUpVector$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
-		}
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal unsafe delegate int Euler_00004B98$PostfixBurstDelegate(lua_State* L);
-
-		internal static class Euler_00004B98$BurstDirectCall
-		{
-			[BurstDiscard]
-			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
-			{
-				if (Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.Pointer == 0)
-				{
-					Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<Bindings.QuatFunctions.Euler_00004B98$PostfixBurstDelegate>(new Bindings.QuatFunctions.Euler_00004B98$PostfixBurstDelegate(Bindings.QuatFunctions.Euler)).Value;
-				}
-				A_0 = Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.Pointer;
-			}
-
-			private static IntPtr GetFunctionPointer()
-			{
-				IntPtr result = (IntPtr)0;
-				Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.GetFunctionPointerDiscard(ref result);
-				return result;
-			}
-
-			public unsafe static int Invoke(lua_State* L)
-			{
-				if (BurstCompiler.IsEnabled)
-				{
-					IntPtr functionPointer = Bindings.QuatFunctions.Euler_00004B98$BurstDirectCall.GetFunctionPointer();
-					if (functionPointer != 0)
-					{
-						return calli(System.Int32(lua_State*), L, functionPointer);
-					}
-				}
-				return Bindings.QuatFunctions.Euler$BurstManaged(L);
-			}
-
-			private static IntPtr Pointer;
 		}
 	}
 
@@ -2905,6 +2729,8 @@ public static class Bindings
 
 	public static class JSON
 	{
+		private static string ModIODirectory = Path.Join(Path.Join(Application.persistentDataPath, "mod.io", "06657"), "data");
+
 		public unsafe static Dictionary<object, object> ConsumeTable(lua_State* L, int tableIndex)
 		{
 			Dictionary<object, object> dictionary = new Dictionary<object, object>();
@@ -2917,81 +2743,80 @@ public static class Bindings
 			{
 				Luau.lua_Types lua_Types = (Luau.lua_Types)Luau.lua_type(L, -1);
 				Luau.lua_Types lua_Types2 = (Luau.lua_Types)Luau.lua_type(L, -2);
-				object key;
-				if (lua_Types2 == Luau.lua_Types.LUA_TSTRING)
+				object obj = null;
+				switch (lua_Types2)
 				{
-					key = new string(Luau.lua_tostring(L, -2));
+				case Luau.lua_Types.LUA_TSTRING:
+					obj = new string(Luau.lua_tostring(L, -2));
+					break;
+				case Luau.lua_Types.LUA_TNUMBER:
+					obj = Luau.lua_tonumber(L, -2);
+					break;
+				default:
+				{
+					FixedString64Bytes output = "Invalid key in table, key must be a string or a number";
+					Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output) + 2);
+					return null;
 				}
-				else
-				{
-					if (lua_Types2 != Luau.lua_Types.LUA_TNUMBER)
-					{
-						FixedString64Bytes fixedString64Bytes = "Invalid key in table, key must be a string or a number";
-						Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString64Bytes>(ref fixedString64Bytes) + 2));
-						return null;
-					}
-					key = Luau.lua_tonumber(L, -2);
 				}
 				switch (lua_Types)
 				{
-				case Luau.lua_Types.LUA_TBOOLEAN:
-					dictionary.Add(key, Luau.lua_toboolean(L, -1) == 1);
-					Luau.lua_pop(L, 1);
-					continue;
 				case Luau.lua_Types.LUA_TNUMBER:
-					dictionary.Add(key, Luau.luaL_checknumber(L, -1));
+					dictionary.Add(obj, Luau.luaL_checknumber(L, -1));
 					Luau.lua_pop(L, 1);
-					continue;
+					break;
+				case Luau.lua_Types.LUA_TBOOLEAN:
+					dictionary.Add(obj, Luau.lua_toboolean(L, -1) == 1);
+					Luau.lua_pop(L, 1);
+					break;
 				case Luau.lua_Types.LUA_TSTRING:
-					dictionary.Add(key, new string(Luau.lua_tostring(L, -1)));
+					dictionary.Add(obj, new string(Luau.lua_tostring(L, -1)));
 					Luau.lua_pop(L, 1);
-					continue;
+					break;
 				case Luau.lua_Types.LUA_TTABLE:
 				case Luau.lua_Types.LUA_TUSERDATA:
 					if (Luau.luaL_getmetafield(L, -1, "metahash") == 1)
 					{
-						BurstClassInfo.ClassInfo classInfo;
-						if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out classInfo))
+						if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out var item))
 						{
-							FixedString64Bytes fixedString64Bytes2 = "\"Internal Class Info Error No Metatable Found\"";
-							Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString64Bytes>(ref fixedString64Bytes2) + 2));
+							FixedString64Bytes output3 = "\"Internal Class Info Error No Metatable Found\"";
+							Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output3) + 2);
 							return null;
 						}
 						Luau.lua_pop(L, 1);
-						FixedString32Bytes fixedString32Bytes = "Vec3";
-						if (classInfo.Name == fixedString32Bytes)
+						if (item.Name == (FixedString32Bytes)"Vec3")
 						{
-							dictionary.Add(key, *Luau.lua_class_get<Vector3>(L, -1));
+							dictionary.Add(obj, *Luau.lua_class_get<Vector3>(L, -1));
 							Luau.lua_pop(L, 1);
-							continue;
+							break;
 						}
-						fixedString32Bytes = "Quat";
-						if (classInfo.Name == fixedString32Bytes)
+						if (!(item.Name == (FixedString32Bytes)"Quat"))
 						{
-							dictionary.Add(key, *Luau.lua_class_get<Quaternion>(L, -1));
-							Luau.lua_pop(L, 1);
-							continue;
+							FixedString32Bytes output4 = "Invalid type in table";
+							Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output4) + 2);
+							return null;
 						}
-						FixedString32Bytes fixedString32Bytes2 = "Invalid type in table";
-						Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes2) + 2));
-						return null;
+						dictionary.Add(obj, *Luau.lua_class_get<Quaternion>(L, -1));
+						Luau.lua_pop(L, 1);
 					}
 					else
 					{
-						object obj = Bindings.JSON.ConsumeTable(L, -1);
+						object obj2 = ConsumeTable(L, -1);
 						Luau.lua_pop(L, 1);
-						if (obj != null)
+						if (obj2 == null)
 						{
-							dictionary.Add(key, obj);
-							continue;
+							return null;
 						}
-						return null;
+						dictionary.Add(obj, obj2);
 					}
 					break;
+				default:
+				{
+					FixedString32Bytes output2 = "Unknown type in table";
+					Luau.luaL_errorL(L, (sbyte*)UnsafeUtility.AddressOf(ref output2) + 2);
+					return null;
 				}
-				FixedString32Bytes fixedString32Bytes3 = "Unknown type in table";
-				Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes3) + 2));
-				return null;
+				}
 			}
 			return dictionary;
 		}
@@ -3002,8 +2827,7 @@ public static class Bindings
 			{
 				return -1;
 			}
-			int result;
-			if (!int.TryParse(input, out result))
+			if (!int.TryParse(input, out var result))
 			{
 				return -1;
 			}
@@ -3012,92 +2836,82 @@ public static class Bindings
 
 		private static bool CompareKeys(JObject obj, HashSet<string> set)
 		{
-			HashSet<string> equals = new HashSet<string>(from p in obj.Properties()
-			select p.Name);
-			return set.SetEquals(equals);
+			HashSet<string> hashSet = new HashSet<string>(from p in obj.Properties()
+				select p.Name);
+			return set.SetEquals(hashSet);
 		}
 
 		public unsafe static bool PushTable(lua_State* L, JObject table)
 		{
 			Luau.lua_createtable(L, 0, 0);
-			foreach (KeyValuePair<string, JToken> keyValuePair in table)
+			foreach (KeyValuePair<string, JToken> item in table)
 			{
-				if (keyValuePair.Key != null && keyValuePair.Value != null)
+				if (item.Key == null || item.Value == null)
 				{
-					int num = Bindings.JSON.ParseStrictInt(keyValuePair.Key);
-					if (num == -1)
+					continue;
+				}
+				int num = ParseStrictInt(item.Key);
+				if (num == -1)
+				{
+					Luau.lua_pushstring(L, item.Key);
+				}
+				if (item.Value is JObject)
+				{
+					if (CompareKeys((JObject)item.Value, new HashSet<string> { "x", "y", "z" }))
 					{
-						Luau.lua_pushstring(L, keyValuePair.Key);
+						JObject obj = item.Value as JObject;
+						float x = obj["x"].ToObject<float>();
+						float y = obj["y"].ToObject<float>();
+						float z = obj["z"].ToObject<float>();
+						Vector3 vector = new Vector3(x, y, z);
+						*Luau.lua_class_push<Vector3>(L) = vector;
 					}
-					if (keyValuePair.Value is JObject)
+					else if (CompareKeys((JObject)item.Value, new HashSet<string> { "x", "y", "z", "w" }))
 					{
-						if (Bindings.JSON.CompareKeys((JObject)keyValuePair.Value, new HashSet<string>
-						{
-							"x",
-							"y",
-							"z"
-						}))
-						{
-							JObject jobject = keyValuePair.Value as JObject;
-							float x = jobject["x"].ToObject<float>();
-							float y = jobject["y"].ToObject<float>();
-							float z = jobject["z"].ToObject<float>();
-							Vector3 vector = new Vector3(x, y, z);
-							*Luau.lua_class_push<Vector3>(L) = vector;
-						}
-						else if (Bindings.JSON.CompareKeys((JObject)keyValuePair.Value, new HashSet<string>
-						{
-							"x",
-							"y",
-							"z",
-							"w"
-						}))
-						{
-							JObject jobject2 = keyValuePair.Value as JObject;
-							float x2 = jobject2["x"].ToObject<float>();
-							float y2 = jobject2["y"].ToObject<float>();
-							float z2 = jobject2["z"].ToObject<float>();
-							float w = jobject2["w"].ToObject<float>();
-							Quaternion quaternion = new Quaternion(x2, y2, z2, w);
-							*Luau.lua_class_push<Quaternion>(L) = quaternion;
-						}
-						else
-						{
-							Bindings.JSON.PushTable(L, (JObject)keyValuePair.Value);
-						}
-					}
-					else if (keyValuePair.Value is JValue)
-					{
-						JTokenType type = keyValuePair.Value.Type;
-						if (type == JTokenType.Integer)
-						{
-							Luau.lua_pushnumber(L, (double)keyValuePair.Value.ToObject<int>());
-						}
-						else if (type == JTokenType.Boolean)
-						{
-							Luau.lua_pushboolean(L, keyValuePair.Value.ToObject<bool>() ? 1 : 0);
-						}
-						else if (type == JTokenType.Float)
-						{
-							Luau.lua_pushnumber(L, keyValuePair.Value.ToObject<double>());
-						}
-						else
-						{
-							if (type != JTokenType.String)
-							{
-								continue;
-							}
-							Luau.lua_pushstring(L, keyValuePair.Value.ToString());
-						}
-					}
-					if (num == -1)
-					{
-						Luau.lua_rawset(L, -3);
+						JObject obj2 = item.Value as JObject;
+						float x2 = obj2["x"].ToObject<float>();
+						float y2 = obj2["y"].ToObject<float>();
+						float z2 = obj2["z"].ToObject<float>();
+						float w = obj2["w"].ToObject<float>();
+						Quaternion quaternion = new Quaternion(x2, y2, z2, w);
+						*Luau.lua_class_push<Quaternion>(L) = quaternion;
 					}
 					else
 					{
-						Luau.lua_rawseti(L, -2, num);
+						PushTable(L, (JObject)item.Value);
 					}
+				}
+				else if (item.Value is JValue)
+				{
+					JTokenType type = item.Value.Type;
+					if (type == JTokenType.Integer)
+					{
+						Luau.lua_pushnumber(L, item.Value.ToObject<int>());
+					}
+					else if (type == JTokenType.Boolean)
+					{
+						Luau.lua_pushboolean(L, item.Value.ToObject<bool>() ? 1 : 0);
+					}
+					else if (type == JTokenType.Float)
+					{
+						Luau.lua_pushnumber(L, item.Value.ToObject<double>());
+					}
+					else
+					{
+						if (type != JTokenType.String)
+						{
+							continue;
+						}
+						Luau.lua_pushstring(L, item.Value.ToString());
+					}
+				}
+				if (num == -1)
+				{
+					Luau.lua_rawset(L, -3);
+				}
+				else
+				{
+					Luau.lua_rawseti(L, -2, num);
 				}
 			}
 			return true;
@@ -3106,77 +2920,59 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DataSave(lua_State* L)
 		{
-			int result;
 			try
 			{
-				string text = JsonConvert.SerializeObject(Bindings.JSON.ConsumeTable(L, 1), Formatting.Indented);
+				string text = JsonConvert.SerializeObject(ConsumeTable(L, 1), Formatting.Indented);
 				if (text.Length > 10000)
 				{
-					Luau.luaL_errorL(L, "Save exceeds 10000 bytes", Array.Empty<string>());
-					result = 0;
+					Luau.luaL_errorL(L, "Save exceeds 10000 bytes");
+					return 0;
 				}
-				else
+				DirectoryInfo directoryInfo = new DirectoryInfo(Path.Join(ModIODirectory, "saves", CustomMapLoader.LoadedMapModId.ToString()));
+				if (!directoryInfo.Exists)
 				{
-					DirectoryInfo directoryInfo = new DirectoryInfo(Path.Join(Bindings.JSON.ModIODirectory, "saves", CustomMapLoader.LoadedMapModId.ToString()));
-					if (!directoryInfo.Exists)
-					{
-						directoryInfo.Create();
-					}
-					File.WriteAllText(Path.Join(directoryInfo.FullName, "luau.json"), text);
-					result = 0;
+					directoryInfo.Create();
 				}
+				File.WriteAllText(Path.Join(directoryInfo.FullName, "luau.json"), text);
+				return 0;
 			}
 			catch
 			{
-				Luau.luaL_errorL(L, "Argument 2 must be a table", Array.Empty<string>());
-				result = 0;
+				Luau.luaL_errorL(L, "Argument 2 must be a table");
+				return 0;
 			}
-			return result;
 		}
 
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DataLoad(lua_State* L)
 		{
-			int result;
 			try
 			{
-				DirectoryInfo directoryInfo = new DirectoryInfo(Path.Join(Bindings.JSON.ModIODirectory, "saves", CustomMapLoader.LoadedMapModId.ToString()));
+				DirectoryInfo directoryInfo = new DirectoryInfo(Path.Join(ModIODirectory, "saves", CustomMapLoader.LoadedMapModId.ToString()));
 				if (!directoryInfo.Exists)
 				{
 					Luau.lua_createtable(L, 0, 0);
-					result = 1;
+					return 1;
 				}
-				else
+				FileInfo[] files = directoryInfo.GetFiles("luau.json");
+				if (files.Length == 0)
 				{
-					FileInfo[] files = directoryInfo.GetFiles("luau.json");
-					if (files.Length == 0)
-					{
-						Luau.lua_createtable(L, 0, 0);
-						result = 1;
-					}
-					else
-					{
-						JObject table = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(files[0].FullName));
-						if (Bindings.JSON.PushTable(L, table))
-						{
-							result = 1;
-						}
-						else
-						{
-							result = 0;
-						}
-					}
+					Luau.lua_createtable(L, 0, 0);
+					return 1;
 				}
+				JObject table = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(files[0].FullName));
+				if (PushTable(L, table))
+				{
+					return 1;
+				}
+				return 0;
 			}
 			catch
 			{
-				Luau.luaL_errorL(L, "Error while loading data", Array.Empty<string>());
-				result = 0;
+				Luau.luaL_errorL(L, "Error while loading data");
+				return 0;
 			}
-			return result;
 		}
-
-		private static string ModIODirectory = Path.Join(Path.Join(Application.persistentDataPath, "mod.io", "06657"), "data");
 	}
 
 	[BurstCompile]
@@ -3198,14 +2994,14 @@ public static class Bindings
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int TeleportPlayer(lua_State* L)
 		{
-			Vector3 a = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
+			Vector3 vector = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			bool keepVelocity = Luau.lua_toboolean(L, 2) == 1;
 			if (GTPlayer.hasInstance)
 			{
 				GTPlayer instance = GTPlayer.Instance;
 				Vector3 position = instance.transform.position;
-				Vector3 b = instance.mainCamera.transform.position - position;
-				Vector3 position2 = a - b;
+				Vector3 vector2 = instance.mainCamera.transform.position - position;
+				Vector3 position2 = vector - vector2;
 				instance.TeleportTo(position2, instance.transform.rotation, keepVelocity);
 			}
 			return 0;
@@ -3225,30 +3021,31 @@ public static class Bindings
 
 	public static class RayCastUtils
 	{
+		public static RaycastHit rayHit;
+
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int RayCast(lua_State* L)
 		{
 			Vector3 origin = *Luau.lua_class_get<Vector3>(L, 1, "Vec3");
 			Vector3 direction = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
-			if (!Physics.Raycast(origin, direction, out Bindings.RayCastUtils.rayHit))
+			if (!Physics.Raycast(origin, direction, out rayHit))
 			{
 				return 0;
 			}
 			Luau.lua_createtable(L, 0, 0);
 			Luau.lua_pushstring(L, "distance");
-			Luau.lua_pushnumber(L, (double)Bindings.RayCastUtils.rayHit.distance);
+			Luau.lua_pushnumber(L, rayHit.distance);
 			Luau.lua_rawset(L, -3);
 			Luau.lua_pushstring(L, "point");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = Bindings.RayCastUtils.rayHit.point;
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = rayHit.point;
 			Luau.lua_rawset(L, -3);
 			Luau.lua_pushstring(L, "normal");
-			*Luau.lua_class_push<Vector3>(L, "Vec3") = Bindings.RayCastUtils.rayHit.normal;
+			*Luau.lua_class_push<Vector3>(L, "Vec3") = rayHit.normal;
 			Luau.lua_rawset(L, -3);
 			Luau.lua_pushstring(L, "object");
-			IntPtr ptr;
-			if (Bindings.LuauGameObjectList.TryGetValue(Bindings.RayCastUtils.rayHit.transform.gameObject, out ptr))
+			if (LuauGameObjectList.TryGetValue(rayHit.transform.gameObject, out var value))
 			{
-				Luau.lua_class_push(L, "GameObject", ptr);
+				Luau.lua_class_push(L, "GameObject", value);
 			}
 			else
 			{
@@ -3256,17 +3053,15 @@ public static class Bindings
 			}
 			Luau.lua_rawset(L, -3);
 			Luau.lua_pushstring(L, "player");
-			Collider collider = Bindings.RayCastUtils.rayHit.collider;
-			VRRig vrrig = (collider != null) ? collider.GetComponentInParent<VRRig>() : null;
-			if (vrrig != null)
+			VRRig vRRig = rayHit.collider?.GetComponentInParent<VRRig>();
+			if (vRRig != null)
 			{
-				NetPlayer creator = vrrig.creator;
+				NetPlayer creator = vRRig.creator;
 				if (creator != null)
 				{
-					IntPtr ptr2;
-					if (Bindings.LuauPlayerList.TryGetValue(creator.ActorNumber, out ptr2))
+					if (LuauPlayerList.TryGetValue(creator.ActorNumber, out var value2))
 					{
-						Luau.lua_class_push(L, "Player", ptr2);
+						Luau.lua_class_push(L, "Player", value2);
 					}
 					else
 					{
@@ -3285,40 +3080,29 @@ public static class Bindings
 			Luau.lua_rawset(L, -3);
 			return 1;
 		}
-
-		public static RaycastHit rayHit;
 	}
 
 	public static class Components
 	{
-		public unsafe static void Build(lua_State* L)
-		{
-			Bindings.Components.LuauParticleSystemBindings.Builder(L);
-			Bindings.Components.LuauAudioSourceBindings.Builder(L);
-			Bindings.Components.LuauLightBindings.Builder(L);
-			Bindings.Components.LuauAnimatorBindings.Builder(L);
-		}
-
-		public static Dictionary<IntPtr, object> ComponentList = new Dictionary<IntPtr, object>();
-
 		public static class LuauParticleSystemBindings
 		{
+			public struct LuauParticleSystem
+			{
+				public int x;
+			}
+
 			public unsafe static void Builder(lua_State* L)
 			{
-				LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem>("ParticleSystem").AddFunction("play", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.play)).AddFunction("stop", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.stop)).AddFunction("clear", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.clear)).Build(L, false));
+				LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauParticleSystem>("ParticleSystem").AddFunction("play", play).AddFunction("stop", stop).AddFunction("clear", clear)
+					.Build(L, global: false));
 			}
 
 			public unsafe static ParticleSystem GetParticleSystem(lua_State* L)
 			{
-				Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem* value = Luau.lua_class_get<Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem>(L, 1);
-				object obj;
-				if (Bindings.Components.ComponentList.TryGetValue((IntPtr)((void*)value), out obj))
+				LuauParticleSystem* ptr = Luau.lua_class_get<LuauParticleSystem>(L, 1);
+				if (ComponentList.TryGetValue((IntPtr)ptr, out var value) && value is ParticleSystem result)
 				{
-					ParticleSystem particleSystem = obj as ParticleSystem;
-					if (particleSystem != null)
-					{
-						return particleSystem;
-					}
+					return result;
 				}
 				return null;
 			}
@@ -3326,7 +3110,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int play(lua_State* L)
 			{
-				ParticleSystem particleSystem = Bindings.Components.LuauParticleSystemBindings.GetParticleSystem(L);
+				ParticleSystem particleSystem = GetParticleSystem(L);
 				if (particleSystem != null)
 				{
 					particleSystem.Play();
@@ -3337,7 +3121,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int stop(lua_State* L)
 			{
-				ParticleSystem particleSystem = Bindings.Components.LuauParticleSystemBindings.GetParticleSystem(L);
+				ParticleSystem particleSystem = GetParticleSystem(L);
 				if (particleSystem != null)
 				{
 					particleSystem.Stop();
@@ -3348,39 +3132,38 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int clear(lua_State* L)
 			{
-				ParticleSystem particleSystem = Bindings.Components.LuauParticleSystemBindings.GetParticleSystem(L);
+				ParticleSystem particleSystem = GetParticleSystem(L);
 				if (particleSystem != null)
 				{
 					particleSystem.Clear();
 				}
 				return 0;
 			}
-
-			public struct LuauParticleSystem
-			{
-				public int x;
-			}
 		}
 
 		public static class LuauAudioSourceBindings
 		{
+			public struct LuauAudioSource
+			{
+				public int x;
+			}
+
 			public unsafe static void Builder(lua_State* L)
 			{
-				LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.Components.LuauAudioSourceBindings.LuauAudioSource>("AudioSource").AddFunction("play", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.play)).AddFunction("setVolume", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setVolume)).AddFunction("setLoop", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setLoop)).AddFunction("setPitch", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setPitch)).AddFunction("setMinDistance", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setMinDistance)).AddFunction("setMaxDistance", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setMaxDistance)).Build(L, false));
+				LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauAudioSource>("AudioSource").AddFunction("play", play).AddFunction("setVolume", setVolume).AddFunction("setLoop", setLoop)
+					.AddFunction("setPitch", setPitch)
+					.AddFunction("setMinDistance", setMinDistance)
+					.AddFunction("setMaxDistance", setMaxDistance)
+					.Build(L, global: false));
 			}
 
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static AudioSource GetAudioSource(lua_State* L)
 			{
-				Bindings.Components.LuauAudioSourceBindings.LuauAudioSource* value = Luau.lua_class_get<Bindings.Components.LuauAudioSourceBindings.LuauAudioSource>(L, 1);
-				object obj;
-				if (Bindings.Components.ComponentList.TryGetValue((IntPtr)((void*)value), out obj))
+				LuauAudioSource* ptr = Luau.lua_class_get<LuauAudioSource>(L, 1);
+				if (ComponentList.TryGetValue((IntPtr)ptr, out var value) && value is AudioSource result)
 				{
-					AudioSource audioSource = obj as AudioSource;
-					if (audioSource != null)
-					{
-						return audioSource;
-					}
+					return result;
 				}
 				return null;
 			}
@@ -3388,7 +3171,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int play(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				if (audioSource != null)
 				{
 					audioSource.Play();
@@ -3399,7 +3182,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setVolume(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (audioSource != null)
 				{
@@ -3411,7 +3194,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setLoop(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				bool loop = Luau.lua_toboolean(L, 2) == 1;
 				if (audioSource != null)
 				{
@@ -3423,7 +3206,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setPitch(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (audioSource != null)
 				{
@@ -3435,7 +3218,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setMinDistance(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (audioSource != null)
 				{
@@ -3447,7 +3230,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setMaxDistance(lua_State* L)
 			{
-				AudioSource audioSource = Bindings.Components.LuauAudioSourceBindings.GetAudioSource(L);
+				AudioSource audioSource = GetAudioSource(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (audioSource != null)
 				{
@@ -3455,31 +3238,27 @@ public static class Bindings
 				}
 				return 0;
 			}
-
-			public struct LuauAudioSource
-			{
-				public int x;
-			}
 		}
 
 		public static class LuauLightBindings
 		{
+			public struct LuauLight
+			{
+				public int x;
+			}
+
 			public unsafe static void Builder(lua_State* L)
 			{
-				LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.Components.LuauLightBindings.LuauLight>("Light").AddFunction("setColor", new lua_CFunction(Bindings.Components.LuauLightBindings.setColor)).AddFunction("setIntensity", new lua_CFunction(Bindings.Components.LuauLightBindings.setIntensity)).AddFunction("setRange", new lua_CFunction(Bindings.Components.LuauLightBindings.setRange)).Build(L, false));
+				LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauLight>("Light").AddFunction("setColor", setColor).AddFunction("setIntensity", setIntensity).AddFunction("setRange", setRange)
+					.Build(L, global: false));
 			}
 
 			public unsafe static Light GetLight(lua_State* L)
 			{
-				Bindings.Components.LuauLightBindings.LuauLight* value = Luau.lua_class_get<Bindings.Components.LuauLightBindings.LuauLight>(L, 1);
-				object obj;
-				if (Bindings.Components.ComponentList.TryGetValue((IntPtr)((void*)value), out obj))
+				LuauLight* ptr = Luau.lua_class_get<LuauLight>(L, 1);
+				if (ComponentList.TryGetValue((IntPtr)ptr, out var value) && value is Light result)
 				{
-					Light light = obj as Light;
-					if (light != null)
-					{
-						return light;
-					}
+					return result;
 				}
 				return null;
 			}
@@ -3487,7 +3266,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setColor(lua_State* L)
 			{
-				Light light = Bindings.Components.LuauLightBindings.GetLight(L);
+				Light light = GetLight(L);
 				Vector3 vector = *Luau.lua_class_get<Vector3>(L, 2);
 				if (light != null)
 				{
@@ -3499,7 +3278,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setIntensity(lua_State* L)
 			{
-				Light light = Bindings.Components.LuauLightBindings.GetLight(L);
+				Light light = GetLight(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (light != null)
 				{
@@ -3511,7 +3290,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setRange(lua_State* L)
 			{
-				Light light = Bindings.Components.LuauLightBindings.GetLight(L);
+				Light light = GetLight(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (light != null)
 				{
@@ -3519,31 +3298,28 @@ public static class Bindings
 				}
 				return 0;
 			}
-
-			public struct LuauLight
-			{
-				public int x;
-			}
 		}
 
 		public static class LuauAnimatorBindings
 		{
+			public struct LuauAnimator
+			{
+				public int x;
+			}
+
 			public unsafe static void Builder(lua_State* L)
 			{
-				LuauVm.ClassBuilders.Append(new LuauClassBuilder<Bindings.Components.LuauAnimatorBindings.LuauAnimator>("Animator").AddFunction("setSpeed", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.setSpeed)).AddFunction("startPlayback", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.startPlayback)).AddFunction("stopPlayback", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.stopPlayback)).AddFunction("reset", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.reset)).Build(L, false));
+				LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauAnimator>("Animator").AddFunction("setSpeed", setSpeed).AddFunction("startPlayback", startPlayback).AddFunction("stopPlayback", stopPlayback)
+					.AddFunction("reset", reset)
+					.Build(L, global: false));
 			}
 
 			public unsafe static Animator GetAnimator(lua_State* L)
 			{
-				Bindings.Components.LuauAnimatorBindings.LuauAnimator* value = Luau.lua_class_get<Bindings.Components.LuauAnimatorBindings.LuauAnimator>(L, 1);
-				object obj;
-				if (Bindings.Components.ComponentList.TryGetValue((IntPtr)((void*)value), out obj))
+				LuauAnimator* ptr = Luau.lua_class_get<LuauAnimator>(L, 1);
+				if (ComponentList.TryGetValue((IntPtr)ptr, out var value) && value is Animator result)
 				{
-					Animator animator = obj as Animator;
-					if (animator != null)
-					{
-						return animator;
-					}
+					return result;
 				}
 				return null;
 			}
@@ -3551,7 +3327,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setSpeed(lua_State* L)
 			{
-				Animator animator = Bindings.Components.LuauAnimatorBindings.GetAnimator(L);
+				Animator animator = GetAnimator(L);
 				double num = Luau.luaL_checknumber(L, 2);
 				if (animator != null)
 				{
@@ -3563,7 +3339,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int startPlayback(lua_State* L)
 			{
-				Animator animator = Bindings.Components.LuauAnimatorBindings.GetAnimator(L);
+				Animator animator = GetAnimator(L);
 				if (animator != null)
 				{
 					animator.StartPlayback();
@@ -3574,7 +3350,7 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int stopPlayback(lua_State* L)
 			{
-				Animator animator = Bindings.Components.LuauAnimatorBindings.GetAnimator(L);
+				Animator animator = GetAnimator(L);
 				if (animator != null)
 				{
 					animator.StopPlayback();
@@ -3585,18 +3361,255 @@ public static class Bindings
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int reset(lua_State* L)
 			{
-				Animator animator = Bindings.Components.LuauAnimatorBindings.GetAnimator(L);
+				Animator animator = GetAnimator(L);
 				if (animator != null)
 				{
 					animator.ResetToEntryState();
 				}
 				return 0;
 			}
-
-			public struct LuauAnimator
-			{
-				public int x;
-			}
 		}
+
+		public static Dictionary<IntPtr, object> ComponentList = new Dictionary<IntPtr, object>();
+
+		public unsafe static void Build(lua_State* L)
+		{
+			LuauParticleSystemBindings.Builder(L);
+			LuauAudioSourceBindings.Builder(L);
+			LuauLightBindings.Builder(L);
+			LuauAnimatorBindings.Builder(L);
+		}
+	}
+
+	public static Dictionary<GameObject, IntPtr> LuauGameObjectList = new Dictionary<GameObject, IntPtr>();
+
+	public static List<KeyValuePair<GameObject, IntPtr>> LuauGameObjectDepthList = new List<KeyValuePair<GameObject, IntPtr>>();
+
+	public static Dictionary<IntPtr, GameObject> LuauGameObjectListReverse = new Dictionary<IntPtr, GameObject>();
+
+	public static Dictionary<GameObject, LuauGameObjectInitialState> LuauGameObjectStates = new Dictionary<GameObject, LuauGameObjectInitialState>();
+
+	public static Dictionary<GameObject, int> LuauTriggerCallbacks = new Dictionary<GameObject, int>();
+
+	public static Dictionary<int, IntPtr> LuauPlayerList = new Dictionary<int, IntPtr>();
+
+	public static Dictionary<int, VRRig> LuauVRRigList = new Dictionary<int, VRRig>();
+
+	public unsafe static GorillaLocomotionSettings* LocomotionSettings;
+
+	public unsafe static PlayerInput* LocalPlayerInput;
+
+	public unsafe static LuauRoomState* RoomState;
+
+	public static Dictionary<int, IntPtr> LuauAIAgentList = new Dictionary<int, IntPtr>();
+
+	public static Dictionary<int, IntPtr> LuauGrabbablesList = new Dictionary<int, IntPtr>();
+
+	public unsafe static void GameObjectBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauGameObject>("GameObject").AddField("position", "Position").AddField("rotation", "Rotation").AddField("scale", "Scale")
+			.AddStaticFunction("findGameObject", GameObjectFunctions.FindGameObject)
+			.AddFunction("setCollision", GameObjectFunctions.SetCollision)
+			.AddFunction("setVisibility", GameObjectFunctions.SetVisibility)
+			.AddFunction("setActive", GameObjectFunctions.SetActive)
+			.AddFunction("setText", GameObjectFunctions.SetText)
+			.AddFunction("onTouched", GameObjectFunctions.OnTouched)
+			.AddFunction("setVelocity", GameObjectFunctions.SetVelocity)
+			.AddFunction("getVelocity", GameObjectFunctions.GetVelocity)
+			.AddFunction("setColor", GameObjectFunctions.SetColor)
+			.AddFunction("findChild", GameObjectFunctions.FindChildGameObject)
+			.AddFunction("clone", GameObjectFunctions.CloneGameObject)
+			.AddFunction("destroy", GameObjectFunctions.DestroyGameObject)
+			.AddFunction("findComponent", GameObjectFunctions.FindComponent)
+			.AddFunction("equals", GameObjectFunctions.Equals)
+			.Build(L, global: true));
+	}
+
+	public unsafe static void GorillaLocomotionSettingsBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<GorillaLocomotionSettings>("PSettings").AddField("velocityLimit").AddField("slideVelocityLimit").AddField("maxJumpSpeed")
+			.AddField("jumpMultiplier")
+			.Build(L, global: false));
+		LocomotionSettings = Luau.lua_class_push<GorillaLocomotionSettings>(L);
+		LocomotionSettings->velocityLimit = GTPlayer.Instance.velocityLimit;
+		LocomotionSettings->slideVelocityLimit = GTPlayer.Instance.slideVelocityLimit;
+		LocomotionSettings->maxJumpSpeed = 6.5f;
+		LocomotionSettings->jumpMultiplier = 1.1f;
+		Luau.lua_setglobal(L, "PlayerSettings");
+	}
+
+	public unsafe static void PlayerInputBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<PlayerInput>("PInput").AddField("leftXAxis").AddField("rightXAxis").AddField("leftYAxis")
+			.AddField("rightYAxis")
+			.AddField("leftTrigger")
+			.AddField("rightTrigger")
+			.AddField("leftGrip")
+			.AddField("rightGrip")
+			.AddField("leftPrimaryButton")
+			.AddField("rightPrimaryButton")
+			.AddField("leftSecondaryButton")
+			.AddField("rightSecondaryButton")
+			.Build(L, global: false));
+		LocalPlayerInput = Luau.lua_class_push<PlayerInput>(L);
+		UpdateInputs();
+		Luau.lua_setglobal(L, "PlayerInput");
+	}
+
+	public unsafe static void UpdateInputs()
+	{
+		if (LocalPlayerInput != null)
+		{
+			LocalPlayerInput->leftPrimaryButton = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
+			LocalPlayerInput->rightPrimaryButton = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+			LocalPlayerInput->leftSecondaryButton = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
+			LocalPlayerInput->rightSecondaryButton = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+			LocalPlayerInput->leftGrip = ControllerInputPoller.GripFloat(XRNode.LeftHand);
+			LocalPlayerInput->rightGrip = ControllerInputPoller.GripFloat(XRNode.RightHand);
+			LocalPlayerInput->leftTrigger = ControllerInputPoller.TriggerFloat(XRNode.LeftHand);
+			LocalPlayerInput->rightTrigger = ControllerInputPoller.TriggerFloat(XRNode.RightHand);
+			Vector2 vector = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand);
+			Vector2 vector2 = ControllerInputPoller.Primary2DAxis(XRNode.RightHand);
+			LocalPlayerInput->leftXAxis = vector.x;
+			LocalPlayerInput->leftYAxis = vector.y;
+			LocalPlayerInput->rightXAxis = vector2.x;
+			LocalPlayerInput->rightYAxis = vector2.y;
+		}
+	}
+
+	public unsafe static void Vec3Builder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Vector3>("Vec3").AddField("x").AddField("y").AddField("z")
+			.AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.New))
+			.AddFunction("__add", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Add))
+			.AddFunction("__sub", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Sub))
+			.AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Mul))
+			.AddFunction("__div", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Div))
+			.AddFunction("__unm", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Unm))
+			.AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Eq))
+			.AddFunction("__tostring", Vec3Functions.ToString)
+			.AddFunction("toString", Vec3Functions.ToString)
+			.AddFunction("dot", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Dot))
+			.AddFunction("cross", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Cross))
+			.AddFunction("projectOnTo", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Project))
+			.AddFunction("length", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Length))
+			.AddFunction("normalize", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Normalize))
+			.AddFunction("getSafeNormal", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.SafeNormal))
+			.AddStaticFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Rotate))
+			.AddFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Rotate))
+			.AddStaticFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Distance))
+			.AddFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Distance))
+			.AddStaticFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Lerp))
+			.AddFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.Lerp))
+			.AddProperty("zeroVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.ZeroVector))
+			.AddProperty("oneVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.OneVector))
+			.AddStaticFunction("nearlyEqual", BurstCompiler.CompileFunctionPointer<lua_CFunction>(Vec3Functions.NearlyEqual))
+			.Build(L, global: true));
+	}
+
+	public unsafe static void QuatBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<Quaternion>("Quat").AddField("x").AddField("y").AddField("z")
+			.AddField("w")
+			.AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.New))
+			.AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.Mul))
+			.AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.Eq))
+			.AddFunction("__tostring", QuatFunctions.ToString)
+			.AddFunction("toString", QuatFunctions.ToString)
+			.AddStaticFunction("fromEuler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.FromEuler))
+			.AddStaticFunction("fromDirection", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.FromDirection))
+			.AddFunction("getUpVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.GetUpVector))
+			.AddFunction("euler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(QuatFunctions.Euler))
+			.Build(L, global: true));
+	}
+
+	public unsafe static void PlayerBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauPlayer>("Player").AddField("playerID", "PlayerID").AddField("playerName", "PlayerName").AddField("playerMaterial", "PlayerMaterial")
+			.AddField("isMasterClient", "IsMasterClient")
+			.AddField("bodyPosition", "BodyPosition")
+			.AddField("velocity", "Velocity")
+			.AddField("isPCVR", "IsPCVR")
+			.AddField("leftHandPosition", "LeftHandPosition")
+			.AddField("rightHandPosition", "RightHandPosition")
+			.AddField("headRotation", "HeadRotation")
+			.AddField("leftHandRotation", "LeftHandRotation")
+			.AddField("rightHandRotation", "RightHandRotation")
+			.AddField("isInVStump", "IsInVStump")
+			.AddField("isEntityAuthority", "IsEntityAuthority")
+			.AddStaticFunction("getPlayerByID", PlayerFunctions.GetPlayerByID)
+			.Build(L, global: true));
+	}
+
+	public unsafe static void AIAgentBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauAIAgent>("AIAgent").AddField("entityID", "EntityID").AddField("agentPosition", "EntityPosition").AddField("agentRotation", "EntityRotation")
+			.AddFunction("__tostring", AIAgentFunctions.ToString)
+			.AddFunction("toString", AIAgentFunctions.ToString)
+			.AddFunction("setDestination", AIAgentFunctions.SetDestination)
+			.AddFunction("destroyAgent", AIAgentFunctions.DestroyEntity)
+			.AddFunction("playAgentAnimation", AIAgentFunctions.PlayAgentAnimation)
+			.AddFunction("getTargetPlayer", AIAgentFunctions.GetTarget)
+			.AddFunction("setTargetPlayer", AIAgentFunctions.SetTarget)
+			.AddStaticFunction("findPrePlacedAIAgentByID", AIAgentFunctions.FindPrePlacedAIAgentByID)
+			.AddStaticFunction("getAIAgentByEntityID", AIAgentFunctions.GetAIAgentByEntityID)
+			.AddStaticFunction("spawnAIAgent", AIAgentFunctions.SpawnAIAgent)
+			.Build(L, global: true));
+	}
+
+	public unsafe static void GrabbableEntityBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauGrabbableEntity>("GrabbableEntity").AddField("entityID", "EntityID").AddField("entityPosition", "EntityPosition").AddField("entityRotation", "EntityRotation")
+			.AddFunction("__tostring", GrabbableEntityFunctions.ToString)
+			.AddFunction("toString", GrabbableEntityFunctions.ToString)
+			.AddFunction("destroyGrabbable", GrabbableEntityFunctions.DestroyEntity)
+			.AddStaticFunction("findPrePlacedGrabbableEntityByID", GrabbableEntityFunctions.FindPrePlacedGrabbableEntityByID)
+			.AddStaticFunction("getGrabbableEntityByEntityID", GrabbableEntityFunctions.GetGrabbableEntityByEntityID)
+			.AddStaticFunction("getHoldingActorNumberByEntityID", GrabbableEntityFunctions.GetHoldingActorNumberByEntityID)
+			.AddStaticFunction("getHoldingActorNumberByLuauID", GrabbableEntityFunctions.GetHoldingActorNumberByLuauID)
+			.AddStaticFunction("spawnGrabbableEntity", GrabbableEntityFunctions.SpawnGrabbableEntity)
+			.Build(L, global: true));
+	}
+
+	[MonoPInvokeCallback(typeof(lua_CFunction))]
+	public unsafe static int LuaStartVibration(lua_State* L)
+	{
+		bool forLeftController = Luau.lua_toboolean(L, 1) == 1;
+		float amplitude = (float)Luau.luaL_checknumber(L, 2);
+		float duration = (float)Luau.luaL_checknumber(L, 3);
+		GorillaTagger.Instance.StartVibration(forLeftController, amplitude, duration);
+		return 0;
+	}
+
+	[MonoPInvokeCallback(typeof(lua_CFunction))]
+	public unsafe static int LuaPlaySound(lua_State* L)
+	{
+		int num = (int)Luau.luaL_checknumber(L, 1);
+		Vector3 position = *Luau.lua_class_get<Vector3>(L, 2, "Vec3");
+		float volume = (float)Luau.luaL_checknumber(L, 3);
+		if (num < 0 || num >= VRRig.LocalRig.clipToPlay.Length)
+		{
+			return 0;
+		}
+		AudioSource.PlayClipAtPoint(VRRig.LocalRig.clipToPlay[num], position, volume);
+		return 0;
+	}
+
+	public unsafe static void RoomStateBuilder(lua_State* L)
+	{
+		LuauVm.ClassBuilders.Append(new LuauClassBuilder<LuauRoomState>("RState").AddField("isQuest", "IsQuest").AddField("fps", "FPS").AddField("isPrivate", "IsPrivate")
+			.AddField("code", "RoomCode")
+			.Build(L, global: false));
+		RoomState = Luau.lua_class_push<LuauRoomState>(L);
+		UpdateRoomState();
+		RoomState->IsQuest = false;
+		RoomState->IsPrivate = !PhotonNetwork.CurrentRoom.IsVisible;
+		RoomState->RoomCode = PhotonNetwork.CurrentRoom.Name;
+		Luau.lua_setglobal(L, "Room");
+	}
+
+	public unsafe static void UpdateRoomState()
+	{
+		RoomState->FPS = 1f / Time.smoothDeltaTime;
 	}
 }

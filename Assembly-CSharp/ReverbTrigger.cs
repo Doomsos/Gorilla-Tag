@@ -1,25 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Audio;
 
 public class ReverbTrigger : MonoBehaviour
 {
-	private void OnTriggerEnter(Collider other)
-	{
-		if (other.gameObject.layer == 8)
-		{
-			this.targetSnapshot.TransitionTo(this.transitionTime);
-		}
-	}
-
-	private void OnTriggerExit(Collider other)
-	{
-		if (other.gameObject.layer == 8)
-		{
-			this.normalSnapshot.TransitionTo(this.transitionTime);
-		}
-	}
-
 	[SerializeField]
 	private AudioMixer mixer;
 
@@ -34,4 +17,20 @@ public class ReverbTrigger : MonoBehaviour
 
 	[SerializeField]
 	private float transitionTime = 1f;
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.layer == 8)
+		{
+			targetSnapshot.TransitionTo(transitionTime);
+		}
+	}
+
+	private void OnTriggerExit(Collider other)
+	{
+		if (other.gameObject.layer == 8)
+		{
+			normalSnapshot.TransitionTo(transitionTime);
+		}
+	}
 }

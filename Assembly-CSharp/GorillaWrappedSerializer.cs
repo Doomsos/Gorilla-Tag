@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Fusion;
 using GorillaTag;
 using Photon.Pun;
@@ -7,78 +7,70 @@ using UnityEngine;
 [NetworkBehaviourWeaved(0)]
 internal abstract class GorillaWrappedSerializer : NetworkBehaviour, IPunObservable, IPunInstantiateMagicCallback, IOnPhotonViewPreNetDestroy, IPhotonViewCallback
 {
-	public NetworkView NetView
-	{
-		get
-		{
-			return this.netView;
-		}
-	}
+	protected bool successfullInstantiate;
+
+	protected IWrappedSerializable serializeTarget;
+
+	private Type targetType;
+
+	protected GameObject targetObject;
+
+	[SerializeField]
+	protected NetworkView netView;
+
+	public NetworkView NetView => netView;
 
 	protected virtual object data { get; set; }
 
-	public bool IsLocallyOwned
-	{
-		get
-		{
-			return this.netView.IsMine;
-		}
-	}
+	public bool IsLocallyOwned => netView.IsMine;
 
-	public bool IsValid
-	{
-		get
-		{
-			return this.netView.IsValid;
-		}
-	}
+	public bool IsValid => netView.IsValid;
 
 	private void Awake()
 	{
-		if (this.netView == null)
+		if (netView == null)
 		{
-			this.netView = base.GetComponent<NetworkView>();
+			netView = GetComponent<NetworkView>();
 		}
 	}
 
 	void IPunInstantiateMagicCallback.OnPhotonInstantiate(PhotonMessageInfo info)
 	{
-		if (this.netView == null || !this.netView.IsValid)
+		if (!(netView == null) && netView.IsValid)
 		{
-			return;
+			PhotonMessageInfoWrapped wrappedInfo = new PhotonMessageInfoWrapped(info);
+			ProcessSpawn(wrappedInfo);
 		}
-		PhotonMessageInfoWrapped wrappedInfo = new PhotonMessageInfoWrapped(info);
-		this.ProcessSpawn(wrappedInfo);
 	}
 
 	public override void Spawned()
 	{
 		PhotonMessageInfoWrapped wrappedInfo = new PhotonMessageInfoWrapped(base.Object.StateAuthority.PlayerId, base.Runner.Tick.Raw);
-		this.ProcessSpawn(wrappedInfo);
+		ProcessSpawn(wrappedInfo);
 	}
 
 	private void ProcessSpawn(PhotonMessageInfoWrapped wrappedInfo)
 	{
-		this.successfullInstantiate = this.OnSpawnSetupCheck(wrappedInfo, out this.targetObject, out this.targetType);
-		if (this.successfullInstantiate)
+		successfullInstantiate = OnSpawnSetupCheck(wrappedInfo, out targetObject, out targetType);
+		if (successfullInstantiate)
 		{
-			GameObject gameObject = this.targetObject;
-			IWrappedSerializable wrappedSerializable = ((gameObject != null) ? gameObject.GetComponent(this.targetType) : null) as IWrappedSerializable;
-			if (wrappedSerializable != null)
+			if (targetObject?.GetComponent(targetType) is IWrappedSerializable wrappedSerializable)
 			{
-				this.serializeTarget = wrappedSerializable;
+				serializeTarget = wrappedSerializable;
 			}
-			if (this.serializeTarget == null)
+			if (serializeTarget == null)
 			{
-				this.successfullInstantiate = false;
+				successfullInstantiate = false;
 			}
 		}
-		if (this.successfullInstantiate)
+		if (successfullInstantiate)
 		{
-			this.OnSuccesfullySpawned(wrappedInfo);
-			return;
+			OnSuccesfullySpawned(wrappedInfo);
 		}
-		this.FailedToSpawn();
+		else
+		{
+			FailedToSpawn();
+		}
 	}
 
 	protected virtual bool OnSpawnSetupCheck(PhotonMessageInfoWrapped wrappedInfo, out GameObject outTargetObject, out Type outTargetType)
@@ -93,68 +85,73 @@ internal abstract class GorillaWrappedSerializer : NetworkBehaviour, IPunObserva
 	private void FailedToSpawn()
 	{
 		Debug.LogError("Failed to network instantiate");
-		MonkeAgentCleanup.RegisterForDestroy(this.netView.GetView);
-		this.netView.GetView.ObservedComponents.Remove(this);
+		MonkeAgentCleanup.RegisterForDestroy(netView.GetView);
+		netView.GetView.ObservedComponents.Remove(this);
 	}
 
 	protected abstract void OnFailedSpawn();
 
 	protected virtual bool ValidOnSerialize(PhotonStream stream, in PhotonMessageInfo info)
 	{
-		return info.Sender == info.photonView.Owner;
+		if (info.Sender != info.photonView.Owner)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public override void FixedUpdateNetwork()
 	{
-		this.data = this.serializeTarget.OnSerializeWrite();
+		data = serializeTarget.OnSerializeWrite();
 	}
 
 	public override void Render()
 	{
 		if (!base.Object.HasStateAuthority)
 		{
-			this.serializeTarget.OnSerializeRead(this.data);
+			serializeTarget.OnSerializeRead(data);
 		}
 	}
 
 	void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (!this.successfullInstantiate || this.serializeTarget == null || !this.ValidOnSerialize(stream, info))
+		if (successfullInstantiate && serializeTarget != null && ValidOnSerialize(stream, in info))
 		{
-			return;
+			if (stream.IsWriting)
+			{
+				serializeTarget.OnSerializeWrite(stream, info);
+			}
+			else
+			{
+				serializeTarget.OnSerializeRead(stream, info);
+			}
 		}
-		if (stream.IsWriting)
-		{
-			this.serializeTarget.OnSerializeWrite(stream, info);
-			return;
-		}
-		this.serializeTarget.OnSerializeRead(stream, info);
 	}
 
 	public override void Despawned(NetworkRunner runner, bool hasState)
 	{
-		this.OnBeforeDespawn();
+		OnBeforeDespawn();
 	}
 
 	void IOnPhotonViewPreNetDestroy.OnPreNetDestroy(PhotonView rootView)
 	{
-		this.OnBeforeDespawn();
+		OnBeforeDespawn();
 	}
 
 	protected abstract void OnBeforeDespawn();
 
 	public virtual T AddRPCComponent<T>() where T : RPCNetworkBase
 	{
-		T t = base.gameObject.AddComponent<T>();
-		this.netView.GetView.RefreshRpcMonoBehaviourCache();
-		t.SetClassTarget(this.serializeTarget, this);
-		return t;
+		T val = base.gameObject.AddComponent<T>();
+		netView.GetView.RefreshRpcMonoBehaviourCache();
+		val.SetClassTarget(serializeTarget, this);
+		return val;
 	}
 
 	public void SendRPC(string rpcName, bool targetOthers, params object[] data)
 	{
-		RpcTarget target = targetOthers ? RpcTarget.Others : RpcTarget.MasterClient;
-		this.netView.SendRPC(rpcName, target, data);
+		RpcTarget target = (targetOthers ? RpcTarget.Others : RpcTarget.MasterClient);
+		netView.SendRPC(rpcName, target, data);
 	}
 
 	protected virtual void FusionDataRPC(string method, RpcTarget target, params object[] parameters)
@@ -167,11 +164,11 @@ internal abstract class GorillaWrappedSerializer : NetworkBehaviour, IPunObserva
 
 	public void SendRPC(string rpcName, NetPlayer targetPlayer, params object[] data)
 	{
-		this.netView.GetView.RPC(rpcName, ((PunNetPlayer)targetPlayer).PlayerRef, data);
+		netView.GetView.RPC(rpcName, ((PunNetPlayer)targetPlayer).PlayerRef, data);
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
 	}
 
@@ -179,15 +176,4 @@ internal abstract class GorillaWrappedSerializer : NetworkBehaviour, IPunObserva
 	public override void CopyStateToBackingFields()
 	{
 	}
-
-	protected bool successfullInstantiate;
-
-	protected IWrappedSerializable serializeTarget;
-
-	private Type targetType;
-
-	protected GameObject targetObject;
-
-	[SerializeField]
-	protected NetworkView netView;
 }

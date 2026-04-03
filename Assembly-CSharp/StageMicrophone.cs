@@ -1,28 +1,8 @@
-﻿using System;
 using GorillaExtensions;
 using UnityEngine;
 
 public class StageMicrophone : MonoBehaviour
 {
-	private void Awake()
-	{
-		StageMicrophone.Instance = this;
-	}
-
-	public bool IsPlayerAmplified(VRRig player)
-	{
-		return (player.GetMouthPosition() - base.transform.position).IsShorterThan(this.PickupRadius);
-	}
-
-	public float GetPlayerSpatialBlend(VRRig player)
-	{
-		if (!this.IsPlayerAmplified(player))
-		{
-			return 0.9f;
-		}
-		return this.AmplifiedSpatialBlend;
-	}
-
 	public static StageMicrophone Instance;
 
 	[SerializeField]
@@ -30,4 +10,23 @@ public class StageMicrophone : MonoBehaviour
 
 	[SerializeField]
 	private float AmplifiedSpatialBlend;
+
+	private void Awake()
+	{
+		Instance = this;
+	}
+
+	public bool IsPlayerAmplified(VRRig player)
+	{
+		return (player.GetMouthPosition() - base.transform.position).IsShorterThan(PickupRadius);
+	}
+
+	public float GetPlayerSpatialBlend(VRRig player)
+	{
+		if (!IsPlayerAmplified(player))
+		{
+			return 0.9f;
+		}
+		return AmplifiedSpatialBlend;
+	}
 }

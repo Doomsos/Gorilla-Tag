@@ -1,44 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GrowOnEnable : MonoBehaviour, ITickSystemTick
 {
-	private void Awake()
-	{
-		this._targetScale = base.transform.localScale;
-	}
-
-	private void OnEnable()
-	{
-		this._lerpVal = 0f;
-		this._curve = AnimationCurves.GetCurveForEase(this.easeType);
-		this.UpdateScale();
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	private void OnDisable()
-	{
-		base.transform.localScale = this._targetScale;
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		this._lerpVal = Mathf.Clamp01(this._lerpVal + Time.deltaTime / this.growDuration);
-		this.UpdateScale();
-		if (this._lerpVal >= 1f)
-		{
-			TickSystem<object>.RemoveTickCallback(this);
-		}
-	}
-
-	private void UpdateScale()
-	{
-		base.transform.localScale = this._targetScale * this._curve.Evaluate(this._lerpVal);
-	}
-
 	[SerializeField]
 	private float growDuration = 1f;
 
@@ -50,4 +13,40 @@ public class GrowOnEnable : MonoBehaviour, ITickSystemTick
 	private Vector3 _targetScale;
 
 	private float _lerpVal;
+
+	public bool TickRunning { get; set; }
+
+	private void Awake()
+	{
+		_targetScale = base.transform.localScale;
+	}
+
+	private void OnEnable()
+	{
+		_lerpVal = 0f;
+		_curve = AnimationCurves.GetCurveForEase(easeType);
+		UpdateScale();
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		base.transform.localScale = _targetScale;
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void Tick()
+	{
+		_lerpVal = Mathf.Clamp01(_lerpVal + Time.deltaTime / growDuration);
+		UpdateScale();
+		if (_lerpVal >= 1f)
+		{
+			TickSystem<object>.RemoveTickCallback(this);
+		}
+	}
+
+	private void UpdateScale()
+	{
+		base.transform.localScale = _targetScale * _curve.Evaluate(_lerpVal);
+	}
 }

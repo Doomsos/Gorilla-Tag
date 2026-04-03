@@ -1,49 +1,46 @@
-﻿using System;
 using System.Collections.Generic;
-using KID.Model;
 using UnityEngine;
 
 public class KIDUI_AgeAppealController : MonoBehaviour
 {
-	public static KIDUI_AgeAppealController Instance
-	{
-		get
-		{
-			return KIDUI_AgeAppealController._instance;
-		}
-	}
+	private static KIDUI_AgeAppealController _instance;
+
+	[SerializeField]
+	private KIDUI_RestrictedAccessScreen _firstAgeAppealScreen;
+
+	[SerializeField]
+	private KIDUI_TooYoungToPlay _tooYoungToPlayScreen;
+
+	public static KIDUI_AgeAppealController Instance => _instance;
 
 	private void Awake()
 	{
-		KIDUI_AgeAppealController._instance = this;
-		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Controller Initialised", Array.Empty<object>());
+		_instance = this;
+		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Controller Initialised");
 	}
 
 	public void StartAgeAppealScreens(SessionStatus? sessionStatus)
 	{
-		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Age Appeal Screens", Array.Empty<object>());
+		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Age Appeal Screens");
 		HandRayController.Instance.EnableHandRays();
 		PrivateUIRoom.AddUI(base.transform);
-		this._firstAgeAppealScreen.ShowRestrictedAccessScreen(sessionStatus);
-		AgeStatusType ageStatusType;
-		if (KIDManager.TryGetAgeStatusTypeFromAge(KIDAgeGate.UserAge, out ageStatusType))
+		_firstAgeAppealScreen.ShowRestrictedAccessScreen(sessionStatus);
+		if (KIDManager.TryGetAgeStatusTypeFromAge(KIDAgeGate.UserAge, out var ageType))
 		{
 			TelemetryData telemetryData = new TelemetryData
 			{
 				EventName = "kid_age_appeal",
-				CustomTags = new string[]
+				CustomTags = new string[3]
 				{
 					"kid_age_appeal",
 					KIDTelemetry.GameVersionCustomTag,
 					KIDTelemetry.GameEnvironment
 				},
-				BodyData = new Dictionary<string, string>
+				BodyData = new Dictionary<string, string> { 
 				{
-					{
-						"submitted_age",
-						ageStatusType.ToString()
-					}
-				}
+					"submitted_age",
+					ageType.ToString()
+				} }
 			};
 			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
 		}
@@ -53,32 +50,26 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 	{
 		PrivateUIRoom.RemoveUI(base.transform);
 		HandRayController.Instance.DisableHandRays();
-		this._firstAgeAppealScreen.gameObject.SetActive(false);
+		_firstAgeAppealScreen.gameObject.SetActive(value: false);
 		Object.DestroyImmediate(base.gameObject);
 	}
 
 	public void StartTooYoungToPlayScreen()
 	{
-		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Too Young to Play Screen", Array.Empty<object>());
+		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Too Young to Play Screen");
 		HandRayController.Instance.EnableHandRays();
 		PrivateUIRoom.AddUI(base.transform);
-		this._tooYoungToPlayScreen.ShowTooYoungToPlayScreen();
+		_tooYoungToPlayScreen.ShowTooYoungToPlayScreen();
 		TelemetryData telemetryData = new TelemetryData
 		{
 			EventName = "kid_screen_shown",
-			CustomTags = new string[]
+			CustomTags = new string[3]
 			{
 				"kid_age_appeal",
 				KIDTelemetry.GameVersionCustomTag,
 				KIDTelemetry.GameEnvironment
 			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"blocked"
-				}
-			}
+			BodyData = new Dictionary<string, string> { { "screen", "blocked" } }
 		};
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
 	}
@@ -90,19 +81,6 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 
 	public void OnDisable()
 	{
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
-
-	private static KIDUI_AgeAppealController _instance;
-
-	[SerializeField]
-	private KIDUI_RestrictedAccessScreen _firstAgeAppealScreen;
-
-	[SerializeField]
-	private KIDUI_TooYoungToPlay _tooYoungToPlayScreen;
 }

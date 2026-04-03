@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface IFXContextParems<T> where T : FXSArgs
 {
 	FXSystemSettings settings { get; }

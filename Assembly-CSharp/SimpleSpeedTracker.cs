@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,185 +5,6 @@ using UnityEngine.Events;
 [DisallowMultipleComponent]
 public class SimpleSpeedTracker : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void OnEnable()
-	{
-		if (this.target == null)
-		{
-			this.target = base.transform;
-		}
-		this.lastPos = this.target.position;
-		this.lastSliceTime = Time.time;
-		this.lastVelocity = Vector3.zero;
-		this.lastRawSpeed = 0f;
-		this.lastSpeed = 0f;
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void SliceUpdate()
-	{
-		float num = Mathf.Max(1E-06f, Time.time - this.lastSliceTime);
-		Vector3 position = this.target.position;
-		Vector3 vector = (position - this.lastPos) / num;
-		float magnitude = vector.magnitude;
-		this.lastSpeed = (this.useRawSpeed ? magnitude : Mathf.Lerp(this.lastSpeed, magnitude, 1f - Mathf.Exp(-this.responsiveness * num)));
-		float num2 = this.postprocessCurve.Evaluate(this.lastSpeed);
-		this.continuousProperties.ApplyAll(num2);
-		float num3 = this.useRawSpeed ? magnitude : num2;
-		UnityEvent<float> unityEvent = this.onSpeedUpdated;
-		if (unityEvent != null)
-		{
-			unityEvent.Invoke(num3);
-		}
-		this.debugCurrentSpeed = num3;
-		bool flag = num3 >= this.eventThreshold;
-		if (flag && !this.wasAboveThreshold)
-		{
-			UnityEvent unityEvent2 = this.onSpeedAboveThreshold;
-			if (unityEvent2 != null)
-			{
-				unityEvent2.Invoke();
-			}
-		}
-		else if (!flag && this.wasAboveThreshold)
-		{
-			UnityEvent unityEvent3 = this.onSpeedBelowThreshold;
-			if (unityEvent3 != null)
-			{
-				unityEvent3.Invoke();
-			}
-		}
-		this.wasAboveThreshold = flag;
-		this.lastVelocity = vector;
-		this.lastRawSpeed = magnitude;
-		this.lastPos = position;
-		this.lastSliceTime = Time.time;
-	}
-
-	public float GetPostProcessSpeed()
-	{
-		return this.postprocessCurve.Evaluate(this.lastSpeed);
-	}
-
-	public float GetRawSpeed()
-	{
-		return this.lastRawSpeed;
-	}
-
-	public Vector3 GetWorldVelocity()
-	{
-		return this.lastVelocity;
-	}
-
-	public Vector3 GetLocalVelocity()
-	{
-		if (this.useWorldAxes)
-		{
-			return this.lastVelocity;
-		}
-		if (this.target != null)
-		{
-			return this.target.InverseTransformDirection(this.lastVelocity);
-		}
-		return base.transform.InverseTransformDirection(this.lastVelocity);
-	}
-
-	public float GetSignedSpeedAlongForward(Transform reference)
-	{
-		if (reference == null)
-		{
-			return 0f;
-		}
-		return Vector3.Dot(this.lastVelocity, reference.forward);
-	}
-
-	public float GetSignedSpeedX()
-	{
-		return Vector3.Dot(this.lastVelocity, this.ResolveAxisRight());
-	}
-
-	public float GetSignedSpeedY()
-	{
-		return Vector3.Dot(this.lastVelocity, this.ResolveAxisUp());
-	}
-
-	public float GetSignedSpeedZ()
-	{
-		return Vector3.Dot(this.lastVelocity, this.ResolveAxisForward());
-	}
-
-	public Vector3 GetVelocityInAxisSpace()
-	{
-		Vector3 rhs = this.ResolveAxisRight();
-		Vector3 rhs2 = this.ResolveAxisUp();
-		Vector3 rhs3 = this.ResolveAxisForward();
-		return new Vector3(Vector3.Dot(this.lastVelocity, rhs), Vector3.Dot(this.lastVelocity, rhs2), Vector3.Dot(this.lastVelocity, rhs3));
-	}
-
-	private Vector3 ResolveAxisRight()
-	{
-		if (this.useWorldAxes)
-		{
-			if (this.worldSpace != null)
-			{
-				return this.worldSpace.right;
-			}
-			return Vector3.right;
-		}
-		else
-		{
-			if (!(this.target != null))
-			{
-				return base.transform.right;
-			}
-			return this.target.right;
-		}
-	}
-
-	private Vector3 ResolveAxisUp()
-	{
-		if (this.useWorldAxes)
-		{
-			if (this.worldSpace != null)
-			{
-				return this.worldSpace.up;
-			}
-			return Vector3.up;
-		}
-		else
-		{
-			if (!(this.target != null))
-			{
-				return base.transform.up;
-			}
-			return this.target.up;
-		}
-	}
-
-	private Vector3 ResolveAxisForward()
-	{
-		if (this.useWorldAxes)
-		{
-			if (this.worldSpace != null)
-			{
-				return this.worldSpace.forward;
-			}
-			return Vector3.forward;
-		}
-		else
-		{
-			if (!(this.target != null))
-			{
-				return base.transform.forward;
-			}
-			return this.target.forward;
-		}
-	}
-
 	[Header("Settings")]
 	[Tooltip("Transform whose movement speed is tracked. If left empty, uses this object’s transform.")]
 	[SerializeField]
@@ -238,4 +58,162 @@ public class SimpleSpeedTracker : MonoBehaviour, IGorillaSliceableSimple
 	private float lastSliceTime;
 
 	private bool wasAboveThreshold;
+
+	public void OnEnable()
+	{
+		if (target == null)
+		{
+			target = base.transform;
+		}
+		lastPos = target.position;
+		lastSliceTime = Time.time;
+		lastVelocity = Vector3.zero;
+		lastRawSpeed = 0f;
+		lastSpeed = 0f;
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void SliceUpdate()
+	{
+		float num = Mathf.Max(1E-06f, Time.time - lastSliceTime);
+		Vector3 position = target.position;
+		Vector3 vector = (position - lastPos) / num;
+		float magnitude = vector.magnitude;
+		lastSpeed = (useRawSpeed ? magnitude : Mathf.Lerp(lastSpeed, magnitude, 1f - Mathf.Exp((0f - responsiveness) * num)));
+		float num2 = postprocessCurve.Evaluate(lastSpeed);
+		continuousProperties.ApplyAll(num2);
+		float num3 = (useRawSpeed ? magnitude : num2);
+		onSpeedUpdated?.Invoke(num3);
+		debugCurrentSpeed = num3;
+		bool flag = num3 >= eventThreshold;
+		if (flag && !wasAboveThreshold)
+		{
+			onSpeedAboveThreshold?.Invoke();
+		}
+		else if (!flag && wasAboveThreshold)
+		{
+			onSpeedBelowThreshold?.Invoke();
+		}
+		wasAboveThreshold = flag;
+		lastVelocity = vector;
+		lastRawSpeed = magnitude;
+		lastPos = position;
+		lastSliceTime = Time.time;
+	}
+
+	public float GetPostProcessSpeed()
+	{
+		return postprocessCurve.Evaluate(lastSpeed);
+	}
+
+	public float GetRawSpeed()
+	{
+		return lastRawSpeed;
+	}
+
+	public Vector3 GetWorldVelocity()
+	{
+		return lastVelocity;
+	}
+
+	public Vector3 GetLocalVelocity()
+	{
+		if (useWorldAxes)
+		{
+			return lastVelocity;
+		}
+		if (target != null)
+		{
+			return target.InverseTransformDirection(lastVelocity);
+		}
+		return base.transform.InverseTransformDirection(lastVelocity);
+	}
+
+	public float GetSignedSpeedAlongForward(Transform reference)
+	{
+		if (reference == null)
+		{
+			return 0f;
+		}
+		return Vector3.Dot(lastVelocity, reference.forward);
+	}
+
+	public float GetSignedSpeedX()
+	{
+		return Vector3.Dot(lastVelocity, ResolveAxisRight());
+	}
+
+	public float GetSignedSpeedY()
+	{
+		return Vector3.Dot(lastVelocity, ResolveAxisUp());
+	}
+
+	public float GetSignedSpeedZ()
+	{
+		return Vector3.Dot(lastVelocity, ResolveAxisForward());
+	}
+
+	public Vector3 GetVelocityInAxisSpace()
+	{
+		Vector3 rhs = ResolveAxisRight();
+		Vector3 rhs2 = ResolveAxisUp();
+		Vector3 rhs3 = ResolveAxisForward();
+		return new Vector3(Vector3.Dot(lastVelocity, rhs), Vector3.Dot(lastVelocity, rhs2), Vector3.Dot(lastVelocity, rhs3));
+	}
+
+	private Vector3 ResolveAxisRight()
+	{
+		if (useWorldAxes)
+		{
+			if (worldSpace != null)
+			{
+				return worldSpace.right;
+			}
+			return Vector3.right;
+		}
+		if (!(target != null))
+		{
+			return base.transform.right;
+		}
+		return target.right;
+	}
+
+	private Vector3 ResolveAxisUp()
+	{
+		if (useWorldAxes)
+		{
+			if (worldSpace != null)
+			{
+				return worldSpace.up;
+			}
+			return Vector3.up;
+		}
+		if (!(target != null))
+		{
+			return base.transform.up;
+		}
+		return target.up;
+	}
+
+	private Vector3 ResolveAxisForward()
+	{
+		if (useWorldAxes)
+		{
+			if (worldSpace != null)
+			{
+				return worldSpace.forward;
+			}
+			return Vector3.forward;
+		}
+		if (!(target != null))
+		{
+			return base.transform.forward;
+		}
+		return target.forward;
+	}
 }

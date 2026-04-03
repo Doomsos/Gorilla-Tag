@@ -1,249 +1,206 @@
-﻿using System;
+using System;
 using GorillaTag.Gravity;
 using UnityEngine;
 
-namespace GorillaLocomotion
+namespace GorillaLocomotion;
+
+public class GTPlayerTransform : MonkeGravityController
 {
-	public class GTPlayerTransform : MonkeGravityController
+	private static Vector3 k_rotationPosOffsetChange = Vector3.zero;
+
+	private static Transform k_transform;
+
+	private static Rigidbody k_rigidBody;
+
+	private static Transform k_bodyTransform;
+
+	private static GTPlayer k_playerInstance;
+
+	private static int k_rotationOverrideFrameTime;
+
+	[SerializeField]
+	private Transform m_gtPlayerBodyTransform;
+
+	[SerializeField]
+	private GTPlayer m_gtPlayerInstance;
+
+	public static Vector3 Up { get; private set; } = Vector3.up;
+
+	public static Vector3 PhysicsUp { get; private set; } = Vector3.up;
+
+	public static Vector3 Down { get; private set; } = Vector3.down;
+
+	public static Vector3 PhysicsDown { get; private set; } = Vector3.down;
+
+	public static Vector3 Forward { get; private set; } = Vector3.forward;
+
+	public static Vector3 Right { get; private set; } = Vector3.right;
+
+	public static Quaternion BodyRotation => k_bodyTransform.rotation;
+
+	public static bool UseNetRotation { get; set; } = false;
+
+	public static bool IgnoreGravityRotation { get; set; } = false;
+
+	public static bool IgnoreGravityForce { get; set; } = false;
+
+	public static Vector3 RotationPosOffsetChange => k_rotationPosOffsetChange;
+
+	public static GTPlayerTransform Instance { get; private set; }
+
+	public override float Scale => VRRig.LocalRig.scaleFactor;
+
+	public static void RotateToUp(in Vector3 targetUp)
 	{
-		public static Vector3 Up { get; private set; } = Vector3.up;
-
-		public static Vector3 PhysicsUp { get; private set; } = Vector3.up;
-
-		public static Vector3 Down { get; private set; } = Vector3.down;
-
-		public static Vector3 PhysicsDown { get; private set; } = Vector3.down;
-
-		public static Vector3 Forward { get; private set; } = Vector3.forward;
-
-		public static Vector3 Right { get; private set; } = Vector3.right;
-
-		public static Quaternion BodyRotation
+		if (targetUp == Up)
 		{
-			get
+			Instance.ClearRotationRecovery();
+		}
+		else
+		{
+			RotateFromToDirection(Up, in targetUp);
+		}
+	}
+
+	public static void RotateToForward(in Vector3 targetForward)
+	{
+		if (!(targetForward == Forward))
+		{
+			RotateFromToDirection(Forward, in targetForward);
+		}
+	}
+
+	public static void RotateFromToDirection(in Vector3 currentDir, in Vector3 targetDir)
+	{
+		Quaternion currentRotation = k_transform.rotation;
+		SetRotation(Quaternion.FromToRotation(currentDir, targetDir) * currentRotation, in currentRotation);
+	}
+
+	public static void RotateBy(in Quaternion rotation)
+	{
+		Quaternion currentRotation = k_transform.rotation;
+		SetRotation(currentRotation * rotation, in currentRotation);
+	}
+
+	public static void SetRotation(in Quaternion targetRotation)
+	{
+		SetRotation(in targetRotation, k_transform.rotation);
+	}
+
+	private static void SetRotation(in Quaternion newRotation, in Quaternion currentRotation)
+	{
+		ref readonly GTPlayer.HandState leftHandRef = ref k_playerInstance.LeftHandRef;
+		ref readonly GTPlayer.HandState rightHandRef = ref k_playerInstance.RightHandRef;
+		Vector3 pivotPoint = k_transform.position;
+		Quaternion rotation = newRotation * Quaternion.Inverse(currentRotation);
+		Vector3 rotatedDifference = GetRotatedDifference(in pivotPoint, k_bodyTransform.position, in rotation);
+		if (leftHandRef.wasColliding || leftHandRef.wasSliding)
+		{
+			Vector3 rotatedDifference2 = GetRotatedDifference(in pivotPoint, in leftHandRef.lastPosition, in rotation);
+			if (Vector3.Dot(Vector3.Normalize(rotatedDifference2), leftHandRef.lastHitInfo.normal) <= 0f)
 			{
-				return GTPlayerTransform.k_bodyTransform.rotation;
+				rotatedDifference -= rotatedDifference2;
 			}
 		}
-
-		public static bool UseNetRotation { get; set; } = false;
-
-		public static bool IgnoreGravityRotation { get; set; } = false;
-
-		public static bool IgnoreGravityForce { get; set; } = false;
-
-		public static Vector3 RotationPosOffsetChange
+		if (rightHandRef.wasColliding || rightHandRef.wasSliding)
 		{
-			get
+			Vector3 rotatedDifference3 = GetRotatedDifference(in pivotPoint, in rightHandRef.lastPosition, in rotation);
+			if (Vector3.Dot(Vector3.Normalize(rotatedDifference3), rightHandRef.lastHitInfo.normal) <= 0f)
 			{
-				return GTPlayerTransform.k_rotationPosOffsetChange;
+				rotatedDifference -= rotatedDifference3;
 			}
 		}
+		k_rotationPosOffsetChange -= rotatedDifference;
+		k_rigidBody.position = pivotPoint - rotatedDifference;
+		k_rigidBody.rotation = newRotation;
+		Up = newRotation * Vector3.up;
+		Down = Up * -1f;
+		Forward = newRotation * Vector3.forward;
+		Right = newRotation * Vector3.right;
+	}
 
-		public static GTPlayerTransform Instance { get; private set; }
+	private static Vector3 GetRotatedDifference(in Vector3 pivotPoint, in Vector3 worldPoint, in Quaternion rotation)
+	{
+		Vector3 vector = worldPoint - pivotPoint;
+		return rotation * vector - vector;
+	}
 
-		public static void RotateToUp(in Vector3 targetUp)
+	public static void ApplyRotationOverride(in Quaternion rotation, int frameTime)
+	{
+		SetRotation(in rotation);
+		k_rotationOverrideFrameTime = frameTime;
+	}
+
+	public static void ResetRotationPositionOffset()
+	{
+		k_rotationPosOffsetChange = Vector3.zero;
+	}
+
+	public static void EnableNetworkRotations()
+	{
+		UseNetRotation = true;
+	}
+
+	public static void DisableNetworkRotations()
+	{
+		UseNetRotation = false;
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		if (!base.Register)
 		{
-			if (targetUp == GTPlayerTransform.Up)
-			{
-				GTPlayerTransform.Instance.ClearRotationRecovery();
-				return;
-			}
-			Vector3 up = GTPlayerTransform.Up;
-			GTPlayerTransform.RotateFromToDirection(up, targetUp);
+			Debug.LogError("GTPlayerTransform: failed to load required references", base.gameObject);
 		}
+		Instance = this;
+		k_transform = m_targetTransform;
+		k_rigidBody = m_targetRigidBody;
+		k_bodyTransform = m_gtPlayerBodyTransform;
+		k_playerInstance = m_gtPlayerInstance;
+		Up = k_transform.up;
+		Forward = k_transform.forward;
+		Right = k_transform.right;
+		Down = Up * -1f;
+		m_globalGravityIntent = false;
+	}
 
-		public static void RotateToForward(in Vector3 targetForward)
+	public override void ApplyGravityUpRotation(in Vector3 upDir, float speed)
+	{
+		if (!IgnoreGravityRotation && k_rotationOverrideFrameTime < Time.frameCount - 1)
 		{
-			if (targetForward == GTPlayerTransform.Forward)
-			{
-				return;
-			}
-			Vector3 forward = GTPlayerTransform.Forward;
-			GTPlayerTransform.RotateFromToDirection(forward, targetForward);
-		}
-
-		public static void RotateFromToDirection(in Vector3 currentDir, in Vector3 targetDir)
-		{
-			Quaternion rotation = GTPlayerTransform.k_transform.rotation;
-			Quaternion quaternion = Quaternion.FromToRotation(currentDir, targetDir) * rotation;
-			GTPlayerTransform.SetRotation(quaternion, rotation);
-		}
-
-		public static void RotateBy(in Quaternion rotation)
-		{
-			Quaternion rotation2 = GTPlayerTransform.k_transform.rotation;
-			Quaternion quaternion = rotation2 * rotation;
-			GTPlayerTransform.SetRotation(quaternion, rotation2);
-		}
-
-		public static void SetRotation(in Quaternion targetRotation)
-		{
-			Quaternion rotation = GTPlayerTransform.k_transform.rotation;
-			GTPlayerTransform.SetRotation(targetRotation, rotation);
-		}
-
-		private static void SetRotation(in Quaternion newRotation, in Quaternion currentRotation)
-		{
-			ref readonly GTPlayer.HandState leftHandRef = ref GTPlayerTransform.k_playerInstance.LeftHandRef;
-			ref readonly GTPlayer.HandState rightHandRef = ref GTPlayerTransform.k_playerInstance.RightHandRef;
-			Vector3 position = GTPlayerTransform.k_transform.position;
-			Quaternion quaternion = newRotation * Quaternion.Inverse(currentRotation);
-			Vector3 position2 = GTPlayerTransform.k_bodyTransform.position;
-			Vector3 vector = GTPlayerTransform.GetRotatedDifference(position, position2, quaternion);
-			if (leftHandRef.wasColliding || leftHandRef.wasSliding)
-			{
-				Vector3 rotatedDifference = GTPlayerTransform.GetRotatedDifference(position, leftHandRef.lastPosition, quaternion);
-				Vector3 lhs = Vector3.Normalize(rotatedDifference);
-				RaycastHit lastHitInfo = leftHandRef.lastHitInfo;
-				if (Vector3.Dot(lhs, lastHitInfo.normal) <= 0f)
-				{
-					vector -= rotatedDifference;
-				}
-			}
-			if (rightHandRef.wasColliding || rightHandRef.wasSliding)
-			{
-				Vector3 rotatedDifference2 = GTPlayerTransform.GetRotatedDifference(position, rightHandRef.lastPosition, quaternion);
-				Vector3 lhs2 = Vector3.Normalize(rotatedDifference2);
-				RaycastHit lastHitInfo = rightHandRef.lastHitInfo;
-				if (Vector3.Dot(lhs2, lastHitInfo.normal) <= 0f)
-				{
-					vector -= rotatedDifference2;
-				}
-			}
-			GTPlayerTransform.k_rotationPosOffsetChange -= vector;
-			GTPlayerTransform.k_rigidBody.position = position - vector;
-			GTPlayerTransform.k_rigidBody.rotation = newRotation;
-			GTPlayerTransform.Up = newRotation * Vector3.up;
-			GTPlayerTransform.Down = GTPlayerTransform.Up * -1f;
-			GTPlayerTransform.Forward = newRotation * Vector3.forward;
-			GTPlayerTransform.Right = newRotation * Vector3.right;
-		}
-
-		private static Vector3 GetRotatedDifference(in Vector3 pivotPoint, in Vector3 worldPoint, in Quaternion rotation)
-		{
-			Vector3 vector = worldPoint - pivotPoint;
-			return rotation * vector - vector;
-		}
-
-		public static void ApplyRotationOverride(in Quaternion rotation, int frameTime)
-		{
-			GTPlayerTransform.SetRotation(rotation);
-			GTPlayerTransform.k_rotationOverrideFrameTime = frameTime;
-		}
-
-		public static void ResetRotationPositionOffset()
-		{
-			GTPlayerTransform.k_rotationPosOffsetChange = Vector3.zero;
-		}
-
-		public static void EnableNetworkRotations()
-		{
-			GTPlayerTransform.UseNetRotation = true;
-		}
-
-		public static void DisableNetworkRotations()
-		{
-			GTPlayerTransform.UseNetRotation = false;
-		}
-
-		protected override void Awake()
-		{
-			base.Awake();
-			if (!base.Register)
-			{
-				Debug.LogError("GTPlayerTransform: failed to load required references", base.gameObject);
-			}
-			GTPlayerTransform.Instance = this;
-			GTPlayerTransform.k_transform = this.m_targetTransform;
-			GTPlayerTransform.k_rigidBody = this.m_targetRigidBody;
-			GTPlayerTransform.k_bodyTransform = this.m_gtPlayerBodyTransform;
-			GTPlayerTransform.k_playerInstance = this.m_gtPlayerInstance;
-			GTPlayerTransform.Up = GTPlayerTransform.k_transform.up;
-			GTPlayerTransform.Forward = GTPlayerTransform.k_transform.forward;
-			GTPlayerTransform.Right = GTPlayerTransform.k_transform.right;
-			GTPlayerTransform.Down = GTPlayerTransform.Up * -1f;
-			this.m_globalGravityIntent = false;
-		}
-
-		public override void ApplyGravityUpRotation(in Vector3 upDir, float speed)
-		{
-			if (GTPlayerTransform.IgnoreGravityRotation || GTPlayerTransform.k_rotationOverrideFrameTime >= Time.frameCount - 1)
-			{
-				return;
-			}
 			if (base.InstantRotation)
 			{
-				GTPlayerTransform.RotateToUp(upDir);
-				return;
-			}
-			Vector3 vector;
-			if (Vector3.Angle(GTPlayerTransform.Up, upDir) * 0.017453292f <= speed)
-			{
-				vector = upDir;
+				RotateToUp(in upDir);
 			}
 			else
 			{
-				vector = Vector3.RotateTowards(GTPlayerTransform.Up, upDir, speed, 0f);
+				RotateToUp((!(Vector3.Angle(Up, upDir) * (MathF.PI / 180f) <= speed)) ? Vector3.RotateTowards(Up, upDir, speed, 0f) : upDir);
 			}
-			GTPlayerTransform.RotateToUp(vector);
 		}
+	}
 
-		public override void ApplyGravityForce(in Vector3 force, ForceMode forceType = ForceMode.Acceleration)
+	public override void ApplyGravityForce(in Vector3 force, ForceMode forceType = ForceMode.Acceleration)
+	{
+		if (!IgnoreGravityForce && !k_playerInstance.isClimbing && k_playerInstance.GravityOverrideCount <= 0)
 		{
-			if (GTPlayerTransform.IgnoreGravityForce || GTPlayerTransform.k_playerInstance.isClimbing || GTPlayerTransform.k_playerInstance.GravityOverrideCount > 0)
-			{
-				return;
-			}
-			Vector3 vector = force * GTPlayerTransform.k_playerInstance.scale;
-			base.ApplyGravityForce(vector, forceType);
+			base.ApplyGravityForce(force * k_playerInstance.scale, forceType);
 		}
+	}
 
-		public override Vector3 GetWorldPoint()
+	public override Vector3 GetWorldPoint()
+	{
+		return k_bodyTransform.position;
+	}
+
+	public override void CallBack()
+	{
+		base.CallBack();
+		PhysicsUp = base.GravityUp;
+		PhysicsDown = base.GravityDown;
+		if (base.GravityZonesCount <= 0 && Up != PhysicsUp)
 		{
-			return GTPlayerTransform.k_bodyTransform.position;
+			ApplyGravityUpRotation(PhysicsUp, MonkeGravityManager.DefaultGravityInfo.rotationSpeed * Time.fixedDeltaTime);
 		}
-
-		public override float Scale
-		{
-			get
-			{
-				return VRRig.LocalRig.scaleFactor;
-			}
-		}
-
-		public override void CallBack()
-		{
-			base.CallBack();
-			GTPlayerTransform.PhysicsUp = base.GravityUp;
-			GTPlayerTransform.PhysicsDown = base.GravityDown;
-			if (base.GravityZonesCount > 0)
-			{
-				return;
-			}
-			if (GTPlayerTransform.Up != GTPlayerTransform.PhysicsUp)
-			{
-				Vector3 physicsUp = GTPlayerTransform.PhysicsUp;
-				this.ApplyGravityUpRotation(physicsUp, MonkeGravityManager.DefaultGravityInfo.rotationSpeed * Time.fixedDeltaTime);
-			}
-		}
-
-		private static Vector3 k_rotationPosOffsetChange = Vector3.zero;
-
-		private static Transform k_transform;
-
-		private static Rigidbody k_rigidBody;
-
-		private static Transform k_bodyTransform;
-
-		private static GTPlayer k_playerInstance;
-
-		private static int k_rotationOverrideFrameTime;
-
-		[SerializeField]
-		private Transform m_gtPlayerBodyTransform;
-
-		[SerializeField]
-		private GTPlayer m_gtPlayerInstance;
 	}
 }

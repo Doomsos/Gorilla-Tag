@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-[JsonConverter(typeof(StringEnumConverter))]
 [Serializable]
+[JsonConverter(typeof(StringEnumConverter))]
 public enum QuestCategory
 {
 	NONE,

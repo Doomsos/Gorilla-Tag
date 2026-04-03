@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTag;
 using UnityEngine;
@@ -7,148 +7,6 @@ using UnityEngine.Events;
 [RequireComponent(typeof(UseableObjectEvents))]
 public class UseableObject : TransferrableObject
 {
-	public bool isMidUse
-	{
-		get
-		{
-			return this._isMidUse;
-		}
-	}
-
-	public float useTimeElapsed
-	{
-		get
-		{
-			return this._useTimeElapsed;
-		}
-	}
-
-	public bool justUsed
-	{
-		get
-		{
-			if (!this._justUsed)
-			{
-				return false;
-			}
-			this._justUsed = false;
-			return true;
-		}
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		this._events = base.gameObject.GetOrAddComponent<UseableObjectEvents>();
-	}
-
-	internal override void OnEnable()
-	{
-		base.OnEnable();
-		UseableObjectEvents events = this._events;
-		VRRig myOnlineRig = base.myOnlineRig;
-		NetPlayer player;
-		if ((player = ((myOnlineRig != null) ? myOnlineRig.creator : null)) == null)
-		{
-			VRRig myRig = base.myRig;
-			player = ((myRig != null) ? myRig.creator : null);
-		}
-		events.Init(player);
-		this._events.Activate += this.OnObjectActivated;
-		this._events.Deactivate += this.OnObjectDeactivated;
-	}
-
-	internal override void OnDisable()
-	{
-		base.OnDisable();
-		Object.Destroy(this._events);
-	}
-
-	private void OnObjectActivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
-	{
-	}
-
-	private void OnObjectDeactivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
-	{
-	}
-
-	public override void TriggeredLateUpdate()
-	{
-		base.TriggeredLateUpdate();
-		if (this._isMidUse)
-		{
-			this._useTimeElapsed += Time.deltaTime;
-		}
-	}
-
-	public override void OnActivate()
-	{
-		base.OnActivate();
-		if (this.IsMyItem())
-		{
-			UnityEvent unityEvent = this.onActivateLocal;
-			if (unityEvent != null)
-			{
-				unityEvent.Invoke();
-			}
-			this._useTimeElapsed = 0f;
-			this._isMidUse = true;
-		}
-		if (this._raiseActivate)
-		{
-			UseableObjectEvents events = this._events;
-			if (events == null)
-			{
-				return;
-			}
-			PhotonEvent activate = events.Activate;
-			if (activate == null)
-			{
-				return;
-			}
-			activate.RaiseAll(Array.Empty<object>());
-		}
-	}
-
-	public override void OnDeactivate()
-	{
-		base.OnDeactivate();
-		if (this.IsMyItem())
-		{
-			UnityEvent unityEvent = this.onDeactivateLocal;
-			if (unityEvent != null)
-			{
-				unityEvent.Invoke();
-			}
-			this._isMidUse = false;
-			this._justUsed = true;
-		}
-		if (this._raiseDeactivate)
-		{
-			UseableObjectEvents events = this._events;
-			if (events == null)
-			{
-				return;
-			}
-			PhotonEvent deactivate = events.Deactivate;
-			if (deactivate == null)
-			{
-				return;
-			}
-			deactivate.RaiseAll(Array.Empty<object>());
-		}
-	}
-
-	public override bool CanActivate()
-	{
-		return !this.disableActivation;
-	}
-
-	public override bool CanDeactivate()
-	{
-		return !this.disableDeactivation;
-	}
-
 	[DebugOption]
 	public bool disableActivation;
 
@@ -185,4 +43,98 @@ public class UseableObject : TransferrableObject
 	public UnityEvent onActivateLocal;
 
 	public UnityEvent onDeactivateLocal;
+
+	public bool isMidUse => _isMidUse;
+
+	public float useTimeElapsed => _useTimeElapsed;
+
+	public bool justUsed
+	{
+		get
+		{
+			if (!_justUsed)
+			{
+				return false;
+			}
+			_justUsed = false;
+			return true;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		_events = base.gameObject.GetOrAddComponent<UseableObjectEvents>();
+	}
+
+	internal override void OnEnable()
+	{
+		base.OnEnable();
+		_events.Init(base.myOnlineRig?.creator ?? base.myRig?.creator);
+		_events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(OnObjectActivated);
+		_events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(OnObjectDeactivated);
+	}
+
+	internal override void OnDisable()
+	{
+		base.OnDisable();
+		UnityEngine.Object.Destroy(_events);
+	}
+
+	private void OnObjectActivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
+	{
+	}
+
+	private void OnObjectDeactivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
+	{
+	}
+
+	public override void TriggeredLateUpdate()
+	{
+		base.TriggeredLateUpdate();
+		if (_isMidUse)
+		{
+			_useTimeElapsed += Time.deltaTime;
+		}
+	}
+
+	public override void OnActivate()
+	{
+		base.OnActivate();
+		if (IsMyItem())
+		{
+			onActivateLocal?.Invoke();
+			_useTimeElapsed = 0f;
+			_isMidUse = true;
+		}
+		if (_raiseActivate)
+		{
+			_events?.Activate?.RaiseAll();
+		}
+	}
+
+	public override void OnDeactivate()
+	{
+		base.OnDeactivate();
+		if (IsMyItem())
+		{
+			onDeactivateLocal?.Invoke();
+			_isMidUse = false;
+			_justUsed = true;
+		}
+		if (_raiseDeactivate)
+		{
+			_events?.Deactivate?.RaiseAll();
+		}
+	}
+
+	public override bool CanActivate()
+	{
+		return !disableActivation;
+	}
+
+	public override bool CanDeactivate()
+	{
+		return !disableDeactivation;
+	}
 }

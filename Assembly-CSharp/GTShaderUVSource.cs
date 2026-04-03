@@ -1,7 +1,5 @@
-﻿using System;
-
 public enum GTShaderUVSource
 {
-	UV0,
+	UV0 = 0,
 	WorldPlanarY = 3
 }

@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 
 public class ComponentMember
 {
+	private Func<string> getValue;
+
+	public string computedPrefix;
+
+	public string computedSuffix;
+
 	public string Name { get; }
 
-	public string Value
-	{
-		get
-		{
-			return this.getValue();
-		}
-	}
+	public string Value => getValue();
 
 	public bool IsStarred { get; }
 
@@ -18,15 +18,9 @@ public class ComponentMember
 
 	public ComponentMember(string name, Func<string> getValue, bool isStarred, string color)
 	{
-		this.Name = name;
+		Name = name;
 		this.getValue = getValue;
-		this.IsStarred = isStarred;
-		this.Color = color;
+		IsStarred = isStarred;
+		Color = color;
 	}
-
-	private Func<string> getValue;
-
-	public string computedPrefix;
-
-	public string computedSuffix;
 }

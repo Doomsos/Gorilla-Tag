@@ -1,127 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GameBall : MonoBehaviour
 {
-	public bool IsLaunched
-	{
-		get
-		{
-			return this._launched;
-		}
-	}
-
-	private void Awake()
-	{
-		this.id = GameBallId.Invalid;
-		if (this.rigidBody == null)
-		{
-			this.rigidBody = base.GetComponent<Rigidbody>();
-		}
-		if (this.collider == null)
-		{
-			this.collider = base.GetComponent<Collider>();
-		}
-		if (this.disc && this.rigidBody != null)
-		{
-			this.rigidBody.maxAngularVelocity = 28f;
-		}
-		this.heldByActorNumber = -1;
-		this.lastHeldByTeamId = -1;
-		this.onlyGrabTeamId = -1;
-		this._monkeBall = base.GetComponent<MonkeBall>();
-	}
-
-	private void FixedUpdate()
-	{
-		if (this.rigidBody == null)
-		{
-			return;
-		}
-		if (this._launched)
-		{
-			this._launchedTimer += Time.fixedDeltaTime;
-			if (this.collider.isTrigger && this._launchedTimer > 1f && this.rigidBody.linearVelocity.y <= 0f)
-			{
-				this._launched = false;
-				this.collider.isTrigger = false;
-			}
-		}
-		Vector3 a = -Physics.gravity * (1f - this.gravityMult);
-		this.rigidBody.AddForce(a * this.rigidBody.mass, ForceMode.Force);
-		this._catchSoundDecay -= Time.deltaTime;
-	}
-
-	public void WasLaunched()
-	{
-		this._launched = true;
-		this.collider.isTrigger = true;
-		this._launchedTimer = 0f;
-	}
-
-	public Vector3 GetVelocity()
-	{
-		if (this.rigidBody == null)
-		{
-			return Vector3.zero;
-		}
-		return this.rigidBody.linearVelocity;
-	}
-
-	public void SetVelocity(Vector3 velocity)
-	{
-		this.rigidBody.linearVelocity = velocity;
-	}
-
-	public void PlayCatchFx()
-	{
-		if (this.audioSource != null && this._catchSoundDecay <= 0f && this.audioSource.isActiveAndEnabled)
-		{
-			this.audioSource.clip = this.catchSound;
-			this.audioSource.volume = this.catchSoundVolume;
-			this.audioSource.GTPlay();
-			this._catchSoundDecay = 0.1f;
-		}
-	}
-
-	public void PlayThrowFx()
-	{
-		if (this.audioSource != null && this.audioSource.isActiveAndEnabled)
-		{
-			this.audioSource.clip = this.throwSound;
-			this.audioSource.volume = this.throwSoundVolume;
-			this.audioSource.GTPlay();
-		}
-	}
-
-	public void PlayBounceFX()
-	{
-		if (this.audioSource != null && this.audioSource.isActiveAndEnabled)
-		{
-			this.audioSource.clip = this.groundSound;
-			this.audioSource.volume = this.groundSoundVolume;
-			this.audioSource.GTPlay();
-		}
-	}
-
-	public void SetHeldByTeamId(int teamId)
-	{
-		this.lastHeldByTeamId = teamId;
-	}
-
-	private bool IsGamePlayer(Collider collider)
-	{
-		return GameBallPlayer.GetGamePlayer(collider, false) != null;
-	}
-
-	public void SetVisualOffset(bool detach)
-	{
-		if (this._monkeBall != null)
-		{
-			this._monkeBall.SetVisualOffset(detach);
-		}
-	}
-
 	public GameBallId id;
 
 	public float gravityMult = 1f;
@@ -165,4 +45,117 @@ public class GameBall : MonoBehaviour
 	private float _launchedTimer;
 
 	public MonkeBall _monkeBall;
+
+	public bool IsLaunched => _launched;
+
+	private void Awake()
+	{
+		id = GameBallId.Invalid;
+		if (rigidBody == null)
+		{
+			rigidBody = GetComponent<Rigidbody>();
+		}
+		if (collider == null)
+		{
+			collider = GetComponent<Collider>();
+		}
+		if (disc && rigidBody != null)
+		{
+			rigidBody.maxAngularVelocity = 28f;
+		}
+		heldByActorNumber = -1;
+		lastHeldByTeamId = -1;
+		onlyGrabTeamId = -1;
+		_monkeBall = GetComponent<MonkeBall>();
+	}
+
+	private void FixedUpdate()
+	{
+		if (rigidBody == null)
+		{
+			return;
+		}
+		if (_launched)
+		{
+			_launchedTimer += Time.fixedDeltaTime;
+			if (collider.isTrigger && _launchedTimer > 1f && rigidBody.linearVelocity.y <= 0f)
+			{
+				_launched = false;
+				collider.isTrigger = false;
+			}
+		}
+		Vector3 vector = -Physics.gravity * (1f - gravityMult);
+		rigidBody.AddForce(vector * rigidBody.mass, ForceMode.Force);
+		_catchSoundDecay -= Time.deltaTime;
+	}
+
+	public void WasLaunched()
+	{
+		_launched = true;
+		collider.isTrigger = true;
+		_launchedTimer = 0f;
+	}
+
+	public Vector3 GetVelocity()
+	{
+		if (rigidBody == null)
+		{
+			return Vector3.zero;
+		}
+		return rigidBody.linearVelocity;
+	}
+
+	public void SetVelocity(Vector3 velocity)
+	{
+		rigidBody.linearVelocity = velocity;
+	}
+
+	public void PlayCatchFx()
+	{
+		if (audioSource != null && _catchSoundDecay <= 0f && audioSource.isActiveAndEnabled)
+		{
+			audioSource.clip = catchSound;
+			audioSource.volume = catchSoundVolume;
+			audioSource.GTPlay();
+			_catchSoundDecay = 0.1f;
+		}
+	}
+
+	public void PlayThrowFx()
+	{
+		if (audioSource != null && audioSource.isActiveAndEnabled)
+		{
+			audioSource.clip = throwSound;
+			audioSource.volume = throwSoundVolume;
+			audioSource.GTPlay();
+		}
+	}
+
+	public void PlayBounceFX()
+	{
+		if (audioSource != null && audioSource.isActiveAndEnabled)
+		{
+			audioSource.clip = groundSound;
+			audioSource.volume = groundSoundVolume;
+			audioSource.GTPlay();
+		}
+	}
+
+	public void SetHeldByTeamId(int teamId)
+	{
+		lastHeldByTeamId = teamId;
+	}
+
+	private bool IsGamePlayer(Collider collider)
+	{
+		return GameBallPlayer.GetGamePlayer(collider) != null;
+	}
+
+	public void SetVisualOffset(bool detach)
+	{
+		if (_monkeBall != null)
+		{
+			_monkeBall.SetVisualOffset(detach);
+		}
+	}
 }

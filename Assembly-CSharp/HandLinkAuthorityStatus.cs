@@ -1,64 +1,102 @@
-﻿using System;
-
 public struct HandLinkAuthorityStatus
 {
+	public HandLinkAuthorityType type;
+
+	public float timestamp;
+
+	public int tiebreak;
+
 	public HandLinkAuthorityStatus(HandLinkAuthorityType authority)
 	{
-		this.type = authority;
-		this.timestamp = -1f;
-		this.tiebreak = -1;
+		type = authority;
+		timestamp = -1f;
+		tiebreak = -1;
 	}
 
 	public HandLinkAuthorityStatus(HandLinkAuthorityType authority, float timestamp, int tiebreak)
 	{
-		this.type = authority;
+		type = authority;
 		this.timestamp = timestamp;
 		this.tiebreak = tiebreak;
 	}
 
 	public static bool operator >(HandLinkAuthorityStatus a, HandLinkAuthorityStatus b)
 	{
-		return a.type > b.type || (b.type <= a.type && (a.timestamp > b.timestamp || (b.timestamp <= a.timestamp && a.tiebreak > b.tiebreak)));
+		if (a.type > b.type)
+		{
+			return true;
+		}
+		if (b.type > a.type)
+		{
+			return false;
+		}
+		if (a.timestamp > b.timestamp)
+		{
+			return true;
+		}
+		if (b.timestamp > a.timestamp)
+		{
+			return false;
+		}
+		return a.tiebreak > b.tiebreak;
 	}
 
 	public static bool operator <(HandLinkAuthorityStatus a, HandLinkAuthorityStatus b)
 	{
-		return a.type < b.type || (b.type >= a.type && (a.timestamp < b.timestamp || (b.timestamp >= a.timestamp && a.tiebreak < b.tiebreak)));
+		if (a.type < b.type)
+		{
+			return true;
+		}
+		if (b.type < a.type)
+		{
+			return false;
+		}
+		if (a.timestamp < b.timestamp)
+		{
+			return true;
+		}
+		if (b.timestamp < a.timestamp)
+		{
+			return false;
+		}
+		return a.tiebreak < b.tiebreak;
 	}
 
 	public int CompareTo(HandLinkAuthorityStatus b)
 	{
-		int num = this.type.CompareTo(b.type);
+		int num = type.CompareTo(b.type);
 		if (num != 0)
 		{
 			return num;
 		}
-		int num2 = this.timestamp.CompareTo(b.timestamp);
+		int num2 = timestamp.CompareTo(b.timestamp);
 		if (num2 != 0)
 		{
 			return num2;
 		}
-		return this.tiebreak.CompareTo(b.tiebreak);
+		return tiebreak.CompareTo(b.tiebreak);
 	}
 
 	public static bool operator ==(HandLinkAuthorityStatus a, HandLinkAuthorityStatus b)
 	{
-		return a.type == b.type && a.timestamp == b.timestamp && a.tiebreak == b.tiebreak;
+		if (a.type == b.type && a.timestamp == b.timestamp)
+		{
+			return a.tiebreak == b.tiebreak;
+		}
+		return false;
 	}
 
 	public static bool operator !=(HandLinkAuthorityStatus a, HandLinkAuthorityStatus b)
 	{
-		return a.timestamp != b.timestamp || a.tiebreak != b.tiebreak;
+		if (a.timestamp == b.timestamp)
+		{
+			return a.tiebreak != b.tiebreak;
+		}
+		return true;
 	}
 
 	public override string ToString()
 	{
-		return string.Format("{0}/{1}", this.timestamp.ToString("0.0000"), this.tiebreak);
+		return string.Format("{0}/{1}", timestamp.ToString("0.0000"), tiebreak);
 	}
-
-	public HandLinkAuthorityType type;
-
-	public float timestamp;
-
-	public int tiebreak;
 }

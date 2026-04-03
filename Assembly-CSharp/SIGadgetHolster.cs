@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using UnityEngine;
@@ -8,13 +7,10 @@ using UnityEngine.UI;
 [RequireComponent(typeof(GameSnappable))]
 public class SIGadgetHolster : SIGadget, I_SIDisruptable
 {
-	private void Start()
+	private enum State
 	{
-		this.gtPlayer = GTPlayer.Instance;
-	}
-
-	public void Disrupt(float disruptTime)
-	{
+		Unequipped,
+		Equipped
 	}
 
 	[SerializeField]
@@ -22,13 +18,16 @@ public class SIGadgetHolster : SIGadget, I_SIDisruptable
 
 	public List<SuperInfectionSnapPoint> snapPoints;
 
-	private SIGadgetHolster.State state;
+	private State state;
 
 	private GTPlayer gtPlayer;
 
-	private enum State
+	private void Start()
 	{
-		Unequipped,
-		Equipped
+		gtPlayer = GTPlayer.Instance;
+	}
+
+	public void Disrupt(float disruptTime)
+	{
 	}
 }

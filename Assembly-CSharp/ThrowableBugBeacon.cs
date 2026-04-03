@@ -1,33 +1,30 @@
-﻿using System;
 using UnityEngine;
 
 public class ThrowableBugBeacon : MonoBehaviour
 {
-	public static event ThrowableBugBeacon.ThrowableBugBeaconEvent OnCall;
+	public delegate void ThrowableBugBeaconEvent(ThrowableBugBeacon tbb);
 
-	public static event ThrowableBugBeacon.ThrowableBugBeaconEvent OnDismiss;
+	public delegate void ThrowableBugBeaconFloatEvent(ThrowableBugBeacon tbb, float f);
 
-	public static event ThrowableBugBeacon.ThrowableBugBeaconEvent OnLock;
+	[SerializeField]
+	private float range;
 
-	public static event ThrowableBugBeacon.ThrowableBugBeaconEvent OnUnlock;
+	[SerializeField]
+	private ThrowableBug.BugName bugName;
 
-	public static event ThrowableBugBeacon.ThrowableBugBeaconFloatEvent OnChangeSpeedMultiplier;
+	public ThrowableBug.BugName BugName => bugName;
 
-	public ThrowableBug.BugName BugName
-	{
-		get
-		{
-			return this.bugName;
-		}
-	}
+	public float Range => range;
 
-	public float Range
-	{
-		get
-		{
-			return this.range;
-		}
-	}
+	public static event ThrowableBugBeaconEvent OnCall;
+
+	public static event ThrowableBugBeaconEvent OnDismiss;
+
+	public static event ThrowableBugBeaconEvent OnLock;
+
+	public static event ThrowableBugBeaconEvent OnUnlock;
+
+	public static event ThrowableBugBeaconFloatEvent OnChangeSpeedMultiplier;
 
 	public void Call()
 	{
@@ -76,14 +73,4 @@ public class ThrowableBugBeacon : MonoBehaviour
 			ThrowableBugBeacon.OnUnlock(this);
 		}
 	}
-
-	[SerializeField]
-	private float range;
-
-	[SerializeField]
-	private ThrowableBug.BugName bugName;
-
-	public delegate void ThrowableBugBeaconEvent(ThrowableBugBeacon tbb);
-
-	public delegate void ThrowableBugBeaconFloatEvent(ThrowableBugBeacon tbb, float f);
 }

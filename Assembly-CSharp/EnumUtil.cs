@@ -1,21 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public static class EnumUtil
 {
 	public static string[] GetNames<TEnum>() where TEnum : struct, Enum
 	{
-		return ArrayUtils.Clone<string>(EnumData<TEnum>.Shared.Names);
+		return ArrayUtils.Clone(EnumData<TEnum>.Shared.Names);
 	}
 
 	public static TEnum[] GetValues<TEnum>() where TEnum : struct, Enum
 	{
-		return ArrayUtils.Clone<TEnum>(EnumData<TEnum>.Shared.Values);
+		return ArrayUtils.Clone(EnumData<TEnum>.Shared.Values);
 	}
 
 	public static long[] GetLongValues<TEnum>() where TEnum : struct, Enum
 	{
-		return ArrayUtils.Clone<long>(EnumData<TEnum>.Shared.LongValues);
+		return ArrayUtils.Clone(EnumData<TEnum>.Shared.LongValues);
 	}
 
 	public static string EnumToName<TEnum>(TEnum e) where TEnum : struct, Enum
@@ -80,7 +80,7 @@ public static class EnumUtil
 
 	public static TEnum[] SplitBitmask<TEnum>(TEnum bitmask) where TEnum : struct, Enum
 	{
-		return EnumUtil.SplitBitmask<TEnum>(Convert.ToInt64(bitmask));
+		return SplitBitmask<TEnum>(Convert.ToInt64(bitmask));
 	}
 
 	public static TEnum[] SplitBitmask<TEnum>(long bitmaskLong) where TEnum : struct, Enum
@@ -92,10 +92,7 @@ public static class EnumUtil
 		}
 		if (bitmaskLong == 0L)
 		{
-			return new TEnum[]
-			{
-				(TEnum)((object)Enum.ToObject(typeof(TEnum), 0L))
-			};
+			return new TEnum[1] { (TEnum)Enum.ToObject(typeof(TEnum), 0L) };
 		}
 		List<TEnum> list = new List<TEnum>(shared.Values.Length);
 		for (int i = 0; i < shared.Values.Length; i++)

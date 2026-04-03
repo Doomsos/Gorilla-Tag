@@ -1,19 +1,9 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SIUIProgressBar : MonoBehaviour
 {
-	public void UpdateFillPercent(float percentFull)
-	{
-		float num = this.backgroundImage.rectTransform.sizeDelta.x * (1f - 2f * this.borderPercent / 100f);
-		float num2 = num * Mathf.Min(1f, percentFull);
-		float x = -(num - num2) / 2f * this.progressImage.rectTransform.localScale.x;
-		this.progressImage.rectTransform.sizeDelta = new Vector2(num2, this.progressImage.rectTransform.sizeDelta.y);
-		this.progressImage.rectTransform.localPosition = new Vector3(x, this.progressImage.rectTransform.localPosition.y, this.progressImage.rectTransform.localPosition.z);
-	}
-
 	public Image backgroundImage;
 
 	public Image progressImage;
@@ -21,4 +11,13 @@ public class SIUIProgressBar : MonoBehaviour
 	public float borderPercent;
 
 	public TextMeshProUGUI progressText;
+
+	public void UpdateFillPercent(float percentFull)
+	{
+		float num = backgroundImage.rectTransform.sizeDelta.x * (1f - 2f * borderPercent / 100f);
+		float num2 = num * Mathf.Min(1f, percentFull);
+		float x = (0f - (num - num2)) / 2f * progressImage.rectTransform.localScale.x;
+		progressImage.rectTransform.sizeDelta = new Vector2(num2, progressImage.rectTransform.sizeDelta.y);
+		progressImage.rectTransform.localPosition = new Vector3(x, progressImage.rectTransform.localPosition.y, progressImage.rectTransform.localPosition.z);
+	}
 }

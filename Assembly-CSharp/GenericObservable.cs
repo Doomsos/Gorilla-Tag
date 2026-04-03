@@ -1,33 +1,22 @@
-﻿using System;
 using UnityEngine.Events;
 
 public class GenericObservable : ObservableBehavior
 {
+	public UnityEvent OnObservable;
+
+	public UnityEvent OnUnobservable;
+
 	protected override void ObservableSliceUpdate()
 	{
 	}
 
 	protected override void OnBecameObservable()
 	{
-		UnityEvent onObservable = this.OnObservable;
-		if (onObservable == null)
-		{
-			return;
-		}
-		onObservable.Invoke();
+		OnObservable?.Invoke();
 	}
 
 	protected override void OnLostObservable()
 	{
-		UnityEvent onUnobservable = this.OnUnobservable;
-		if (onUnobservable == null)
-		{
-			return;
-		}
-		onUnobservable.Invoke();
+		OnUnobservable?.Invoke();
 	}
-
-	public UnityEvent OnObservable;
-
-	public UnityEvent OnUnobservable;
 }

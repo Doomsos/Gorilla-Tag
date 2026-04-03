@@ -1,145 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using GorillaGameModes;
 using UnityEngine;
 
 [Serializable]
 public class SITechTreePage
 {
-	public EAssetReleaseTier EdReleaseTier
-	{
-		get
-		{
-			return this.m_edReleaseTier;
-		}
-		set
-		{
-			this.m_edReleaseTier = value;
-		}
-	}
-
-	public bool IsValid
-	{
-		get
-		{
-			EAssetReleaseTier edReleaseTier = this.m_edReleaseTier;
-			if (edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC)
-			{
-				SITechTreeNode[] array = this.treeNodes;
-				return array != null && array.Length != 0;
-			}
-			return false;
-		}
-	}
-
-	public bool IsAllowed
-	{
-		get
-		{
-			return (this.excludedGameModes & (ESuperGameModes)GameMode.CurrentGameModeFlag) == (ESuperGameModes)0;
-		}
-	}
-
-	public List<GraphNode<SITechTreeNode>> Roots { get; private set; }
-
-	public List<GraphNode<SITechTreeNode>> AllNodes { get; private set; }
-
-	public List<SITechTreeNode> DispensableGadgets { get; private set; }
-
-	public void ClearGraph()
-	{
-		this.Roots = null;
-		this.AllNodes = null;
-	}
-
-	public void BuildGraph()
-	{
-		SITechTreePage.<>c__DisplayClass27_0 CS$<>8__locals1;
-		CS$<>8__locals1.<>4__this = this;
-		this.Roots = new List<GraphNode<SITechTreeNode>>();
-		this.AllNodes = new List<GraphNode<SITechTreeNode>>();
-		this.DispensableGadgets = new List<SITechTreeNode>();
-		if (!this.IsValid)
-		{
-			return;
-		}
-		CS$<>8__locals1.nodeLookup = new Dictionary<SIUpgradeType, GraphNode<SITechTreeNode>>();
-		foreach (SITechTreeNode sitechTreeNode in this.treeNodes)
-		{
-			if (sitechTreeNode.IsValid && (sitechTreeNode.parentUpgrades == null || sitechTreeNode.parentUpgrades.Length == 0))
-			{
-				this.Roots.Add(this.<BuildGraph>g__PopulateGraph|27_0(sitechTreeNode, this.excludedGameModes, ref CS$<>8__locals1));
-			}
-		}
-		foreach (GraphNode<SITechTreeNode> graphNode in this.AllNodes)
-		{
-			if (graphNode.Value.IsDispensableGadget)
-			{
-				this.DispensableGadgets.Add(graphNode.Value);
-			}
-		}
-	}
-
-	public void PrintGraph()
-	{
-		foreach (GraphNode<SITechTreeNode> graphNode in this.Roots)
-		{
-			foreach (GraphNode<SITechTreeNode> graphNode2 in graphNode.TraversePreOrderDistinct(null))
-			{
-				Debug.Log(string.Concat(new string[]
-				{
-					"[SI] Graph node: ",
-					graphNode2.Value.nickName,
-					" [",
-					SITechTreePage.<PrintGraph>g__NodeListText|28_0(graphNode2.Parents),
-					"]"
-				}));
-			}
-		}
-	}
-
-	[CompilerGenerated]
-	private GraphNode<SITechTreeNode> <BuildGraph>g__PopulateGraph|27_0(SITechTreeNode node, ESuperGameModes parentExcludedGameModes, ref SITechTreePage.<>c__DisplayClass27_0 A_3)
-	{
-		node.excludedGameModes |= parentExcludedGameModes;
-		GraphNode<SITechTreeNode> graphNode;
-		if (!A_3.nodeLookup.TryGetValue(node.upgradeType, out graphNode))
-		{
-			graphNode = new GraphNode<SITechTreeNode>(node);
-			A_3.nodeLookup.Add(node.upgradeType, graphNode);
-			this.AllNodes.Add(graphNode);
-		}
-		SIUpgradeType upgradeType = node.upgradeType;
-		foreach (SITechTreeNode sitechTreeNode in this.treeNodes)
-		{
-			if (sitechTreeNode.IsValid && sitechTreeNode.parentUpgrades != null)
-			{
-				SIUpgradeType[] parentUpgrades = sitechTreeNode.parentUpgrades;
-				for (int j = 0; j < parentUpgrades.Length; j++)
-				{
-					if (parentUpgrades[j] == upgradeType)
-					{
-						GraphNode<SITechTreeNode> graphNode2 = this.<BuildGraph>g__PopulateGraph|27_0(sitechTreeNode, node.excludedGameModes, ref A_3);
-						if (!graphNode.Children.Contains(graphNode2))
-						{
-							graphNode.AddChild(graphNode2);
-						}
-					}
-				}
-			}
-		}
-		return graphNode;
-	}
-
-	[CompilerGenerated]
-	internal static string <PrintGraph>g__NodeListText|28_0(List<GraphNode<SITechTreeNode>> nodes)
-	{
-		return string.Join("|", from n in nodes
-		select n.Value.nickName);
-	}
-
 	[SerializeField]
 	private EAssetReleaseTier m_edReleaseTier = (EAssetReleaseTier)(-1);
 
@@ -155,4 +22,121 @@ public class SITechTreePage
 	private SITechTreeNode[] treeNodes;
 
 	public float costMultiplier = 1f;
+
+	public EAssetReleaseTier EdReleaseTier
+	{
+		get
+		{
+			return m_edReleaseTier;
+		}
+		set
+		{
+			m_edReleaseTier = value;
+		}
+	}
+
+	public bool IsValid
+	{
+		get
+		{
+			EAssetReleaseTier edReleaseTier = m_edReleaseTier;
+			if (edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC)
+			{
+				SITechTreeNode[] array = treeNodes;
+				if (array == null)
+				{
+					return false;
+				}
+				return array.Length != 0;
+			}
+			return false;
+		}
+	}
+
+	public bool IsAllowed => ((uint)excludedGameModes & (uint)GameMode.CurrentGameModeFlag) == 0;
+
+	public List<GraphNode<SITechTreeNode>> Roots { get; private set; }
+
+	public List<GraphNode<SITechTreeNode>> AllNodes { get; private set; }
+
+	public List<SITechTreeNode> DispensableGadgets { get; private set; }
+
+	public void ClearGraph()
+	{
+		Roots = null;
+		AllNodes = null;
+	}
+
+	public void BuildGraph()
+	{
+		Roots = new List<GraphNode<SITechTreeNode>>();
+		AllNodes = new List<GraphNode<SITechTreeNode>>();
+		DispensableGadgets = new List<SITechTreeNode>();
+		if (!IsValid)
+		{
+			return;
+		}
+		Dictionary<SIUpgradeType, GraphNode<SITechTreeNode>> nodeLookup = new Dictionary<SIUpgradeType, GraphNode<SITechTreeNode>>();
+		SITechTreeNode[] array = treeNodes;
+		foreach (SITechTreeNode sITechTreeNode in array)
+		{
+			if (sITechTreeNode.IsValid && (sITechTreeNode.parentUpgrades == null || sITechTreeNode.parentUpgrades.Length == 0))
+			{
+				Roots.Add(PopulateGraph(sITechTreeNode, excludedGameModes));
+			}
+		}
+		foreach (GraphNode<SITechTreeNode> allNode in AllNodes)
+		{
+			if (allNode.Value.IsDispensableGadget)
+			{
+				DispensableGadgets.Add(allNode.Value);
+			}
+		}
+		GraphNode<SITechTreeNode> PopulateGraph(SITechTreeNode node, ESuperGameModes parentExcludedGameModes)
+		{
+			node.excludedGameModes |= parentExcludedGameModes;
+			if (!nodeLookup.TryGetValue(node.upgradeType, out var value))
+			{
+				value = new GraphNode<SITechTreeNode>(node);
+				nodeLookup.Add(node.upgradeType, value);
+				AllNodes.Add(value);
+			}
+			SIUpgradeType upgradeType = node.upgradeType;
+			SITechTreeNode[] array2 = treeNodes;
+			foreach (SITechTreeNode sITechTreeNode2 in array2)
+			{
+				if (sITechTreeNode2.IsValid && sITechTreeNode2.parentUpgrades != null)
+				{
+					SIUpgradeType[] parentUpgrades = sITechTreeNode2.parentUpgrades;
+					for (int k = 0; k < parentUpgrades.Length; k++)
+					{
+						if (parentUpgrades[k] == upgradeType)
+						{
+							GraphNode<SITechTreeNode> graphNode = PopulateGraph(sITechTreeNode2, node.excludedGameModes);
+							if (!value.Children.Contains(graphNode))
+							{
+								value.AddChild(graphNode);
+							}
+						}
+					}
+				}
+			}
+			return value;
+		}
+	}
+
+	public void PrintGraph()
+	{
+		foreach (GraphNode<SITechTreeNode> root in Roots)
+		{
+			foreach (GraphNode<SITechTreeNode> item in root.TraversePreOrderDistinct())
+			{
+				Debug.Log("[SI] Graph node: " + item.Value.nickName + " [" + NodeListText(item.Parents) + "]");
+			}
+		}
+		static string NodeListText(List<GraphNode<SITechTreeNode>> nodes)
+		{
+			return string.Join("|", nodes.Select((GraphNode<SITechTreeNode> n) => n.Value.nickName));
+		}
+	}
 }

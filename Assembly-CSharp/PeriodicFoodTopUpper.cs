@@ -1,31 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class PeriodicFoodTopUpper : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.food = base.GetComponentInParent<CrittersFood>();
-	}
-
-	private void Update()
-	{
-		if (!CrittersManager.instance.LocalAuthority())
-		{
-			return;
-		}
-		if (!this.waitingToRefill && this.food.currentFood == 0f)
-		{
-			this.waitingToRefill = true;
-			this.timeFoodEmpty = Time.time;
-		}
-		if (this.waitingToRefill && Time.time > this.timeFoodEmpty + this.waitToRefill)
-		{
-			this.waitingToRefill = false;
-			this.food.Initialize();
-		}
-	}
-
 	private CrittersFood food;
 
 	private float timeFoodEmpty;
@@ -35,4 +11,26 @@ public class PeriodicFoodTopUpper : MonoBehaviour
 	public float waitToRefill = 10f;
 
 	public GameObject foodObject;
+
+	private void Awake()
+	{
+		food = GetComponentInParent<CrittersFood>();
+	}
+
+	private void Update()
+	{
+		if (CrittersManager.instance.LocalAuthority())
+		{
+			if (!waitingToRefill && food.currentFood == 0f)
+			{
+				waitingToRefill = true;
+				timeFoodEmpty = Time.time;
+			}
+			if (waitingToRefill && Time.time > timeFoodEmpty + waitToRefill)
+			{
+				waitingToRefill = false;
+				food.Initialize();
+			}
+		}
+	}
 }

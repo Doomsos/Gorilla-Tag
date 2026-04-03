@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -6,142 +5,6 @@ using UnityEngine.UI;
 
 public class SIResourceDeposit : MonoBehaviour, ISIResourceDeposit
 {
-	public bool IsAuthority
-	{
-		get
-		{
-			return this.SIManager.gameEntityManager.IsAuthority();
-		}
-	}
-
-	public SuperInfectionManager SIManager
-	{
-		get
-		{
-			return this.superInfection.siManager;
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (this._displayResources == null || this._displayResources.Count == 0)
-		{
-			List<SIResource> resourcePrefabs = this.superInfection.ResourcePrefabs;
-			if (resourcePrefabs != null && resourcePrefabs.Count > 0)
-			{
-				this._displayResources = new List<GameObject>();
-				for (int i = 0; i < Mathf.Min(resourcePrefabs.Count, this.resourceDisplays.Length); i++)
-				{
-					GameObject gameObject = resourcePrefabs[i].gameObject;
-					bool activeSelf = gameObject.activeSelf;
-					try
-					{
-						if (activeSelf)
-						{
-							gameObject.SetActive(false);
-						}
-						GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, this.resourceDisplays[i].transform);
-						gameObject2.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);
-						this._displayResources.Add(gameObject2);
-						foreach (MonoBehaviour monoBehaviour in gameObject2.GetComponentsInChildren<MonoBehaviour>(true))
-						{
-							monoBehaviour.enabled = false;
-							Object.Destroy(monoBehaviour);
-						}
-						Rigidbody component = gameObject2.GetComponent<Rigidbody>();
-						if (component != null)
-						{
-							Object.Destroy(component);
-						}
-						gameObject2.SetLayerRecursively(UnityLayer.Default);
-						gameObject2.SetActive(true);
-					}
-					finally
-					{
-						if (activeSelf)
-						{
-							gameObject.SetActive(true);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (this.netPlayer != null)
-		{
-			stream.SendNext(this.netPlayer.ActorNr);
-		}
-		else
-		{
-			stream.SendNext(-1);
-		}
-		stream.SendNext((int)this.netResourceType);
-		stream.SendNext((int)this.netLimitedDepositType);
-		stream.SendNext(this.netShowPopup);
-		this.netShowPopup = false;
-	}
-
-	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.netPlayer = SIPlayer.Get((int)stream.ReceiveNext());
-		this.netResourceType = (SIResource.ResourceType)((int)stream.ReceiveNext());
-		this.netLimitedDepositType = (SIResource.LimitedDepositType)((int)stream.ReceiveNext());
-		if ((bool)stream.ReceiveNext())
-		{
-			this.LocalShowPopup(this.netPlayer, this.netResourceType, this.netLimitedDepositType);
-		}
-	}
-
-	private void LocalShowPopup(SIPlayer player, SIResource.ResourceType resourceType, SIResource.LimitedDepositType limitedDepositType)
-	{
-		if (limitedDepositType == SIResource.LimitedDepositType.None)
-		{
-			this.depositBin.SetActive(true);
-		}
-		this.popupScreen.EnableAndResetTimer();
-		this.depositText.text = string.Format("{0} COLLECTED {1}\n(TOTAL {2})", player.gamePlayer.rig.Creator.SanitizedNickName, resourceType.GetName<SIResource.ResourceType>(), player.GetResourceAmount(resourceType));
-		this.depositImage.sprite = ((resourceType == SIResource.ResourceType.TechPoint) ? this.resourceImageSprites[0] : this.resourceImageSprites[1]);
-	}
-
-	public void ResourceDeposited(SIResource resource)
-	{
-		bool flag = false;
-		if (resource.lastPlayerHeld.gamePlayer.IsLocal() && !resource.localDeposited)
-		{
-			this.AuthShowPopup(resource);
-			resource.HandleDepositLocal(resource.lastPlayerHeld);
-			resource.lastPlayerHeld.GatherResource(resource.type, resource.limitedDepositType, 1);
-			this.superInfection.siManager.CallRPC(SuperInfectionManager.ClientToAuthorityRPC.ResourceDepositDeposited, new object[]
-			{
-				resource.myGameEntity.GetNetId(),
-				this.index
-			});
-			flag = true;
-		}
-		if (this.superInfection.siManager.gameEntityManager.IsAuthority())
-		{
-			resource.HandleDepositAuth(resource.lastPlayerHeld);
-			this.superInfection.siManager.gameEntityManager.RequestDestroyItem(resource.myGameEntity.id);
-			this.AuthShowPopup(resource);
-			flag = true;
-		}
-		if (flag)
-		{
-			this.LocalShowPopup(resource.lastPlayerHeld, resource.type, resource.limitedDepositType);
-		}
-	}
-
-	private void AuthShowPopup(SIResource resource)
-	{
-		this.netPlayer = resource.lastPlayerHeld;
-		this.netResourceType = resource.type;
-		this.netLimitedDepositType = resource.limitedDepositType;
-		this.netShowPopup = true;
-	}
-
 	public int index;
 
 	public Text depositText;
@@ -170,4 +33,131 @@ public class SIResourceDeposit : MonoBehaviour, ISIResourceDeposit
 	public List<SIUIPlayerQuestDisplay> questDisplays;
 
 	private List<GameObject> _displayResources;
+
+	public bool IsAuthority => SIManager.gameEntityManager.IsAuthority();
+
+	public SuperInfectionManager SIManager => superInfection.siManager;
+
+	private void OnEnable()
+	{
+		if (_displayResources != null && _displayResources.Count != 0)
+		{
+			return;
+		}
+		List<SIResource> resourcePrefabs = superInfection.ResourcePrefabs;
+		if (resourcePrefabs == null || resourcePrefabs.Count <= 0)
+		{
+			return;
+		}
+		_displayResources = new List<GameObject>();
+		for (int i = 0; i < Mathf.Min(resourcePrefabs.Count, resourceDisplays.Length); i++)
+		{
+			GameObject gameObject = resourcePrefabs[i].gameObject;
+			bool activeSelf = gameObject.activeSelf;
+			try
+			{
+				if (activeSelf)
+				{
+					gameObject.SetActive(value: false);
+				}
+				GameObject gameObject2 = Object.Instantiate(gameObject, resourceDisplays[i].transform);
+				gameObject2.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);
+				_displayResources.Add(gameObject2);
+				MonoBehaviour[] componentsInChildren = gameObject2.GetComponentsInChildren<MonoBehaviour>(includeInactive: true);
+				foreach (MonoBehaviour obj in componentsInChildren)
+				{
+					obj.enabled = false;
+					Object.Destroy(obj);
+				}
+				Rigidbody component = gameObject2.GetComponent<Rigidbody>();
+				if ((object)component != null)
+				{
+					Object.Destroy(component);
+				}
+				gameObject2.SetLayerRecursively(UnityLayer.Default);
+				gameObject2.SetActive(value: true);
+			}
+			finally
+			{
+				if (activeSelf)
+				{
+					gameObject.SetActive(value: true);
+				}
+			}
+		}
+	}
+
+	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (netPlayer != null)
+		{
+			stream.SendNext(netPlayer.ActorNr);
+		}
+		else
+		{
+			stream.SendNext(-1);
+		}
+		stream.SendNext((int)netResourceType);
+		stream.SendNext((int)netLimitedDepositType);
+		stream.SendNext(netShowPopup);
+		netShowPopup = false;
+	}
+
+	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		netPlayer = SIPlayer.Get((int)stream.ReceiveNext());
+		netResourceType = (SIResource.ResourceType)(int)stream.ReceiveNext();
+		netLimitedDepositType = (SIResource.LimitedDepositType)(int)stream.ReceiveNext();
+		if ((bool)stream.ReceiveNext())
+		{
+			LocalShowPopup(netPlayer, netResourceType, netLimitedDepositType);
+		}
+	}
+
+	private void LocalShowPopup(SIPlayer player, SIResource.ResourceType resourceType, SIResource.LimitedDepositType limitedDepositType)
+	{
+		if (limitedDepositType == SIResource.LimitedDepositType.None)
+		{
+			depositBin.SetActive(value: true);
+		}
+		popupScreen.EnableAndResetTimer();
+		depositText.text = $"{player.gamePlayer.rig.Creator.SanitizedNickName} COLLECTED {resourceType.GetName()}\n(TOTAL {player.GetResourceAmount(resourceType)})";
+		depositImage.sprite = ((resourceType == SIResource.ResourceType.TechPoint) ? resourceImageSprites[0] : resourceImageSprites[1]);
+	}
+
+	public void ResourceDeposited(SIResource resource)
+	{
+		bool flag = false;
+		if (resource.lastPlayerHeld.gamePlayer.IsLocal() && !resource.localDeposited)
+		{
+			AuthShowPopup(resource);
+			resource.HandleDepositLocal(resource.lastPlayerHeld);
+			resource.lastPlayerHeld.GatherResource(resource.type, resource.limitedDepositType, 1);
+			superInfection.siManager.CallRPC(SuperInfectionManager.ClientToAuthorityRPC.ResourceDepositDeposited, new object[2]
+			{
+				resource.myGameEntity.GetNetId(),
+				index
+			});
+			flag = true;
+		}
+		if (superInfection.siManager.gameEntityManager.IsAuthority())
+		{
+			resource.HandleDepositAuth(resource.lastPlayerHeld);
+			superInfection.siManager.gameEntityManager.RequestDestroyItem(resource.myGameEntity.id);
+			AuthShowPopup(resource);
+			flag = true;
+		}
+		if (flag)
+		{
+			LocalShowPopup(resource.lastPlayerHeld, resource.type, resource.limitedDepositType);
+		}
+	}
+
+	private void AuthShowPopup(SIResource resource)
+	{
+		netPlayer = resource.lastPlayerHeld;
+		netResourceType = resource.type;
+		netLimitedDepositType = resource.limitedDepositType;
+		netShowPopup = true;
+	}
 }

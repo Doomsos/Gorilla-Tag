@@ -1,157 +1,16 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ShadeRevealer : TransferrableObject
 {
-	protected override void Awake()
+	public enum State
 	{
-		base.Awake();
-		HashSet<GameObject> hashSet = new HashSet<GameObject>();
-		for (int i = 0; i < this.enableWhenScanning.Length; i++)
-		{
-			hashSet.Add(this.enableWhenScanning[i]);
-		}
-		for (int j = 0; j < this.enableWhenTracking.Length; j++)
-		{
-			hashSet.Add(this.enableWhenTracking[j]);
-		}
-		for (int k = 0; k < this.enableWhenLocked.Length; k++)
-		{
-			hashSet.Add(this.enableWhenLocked[k]);
-		}
-		for (int l = 0; l < this.enableWhenPrimed.Length; l++)
-		{
-			hashSet.Add(this.enableWhenPrimed[l]);
-		}
-		this.objectsToDisableWhenOff = new GameObject[hashSet.Count];
-		hashSet.CopyTo(this.objectsToDisableWhenOff);
-	}
-
-	private float GetDistanceToBeamRay(Vector3 toPosition)
-	{
-		return Vector3.Cross(this.beamForward.forward, toPosition).magnitude;
-	}
-
-	public ShadeRevealer.State GetBeamStateForPosition(Vector3 toPosition, float tolerance)
-	{
-		if (toPosition.magnitude <= this.beamLength + tolerance && Vector3.Dot(toPosition.normalized, this.beamForward.forward) > 0f)
-		{
-			float num = this.GetDistanceToBeamRay(toPosition) - tolerance;
-			if (num <= this.lockThreshold)
-			{
-				return ShadeRevealer.State.LOCKED;
-			}
-			if (num <= this.trackThreshold)
-			{
-				return ShadeRevealer.State.TRACKING;
-			}
-		}
-		return ShadeRevealer.State.SCANNING;
-	}
-
-	public ShadeRevealer.State GetBeamStateForCritter(CosmeticCritter critter, float tolerance)
-	{
-		return this.GetBeamStateForPosition(critter.transform.position - this.beamForward.position, tolerance);
-	}
-
-	public bool CritterWithinBeamThreshold(CosmeticCritter critter, ShadeRevealer.State criteria, float tolerance)
-	{
-		return this.GetBeamStateForCritter(critter, tolerance) >= criteria;
-	}
-
-	public void SetBestBeamState(ShadeRevealer.State state)
-	{
-		if (state > this.pendingBeamState)
-		{
-			this.pendingBeamState = state;
-		}
-	}
-
-	private void SetObjectsEnabledFromState(ShadeRevealer.State state)
-	{
-		for (int i = 0; i < this.objectsToDisableWhenOff.Length; i++)
-		{
-			this.objectsToDisableWhenOff[i].SetActive(false);
-		}
-		GameObject[] array;
-		switch (state)
-		{
-		case ShadeRevealer.State.SCANNING:
-			array = this.enableWhenScanning;
-			break;
-		case ShadeRevealer.State.TRACKING:
-			array = this.enableWhenTracking;
-			break;
-		case ShadeRevealer.State.LOCKED:
-			array = this.enableWhenLocked;
-			break;
-		case ShadeRevealer.State.PRIMED:
-			array = this.enableWhenPrimed;
-			break;
-		default:
-			return;
-		}
-		for (int j = 0; j < array.Length; j++)
-		{
-			array[j].SetActive(true);
-		}
-	}
-
-	protected override void LateUpdateShared()
-	{
-		base.LateUpdateShared();
-		if (this.currentBeamState != this.pendingBeamState)
-		{
-			this.currentBeamState = this.pendingBeamState;
-			this.SetObjectsEnabledFromState(this.currentBeamState);
-		}
-		this.beamSFX.pitch = 1f + this.shadeCatcher.GetActionTimeFrac() * 2f;
-		if (this.isScanning)
-		{
-			this.pendingBeamState = ShadeRevealer.State.SCANNING;
-		}
-	}
-
-	public void StartScanning()
-	{
-		this.shadeCatcher.enabled = true;
-		this.initialActivationSFX.GTPlay();
-		this.beamSFX.GTPlay();
-		this.isScanning = true;
-		this.currentBeamState = ShadeRevealer.State.OFF;
-		this.pendingBeamState = ShadeRevealer.State.SCANNING;
-	}
-
-	public void StopScanning()
-	{
-		if (this.currentBeamState == ShadeRevealer.State.PRIMED)
-		{
-			UnityEvent unityEvent = this.onShadeLaunched;
-			if (unityEvent != null)
-			{
-				unityEvent.Invoke();
-			}
-		}
-		this.shadeCatcher.enabled = false;
-		this.initialActivationSFX.GTStop();
-		this.beamSFX.GTStop();
-		this.isScanning = false;
-		this.currentBeamState = ShadeRevealer.State.OFF;
-		this.pendingBeamState = ShadeRevealer.State.OFF;
-		this.SetObjectsEnabledFromState(ShadeRevealer.State.OFF);
-	}
-
-	public void ShadeCaught()
-	{
-		this.shadeCatcher.enabled = false;
-		this.beamSFX.GTStop();
-		this.catchSFX.GTPlay();
-		this.catchFX.Play();
-		this.isScanning = false;
-		this.currentBeamState = ShadeRevealer.State.OFF;
-		this.pendingBeamState = ShadeRevealer.State.PRIMED;
+		OFF,
+		SCANNING,
+		TRACKING,
+		LOCKED,
+		PRIMED
 	}
 
 	[SerializeField]
@@ -218,18 +77,154 @@ public class ShadeRevealer : TransferrableObject
 
 	private bool isScanning;
 
-	private ShadeRevealer.State currentBeamState;
+	private State currentBeamState;
 
-	private ShadeRevealer.State pendingBeamState;
+	private State pendingBeamState;
 
 	private GameObject[] objectsToDisableWhenOff;
 
-	public enum State
+	protected override void Awake()
 	{
-		OFF,
-		SCANNING,
-		TRACKING,
-		LOCKED,
-		PRIMED
+		base.Awake();
+		HashSet<GameObject> hashSet = new HashSet<GameObject>();
+		for (int i = 0; i < enableWhenScanning.Length; i++)
+		{
+			hashSet.Add(enableWhenScanning[i]);
+		}
+		for (int j = 0; j < enableWhenTracking.Length; j++)
+		{
+			hashSet.Add(enableWhenTracking[j]);
+		}
+		for (int k = 0; k < enableWhenLocked.Length; k++)
+		{
+			hashSet.Add(enableWhenLocked[k]);
+		}
+		for (int l = 0; l < enableWhenPrimed.Length; l++)
+		{
+			hashSet.Add(enableWhenPrimed[l]);
+		}
+		objectsToDisableWhenOff = new GameObject[hashSet.Count];
+		hashSet.CopyTo(objectsToDisableWhenOff);
+	}
+
+	private float GetDistanceToBeamRay(Vector3 toPosition)
+	{
+		return Vector3.Cross(beamForward.forward, toPosition).magnitude;
+	}
+
+	public State GetBeamStateForPosition(Vector3 toPosition, float tolerance)
+	{
+		if (toPosition.magnitude <= beamLength + tolerance && Vector3.Dot(toPosition.normalized, beamForward.forward) > 0f)
+		{
+			float num = GetDistanceToBeamRay(toPosition) - tolerance;
+			if (num <= lockThreshold)
+			{
+				return State.LOCKED;
+			}
+			if (num <= trackThreshold)
+			{
+				return State.TRACKING;
+			}
+		}
+		return State.SCANNING;
+	}
+
+	public State GetBeamStateForCritter(CosmeticCritter critter, float tolerance)
+	{
+		return GetBeamStateForPosition(critter.transform.position - beamForward.position, tolerance);
+	}
+
+	public bool CritterWithinBeamThreshold(CosmeticCritter critter, State criteria, float tolerance)
+	{
+		return GetBeamStateForCritter(critter, tolerance) >= criteria;
+	}
+
+	public void SetBestBeamState(State state)
+	{
+		if (state > pendingBeamState)
+		{
+			pendingBeamState = state;
+		}
+	}
+
+	private void SetObjectsEnabledFromState(State state)
+	{
+		for (int i = 0; i < objectsToDisableWhenOff.Length; i++)
+		{
+			objectsToDisableWhenOff[i].SetActive(value: false);
+		}
+		GameObject[] array;
+		switch (state)
+		{
+		default:
+			return;
+		case State.SCANNING:
+			array = enableWhenScanning;
+			break;
+		case State.TRACKING:
+			array = enableWhenTracking;
+			break;
+		case State.LOCKED:
+			array = enableWhenLocked;
+			break;
+		case State.PRIMED:
+			array = enableWhenPrimed;
+			break;
+		}
+		for (int j = 0; j < array.Length; j++)
+		{
+			array[j].SetActive(value: true);
+		}
+	}
+
+	protected override void LateUpdateShared()
+	{
+		base.LateUpdateShared();
+		if (currentBeamState != pendingBeamState)
+		{
+			currentBeamState = pendingBeamState;
+			SetObjectsEnabledFromState(currentBeamState);
+		}
+		beamSFX.pitch = 1f + shadeCatcher.GetActionTimeFrac() * 2f;
+		if (isScanning)
+		{
+			pendingBeamState = State.SCANNING;
+		}
+	}
+
+	public void StartScanning()
+	{
+		shadeCatcher.enabled = true;
+		initialActivationSFX.GTPlay();
+		beamSFX.GTPlay();
+		isScanning = true;
+		currentBeamState = State.OFF;
+		pendingBeamState = State.SCANNING;
+	}
+
+	public void StopScanning()
+	{
+		if (currentBeamState == State.PRIMED)
+		{
+			onShadeLaunched?.Invoke();
+		}
+		shadeCatcher.enabled = false;
+		initialActivationSFX.GTStop();
+		beamSFX.GTStop();
+		isScanning = false;
+		currentBeamState = State.OFF;
+		pendingBeamState = State.OFF;
+		SetObjectsEnabledFromState(State.OFF);
+	}
+
+	public void ShadeCaught()
+	{
+		shadeCatcher.enabled = false;
+		beamSFX.GTStop();
+		catchSFX.GTPlay();
+		catchFX.Play();
+		isScanning = false;
+		currentBeamState = State.OFF;
+		pendingBeamState = State.PRIMED;
 	}
 }

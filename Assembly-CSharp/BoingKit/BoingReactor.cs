@@ -1,22 +1,19 @@
-﻿using System;
+namespace BoingKit;
 
-namespace BoingKit
+public class BoingReactor : BoingBehavior
 {
-	public class BoingReactor : BoingBehavior
+	protected override void Register()
 	{
-		protected override void Register()
-		{
-			BoingManager.Register(this);
-		}
+		BoingManager.Register(this);
+	}
 
-		protected override void Unregister()
-		{
-			BoingManager.Unregister(this);
-		}
+	protected override void Unregister()
+	{
+		BoingManager.Unregister(this);
+	}
 
-		public override void PrepareExecute()
-		{
-			base.PrepareExecute(true);
-		}
+	public override void PrepareExecute()
+	{
+		PrepareExecute(accumulateEffectors: true);
 	}
 }

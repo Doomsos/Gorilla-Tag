@@ -1,9 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct OrientedBounds
 {
+	public Vector3 size;
+
+	public Vector3 center;
+
+	public Quaternion rotation;
+
 	public static OrientedBounds Empty { get; } = new OrientedBounds
 	{
 		size = Vector3.zero,
@@ -20,12 +26,6 @@ public struct OrientedBounds
 
 	public Matrix4x4 TRS()
 	{
-		return Matrix4x4.TRS(this.center, this.rotation, this.size);
+		return Matrix4x4.TRS(center, rotation, size);
 	}
-
-	public Vector3 size;
-
-	public Vector3 center;
-
-	public Quaternion rotation;
 }

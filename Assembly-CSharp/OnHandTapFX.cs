@@ -1,27 +1,8 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 internal struct OnHandTapFX : IFXEffectContext<HandEffectContext>
 {
-	public HandEffectContext effectContext
-	{
-		get
-		{
-			HandEffectContext handEffect = this.rig.GetHandEffect(this.isLeftHand, this.stiltID);
-			this.rig.SetHandEffectData(handEffect, this.surfaceIndex, this.isDownTap, this.isLeftHand, this.stiltID, this.volume, this.speed, this.tapDir);
-			return handEffect;
-		}
-	}
-
-	public FXSystemSettings settings
-	{
-		get
-		{
-			return this.rig.fxSettings;
-		}
-	}
-
 	public VRRig rig;
 
 	public Vector3 tapDir;
@@ -37,4 +18,16 @@ internal struct OnHandTapFX : IFXEffectContext<HandEffectContext>
 	public float volume;
 
 	public float speed;
+
+	public HandEffectContext effectContext
+	{
+		get
+		{
+			HandEffectContext handEffect = rig.GetHandEffect(isLeftHand, stiltID);
+			rig.SetHandEffectData(handEffect, surfaceIndex, isDownTap, isLeftHand, stiltID, volume, speed, tapDir);
+			return handEffect;
+		}
+	}
+
+	public FXSystemSettings settings => rig.fxSettings;
 }

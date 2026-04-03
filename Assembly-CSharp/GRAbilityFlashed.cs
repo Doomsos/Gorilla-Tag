@@ -1,48 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GRAbilityFlashed : GRAbilityBase
 {
-	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
-	{
-		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
-	}
-
-	public void SetStunTime(float time)
-	{
-		this.stunTime = time;
-	}
-
-	protected override void OnStart()
-	{
-		if (this.flashAnimations.Count > 0)
-		{
-			this.flashAnimationIndex = AbilityHelperFunctions.RandomRangeUnique(0, this.flashAnimations.Count, this.flashAnimationIndex);
-			this.PlayAnim(this.flashAnimations[this.flashAnimationIndex].animName, 0.1f, this.flashAnimations[this.flashAnimationIndex].speed);
-			this.behaviorEndTime = Time.timeAsDouble + (double)this.flashAnimations[this.flashAnimationIndex].duration + (double)this.stunTime;
-		}
-		else
-		{
-			this.PlayAnim("GREnemyFlashReaction01", 0.1f, 1f);
-			this.behaviorEndTime = Time.timeAsDouble + 0.5 + (double)this.stunTime;
-		}
-		this.agent.SetIsPathing(false, true);
-		this.agent.SetDisableNetworkSync(true);
-	}
-
-	protected override void OnStop()
-	{
-		this.agent.SetIsPathing(true, true);
-		this.agent.SetDisableNetworkSync(false);
-	}
-
-	public override bool IsDone()
-	{
-		return Time.timeAsDouble >= this.behaviorEndTime;
-	}
-
 	public List<AnimationData> flashAnimations;
 
 	private int flashAnimationIndex;
@@ -50,4 +12,42 @@ public class GRAbilityFlashed : GRAbilityBase
 	private double behaviorEndTime;
 
 	private float stunTime;
+
+	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
+	{
+		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
+	}
+
+	public void SetStunTime(float time)
+	{
+		stunTime = time;
+	}
+
+	protected override void OnStart()
+	{
+		if (flashAnimations.Count > 0)
+		{
+			flashAnimationIndex = AbilityHelperFunctions.RandomRangeUnique(0, flashAnimations.Count, flashAnimationIndex);
+			PlayAnim(flashAnimations[flashAnimationIndex].animName, 0.1f, flashAnimations[flashAnimationIndex].speed);
+			behaviorEndTime = Time.timeAsDouble + (double)flashAnimations[flashAnimationIndex].duration + (double)stunTime;
+		}
+		else
+		{
+			PlayAnim("GREnemyFlashReaction01", 0.1f, 1f);
+			behaviorEndTime = Time.timeAsDouble + 0.5 + (double)stunTime;
+		}
+		agent.SetIsPathing(isPathing: false, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: true);
+	}
+
+	protected override void OnStop()
+	{
+		agent.SetIsPathing(isPathing: true, ignoreRigiBody: true);
+		agent.SetDisableNetworkSync(disable: false);
+	}
+
+	public override bool IsDone()
+	{
+		return Time.timeAsDouble >= behaviorEndTime;
+	}
 }

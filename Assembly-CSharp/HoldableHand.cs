@@ -1,27 +1,31 @@
-﻿using System;
 using GorillaGameModes;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 {
-	public VRRig Rig
-	{
-		get
-		{
-			return this.myPlayer;
-		}
-	}
+	[SerializeField]
+	private VRRig myPlayer;
+
+	[SerializeField]
+	private bool isBody;
+
+	[SerializeField]
+	private bool isLeftHand;
+
+	public InteractionPoint interactionPoint;
+
+	public VRRig Rig => myPlayer;
 
 	private void Start()
 	{
-		if (this.myPlayer.isOfflineVRRig)
+		if (myPlayer.isOfflineVRRig)
 		{
-			base.gameObject.SetActive(false);
+			base.gameObject.SetActive(value: false);
 		}
-		if (this.interactionPoint == null)
+		if (interactionPoint == null)
 		{
-			this.interactionPoint = base.GetComponent<InteractionPoint>();
+			interactionPoint = GetComponent<InteractionPoint>();
 		}
 	}
 
@@ -37,24 +41,18 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 
 	public void SliceUpdate()
 	{
-		this.interactionPoint.enabled = (GameMode.ActiveGameMode is GorillaGuardianManager);
+		interactionPoint.enabled = GameMode.ActiveGameMode is GorillaGuardianManager;
 	}
 
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
-		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
-		if (gorillaGuardianManager != null && !this.myPlayer.creator.IsLocal && gorillaGuardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer))
+		if (GameMode.ActiveGameMode is GorillaGuardianManager gorillaGuardianManager && !myPlayer.creator.IsLocal && gorillaGuardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer))
 		{
 			bool flag = grabbingHand == EquipmentInteractor.instance.leftHand;
-			this.myPlayer.netView.SendRPC("GrabbedByPlayer", this.myPlayer.Creator, new object[]
-			{
-				this.isBody,
-				this.isLeftHand,
-				flag
-			});
-			this.myPlayer.ApplyLocalGrabOverride(this.isBody, this.isLeftHand, grabbingHand.transform);
+			myPlayer.netView.SendRPC("GrabbedByPlayer", myPlayer.Creator, isBody, isLeftHand, flag);
+			myPlayer.ApplyLocalGrabOverride(isBody, isLeftHand, grabbingHand.transform);
 			EquipmentInteractor.instance.UpdateHandEquipment(this, flag);
-			this.ClearOtherGrabs(flag);
+			ClearOtherGrabs(flag);
 		}
 	}
 
@@ -64,22 +62,18 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 		{
 			return false;
 		}
-		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
-		if (gorillaGuardianManager != null && !this.myPlayer.creator.IsLocal)
+		if (GameMode.ActiveGameMode is GorillaGuardianManager gorillaGuardianManager && !myPlayer.creator.IsLocal)
 		{
 			bool forLeftHand = releasingHand == EquipmentInteractor.instance.leftHand;
 			Vector3 vector = Vector3.zero;
 			if (gorillaGuardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer))
 			{
-				vector = GTPlayer.Instance.GetHandVelocityTracker(forLeftHand).GetAverageVelocity(true, 0.15f, false);
+				vector = GTPlayer.Instance.GetHandVelocityTracker(forLeftHand).GetAverageVelocity(worldSpace: true);
 			}
 			vector = Vector3.ClampMagnitude(vector, 20f);
-			this.myPlayer.netView.SendRPC("DroppedByPlayer", this.myPlayer.Creator, new object[]
-			{
-				vector
-			});
-			this.myPlayer.ClearLocalGrabOverride();
-			this.myPlayer.ApplyLocalTrajectoryOverride(vector);
+			myPlayer.netView.SendRPC("DroppedByPlayer", myPlayer.Creator, vector);
+			myPlayer.ClearLocalGrabOverride();
+			myPlayer.ApplyLocalTrajectoryOverride(vector);
 			EquipmentInteractor.instance.UpdateHandEquipment(null, forLeftHand);
 		}
 		return true;
@@ -91,42 +85,29 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 
 	public override void DropItemCleanup()
 	{
-		this.myPlayer.ClearLocalGrabOverride();
+		myPlayer.ClearLocalGrabOverride();
 	}
 
 	private void ClearOtherGrabs(bool grabbedLeft)
 	{
-		IHoldableObject holdableObject = grabbedLeft ? EquipmentInteractor.instance.rightHandHeldEquipment : EquipmentInteractor.instance.leftHandHeldEquipment;
-		if (this.isBody)
+		IHoldableObject holdableObject = (grabbedLeft ? EquipmentInteractor.instance.rightHandHeldEquipment : EquipmentInteractor.instance.leftHandHeldEquipment);
+		if (isBody)
 		{
-			if (holdableObject == this.myPlayer.leftHolds || holdableObject == this.myPlayer.rightHolds)
+			if (holdableObject == myPlayer.leftHolds || holdableObject == myPlayer.rightHolds)
 			{
 				EquipmentInteractor.instance.UpdateHandEquipment(null, !grabbedLeft);
-				return;
 			}
 		}
-		else if (this.isLeftHand)
+		else if (isLeftHand)
 		{
-			if (holdableObject == this.myPlayer.rightHolds || holdableObject == this.myPlayer.bodyHolds)
+			if (holdableObject == myPlayer.rightHolds || holdableObject == myPlayer.bodyHolds)
 			{
 				EquipmentInteractor.instance.UpdateHandEquipment(null, !grabbedLeft);
-				return;
 			}
 		}
-		else if (holdableObject == this.myPlayer.leftHolds || holdableObject == this.myPlayer.bodyHolds)
+		else if (holdableObject == myPlayer.leftHolds || holdableObject == myPlayer.bodyHolds)
 		{
 			EquipmentInteractor.instance.UpdateHandEquipment(null, !grabbedLeft);
 		}
 	}
-
-	[SerializeField]
-	private VRRig myPlayer;
-
-	[SerializeField]
-	private bool isBody;
-
-	[SerializeField]
-	private bool isLeftHand;
-
-	public InteractionPoint interactionPoint;
 }

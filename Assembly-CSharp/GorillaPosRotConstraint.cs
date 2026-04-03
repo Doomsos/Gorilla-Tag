@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
 

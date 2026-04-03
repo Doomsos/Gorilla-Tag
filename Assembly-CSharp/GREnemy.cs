@@ -1,30 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTagScripts.GhostReactor;
 using UnityEngine;
 
 public class GREnemy : MonoBehaviour, IGameEntityComponent, IGameHittable
 {
+	public GRHealthMeter healthMeter;
+
+	public GREnemyType enemyType;
+
+	public GameEntity gameEntity;
+
+	public GRDamageFlash damageFlash;
+
 	private void Awake()
 	{
-		this.damageFlash.Setup();
+		damageFlash.Setup();
 	}
 
 	public void OnEntityInit()
 	{
-		if (this.gameEntity != null)
+		if (gameEntity != null)
 		{
-			GameEntity gameEntity = this.gameEntity;
-			gameEntity.OnTick = (Action)Delegate.Combine(gameEntity.OnTick, new Action(this.OnUpdate));
+			GameEntity obj = gameEntity;
+			obj.OnTick = (Action)Delegate.Combine(obj.OnTick, new Action(OnUpdate));
 		}
 	}
 
 	public void OnEntityDestroy()
 	{
-		if (this.gameEntity != null)
+		if (gameEntity != null)
 		{
-			GameEntity gameEntity = this.gameEntity;
-			gameEntity.OnTick = (Action)Delegate.Combine(gameEntity.OnTick, new Action(this.OnUpdate));
+			GameEntity obj = gameEntity;
+			obj.OnTick = (Action)Delegate.Combine(obj.OnTick, new Action(OnUpdate));
 		}
 	}
 
@@ -64,22 +72,22 @@ public class GREnemy : MonoBehaviour, IGameEntityComponent, IGameHittable
 
 	public void OnUpdate()
 	{
-		this.damageFlash.Update();
+		damageFlash.Update();
 	}
 
 	public void SetMaxHP(int maxHp)
 	{
-		if (this.healthMeter != null)
+		if (healthMeter != null)
 		{
-			this.healthMeter.Setup(maxHp);
+			healthMeter.Setup(maxHp);
 		}
 	}
 
 	public void SetHP(int newHp)
 	{
-		if (this.healthMeter != null)
+		if (healthMeter != null)
 		{
-			this.healthMeter.SetHP(newHp);
+			healthMeter.SetHP(newHp);
 		}
 	}
 
@@ -92,15 +100,7 @@ public class GREnemy : MonoBehaviour, IGameEntityComponent, IGameHittable
 	{
 		if (hit.hitAmount > 0)
 		{
-			this.damageFlash.Play();
+			damageFlash.Play();
 		}
 	}
-
-	public GRHealthMeter healthMeter;
-
-	public GREnemyType enemyType;
-
-	public GameEntity gameEntity;
-
-	public GRDamageFlash damageFlash;
 }

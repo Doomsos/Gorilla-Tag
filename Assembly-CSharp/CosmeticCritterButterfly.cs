@@ -1,33 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class CosmeticCritterButterfly : CosmeticCritter
 {
-	public ParticleSystem.EmitParams GetEmitParams
-	{
-		get
-		{
-			return this.emitParams;
-		}
-	}
-
-	public void SetStartPos(Vector3 initialPos)
-	{
-		this.startPosition = initialPos;
-	}
-
-	public override void SetRandomVariables()
-	{
-		this.direction = Random.insideUnitSphere;
-		this.emitParams.startColor = Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f);
-		this.particleSystem.Emit(this.emitParams, 1);
-	}
-
-	public override void Tick()
-	{
-		base.transform.position = this.startPosition + (float)base.GetAliveTime() * this.speed * this.direction;
-	}
-
 	[Tooltip("The speed this Butterfly will move at.")]
 	[SerializeField]
 	private float speed = 1f;
@@ -41,4 +15,23 @@ public class CosmeticCritterButterfly : CosmeticCritter
 	private Vector3 direction;
 
 	private ParticleSystem.EmitParams emitParams;
+
+	public ParticleSystem.EmitParams GetEmitParams => emitParams;
+
+	public void SetStartPos(Vector3 initialPos)
+	{
+		startPosition = initialPos;
+	}
+
+	public override void SetRandomVariables()
+	{
+		direction = Random.insideUnitSphere;
+		emitParams.startColor = Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f);
+		particleSystem.Emit(emitParams, 1);
+	}
+
+	public override void Tick()
+	{
+		base.transform.position = startPosition + (float)GetAliveTime() * speed * direction;
+	}
 }

@@ -1,81 +1,70 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CompositeTriggerEvents))]
 public class VRRigCollection : MonoBehaviour
 {
-	public List<RigContainer> Rigs
-	{
-		get
-		{
-			return this.containedRigs;
-		}
-	}
+	public readonly List<RigContainer> containedRigs = new List<RigContainer>(20);
+
+	[SerializeField]
+	private CompositeTriggerEvents collisionTriggerEvents;
+
+	public Action<RigContainer> playerEnteredCollection;
+
+	public Action<RigContainer> playerLeftCollection;
+
+	public List<RigContainer> Rigs => containedRigs;
 
 	private void OnEnable()
 	{
-		this.collisionTriggerEvents.CompositeTriggerEnter += this.OnRigTriggerEnter;
-		this.collisionTriggerEvents.CompositeTriggerExit += this.OnRigTriggerExit;
+		collisionTriggerEvents.CompositeTriggerEnter += OnRigTriggerEnter;
+		collisionTriggerEvents.CompositeTriggerExit += OnRigTriggerExit;
 	}
 
 	private void OnDisable()
 	{
-		for (int i = this.containedRigs.Count - 1; i >= 0; i--)
+		for (int num = containedRigs.Count - 1; num >= 0; num--)
 		{
-			this.RigDisabled(this.containedRigs[i]);
+			RigDisabled(containedRigs[num]);
 		}
-		this.collisionTriggerEvents.CompositeTriggerEnter -= this.OnRigTriggerEnter;
-		this.collisionTriggerEvents.CompositeTriggerExit -= this.OnRigTriggerExit;
+		collisionTriggerEvents.CompositeTriggerEnter -= OnRigTriggerEnter;
+		collisionTriggerEvents.CompositeTriggerExit -= OnRigTriggerExit;
 	}
 
 	private void OnRigTriggerEnter(Collider other)
 	{
 		Rigidbody attachedRigidbody = other.attachedRigidbody;
-		RigContainer rigContainer;
-		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(out rigContainer) || other != rigContainer.HeadCollider || this.containedRigs.Contains(rigContainer))
+		if (!(attachedRigidbody == null) && attachedRigidbody.TryGetComponent<RigContainer>(out var component) && !(other != component.HeadCollider) && !containedRigs.Contains(component))
 		{
-			return;
+			component.RigEvents.disableEvent += new Action<RigContainer>(RigDisabled);
+			containedRigs.Add(component);
+			playerEnteredCollection?.Invoke(component);
 		}
-		rigContainer.RigEvents.disableEvent += this.RigDisabled;
-		this.containedRigs.Add(rigContainer);
-		Action<RigContainer> action = this.playerEnteredCollection;
-		if (action == null)
-		{
-			return;
-		}
-		action(rigContainer);
 	}
 
 	private void OnRigTriggerExit(Collider other)
 	{
 		Rigidbody attachedRigidbody = other.attachedRigidbody;
-		RigContainer rigContainer;
-		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(out rigContainer) || other != rigContainer.HeadCollider || !this.containedRigs.Contains(rigContainer))
+		if (!(attachedRigidbody == null) && attachedRigidbody.TryGetComponent<RigContainer>(out var component) && !(other != component.HeadCollider) && containedRigs.Contains(component))
 		{
-			return;
+			component.RigEvents.disableEvent -= new Action<RigContainer>(RigDisabled);
+			containedRigs.Remove(component);
+			playerLeftCollection?.Invoke(component);
 		}
-		rigContainer.RigEvents.disableEvent -= this.RigDisabled;
-		this.containedRigs.Remove(rigContainer);
-		Action<RigContainer> action = this.playerLeftCollection;
-		if (action == null)
-		{
-			return;
-		}
-		action(rigContainer);
 	}
 
 	private void RigDisabled(RigContainer rig)
 	{
-		this.collisionTriggerEvents.ResetColliderMask(rig.HeadCollider);
-		this.collisionTriggerEvents.ResetColliderMask(rig.BodyCollider);
+		collisionTriggerEvents.ResetColliderMask(rig.HeadCollider);
+		collisionTriggerEvents.ResetColliderMask(rig.BodyCollider);
 	}
 
 	private bool HasRig(VRRig rig)
 	{
-		for (int i = 0; i < this.containedRigs.Count; i++)
+		for (int i = 0; i < containedRigs.Count; i++)
 		{
-			if (this.containedRigs[i].Rig == rig)
+			if (containedRigs[i].Rig == rig)
 			{
 				return true;
 			}
@@ -85,22 +74,13 @@ public class VRRigCollection : MonoBehaviour
 
 	private bool HasRig(NetPlayer player)
 	{
-		for (int i = 0; i < this.containedRigs.Count; i++)
+		for (int i = 0; i < containedRigs.Count; i++)
 		{
-			if (this.containedRigs[i].Creator == player)
+			if (containedRigs[i].Creator == player)
 			{
 				return true;
 			}
 		}
 		return false;
 	}
-
-	public readonly List<RigContainer> containedRigs = new List<RigContainer>(20);
-
-	[SerializeField]
-	private CompositeTriggerEvents collisionTriggerEvents;
-
-	public Action<RigContainer> playerEnteredCollection;
-
-	public Action<RigContainer> playerLeftCollection;
 }

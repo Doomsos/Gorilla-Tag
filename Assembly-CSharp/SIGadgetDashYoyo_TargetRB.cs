@@ -1,39 +1,28 @@
-﻿using System;
 using UnityEngine;
 
 public class SIGadgetDashYoyo_TargetRB : MonoBehaviour
 {
+	[SerializeField]
+	private SIGadgetDashYoyo gadget;
+
 	protected void OnEnable()
 	{
 	}
 
 	protected void OnTriggerEnter(Collider otherCollider)
 	{
-		if (base.isActiveAndEnabled && this.gadget.gameEntity.IsAuthority() && (this.gadget.gameEntity.heldByActorNumber != -1 || this.gadget.gameEntity.snappedByActorNumber != -1) && (otherCollider.gameObject.IsOnLayer(UnityLayer.GorillaTagCollider) || otherCollider.gameObject.IsOnLayer(UnityLayer.GorillaSlingshotCollider)) && !ApplicationQuittingState.IsQuitting)
+		if (!base.isActiveAndEnabled || !gadget.gameEntity.IsAuthority() || (gadget.gameEntity.heldByActorNumber == -1 && gadget.gameEntity.snappedByActorNumber == -1) || (!otherCollider.gameObject.IsOnLayer(UnityLayer.GorillaTagCollider) && !otherCollider.gameObject.IsOnLayer(UnityLayer.GorillaSlingshotCollider)) || ApplicationQuittingState.IsQuitting || !(GorillaGameManager.instance is SuperInfectionGame siTagGameManager))
 		{
-			SuperInfectionGame superInfectionGame = GorillaGameManager.instance as SuperInfectionGame;
-			if (superInfectionGame != null)
+			return;
+		}
+		VRRig componentInParent = otherCollider.GetComponentInParent<VRRig>();
+		if ((object)componentInParent != null)
+		{
+			NetPlayer creator = componentInParent.creator;
+			if (creator != null && (object)SuperInfectionManager.GetSIManagerForZone(gadget.gameEntity.manager.zone) != null)
 			{
-				VRRig componentInParent = otherCollider.GetComponentInParent<VRRig>();
-				if (componentInParent == null)
-				{
-					return;
-				}
-				NetPlayer creator = componentInParent.creator;
-				if (creator == null)
-				{
-					return;
-				}
-				if (SuperInfectionManager.GetSIManagerForZone(this.gadget.gameEntity.manager.zone) == null)
-				{
-					return;
-				}
-				this.gadget.OnHitPlayer_Authority(superInfectionGame, creator);
-				return;
+				gadget.OnHitPlayer_Authority(siTagGameManager, creator);
 			}
 		}
 	}
-
-	[SerializeField]
-	private SIGadgetDashYoyo gadget;
 }

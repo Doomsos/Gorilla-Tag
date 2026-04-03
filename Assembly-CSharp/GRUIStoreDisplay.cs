@@ -1,229 +1,36 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class GRUIStoreDisplay : MonoBehaviour
 {
-	public void Awake()
+	[Serializable]
+	public class GRPurchaseSlot
 	{
-	}
+		public TMP_Text Name;
 
-	public void OnEnable()
-	{
-		this.RefreshUI();
-	}
+		public TMP_Text Price;
 
-	public void OnDisable()
-	{
-	}
+		public TMP_Text Description;
 
-	public void Setup(int playerActorId, GhostReactor reactor)
-	{
-		this.reactor = reactor;
-		this.toolProgressionManager = reactor.toolProgression;
-		this.playerActorId = playerActorId;
-		this.RefreshUI();
-		this.toolProgressionManager.OnProgressionUpdated += this.onProgressionUpdated;
-	}
+		public GRToolProgressionManager.ToolParts PurchaseID;
 
-	private void onProgressionUpdated()
-	{
-		this.RefreshUI();
-	}
+		[NonSerialized]
+		public Material overrideMaterial;
 
-	private void RefreshUI()
-	{
-		this.RefreshItemInfo();
-	}
+		[NonSerialized]
+		public bool canAfford;
 
-	public void OnBuy(int playerActorNumber)
-	{
-		if (playerActorNumber != this.playerActorId)
-		{
-			return;
-		}
-		if (GRPlayer.Get(this.playerActorId) == null)
-		{
-			return;
-		}
-		if (!this.CanLocalPlayerPurchaseItem())
-		{
-			if (this.scanner != null)
-			{
-				UnityEvent onFailed = this.scanner.onFailed;
-				if (onFailed == null)
-				{
-					return;
-				}
-				onFailed.Invoke();
-			}
-			return;
-		}
-		if (this.scanner != null)
-		{
-			UnityEvent onSucceeded = this.scanner.onSucceeded;
-			if (onSucceeded != null)
-			{
-				onSucceeded.Invoke();
-			}
-		}
-		bool flag;
-		if (!this.reactor.grManager.DebugIsToolStationHacked() && (!this.toolProgressionManager.IsPartUnlocked(this.slot.PurchaseID, out flag) || !flag))
-		{
-			if (this.slot.drillUpgradeLevel == ProgressionManager.DrillUpgradeLevel.Base)
-			{
-				if (ProgressionManager.Instance.GetShinyRocksTotal() >= 2500)
-				{
-					ProgressionManager.Instance.PurchaseDrillUpgrade(ProgressionManager.DrillUpgradeLevel.Base);
-					return;
-				}
-			}
-			else
-			{
-				this.toolProgressionManager.AttemptToUnlockPart(this.slot.PurchaseID);
-			}
-		}
-	}
+		[NonSerialized]
+		public string purchaseText = "";
 
-	private bool CanLocalPlayerPurchaseItem()
-	{
-		return this.slot.canAfford;
-	}
-
-	public void RefreshItemInfo()
-	{
-		bool flag = true;
-		if (this.toolProgressionManager != null)
-		{
-			GRToolProgressionManager.ToolProgressionMetaData partMetadata = this.toolProgressionManager.GetPartMetadata(this.slot.PurchaseID);
-			if (partMetadata == null)
-			{
-				this.slot.Name.text = "ERROR";
-				return;
-			}
-			string text = "ERROR";
-			string text2 = "";
-			Color white = Color.white;
-			bool flag2 = true;
-			int num = 10000;
-			int num2;
-			this.toolProgressionManager.GetPlayerShiftCredit(out num2);
-			int numberOfResearchPoints = this.toolProgressionManager.GetNumberOfResearchPoints();
-			this.slot.canAfford = false;
-			this.slot.purchaseText = "LOCKED";
-			if (this.slot.Description != null)
-			{
-				this.slot.Description.text = partMetadata.description;
-			}
-			bool flag3;
-			if (this.toolProgressionManager.IsPartUnlocked(this.slot.PurchaseID, out flag3))
-			{
-				if (flag3)
-				{
-					if (this.slot.drillUpgradeLevel != ProgressionManager.DrillUpgradeLevel.None)
-					{
-						this.slot.Price.color = this.colorCanBuyCredits;
-						this.slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
-						this.slot.canAfford = true;
-						this.slot.purchaseText = "Purchased";
-						text = this.slot.purchaseText;
-						this.slot.Price.text = text;
-						return;
-					}
-					if (this.toolProgressionManager.GetShiftCreditCost(this.slot.PurchaseID, out num))
-					{
-						text = string.Format("⑭ {0}", num);
-					}
-					bool flag4 = num2 >= num;
-					this.slot.Name.text = partMetadata.name;
-					this.slot.Name.color = (flag ? this.colorSelectedItem : this.colorUnselectedItem);
-					this.slot.Price.text = text;
-					this.slot.Price.color = (flag4 ? this.colorCanBuyCredits : this.colorCantBuy);
-					this.slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
-					this.slot.canAfford = flag4;
-					if (flag4)
-					{
-						this.slot.purchaseText = string.Format("BUY FOR\n⑭ {0}", num);
-						return;
-					}
-					this.slot.purchaseText = string.Format("NEED\n⑭ {0}", num);
-					return;
-				}
-				else
-				{
-					this.slot.Name.text = partMetadata.name;
-					this.slot.Name.color = (flag ? this.colorUnresearchedItem : this.colorUnselectedUnresearchedItem);
-					flag2 = true;
-					GRToolProgressionTree.EmployeeLevelRequirement employeeLevelRequirement;
-					if (this.toolProgressionManager.GetPartUnlockEmployeeRequiredLevel(this.slot.PurchaseID, out employeeLevelRequirement) && this.toolProgressionManager.GetCurrentEmployeeLevel() < employeeLevelRequirement)
-					{
-						this.toolProgressionManager.GetEmployeeLevelDisplayName(employeeLevelRequirement);
-						text2 += string.Format("⑱ {0}\n", employeeLevelRequirement);
-						flag2 = false;
-					}
-					this.cachedRequiredPartsList.Clear();
-					if (this.toolProgressionManager.GetPartUnlockRequiredParentParts(this.slot.PurchaseID, out this.cachedRequiredPartsList))
-					{
-						foreach (GRToolProgressionManager.ToolParts part in this.cachedRequiredPartsList)
-						{
-							bool flag5 = false;
-							GRToolProgressionManager.ToolProgressionMetaData partMetadata2 = this.toolProgressionManager.GetPartMetadata(part);
-							if (partMetadata2 == null)
-							{
-								text2 += "⑱ ERROR\n";
-								flag2 = false;
-							}
-							else if (!this.toolProgressionManager.IsPartUnlocked(part, out flag5) || !flag5)
-							{
-								text2 = text2 + "⑱ " + partMetadata2.name + "\n";
-								flag2 = false;
-							}
-						}
-					}
-					if (!flag2)
-					{
-						this.slot.Price.text = text2;
-						this.slot.Price.color = this.colorCantBuy;
-						this.slot.Price.fontSize = ((text2.Length <= 8) ? 2.25f : 1.6f);
-						this.slot.canAfford = false;
-						this.slot.purchaseText = "LOCKED";
-						return;
-					}
-					if (this.slot.drillUpgradeLevel == ProgressionManager.DrillUpgradeLevel.Base)
-					{
-						this.slot.Price.color = this.colorCanBuyCredits;
-						this.slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
-						this.slot.canAfford = true;
-						this.slot.purchaseText = string.Format("Cost {0}⑯ Shiny Rocks", 2500);
-						text = this.slot.purchaseText;
-						this.slot.Price.text = text;
-						return;
-					}
-					if (this.toolProgressionManager.GetPartUnlockJuiceCost(this.slot.PurchaseID, out num))
-					{
-						text = string.Format("⑮ {0}", num);
-					}
-					bool flag4 = numberOfResearchPoints >= num;
-					this.slot.Price.text = text;
-					this.slot.Price.color = (flag4 ? this.colorCanBuyJuice : this.colorCantBuy);
-					this.slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
-					this.slot.canAfford = flag4;
-					if (flag4)
-					{
-						this.slot.purchaseText = string.Format("RESEARCH\n⑮ {0}", num);
-						return;
-					}
-					this.slot.purchaseText = string.Format("NEED\n⑮ {0}", num);
-				}
-			}
-		}
+		public ProgressionManager.DrillUpgradeLevel drillUpgradeLevel;
 	}
 
 	public IDCardScanner scanner;
 
-	public GRUIStoreDisplay.GRPurchaseSlot slot;
+	public GRPurchaseSlot slot;
 
 	private GhostReactor reactor;
 
@@ -249,26 +56,205 @@ public class GRUIStoreDisplay : MonoBehaviour
 
 	private List<GRToolProgressionManager.ToolParts> cachedRequiredPartsList = new List<GRToolProgressionManager.ToolParts>(5);
 
-	[Serializable]
-	public class GRPurchaseSlot
+	public void Awake()
 	{
-		public TMP_Text Name;
+	}
 
-		public TMP_Text Price;
+	public void OnEnable()
+	{
+		RefreshUI();
+	}
 
-		public TMP_Text Description;
+	public void OnDisable()
+	{
+	}
 
-		public GRToolProgressionManager.ToolParts PurchaseID;
+	public void Setup(int playerActorId, GhostReactor reactor)
+	{
+		this.reactor = reactor;
+		toolProgressionManager = reactor.toolProgression;
+		this.playerActorId = playerActorId;
+		RefreshUI();
+		toolProgressionManager.OnProgressionUpdated += onProgressionUpdated;
+	}
 
-		[NonSerialized]
-		public Material overrideMaterial;
+	private void onProgressionUpdated()
+	{
+		RefreshUI();
+	}
 
-		[NonSerialized]
-		public bool canAfford;
+	private void RefreshUI()
+	{
+		RefreshItemInfo();
+	}
 
-		[NonSerialized]
-		public string purchaseText = "";
+	public void OnBuy(int playerActorNumber)
+	{
+		if (playerActorNumber != playerActorId || GRPlayer.Get(playerActorId) == null)
+		{
+			return;
+		}
+		if (!CanLocalPlayerPurchaseItem())
+		{
+			if (scanner != null)
+			{
+				scanner.onFailed?.Invoke();
+			}
+			return;
+		}
+		if (scanner != null)
+		{
+			scanner.onSucceeded?.Invoke();
+		}
+		if (reactor.grManager.DebugIsToolStationHacked() || (toolProgressionManager.IsPartUnlocked(slot.PurchaseID, out var unlocked) && unlocked))
+		{
+			return;
+		}
+		if (slot.drillUpgradeLevel == ProgressionManager.DrillUpgradeLevel.Base)
+		{
+			if (ProgressionManager.Instance.GetShinyRocksTotal() >= 2500)
+			{
+				ProgressionManager.Instance.PurchaseDrillUpgrade(ProgressionManager.DrillUpgradeLevel.Base);
+			}
+		}
+		else
+		{
+			toolProgressionManager.AttemptToUnlockPart(slot.PurchaseID);
+		}
+	}
 
-		public ProgressionManager.DrillUpgradeLevel drillUpgradeLevel;
+	private bool CanLocalPlayerPurchaseItem()
+	{
+		return slot.canAfford;
+	}
+
+	public void RefreshItemInfo()
+	{
+		bool flag = true;
+		if (!(toolProgressionManager != null))
+		{
+			return;
+		}
+		GRToolProgressionManager.ToolProgressionMetaData partMetadata = toolProgressionManager.GetPartMetadata(slot.PurchaseID);
+		if (partMetadata == null)
+		{
+			slot.Name.text = "ERROR";
+			return;
+		}
+		string text = "ERROR";
+		string text2 = "";
+		_ = Color.white;
+		bool flag2 = true;
+		bool flag3 = false;
+		int juiceCost = 10000;
+		toolProgressionManager.GetPlayerShiftCredit(out var playerShiftCredit);
+		int numberOfResearchPoints = toolProgressionManager.GetNumberOfResearchPoints();
+		slot.canAfford = false;
+		slot.purchaseText = "LOCKED";
+		if (slot.Description != null)
+		{
+			slot.Description.text = partMetadata.description;
+		}
+		if (!toolProgressionManager.IsPartUnlocked(slot.PurchaseID, out var unlocked))
+		{
+			return;
+		}
+		if (unlocked)
+		{
+			if (slot.drillUpgradeLevel != ProgressionManager.DrillUpgradeLevel.None)
+			{
+				slot.Price.color = colorCanBuyCredits;
+				slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
+				slot.canAfford = true;
+				slot.purchaseText = "Purchased";
+				text = slot.purchaseText;
+				slot.Price.text = text;
+				return;
+			}
+			if (toolProgressionManager.GetShiftCreditCost(slot.PurchaseID, out juiceCost))
+			{
+				text = $"⑭ {juiceCost}";
+			}
+			flag3 = playerShiftCredit >= juiceCost;
+			slot.Name.text = partMetadata.name;
+			slot.Name.color = (flag ? colorSelectedItem : colorUnselectedItem);
+			slot.Price.text = text;
+			slot.Price.color = (flag3 ? colorCanBuyCredits : colorCantBuy);
+			slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
+			slot.canAfford = flag3;
+			if (flag3)
+			{
+				slot.purchaseText = $"BUY FOR\n⑭ {juiceCost}";
+			}
+			else
+			{
+				slot.purchaseText = $"NEED\n⑭ {juiceCost}";
+			}
+			return;
+		}
+		slot.Name.text = partMetadata.name;
+		slot.Name.color = (flag ? colorUnresearchedItem : colorUnselectedUnresearchedItem);
+		flag2 = true;
+		if (toolProgressionManager.GetPartUnlockEmployeeRequiredLevel(slot.PurchaseID, out var level) && toolProgressionManager.GetCurrentEmployeeLevel() < level)
+		{
+			toolProgressionManager.GetEmployeeLevelDisplayName(level);
+			text2 += $"⑱ {level}\n";
+			flag2 = false;
+		}
+		cachedRequiredPartsList.Clear();
+		if (toolProgressionManager.GetPartUnlockRequiredParentParts(slot.PurchaseID, out cachedRequiredPartsList))
+		{
+			foreach (GRToolProgressionManager.ToolParts cachedRequiredParts in cachedRequiredPartsList)
+			{
+				bool unlocked2 = false;
+				GRToolProgressionManager.ToolProgressionMetaData partMetadata2 = toolProgressionManager.GetPartMetadata(cachedRequiredParts);
+				if (partMetadata2 == null)
+				{
+					text2 += "⑱ ERROR\n";
+					flag2 = false;
+				}
+				else if (!toolProgressionManager.IsPartUnlocked(cachedRequiredParts, out unlocked2) || !unlocked2)
+				{
+					text2 = text2 + "⑱ " + partMetadata2.name + "\n";
+					flag2 = false;
+				}
+			}
+		}
+		if (!flag2)
+		{
+			slot.Price.text = text2;
+			slot.Price.color = colorCantBuy;
+			slot.Price.fontSize = ((text2.Length <= 8) ? 2.25f : 1.6f);
+			slot.canAfford = false;
+			slot.purchaseText = "LOCKED";
+			return;
+		}
+		if (slot.drillUpgradeLevel == ProgressionManager.DrillUpgradeLevel.Base)
+		{
+			slot.Price.color = colorCanBuyCredits;
+			slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
+			slot.canAfford = true;
+			slot.purchaseText = $"Cost {2500}⑯ Shiny Rocks";
+			text = slot.purchaseText;
+			slot.Price.text = text;
+			return;
+		}
+		if (toolProgressionManager.GetPartUnlockJuiceCost(slot.PurchaseID, out juiceCost))
+		{
+			text = $"⑮ {juiceCost}";
+		}
+		flag3 = numberOfResearchPoints >= juiceCost;
+		slot.Price.text = text;
+		slot.Price.color = (flag3 ? colorCanBuyJuice : colorCantBuy);
+		slot.Price.fontSize = ((text.Length <= 8) ? 2.25f : 1.6f);
+		slot.canAfford = flag3;
+		if (flag3)
+		{
+			slot.purchaseText = $"RESEARCH\n⑮ {juiceCost}";
+		}
+		else
+		{
+			slot.purchaseText = $"NEED\n⑮ {juiceCost}";
+		}
 	}
 }

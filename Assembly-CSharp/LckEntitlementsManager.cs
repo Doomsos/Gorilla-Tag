@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Liv.Lck;
+using Liv.Lck.Core;
 using Liv.Lck.Core.Cosmetics;
 using Liv.Lck.DependencyInjection;
 using Photon.Pun;
@@ -12,210 +12,20 @@ using UnityEngine;
 
 public class LckEntitlementsManager : MonoBehaviour
 {
-	public static bool LckEntitlementsEnabled { get; private set; }
-
-	public static LckEntitlementsManager Instance { get; private set; }
-
-	private void Awake()
+	private class PlayerProcessRecord
 	{
-		if (LckEntitlementsManager.Instance != null && LckEntitlementsManager.Instance != this)
-		{
-			Object.Destroy(base.gameObject);
-			return;
-		}
-		LckEntitlementsManager.Instance = this;
+		public int AttemptCount;
+
+		public float TimeoutUntilTimestamp;
+
+		public float LastSeenTimestamp;
 	}
 
-	private void OnEnable()
+	private enum FeatureState
 	{
-		this.InitializeFeatureAsync();
-		this._cleanupProcessedPlayersCoroutine = base.StartCoroutine(this.CleanupProcessedPlayersCoroutine());
-		this._getEntitlementsBatchingCoroutine = base.StartCoroutine(this.ProcessBatchedRemotePlayersCoroutine());
-	}
-
-	private void OnDisable()
-	{
-		if (this._cleanupProcessedPlayersCoroutine != null)
-		{
-			base.StopCoroutine(this._cleanupProcessedPlayersCoroutine);
-			this._cleanupProcessedPlayersCoroutine = null;
-		}
-		if (this._getEntitlementsBatchingCoroutine != null)
-		{
-			base.StopCoroutine(this._getEntitlementsBatchingCoroutine);
-			this._getEntitlementsBatchingCoroutine = null;
-		}
-	}
-
-	private Task InitializeFeatureAsync()
-	{
-		LckEntitlementsManager.<InitializeFeatureAsync>d__27 <InitializeFeatureAsync>d__;
-		<InitializeFeatureAsync>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<InitializeFeatureAsync>d__.<>4__this = this;
-		<InitializeFeatureAsync>d__.<>1__state = -1;
-		<InitializeFeatureAsync>d__.<>t__builder.Start<LckEntitlementsManager.<InitializeFeatureAsync>d__27>(ref <InitializeFeatureAsync>d__);
-		return <InitializeFeatureAsync>d__.<>t__builder.Task;
-	}
-
-	public void OnLocalPlayerSpawned(string localUserId)
-	{
-		if (!this.ShouldProcessPlayer(localUserId))
-		{
-			return;
-		}
-		base.StartCoroutine(this.ProcessLocalPlayerSpawn(localUserId));
-	}
-
-	public void OnRemotePlayerSpawned(string remoteUserId)
-	{
-		if (this._currentState == LckEntitlementsManager.FeatureState.Disabled)
-		{
-			return;
-		}
-		if (!this.ShouldProcessPlayer(remoteUserId))
-		{
-			return;
-		}
-		HashSet<string> remotePlayersToGetEntitlementsFor = this._remotePlayersToGetEntitlementsFor;
-		lock (remotePlayersToGetEntitlementsFor)
-		{
-			this._remotePlayersToGetEntitlementsFor.Add(remoteUserId);
-		}
-	}
-
-	private IEnumerator ProcessLocalPlayerSpawn(string userId)
-	{
-		yield return new WaitUntil(() => this._currentState > LckEntitlementsManager.FeatureState.Checking);
-		if (this._currentState == LckEntitlementsManager.FeatureState.Disabled)
-		{
-			yield break;
-		}
-		base.StartCoroutine(this.AnnouncePlayerPresenceForSession(userId));
-		yield break;
-	}
-
-	private bool ShouldProcessPlayer(string userId)
-	{
-		LckEntitlementsManager.PlayerProcessRecord playerProcessRecord;
-		if (!this._processedPlayers.TryGetValue(userId, out playerProcessRecord))
-		{
-			playerProcessRecord = new LckEntitlementsManager.PlayerProcessRecord();
-			this._processedPlayers[userId] = playerProcessRecord;
-		}
-		playerProcessRecord.LastSeenTimestamp = Time.time;
-		if (Time.time < playerProcessRecord.TimeoutUntilTimestamp)
-		{
-			return false;
-		}
-		if (playerProcessRecord.AttemptCount > 3)
-		{
-			playerProcessRecord.AttemptCount = 0;
-		}
-		playerProcessRecord.AttemptCount++;
-		if (playerProcessRecord.AttemptCount > 3)
-		{
-			playerProcessRecord.TimeoutUntilTimestamp = Time.time + 60f;
-			return false;
-		}
-		return true;
-	}
-
-	private IEnumerator ProcessBatchedRemotePlayersCoroutine()
-	{
-		for (;;)
-		{
-			yield return new WaitForSeconds(15f);
-			if (!this._isProcessingBatch)
-			{
-				HashSet<string> remotePlayersToGetEntitlementsFor = this._remotePlayersToGetEntitlementsFor;
-				List<string> list;
-				lock (remotePlayersToGetEntitlementsFor)
-				{
-					if (this._remotePlayersToGetEntitlementsFor.Count == 0)
-					{
-						continue;
-					}
-					list = this._remotePlayersToGetEntitlementsFor.ToList<string>();
-					this._remotePlayersToGetEntitlementsFor.Clear();
-				}
-				if (list.Count > 0)
-				{
-					this._isProcessingBatch = true;
-					this.GetCosmeticsForPlayersAsync(list, "ProcessBatchedRemotePlayers");
-				}
-			}
-		}
-		yield break;
-	}
-
-	private IEnumerator AnnouncePlayerPresenceForSession(string localPlayerId)
-	{
-		if (PhotonNetwork.CurrentRoom == null)
-		{
-			Debug.LogError("LCK: Called AnnouncePlayerPresenceForSession() but no room was found. Player not announced.");
-			yield break;
-		}
-		string sessionId = "DefaultSessionId";
-		int num;
-		for (int attempt = 1; attempt <= 2; attempt = num + 1)
-		{
-			LckEntitlementsManager.<>c__DisplayClass33_0 CS$<>8__locals1 = new LckEntitlementsManager.<>c__DisplayClass33_0();
-			CS$<>8__locals1.announcementAsync = this._lckCosmeticsCoordinator.AnnouncePlayerPresenceForSessionAsync(localPlayerId, sessionId);
-			yield return new WaitUntil(() => CS$<>8__locals1.announcementAsync.IsCompleted);
-			if (!CS$<>8__locals1.announcementAsync.IsFaulted && CS$<>8__locals1.announcementAsync.Result.IsOk)
-			{
-				yield break;
-			}
-			string arg = CS$<>8__locals1.announcementAsync.IsFaulted ? CS$<>8__locals1.announcementAsync.Exception.ToString() : CS$<>8__locals1.announcementAsync.Result.Message.ToString();
-			Debug.LogError(string.Format("LCK: Error setting session entitlement (Attempt {0}/{1}): {2}", attempt, 2, arg));
-			CS$<>8__locals1 = null;
-			num = attempt;
-		}
-		Debug.LogError("LCK: All attempts to set session entitlement failed.");
-		yield break;
-	}
-
-	private Task GetCosmeticsForPlayersAsync(List<string> userIdList, string methodNameForLogging)
-	{
-		LckEntitlementsManager.<GetCosmeticsForPlayersAsync>d__34 <GetCosmeticsForPlayersAsync>d__;
-		<GetCosmeticsForPlayersAsync>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<GetCosmeticsForPlayersAsync>d__.<>4__this = this;
-		<GetCosmeticsForPlayersAsync>d__.userIdList = userIdList;
-		<GetCosmeticsForPlayersAsync>d__.methodNameForLogging = methodNameForLogging;
-		<GetCosmeticsForPlayersAsync>d__.<>1__state = -1;
-		<GetCosmeticsForPlayersAsync>d__.<>t__builder.Start<LckEntitlementsManager.<GetCosmeticsForPlayersAsync>d__34>(ref <GetCosmeticsForPlayersAsync>d__);
-		return <GetCosmeticsForPlayersAsync>d__.<>t__builder.Task;
-	}
-
-	private IEnumerator CleanupProcessedPlayersCoroutine()
-	{
-		List<string> playersToRemove = new List<string>();
-		for (;;)
-		{
-			yield return new WaitForSeconds(60f);
-			playersToRemove.Clear();
-			float time = Time.time;
-			foreach (KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord> keyValuePair in this._processedPlayers)
-			{
-				if (time > keyValuePair.Value.LastSeenTimestamp + 300f)
-				{
-					playersToRemove.Add(keyValuePair.Key);
-				}
-			}
-			if (playersToRemove.Count > 0)
-			{
-				using (List<string>.Enumerator enumerator2 = playersToRemove.GetEnumerator())
-				{
-					while (enumerator2.MoveNext())
-					{
-						string key = enumerator2.Current;
-						this._processedPlayers.Remove(key);
-					}
-					continue;
-				}
-				yield break;
-			}
-		}
+		Checking,
+		Enabled,
+		Disabled
 	}
 
 	[InjectLck]
@@ -236,31 +46,233 @@ public class LckEntitlementsManager : MonoBehaviour
 
 	private const string DEFAULT_SESSION_ID = "DefaultSessionId";
 
-	private LckEntitlementsManager.FeatureState _currentState;
+	private FeatureState _currentState;
 
 	private readonly HashSet<string> _remotePlayersToGetEntitlementsFor = new HashSet<string>();
 
 	private Coroutine _getEntitlementsBatchingCoroutine;
 
-	private readonly Dictionary<string, LckEntitlementsManager.PlayerProcessRecord> _processedPlayers = new Dictionary<string, LckEntitlementsManager.PlayerProcessRecord>();
+	private readonly Dictionary<string, PlayerProcessRecord> _processedPlayers = new Dictionary<string, PlayerProcessRecord>();
 
 	private Coroutine _cleanupProcessedPlayersCoroutine;
 
 	private bool _isProcessingBatch;
 
-	private class PlayerProcessRecord
+	public static bool LckEntitlementsEnabled { get; private set; }
+
+	public static LckEntitlementsManager Instance { get; private set; }
+
+	private void Awake()
 	{
-		public int AttemptCount;
-
-		public float TimeoutUntilTimestamp;
-
-		public float LastSeenTimestamp;
+		if (Instance != null && Instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+		else
+		{
+			Instance = this;
+		}
 	}
 
-	private enum FeatureState
+	private void OnEnable()
 	{
-		Checking,
-		Enabled,
-		Disabled
+		InitializeFeatureAsync();
+		_cleanupProcessedPlayersCoroutine = StartCoroutine(CleanupProcessedPlayersCoroutine());
+		_getEntitlementsBatchingCoroutine = StartCoroutine(ProcessBatchedRemotePlayersCoroutine());
+	}
+
+	private void OnDisable()
+	{
+		if (_cleanupProcessedPlayersCoroutine != null)
+		{
+			StopCoroutine(_cleanupProcessedPlayersCoroutine);
+			_cleanupProcessedPlayersCoroutine = null;
+		}
+		if (_getEntitlementsBatchingCoroutine != null)
+		{
+			StopCoroutine(_getEntitlementsBatchingCoroutine);
+			_getEntitlementsBatchingCoroutine = null;
+		}
+	}
+
+	private async Task InitializeFeatureAsync()
+	{
+		_currentState = FeatureState.Checking;
+		bool flag = await _featureFlagManager.IsEnabledAsync();
+		if (!(this == null))
+		{
+			_currentState = (flag ? FeatureState.Enabled : FeatureState.Disabled);
+			LckEntitlementsEnabled = flag;
+		}
+	}
+
+	public void OnLocalPlayerSpawned(string localUserId)
+	{
+		if (ShouldProcessPlayer(localUserId))
+		{
+			StartCoroutine(ProcessLocalPlayerSpawn(localUserId));
+		}
+	}
+
+	public void OnRemotePlayerSpawned(string remoteUserId)
+	{
+		if (_currentState == FeatureState.Disabled || !ShouldProcessPlayer(remoteUserId))
+		{
+			return;
+		}
+		lock (_remotePlayersToGetEntitlementsFor)
+		{
+			_remotePlayersToGetEntitlementsFor.Add(remoteUserId);
+		}
+	}
+
+	private IEnumerator ProcessLocalPlayerSpawn(string userId)
+	{
+		yield return new WaitUntil(() => _currentState != FeatureState.Checking);
+		if (_currentState != FeatureState.Disabled)
+		{
+			StartCoroutine(AnnouncePlayerPresenceForSession(userId));
+		}
+	}
+
+	private bool ShouldProcessPlayer(string userId)
+	{
+		if (!_processedPlayers.TryGetValue(userId, out var value))
+		{
+			value = new PlayerProcessRecord();
+			_processedPlayers[userId] = value;
+		}
+		value.LastSeenTimestamp = Time.time;
+		if (Time.time < value.TimeoutUntilTimestamp)
+		{
+			return false;
+		}
+		if (value.AttemptCount > 3)
+		{
+			value.AttemptCount = 0;
+		}
+		value.AttemptCount++;
+		if (value.AttemptCount > 3)
+		{
+			value.TimeoutUntilTimestamp = Time.time + 60f;
+			return false;
+		}
+		return true;
+	}
+
+	private IEnumerator ProcessBatchedRemotePlayersCoroutine()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(15f);
+			if (_isProcessingBatch)
+			{
+				continue;
+			}
+			List<string> list;
+			lock (_remotePlayersToGetEntitlementsFor)
+			{
+				if (_remotePlayersToGetEntitlementsFor.Count == 0)
+				{
+					continue;
+				}
+				list = _remotePlayersToGetEntitlementsFor.ToList();
+				_remotePlayersToGetEntitlementsFor.Clear();
+				goto IL_008b;
+			}
+			IL_008b:
+			if (list.Count > 0)
+			{
+				_isProcessingBatch = true;
+				GetCosmeticsForPlayersAsync(list, "ProcessBatchedRemotePlayers");
+			}
+		}
+	}
+
+	private IEnumerator AnnouncePlayerPresenceForSession(string localPlayerId)
+	{
+		if (PhotonNetwork.CurrentRoom == null)
+		{
+			Debug.LogError("LCK: Called AnnouncePlayerPresenceForSession() but no room was found. Player not announced.");
+			yield break;
+		}
+		string sessionId = "DefaultSessionId";
+		for (int attempt = 1; attempt <= 2; attempt++)
+		{
+			Task<Result<bool>> announcementAsync = _lckCosmeticsCoordinator.AnnouncePlayerPresenceForSessionAsync(localPlayerId, sessionId);
+			yield return new WaitUntil(() => announcementAsync.IsCompleted);
+			if (announcementAsync.IsFaulted || !announcementAsync.Result.IsOk)
+			{
+				string arg = (announcementAsync.IsFaulted ? announcementAsync.Exception.ToString() : announcementAsync.Result.Message.ToString());
+				Debug.LogError($"LCK: Error setting session entitlement (Attempt {attempt}/{2}): {arg}");
+				continue;
+			}
+			yield break;
+		}
+		Debug.LogError("LCK: All attempts to set session entitlement failed.");
+	}
+
+	private async Task GetCosmeticsForPlayersAsync(List<string> userIdList, string methodNameForLogging)
+	{
+		try
+		{
+			if (userIdList == null || userIdList.Count == 0)
+			{
+				return;
+			}
+			if (PhotonNetwork.CurrentRoom == null)
+			{
+				Debug.LogError("LCK: Called " + methodNameForLogging + " but no room was found.");
+				return;
+			}
+			string sessionId = "DefaultSessionId";
+			await Task.Run(async delegate
+			{
+				for (int attempt = 1; attempt <= 2; attempt++)
+				{
+					Result<bool> result = await _lckCosmeticsCoordinator.GetUserCosmeticsForSessionAsync(userIdList, sessionId);
+					if (result.IsOk)
+					{
+						return;
+					}
+					Debug.LogError($"LCK: Error in {methodNameForLogging} (Attempt {attempt}/{2}): {result.Message}");
+				}
+				Debug.LogError("LCK: All attempts to call " + methodNameForLogging + " failed.");
+			});
+		}
+		catch (Exception arg)
+		{
+			Debug.LogError($"LCK: An exception occurred in GetCosmeticsForPlayersAsync: {arg}");
+		}
+		finally
+		{
+			_isProcessingBatch = false;
+		}
+	}
+
+	private IEnumerator CleanupProcessedPlayersCoroutine()
+	{
+		List<string> playersToRemove = new List<string>();
+		while (true)
+		{
+			yield return new WaitForSeconds(60f);
+			playersToRemove.Clear();
+			float time = Time.time;
+			foreach (KeyValuePair<string, PlayerProcessRecord> processedPlayer in _processedPlayers)
+			{
+				if (time > processedPlayer.Value.LastSeenTimestamp + 300f)
+				{
+					playersToRemove.Add(processedPlayer.Key);
+				}
+			}
+			if (playersToRemove.Count <= 0)
+			{
+				continue;
+			}
+			foreach (string item in playersToRemove)
+			{
+				_processedPlayers.Remove(item);
+			}
+		}
 	}
 }

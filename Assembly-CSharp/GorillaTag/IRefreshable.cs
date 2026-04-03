@@ -1,9 +1,6 @@
-﻿using System;
+namespace GorillaTag;
 
-namespace GorillaTag
+public interface IRefreshable
 {
-	public interface IRefreshable
-	{
-		void Refresh();
-	}
+	void Refresh();
 }

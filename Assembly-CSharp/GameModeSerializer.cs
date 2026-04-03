@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Fusion;
 using GorillaExtensions;
 using GorillaGameModes;
@@ -9,35 +9,46 @@ using UnityEngine.Scripting;
 [NetworkBehaviourWeaved(1)]
 internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthorityChanged, IPublicFacingInterface
 {
+	[WeaverGenerated]
+	[DefaultForProperty("gameModeKeyInt", 0, 1)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private int _gameModeKeyInt;
+
+	private GameModeType gameModeKey;
+
+	private GorillaGameManager gameModeInstance;
+
+	private FusionGameModeData gameModeData;
+
+	private Type currentGameDataType;
+
+	private CallLimiter broadcastTagCallLimit = new CallLimiter(12, 5f);
+
+	public static Action<NetPlayer> FusionGameModeOwnerChanged;
+
 	[Networked]
 	[NetworkedWeaved(0, 1)]
 	private unsafe int gameModeKeyInt
 	{
 		get
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing GameModeSerializer.gameModeKeyInt. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			return this.Ptr[0];
+			return *(int*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
 		set
 		{
-			if (this.Ptr == null)
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
 				throw new InvalidOperationException("Error when accessing GameModeSerializer.gameModeKeyInt. Networked properties can only be accessed when Spawned() has been called.");
 			}
-			this.Ptr[0] = value;
+			*(int*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
 		}
 	}
 
-	public GorillaGameManager GameModeInstance
-	{
-		get
-		{
-			return this.gameModeInstance;
-		}
-	}
+	public GorillaGameManager GameModeInstance => gameModeInstance;
 
 	protected override bool OnSpawnSetupCheck(PhotonMessageInfoWrapped wrappedInfo, out GameObject outTargetObject, out Type outTargetType)
 	{
@@ -53,60 +64,55 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		{
 			if (!player.IsMasterClient)
 			{
-				GTDev.LogError<string>("SPAWN FAIL NOT MASTER :" + player.UserId + player.NickName, null);
+				GTDev.LogError("SPAWN FAIL NOT MASTER :" + player.UserId + player.NickName);
 				MonkeAgent.instance.SendReport("trying to inappropriately create game managers", player.UserId, player.NickName);
 				return false;
 			}
-			if (!this.netView.IsRoomView)
+			if (!netView.IsRoomView)
 			{
-				GTDev.LogError<string>("SPAWN FAIL ROOM VIEW" + player.UserId + player.NickName, null);
+				GTDev.LogError("SPAWN FAIL ROOM VIEW" + player.UserId + player.NickName);
 				MonkeAgent.instance.SendReport("creating game manager as player object", player.UserId, player.NickName);
 				return false;
 			}
 			if (activeNetworkHandler.IsNotNull() && activeNetworkHandler != this)
 			{
-				GTDev.LogError<string>("DUPLICATE CHECK" + player.UserId + player.NickName, null);
+				GTDev.LogError("DUPLICATE CHECK" + player.UserId + player.NickName);
 				MonkeAgent.instance.SendReport("trying to create multiple game managers", player.UserId, player.NickName);
 				return false;
 			}
 		}
-		else if ((activeNetworkHandler.IsNotNull() && activeNetworkHandler != this) || !this.netView.IsRoomView)
+		else if ((activeNetworkHandler.IsNotNull() && activeNetworkHandler != this) || !netView.IsRoomView)
 		{
-			GTDev.LogError<string>("ACTIVE HANDLER CHECK FAIL" + ((player != null) ? player.UserId : null) + ((player != null) ? player.NickName : null), null);
-			GTDev.LogError<string>("existing game manager! destroying newly created manager", null);
+			GTDev.LogError("ACTIVE HANDLER CHECK FAIL" + player?.UserId + player?.NickName);
+			GTDev.LogError("existing game manager! destroying newly created manager");
 			return false;
 		}
 		object[] instantiationData = wrappedInfo.punInfo.photonView.InstantiationData;
-		if (instantiationData != null && instantiationData.Length >= 1)
+		if (instantiationData == null || instantiationData.Length < 1 || !(instantiationData[0] is int num))
 		{
-			object obj = instantiationData[0];
-			if (obj is int)
-			{
-				int num = (int)obj;
-				this.gameModeKey = (GameModeType)num;
-				this.gameModeInstance = GorillaGameModes.GameMode.GetGameModeInstance(this.gameModeKey);
-				if (this.gameModeInstance.IsNull() || !this.gameModeInstance.ValidGameMode())
-				{
-					return false;
-				}
-				this.serializeTarget = this.gameModeInstance;
-				base.transform.parent = VRRigCache.Instance.NetworkParent;
-				return true;
-			}
+			GTDev.LogError("missing instantiation data");
+			return false;
 		}
-		GTDev.LogError<string>("missing instantiation data", null);
-		return false;
+		gameModeKey = (GameModeType)num;
+		gameModeInstance = GorillaGameModes.GameMode.GetGameModeInstance(gameModeKey);
+		if (gameModeInstance.IsNull() || !gameModeInstance.ValidGameMode())
+		{
+			return false;
+		}
+		serializeTarget = gameModeInstance;
+		base.transform.parent = VRRigCache.Instance.NetworkParent;
+		return true;
 	}
 
 	internal void Init(int gameModeType)
 	{
 		Debug.Log("<color=red>Init called</color>");
-		this.gameModeKeyInt = gameModeType;
+		gameModeKeyInt = gameModeType;
 	}
 
 	protected override void OnSuccesfullySpawned(PhotonMessageInfoWrapped info)
 	{
-		this.netView.GetView.AddCallbackTarget(this);
+		netView.GetView.AddCallbackTarget(this);
 		GorillaGameModes.GameMode.SetupGameModeRemote(this);
 	}
 
@@ -122,142 +128,137 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 	[PunRPC]
 	internal void RPC_ReportTag(int taggedPlayer, PhotonMessageInfo info)
 	{
-		this.ReportTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), new PhotonMessageInfoWrapped(info));
+		ReportTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), new PhotonMessageInfoWrapped(info));
 	}
 
 	[PunRPC]
 	internal void RPC_ReportHit(PhotonMessageInfo info)
 	{
-		this.ReportHit(new PhotonMessageInfoWrapped(info));
+		ReportHit(new PhotonMessageInfoWrapped(info));
 	}
 
 	[Rpc(RpcSources.All, RpcTargets.All)]
 	internal unsafe void RPC_ReportTag(int taggedPlayer, RpcInfo info = default(RpcInfo))
 	{
-		if (!this.InvokeRpc)
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage == SimulationStages.Resimulate)
 			{
-				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-				if ((localAuthorityMask & 7) == 0)
-				{
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GameModeSerializer::RPC_ReportTag(System.Int32,Fusion.RpcInfo)", base.Object, 7);
-				}
-				else
-				{
-					int num = 8;
-					num += 4;
-					if (!SimulationMessage.CanAllocateUserPayload(num))
-					{
-						NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GameModeSerializer::RPC_ReportTag(System.Int32,Fusion.RpcInfo)", num);
-					}
-					else
-					{
-						if (base.Runner.HasAnyActiveConnections())
-						{
-							SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
-							int num2 = 8;
-							*(int*)(ptr2 + num2) = taggedPlayer;
-							num2 += 4;
-							ptr->Offset = num2 * 8;
-							base.Runner.SendRpc(ptr);
-						}
-						if ((localAuthorityMask & 7) != 0)
-						{
-							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-							goto IL_12;
-						}
-					}
-				}
+				return;
 			}
-			return;
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
+			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GameModeSerializer::RPC_ReportTag(System.Int32,Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			int num = 8;
+			num += 4;
+			if (!SimulationMessage.CanAllocateUserPayload(num))
+			{
+				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GameModeSerializer::RPC_ReportTag(System.Int32,Fusion.RpcInfo)", num);
+				return;
+			}
+			if (base.Runner.HasAnyActiveConnections())
+			{
+				SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+				byte* ptr2 = (byte*)ptr + 28;
+				*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 1);
+				int num2 = 8;
+				*(int*)(ptr2 + num2) = taggedPlayer;
+				num2 += 4;
+				ptr->Offset = num2 * 8;
+				base.Runner.SendRpc(ptr);
+			}
+			if ((localAuthorityMask & 7) == 0)
+			{
+				return;
+			}
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
-		this.InvokeRpc = false;
-		IL_12:
-		this.ReportTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), new PhotonMessageInfoWrapped(info));
+		ReportTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), new PhotonMessageInfoWrapped(info));
 	}
 
 	[Rpc(RpcSources.All, RpcTargets.All)]
 	internal unsafe void RPC_ReportHit(RpcInfo info = default(RpcInfo))
 	{
-		if (!this.InvokeRpc)
+		if (((NetworkBehaviour)this).InvokeRpc)
+		{
+			((NetworkBehaviour)this).InvokeRpc = false;
+		}
+		else
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage == SimulationStages.Resimulate)
 			{
-				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-				if ((localAuthorityMask & 7) == 0)
-				{
-					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GameModeSerializer::RPC_ReportHit(Fusion.RpcInfo)", base.Object, 7);
-				}
-				else
-				{
-					int num = 8;
-					if (!SimulationMessage.CanAllocateUserPayload(num))
-					{
-						NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GameModeSerializer::RPC_ReportHit(Fusion.RpcInfo)", num);
-					}
-					else
-					{
-						if (base.Runner.HasAnyActiveConnections())
-						{
-							SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 2);
-							int num2 = 8;
-							ptr->Offset = num2 * 8;
-							base.Runner.SendRpc(ptr);
-						}
-						if ((localAuthorityMask & 7) != 0)
-						{
-							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-							goto IL_12;
-						}
-					}
-				}
+				return;
 			}
-			return;
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
+			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GameModeSerializer::RPC_ReportHit(Fusion.RpcInfo)", base.Object, 7);
+				return;
+			}
+			int num = 8;
+			if (!SimulationMessage.CanAllocateUserPayload(num))
+			{
+				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GameModeSerializer::RPC_ReportHit(Fusion.RpcInfo)", num);
+				return;
+			}
+			if (base.Runner.HasAnyActiveConnections())
+			{
+				SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+				byte* ptr2 = (byte*)ptr + 28;
+				*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 2);
+				int num2 = 8;
+				ptr->Offset = num2 * 8;
+				base.Runner.SendRpc(ptr);
+			}
+			if ((localAuthorityMask & 7) == 0)
+			{
+				return;
+			}
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
-		this.InvokeRpc = false;
-		IL_12:
-		this.ReportHit(new PhotonMessageInfoWrapped(info));
+		ReportHit(new PhotonMessageInfoWrapped(info));
 	}
 
 	private void ReportTag(NetPlayer taggedPlayer, PhotonMessageInfoWrapped info)
 	{
 		MonkeAgent.IncrementRPCCall(info, "ReportTag");
 		NetPlayer sender = info.Sender;
-		this.gameModeInstance.ReportTag(taggedPlayer, sender);
+		gameModeInstance.ReportTag(taggedPlayer, sender);
 	}
 
 	private void ReportHit(PhotonMessageInfoWrapped info)
 	{
 		MonkeAgent.IncrementRPCCall(info, "ReportContactWithLavaRPC");
-		bool flag = ZoneManagement.instance.IsZoneActive(GTZone.customMaps);
-		bool flag2 = false;
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(info.Sender, out rigContainer))
+		bool num = ZoneManagement.instance.IsZoneActive(GTZone.customMaps);
+		bool flag = false;
+		if (VRRigCache.Instance.TryGetVrrig(info.Sender, out var playerRig))
 		{
 			InfectionLavaController infectionLavaController = null;
-			if (rigContainer.Rig.zoneEntity != null)
+			if (playerRig.Rig.zoneEntity != null)
 			{
-				infectionLavaController = InfectionLavaController.GetControllerForZone(rigContainer.Rig.zoneEntity.currentZone);
+				infectionLavaController = InfectionLavaController.GetControllerForZone(playerRig.Rig.zoneEntity.currentZone);
 			}
-			flag2 = (infectionLavaController != null && infectionLavaController.LavaCurrentlyActivated && (infectionLavaController.SurfaceCenter - rigContainer.Rig.syncPos).sqrMagnitude < 2500f && infectionLavaController.LavaPlane.GetDistanceToPoint(rigContainer.Rig.syncPos) < 5f);
+			flag = infectionLavaController != null && infectionLavaController.LavaCurrentlyActivated && (infectionLavaController.SurfaceCenter - playerRig.Rig.syncPos).sqrMagnitude < 2500f && infectionLavaController.LavaPlane.GetDistanceToPoint(playerRig.Rig.syncPos) < 5f;
 		}
-		if (flag || flag2)
+		if (num || flag)
 		{
-			this.GameModeInstance.HitPlayer(info.Sender);
+			GameModeInstance.HitPlayer(info.Sender);
 		}
 	}
 
 	[PunRPC]
 	internal void RPC_BroadcastRoundComplete(PhotonMessageInfo info)
 	{
-		this.BroadcastRoundComplete(info);
+		BroadcastRoundComplete(info);
 	}
 
 	private void BroadcastRoundComplete(PhotonMessageInfoWrapped info)
@@ -265,37 +266,28 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		MonkeAgent.IncrementRPCCall(info, "BroadcastRoundComplete");
 		if (info.Sender.IsMasterClient)
 		{
-			this.gameModeInstance.HandleRoundComplete();
+			gameModeInstance.HandleRoundComplete();
 		}
 	}
 
 	[PunRPC]
 	internal void RPC_BroadcastTag(int taggedPlayer, int taggingPlayer, PhotonMessageInfo info)
 	{
-		this.BroadcastTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), NetworkSystem.Instance.GetPlayer(taggingPlayer), info);
+		BroadcastTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), NetworkSystem.Instance.GetPlayer(taggingPlayer), info);
 	}
 
 	private void BroadcastTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer, PhotonMessageInfo info)
 	{
 		MonkeAgent.IncrementRPCCall(info, "BroadcastTag");
-		if (!info.Sender.IsMasterClient)
+		if (info.Sender.IsMasterClient && taggedPlayer != null && taggingPlayer != null && broadcastTagCallLimit.CheckCallTime(Time.time))
 		{
-			return;
+			gameModeInstance.HandleTagBroadcast(taggedPlayer, taggingPlayer);
 		}
-		if (taggedPlayer == null || taggingPlayer == null)
-		{
-			return;
-		}
-		if (!this.broadcastTagCallLimit.CheckCallTime(Time.time))
-		{
-			return;
-		}
-		this.gameModeInstance.HandleTagBroadcast(taggedPlayer, taggingPlayer);
 	}
 
 	protected override void FusionDataRPC(string method, NetPlayer targetPlayer, params object[] parameters)
 	{
-		Debug.Log(this.gameModeData.GetType().Name);
+		Debug.Log(gameModeData.GetType().Name);
 	}
 
 	protected override void FusionDataRPC(string method, RpcTarget target, params object[] parameters)
@@ -305,29 +297,29 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 
 	void IStateAuthorityChanged.StateAuthorityChanged()
 	{
-		GameModeSerializer.FusionGameModeOwnerChanged(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
+		FusionGameModeOwnerChanged(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
-		this.gameModeKeyInt = this._gameModeKeyInt;
+		base.CopyBackingFieldsToState(P_0);
+		gameModeKeyInt = _gameModeKeyInt;
 	}
 
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
 		base.CopyStateToBackingFields();
-		this._gameModeKeyInt = this.gameModeKeyInt;
+		_gameModeKeyInt = gameModeKeyInt;
 	}
 
 	[NetworkRpcWeavedInvoker(1, 7, 7)]
 	[Preserve]
 	[WeaverGenerated]
-	protected unsafe static void RPC_ReportTag@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	protected unsafe static void RPC_ReportTag_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
-		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
+		byte* ptr = (byte*)message + 28;
 		int num = 8;
 		int num2 = *(int*)(ptr + num);
 		num += 4;
@@ -340,28 +332,12 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 	[NetworkRpcWeavedInvoker(2, 7, 7)]
 	[Preserve]
 	[WeaverGenerated]
-	protected unsafe static void RPC_ReportHit@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	protected unsafe static void RPC_ReportHit_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
-		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
 		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 		behaviour.InvokeRpc = true;
 		((GameModeSerializer)behaviour).RPC_ReportHit(info);
 	}
-
-	[WeaverGenerated]
-	[DefaultForProperty("gameModeKeyInt", 0, 1)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private int _gameModeKeyInt;
-
-	private GameModeType gameModeKey;
-
-	private GorillaGameManager gameModeInstance;
-
-	private FusionGameModeData gameModeData;
-
-	private Type currentGameDataType;
-
-	private CallLimiter broadcastTagCallLimit = new CallLimiter(12, 5f, 0.5f);
-
-	public static Action<NetPlayer> FusionGameModeOwnerChanged;
 }

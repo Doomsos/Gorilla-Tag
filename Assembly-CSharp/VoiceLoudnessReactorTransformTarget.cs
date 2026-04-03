@@ -1,21 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class VoiceLoudnessReactorTransformTarget
 {
-	public Vector3 Initial
-	{
-		get
-		{
-			return this.initial;
-		}
-		set
-		{
-			this.initial = value;
-		}
-	}
-
 	public Transform transform;
 
 	private Vector3 initial;
@@ -25,4 +13,16 @@ public class VoiceLoudnessReactorTransformTarget
 	public float Scale = 1f;
 
 	public bool UseSmoothedLoudness;
+
+	public Vector3 Initial
+	{
+		get
+		{
+			return initial;
+		}
+		set
+		{
+			initial = value;
+		}
+	}
 }

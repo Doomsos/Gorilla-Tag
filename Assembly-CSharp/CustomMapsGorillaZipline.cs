@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CustomMapSupport;
 using GorillaExtensions;
 using GorillaLocomotion.Climbing;
@@ -10,70 +10,70 @@ public class CustomMapsGorillaZipline : GorillaZipline
 {
 	public bool GenerateZipline(CustomMapSupport.BezierSpline splineRef)
 	{
-		this.spline = base.GetComponent<global::BezierSpline>();
-		if (this.spline.IsNull())
+		spline = GetComponent<BezierSpline>();
+		if (spline.IsNull())
 		{
 			return false;
 		}
-		this.spline.BuildSplineFromPoints(splineRef.GetControlPoints(), this.ConvertControlPointModes(splineRef.GetControlPointModes()), splineRef.Loop);
-		if (this.segmentsRoot == null)
+		spline.BuildSplineFromPoints(splineRef.GetControlPoints(), ConvertControlPointModes(splineRef.GetControlPointModes()), splineRef.Loop);
+		if (segmentsRoot == null)
 		{
 			return false;
 		}
-		this.ziplineDistance = 0f;
-		float num = 0f;
-		int num2 = 0;
+		ziplineDistance = 0f;
+		float t = 0f;
+		int num = 0;
 		Transform transform = null;
-		while (num < 1f)
+		while (t < 1f)
 		{
-			float num3 = this.segmentDistance;
-			if (num2 == 0)
+			float num2 = segmentDistance;
+			if (num == 0)
 			{
-				num3 /= 2f;
+				num2 /= 2f;
 			}
-			base.FindTFromDistance(ref num, num3, 5000);
-			if (num < 1f || this.spline.Loop)
+			FindTFromDistance(ref t, num2, 5000);
+			if (t < 1f || spline.Loop)
 			{
-				Vector3 point = this.spline.GetPoint(num);
-				GameObject gameObject = Object.Instantiate<GameObject>(this.segmentPrefab);
-				gameObject.transform.SetParent(this.segmentsRoot);
+				Vector3 point = spline.GetPoint(t);
+				GameObject gameObject = UnityEngine.Object.Instantiate(segmentPrefab);
+				gameObject.transform.SetParent(segmentsRoot);
 				gameObject.transform.position = point;
-				gameObject.transform.LookAt(point + this.spline.GetDirection(num));
+				gameObject.transform.LookAt(point + spline.GetDirection(t));
 				gameObject.transform.position -= gameObject.transform.forward * 0.5f;
-				if (num2 > 0)
+				if (num > 0)
 				{
 					transform.LookAt(gameObject.transform);
 				}
-				gameObject.GetComponent<GorillaClimbableRef>().climb = this.slideHelper;
-				this.ziplineDistance += this.segmentDistance;
+				gameObject.GetComponent<GorillaClimbableRef>().climb = slideHelper;
+				ziplineDistance += segmentDistance;
 				transform = gameObject.transform;
 			}
-			num2++;
+			num++;
 		}
 		return true;
 	}
 
 	protected override void OnBeforeClimb(GorillaHandClimber hand, GorillaClimbableRef climbRef)
 	{
-		this.slideHelper.gameObject.SetActive(true);
+		slideHelper.gameObject.SetActive(value: true);
 		base.OnBeforeClimb(hand, climbRef);
 	}
 
-	private global::BezierControlPointMode[] ConvertControlPointModes(CustomMapSupport.BezierControlPointMode[] refModes)
+	private BezierControlPointMode[] ConvertControlPointModes(CustomMapSupport.BezierControlPointMode[] refModes)
 	{
-		global::BezierControlPointMode[] array = new global::BezierControlPointMode[refModes.Length];
+		BezierControlPointMode[] array = new BezierControlPointMode[refModes.Length];
 		for (int i = 0; i < refModes.Length; i++)
 		{
 			switch (refModes[i])
 			{
 			case CustomMapSupport.BezierControlPointMode.Free:
-				array[i] = global::BezierControlPointMode.Free;
+				array[i] = BezierControlPointMode.Free;
 				break;
 			case CustomMapSupport.BezierControlPointMode.Aligned:
-				array[i] = global::BezierControlPointMode.Aligned;
+				array[i] = BezierControlPointMode.Aligned;
 				break;
 			case CustomMapSupport.BezierControlPointMode.Mirrored:
-				array[i] = global::BezierControlPointMode.Mirrored;
+				array[i] = BezierControlPointMode.Mirrored;
 				break;
 			}
 		}
@@ -82,28 +82,27 @@ public class CustomMapsGorillaZipline : GorillaZipline
 
 	protected override void Start()
 	{
-		GorillaClimbable slideHelper = this.slideHelper;
-		slideHelper.onBeforeClimb = (Action<GorillaHandClimber, GorillaClimbableRef>)Delegate.Combine(slideHelper.onBeforeClimb, new Action<GorillaHandClimber, GorillaClimbableRef>(this.OnBeforeClimb));
+		GorillaClimbable gorillaClimbable = slideHelper;
+		gorillaClimbable.onBeforeClimb = (Action<GorillaHandClimber, GorillaClimbableRef>)Delegate.Combine(gorillaClimbable.onBeforeClimb, new Action<GorillaHandClimber, GorillaClimbableRef>(OnBeforeClimb));
 	}
 
 	public void Init(GTObjectPlaceholder ziplinePlaceholder)
 	{
-		if (ziplinePlaceholder.PlaceholderObject != GTObject.ZipLine)
+		if (ziplinePlaceholder.PlaceholderObject == GTObject.ZipLine)
 		{
-			return;
-		}
-		this.segmentDistance = ziplinePlaceholder.ziplineSegmentGenerationOffset;
-		this.spline = base.gameObject.GetComponent<global::BezierSpline>();
-		if (this.spline == null)
-		{
-			this.spline = base.gameObject.AddComponent<global::BezierSpline>();
-		}
-		this.spline.BuildSplineFromPoints(ziplinePlaceholder.spline.GetControlPoints(), this.ConvertControlPointModes(ziplinePlaceholder.spline.GetControlPointModes()), ziplinePlaceholder.spline.Loop);
-		for (int i = 0; i < ziplinePlaceholder.ziplineSegments.Count; i++)
-		{
-			ziplinePlaceholder.ziplineSegments[i].transform.SetParent(this.segmentsRoot, true);
-			ziplinePlaceholder.ziplineSegments[i].AddComponent<GorillaClimbableRef>().climb = this.slideHelper;
-			this.ziplineDistance += this.segmentDistance;
+			segmentDistance = ziplinePlaceholder.ziplineSegmentGenerationOffset;
+			spline = base.gameObject.GetComponent<BezierSpline>();
+			if (spline == null)
+			{
+				spline = base.gameObject.AddComponent<BezierSpline>();
+			}
+			spline.BuildSplineFromPoints(ziplinePlaceholder.spline.GetControlPoints(), ConvertControlPointModes(ziplinePlaceholder.spline.GetControlPointModes()), ziplinePlaceholder.spline.Loop);
+			for (int i = 0; i < ziplinePlaceholder.ziplineSegments.Count; i++)
+			{
+				ziplinePlaceholder.ziplineSegments[i].transform.SetParent(segmentsRoot, worldPositionStays: true);
+				ziplinePlaceholder.ziplineSegments[i].AddComponent<GorillaClimbableRef>().climb = slideHelper;
+				ziplineDistance += segmentDistance;
+			}
 		}
 	}
 }

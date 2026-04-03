@@ -1,24 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GhostReactorTelemetry : MonoBehaviour
 {
-	public static string GameVersionCustomTag
-	{
-		get
-		{
-			return "game_version_" + Application.version;
-		}
-	}
-
-	public static string GameEnvironment
-	{
-		get
-		{
-			return "game_environment_live";
-		}
-	}
-
 	public const string SHIFT_START_EVENT_NAME = "ghost_game_start";
 
 	public const string SHIFT_END_EVENT_NAME = "ghost_game_end";
@@ -172,4 +155,8 @@ public class GhostReactorTelemetry : MonoBehaviour
 	public const string IS_PRIVATE_ROOM_BODY_DATA = "is_private_room";
 
 	public const string NUM_SHIFTS_PLAYED_BODY_DATA = "num_shifts_played";
+
+	public static string GameVersionCustomTag => "game_version_" + Application.version;
+
+	public static string GameEnvironment => "game_environment_live";
 }

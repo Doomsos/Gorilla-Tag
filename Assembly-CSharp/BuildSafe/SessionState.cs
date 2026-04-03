@@ -1,20 +1,17 @@
-﻿using System;
+namespace BuildSafe;
 
-namespace BuildSafe
+public class SessionState
 {
-	public class SessionState
-	{
-		public string this[string key]
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
-		}
+	public static readonly SessionState Shared = new SessionState();
 
-		public static readonly SessionState Shared = new SessionState();
+	public string this[string key]
+	{
+		get
+		{
+			return null;
+		}
+		set
+		{
+		}
 	}
 }

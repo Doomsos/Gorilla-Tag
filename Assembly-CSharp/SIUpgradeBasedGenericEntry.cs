@@ -1,16 +1,25 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 internal struct SIUpgradeBasedGenericEntry<T>
 {
+	public T value;
+
+	[Tooltip("For the objects to become activated, you must match AT LEAST ONE appearRequirement (if there are any), and not match any disappearRequirements.")]
+	public SIUpgradeType[] activeRequirements;
+
+	[Tooltip("For the objects to become deactivated, you must match AT LEAST ONE disappearRequirement (if there are any).")]
+	public SIUpgradeType[] inactiveRequirements;
+
 	public bool IsActive(SIUpgradeSet withUpgrades)
 	{
 		bool flag = true;
-		if (this.activeRequirements.Length != 0)
+		if (activeRequirements.Length != 0)
 		{
 			flag = false;
-			foreach (SIUpgradeType upgrade in this.activeRequirements)
+			SIUpgradeType[] array = activeRequirements;
+			foreach (SIUpgradeType upgrade in array)
 			{
 				if (withUpgrades.Contains(upgrade))
 				{
@@ -21,7 +30,8 @@ internal struct SIUpgradeBasedGenericEntry<T>
 		}
 		if (flag)
 		{
-			foreach (SIUpgradeType upgrade2 in this.inactiveRequirements)
+			SIUpgradeType[] array = inactiveRequirements;
+			foreach (SIUpgradeType upgrade2 in array)
 			{
 				if (withUpgrades.Contains(upgrade2))
 				{
@@ -32,12 +42,4 @@ internal struct SIUpgradeBasedGenericEntry<T>
 		}
 		return flag;
 	}
-
-	public T value;
-
-	[Tooltip("For the objects to become activated, you must match AT LEAST ONE appearRequirement (if there are any), and not match any disappearRequirements.")]
-	public SIUpgradeType[] activeRequirements;
-
-	[Tooltip("For the objects to become deactivated, you must match AT LEAST ONE disappearRequirement (if there are any).")]
-	public SIUpgradeType[] inactiveRequirements;
 }

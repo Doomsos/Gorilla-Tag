@@ -1,380 +1,367 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using GorillaExtensions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[DefaultExecutionOrder(2000)]
+public class StaticLodManager : MonoBehaviour, IGorillaSliceableSimple
 {
-	[DefaultExecutionOrder(2000)]
-	public class StaticLodManager : MonoBehaviour, IGorillaSliceableSimple
+	private struct GroupInfo
 	{
-		public void OnEnable()
-		{
-			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-			this.mainCamera = Camera.main;
-			this.hasMainCamera = (this.mainCamera != null);
-		}
+		public bool isLoaded;
 
-		public void OnDisable()
-		{
-			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		}
+		public bool componentEnabled;
 
-		public static int Register(StaticLodGroup lodGroup)
-		{
-			if (lodGroup == null)
-			{
-				return -1;
-			}
-			int count;
-			if (StaticLodManager.freeSlots.TryPop(out count))
-			{
-				StaticLodManager.groupMonoBehaviours[count] = lodGroup;
-				StaticLodManager.groupInfos[count] = default(StaticLodManager.GroupInfo);
-			}
-			else
-			{
-				count = StaticLodManager.groupMonoBehaviours.Count;
-				StaticLodManager.groupMonoBehaviours.Add(lodGroup);
-				StaticLodManager.groupInfos.Add(default(StaticLodManager.GroupInfo));
-			}
-			StaticLodManager._groupInstId_to_index[lodGroup.GetInstanceID()] = count;
-			StaticLodManager.GroupInfo groupInfo = StaticLodManager.groupInfos[count];
-			groupInfo.isLoaded = true;
-			groupInfo.componentEnabled = lodGroup.isActiveAndEnabled;
-			groupInfo.uiEnabled = true;
-			groupInfo.collidersEnabled = true;
-			groupInfo.uiEnableDistanceSq = lodGroup.uiFadeDistanceMax * lodGroup.uiFadeDistanceMax;
-			groupInfo.collisionEnableDistanceSq = lodGroup.collisionEnableDistance * lodGroup.collisionEnableDistance;
-			StaticLodManager.groupInfos[count] = groupInfo;
-			StaticLodManager._TryAddMembersToLodGroup(true, count);
-			groupInfo = StaticLodManager.groupInfos[count];
-			if (Mathf.Approximately(groupInfo.radiusSq, 0f))
-			{
-				groupInfo.bounds = new Bounds(lodGroup.transform.position, Vector3.one * 0.01f);
-				groupInfo.center = groupInfo.bounds.center;
-				groupInfo.radiusSq = groupInfo.bounds.extents.sqrMagnitude;
-				StaticLodManager.groupInfos[count] = groupInfo;
-			}
-			return count;
-		}
+		public Vector3 center;
 
-		public static int OldRegister(StaticLodGroup lodGroup)
+		public float radiusSq;
+
+		public Bounds bounds;
+
+		public bool uiEnabled;
+
+		public float uiEnableDistanceSq;
+
+		public Graphic[] uiGraphics;
+
+		public Renderer[] renderers;
+
+		public bool collidersEnabled;
+
+		public float collisionEnableDistanceSq;
+
+		public Collider[] interactableColliders;
+	}
+
+	private delegate Bounds _GetBoundsDelegate<in T>(T t) where T : Component;
+
+	[OnEnterPlay_Clear]
+	private static readonly List<StaticLodGroup> groupMonoBehaviours = new List<StaticLodGroup>(256);
+
+	[OnEnterPlay_Clear]
+	private static readonly Dictionary<int, int> _groupInstId_to_index = new Dictionary<int, int>(256);
+
+	[DebugReadout]
+	[OnEnterPlay_Clear]
+	private static readonly List<GroupInfo> groupInfos = new List<GroupInfo>(256);
+
+	[OnEnterPlay_Clear]
+	private static readonly Stack<int> freeSlots = new Stack<int>();
+
+	private Camera mainCamera;
+
+	private bool hasMainCamera;
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+		mainCamera = Camera.main;
+		hasMainCamera = mainCamera != null;
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	public static int Register(StaticLodGroup lodGroup)
+	{
+		if (lodGroup == null)
 		{
-			StaticLodGroupExcluder componentInParent = lodGroup.GetComponentInParent<StaticLodGroupExcluder>();
-			List<Graphic> list;
-			int num;
-			using (lodGroup.GTGetComponentsListPool(true, out list))
+			return -1;
+		}
+		if (freeSlots.TryPop(out var result))
+		{
+			groupMonoBehaviours[result] = lodGroup;
+			groupInfos[result] = default(GroupInfo);
+		}
+		else
+		{
+			result = groupMonoBehaviours.Count;
+			groupMonoBehaviours.Add(lodGroup);
+			groupInfos.Add(default(GroupInfo));
+		}
+		_groupInstId_to_index[lodGroup.GetInstanceID()] = result;
+		GroupInfo value = groupInfos[result];
+		value.isLoaded = true;
+		value.componentEnabled = lodGroup.isActiveAndEnabled;
+		value.uiEnabled = true;
+		value.collidersEnabled = true;
+		value.uiEnableDistanceSq = lodGroup.uiFadeDistanceMax * lodGroup.uiFadeDistanceMax;
+		value.collisionEnableDistanceSq = lodGroup.collisionEnableDistance * lodGroup.collisionEnableDistance;
+		groupInfos[result] = value;
+		_TryAddMembersToLodGroup(isNew: true, result);
+		value = groupInfos[result];
+		if (Mathf.Approximately(value.radiusSq, 0f))
+		{
+			value.bounds = new Bounds(lodGroup.transform.position, Vector3.one * 0.01f);
+			value.center = value.bounds.center;
+			value.radiusSq = value.bounds.extents.sqrMagnitude;
+			groupInfos[result] = value;
+		}
+		return result;
+	}
+
+	public static int OldRegister(StaticLodGroup lodGroup)
+	{
+		StaticLodGroupExcluder componentInParent = lodGroup.GetComponentInParent<StaticLodGroupExcluder>();
+		List<Graphic> pooledList;
+		using (((Component)lodGroup).GTGetComponentsListPool(true, out pooledList))
+		{
+			for (int num = pooledList.Count - 1; num >= 0; num--)
 			{
-				for (int i = list.Count - 1; i >= 0; i--)
+				StaticLodGroupExcluder componentInParent2 = pooledList[num].GetComponentInParent<StaticLodGroupExcluder>(includeInactive: true);
+				if (componentInParent2 != null && componentInParent2 != componentInParent)
 				{
-					StaticLodGroupExcluder componentInParent2 = list[i].GetComponentInParent<StaticLodGroupExcluder>(true);
-					if (componentInParent2 != null && componentInParent2 != componentInParent)
-					{
-						list.RemoveAt(i);
-					}
-				}
-				Graphic[] array = list.ToArray();
-				List<Renderer> list2;
-				using (lodGroup.GTGetComponentsListPool(true, out list2))
-				{
-					for (int j = list2.Count - 1; j >= 0; j--)
-					{
-						num = list2[j].gameObject.layer;
-						if ((num != 5 && num != 18) || !list2[j].enabled)
-						{
-							list2.RemoveAt(j);
-						}
-						else
-						{
-							StaticLodGroupExcluder componentInParent3 = list[j].GetComponentInParent<StaticLodGroupExcluder>(true);
-							if (componentInParent3 != null && componentInParent3 != componentInParent)
-							{
-								list2.RemoveAt(j);
-							}
-						}
-					}
-					Renderer[] array2 = list2.ToArray();
-					List<Collider> list3;
-					using (lodGroup.GTGetComponentsListPool(true, out list3))
-					{
-						for (int k = 0; k < list3.Count; k++)
-						{
-							Collider collider = list3[k];
-							if (!collider.gameObject.IsOnLayer(UnityLayer.GorillaInteractable))
-							{
-								list3.RemoveAt(k);
-							}
-							else
-							{
-								StaticLodGroupExcluder componentInParent4 = collider.GetComponentInParent<StaticLodGroupExcluder>();
-								if (componentInParent4 != null && componentInParent4 != componentInParent)
-								{
-									list3.RemoveAt(k);
-								}
-							}
-						}
-						Collider[] array3 = list3.ToArray();
-						Bounds bounds = (array2.Length != 0) ? array2[0].bounds : ((array3.Length != 0) ? array3[0].bounds : ((array.Length != 0) ? new Bounds(array[0].transform.position, Vector3.one * 0.01f) : new Bounds(lodGroup.transform.position, Vector3.one * 0.01f)));
-						for (int l = 0; l < array.Length; l++)
-						{
-							bounds.Encapsulate(array[l].transform.position);
-						}
-						for (int m = 0; m < array2.Length; m++)
-						{
-							bounds.Encapsulate(array2[m].bounds);
-						}
-						for (int n = 0; n < array3.Length; n++)
-						{
-							bounds.Encapsulate(array3[n].bounds);
-						}
-						StaticLodManager.GroupInfo groupInfo = new StaticLodManager.GroupInfo
-						{
-							isLoaded = true,
-							componentEnabled = lodGroup.isActiveAndEnabled,
-							center = bounds.center,
-							radiusSq = bounds.extents.sqrMagnitude,
-							uiEnabled = true,
-							uiEnableDistanceSq = lodGroup.uiFadeDistanceMax * lodGroup.uiFadeDistanceMax,
-							uiGraphics = array,
-							renderers = array2,
-							collidersEnabled = true,
-							collisionEnableDistanceSq = lodGroup.collisionEnableDistance * lodGroup.collisionEnableDistance,
-							interactableColliders = array3
-						};
-						int count;
-						if (StaticLodManager.freeSlots.TryPop(out count))
-						{
-							StaticLodManager.groupMonoBehaviours[count] = lodGroup;
-							StaticLodManager.groupInfos[count] = groupInfo;
-						}
-						else
-						{
-							count = StaticLodManager.groupMonoBehaviours.Count;
-							StaticLodManager.groupMonoBehaviours.Add(lodGroup);
-							StaticLodManager.groupInfos.Add(groupInfo);
-						}
-						StaticLodManager._groupInstId_to_index[lodGroup.GetInstanceID()] = count;
-						num = count;
-					}
+					pooledList.RemoveAt(num);
 				}
 			}
-			return num;
-		}
-
-		public static void Unregister(int lodGroupIndex)
-		{
-			StaticLodGroup staticLodGroup = StaticLodManager.groupMonoBehaviours[lodGroupIndex];
-			if (staticLodGroup != null)
+			Graphic[] array = pooledList.ToArray();
+			List<Renderer> pooledList2;
+			using (((Component)lodGroup).GTGetComponentsListPool(true, out pooledList2))
 			{
-				StaticLodManager._groupInstId_to_index.Remove(staticLodGroup.GetInstanceID());
+				for (int num2 = pooledList2.Count - 1; num2 >= 0; num2--)
+				{
+					int layer = pooledList2[num2].gameObject.layer;
+					if ((layer != 5 && layer != 18) || !pooledList2[num2].enabled)
+					{
+						pooledList2.RemoveAt(num2);
+					}
+					else
+					{
+						StaticLodGroupExcluder componentInParent3 = pooledList[num2].GetComponentInParent<StaticLodGroupExcluder>(includeInactive: true);
+						if (componentInParent3 != null && componentInParent3 != componentInParent)
+						{
+							pooledList2.RemoveAt(num2);
+						}
+					}
+				}
+				Renderer[] array2 = pooledList2.ToArray();
+				List<Collider> pooledList3;
+				using (((Component)lodGroup).GTGetComponentsListPool(true, out pooledList3))
+				{
+					for (int i = 0; i < pooledList3.Count; i++)
+					{
+						Collider collider = pooledList3[i];
+						if (!collider.gameObject.IsOnLayer(UnityLayer.GorillaInteractable))
+						{
+							pooledList3.RemoveAt(i);
+							continue;
+						}
+						StaticLodGroupExcluder componentInParent4 = collider.GetComponentInParent<StaticLodGroupExcluder>();
+						if (componentInParent4 != null && componentInParent4 != componentInParent)
+						{
+							pooledList3.RemoveAt(i);
+						}
+					}
+					Collider[] array3 = pooledList3.ToArray();
+					Bounds bounds = ((array2.Length != 0) ? array2[0].bounds : ((array3.Length != 0) ? array3[0].bounds : ((array.Length != 0) ? new Bounds(array[0].transform.position, Vector3.one * 0.01f) : new Bounds(lodGroup.transform.position, Vector3.one * 0.01f))));
+					for (int j = 0; j < array.Length; j++)
+					{
+						bounds.Encapsulate(array[j].transform.position);
+					}
+					for (int k = 0; k < array2.Length; k++)
+					{
+						bounds.Encapsulate(array2[k].bounds);
+					}
+					for (int l = 0; l < array3.Length; l++)
+					{
+						bounds.Encapsulate(array3[l].bounds);
+					}
+					GroupInfo groupInfo = new GroupInfo
+					{
+						isLoaded = true,
+						componentEnabled = lodGroup.isActiveAndEnabled,
+						center = bounds.center,
+						radiusSq = bounds.extents.sqrMagnitude,
+						uiEnabled = true,
+						uiEnableDistanceSq = lodGroup.uiFadeDistanceMax * lodGroup.uiFadeDistanceMax,
+						uiGraphics = array,
+						renderers = array2,
+						collidersEnabled = true,
+						collisionEnableDistanceSq = lodGroup.collisionEnableDistance * lodGroup.collisionEnableDistance,
+						interactableColliders = array3
+					};
+					if (freeSlots.TryPop(out var result))
+					{
+						groupMonoBehaviours[result] = lodGroup;
+						groupInfos[result] = groupInfo;
+					}
+					else
+					{
+						result = groupMonoBehaviours.Count;
+						groupMonoBehaviours.Add(lodGroup);
+						groupInfos.Add(groupInfo);
+					}
+					_groupInstId_to_index[lodGroup.GetInstanceID()] = result;
+					return result;
+				}
 			}
-			StaticLodManager.groupMonoBehaviours[lodGroupIndex] = null;
-			StaticLodManager.groupInfos[lodGroupIndex] = default(StaticLodManager.GroupInfo);
-			StaticLodManager.freeSlots.Push(lodGroupIndex);
 		}
+	}
 
-		public static bool TryAddLateInstantiatedMembers(GameObject root)
+	public static void Unregister(int lodGroupIndex)
+	{
+		StaticLodGroup staticLodGroup = groupMonoBehaviours[lodGroupIndex];
+		if (staticLodGroup != null)
 		{
-			StaticLodGroup componentInParent = root.GetComponentInParent<StaticLodGroup>(true);
-			if (componentInParent == null)
+			_groupInstId_to_index.Remove(staticLodGroup.GetInstanceID());
+		}
+		groupMonoBehaviours[lodGroupIndex] = null;
+		groupInfos[lodGroupIndex] = default(GroupInfo);
+		freeSlots.Push(lodGroupIndex);
+	}
+
+	public static bool TryAddLateInstantiatedMembers(GameObject root)
+	{
+		StaticLodGroup componentInParent = root.GetComponentInParent<StaticLodGroup>(includeInactive: true);
+		if (componentInParent == null)
+		{
+			return false;
+		}
+		if (!_groupInstId_to_index.TryGetValue(componentInParent.GetInstanceID(), out var value))
+		{
+			return false;
+		}
+		if (componentInParent.gameObject != root)
+		{
+			StaticLodGroupExcluder componentInParent2 = root.GetComponentInParent<StaticLodGroupExcluder>(includeInactive: true);
+			if (componentInParent2 != null && componentInParent.transform.GetDepth() < componentInParent2.transform.GetDepth())
 			{
 				return false;
 			}
-			int groupIndex;
-			if (!StaticLodManager._groupInstId_to_index.TryGetValue(componentInParent.GetInstanceID(), out groupIndex))
-			{
-				return false;
-			}
-			if (componentInParent.gameObject != root)
-			{
-				StaticLodGroupExcluder componentInParent2 = root.GetComponentInParent<StaticLodGroupExcluder>(true);
-				if (componentInParent2 != null && componentInParent.transform.GetDepth() < componentInParent2.transform.GetDepth())
-				{
-					return false;
-				}
-			}
-			return StaticLodManager._TryAddMembersToLodGroup(false, groupIndex);
 		}
+		return _TryAddMembersToLodGroup(isNew: false, value);
+	}
 
-		private static bool _TryAddMembersToLodGroup(bool isNew, int groupIndex)
+	private static bool _TryAddMembersToLodGroup(bool isNew, int groupIndex)
+	{
+		StaticLodGroup lodGroup = groupMonoBehaviours[groupIndex];
+		GroupInfo ref_groupInfo = groupInfos[groupIndex];
+		int result = (int)(0u | (_TryAddComponentsToGroup(lodGroup, ref ref_groupInfo, ref ref_groupInfo.interactableColliders, (Collider coll) => coll.gameObject.IsOnLayer(UnityLayer.GorillaInteractable), (Collider coll) => coll.bounds) ? 1u : 0u) | (_TryAddComponentsToGroup(lodGroup, ref ref_groupInfo, ref ref_groupInfo.renderers, delegate(Renderer rend)
 		{
-			bool flag = false;
-			StaticLodGroup lodGroup = StaticLodManager.groupMonoBehaviours[groupIndex];
-			StaticLodManager.GroupInfo value = StaticLodManager.groupInfos[groupIndex];
-			bool result = flag | StaticLodManager._TryAddComponentsToGroup<Collider>(lodGroup, ref value, ref value.interactableColliders, (Collider coll) => coll.gameObject.IsOnLayer(UnityLayer.GorillaInteractable), (Collider coll) => coll.bounds) | StaticLodManager._TryAddComponentsToGroup<Renderer>(lodGroup, ref value, ref value.renderers, delegate(Renderer rend)
+			int layer = rend.gameObject.layer;
+			return (layer == 5 || layer == 18) && rend.enabled;
+		}, (Renderer rend) => rend.bounds) ? 1u : 0u)) | (_TryAddComponentsToGroup(lodGroup, ref ref_groupInfo, ref ref_groupInfo.uiGraphics, (Graphic _) => true, (Graphic gfx) => new Bounds(gfx.transform.position, Vector3.one * 0.01f)) ? 1 : 0);
+		groupInfos[groupIndex] = ref_groupInfo;
+		return (byte)result != 0;
+	}
+
+	private static bool _TryAddComponentsToGroup<T>(StaticLodGroup lodGroup, ref GroupInfo ref_groupInfo, ref T[] ref_components, Predicate<T> includeIf, _GetBoundsDelegate<T> getBounds) where T : Component
+	{
+		List<T> componentsInChildrenUntil = lodGroup.GetComponentsInChildrenUntil<T, StaticLodGroup, StaticLodGroupExcluder>(includeInactive: true, stopAtRoot: false);
+		for (int num = componentsInChildrenUntil.Count - 1; num >= 0; num--)
+		{
+			if (!includeIf(componentsInChildrenUntil[num]))
 			{
-				int layer = rend.gameObject.layer;
-				return (layer == 5 || layer == 18) && rend.enabled;
-			}, (Renderer rend) => rend.bounds) | StaticLodManager._TryAddComponentsToGroup<Graphic>(lodGroup, ref value, ref value.uiGraphics, (Graphic _) => true, (Graphic gfx) => new Bounds(gfx.transform.position, Vector3.one * 0.01f));
-			StaticLodManager.groupInfos[groupIndex] = value;
-			return result;
+				componentsInChildrenUntil.RemoveAt(num);
+			}
 		}
-
-		private static bool _TryAddComponentsToGroup<T>(StaticLodGroup lodGroup, ref StaticLodManager.GroupInfo ref_groupInfo, ref T[] ref_components, Predicate<T> includeIf, StaticLodManager._GetBoundsDelegate<T> getBounds) where T : Component
+		if (componentsInChildrenUntil.Count == 0)
 		{
-			List<T> componentsInChildrenUntil = lodGroup.GetComponentsInChildrenUntil(true, false, 64);
-			for (int i = componentsInChildrenUntil.Count - 1; i >= 0; i--)
+			if (ref_components == null)
 			{
-				if (!includeIf(componentsInChildrenUntil[i]))
-				{
-					componentsInChildrenUntil.RemoveAt(i);
-				}
+				ref_components = Array.Empty<T>();
 			}
-			if (componentsInChildrenUntil.Count == 0)
-			{
-				if (ref_components == null)
-				{
-					ref_components = Array.Empty<T>();
-				}
-				return false;
-			}
-			T[] array = ref_components;
-			int num = (array != null) ? array.Length : 0;
-			if (num == 0)
-			{
-				ref_components = componentsInChildrenUntil.ToArray();
-			}
-			else
-			{
-				Array.Resize<T>(ref ref_components, num + componentsInChildrenUntil.Count);
-				for (int j = num; j < ref_components.Length; j++)
-				{
-					ref_components[j] = componentsInChildrenUntil[j - num];
-				}
-			}
-			if (Mathf.Approximately(ref_groupInfo.radiusSq, 0f))
-			{
-				ref_groupInfo.bounds = getBounds(ref_components[0]);
-			}
-			for (int k = num; k < ref_components.Length; k++)
-			{
-				ref_groupInfo.bounds.Encapsulate(getBounds(ref_components[k]));
-			}
-			ref_groupInfo.center = ref_groupInfo.bounds.center;
-			ref_groupInfo.radiusSq = ref_groupInfo.bounds.extents.sqrMagnitude;
-			return true;
+			return false;
 		}
-
-		[Conditional("UNITY_EDITOR")]
-		private static void _EdAddPathsToGroup<T>(T[] components, ref string[] ref_edDebugPaths) where T : Component
+		T[] obj = ref_components;
+		int num2 = ((obj != null) ? obj.Length : 0);
+		if (num2 == 0)
 		{
+			ref_components = componentsInChildrenUntil.ToArray();
 		}
-
-		public static void SetEnabled(int index, bool enable)
+		else
 		{
-			if (ApplicationQuittingState.IsQuitting)
+			Array.Resize(ref ref_components, num2 + componentsInChildrenUntil.Count);
+			for (int i = num2; i < ref_components.Length; i++)
 			{
-				return;
+				ref_components[i] = componentsInChildrenUntil[i - num2];
 			}
-			if (StaticLodManager.groupInfos == null || index < 0 || index >= StaticLodManager.groupInfos.Count)
-			{
-				return;
-			}
-			StaticLodManager.GroupInfo value = StaticLodManager.groupInfos[index];
+		}
+		if (Mathf.Approximately(ref_groupInfo.radiusSq, 0f))
+		{
+			ref_groupInfo.bounds = getBounds(ref_components[0]);
+		}
+		for (int j = num2; j < ref_components.Length; j++)
+		{
+			ref_groupInfo.bounds.Encapsulate(getBounds(ref_components[j]));
+		}
+		ref_groupInfo.center = ref_groupInfo.bounds.center;
+		ref_groupInfo.radiusSq = ref_groupInfo.bounds.extents.sqrMagnitude;
+		return true;
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	private static void _EdAddPathsToGroup<T>(T[] components, ref string[] ref_edDebugPaths) where T : Component
+	{
+	}
+
+	public static void SetEnabled(int index, bool enable)
+	{
+		if (!ApplicationQuittingState.IsQuitting && groupInfos != null && index >= 0 && index < groupInfos.Count)
+		{
+			GroupInfo value = groupInfos[index];
 			value.componentEnabled = enable;
-			StaticLodManager.groupInfos[index] = value;
+			groupInfos[index] = value;
 		}
+	}
 
-		public void SliceUpdate()
+	public void SliceUpdate()
+	{
+		if (!hasMainCamera)
 		{
-			if (!this.hasMainCamera)
+			return;
+		}
+		Vector3 position = mainCamera.transform.position;
+		for (int i = 0; i < groupInfos.Count; i++)
+		{
+			GroupInfo value = groupInfos[i];
+			if (!value.isLoaded || !value.componentEnabled)
 			{
-				return;
+				continue;
 			}
-			Vector3 position = this.mainCamera.transform.position;
-			for (int i = 0; i < StaticLodManager.groupInfos.Count; i++)
+			float num = Mathf.Max(0f, (value.center - position).sqrMagnitude - value.radiusSq);
+			float num2 = (value.uiEnabled ? 0.010000001f : 0f);
+			bool flag = num < value.uiEnableDistanceSq + num2;
+			if (flag != value.uiEnabled)
 			{
-				StaticLodManager.GroupInfo groupInfo = StaticLodManager.groupInfos[i];
-				if (groupInfo.isLoaded && groupInfo.componentEnabled)
+				for (int j = 0; j < value.uiGraphics.Length; j++)
 				{
-					float num = Mathf.Max(0f, (groupInfo.center - position).sqrMagnitude - groupInfo.radiusSq);
-					float num2 = groupInfo.uiEnabled ? 0.010000001f : 0f;
-					bool flag = num < groupInfo.uiEnableDistanceSq + num2;
-					if (flag != groupInfo.uiEnabled)
+					Graphic graphic = value.uiGraphics[j];
+					if (!(graphic == null))
 					{
-						for (int j = 0; j < groupInfo.uiGraphics.Length; j++)
-						{
-							Graphic graphic = groupInfo.uiGraphics[j];
-							if (!(graphic == null))
-							{
-								graphic.enabled = flag;
-							}
-						}
-						for (int k = 0; k < groupInfo.renderers.Length; k++)
-						{
-							Renderer renderer = groupInfo.renderers[k];
-							if (!(renderer == null))
-							{
-								renderer.enabled = flag;
-							}
-						}
+						graphic.enabled = flag;
 					}
-					groupInfo.uiEnabled = flag;
-					num2 = (groupInfo.collidersEnabled ? 0.010000001f : 0f);
-					bool flag2 = num < groupInfo.collisionEnableDistanceSq + num2;
-					if (flag2 != groupInfo.collidersEnabled)
+				}
+				for (int k = 0; k < value.renderers.Length; k++)
+				{
+					Renderer renderer = value.renderers[k];
+					if (!(renderer == null))
 					{
-						for (int l = 0; l < groupInfo.interactableColliders.Length; l++)
-						{
-							if (!(groupInfo.interactableColliders[l] == null))
-							{
-								groupInfo.interactableColliders[l].enabled = flag2;
-							}
-						}
+						renderer.enabled = flag;
 					}
-					groupInfo.collidersEnabled = flag2;
-					StaticLodManager.groupInfos[i] = groupInfo;
 				}
 			}
+			value.uiEnabled = flag;
+			num2 = (value.collidersEnabled ? 0.010000001f : 0f);
+			bool flag2 = num < value.collisionEnableDistanceSq + num2;
+			if (flag2 != value.collidersEnabled)
+			{
+				for (int l = 0; l < value.interactableColliders.Length; l++)
+				{
+					if (!(value.interactableColliders[l] == null))
+					{
+						value.interactableColliders[l].enabled = flag2;
+					}
+				}
+			}
+			value.collidersEnabled = flag2;
+			groupInfos[i] = value;
 		}
-
-		[OnEnterPlay_Clear]
-		private static readonly List<StaticLodGroup> groupMonoBehaviours = new List<StaticLodGroup>(256);
-
-		[OnEnterPlay_Clear]
-		private static readonly Dictionary<int, int> _groupInstId_to_index = new Dictionary<int, int>(256);
-
-		[DebugReadout]
-		[OnEnterPlay_Clear]
-		private static readonly List<StaticLodManager.GroupInfo> groupInfos = new List<StaticLodManager.GroupInfo>(256);
-
-		[OnEnterPlay_Clear]
-		private static readonly Stack<int> freeSlots = new Stack<int>();
-
-		private Camera mainCamera;
-
-		private bool hasMainCamera;
-
-		private struct GroupInfo
-		{
-			public bool isLoaded;
-
-			public bool componentEnabled;
-
-			public Vector3 center;
-
-			public float radiusSq;
-
-			public Bounds bounds;
-
-			public bool uiEnabled;
-
-			public float uiEnableDistanceSq;
-
-			public Graphic[] uiGraphics;
-
-			public Renderer[] renderers;
-
-			public bool collidersEnabled;
-
-			public float collisionEnableDistanceSq;
-
-			public Collider[] interactableColliders;
-		}
-
-		private delegate Bounds _GetBoundsDelegate<in T>(T t) where T : Component;
 	}
 }

@@ -1,23 +1,30 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class WeightedList<T>
 {
-	public int Count
-	{
-		get
-		{
-			return this.items.Count;
-		}
-	}
+	private List<T> items = new List<T>();
 
-	public List<T> Items
+	private List<float> weights = new List<float>();
+
+	private List<float> cumulativeWeights = new List<float>();
+
+	private float totalWeight;
+
+	public int Count => items.Count;
+
+	public List<T> Items => items;
+
+	public (T Item, float Weight) this[int index]
 	{
 		get
 		{
-			return this.items;
+			if (index < 0 || index >= items.Count)
+			{
+				throw new IndexOutOfRangeException();
+			}
+			return (Item: items[index], Weight: weights[index]);
 		}
 	}
 
@@ -27,47 +34,25 @@ public class WeightedList<T>
 		{
 			throw new ArgumentException("Weight must be greater than zero.");
 		}
-		this.totalWeight += weight;
-		this.items.Add(item);
-		this.weights.Add(weight);
-		this.cumulativeWeights.Add(this.totalWeight);
-	}
-
-	[TupleElementNames(new string[]
-	{
-		"Item",
-		"Weight"
-	})]
-	public ValueTuple<T, float> this[int index]
-	{
-		[return: TupleElementNames(new string[]
-		{
-			"Item",
-			"Weight"
-		})]
-		get
-		{
-			if (index < 0 || index >= this.items.Count)
-			{
-				throw new IndexOutOfRangeException();
-			}
-			return new ValueTuple<T, float>(this.items[index], this.weights[index]);
-		}
+		totalWeight += weight;
+		items.Add(item);
+		weights.Add(weight);
+		cumulativeWeights.Add(totalWeight);
 	}
 
 	public T GetRandomItem()
 	{
-		return this.items[this.GetRandomIndex()];
+		return items[GetRandomIndex()];
 	}
 
 	public int GetRandomIndex()
 	{
-		if (this.items.Count == 0)
+		if (items.Count == 0)
 		{
 			throw new InvalidOperationException("The list is empty.");
 		}
-		float item = Random.value * this.totalWeight;
-		int num = this.cumulativeWeights.BinarySearch(item);
+		float item = UnityEngine.Random.value * totalWeight;
+		int num = cumulativeWeights.BinarySearch(item);
 		if (num < 0)
 		{
 			num = ~num;
@@ -77,52 +62,44 @@ public class WeightedList<T>
 
 	public bool Remove(T item)
 	{
-		int num = this.items.IndexOf(item);
+		int num = items.IndexOf(item);
 		if (num == -1)
 		{
 			return false;
 		}
-		this.RemoveAt(num);
+		RemoveAt(num);
 		return true;
 	}
 
 	public void RemoveAt(int index)
 	{
-		if (index < 0 || index >= this.items.Count)
+		if (index < 0 || index >= items.Count)
 		{
 			throw new ArgumentOutOfRangeException("index");
 		}
-		this.totalWeight -= this.weights[index];
-		this.items.RemoveAt(index);
-		this.weights.RemoveAt(index);
-		this.RecalculateCumulativeWeights();
+		totalWeight -= weights[index];
+		items.RemoveAt(index);
+		weights.RemoveAt(index);
+		RecalculateCumulativeWeights();
 	}
 
 	private void RecalculateCumulativeWeights()
 	{
-		this.cumulativeWeights.Clear();
+		cumulativeWeights.Clear();
 		float num = 0f;
-		foreach (float num2 in this.weights)
+		foreach (float weight in weights)
 		{
-			num += num2;
-			this.cumulativeWeights.Add(num);
+			num += weight;
+			cumulativeWeights.Add(num);
 		}
-		this.totalWeight = num;
+		totalWeight = num;
 	}
 
 	public void Clear()
 	{
-		this.items.Clear();
-		this.weights.Clear();
-		this.cumulativeWeights.Clear();
-		this.totalWeight = 0f;
+		items.Clear();
+		weights.Clear();
+		cumulativeWeights.Clear();
+		totalWeight = 0f;
 	}
-
-	private List<T> items = new List<T>();
-
-	private List<float> weights = new List<float>();
-
-	private List<float> cumulativeWeights = new List<float>();
-
-	private float totalWeight;
 }

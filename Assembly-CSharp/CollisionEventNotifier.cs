@@ -1,31 +1,20 @@
-﻿using System;
 using UnityEngine;
 
 public class CollisionEventNotifier : MonoBehaviour
 {
-	public event CollisionEventNotifier.CollisionEvent CollisionEnterEvent;
+	public delegate void CollisionEvent(CollisionEventNotifier notifier, Collision collision);
 
-	public event CollisionEventNotifier.CollisionEvent CollisionExitEvent;
+	public event CollisionEvent CollisionEnterEvent;
+
+	public event CollisionEvent CollisionExitEvent;
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		CollisionEventNotifier.CollisionEvent collisionEnterEvent = this.CollisionEnterEvent;
-		if (collisionEnterEvent == null)
-		{
-			return;
-		}
-		collisionEnterEvent(this, collision);
+		this.CollisionEnterEvent?.Invoke(this, collision);
 	}
 
 	private void OnCollisionExit(Collision collision)
 	{
-		CollisionEventNotifier.CollisionEvent collisionExitEvent = this.CollisionExitEvent;
-		if (collisionExitEvent == null)
-		{
-			return;
-		}
-		collisionExitEvent(this, collision);
+		this.CollisionExitEvent?.Invoke(this, collision);
 	}
-
-	public delegate void CollisionEvent(CollisionEventNotifier notifier, Collision collision);
 }

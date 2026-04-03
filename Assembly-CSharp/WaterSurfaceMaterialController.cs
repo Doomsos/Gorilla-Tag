@@ -1,25 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 [ExecuteAlways]
 public class WaterSurfaceMaterialController : MonoBehaviour
 {
-	protected void OnEnable()
-	{
-		this.renderer = base.GetComponent<Renderer>();
-		this.matPropBlock = new MaterialPropertyBlock();
-		this.ApplyProperties();
-	}
-
-	private void ApplyProperties()
-	{
-		this.matPropBlock.SetVector(ShaderProps._ScrollSpeedAndScale, new Vector4(this.ScrollX, this.ScrollY, this.Scale, 0f));
-		if (this.renderer)
-		{
-			this.renderer.SetPropertyBlock(this.matPropBlock);
-		}
-	}
-
 	public float ScrollX = 0.6f;
 
 	public float ScrollY = 0.6f;
@@ -29,4 +12,20 @@ public class WaterSurfaceMaterialController : MonoBehaviour
 	private Renderer renderer;
 
 	private MaterialPropertyBlock matPropBlock;
+
+	protected void OnEnable()
+	{
+		renderer = GetComponent<Renderer>();
+		matPropBlock = new MaterialPropertyBlock();
+		ApplyProperties();
+	}
+
+	private void ApplyProperties()
+	{
+		matPropBlock.SetVector(ShaderProps._ScrollSpeedAndScale, new Vector4(ScrollX, ScrollY, Scale, 0f));
+		if ((bool)renderer)
+		{
+			renderer.SetPropertyBlock(matPropBlock);
+		}
+	}
 }

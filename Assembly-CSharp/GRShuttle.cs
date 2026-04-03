@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -7,765 +7,6 @@ using UnityEngine;
 
 public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void Awake()
-	{
-		this.shuttleUI.Setup(null, null);
-		if (this.entryCardScanner != null)
-		{
-			this.entryCardScanner.requireSpecificPlayer = true;
-			this.entryCardScanner.restrictToPlayer = null;
-		}
-		if (this.departCardScanner != null)
-		{
-			this.departCardScanner.requireSpecificPlayer = true;
-			this.departCardScanner.restrictToPlayer = null;
-		}
-		this.state = GRShuttleState.Docked;
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void Init(int shuttleId)
-	{
-		this.shuttleId = shuttleId;
-		this.StopMoveFx();
-	}
-
-	public void SetBay(GRBay bay)
-	{
-		this.shuttleBay = bay;
-	}
-
-	public void SetReactor(GhostReactor reactor)
-	{
-		this.reactor = reactor;
-	}
-
-	public void SetLocation(GRShuttleGroupLoc location)
-	{
-		this.location = location;
-		this.targetSection = this.ClampTargetSection(this.targetSection);
-	}
-
-	public void Setup(GhostReactor reactor, GRShuttleGroupLoc location, int employeeIndex)
-	{
-		this.reactor = reactor;
-		this.location = location;
-		this.employeeIndex = employeeIndex;
-		this.SetOwner(null);
-		this.targetSection = this.ClampTargetSection(this.targetSection);
-	}
-
-	public int GetTargetFloor()
-	{
-		if (this.specificDestinationShuttle != null)
-		{
-			return this.specificDestinationShuttle.specificFloor;
-		}
-		if (this.targetSection < 0 || this.targetSection >= GRShuttle.sectionFloors.Length)
-		{
-			return 0;
-		}
-		return GRShuttle.sectionFloors[this.targetSection];
-	}
-
-	public GRShuttleState GetState()
-	{
-		return this.state;
-	}
-
-	public NetPlayer GetOwner()
-	{
-		return this.shuttleOwner;
-	}
-
-	public void SetOwner(NetPlayer player)
-	{
-		this.shuttleOwner = player;
-		this.shuttleUI.Setup(this.reactor, player);
-		this.entryCardScanner.restrictToPlayer = player;
-		this.departCardScanner.restrictToPlayer = player;
-		if (this.shuttleBay != null)
-		{
-			this.shuttleBay.Refresh();
-		}
-	}
-
-	public void SliceUpdate()
-	{
-		this.UpdateState();
-	}
-
-	public void Refresh()
-	{
-		this.shuttleUI.RefreshUI();
-	}
-
-	public void JoinShuttleRoomLocalPlayer(GRShuttle sourceShuttle, GRShuttle destShuttle)
-	{
-	}
-
-	public static void TeleportLocalPlayer(GRShuttle sourceShuttle, GRShuttle destShuttle)
-	{
-		sourceShuttle.friendCollider.RefreshPlayersWithinBounds();
-		if (!sourceShuttle.friendCollider.playerIDsCurrentlyTouching.Contains(NetworkSystem.Instance.LocalPlayer.UserId))
-		{
-			return;
-		}
-		GTPlayer instance = GTPlayer.Instance;
-		VRRig localRig = VRRig.LocalRig;
-		float angle = destShuttle.transform.rotation.eulerAngles.y - sourceShuttle.transform.rotation.eulerAngles.y;
-		Vector3 b = localRig.transform.position - instance.transform.position;
-		Vector3 position = sourceShuttle.transform.InverseTransformPoint(instance.transform.position);
-		position.x *= 0.8f;
-		position.z *= 0.8f;
-		Vector3 position2 = destShuttle.transform.TransformPoint(position);
-		instance.TeleportTo(position2, instance.transform.rotation);
-		instance.turnParent.transform.RotateAround(instance.headCollider.transform.position, sourceShuttle.transform.up, angle);
-		localRig.transform.position = instance.transform.position + b;
-		instance.InitializeValues();
-	}
-
-	public void SetState(GRShuttleState newState, bool force = false)
-	{
-		if (this.state == newState && !force)
-		{
-			return;
-		}
-		switch (this.state)
-		{
-		case GRShuttleState.Docked:
-			if (this.shuttleBay != null)
-			{
-				this.shuttleBay.Refresh();
-			}
-			break;
-		case GRShuttleState.PostMove:
-			if (this.specificDestinationShuttle != null)
-			{
-				this.OpenDoorLocal();
-			}
-			else
-			{
-				this.CloseDoorLocal();
-			}
-			break;
-		case GRShuttleState.PostArrive:
-			this.OpenDoorLocal();
-			break;
-		}
-		this.state = newState;
-		this.stateStartTime = Time.timeAsDouble;
-		switch (this.state)
-		{
-		case GRShuttleState.Docked:
-			if (this.shuttleBay != null)
-			{
-				this.shuttleBay.Refresh();
-			}
-			this.StopMoveFx();
-			break;
-		case GRShuttleState.PreMove:
-			this.CloseDoorLocal();
-			this.takeOffSound.Play(null);
-			if (this.specificDestinationShuttle != null)
-			{
-				GRPlayer grplayer = GRPlayer.Get(GRElevatorManager.LowestActorNumberInElevator(this.friendCollider, this.specificDestinationShuttle.friendCollider));
-				this.shuttleOwner = grplayer.gamePlayer.rig.OwningNetPlayer;
-			}
-			GRShuttle.TryStartLocalPlayerShuttleMove(this.shuttleId, this.shuttleOwner);
-			this.StartMoveFx();
-			return;
-		case GRShuttleState.Moving:
-			this.moveSound.Play(null);
-			return;
-		case GRShuttleState.PostMove:
-			break;
-		case GRShuttleState.Arriving:
-			this.CloseDoorLocal();
-			this.moveSound.Play(null);
-			return;
-		case GRShuttleState.PostArrive:
-			this.landSound.Play(null);
-			return;
-		default:
-			return;
-		}
-	}
-
-	private void UpdateState()
-	{
-		double timeAsDouble = Time.timeAsDouble;
-		switch (this.state)
-		{
-		case GRShuttleState.PreMove:
-			if (timeAsDouble > this.stateStartTime + 1.0)
-			{
-				this.SetState(GRShuttleState.Moving, false);
-				return;
-			}
-			break;
-		case GRShuttleState.Moving:
-			if (timeAsDouble > this.stateStartTime + 5.0)
-			{
-				this.SetState(GRShuttleState.PostMove, false);
-				return;
-			}
-			break;
-		case GRShuttleState.PostMove:
-			if (timeAsDouble > this.stateStartTime + 1.0)
-			{
-				this.SetState(GRShuttleState.Docked, false);
-				return;
-			}
-			break;
-		case GRShuttleState.Arriving:
-			if (timeAsDouble > this.stateStartTime + 2.0)
-			{
-				this.SetState(GRShuttleState.PostArrive, false);
-				return;
-			}
-			break;
-		case GRShuttleState.PostArrive:
-			if (timeAsDouble > this.stateStartTime + 1.0)
-			{
-				this.SetState(GRShuttleState.Docked, false);
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void RequestArrival()
-	{
-		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleArrive, this.shuttleId);
-	}
-
-	private void StartMoveFx()
-	{
-		if (this.windowFx != null)
-		{
-			this.windowFx.Play();
-		}
-		for (int i = 0; i < this.hideOnMove.Count; i++)
-		{
-			this.hideOnMove[i].SetActive(false);
-		}
-		for (int j = 0; j < this.showOnMove.Count; j++)
-		{
-			this.showOnMove[j].SetActive(true);
-		}
-	}
-
-	private void StopMoveFx()
-	{
-		if (this.windowFx != null)
-		{
-			this.windowFx.Stop();
-		}
-		for (int i = 0; i < this.hideOnMove.Count; i++)
-		{
-			this.hideOnMove[i].SetActive(true);
-		}
-		for (int j = 0; j < this.showOnMove.Count; j++)
-		{
-			this.showOnMove[j].SetActive(false);
-		}
-	}
-
-	public bool IsPodUnlocked()
-	{
-		if (this.specificDestinationShuttle != null)
-		{
-			return true;
-		}
-		if (this.shuttleOwner == null)
-		{
-			return false;
-		}
-		GRPlayer grplayer = GRPlayer.Get(this.shuttleOwner);
-		return !(grplayer == null) && grplayer.IsDropPodUnlocked();
-	}
-
-	public int GetMaxDropFloor()
-	{
-		if (this.shuttleOwner == null)
-		{
-			return 0;
-		}
-		GRPlayer grplayer = GRPlayer.Get(this.shuttleOwner);
-		if (grplayer == null)
-		{
-			return 0;
-		}
-		return grplayer.GetMaxDropFloor();
-	}
-
-	public void OnShuttleMove()
-	{
-		if (this.state != GRShuttleState.Docked)
-		{
-			return;
-		}
-		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, this.shuttleId);
-	}
-
-	public void OnShuttleMoveActorNr(int actorNr)
-	{
-		if (this.state != GRShuttleState.Docked || actorNr != this.shuttleOwner.ActorNumber || this.GetTargetFloor() > this.GetMaxDropFloor())
-		{
-			this.departCardScanner.onFailed.Invoke();
-			return;
-		}
-		this.departCardScanner.onSucceeded.Invoke();
-		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, this.shuttleId);
-	}
-
-	public void TargetLevelUp()
-	{
-		if (this.state != GRShuttleState.Docked)
-		{
-			return;
-		}
-		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelUp, this.shuttleId);
-	}
-
-	public void TargetLevelDown()
-	{
-		if (this.state != GRShuttleState.Docked)
-		{
-			return;
-		}
-		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelDown, this.shuttleId);
-	}
-
-	private GRShuttle GetTargetShuttle()
-	{
-		if (this.specificDestinationShuttle != null)
-		{
-			return this.specificDestinationShuttle;
-		}
-		if (this.shuttleOwner == null)
-		{
-			return null;
-		}
-		GRShuttle drillShuttleForPlayer = GRElevatorManager._instance.GetDrillShuttleForPlayer(this.shuttleOwner.ActorNumber);
-		GRShuttle stagingShuttleForPlayer = GRElevatorManager._instance.GetStagingShuttleForPlayer(this.shuttleOwner.ActorNumber);
-		if (this.location != GRShuttleGroupLoc.Drill)
-		{
-			return drillShuttleForPlayer;
-		}
-		return stagingShuttleForPlayer;
-	}
-
-	public bool IsPlayerOwner(GRPlayer player)
-	{
-		return GRPlayer.Get(this.GetOwner()) == player;
-	}
-
-	public bool IsShuttleInteractableByPlayer(GRPlayer player, bool ignoreOwnership)
-	{
-		if (!ignoreOwnership && !this.IsPlayerOwner(player) && this.specificDestinationShuttle == null)
-		{
-			return false;
-		}
-		if (this.entryCardScanner == null)
-		{
-			return true;
-		}
-		if (this.departCardScanner == null)
-		{
-			return true;
-		}
-		bool flag = GameEntityManager.IsPlayerHandNearPosition(player.gamePlayer, this.entryCardScanner.transform.position, false, true, 16f);
-		bool flag2 = GameEntityManager.IsPlayerHandNearPosition(player.gamePlayer, this.departCardScanner.transform.position, false, true, 16f);
-		return flag || flag2;
-	}
-
-	public bool IsPlayerOwner(NetPlayer player)
-	{
-		return this.GetOwner() == player;
-	}
-
-	public void ToggleDoor()
-	{
-		if (this.state != GRShuttleState.Docked)
-		{
-			return;
-		}
-		if (this.entryDoor.doorState == GRDoor.DoorState.Closed)
-		{
-			this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleOpen, this.shuttleId);
-			return;
-		}
-		if (this.entryDoor.doorState == GRDoor.DoorState.Open)
-		{
-			double timeAsDouble = Time.timeAsDouble;
-			if (timeAsDouble > this.lastCloseTime + 5.0)
-			{
-				this.lastCloseTime = timeAsDouble;
-				this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleClose, this.shuttleId);
-			}
-		}
-	}
-
-	public void ToggleDoorActorNr(int actorNr)
-	{
-		if (this.state == GRShuttleState.Docked && this.GetOwner() != null && this.GetOwner().ActorNumber == actorNr && GRPlayer.Get(this.shuttleOwner).IsDropPodUnlocked())
-		{
-			IDCardScanner idcardScanner = this.entryCardScanner;
-			if (idcardScanner != null)
-			{
-				idcardScanner.onSucceeded.Invoke();
-			}
-			this.ToggleDoor();
-			return;
-		}
-		IDCardScanner idcardScanner2 = this.entryCardScanner;
-		if (idcardScanner2 == null)
-		{
-			return;
-		}
-		idcardScanner2.onFailed.Invoke();
-	}
-
-	public void EmergencyOpenDoor()
-	{
-		if (this.state == GRShuttleState.Docked)
-		{
-			if (PhotonNetwork.InRoom)
-			{
-				this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleOpen, this.shuttleId);
-				return;
-			}
-			this.OpenDoorLocal();
-		}
-	}
-
-	public void OnOpenDoor()
-	{
-		if (this.entryDoor.doorState == GRDoor.DoorState.Closed && this.entryCardScanner != null)
-		{
-			this.entryCardScanner.onSucceeded.Invoke();
-		}
-		this.OpenDoorLocal();
-	}
-
-	public void OpenDoorLocal()
-	{
-		if (this.entryDoor != null && this.entryDoor.doorState == GRDoor.DoorState.Closed)
-		{
-			this.entryDoor.SetDoorState(GRDoor.DoorState.Open);
-		}
-		if (this.shuttleBay != null)
-		{
-			this.shuttleBay.SetOpen(true);
-		}
-	}
-
-	public void CloseDoorLocal()
-	{
-		if (this.entryDoor != null && this.entryDoor.doorState == GRDoor.DoorState.Open)
-		{
-			this.entryDoor.SetDoorState(GRDoor.DoorState.Closed);
-		}
-	}
-
-	public void OnCloseDoor()
-	{
-		if (this.entryDoor.doorState == GRDoor.DoorState.Open && this.entryCardScanner != null)
-		{
-			this.entryCardScanner.onSucceeded.Invoke();
-		}
-		this.CloseDoorLocal();
-	}
-
-	public void OnLaunch()
-	{
-		if (this.GetTargetFloor() > this.GetMaxDropFloor())
-		{
-			return;
-		}
-		this.SetState(GRShuttleState.PreMove, false);
-		if (this.departCardScanner != null)
-		{
-			this.departCardScanner.onSucceeded.Invoke();
-		}
-	}
-
-	public void OnArrive()
-	{
-		this.SetState(GRShuttleState.Arriving, false);
-	}
-
-	public void OnTargetLevelUp()
-	{
-		this.targetSection = this.ClampTargetSection(this.targetSection - 1);
-		if (this.shuttleUI != null)
-		{
-			this.shuttleUI.RefreshUI();
-		}
-	}
-
-	public void OnTargetLevelDown()
-	{
-		this.targetSection = this.ClampTargetSection(this.targetSection + 1);
-		if (this.shuttleUI != null)
-		{
-			this.shuttleUI.RefreshUI();
-		}
-	}
-
-	private int ClampTargetSection(int newTargetSection)
-	{
-		if (this.location == GRShuttleGroupLoc.Staging)
-		{
-			newTargetSection = Mathf.Clamp(newTargetSection, 1, GRShuttle.sectionFloors.Length - 1);
-		}
-		else
-		{
-			newTargetSection = 0;
-		}
-		return newTargetSection;
-	}
-
-	public static void TryStartLocalPlayerShuttleMove(int currShuttleId, NetPlayer shuttleOwner)
-	{
-		GRPlayer local = GRPlayer.GetLocal();
-		if (local == null)
-		{
-			return;
-		}
-		GRShuttle shuttle = GRElevatorManager.GetShuttle(currShuttleId);
-		if (shuttle == null)
-		{
-			return;
-		}
-		if (!GRElevatorManager.IsPlayerInShuttle(local.gamePlayer.rig.OwningNetPlayer.ActorNumber, shuttle, null))
-		{
-			return;
-		}
-		if (shuttleOwner != null && shuttleOwner.GetPlayerRef() != null)
-		{
-			local.shuttleData.ownerUserId = shuttleOwner.UserId;
-		}
-		else
-		{
-			local.shuttleData.ownerUserId = VRRig.LocalRig.OwningNetPlayer.UserId;
-		}
-		local.shuttleData.currShuttleId = currShuttleId;
-		local.shuttleData.targetShuttleId = -1;
-		local.shuttleData.targetLevel = shuttle.GetTargetFloor();
-		GRShuttle.SetPlayerShuttleState(local, GRPlayer.ShuttleState.Moving);
-	}
-
-	public static void UpdateGRPlayerShuttle(GRPlayer player)
-	{
-		if (player == null)
-		{
-			return;
-		}
-		GRPlayer.ShuttleData shuttleData = player.shuttleData;
-		if (shuttleData == null || shuttleData.state == GRPlayer.ShuttleState.Idle)
-		{
-			return;
-		}
-		if (!player.gamePlayer.IsLocal())
-		{
-			return;
-		}
-		double timeAsDouble = Time.timeAsDouble;
-		double num = shuttleData.stateStartTime;
-		if (shuttleData.state != GRPlayer.ShuttleState.Idle && timeAsDouble > num + 10.0)
-		{
-			GRShuttle.CancelPlayerShuttle(player);
-			return;
-		}
-		switch (shuttleData.state)
-		{
-		case GRPlayer.ShuttleState.Moving:
-			if (timeAsDouble > num + 3.0)
-			{
-				GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.JoinRoom);
-				return;
-			}
-			break;
-		case GRPlayer.ShuttleState.WaitForLeaveRoom:
-			if (!PhotonNetwork.InRoom)
-			{
-				GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeadPlayer);
-				return;
-			}
-			break;
-		case GRPlayer.ShuttleState.JoinRoom:
-			if (NetworkSystem.Instance.SessionIsPrivate)
-			{
-				GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeadPlayer);
-				return;
-			}
-			GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeaveRoom);
-			return;
-		case GRPlayer.ShuttleState.WaitForLeadPlayer:
-			player.shuttleData.targetShuttleId = -1;
-			if (PhotonNetwork.InRoom)
-			{
-				player.shuttleData.targetShuttleId = GRShuttle.CalcTargetShuttleId(player.shuttleData.currShuttleId, player.shuttleData.ownerUserId);
-			}
-			if (player.shuttleData.targetShuttleId != -1)
-			{
-				GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.Teleport);
-				return;
-			}
-			break;
-		case GRPlayer.ShuttleState.Teleport:
-		{
-			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId).zone);
-			if (timeAsDouble > num + 1.0 && (managerForZone == null || managerForZone.IsZoneActive()))
-			{
-				int num2 = GRShuttle.CalcTargetShuttleId(player.shuttleData.currShuttleId, player.shuttleData.ownerUserId);
-				if (num2 == player.shuttleData.targetShuttleId)
-				{
-					GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.PostTeleport);
-					return;
-				}
-				if (num2 != -1)
-				{
-					player.shuttleData.currShuttleId = player.shuttleData.targetShuttleId;
-					player.shuttleData.targetShuttleId = num2;
-					GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.TeleportToMyShuttleSafety);
-					return;
-				}
-			}
-			break;
-		}
-		case GRPlayer.ShuttleState.TeleportToMyShuttleSafety:
-			GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.PostTeleport);
-			return;
-		case GRPlayer.ShuttleState.PostTeleport:
-			if (timeAsDouble > num + 1.0)
-			{
-				GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.Idle);
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public static int CalcTargetShuttleId(int currShuttleId, string ownerUserId)
-	{
-		GRShuttle shuttle = GRElevatorManager.GetShuttle(currShuttleId);
-		if (shuttle.specificDestinationShuttle != null)
-		{
-			return shuttle.specificDestinationShuttle.shuttleId;
-		}
-		GRPlayer fromUserId = GRPlayer.GetFromUserId(ownerUserId);
-		if (fromUserId != null)
-		{
-			bool isOnDrillovator = shuttle.GetTargetFloor() >= 0;
-			GRShuttle assignedShuttle = fromUserId.GetAssignedShuttle(isOnDrillovator);
-			if (assignedShuttle != null)
-			{
-				return assignedShuttle.shuttleId;
-			}
-		}
-		return -1;
-	}
-
-	public static void CancelPlayerShuttle(GRPlayer player)
-	{
-		GRPlayer.ShuttleState shuttleState = player.shuttleData.state;
-		if (shuttleState - GRPlayer.ShuttleState.Moving > 3)
-		{
-			if (shuttleState - GRPlayer.ShuttleState.Teleport <= 2)
-			{
-				GRShuttle shuttle = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
-				if (shuttle != null)
-				{
-					shuttle.OpenDoorLocal();
-				}
-			}
-		}
-		else
-		{
-			GRShuttle shuttle2 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
-			if (shuttle2 != null)
-			{
-				shuttle2.OpenDoorLocal();
-			}
-		}
-		GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.Idle);
-	}
-
-	public static void SetPlayerShuttleState(GRPlayer player, GRPlayer.ShuttleState newState)
-	{
-		GRPlayer.ShuttleData shuttleData = player.shuttleData;
-		shuttleData.state = newState;
-		shuttleData.stateStartTime = Time.timeAsDouble;
-		switch (shuttleData.state)
-		{
-		case GRPlayer.ShuttleState.Moving:
-		case GRPlayer.ShuttleState.WaitForLeaveRoom:
-		case GRPlayer.ShuttleState.WaitForLeadPlayer:
-			break;
-		case GRPlayer.ShuttleState.JoinRoom:
-		{
-			GRShuttle shuttle = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
-			GRShuttle targetShuttle = shuttle.GetTargetShuttle();
-			if (targetShuttle != null && !NetworkSystem.Instance.SessionIsPrivate && shuttle.shuttleOwner.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				GRElevatorManager.LeadShuttleJoin(shuttle.friendCollider, targetShuttle.friendCollider, targetShuttle.joinTrigger, shuttle.GetTargetFloor());
-				return;
-			}
-			break;
-		}
-		case GRPlayer.ShuttleState.Teleport:
-		{
-			GRShuttle shuttle2 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
-			GRShuttle shuttle3 = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
-			if (shuttle3 != null)
-			{
-				GRShuttle.TeleportLocalPlayer(shuttle2, shuttle3);
-				shuttle3.CloseDoorLocal();
-				return;
-			}
-			break;
-		}
-		case GRPlayer.ShuttleState.TeleportToMyShuttleSafety:
-		{
-			GRShuttle shuttle4 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
-			GRShuttle shuttle5 = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
-			if (shuttle5 != null)
-			{
-				GRShuttle.TeleportLocalPlayer(shuttle4, shuttle5);
-				shuttle5.CloseDoorLocal();
-				return;
-			}
-			break;
-		}
-		case GRPlayer.ShuttleState.PostTeleport:
-		{
-			GRShuttle shuttle6 = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
-			if (shuttle6 != null)
-			{
-				shuttle6.RequestArrival();
-			}
-			break;
-		}
-		default:
-			return;
-		}
-	}
-
 	public const int InvalidId = -1;
 
 	private const int MAX_DEPTH = 29;
@@ -823,15 +64,727 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 
 	private double lastCloseTime;
 
-	private static int[] sectionFloors = new int[]
+	private static int[] sectionFloors = new int[8] { -1, 0, 4, 9, 14, 19, 24, 29 };
+
+	public void Awake()
 	{
-		-1,
-		0,
-		4,
-		9,
-		14,
-		19,
-		24,
-		29
-	};
+		shuttleUI.Setup(null, null);
+		if (entryCardScanner != null)
+		{
+			entryCardScanner.requireSpecificPlayer = true;
+			entryCardScanner.restrictToPlayer = null;
+		}
+		if (departCardScanner != null)
+		{
+			departCardScanner.requireSpecificPlayer = true;
+			departCardScanner.restrictToPlayer = null;
+		}
+		state = GRShuttleState.Docked;
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void Init(int shuttleId)
+	{
+		this.shuttleId = shuttleId;
+		StopMoveFx();
+	}
+
+	public void SetBay(GRBay bay)
+	{
+		shuttleBay = bay;
+	}
+
+	public void SetReactor(GhostReactor reactor)
+	{
+		this.reactor = reactor;
+	}
+
+	public void SetLocation(GRShuttleGroupLoc location)
+	{
+		this.location = location;
+		targetSection = ClampTargetSection(targetSection);
+	}
+
+	public void Setup(GhostReactor reactor, GRShuttleGroupLoc location, int employeeIndex)
+	{
+		this.reactor = reactor;
+		this.location = location;
+		this.employeeIndex = employeeIndex;
+		SetOwner(null);
+		targetSection = ClampTargetSection(targetSection);
+	}
+
+	public int GetTargetFloor()
+	{
+		if (specificDestinationShuttle != null)
+		{
+			return specificDestinationShuttle.specificFloor;
+		}
+		if (targetSection < 0 || targetSection >= sectionFloors.Length)
+		{
+			return 0;
+		}
+		return sectionFloors[targetSection];
+	}
+
+	public GRShuttleState GetState()
+	{
+		return state;
+	}
+
+	public NetPlayer GetOwner()
+	{
+		return shuttleOwner;
+	}
+
+	public void SetOwner(NetPlayer player)
+	{
+		shuttleOwner = player;
+		shuttleUI.Setup(reactor, player);
+		entryCardScanner.restrictToPlayer = player;
+		departCardScanner.restrictToPlayer = player;
+		if (shuttleBay != null)
+		{
+			shuttleBay.Refresh();
+		}
+	}
+
+	public void SliceUpdate()
+	{
+		UpdateState();
+	}
+
+	public void Refresh()
+	{
+		shuttleUI.RefreshUI();
+	}
+
+	public void JoinShuttleRoomLocalPlayer(GRShuttle sourceShuttle, GRShuttle destShuttle)
+	{
+	}
+
+	public static void TeleportLocalPlayer(GRShuttle sourceShuttle, GRShuttle destShuttle)
+	{
+		sourceShuttle.friendCollider.RefreshPlayersWithinBounds();
+		if (sourceShuttle.friendCollider.playerIDsCurrentlyTouching.Contains(NetworkSystem.Instance.LocalPlayer.UserId))
+		{
+			GTPlayer instance = GTPlayer.Instance;
+			VRRig localRig = VRRig.LocalRig;
+			float angle = destShuttle.transform.rotation.eulerAngles.y - sourceShuttle.transform.rotation.eulerAngles.y;
+			Vector3 vector = localRig.transform.position - instance.transform.position;
+			Vector3 position = sourceShuttle.transform.InverseTransformPoint(instance.transform.position);
+			position.x *= 0.8f;
+			position.z *= 0.8f;
+			Vector3 position2 = destShuttle.transform.TransformPoint(position);
+			instance.TeleportTo(position2, instance.transform.rotation);
+			instance.turnParent.transform.RotateAround(instance.headCollider.transform.position, sourceShuttle.transform.up, angle);
+			localRig.transform.position = instance.transform.position + vector;
+			instance.InitializeValues();
+		}
+	}
+
+	public void SetState(GRShuttleState newState, bool force = false)
+	{
+		if (state == newState && !force)
+		{
+			return;
+		}
+		switch (state)
+		{
+		case GRShuttleState.PostMove:
+			if (specificDestinationShuttle != null)
+			{
+				OpenDoorLocal();
+			}
+			else
+			{
+				CloseDoorLocal();
+			}
+			break;
+		case GRShuttleState.PostArrive:
+			OpenDoorLocal();
+			break;
+		case GRShuttleState.Docked:
+			if (shuttleBay != null)
+			{
+				shuttleBay.Refresh();
+			}
+			break;
+		}
+		state = newState;
+		stateStartTime = Time.timeAsDouble;
+		switch (state)
+		{
+		case GRShuttleState.PreMove:
+			CloseDoorLocal();
+			takeOffSound.Play(null);
+			if (specificDestinationShuttle != null)
+			{
+				GRPlayer gRPlayer = GRPlayer.Get(GRElevatorManager.LowestActorNumberInElevator(friendCollider, specificDestinationShuttle.friendCollider));
+				shuttleOwner = gRPlayer.gamePlayer.rig.OwningNetPlayer;
+			}
+			TryStartLocalPlayerShuttleMove(shuttleId, shuttleOwner);
+			StartMoveFx();
+			break;
+		case GRShuttleState.Moving:
+			moveSound.Play(null);
+			break;
+		case GRShuttleState.Arriving:
+			CloseDoorLocal();
+			moveSound.Play(null);
+			break;
+		case GRShuttleState.PostArrive:
+			landSound.Play(null);
+			break;
+		case GRShuttleState.Docked:
+			if (shuttleBay != null)
+			{
+				shuttleBay.Refresh();
+			}
+			StopMoveFx();
+			break;
+		case GRShuttleState.PostMove:
+			break;
+		}
+	}
+
+	private void UpdateState()
+	{
+		double timeAsDouble = Time.timeAsDouble;
+		switch (state)
+		{
+		case GRShuttleState.PreMove:
+			if (timeAsDouble > stateStartTime + 1.0)
+			{
+				SetState(GRShuttleState.Moving);
+			}
+			break;
+		case GRShuttleState.Moving:
+			if (timeAsDouble > stateStartTime + 5.0)
+			{
+				SetState(GRShuttleState.PostMove);
+			}
+			break;
+		case GRShuttleState.PostMove:
+			if (timeAsDouble > stateStartTime + 1.0)
+			{
+				SetState(GRShuttleState.Docked);
+			}
+			break;
+		case GRShuttleState.Arriving:
+			if (timeAsDouble > stateStartTime + 2.0)
+			{
+				SetState(GRShuttleState.PostArrive);
+			}
+			break;
+		case GRShuttleState.PostArrive:
+			if (timeAsDouble > stateStartTime + 1.0)
+			{
+				SetState(GRShuttleState.Docked);
+			}
+			break;
+		}
+	}
+
+	public void RequestArrival()
+	{
+		reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleArrive, shuttleId);
+	}
+
+	private void StartMoveFx()
+	{
+		if (windowFx != null)
+		{
+			windowFx.Play();
+		}
+		for (int i = 0; i < hideOnMove.Count; i++)
+		{
+			hideOnMove[i].SetActive(value: false);
+		}
+		for (int j = 0; j < showOnMove.Count; j++)
+		{
+			showOnMove[j].SetActive(value: true);
+		}
+	}
+
+	private void StopMoveFx()
+	{
+		if (windowFx != null)
+		{
+			windowFx.Stop();
+		}
+		for (int i = 0; i < hideOnMove.Count; i++)
+		{
+			hideOnMove[i].SetActive(value: true);
+		}
+		for (int j = 0; j < showOnMove.Count; j++)
+		{
+			showOnMove[j].SetActive(value: false);
+		}
+	}
+
+	public bool IsPodUnlocked()
+	{
+		if (specificDestinationShuttle != null)
+		{
+			return true;
+		}
+		if (shuttleOwner == null)
+		{
+			return false;
+		}
+		GRPlayer gRPlayer = GRPlayer.Get(shuttleOwner);
+		if (gRPlayer == null)
+		{
+			return false;
+		}
+		return gRPlayer.IsDropPodUnlocked();
+	}
+
+	public int GetMaxDropFloor()
+	{
+		if (shuttleOwner == null)
+		{
+			return 0;
+		}
+		GRPlayer gRPlayer = GRPlayer.Get(shuttleOwner);
+		if (gRPlayer == null)
+		{
+			return 0;
+		}
+		return gRPlayer.GetMaxDropFloor();
+	}
+
+	public void OnShuttleMove()
+	{
+		if (state == GRShuttleState.Docked)
+		{
+			reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, shuttleId);
+		}
+	}
+
+	public void OnShuttleMoveActorNr(int actorNr)
+	{
+		if (state != GRShuttleState.Docked || actorNr != shuttleOwner.ActorNumber || GetTargetFloor() > GetMaxDropFloor())
+		{
+			departCardScanner.onFailed.Invoke();
+			return;
+		}
+		departCardScanner.onSucceeded.Invoke();
+		reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, shuttleId);
+	}
+
+	public void TargetLevelUp()
+	{
+		if (state == GRShuttleState.Docked)
+		{
+			reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelUp, shuttleId);
+		}
+	}
+
+	public void TargetLevelDown()
+	{
+		if (state == GRShuttleState.Docked)
+		{
+			reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelDown, shuttleId);
+		}
+	}
+
+	private GRShuttle GetTargetShuttle()
+	{
+		if (specificDestinationShuttle != null)
+		{
+			return specificDestinationShuttle;
+		}
+		if (shuttleOwner == null)
+		{
+			return null;
+		}
+		GRShuttle drillShuttleForPlayer = GRElevatorManager._instance.GetDrillShuttleForPlayer(shuttleOwner.ActorNumber);
+		GRShuttle stagingShuttleForPlayer = GRElevatorManager._instance.GetStagingShuttleForPlayer(shuttleOwner.ActorNumber);
+		if (location != GRShuttleGroupLoc.Drill)
+		{
+			return drillShuttleForPlayer;
+		}
+		return stagingShuttleForPlayer;
+	}
+
+	public bool IsPlayerOwner(GRPlayer player)
+	{
+		return GRPlayer.Get(GetOwner()) == player;
+	}
+
+	public bool IsShuttleInteractableByPlayer(GRPlayer player, bool ignoreOwnership)
+	{
+		if (!ignoreOwnership && !IsPlayerOwner(player) && specificDestinationShuttle == null)
+		{
+			return false;
+		}
+		if (entryCardScanner == null)
+		{
+			return true;
+		}
+		if (departCardScanner == null)
+		{
+			return true;
+		}
+		bool num = GameEntityManager.IsPlayerHandNearPosition(player.gamePlayer, entryCardScanner.transform.position, isLeftHand: false, checkBothHands: true);
+		bool flag = GameEntityManager.IsPlayerHandNearPosition(player.gamePlayer, departCardScanner.transform.position, isLeftHand: false, checkBothHands: true);
+		return num || flag;
+	}
+
+	public bool IsPlayerOwner(NetPlayer player)
+	{
+		return GetOwner() == player;
+	}
+
+	public void ToggleDoor()
+	{
+		if (state != GRShuttleState.Docked)
+		{
+			return;
+		}
+		if (entryDoor.doorState == GRDoor.DoorState.Closed)
+		{
+			reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleOpen, shuttleId);
+		}
+		else if (entryDoor.doorState == GRDoor.DoorState.Open)
+		{
+			double timeAsDouble = Time.timeAsDouble;
+			if (timeAsDouble > lastCloseTime + 5.0)
+			{
+				lastCloseTime = timeAsDouble;
+				reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleClose, shuttleId);
+			}
+		}
+	}
+
+	public void ToggleDoorActorNr(int actorNr)
+	{
+		if (state != GRShuttleState.Docked || GetOwner() == null || GetOwner().ActorNumber != actorNr || !GRPlayer.Get(shuttleOwner).IsDropPodUnlocked())
+		{
+			entryCardScanner?.onFailed.Invoke();
+			return;
+		}
+		entryCardScanner?.onSucceeded.Invoke();
+		ToggleDoor();
+	}
+
+	public void EmergencyOpenDoor()
+	{
+		if (state == GRShuttleState.Docked)
+		{
+			if (PhotonNetwork.InRoom)
+			{
+				reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleOpen, shuttleId);
+			}
+			else
+			{
+				OpenDoorLocal();
+			}
+		}
+	}
+
+	public void OnOpenDoor()
+	{
+		if (entryDoor.doorState == GRDoor.DoorState.Closed && entryCardScanner != null)
+		{
+			entryCardScanner.onSucceeded.Invoke();
+		}
+		OpenDoorLocal();
+	}
+
+	public void OpenDoorLocal()
+	{
+		if (entryDoor != null && entryDoor.doorState == GRDoor.DoorState.Closed)
+		{
+			entryDoor.SetDoorState(GRDoor.DoorState.Open);
+		}
+		if (shuttleBay != null)
+		{
+			shuttleBay.SetOpen(open: true);
+		}
+	}
+
+	public void CloseDoorLocal()
+	{
+		if (entryDoor != null && entryDoor.doorState == GRDoor.DoorState.Open)
+		{
+			entryDoor.SetDoorState(GRDoor.DoorState.Closed);
+		}
+	}
+
+	public void OnCloseDoor()
+	{
+		if (entryDoor.doorState == GRDoor.DoorState.Open && entryCardScanner != null)
+		{
+			entryCardScanner.onSucceeded.Invoke();
+		}
+		CloseDoorLocal();
+	}
+
+	public void OnLaunch()
+	{
+		if (GetTargetFloor() <= GetMaxDropFloor())
+		{
+			SetState(GRShuttleState.PreMove);
+			if (departCardScanner != null)
+			{
+				departCardScanner.onSucceeded.Invoke();
+			}
+		}
+	}
+
+	public void OnArrive()
+	{
+		SetState(GRShuttleState.Arriving);
+	}
+
+	public void OnTargetLevelUp()
+	{
+		targetSection = ClampTargetSection(targetSection - 1);
+		if (shuttleUI != null)
+		{
+			shuttleUI.RefreshUI();
+		}
+	}
+
+	public void OnTargetLevelDown()
+	{
+		targetSection = ClampTargetSection(targetSection + 1);
+		if (shuttleUI != null)
+		{
+			shuttleUI.RefreshUI();
+		}
+	}
+
+	private int ClampTargetSection(int newTargetSection)
+	{
+		newTargetSection = ((location == GRShuttleGroupLoc.Staging) ? Mathf.Clamp(newTargetSection, 1, sectionFloors.Length - 1) : 0);
+		return newTargetSection;
+	}
+
+	public static void TryStartLocalPlayerShuttleMove(int currShuttleId, NetPlayer shuttleOwner)
+	{
+		GRPlayer local = GRPlayer.GetLocal();
+		if (local == null)
+		{
+			return;
+		}
+		GRShuttle shuttle = GRElevatorManager.GetShuttle(currShuttleId);
+		if (!(shuttle == null) && GRElevatorManager.IsPlayerInShuttle(local.gamePlayer.rig.OwningNetPlayer.ActorNumber, shuttle, null))
+		{
+			if (shuttleOwner != null && shuttleOwner.GetPlayerRef() != null)
+			{
+				local.shuttleData.ownerUserId = shuttleOwner.UserId;
+			}
+			else
+			{
+				local.shuttleData.ownerUserId = VRRig.LocalRig.OwningNetPlayer.UserId;
+			}
+			local.shuttleData.currShuttleId = currShuttleId;
+			local.shuttleData.targetShuttleId = -1;
+			local.shuttleData.targetLevel = shuttle.GetTargetFloor();
+			SetPlayerShuttleState(local, GRPlayer.ShuttleState.Moving);
+		}
+	}
+
+	public static void UpdateGRPlayerShuttle(GRPlayer player)
+	{
+		if (player == null)
+		{
+			return;
+		}
+		GRPlayer.ShuttleData shuttleData = player.shuttleData;
+		if (shuttleData == null || shuttleData.state == GRPlayer.ShuttleState.Idle || !player.gamePlayer.IsLocal())
+		{
+			return;
+		}
+		double timeAsDouble = Time.timeAsDouble;
+		double num = shuttleData.stateStartTime;
+		if (shuttleData.state != GRPlayer.ShuttleState.Idle && timeAsDouble > num + 10.0)
+		{
+			CancelPlayerShuttle(player);
+			return;
+		}
+		switch (shuttleData.state)
+		{
+		case GRPlayer.ShuttleState.Moving:
+			if (timeAsDouble > num + 3.0)
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.JoinRoom);
+			}
+			break;
+		case GRPlayer.ShuttleState.JoinRoom:
+			if (NetworkSystem.Instance.SessionIsPrivate)
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeadPlayer);
+			}
+			else
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeaveRoom);
+			}
+			break;
+		case GRPlayer.ShuttleState.WaitForLeaveRoom:
+			if (!PhotonNetwork.InRoom)
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.WaitForLeadPlayer);
+			}
+			break;
+		case GRPlayer.ShuttleState.WaitForLeadPlayer:
+			player.shuttleData.targetShuttleId = -1;
+			if (PhotonNetwork.InRoom)
+			{
+				player.shuttleData.targetShuttleId = CalcTargetShuttleId(player.shuttleData.currShuttleId, player.shuttleData.ownerUserId);
+			}
+			if (player.shuttleData.targetShuttleId != -1)
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.Teleport);
+			}
+			break;
+		case GRPlayer.ShuttleState.Teleport:
+		{
+			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId).zone);
+			if (timeAsDouble > num + 1.0 && (managerForZone == null || managerForZone.IsZoneActive()))
+			{
+				int num2 = CalcTargetShuttleId(player.shuttleData.currShuttleId, player.shuttleData.ownerUserId);
+				if (num2 == player.shuttleData.targetShuttleId)
+				{
+					SetPlayerShuttleState(player, GRPlayer.ShuttleState.PostTeleport);
+				}
+				else if (num2 != -1)
+				{
+					player.shuttleData.currShuttleId = player.shuttleData.targetShuttleId;
+					player.shuttleData.targetShuttleId = num2;
+					SetPlayerShuttleState(player, GRPlayer.ShuttleState.TeleportToMyShuttleSafety);
+				}
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.TeleportToMyShuttleSafety:
+			SetPlayerShuttleState(player, GRPlayer.ShuttleState.PostTeleport);
+			break;
+		case GRPlayer.ShuttleState.PostTeleport:
+			if (timeAsDouble > num + 1.0)
+			{
+				SetPlayerShuttleState(player, GRPlayer.ShuttleState.Idle);
+			}
+			break;
+		}
+	}
+
+	public static int CalcTargetShuttleId(int currShuttleId, string ownerUserId)
+	{
+		GRShuttle shuttle = GRElevatorManager.GetShuttle(currShuttleId);
+		if (shuttle.specificDestinationShuttle != null)
+		{
+			return shuttle.specificDestinationShuttle.shuttleId;
+		}
+		GRPlayer fromUserId = GRPlayer.GetFromUserId(ownerUserId);
+		if (fromUserId != null)
+		{
+			bool isOnDrillovator = shuttle.GetTargetFloor() >= 0;
+			GRShuttle assignedShuttle = fromUserId.GetAssignedShuttle(isOnDrillovator);
+			if (assignedShuttle != null)
+			{
+				return assignedShuttle.shuttleId;
+			}
+		}
+		return -1;
+	}
+
+	public static void CancelPlayerShuttle(GRPlayer player)
+	{
+		switch (player.shuttleData.state)
+		{
+		case GRPlayer.ShuttleState.Moving:
+		case GRPlayer.ShuttleState.WaitForLeaveRoom:
+		case GRPlayer.ShuttleState.JoinRoom:
+		case GRPlayer.ShuttleState.WaitForLeadPlayer:
+		{
+			GRShuttle shuttle2 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
+			if (shuttle2 != null)
+			{
+				shuttle2.OpenDoorLocal();
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.Teleport:
+		case GRPlayer.ShuttleState.TeleportToMyShuttleSafety:
+		case GRPlayer.ShuttleState.PostTeleport:
+		{
+			GRShuttle shuttle = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
+			if (shuttle != null)
+			{
+				shuttle.OpenDoorLocal();
+			}
+			break;
+		}
+		}
+		SetPlayerShuttleState(player, GRPlayer.ShuttleState.Idle);
+	}
+
+	public static void SetPlayerShuttleState(GRPlayer player, GRPlayer.ShuttleState newState)
+	{
+		GRPlayer.ShuttleData shuttleData = player.shuttleData;
+		shuttleData.state = newState;
+		shuttleData.stateStartTime = Time.timeAsDouble;
+		switch (shuttleData.state)
+		{
+		case GRPlayer.ShuttleState.JoinRoom:
+		{
+			GRShuttle shuttle6 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
+			GRShuttle targetShuttle = shuttle6.GetTargetShuttle();
+			if (targetShuttle != null && !NetworkSystem.Instance.SessionIsPrivate && shuttle6.shuttleOwner.ActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
+			{
+				GRElevatorManager.LeadShuttleJoin(shuttle6.friendCollider, targetShuttle.friendCollider, targetShuttle.joinTrigger, shuttle6.GetTargetFloor());
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.Teleport:
+		{
+			GRShuttle shuttle2 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
+			GRShuttle shuttle3 = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
+			if (shuttle3 != null)
+			{
+				TeleportLocalPlayer(shuttle2, shuttle3);
+				shuttle3.CloseDoorLocal();
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.TeleportToMyShuttleSafety:
+		{
+			GRShuttle shuttle4 = GRElevatorManager.GetShuttle(player.shuttleData.currShuttleId);
+			GRShuttle shuttle5 = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
+			if (shuttle5 != null)
+			{
+				TeleportLocalPlayer(shuttle4, shuttle5);
+				shuttle5.CloseDoorLocal();
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.PostTeleport:
+		{
+			GRShuttle shuttle = GRElevatorManager.GetShuttle(player.shuttleData.targetShuttleId);
+			if (shuttle != null)
+			{
+				shuttle.RequestArrival();
+			}
+			break;
+		}
+		case GRPlayer.ShuttleState.Moving:
+		case GRPlayer.ShuttleState.WaitForLeaveRoom:
+		case GRPlayer.ShuttleState.WaitForLeadPlayer:
+			break;
+		}
+	}
 }

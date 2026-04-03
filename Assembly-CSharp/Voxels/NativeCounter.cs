@@ -1,44 +1,43 @@
-﻿using System;
+using System;
 using System.Threading;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Voxels
+namespace Voxels;
+
+public struct NativeCounter : IDisposable
 {
-	public struct NativeCounter : IDisposable
+	private readonly Allocator _allocator;
+
+	[NativeDisableUnsafePtrRestriction]
+	private unsafe readonly int* _counter;
+
+	public unsafe int Count
 	{
-		public unsafe int Count
+		get
 		{
-			get
-			{
-				return *this._counter;
-			}
-			set
-			{
-				*this._counter = value;
-			}
+			return *_counter;
 		}
-
-		public unsafe NativeCounter(Allocator allocator)
+		set
 		{
-			this._allocator = allocator;
-			this._counter = (int*)UnsafeUtility.Malloc(4L, 4, this._allocator);
-			this.Count = 0;
+			*_counter = value;
 		}
+	}
 
-		public unsafe int Increment()
-		{
-			return Interlocked.Increment(ref *this._counter) - 1;
-		}
+	public unsafe NativeCounter(Allocator allocator)
+	{
+		_allocator = allocator;
+		_counter = (int*)UnsafeUtility.Malloc(4L, 4, _allocator);
+		Count = 0;
+	}
 
-		public unsafe void Dispose()
-		{
-			UnsafeUtility.Free((void*)this._counter, this._allocator);
-		}
+	public unsafe int Increment()
+	{
+		return Interlocked.Increment(ref *_counter) - 1;
+	}
 
-		private readonly Allocator _allocator;
-
-		[NativeDisableUnsafePtrRestriction]
-		private unsafe readonly int* _counter;
+	public unsafe void Dispose()
+	{
+		UnsafeUtility.Free(_counter, _allocator);
 	}
 }

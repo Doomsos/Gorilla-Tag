@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -9,691 +9,103 @@ using UnityEngine.Networking;
 
 public class GorillaTagCompetitiveServerApi : MonoBehaviour
 {
-	private void Awake()
+	public enum EPlatformType
 	{
-		if (GorillaTagCompetitiveServerApi.Instance)
-		{
-			GTDev.LogError<string>("Duplicate GorillaTagCompetitiveServerApi detected. Destroying self.", base.gameObject, null);
-			Object.Destroy(this);
-			return;
-		}
-		GorillaTagCompetitiveServerApi.Instance = this;
+		PC,
+		Quest,
+		NumPlatforms
 	}
 
-	public void RequestGetRankInformation(List<string> playfabs, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
+	[Serializable]
+	public class RankedModeRequestDataBase
 	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestGetRankInformation Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.GetRankInformationInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestGetRankInformation already in progress", null);
-			return;
-		}
-		this.GetRankInformationInProgress = true;
-		string platform = "PC";
-		base.StartCoroutine(this.GetRankInformation(new GorillaTagCompetitiveServerApi.RankedModeProgressionRequestData
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform,
-			playfabIds = playfabs
-		}, callback));
+		public string mothershipId;
+
+		public string mothershipToken;
+
+		public string mothershipEnvId;
 	}
 
-	private IEnumerator GetRankInformation(GorillaTagCompetitiveServerApi.RankedModeProgressionRequestData data, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
+	[Serializable]
+	public class RankedModeRequestDataPlatformed : RankedModeRequestDataBase
 	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/GetTier", "GET");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			this.OnCompleteGetRankInformation(request.downloadHandler.text, callback);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_136;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_136;
-			}
-			bool flag = true;
-			goto IL_139;
-			IL_136:
-			flag = false;
-			IL_139:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompleteGetRankInformation(null, callback);
-			}
-		}
-		if (retry)
-		{
-			if (this.GetRankInformationRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.GetRankInformationRetryCount + 1)));
-				this.GetRankInformationRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.GetRankInformationInProgress = false;
-				this.RequestGetRankInformation(data.playfabIds, callback);
-			}
-			else
-			{
-				this.GetRankInformationRetryCount = 0;
-				this.OnCompleteGetRankInformation(null, callback);
-			}
-		}
-		yield break;
+		public string platform;
 	}
 
-	private void OnCompleteGetRankInformation([CanBeNull] string response, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
+	[Serializable]
+	public class RankedModeProgressionRequestData : RankedModeRequestDataPlatformed
 	{
-		this.GetRankInformationInProgress = false;
-		this.GetRankInformationRetryCount = 0;
-		if (response.IsNullOrEmpty())
-		{
-			return;
-		}
-		string text = "{ \"playerData\": " + response + " }";
-		GorillaTagCompetitiveServerApi.RankedModeProgressionData obj;
-		try
-		{
-			obj = JsonUtility.FromJson<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(text);
-		}
-		catch (ArgumentException exception)
-		{
-			Debug.LogException(exception);
-			Debug.LogError("[GT/GorillaTagCompetitiveServerApi]  ERROR!!!  OnCompleteGetRankInformation: Encountered ArgumentException above while trying to parse json string:\n" + text);
-			return;
-		}
-		catch (Exception exception2)
-		{
-			Debug.LogException(exception2);
-			Debug.LogError("[GT/GorillaTagCompetitiveServerApi]  ERROR!!!  OnCompleteGetRankInformation: Encountered exception above while trying to parse json string:\n" + text);
-			return;
-		}
-		if (callback != null)
-		{
-			callback(obj);
-		}
+		public List<string> playfabIds;
 	}
 
-	public void RequestCreateMatchId(Action<string> callback)
+	[Serializable]
+	public class RankedModeProgressionPlatformData
 	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestCreateMatchId Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.CreateMatchIdInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestCreateMatchId already in progress", null);
-			return;
-		}
-		string platform = "PC";
-		this.CreateMatchIdInProgress = true;
-		base.StartCoroutine(this.CreateMatchId(new GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform
-		}, callback));
+		public string platform;
+
+		public float elo;
+
+		public int majorTier;
+
+		public int minorTier;
+
+		public float rankProgress;
 	}
 
-	private IEnumerator CreateMatchId(GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed data, Action<string> callback)
+	[Serializable]
+	public class RankedModePlayerProgressionData
 	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/CreateMatchId", "POST");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			GTDev.Log<string>("CreateMatchId Success: raw response: " + request.downloadHandler.text, null);
-			this.OnCompleteCreateMatchId(request.downloadHandler.text, callback);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_156;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_156;
-			}
-			bool flag = true;
-			goto IL_159;
-			IL_156:
-			flag = false;
-			IL_159:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompleteCreateMatchId(request.downloadHandler.text, callback);
-			}
-		}
-		if (retry)
-		{
-			if (this.CreateMatchIdRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.CreateMatchIdRetryCount + 1)));
-				this.CreateMatchIdRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.CreateMatchIdInProgress = false;
-				this.RequestCreateMatchId(callback);
-			}
-			else
-			{
-				this.CreateMatchIdRetryCount = 0;
-				this.OnCompleteCreateMatchId(null, callback);
-			}
-		}
-		yield break;
+		public string playfabID;
+
+		public RankedModeProgressionPlatformData[] platformData = new RankedModeProgressionPlatformData[2];
 	}
 
-	private void OnCompleteCreateMatchId([CanBeNull] string response, Action<string> callback)
+	[Serializable]
+	public class RankedModeProgressionData
 	{
-		this.CreateMatchIdInProgress = false;
-		this.CreateMatchIdRetryCount = 0;
-		if (response.IsNullOrEmpty())
-		{
-			return;
-		}
-		if (callback != null)
-		{
-			callback(response);
-		}
+		public List<RankedModePlayerProgressionData> playerData;
 	}
 
-	public void RequestValidateMatchJoin(string matchId, Action<bool> callback)
+	[Serializable]
+	public class RankedModeRequestDataWithMatchId : RankedModeRequestDataPlatformed
 	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestValidateMatchJoin Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.ValidateMatchJoinInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestValidateMatchJoin already in progress", null);
-			return;
-		}
-		string platform = "PC";
-		this.ValidateMatchJoinInProgress = true;
-		base.StartCoroutine(this.ValidateMatchJoin(new GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform,
-			matchId = matchId
-		}, callback));
+		public string matchId;
 	}
 
-	private IEnumerator ValidateMatchJoin(GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId data, Action<bool> callback)
+	[Serializable]
+	public class RankedModeValidateMatchJoinResponseData
 	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/ValidateMatchJoin", "POST");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			GTDev.Log<string>("ValidateMatchJoin Success: raw response: " + request.downloadHandler.text, null);
-			this.OnCompleteValidateMatchJoin(request.downloadHandler.text, callback);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_156;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_156;
-			}
-			bool flag = true;
-			goto IL_159;
-			IL_156:
-			flag = false;
-			IL_159:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompleteValidateMatchJoin(request.downloadHandler.text, callback);
-			}
-		}
-		if (retry)
-		{
-			if (this.ValidateMatchJoinRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.ValidateMatchJoinRetryCount + 1)));
-				this.ValidateMatchJoinRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.ValidateMatchJoinInProgress = false;
-				this.RequestValidateMatchJoin(data.matchId, callback);
-			}
-			else
-			{
-				this.ValidateMatchJoinRetryCount = 0;
-				this.OnCompleteValidateMatchJoin(null, callback);
-			}
-		}
-		yield break;
+		public bool validJoin;
 	}
 
-	private void OnCompleteValidateMatchJoin([CanBeNull] string response, Action<bool> callback)
+	[Serializable]
+	public class RankedModePlayerScore
 	{
-		this.ValidateMatchJoinInProgress = false;
-		this.ValidateMatchJoinRetryCount = 0;
-		if (response.IsNullOrEmpty())
-		{
-			return;
-		}
-		GorillaTagCompetitiveServerApi.RankedModeValidateMatchJoinResponseData rankedModeValidateMatchJoinResponseData = JsonUtility.FromJson<GorillaTagCompetitiveServerApi.RankedModeValidateMatchJoinResponseData>(response);
-		if (callback != null)
-		{
-			callback(rankedModeValidateMatchJoinResponseData.validJoin);
-		}
+		public string playfabId;
+
+		public float gameScore;
 	}
 
-	public void RequestSubmitMatchScores(string matchId, List<RankedMultiplayerScore.PlayerScore> finalScores)
+	[Serializable]
+	public class RankedModeSubmitMatchScoresRequestData : RankedModeRequestDataBase
 	{
-		List<GorillaTagCompetitiveServerApi.RankedModePlayerScore> list = new List<GorillaTagCompetitiveServerApi.RankedModePlayerScore>();
-		foreach (RankedMultiplayerScore.PlayerScore playerScore in finalScores)
-		{
-			NetPlayer player = NetworkSystem.Instance.GetPlayer(playerScore.PlayerId);
-			list.Add(new GorillaTagCompetitiveServerApi.RankedModePlayerScore
-			{
-				playfabId = player.UserId,
-				gameScore = playerScore.GameScore
-			});
-		}
-		this.RequestSubmitMatchScores(matchId, list);
+		public string matchId;
+
+		public string playfabId;
+
+		public List<RankedModePlayerScore> playerScores;
 	}
 
-	private void RequestSubmitMatchScores(string matchId, List<GorillaTagCompetitiveServerApi.RankedModePlayerScore> playerScores)
+	[Serializable]
+	public class RankedModeSetEloValueRequestData : RankedModeRequestDataPlatformed
 	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestSubmitMatchScores Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.SubmitMatchScoresInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestSubmitMatchScores already in progress", null);
-			return;
-		}
-		this.SubmitMatchScoresInProgress = true;
-		base.StartCoroutine(this.SubmitMatchScores(new GorillaTagCompetitiveServerApi.RankedModeSubmitMatchScoresRequestData
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			matchId = matchId,
-			playfabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
-			playerScores = playerScores
-		}));
+		public float elo;
 	}
 
-	private IEnumerator SubmitMatchScores(GorillaTagCompetitiveServerApi.RankedModeSubmitMatchScoresRequestData data)
+	[Serializable]
+	public class RankedModeUnlockCompetitiveQueueRequestData : RankedModeRequestDataPlatformed
 	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/SubmitMatchScores", "POST");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			GTDev.Log<string>("SubmitMatchScores Success: raw response: " + request.downloadHandler.text, null);
-			this.OnCompleteSubmitMatchScores(request.downloadHandler.text);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_150;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_150;
-			}
-			bool flag = true;
-			goto IL_153;
-			IL_150:
-			flag = false;
-			IL_153:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompleteSubmitMatchScores(request.downloadHandler.text);
-			}
-		}
-		if (retry)
-		{
-			if (this.SubmitMatchScoresRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.SubmitMatchScoresRetryCount + 1)));
-				this.SubmitMatchScoresRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.SubmitMatchScoresInProgress = false;
-				this.RequestSubmitMatchScores(data.matchId, data.playerScores);
-			}
-			else
-			{
-				this.SubmitMatchScoresRetryCount = 0;
-				this.OnCompleteSubmitMatchScores(null);
-			}
-		}
-		yield break;
-	}
-
-	private void OnCompleteSubmitMatchScores([CanBeNull] string response)
-	{
-		this.SubmitMatchScoresInProgress = false;
-		this.SubmitMatchScoresRetryCount = 0;
-	}
-
-	public void RequestSetEloValue(float desiredElo, Action callback)
-	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestSetEloValue Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.SetEloValueInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestSetEloValue already in progress", null);
-			return;
-		}
-		string platform = "PC";
-		this.SetEloValueInProgress = true;
-		base.StartCoroutine(this.SetEloValue(new GorillaTagCompetitiveServerApi.RankedModeSetEloValueRequestData
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform,
-			elo = desiredElo
-		}, callback));
-	}
-
-	private IEnumerator SetEloValue(GorillaTagCompetitiveServerApi.RankedModeSetEloValueRequestData data, Action callback)
-	{
-		GTDev.LogWarning<string>("SetEloValue is for internal use only (Is Beta)", null);
-		yield break;
-	}
-
-	private void OnCompleteSetEloValue([CanBeNull] string response, Action callback)
-	{
-		this.SetEloValueInProgress = false;
-		this.SetEloValueRetryCount = 0;
-		if (response != null && callback != null)
-		{
-			callback();
-		}
-	}
-
-	public void RequestPingRoom(string matchId, Action callback)
-	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestPingRoom Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.SetEloValueInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestPingRoom already in progress", null);
-			return;
-		}
-		string platform = "PC";
-		this.PingMatchInProgress = true;
-		base.StartCoroutine(this.PingRoom(new GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform,
-			matchId = matchId
-		}, callback));
-	}
-
-	private IEnumerator PingRoom(GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId data, Action callback)
-	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/PingRoom", "POST");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			GTDev.Log<string>("PingRoom Success: raw response: " + request.downloadHandler.text, null);
-			this.OnCompletePingRoom(request.downloadHandler.text, callback);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_156;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_156;
-			}
-			bool flag = true;
-			goto IL_159;
-			IL_156:
-			flag = false;
-			IL_159:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompletePingRoom(request.downloadHandler.text, callback);
-			}
-		}
-		if (retry)
-		{
-			if (this.PingMatchRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.PingMatchRetryCount + 1)));
-				this.ValidateMatchJoinRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.PingMatchInProgress = false;
-				this.RequestPingRoom(data.matchId, callback);
-			}
-			else
-			{
-				this.PingMatchRetryCount = 0;
-				this.OnCompletePingRoom(null, callback);
-			}
-		}
-		yield break;
-	}
-
-	private void OnCompletePingRoom([CanBeNull] string response, Action callback)
-	{
-		GTDev.Log<string>("PingRoom complete", null);
-		this.PingMatchInProgress = false;
-		this.PingMatchRetryCount = 0;
-		if (response != null && callback != null)
-		{
-			callback();
-		}
-	}
-
-	public void RequestUnlockCompetitiveQueue(bool unlocked, Action callback)
-	{
-		if (!MothershipClientContext.IsClientLoggedIn())
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestUnlockCompetitiveQueue Client Not Logged into Mothership", null);
-			return;
-		}
-		if (this.UnlockCompetitiveQueueInProgress)
-		{
-			GTDev.LogWarning<string>("GorillaTagCompetitiveServerApi RequestUnlockCompetitiveQueue already in progress", null);
-			return;
-		}
-		string platform = "PC";
-		this.UnlockCompetitiveQueueInProgress = true;
-		base.StartCoroutine(this.UnlockCompetitiveQueue(new GorillaTagCompetitiveServerApi.RankedModeUnlockCompetitiveQueueRequestData
-		{
-			mothershipId = MothershipClientContext.MothershipId,
-			mothershipToken = MothershipClientContext.Token,
-			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
-			platform = platform,
-			unlocked = unlocked
-		}, callback));
-	}
-
-	private IEnumerator UnlockCompetitiveQueue(GorillaTagCompetitiveServerApi.RankedModeUnlockCompetitiveQueueRequestData data, Action callback)
-	{
-		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/UnlockCompetitiveQueue", "POST");
-		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-		bool retry = false;
-		request.uploadHandler = new UploadHandlerRaw(bytes);
-		request.downloadHandler = new DownloadHandlerBuffer();
-		request.SetRequestHeader("Content-Type", "application/json");
-		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
-		{
-			GTDev.Log<string>("UnlockCompetitiveQueue Success: raw response: " + request.downloadHandler.text, null);
-			this.OnCompleteUnlockCompetitiveQueue(request.downloadHandler.text, callback);
-		}
-		else if (request.result != UnityWebRequest.Result.ProtocolError)
-		{
-			retry = true;
-		}
-		else
-		{
-			long responseCode = request.responseCode;
-			if (responseCode >= 500L)
-			{
-				if (responseCode >= 600L)
-				{
-					goto IL_156;
-				}
-			}
-			else if (responseCode != 408L && responseCode != 429L)
-			{
-				goto IL_156;
-			}
-			bool flag = true;
-			goto IL_159;
-			IL_156:
-			flag = false;
-			IL_159:
-			if (flag)
-			{
-				retry = true;
-			}
-			else
-			{
-				this.OnCompleteUnlockCompetitiveQueue(request.downloadHandler.text, callback);
-			}
-		}
-		if (retry)
-		{
-			if (this.UnlockCompetitiveQueueRetryCount < this.MAX_SERVER_RETRIES)
-			{
-				float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.UnlockCompetitiveQueueRetryCount + 1)));
-				this.ValidateMatchJoinRetryCount++;
-				yield return new WaitForSecondsRealtime(time);
-				this.UnlockCompetitiveQueueInProgress = false;
-				this.RequestUnlockCompetitiveQueue(data.unlocked, callback);
-			}
-			else
-			{
-				this.UnlockCompetitiveQueueRetryCount = 0;
-				this.OnCompleteUnlockCompetitiveQueue(null, callback);
-			}
-		}
-		yield break;
-	}
-
-	private void OnCompleteUnlockCompetitiveQueue([CanBeNull] string response, Action callback)
-	{
-		GTDev.Log<string>("UnlockCompetitiveQueue complete", null);
-		this.UnlockCompetitiveQueueInProgress = false;
-		this.UnlockCompetitiveQueueRetryCount = 0;
-		if (response != null && callback != null)
-		{
-			callback();
-		}
+		public bool unlocked;
 	}
 
 	public static GorillaTagCompetitiveServerApi Instance;
@@ -728,102 +140,716 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 
 	private int UnlockCompetitiveQueueRetryCount;
 
-	public enum EPlatformType
+	private void Awake()
 	{
-		PC,
-		Quest,
-		NumPlatforms
+		if ((bool)Instance)
+		{
+			GTDev.LogError("Duplicate GorillaTagCompetitiveServerApi detected. Destroying self.", base.gameObject);
+			UnityEngine.Object.Destroy(this);
+		}
+		else
+		{
+			Instance = this;
+		}
 	}
 
-	[Serializable]
-	public class RankedModeRequestDataBase
+	public void RequestGetRankInformation(List<string> playfabs, Action<RankedModeProgressionData> callback)
 	{
-		public string mothershipId;
-
-		public string mothershipToken;
-
-		public string mothershipEnvId;
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestGetRankInformation Client Not Logged into Mothership");
+			return;
+		}
+		if (GetRankInformationInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestGetRankInformation already in progress");
+			return;
+		}
+		GetRankInformationInProgress = true;
+		string text = "Quest";
+		text = "PC";
+		StartCoroutine(GetRankInformation(new RankedModeProgressionRequestData
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text,
+			playfabIds = playfabs
+		}, callback));
 	}
 
-	[Serializable]
-	public class RankedModeRequestDataPlatformed : GorillaTagCompetitiveServerApi.RankedModeRequestDataBase
+	private IEnumerator GetRankInformation(RankedModeProgressionRequestData data, Action<RankedModeProgressionData> callback)
 	{
-		public string platform;
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/GetTier", "GET");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			OnCompleteGetRankInformation(request.downloadHandler.text, callback);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_0131;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_0131;
+				}
+				flag = false;
+				goto IL_0139;
+			}
+			retry = true;
+		}
+		goto IL_0153;
+		IL_0131:
+		flag = true;
+		goto IL_0139;
+		IL_0153:
+		if (retry)
+		{
+			if (GetRankInformationRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, GetRankInformationRetryCount + 1));
+				GetRankInformationRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				GetRankInformationInProgress = false;
+				RequestGetRankInformation(data.playfabIds, callback);
+			}
+			else
+			{
+				GetRankInformationRetryCount = 0;
+				OnCompleteGetRankInformation(null, callback);
+			}
+		}
+		yield break;
+		IL_0139:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompleteGetRankInformation(null, callback);
+		}
+		goto IL_0153;
 	}
 
-	[Serializable]
-	public class RankedModeProgressionRequestData : GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed
+	private void OnCompleteGetRankInformation([CanBeNull] string response, Action<RankedModeProgressionData> callback)
 	{
-		public List<string> playfabIds;
+		GetRankInformationInProgress = false;
+		GetRankInformationRetryCount = 0;
+		if (!response.IsNullOrEmpty())
+		{
+			string text = "{ \"playerData\": " + response + " }";
+			RankedModeProgressionData obj;
+			try
+			{
+				obj = JsonUtility.FromJson<RankedModeProgressionData>(text);
+			}
+			catch (ArgumentException exception)
+			{
+				Debug.LogException(exception);
+				Debug.LogError("[GT/GorillaTagCompetitiveServerApi]  ERROR!!!  OnCompleteGetRankInformation: Encountered ArgumentException above while trying to parse json string:\n" + text);
+				return;
+			}
+			catch (Exception exception2)
+			{
+				Debug.LogException(exception2);
+				Debug.LogError("[GT/GorillaTagCompetitiveServerApi]  ERROR!!!  OnCompleteGetRankInformation: Encountered exception above while trying to parse json string:\n" + text);
+				return;
+			}
+			callback?.Invoke(obj);
+		}
 	}
 
-	[Serializable]
-	public class RankedModeProgressionPlatformData
+	public void RequestCreateMatchId(Action<string> callback)
 	{
-		public string platform;
-
-		public float elo;
-
-		public int majorTier;
-
-		public int minorTier;
-
-		public float rankProgress;
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestCreateMatchId Client Not Logged into Mothership");
+			return;
+		}
+		if (CreateMatchIdInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestCreateMatchId already in progress");
+			return;
+		}
+		string text = "Quest";
+		text = "PC";
+		CreateMatchIdInProgress = true;
+		StartCoroutine(CreateMatchId(new RankedModeRequestDataPlatformed
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text
+		}, callback));
 	}
 
-	[Serializable]
-	public class RankedModePlayerProgressionData
+	private IEnumerator CreateMatchId(RankedModeRequestDataPlatformed data, Action<string> callback)
 	{
-		public string playfabID;
-
-		public GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData[] platformData = new GorillaTagCompetitiveServerApi.RankedModeProgressionPlatformData[2];
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/CreateMatchId", "POST");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			GTDev.Log("CreateMatchId Success: raw response: " + request.downloadHandler.text);
+			OnCompleteCreateMatchId(request.downloadHandler.text, callback);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_0151;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_0151;
+				}
+				flag = false;
+				goto IL_0159;
+			}
+			retry = true;
+		}
+		goto IL_0182;
+		IL_0151:
+		flag = true;
+		goto IL_0159;
+		IL_0182:
+		if (retry)
+		{
+			if (CreateMatchIdRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, CreateMatchIdRetryCount + 1));
+				CreateMatchIdRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				CreateMatchIdInProgress = false;
+				RequestCreateMatchId(callback);
+			}
+			else
+			{
+				CreateMatchIdRetryCount = 0;
+				OnCompleteCreateMatchId(null, callback);
+			}
+		}
+		yield break;
+		IL_0159:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompleteCreateMatchId(request.downloadHandler.text, callback);
+		}
+		goto IL_0182;
 	}
 
-	[Serializable]
-	public class RankedModeProgressionData
+	private void OnCompleteCreateMatchId([CanBeNull] string response, Action<string> callback)
 	{
-		public List<GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData> playerData;
+		CreateMatchIdInProgress = false;
+		CreateMatchIdRetryCount = 0;
+		if (!response.IsNullOrEmpty())
+		{
+			callback?.Invoke(response);
+		}
 	}
 
-	[Serializable]
-	public class RankedModeRequestDataWithMatchId : GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed
+	public void RequestValidateMatchJoin(string matchId, Action<bool> callback)
 	{
-		public string matchId;
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestValidateMatchJoin Client Not Logged into Mothership");
+			return;
+		}
+		if (ValidateMatchJoinInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestValidateMatchJoin already in progress");
+			return;
+		}
+		string text = "Quest";
+		text = "PC";
+		ValidateMatchJoinInProgress = true;
+		StartCoroutine(ValidateMatchJoin(new RankedModeRequestDataWithMatchId
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text,
+			matchId = matchId
+		}, callback));
 	}
 
-	[Serializable]
-	public class RankedModeValidateMatchJoinResponseData
+	private IEnumerator ValidateMatchJoin(RankedModeRequestDataWithMatchId data, Action<bool> callback)
 	{
-		public bool validJoin;
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/ValidateMatchJoin", "POST");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			GTDev.Log("ValidateMatchJoin Success: raw response: " + request.downloadHandler.text);
+			OnCompleteValidateMatchJoin(request.downloadHandler.text, callback);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_0151;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_0151;
+				}
+				flag = false;
+				goto IL_0159;
+			}
+			retry = true;
+		}
+		goto IL_0182;
+		IL_0151:
+		flag = true;
+		goto IL_0159;
+		IL_0182:
+		if (retry)
+		{
+			if (ValidateMatchJoinRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, ValidateMatchJoinRetryCount + 1));
+				ValidateMatchJoinRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				ValidateMatchJoinInProgress = false;
+				RequestValidateMatchJoin(data.matchId, callback);
+			}
+			else
+			{
+				ValidateMatchJoinRetryCount = 0;
+				OnCompleteValidateMatchJoin(null, callback);
+			}
+		}
+		yield break;
+		IL_0159:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompleteValidateMatchJoin(request.downloadHandler.text, callback);
+		}
+		goto IL_0182;
 	}
 
-	[Serializable]
-	public class RankedModePlayerScore
+	private void OnCompleteValidateMatchJoin([CanBeNull] string response, Action<bool> callback)
 	{
-		public string playfabId;
-
-		public float gameScore;
+		ValidateMatchJoinInProgress = false;
+		ValidateMatchJoinRetryCount = 0;
+		if (!response.IsNullOrEmpty())
+		{
+			RankedModeValidateMatchJoinResponseData rankedModeValidateMatchJoinResponseData = JsonUtility.FromJson<RankedModeValidateMatchJoinResponseData>(response);
+			callback?.Invoke(rankedModeValidateMatchJoinResponseData.validJoin);
+		}
 	}
 
-	[Serializable]
-	public class RankedModeSubmitMatchScoresRequestData : GorillaTagCompetitiveServerApi.RankedModeRequestDataBase
+	public void RequestSubmitMatchScores(string matchId, List<RankedMultiplayerScore.PlayerScore> finalScores)
 	{
-		public string matchId;
-
-		public string playfabId;
-
-		public List<GorillaTagCompetitiveServerApi.RankedModePlayerScore> playerScores;
+		List<RankedModePlayerScore> list = new List<RankedModePlayerScore>();
+		foreach (RankedMultiplayerScore.PlayerScore finalScore in finalScores)
+		{
+			NetPlayer player = NetworkSystem.Instance.GetPlayer(finalScore.PlayerId);
+			list.Add(new RankedModePlayerScore
+			{
+				playfabId = player.UserId,
+				gameScore = finalScore.GameScore
+			});
+		}
+		RequestSubmitMatchScores(matchId, list);
 	}
 
-	[Serializable]
-	public class RankedModeSetEloValueRequestData : GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed
+	private void RequestSubmitMatchScores(string matchId, List<RankedModePlayerScore> playerScores)
 	{
-		public float elo;
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestSubmitMatchScores Client Not Logged into Mothership");
+			return;
+		}
+		if (SubmitMatchScoresInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestSubmitMatchScores already in progress");
+			return;
+		}
+		SubmitMatchScoresInProgress = true;
+		StartCoroutine(SubmitMatchScores(new RankedModeSubmitMatchScoresRequestData
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			matchId = matchId,
+			playfabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
+			playerScores = playerScores
+		}));
 	}
 
-	[Serializable]
-	public class RankedModeUnlockCompetitiveQueueRequestData : GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed
+	private IEnumerator SubmitMatchScores(RankedModeSubmitMatchScoresRequestData data)
 	{
-		public bool unlocked;
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/SubmitMatchScores", "POST");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			GTDev.Log("SubmitMatchScores Success: raw response: " + request.downloadHandler.text);
+			OnCompleteSubmitMatchScores(request.downloadHandler.text);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_014b;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_014b;
+				}
+				flag = false;
+				goto IL_0153;
+			}
+			retry = true;
+		}
+		goto IL_0176;
+		IL_014b:
+		flag = true;
+		goto IL_0153;
+		IL_0176:
+		if (retry)
+		{
+			if (SubmitMatchScoresRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, SubmitMatchScoresRetryCount + 1));
+				SubmitMatchScoresRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				SubmitMatchScoresInProgress = false;
+				RequestSubmitMatchScores(data.matchId, data.playerScores);
+			}
+			else
+			{
+				SubmitMatchScoresRetryCount = 0;
+				OnCompleteSubmitMatchScores(null);
+			}
+		}
+		yield break;
+		IL_0153:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompleteSubmitMatchScores(request.downloadHandler.text);
+		}
+		goto IL_0176;
+	}
+
+	private void OnCompleteSubmitMatchScores([CanBeNull] string response)
+	{
+		SubmitMatchScoresInProgress = false;
+		SubmitMatchScoresRetryCount = 0;
+	}
+
+	public void RequestSetEloValue(float desiredElo, Action callback)
+	{
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestSetEloValue Client Not Logged into Mothership");
+			return;
+		}
+		if (SetEloValueInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestSetEloValue already in progress");
+			return;
+		}
+		string text = "Quest";
+		text = "PC";
+		SetEloValueInProgress = true;
+		StartCoroutine(SetEloValue(new RankedModeSetEloValueRequestData
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text,
+			elo = desiredElo
+		}, callback));
+	}
+
+	private IEnumerator SetEloValue(RankedModeSetEloValueRequestData data, Action callback)
+	{
+		GTDev.LogWarning("SetEloValue is for internal use only (Is Beta)");
+		yield break;
+	}
+
+	private void OnCompleteSetEloValue([CanBeNull] string response, Action callback)
+	{
+		SetEloValueInProgress = false;
+		SetEloValueRetryCount = 0;
+		if (response != null)
+		{
+			callback?.Invoke();
+		}
+	}
+
+	public void RequestPingRoom(string matchId, Action callback)
+	{
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestPingRoom Client Not Logged into Mothership");
+			return;
+		}
+		if (SetEloValueInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestPingRoom already in progress");
+			return;
+		}
+		string text = "Quest";
+		text = "PC";
+		PingMatchInProgress = true;
+		StartCoroutine(PingRoom(new RankedModeRequestDataWithMatchId
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text,
+			matchId = matchId
+		}, callback));
+	}
+
+	private IEnumerator PingRoom(RankedModeRequestDataWithMatchId data, Action callback)
+	{
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/PingRoom", "POST");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			GTDev.Log("PingRoom Success: raw response: " + request.downloadHandler.text);
+			OnCompletePingRoom(request.downloadHandler.text, callback);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_0151;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_0151;
+				}
+				flag = false;
+				goto IL_0159;
+			}
+			retry = true;
+		}
+		goto IL_0182;
+		IL_0151:
+		flag = true;
+		goto IL_0159;
+		IL_0182:
+		if (retry)
+		{
+			if (PingMatchRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, PingMatchRetryCount + 1));
+				ValidateMatchJoinRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				PingMatchInProgress = false;
+				RequestPingRoom(data.matchId, callback);
+			}
+			else
+			{
+				PingMatchRetryCount = 0;
+				OnCompletePingRoom(null, callback);
+			}
+		}
+		yield break;
+		IL_0159:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompletePingRoom(request.downloadHandler.text, callback);
+		}
+		goto IL_0182;
+	}
+
+	private void OnCompletePingRoom([CanBeNull] string response, Action callback)
+	{
+		GTDev.Log("PingRoom complete");
+		PingMatchInProgress = false;
+		PingMatchRetryCount = 0;
+		if (response != null)
+		{
+			callback?.Invoke();
+		}
+	}
+
+	public void RequestUnlockCompetitiveQueue(bool unlocked, Action callback)
+	{
+		if (!MothershipClientContext.IsClientLoggedIn())
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestUnlockCompetitiveQueue Client Not Logged into Mothership");
+			return;
+		}
+		if (UnlockCompetitiveQueueInProgress)
+		{
+			GTDev.LogWarning("GorillaTagCompetitiveServerApi RequestUnlockCompetitiveQueue already in progress");
+			return;
+		}
+		string text = "Quest";
+		text = "PC";
+		UnlockCompetitiveQueueInProgress = true;
+		StartCoroutine(UnlockCompetitiveQueue(new RankedModeUnlockCompetitiveQueueRequestData
+		{
+			mothershipId = MothershipClientContext.MothershipId,
+			mothershipToken = MothershipClientContext.Token,
+			mothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			platform = text,
+			unlocked = unlocked
+		}, callback));
+	}
+
+	private IEnumerator UnlockCompetitiveQueue(RankedModeUnlockCompetitiveQueueRequestData data, Action callback)
+	{
+		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/UnlockCompetitiveQueue", "POST");
+		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+		bool retry = false;
+		request.uploadHandler = new UploadHandlerRaw(bytes);
+		request.downloadHandler = new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		bool flag;
+		if (request.result == UnityWebRequest.Result.Success)
+		{
+			GTDev.Log("UnlockCompetitiveQueue Success: raw response: " + request.downloadHandler.text);
+			OnCompleteUnlockCompetitiveQueue(request.downloadHandler.text, callback);
+		}
+		else
+		{
+			if (request.result == UnityWebRequest.Result.ProtocolError)
+			{
+				long responseCode = request.responseCode;
+				if (responseCode >= 500)
+				{
+					if (responseCode < 600)
+					{
+						goto IL_0151;
+					}
+				}
+				else if (responseCode == 408 || responseCode == 429)
+				{
+					goto IL_0151;
+				}
+				flag = false;
+				goto IL_0159;
+			}
+			retry = true;
+		}
+		goto IL_0182;
+		IL_0151:
+		flag = true;
+		goto IL_0159;
+		IL_0182:
+		if (retry)
+		{
+			if (UnlockCompetitiveQueueRetryCount < MAX_SERVER_RETRIES)
+			{
+				float time = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, UnlockCompetitiveQueueRetryCount + 1));
+				ValidateMatchJoinRetryCount++;
+				yield return new WaitForSecondsRealtime(time);
+				UnlockCompetitiveQueueInProgress = false;
+				RequestUnlockCompetitiveQueue(data.unlocked, callback);
+			}
+			else
+			{
+				UnlockCompetitiveQueueRetryCount = 0;
+				OnCompleteUnlockCompetitiveQueue(null, callback);
+			}
+		}
+		yield break;
+		IL_0159:
+		if (flag)
+		{
+			retry = true;
+		}
+		else
+		{
+			OnCompleteUnlockCompetitiveQueue(request.downloadHandler.text, callback);
+		}
+		goto IL_0182;
+	}
+
+	private void OnCompleteUnlockCompetitiveQueue([CanBeNull] string response, Action callback)
+	{
+		GTDev.Log("UnlockCompetitiveQueue complete");
+		UnlockCompetitiveQueueInProgress = false;
+		UnlockCompetitiveQueueRetryCount = 0;
+		if (response != null)
+		{
+			callback?.Invoke();
+		}
 	}
 }

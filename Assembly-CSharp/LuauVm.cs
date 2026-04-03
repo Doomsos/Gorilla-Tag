@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ExitGames.Client.Photon;
@@ -13,14 +13,28 @@ using UnityEngine;
 
 public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 {
+	public static List<object> ClassBuilders = new List<object>();
+
+	public static List<GCHandle> Handles = new List<GCHandle>();
+
+	private static Dictionary<int, float> callTimers = new Dictionary<int, float>();
+
+	private static float callCount = 25f;
+
+	public static Queue<object[]> eventQueue = new Queue<object[]>();
+
+	public static Queue<object[]> localEventQueue = new Queue<object[]>();
+
+	public static Queue<GameObject> touchEventsQueue = new Queue<GameObject>();
+
 	private void LateUpdate()
 	{
-		foreach (LuauScriptRunner luauScriptRunner in LuauScriptRunner.ScriptRunners)
+		foreach (LuauScriptRunner scriptRunner in LuauScriptRunner.ScriptRunners)
 		{
-			if (!luauScriptRunner.Tick(Time.deltaTime))
+			if (!scriptRunner.Tick(Time.deltaTime))
 			{
-				LuauHud.Instance.LuauLog(luauScriptRunner.ScriptName + " errored out");
-				LuauScriptRunner.ScriptRunners.Remove(luauScriptRunner);
+				LuauHud.Instance.LuauLog(scriptRunner.ScriptName + " errored out");
+				LuauScriptRunner.ScriptRunners.Remove(scriptRunner);
 				break;
 			}
 		}
@@ -40,28 +54,26 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		{
 			return;
 		}
-		float num = 0f;
-		LuauVm.callTimers.TryGetValue(eventData.Sender, out num);
-		if (num < Time.time - 1f)
+		float value = 0f;
+		callTimers.TryGetValue(eventData.Sender, out value);
+		if (value < Time.time - 1f)
 		{
-			num = Time.time - 1f;
+			value = Time.time - 1f;
 		}
-		num += 1f / LuauVm.callCount;
-		LuauVm.callTimers[eventData.Sender] = num;
-		if (num > Time.time)
+		value += 1f / callCount;
+		callTimers[eventData.Sender] = value;
+		if (!(value > Time.time))
 		{
-			return;
+			object[] array = new object[2]
+			{
+				NetworkSystem.Instance.GetPlayer(eventData.Sender),
+				(object[])eventData.CustomData
+			};
+			if (array.Length <= 20)
+			{
+				eventQueue.Enqueue(array);
+			}
 		}
-		object[] array = new object[]
-		{
-			NetworkSystem.Instance.GetPlayer(eventData.Sender),
-			(object[])eventData.CustomData
-		};
-		if (array.Length > 20)
-		{
-			return;
-		}
-		LuauVm.eventQueue.Enqueue(array);
 	}
 
 	public unsafe static int SendEvent(lua_State* L, object[] args, bool useTable = true)
@@ -79,186 +91,166 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 				return -1;
 			}
 			Luau.lua_getfield(L, -10002, "onEvent");
-			if (Luau.lua_type(L, -1) != 7)
+			if (Luau.lua_type(L, -1) == 7)
 			{
-				Luau.lua_pop(L, 1);
-				return 0;
-			}
-			string text = args[0] as string;
-			if (text == null)
-			{
-				Luau.lua_pop(L, 1);
-				return 0;
-			}
-			if (string.IsNullOrEmpty(text))
-			{
-				Luau.lua_pop(L, 1);
-				return 0;
-			}
-			if (text.Length > 30)
-			{
-				Luau.lua_pop(L, 1);
-				return 0;
-			}
-			Luau.lua_pushstring(L, (string)args[0]);
-			if (useTable)
-			{
-				Luau.lua_createtable(L, args.Length, 0);
-			}
-			int i = 1;
-			while (i < args.Length)
-			{
-				object obj = args[i];
-				if (obj.IsType<double>())
+				if (args[0] is string text)
 				{
-					if (double.IsFinite((double)obj))
+					if (string.IsNullOrEmpty(text))
 					{
-						Luau.lua_pushnumber(L, (double)obj);
-						goto IL_399;
+						Luau.lua_pop(L, 1);
+						return 0;
 					}
-				}
-				else
-				{
-					if (obj.IsType<bool>())
+					if (text.Length > 30)
 					{
-						Luau.lua_pushboolean(L, (int)obj);
-						goto IL_399;
+						Luau.lua_pop(L, 1);
+						return 0;
 					}
-					if (obj.IsType<Vector3>())
+					Luau.lua_pushstring(L, (string)args[0]);
+					if (useTable)
 					{
-						Vector3 vector = (Vector3)obj;
-						vector.ClampMagnitudeSafe(10000000f);
-						*Luau.lua_class_push<Vector3>(L, "Vec3") = vector;
-						goto IL_399;
+						Luau.lua_createtable(L, args.Length, 0);
 					}
-					if (obj.IsType<Quaternion>())
+					for (int i = 1; i < args.Length; i++)
 					{
-						Quaternion quaternion = (Quaternion)obj;
-						if (float.IsFinite(quaternion.x) && float.IsFinite(quaternion.y) && float.IsFinite(quaternion.z) && float.IsFinite(quaternion.w))
+						object obj = args[i];
+						if (obj.IsType<double>())
 						{
-							*Luau.lua_class_push<Quaternion>(L, "Quat") = quaternion;
-							goto IL_399;
-						}
-					}
-					else if (obj.IsType<Player>())
-					{
-						int actorNumber = ((Player)obj).ActorNumber;
-						IntPtr ptr;
-						if (Bindings.LuauPlayerList.TryGetValue(actorNumber, out ptr))
-						{
-							Luau.lua_class_push(L, "Player", ptr);
-							goto IL_399;
-						}
-						NetPlayer netPlayer2 = (NetPlayer)obj;
-						if (netPlayer2 == null)
-						{
-							Luau.lua_pushnil(L);
-							goto IL_399;
-						}
-						Bindings.LuauPlayer* ptr2 = Luau.lua_class_push<Bindings.LuauPlayer>(L);
-						ptr2->PlayerID = netPlayer2.ActorNumber;
-						ptr2->PlayerName = netPlayer2.SanitizedNickName;
-						ptr2->PlayerMaterial = 0;
-						ptr2->IsMasterClient = netPlayer2.IsMasterClient;
-						RigContainer rigContainer;
-						VRRigCache.Instance.TryGetVrrig(netPlayer2, out rigContainer);
-						VRRig rig = rigContainer.Rig;
-						Bindings.LuauVRRigList[netPlayer2.ActorNumber] = rig;
-						Bindings.PlayerFunctions.UpdatePlayer(L, rig, ptr2);
-						Bindings.LuauPlayerList[netPlayer2.ActorNumber] = (IntPtr)((void*)ptr2);
-						goto IL_399;
-					}
-					else if (obj.IsType<Bindings.LuauAIAgent>())
-					{
-						int entityID = ((Bindings.LuauAIAgent)obj).EntityID;
-						IntPtr ptr3;
-						if (Bindings.LuauAIAgentList.TryGetValue(entityID, out ptr3))
-						{
-							Luau.lua_class_push(L, "AIAgent", ptr3);
-							goto IL_399;
-						}
-						bool flag = false;
-						if (Bindings.LuauAIAgentList.Count + Bindings.LuauGrabbablesList.Count == Constants.aiAgentLimit)
-						{
-							Debug.Log("[LuauVM::OnEvent] Custom Map AI Agent limit has already been reached!");
-						}
-						else
-						{
-							GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
-							if (entityManager.IsNotNull())
+							if (!double.IsFinite((double)obj))
 							{
-								GameEntityId entityIdFromNetId = entityManager.GetEntityIdFromNetId(entityID);
-								GameEntity gameEntity = entityManager.GetGameEntity(entityIdFromNetId);
-								if (gameEntity.IsNotNull() && gameEntity.gameObject.IsNotNull() && gameEntity.gameObject.GetComponent<GameAgent>() != null)
+								continue;
+							}
+							Luau.lua_pushnumber(L, (double)obj);
+						}
+						else if (obj.IsType<bool>())
+						{
+							Luau.lua_pushboolean(L, (int)obj);
+						}
+						else if (obj.IsType<Vector3>())
+						{
+							Vector3 vector = (Vector3)obj;
+							vector.ClampMagnitudeSafe(10000000f);
+							*Luau.lua_class_push<Vector3>(L, "Vec3") = vector;
+						}
+						else if (obj.IsType<Quaternion>())
+						{
+							Quaternion quaternion = (Quaternion)obj;
+							if (!float.IsFinite(quaternion.x) || !float.IsFinite(quaternion.y) || !float.IsFinite(quaternion.z) || !float.IsFinite(quaternion.w))
+							{
+								continue;
+							}
+							*Luau.lua_class_push<Quaternion>(L, "Quat") = quaternion;
+						}
+						else if (obj.IsType<Player>())
+						{
+							int actorNumber = ((Player)obj).ActorNumber;
+							if (Bindings.LuauPlayerList.TryGetValue(actorNumber, out var value))
+							{
+								Luau.lua_class_push(L, "Player", value);
+							}
+							else
+							{
+								NetPlayer netPlayer2 = (NetPlayer)obj;
+								if (netPlayer2 == null)
 								{
-									Bindings.LuauAIAgent* ptr4 = Luau.lua_class_push<Bindings.LuauAIAgent>(L);
-									Bindings.AIAgentFunctions.UpdateEntity(gameEntity, ptr4);
-									Bindings.LuauAIAgentList[entityID] = (IntPtr)((void*)ptr4);
-									flag = true;
+									Luau.lua_pushnil(L);
+								}
+								else
+								{
+									Bindings.LuauPlayer* ptr = Luau.lua_class_push<Bindings.LuauPlayer>(L);
+									ptr->PlayerID = netPlayer2.ActorNumber;
+									ptr->PlayerName = netPlayer2.SanitizedNickName;
+									ptr->PlayerMaterial = 0;
+									ptr->IsMasterClient = netPlayer2.IsMasterClient;
+									VRRigCache.Instance.TryGetVrrig(netPlayer2, out var playerRig);
+									VRRig rig = playerRig.Rig;
+									Bindings.LuauVRRigList[netPlayer2.ActorNumber] = rig;
+									Bindings.PlayerFunctions.UpdatePlayer(L, rig, ptr);
+									Bindings.LuauPlayerList[netPlayer2.ActorNumber] = (IntPtr)ptr;
 								}
 							}
 						}
-						if (!flag)
+						else if (obj.IsType<Bindings.LuauAIAgent>())
+						{
+							int entityID = ((Bindings.LuauAIAgent)obj).EntityID;
+							if (Bindings.LuauAIAgentList.TryGetValue(entityID, out var value2))
+							{
+								Luau.lua_class_push(L, "AIAgent", value2);
+							}
+							else
+							{
+								bool flag = false;
+								if (Bindings.LuauAIAgentList.Count + Bindings.LuauGrabbablesList.Count == GT_CustomMapSupportRuntime.Constants.aiAgentLimit)
+								{
+									Debug.Log("[LuauVM::OnEvent] Custom Map AI Agent limit has already been reached!");
+								}
+								else
+								{
+									GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
+									if (entityManager.IsNotNull())
+									{
+										GameEntityId entityIdFromNetId = entityManager.GetEntityIdFromNetId(entityID);
+										GameEntity gameEntity = entityManager.GetGameEntity(entityIdFromNetId);
+										if (gameEntity.IsNotNull() && gameEntity.gameObject.IsNotNull() && gameEntity.gameObject.GetComponent<GameAgent>() != null)
+										{
+											Bindings.LuauAIAgent* ptr2 = Luau.lua_class_push<Bindings.LuauAIAgent>(L);
+											Bindings.AIAgentFunctions.UpdateEntity(gameEntity, ptr2);
+											Bindings.LuauAIAgentList[entityID] = (IntPtr)ptr2;
+											flag = true;
+										}
+									}
+								}
+								if (!flag)
+								{
+									Luau.lua_pushnil(L);
+								}
+							}
+						}
+						else if (obj == null)
 						{
 							Luau.lua_pushnil(L);
-							goto IL_399;
 						}
-						goto IL_399;
-					}
-					else
-					{
-						if (obj == null)
+						if (useTable)
 						{
-							Luau.lua_pushnil(L);
-							goto IL_399;
+							Luau.lua_rawseti(L, -2, i);
 						}
-						goto IL_399;
 					}
-				}
-				IL_3A5:
-				i++;
-				continue;
-				IL_399:
-				if (useTable)
-				{
-					Luau.lua_rawseti(L, -2, i);
-					goto IL_3A5;
-				}
-				goto IL_3A5;
-			}
-			if (netPlayer != null)
-			{
-				int actorNumber2 = netPlayer.ActorNumber;
-				IntPtr ptr5;
-				if (Bindings.LuauPlayerList.TryGetValue(actorNumber2, out ptr5))
-				{
-					Luau.lua_class_push(L, "Player", ptr5);
-				}
-				else
-				{
-					NetPlayer netPlayer3 = netPlayer;
-					if (netPlayer3 == null)
+					if (netPlayer != null)
 					{
-						Luau.lua_pushnil(L);
+						int actorNumber2 = netPlayer.ActorNumber;
+						if (Bindings.LuauPlayerList.TryGetValue(actorNumber2, out var value3))
+						{
+							Luau.lua_class_push(L, "Player", value3);
+						}
+						else
+						{
+							NetPlayer netPlayer3 = netPlayer;
+							if (netPlayer3 == null)
+							{
+								Luau.lua_pushnil(L);
+							}
+							else
+							{
+								Bindings.LuauPlayer* ptr3 = Luau.lua_class_push<Bindings.LuauPlayer>(L);
+								ptr3->PlayerID = netPlayer3.ActorNumber;
+								ptr3->PlayerName = netPlayer3.SanitizedNickName;
+								ptr3->PlayerMaterial = 0;
+								ptr3->IsMasterClient = netPlayer3.IsMasterClient;
+								VRRigCache.Instance.TryGetVrrig(netPlayer3, out var playerRig2);
+								VRRig rig2 = playerRig2.Rig;
+								Bindings.LuauVRRigList[netPlayer3.ActorNumber] = rig2;
+								Bindings.PlayerFunctions.UpdatePlayer(L, rig2, ptr3);
+								Bindings.LuauPlayerList[netPlayer3.ActorNumber] = (IntPtr)ptr3;
+							}
+						}
+						return Luau.lua_pcall(L, 3, 0, 0);
 					}
-					else
-					{
-						Bindings.LuauPlayer* ptr6 = Luau.lua_class_push<Bindings.LuauPlayer>(L);
-						ptr6->PlayerID = netPlayer3.ActorNumber;
-						ptr6->PlayerName = netPlayer3.SanitizedNickName;
-						ptr6->PlayerMaterial = 0;
-						ptr6->IsMasterClient = netPlayer3.IsMasterClient;
-						RigContainer rigContainer2;
-						VRRigCache.Instance.TryGetVrrig(netPlayer3, out rigContainer2);
-						VRRig rig2 = rigContainer2.Rig;
-						Bindings.LuauVRRigList[netPlayer3.ActorNumber] = rig2;
-						Bindings.PlayerFunctions.UpdatePlayer(L, rig2, ptr6);
-						Bindings.LuauPlayerList[netPlayer3.ActorNumber] = (IntPtr)((void*)ptr6);
-					}
+					return Luau.lua_pcall(L, 2, 0, 0);
 				}
-				return Luau.lua_pcall(L, 3, 0, 0);
+				Luau.lua_pop(L, 1);
+				return 0;
 			}
-			return Luau.lua_pcall(L, 2, 0, 0);
+			Luau.lua_pop(L, 1);
+			return 0;
 		}
 		catch (Exception)
 		{
@@ -266,92 +258,74 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		return 0;
 	}
 
-	public static void ProcessEvents()
+	public unsafe static void ProcessEvents()
 	{
-		while (LuauVm.eventQueue.Count > 0)
+		while (eventQueue.Count > 0)
 		{
-			object[] args = LuauVm.eventQueue.Dequeue();
-			foreach (LuauScriptRunner luauScriptRunner in LuauScriptRunner.ScriptRunners)
+			object[] args = eventQueue.Dequeue();
+			foreach (LuauScriptRunner scriptRunner in LuauScriptRunner.ScriptRunners)
 			{
-				if (luauScriptRunner.ShouldTick)
+				if (scriptRunner.ShouldTick)
 				{
-					int status = LuauVm.SendEvent(luauScriptRunner.L, args, true);
-					luauScriptRunner.ShouldTick = !LuauScriptRunner.ErrorCheck(luauScriptRunner.L, status);
+					int status = SendEvent(scriptRunner.L, args);
+					scriptRunner.ShouldTick = !LuauScriptRunner.ErrorCheck(scriptRunner.L, status);
 				}
 			}
 		}
-		while (LuauVm.localEventQueue.Count > 0)
+		while (localEventQueue.Count > 0)
 		{
-			object[] args2 = LuauVm.localEventQueue.Dequeue();
-			foreach (LuauScriptRunner luauScriptRunner2 in LuauScriptRunner.ScriptRunners)
+			object[] args2 = localEventQueue.Dequeue();
+			foreach (LuauScriptRunner scriptRunner2 in LuauScriptRunner.ScriptRunners)
 			{
-				if (luauScriptRunner2.ShouldTick)
+				if (scriptRunner2.ShouldTick)
 				{
-					int status2 = LuauVm.SendEvent(luauScriptRunner2.L, args2, false);
-					luauScriptRunner2.ShouldTick = !LuauScriptRunner.ErrorCheck(luauScriptRunner2.L, status2);
+					int status2 = SendEvent(scriptRunner2.L, args2, useTable: false);
+					scriptRunner2.ShouldTick = !LuauScriptRunner.ErrorCheck(scriptRunner2.L, status2);
 				}
 			}
 		}
-		while (LuauVm.touchEventsQueue.Count > 0)
+		while (touchEventsQueue.Count > 0)
 		{
-			GameObject key = LuauVm.touchEventsQueue.Dequeue();
-			foreach (LuauScriptRunner luauScriptRunner3 in LuauScriptRunner.ScriptRunners)
+			GameObject key = touchEventsQueue.Dequeue();
+			foreach (LuauScriptRunner scriptRunner3 in LuauScriptRunner.ScriptRunners)
 			{
-				int rid;
-				if (luauScriptRunner3.ShouldTick && Bindings.LuauTriggerCallbacks.TryGetValue(key, out rid))
+				if (scriptRunner3.ShouldTick && Bindings.LuauTriggerCallbacks.TryGetValue(key, out var value))
 				{
-					Luau.lua_getref(luauScriptRunner3.L, rid);
-					if (Luau.lua_type(luauScriptRunner3.L, -1) == 7)
+					Luau.lua_getref(scriptRunner3.L, value);
+					if (Luau.lua_type(scriptRunner3.L, -1) == 7)
 					{
-						int status3 = Luau.lua_pcall(luauScriptRunner3.L, 0, 0, 0);
-						luauScriptRunner3.ShouldTick = !LuauScriptRunner.ErrorCheck(luauScriptRunner3.L, status3);
+						int status3 = Luau.lua_pcall(scriptRunner3.L, 0, 0, 0);
+						scriptRunner3.ShouldTick = !LuauScriptRunner.ErrorCheck(scriptRunner3.L, status3);
 					}
 				}
 			}
 		}
 	}
 
-	protected override void Finalize()
+	~LuauVm()
 	{
 		try
 		{
-			foreach (GCHandle gchandle in LuauVm.Handles)
+			foreach (GCHandle handle in Handles)
 			{
-				gchandle.Free();
+				handle.Free();
 			}
-			if (BurstClassInfo.ClassList.InfoFields.Data.IsCreated)
+			if (!BurstClassInfo.ClassList.InfoFields.Data.IsCreated)
 			{
-				foreach (KVPair<int, BurstClassInfo.ClassInfo> kvpair in BurstClassInfo.ClassList.InfoFields.Data)
+				return;
+			}
+			foreach (KVPair<int, BurstClassInfo.ClassInfo> datum in BurstClassInfo.ClassList.InfoFields.Data)
+			{
+				if (datum.Value.FieldList.IsCreated)
 				{
-					if (kvpair.Value.FieldList.IsCreated)
-					{
-						kvpair.Value.FieldList.Dispose();
-					}
+					datum.Value.FieldList.Dispose();
 				}
-				BurstClassInfo.ClassList.InfoFields.Data.Dispose();
 			}
+			BurstClassInfo.ClassList.InfoFields.Data.Dispose();
 		}
 		catch (ObjectDisposedException message)
 		{
 			Debug.Log(message);
 		}
-		finally
-		{
-			base.Finalize();
-		}
 	}
-
-	public static List<object> ClassBuilders = new List<object>();
-
-	public static List<GCHandle> Handles = new List<GCHandle>();
-
-	private static Dictionary<int, float> callTimers = new Dictionary<int, float>();
-
-	private static float callCount = 25f;
-
-	public static Queue<object[]> eventQueue = new Queue<object[]>();
-
-	public static Queue<object[]> localEventQueue = new Queue<object[]>();
-
-	public static Queue<GameObject> touchEventsQueue = new Queue<GameObject>();
 }

@@ -1,51 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class PitchShiftAudioPlayer : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this._source == null)
-		{
-			this._source = base.GetComponent<AudioSource>();
-		}
-		if (this._pitch == null)
-		{
-			this._pitch = base.GetComponent<RangedFloat>();
-		}
-	}
-
-	private void OnEnable()
-	{
-		this._pitchMixVars.Rent(out this._pitchMix);
-		this._source.outputAudioMixerGroup = this._pitchMix.group;
-	}
-
-	private void OnDisable()
-	{
-		this._source.Stop();
-		this._source.outputAudioMixerGroup = null;
-		AudioMixVar pitchMix = this._pitchMix;
-		if (pitchMix == null)
-		{
-			return;
-		}
-		pitchMix.ReturnToPool();
-	}
-
-	private void Update()
-	{
-		if (this.apply)
-		{
-			this.ApplyPitch();
-		}
-	}
-
-	private void ApplyPitch()
-	{
-		this._pitchMix.value = this._pitch.curved;
-	}
-
 	public bool apply = true;
 
 	[SerializeField]
@@ -59,4 +15,42 @@ public class PitchShiftAudioPlayer : MonoBehaviour
 
 	[SerializeField]
 	private RangedFloat _pitch;
+
+	private void Awake()
+	{
+		if (_source == null)
+		{
+			_source = GetComponent<AudioSource>();
+		}
+		if (_pitch == null)
+		{
+			_pitch = GetComponent<RangedFloat>();
+		}
+	}
+
+	private void OnEnable()
+	{
+		_pitchMixVars.Rent(out _pitchMix);
+		_source.outputAudioMixerGroup = _pitchMix.group;
+	}
+
+	private void OnDisable()
+	{
+		_source.Stop();
+		_source.outputAudioMixerGroup = null;
+		_pitchMix?.ReturnToPool();
+	}
+
+	private void Update()
+	{
+		if (apply)
+		{
+			ApplyPitch();
+		}
+	}
+
+	private void ApplyPitch()
+	{
+		_pitchMix.value = _pitch.curved;
+	}
 }

@@ -1,30 +1,29 @@
-﻿using System;
+using System;
 
-namespace Voxels
+namespace Voxels;
+
+[Serializable]
+public struct GenerationParameters
 {
-	[Serializable]
-	public struct GenerationParameters
-	{
-		public MeshGenerationMode MeshGenerationMode;
+	public MeshGenerationMode MeshGenerationMode;
 
-		public float NoiseScale;
+	public float NoiseScale;
 
-		public float GroundLevel;
+	public float GroundLevel;
 
-		public float HeightScale;
+	public float HeightScale;
 
-		public float HeightCompensation;
+	public float HeightCompensation;
 
-		public int Octaves;
+	public int Octaves;
 
-		public float Persistence;
+	public float Persistence;
 
-		public float IsoLevel;
+	public float IsoLevel;
 
-		public int Seed;
+	public int Seed;
 
-		public float NormalThreshold;
+	public float NormalThreshold;
 
-		public bool AreaWeightedNormals;
-	}
+	public bool AreaWeightedNormals;
 }

@@ -1,155 +1,20 @@
-﻿using System;
+using System;
 using Drawing;
 using Unity.Mathematics;
 using UnityEngine;
 
 public class GizmoRenderer : MonoBehaviour
 {
-	private void Update()
-	{
-		this.RenderGizmos();
-	}
-
-	private unsafe void RenderGizmos()
-	{
-		if (this.renderMode == GizmoRenderer.RenderMode.Never)
-		{
-			return;
-		}
-		if (this.gizmos == null)
-		{
-			return;
-		}
-		int num = this.gizmos.Length;
-		if (num == 0)
-		{
-			return;
-		}
-		CommandBuilder arg = *Draw.ingame;
-		Transform transform = base.transform;
-		for (int i = 0; i < num; i++)
-		{
-			GizmoRenderer.GizmoInfo gizmoInfo = this.gizmos[i];
-			if (gizmoInfo.render)
-			{
-				Transform transform2 = gizmoInfo.target ? gizmoInfo.target : transform;
-				using (arg.InLocalSpace(transform2))
-				{
-					using (arg.WithLineWidth(gizmoInfo.lineWidth, false))
-					{
-						GizmoRenderer.gRenderFuncs[(int)gizmoInfo.type](arg, gizmoInfo);
-					}
-				}
-			}
-		}
-	}
-
-	private static void RenderPlaneWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.WirePlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
-	}
-
-	private static void RenderPlaneSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.SolidPlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
-	}
-
-	private static void RenderGridWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.WireGrid(gizmo.center, gizmo.rotation, gizmo.gridCells, gizmo.size.xz, gizmo.color);
-	}
-
-	private static void RenderBoxWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.WireBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
-	}
-
-	private static void RenderBoxSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.SolidBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
-	}
-
-	private static void RenderSphereWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.WireSphere(gizmo.center, gizmo.radius * 0.5f, gizmo.color);
-	}
-
-	private static void RenderSphereSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		Matrix4x4 matrix = Matrix4x4.TRS(gizmo.center, quaternion.identity, new float3(gizmo.radius));
-		using (draw.WithMatrix(matrix))
-		{
-			draw.SolidMesh(GizmoRenderer.gSphereMesh, gizmo.color);
-		}
-	}
-
-	private static void RenderLabel3D(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.Label3D(gizmo.center, gizmo.rotation, gizmo.text, gizmo.textSize * 0.1f, GizmoRenderer.gLabelAligns[(int)gizmo.textAlign], gizmo.color);
-	}
-
-	private static void RenderLabel2D(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
-	{
-		draw.Label2D(gizmo.center, gizmo.text, gizmo.textSize * gizmo.textPPU, GizmoRenderer.gLabelAligns[(int)gizmo.textAlign], gizmo.color);
-	}
-
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-	private static void InitializeOnLoad()
-	{
-		GizmoRenderer.gSphereMesh = Resources.GetBuiltinResource<Mesh>("New-Sphere.fbx");
-	}
-
-	private static Color GetRandomColor()
-	{
-		Color result = Color.HSVToRGB((float)(DateTime.UtcNow.Ticks % 65536L) / 65535f, 1f, 1f, true);
-		result.a = 1f;
-		return result;
-	}
-
-	public GizmoRenderer.RenderMode renderMode = GizmoRenderer.RenderMode.Always;
-
-	public bool includeInBuild;
-
-	public GizmoRenderer.GizmoInfo[] gizmos = new GizmoRenderer.GizmoInfo[0];
-
-	private static readonly Action<CommandBuilder, GizmoRenderer.GizmoInfo>[] gRenderFuncs = new Action<CommandBuilder, GizmoRenderer.GizmoInfo>[]
-	{
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderBoxWire),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderBoxSolid),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderSphereWire),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderSphereSolid),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderLabel3D),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderLabel2D),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderGridWire),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderPlaneSolid),
-		new Action<CommandBuilder, GizmoRenderer.GizmoInfo>(GizmoRenderer.RenderPlaneWire)
-	};
-
-	private static readonly LabelAlignment[] gLabelAligns = new LabelAlignment[]
-	{
-		LabelAlignment.Center,
-		LabelAlignment.MiddleRight,
-		LabelAlignment.MiddleLeft,
-		LabelAlignment.BottomCenter,
-		LabelAlignment.BottomRight,
-		LabelAlignment.BottomLeft,
-		LabelAlignment.TopRight,
-		LabelAlignment.TopLeft,
-		LabelAlignment.TopCenter
-	};
-
-	private static Mesh gSphereMesh;
-
 	[Serializable]
 	public class GizmoInfo
 	{
 		public bool render = true;
 
-		public GizmoRenderer.GizmoType type;
+		public GizmoType type;
 
-		public Color color = GizmoRenderer.GetRandomColor();
+		public Color color = GetRandomColor();
 
-		public uint lineWidth = 1U;
+		public uint lineWidth = 1u;
 
 		[Space]
 		public Transform target;
@@ -168,9 +33,9 @@ public class GizmoRenderer : MonoBehaviour
 
 		public float textSize = 4f;
 
-		public GizmoRenderer.TextAlign textAlign;
+		public TextAlign textAlign;
 
-		public uint textPPU = 24U;
+		public uint textPPU = 24u;
 
 		[Space]
 		public int2 gridCells = new int2(4);
@@ -179,10 +44,10 @@ public class GizmoRenderer : MonoBehaviour
 	[Flags]
 	public enum RenderMode : uint
 	{
-		Never = 0U,
-		InEditor = 1U,
-		InBuild = 2U,
-		Always = 3U
+		Never = 0u,
+		InEditor = 1u,
+		InBuild = 2u,
+		Always = 3u
 	}
 
 	public enum GizmoType : uint
@@ -209,5 +74,126 @@ public class GizmoRenderer : MonoBehaviour
 		TopRight,
 		TopLeft,
 		TopCenter
+	}
+
+	public RenderMode renderMode = RenderMode.Always;
+
+	public bool includeInBuild;
+
+	public GizmoInfo[] gizmos = new GizmoInfo[0];
+
+	private static readonly Action<CommandBuilder, GizmoInfo>[] gRenderFuncs = new Action<CommandBuilder, GizmoInfo>[9] { RenderBoxWire, RenderBoxSolid, RenderSphereWire, RenderSphereSolid, RenderLabel3D, RenderLabel2D, RenderGridWire, RenderPlaneSolid, RenderPlaneWire };
+
+	private static readonly LabelAlignment[] gLabelAligns = new LabelAlignment[9]
+	{
+		LabelAlignment.Center,
+		LabelAlignment.MiddleRight,
+		LabelAlignment.MiddleLeft,
+		LabelAlignment.BottomCenter,
+		LabelAlignment.BottomRight,
+		LabelAlignment.BottomLeft,
+		LabelAlignment.TopRight,
+		LabelAlignment.TopLeft,
+		LabelAlignment.TopCenter
+	};
+
+	private static Mesh gSphereMesh;
+
+	private void Update()
+	{
+		RenderGizmos();
+	}
+
+	private void RenderGizmos()
+	{
+		if (renderMode == RenderMode.Never || gizmos == null)
+		{
+			return;
+		}
+		int num = gizmos.Length;
+		if (num == 0)
+		{
+			return;
+		}
+		CommandBuilder ingame = Draw.ingame;
+		Transform transform = base.transform;
+		for (int i = 0; i < num; i++)
+		{
+			GizmoInfo gizmoInfo = gizmos[i];
+			if (!gizmoInfo.render)
+			{
+				continue;
+			}
+			Transform transform2 = (gizmoInfo.target ? gizmoInfo.target : transform);
+			using (ingame.InLocalSpace(transform2))
+			{
+				using (ingame.WithLineWidth(gizmoInfo.lineWidth, automaticJoins: false))
+				{
+					gRenderFuncs[(uint)gizmoInfo.type](ingame, gizmoInfo);
+				}
+			}
+		}
+	}
+
+	private static void RenderPlaneWire(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.WirePlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
+	}
+
+	private static void RenderPlaneSolid(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.SolidPlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
+	}
+
+	private static void RenderGridWire(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.WireGrid(gizmo.center, gizmo.rotation, gizmo.gridCells, gizmo.size.xz, gizmo.color);
+	}
+
+	private static void RenderBoxWire(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.WireBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
+	}
+
+	private static void RenderBoxSolid(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.SolidBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
+	}
+
+	private static void RenderSphereWire(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.WireSphere(gizmo.center, gizmo.radius * 0.5f, gizmo.color);
+	}
+
+	private static void RenderSphereSolid(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		Matrix4x4 matrix = Matrix4x4.TRS(gizmo.center, quaternion.identity, new float3(gizmo.radius));
+		using (draw.WithMatrix(matrix))
+		{
+			draw.SolidMesh(gSphereMesh, gizmo.color);
+		}
+	}
+
+	private static void RenderLabel3D(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.Label3D(gizmo.center, gizmo.rotation, gizmo.text, gizmo.textSize * 0.1f, gLabelAligns[(uint)gizmo.textAlign], gizmo.color);
+	}
+
+	private static void RenderLabel2D(CommandBuilder draw, GizmoInfo gizmo)
+	{
+		draw.Label2D(gizmo.center, gizmo.text, gizmo.textSize * (float)gizmo.textPPU, gLabelAligns[(uint)gizmo.textAlign], gizmo.color);
+	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+	private static void InitializeOnLoad()
+	{
+		gSphereMesh = Resources.GetBuiltinResource<Mesh>("New-Sphere.fbx");
+	}
+
+	private static Color GetRandomColor()
+	{
+		Color result = Color.HSVToRGB((float)(DateTime.UtcNow.Ticks % 65536) / 65535f, 1f, 1f, hdr: true);
+		result.a = 1f;
+		return result;
 	}
 }

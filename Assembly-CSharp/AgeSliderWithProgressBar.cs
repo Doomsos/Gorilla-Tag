@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,215 +6,15 @@ using UnityEngine.UI;
 
 public class AgeSliderWithProgressBar : MonoBehaviourTick
 {
-	public AgeSliderWithProgressBar.SliderHeldEvent onHoldComplete
+	[Serializable]
+	public class SliderHeldEvent : UnityEvent<int>
 	{
-		get
-		{
-			return this.m_OnHoldComplete;
-		}
-		set
-		{
-			this.m_OnHoldComplete = value;
-		}
-	}
-
-	public bool AdjustAge
-	{
-		get
-		{
-			return this._adjustAge;
-		}
-	}
-
-	public bool ControllerActive
-	{
-		get
-		{
-			return this.controllerActive;
-		}
-		set
-		{
-			if (value)
-			{
-				ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-			}
-			else
-			{
-				ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-			}
-			this.controllerActive = value;
-		}
-	}
-
-	public string LockMessage
-	{
-		get
-		{
-			return this._lockMessage;
-		}
-		set
-		{
-			this._lockMessage = value;
-		}
-	}
-
-	public int CurrentAge
-	{
-		get
-		{
-			return this._currentAge;
-		}
-	}
-
-	private void Awake()
-	{
-		if (this._messageText)
-		{
-			this._originalText = this._messageText.text;
-		}
-	}
-
-	public void SetOriginalText(string text)
-	{
-		this._originalText = text;
-	}
-
-	private new void OnEnable()
-	{
-		base.OnEnable();
-		if (this._progressBarContainer != null && this.progressBarFill != null)
-		{
-			this.progressBarFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
-		}
-		if (this._ageValueTxt)
-		{
-			this._ageValueTxt.text = ((this._currentAge > 0) ? this._currentAge.ToString() : "?");
-		}
-	}
-
-	public override void Tick()
-	{
-		if (!this._progressBarContainer)
-		{
-			return;
-		}
-		if (!this.ControllerActive)
-		{
-			return;
-		}
-		if (!this._lockMessage.IsNullOrEmpty())
-		{
-			this.progress = 0f;
-			if (this._messageText)
-			{
-				this._messageText.text = this.LockMessage;
-			}
-		}
-		else
-		{
-			if (this._messageText)
-			{
-				this._messageText.text = this._originalText;
-			}
-			if ((double)this.progress == 1.0)
-			{
-				this.m_OnHoldComplete.Invoke(this._currentAge);
-				this.progress = 0f;
-			}
-			if (ControllerBehaviour.Instance.ButtonDown && this._progressBarContainer != null && (this._currentAge > 0 || !this.AdjustAge))
-			{
-				this.progress += Time.deltaTime / this.holdTime;
-				this.progress = Mathf.Clamp01(this.progress);
-			}
-			else
-			{
-				this.progress = 0f;
-			}
-		}
-		if (this._progressBarContainer != null)
-		{
-			this.progressBarFill.rectTransform.localScale = new Vector3(this.progress, 1f, 1f);
-		}
-	}
-
-	private void PostUpdate()
-	{
-		if (this.ControllerActive && this._ageValueTxt && this._ageSlidable && !this._incrementButtonsLockingSlider)
-		{
-			if (ControllerBehaviour.Instance.IsLeftStick)
-			{
-				this._currentAge = Mathf.Clamp(this._currentAge - 1, 0, this._maxAge);
-				if (this._currentAge > 0 && this._currentAge < this._maxAge)
-				{
-					HandRayController.Instance.PulseActiveHandray(this._stickVibrationStrength, this._stickVibrationDuration);
-				}
-			}
-			if (ControllerBehaviour.Instance.IsRightStick)
-			{
-				this._currentAge = Mathf.Clamp(this._currentAge + 1, 0, this._maxAge);
-				if (this._currentAge > 0 && this._currentAge < this._maxAge)
-				{
-					HandRayController.Instance.PulseActiveHandray(this._stickVibrationStrength, this._stickVibrationDuration);
-				}
-			}
-		}
-		if (this._ageValueTxt)
-		{
-			this._ageValueTxt.text = this.GetAgeString();
-			if (this._progressBarContainer != null)
-			{
-				this._progressBarContainer.SetActive(this._currentAge > 0);
-			}
-		}
-	}
-
-	public void EnableEditing()
-	{
-		this._ageSlidable = true;
-	}
-
-	public void DisableEditing()
-	{
-		this._ageSlidable = false;
-	}
-
-	public string GetAgeString()
-	{
-		if (this._confirmButton)
-		{
-			this._confirmButton.interactable = true;
-		}
-		if (this._currentAge == 0)
-		{
-			if (this._confirmButton)
-			{
-				this._confirmButton.interactable = false;
-			}
-			return "?";
-		}
-		if (this._currentAge == this._maxAge)
-		{
-			return this._maxAge.ToString() + "+";
-		}
-		return this._currentAge.ToString();
-	}
-
-	public void ForceAddAge(int number)
-	{
-		this._incrementButtonsLockingSlider = true;
-		this._currentAge = Math.Min(this._currentAge + number, this._maxAge);
-	}
-
-	public void ForceSubtractAge(int number)
-	{
-		this._incrementButtonsLockingSlider = true;
-		this._currentAge = Math.Max(this._currentAge - number, 1);
 	}
 
 	private const int MIN_AGE = 13;
 
 	[SerializeField]
-	private AgeSliderWithProgressBar.SliderHeldEvent m_OnHoldComplete = new AgeSliderWithProgressBar.SliderHeldEvent();
+	private SliderHeldEvent m_OnHoldComplete = new SliderHeldEvent();
 
 	[SerializeField]
 	private bool _adjustAge;
@@ -262,8 +62,192 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 
 	private float progress;
 
-	[Serializable]
-	public class SliderHeldEvent : UnityEvent<int>
+	public SliderHeldEvent onHoldComplete
 	{
+		get
+		{
+			return m_OnHoldComplete;
+		}
+		set
+		{
+			m_OnHoldComplete = value;
+		}
+	}
+
+	public bool AdjustAge => _adjustAge;
+
+	public bool ControllerActive
+	{
+		get
+		{
+			return controllerActive;
+		}
+		set
+		{
+			if (value)
+			{
+				ControllerBehaviour.Instance.OnAction += PostUpdate;
+			}
+			else
+			{
+				ControllerBehaviour.Instance.OnAction -= PostUpdate;
+			}
+			controllerActive = value;
+		}
+	}
+
+	public string LockMessage
+	{
+		get
+		{
+			return _lockMessage;
+		}
+		set
+		{
+			_lockMessage = value;
+		}
+	}
+
+	public int CurrentAge => _currentAge;
+
+	private void Awake()
+	{
+		if ((bool)_messageText)
+		{
+			_originalText = _messageText.text;
+		}
+	}
+
+	public void SetOriginalText(string text)
+	{
+		_originalText = text;
+	}
+
+	private new void OnEnable()
+	{
+		base.OnEnable();
+		if (_progressBarContainer != null && progressBarFill != null)
+		{
+			progressBarFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
+		}
+		if ((bool)_ageValueTxt)
+		{
+			_ageValueTxt.text = ((_currentAge > 0) ? _currentAge.ToString() : "?");
+		}
+	}
+
+	public override void Tick()
+	{
+		if (!_progressBarContainer || !ControllerActive)
+		{
+			return;
+		}
+		if (!_lockMessage.IsNullOrEmpty())
+		{
+			progress = 0f;
+			if ((bool)_messageText)
+			{
+				_messageText.text = LockMessage;
+			}
+		}
+		else
+		{
+			if ((bool)_messageText)
+			{
+				_messageText.text = _originalText;
+			}
+			if ((double)progress == 1.0)
+			{
+				m_OnHoldComplete.Invoke(_currentAge);
+				progress = 0f;
+			}
+			if (ControllerBehaviour.Instance.ButtonDown && _progressBarContainer != null && (_currentAge > 0 || !AdjustAge))
+			{
+				progress += Time.deltaTime / holdTime;
+				progress = Mathf.Clamp01(progress);
+			}
+			else
+			{
+				progress = 0f;
+			}
+		}
+		if (_progressBarContainer != null)
+		{
+			progressBarFill.rectTransform.localScale = new Vector3(progress, 1f, 1f);
+		}
+	}
+
+	private void PostUpdate()
+	{
+		if (ControllerActive && (bool)_ageValueTxt && _ageSlidable && !_incrementButtonsLockingSlider)
+		{
+			if (ControllerBehaviour.Instance.IsLeftStick)
+			{
+				_currentAge = Mathf.Clamp(_currentAge - 1, 0, _maxAge);
+				if (_currentAge > 0 && _currentAge < _maxAge)
+				{
+					HandRayController.Instance.PulseActiveHandray(_stickVibrationStrength, _stickVibrationDuration);
+				}
+			}
+			if (ControllerBehaviour.Instance.IsRightStick)
+			{
+				_currentAge = Mathf.Clamp(_currentAge + 1, 0, _maxAge);
+				if (_currentAge > 0 && _currentAge < _maxAge)
+				{
+					HandRayController.Instance.PulseActiveHandray(_stickVibrationStrength, _stickVibrationDuration);
+				}
+			}
+		}
+		if ((bool)_ageValueTxt)
+		{
+			_ageValueTxt.text = GetAgeString();
+			if (_progressBarContainer != null)
+			{
+				_progressBarContainer.SetActive(_currentAge > 0);
+			}
+		}
+	}
+
+	public void EnableEditing()
+	{
+		_ageSlidable = true;
+	}
+
+	public void DisableEditing()
+	{
+		_ageSlidable = false;
+	}
+
+	public string GetAgeString()
+	{
+		if ((bool)_confirmButton)
+		{
+			_confirmButton.interactable = true;
+		}
+		if (_currentAge == 0)
+		{
+			if ((bool)_confirmButton)
+			{
+				_confirmButton.interactable = false;
+			}
+			return "?";
+		}
+		if (_currentAge == _maxAge)
+		{
+			return _maxAge + "+";
+		}
+		return _currentAge.ToString();
+	}
+
+	public void ForceAddAge(int number)
+	{
+		_incrementButtonsLockingSlider = true;
+		_currentAge = Math.Min(_currentAge + number, _maxAge);
+	}
+
+	public void ForceSubtractAge(int number)
+	{
+		_incrementButtonsLockingSlider = true;
+		_currentAge = Math.Max(_currentAge - number, 1);
 	}
 }

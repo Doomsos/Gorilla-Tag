@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,119 +5,6 @@ using UnityEngine.Playables;
 
 public class GreyZoneSummoner : MonoBehaviour
 {
-	public Vector3 SummoningFocusPoint
-	{
-		get
-		{
-			return this.summoningFocusPoint.position;
-		}
-	}
-
-	public float SummonerMaxDistance
-	{
-		get
-		{
-			return this.areaTriggerCollider.radius + 1f;
-		}
-	}
-
-	private void OnEnable()
-	{
-		this.greyZoneManager = GreyZoneManager.Instance;
-		if (this.greyZoneManager == null)
-		{
-			return;
-		}
-		this.greyZoneManager.RegisterSummoner(this);
-		this.areaTriggerNotifier.TriggerEnterEvent += this.ColliderEnteredArea;
-		this.areaTriggerNotifier.TriggerExitEvent += this.ColliderExitedArea;
-	}
-
-	private void OnDisable()
-	{
-		if (GreyZoneManager.Instance != null)
-		{
-			GreyZoneManager.Instance.DeregisterSummoner(this);
-		}
-		this.areaTriggerNotifier.TriggerEnterEvent -= this.ColliderEnteredArea;
-		this.areaTriggerNotifier.TriggerExitEvent -= this.ColliderExitedArea;
-	}
-
-	public void UpdateProgressFeedback(bool greyZoneAvailable)
-	{
-		if (this.greyZoneManager == null)
-		{
-			return;
-		}
-		if (greyZoneAvailable && !this.candlesParent.gameObject.activeSelf)
-		{
-			this.candlesParent.gameObject.SetActive(true);
-		}
-		this.candlesTimeline.time = (double)Mathf.Clamp01(this.greyZoneManager.SummoningProgress) * this.candlesTimeline.duration;
-		this.candlesTimeline.Evaluate();
-		if (!this.greyZoneManager.GreyZoneActive)
-		{
-			float value = (float)this.summoningTones.Count * this.greyZoneManager.SummoningProgress;
-			for (int i = 0; i < this.summoningTones.Count; i++)
-			{
-				float num = Mathf.InverseLerp((float)i, (float)i + 1f + this.summoningTonesFadeOverlap, value);
-				this.summoningTones[i].volume = num * this.summoningTonesMaxVolume;
-			}
-		}
-		this.greyZoneActivationButton.isOn = this.greyZoneManager.GreyZoneActive;
-		this.greyZoneActivationButton.UpdateColor();
-		for (int j = 0; j < this.greyZoneGravityFactorButtons.Count; j++)
-		{
-			this.greyZoneGravityFactorButtons[j].isOn = (this.greyZoneManager.GravityFactorSelection == j);
-			this.greyZoneGravityFactorButtons[j].UpdateColor();
-		}
-	}
-
-	public void OnGreyZoneActivated()
-	{
-		base.StopAllCoroutines();
-		base.StartCoroutine(this.FadeOutSummoningTones());
-	}
-
-	private IEnumerator FadeOutSummoningTones()
-	{
-		float fadeStartTime = Time.time;
-		float fadeRate = 1f / this.summoningTonesFadeTime;
-		while (Time.time < fadeStartTime + this.summoningTonesFadeTime)
-		{
-			for (int i = 0; i < this.summoningTones.Count; i++)
-			{
-				this.summoningTones[i].volume = Mathf.MoveTowards(this.summoningTones[i].volume, 0f, this.summoningTonesMaxVolume * fadeRate * Time.deltaTime);
-			}
-			yield return null;
-		}
-		for (int j = 0; j < this.summoningTones.Count; j++)
-		{
-			this.summoningTones[j].volume = 0f;
-		}
-		yield break;
-	}
-
-	public void ColliderEnteredArea(TriggerEventNotifier notifier, Collider other)
-	{
-		ZoneEntityBSP component = other.GetComponent<ZoneEntityBSP>();
-		VRRig vrrig = (component != null) ? component.entityRig : null;
-		if (vrrig != null && this.greyZoneManager != null)
-		{
-			this.greyZoneManager.VRRigEnteredSummonerProximity(vrrig, this);
-		}
-	}
-
-	public void ColliderExitedArea(TriggerEventNotifier notifier, Collider other)
-	{
-		ZoneEntityBSP component = other.GetComponent<ZoneEntityBSP>();
-		VRRig vrrig = (component != null) ? component.entityRig : null;
-		if (vrrig != null && this.greyZoneManager != null)
-		{
-			this.greyZoneManager.VRRigExitedSummonerProximity(vrrig, this);
-		}
-	}
-
 	[SerializeField]
 	private Transform summoningFocusPoint;
 
@@ -153,4 +39,103 @@ public class GreyZoneSummoner : MonoBehaviour
 	private List<GorillaPressableButton> greyZoneGravityFactorButtons = new List<GorillaPressableButton>();
 
 	private GreyZoneManager greyZoneManager;
+
+	public Vector3 SummoningFocusPoint => summoningFocusPoint.position;
+
+	public float SummonerMaxDistance => areaTriggerCollider.radius + 1f;
+
+	private void OnEnable()
+	{
+		greyZoneManager = GreyZoneManager.Instance;
+		if (!(greyZoneManager == null))
+		{
+			greyZoneManager.RegisterSummoner(this);
+			areaTriggerNotifier.TriggerEnterEvent += ColliderEnteredArea;
+			areaTriggerNotifier.TriggerExitEvent += ColliderExitedArea;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (GreyZoneManager.Instance != null)
+		{
+			GreyZoneManager.Instance.DeregisterSummoner(this);
+		}
+		areaTriggerNotifier.TriggerEnterEvent -= ColliderEnteredArea;
+		areaTriggerNotifier.TriggerExitEvent -= ColliderExitedArea;
+	}
+
+	public void UpdateProgressFeedback(bool greyZoneAvailable)
+	{
+		if (greyZoneManager == null)
+		{
+			return;
+		}
+		if (greyZoneAvailable && !candlesParent.gameObject.activeSelf)
+		{
+			candlesParent.gameObject.SetActive(value: true);
+		}
+		candlesTimeline.time = (double)Mathf.Clamp01(greyZoneManager.SummoningProgress) * candlesTimeline.duration;
+		candlesTimeline.Evaluate();
+		if (!greyZoneManager.GreyZoneActive)
+		{
+			float value = (float)summoningTones.Count * greyZoneManager.SummoningProgress;
+			for (int i = 0; i < summoningTones.Count; i++)
+			{
+				float num = Mathf.InverseLerp(i, (float)i + 1f + summoningTonesFadeOverlap, value);
+				summoningTones[i].volume = num * summoningTonesMaxVolume;
+			}
+		}
+		greyZoneActivationButton.isOn = greyZoneManager.GreyZoneActive;
+		greyZoneActivationButton.UpdateColor();
+		for (int j = 0; j < greyZoneGravityFactorButtons.Count; j++)
+		{
+			greyZoneGravityFactorButtons[j].isOn = greyZoneManager.GravityFactorSelection == j;
+			greyZoneGravityFactorButtons[j].UpdateColor();
+		}
+	}
+
+	public void OnGreyZoneActivated()
+	{
+		StopAllCoroutines();
+		StartCoroutine(FadeOutSummoningTones());
+	}
+
+	private IEnumerator FadeOutSummoningTones()
+	{
+		float fadeStartTime = Time.time;
+		float fadeRate = 1f / summoningTonesFadeTime;
+		while (Time.time < fadeStartTime + summoningTonesFadeTime)
+		{
+			for (int i = 0; i < summoningTones.Count; i++)
+			{
+				summoningTones[i].volume = Mathf.MoveTowards(summoningTones[i].volume, 0f, summoningTonesMaxVolume * fadeRate * Time.deltaTime);
+			}
+			yield return null;
+		}
+		for (int j = 0; j < summoningTones.Count; j++)
+		{
+			summoningTones[j].volume = 0f;
+		}
+	}
+
+	public void ColliderEnteredArea(TriggerEventNotifier notifier, Collider other)
+	{
+		ZoneEntityBSP component = other.GetComponent<ZoneEntityBSP>();
+		VRRig vRRig = ((component != null) ? component.entityRig : null);
+		if (vRRig != null && greyZoneManager != null)
+		{
+			greyZoneManager.VRRigEnteredSummonerProximity(vRRig, this);
+		}
+	}
+
+	public void ColliderExitedArea(TriggerEventNotifier notifier, Collider other)
+	{
+		ZoneEntityBSP component = other.GetComponent<ZoneEntityBSP>();
+		VRRig vRRig = ((component != null) ? component.entityRig : null);
+		if (vRRig != null && greyZoneManager != null)
+		{
+			greyZoneManager.VRRigExitedSummonerProximity(vRRig, this);
+		}
+	}
 }

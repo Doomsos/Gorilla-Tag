@@ -1,133 +1,15 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using GorillaGameModes;
 using GorillaLocomotion;
 using GorillaNetworking;
 using Photon.Pun;
-using Photon.Realtime;
 using PlayFab;
 using UnityEngine;
 
 public class Gorillanalytics : MonoBehaviour
 {
-	private IEnumerator Start()
-	{
-		PlayFabTitleDataCache.Instance.GetTitleData("GorillanalyticsChance", delegate(string s)
-		{
-			double num;
-			if (double.TryParse(s, out num))
-			{
-				this.oneOverChance = num;
-			}
-		}, delegate(PlayFabError e)
-		{
-		}, false);
-		for (;;)
-		{
-			yield return new WaitForSecondsRealtime(this.interval);
-			if ((double)Random.Range(0f, 1f) < 1.0 / this.oneOverChance && PlayFabClientAPI.IsClientLoggedIn())
-			{
-				this.UploadGorillanalytics();
-			}
-		}
-		yield break;
-	}
-
-	private void UploadGorillanalytics()
-	{
-		try
-		{
-			string map;
-			string mode;
-			string queue;
-			this.GetMapModeQueue(out map, out mode, out queue);
-			Vector3 position = GTPlayer.Instance.headCollider.transform.position;
-			Vector3 averagedVelocity = GTPlayer.Instance.AveragedVelocity;
-			this.uploadData.version = NetworkSystemConfig.AppVersion;
-			this.uploadData.upload_chance = this.oneOverChance;
-			this.uploadData.map = map;
-			this.uploadData.mode = mode;
-			this.uploadData.queue = queue;
-			this.uploadData.player_count = (int)(PhotonNetwork.InRoom ? PhotonNetwork.CurrentRoom.PlayerCount : 0);
-			this.uploadData.pos_x = position.x;
-			this.uploadData.pos_y = position.y;
-			this.uploadData.pos_z = position.z;
-			this.uploadData.vel_x = averagedVelocity.x;
-			this.uploadData.vel_y = averagedVelocity.y;
-			this.uploadData.vel_z = averagedVelocity.z;
-			this.uploadData.cosmetics_owned = string.Join(";", from c in CosmeticsController.instance.unlockedCosmetics
-			select c.itemName);
-			this.uploadData.cosmetics_worn = string.Join(";", from c in CosmeticsController.instance.currentWornSet.items
-			select c.itemName);
-			GorillaServer.Instance.UploadGorillanalytics(this.uploadData);
-		}
-		catch (Exception message)
-		{
-			Debug.LogError(message);
-		}
-	}
-
-	private void GetMapModeQueue(out string map, out string mode, out string queue)
-	{
-		if (!PhotonNetwork.InRoom)
-		{
-			map = "none";
-			mode = "none";
-			queue = "none";
-			return;
-		}
-		object obj = null;
-		Room currentRoom = PhotonNetwork.CurrentRoom;
-		if (currentRoom != null)
-		{
-			currentRoom.CustomProperties.TryGetValue("gameMode", out obj);
-		}
-		string gameMode = ((obj != null) ? obj.ToString() : null) ?? "";
-		GTZone gtzone = GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone;
-		if (gtzone == GTZone.cityNoBuildings || gtzone == GTZone.cityWithSkyJungle || gtzone == GTZone.mall)
-		{
-			gtzone = GTZone.city;
-		}
-		if (gtzone == GTZone.tutorial)
-		{
-			gtzone = GTZone.forest;
-		}
-		if (gtzone == GTZone.ghostReactorTunnel)
-		{
-			gtzone = GTZone.ghostReactor;
-		}
-		map = gtzone.ToString().ToLower();
-		if (NetworkSystem.Instance.SessionIsPrivate)
-		{
-			map += "private";
-		}
-		int num = gameMode.LastIndexOf('|');
-		if (num != -1)
-		{
-			string modeTestString = gameMode.Substring(num + 1).ToUpper();
-			mode = (this.mapModeQueueSet.modes.FirstOrDefault((string s) => modeTestString == s) ?? "unknown");
-		}
-		else
-		{
-			string modeTestString = gameMode.ToUpper();
-			mode = (this.mapModeQueueSet.modes.FirstOrDefault((string s) => modeTestString.EndsWith(s)) ?? "unknown");
-		}
-		queue = (this.mapModeQueueSet.queues.FirstOrDefault((string s) => gameMode.Contains(s)) ?? "unknown");
-	}
-
-	public float interval = 60f;
-
-	public double oneOverChance = 4320.0;
-
-	public PhotonNetworkController photonNetworkController;
-
-	public MapModeQueueSet mapModeQueueSet;
-
-	public GameModeZoneMapping gameModeData;
-
-	private readonly Gorillanalytics.UploadData uploadData = new Gorillanalytics.UploadData();
-
 	private class UploadData
 	{
 		public string version;
@@ -157,5 +39,112 @@ public class Gorillanalytics : MonoBehaviour
 		public string cosmetics_owned;
 
 		public string cosmetics_worn;
+	}
+
+	public float interval = 60f;
+
+	public double oneOverChance = 4320.0;
+
+	public PhotonNetworkController photonNetworkController;
+
+	public MapModeQueueSet mapModeQueueSet;
+
+	public GameModeZoneMapping gameModeData;
+
+	private readonly UploadData uploadData = new UploadData();
+
+	private IEnumerator Start()
+	{
+		PlayFabTitleDataCache.Instance.GetTitleData("GorillanalyticsChance", delegate(string s)
+		{
+			if (double.TryParse(s, out var result))
+			{
+				oneOverChance = result;
+			}
+		}, delegate
+		{
+		});
+		while (true)
+		{
+			yield return new WaitForSecondsRealtime(interval);
+			if ((double)UnityEngine.Random.Range(0f, 1f) < 1.0 / oneOverChance && PlayFabClientAPI.IsClientLoggedIn())
+			{
+				UploadGorillanalytics();
+			}
+		}
+	}
+
+	private void UploadGorillanalytics()
+	{
+		try
+		{
+			GetMapModeQueue(out var map, out var mode, out var queue);
+			Vector3 position = GTPlayer.Instance.headCollider.transform.position;
+			Vector3 averagedVelocity = GTPlayer.Instance.AveragedVelocity;
+			uploadData.version = NetworkSystemConfig.AppVersion;
+			uploadData.upload_chance = oneOverChance;
+			uploadData.map = map;
+			uploadData.mode = mode;
+			uploadData.queue = queue;
+			uploadData.player_count = (PhotonNetwork.InRoom ? PhotonNetwork.CurrentRoom.PlayerCount : 0);
+			uploadData.pos_x = position.x;
+			uploadData.pos_y = position.y;
+			uploadData.pos_z = position.z;
+			uploadData.vel_x = averagedVelocity.x;
+			uploadData.vel_y = averagedVelocity.y;
+			uploadData.vel_z = averagedVelocity.z;
+			uploadData.cosmetics_owned = string.Join(";", CosmeticsController.instance.unlockedCosmetics.Select((CosmeticsController.CosmeticItem c) => c.itemName));
+			uploadData.cosmetics_worn = string.Join(";", CosmeticsController.instance.currentWornSet.items.Select((CosmeticsController.CosmeticItem c) => c.itemName));
+			GorillaServer.Instance.UploadGorillanalytics(uploadData);
+		}
+		catch (Exception message)
+		{
+			Debug.LogError(message);
+		}
+	}
+
+	private void GetMapModeQueue(out string map, out string mode, out string queue)
+	{
+		if (!PhotonNetwork.InRoom)
+		{
+			map = "none";
+			mode = "none";
+			queue = "none";
+			return;
+		}
+		object value = null;
+		PhotonNetwork.CurrentRoom?.CustomProperties.TryGetValue("gameMode", out value);
+		string gameMode = value?.ToString() ?? "";
+		GTZone gTZone = GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone;
+		if (gTZone == GTZone.cityNoBuildings || gTZone == GTZone.cityWithSkyJungle || gTZone == GTZone.mall)
+		{
+			gTZone = GTZone.city;
+		}
+		if (gTZone == GTZone.tutorial)
+		{
+			gTZone = GTZone.forest;
+		}
+		if (gTZone == GTZone.ghostReactorTunnel)
+		{
+			gTZone = GTZone.ghostReactor;
+		}
+		map = gTZone.ToString().ToLower();
+		if (NetworkSystem.Instance.SessionIsPrivate)
+		{
+			map += "private";
+		}
+		int num = gameMode.LastIndexOf('|');
+		string modeTestString;
+		if (num != -1)
+		{
+			modeTestString = gameMode.Substring(num + 1).ToUpper();
+			mode = mapModeQueueSet.modes.FirstOrDefault((string s) => modeTestString == s) ?? "unknown";
+		}
+		else
+		{
+			modeTestString = gameMode.ToUpper();
+			mode = mapModeQueueSet.modes.FirstOrDefault((string s) => modeTestString.EndsWith(s)) ?? "unknown";
+		}
+		queue = mapModeQueueSet.queues.FirstOrDefault((string s) => gameMode.Contains(s)) ?? "unknown";
 	}
 }

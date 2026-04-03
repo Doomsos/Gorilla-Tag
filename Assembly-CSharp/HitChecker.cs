@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,22 +15,23 @@ public class HitChecker : MonoBehaviour
 			raycastHits[i] = nullHit;
 		}
 		collidersHitCount = Physics.SphereCastNonAlloc(handIndicator.lastPosition, sphereRadius, spherecastSweep.normalized, raycastHits, spherecastSweep.magnitude, layerMask, QueryTriggerInteraction.Collide);
-		if (collidersHitCount > 0)
+		if (collidersHitCount <= 0)
 		{
-			raycastHitList.Clear();
-			for (int j = 0; j < raycastHits.Length; j++)
+			return;
+		}
+		raycastHitList.Clear();
+		for (int j = 0; j < raycastHits.Length; j++)
+		{
+			if (raycastHits[j].collider != null)
 			{
-				if (raycastHits[j].collider != null)
-				{
-					raycastHitList.Add(raycastHits[j]);
-				}
+				raycastHitList.Add(raycastHits[j]);
 			}
 		}
 	}
 
 	public static bool CheckHandIn(ref bool anyHit, ref Collider[] colliderHit, float sphereRadius, int layerMask, ref GorillaTriggerColliderHandIndicator handIndicator, ref List<Collider> collidersToBeIn)
 	{
-		anyHit = (Physics.OverlapSphereNonAlloc(handIndicator.transform.position, sphereRadius, colliderHit, layerMask, QueryTriggerInteraction.Collide) > 0);
+		anyHit = Physics.OverlapSphereNonAlloc(handIndicator.transform.position, sphereRadius, colliderHit, layerMask, QueryTriggerInteraction.Collide) > 0;
 		if (anyHit)
 		{
 			anyHit = false;

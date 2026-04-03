@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+[Serializable]
+public struct AdditionalCustomProperty
 {
-	[Serializable]
-	public struct AdditionalCustomProperty
-	{
-		public string key;
+	public string key;
 
-		public string value;
-	}
+	public string value;
 }

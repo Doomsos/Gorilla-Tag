@@ -1,54 +1,53 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace LitJson
+namespace LitJson;
+
+internal struct ObjectMetadata
 {
-	internal struct ObjectMetadata
+	private Type element_type;
+
+	private bool is_dictionary;
+
+	private IDictionary<string, PropertyMetadata> properties;
+
+	public Type ElementType
 	{
-		public Type ElementType
+		get
 		{
-			get
+			if (element_type == null)
 			{
-				if (this.element_type == null)
-				{
-					return typeof(JsonData);
-				}
-				return this.element_type;
+				return typeof(JsonData);
 			}
-			set
-			{
-				this.element_type = value;
-			}
+			return element_type;
 		}
-
-		public bool IsDictionary
+		set
 		{
-			get
-			{
-				return this.is_dictionary;
-			}
-			set
-			{
-				this.is_dictionary = value;
-			}
+			element_type = value;
 		}
+	}
 
-		public IDictionary<string, PropertyMetadata> Properties
+	public bool IsDictionary
+	{
+		get
 		{
-			get
-			{
-				return this.properties;
-			}
-			set
-			{
-				this.properties = value;
-			}
+			return is_dictionary;
 		}
+		set
+		{
+			is_dictionary = value;
+		}
+	}
 
-		private Type element_type;
-
-		private bool is_dictionary;
-
-		private IDictionary<string, PropertyMetadata> properties;
+	public IDictionary<string, PropertyMetadata> Properties
+	{
+		get
+		{
+			return properties;
+		}
+		set
+		{
+			properties = value;
+		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 
 public class OnPlayChange_BaseAttribute : Attribute

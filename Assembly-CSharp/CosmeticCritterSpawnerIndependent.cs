@@ -1,15 +1,17 @@
-﻿using System;
-
 public class CosmeticCritterSpawnerIndependent : CosmeticCritterSpawner
 {
 	public virtual bool CanSpawnLocal()
 	{
-		return this.numCritters < this.maxCritters;
+		return numCritters < maxCritters;
 	}
 
 	public virtual bool CanSpawnRemote(double serverTime)
 	{
-		return this.numCritters < this.maxCritters && this.callLimiter.CheckCallServerTime(serverTime);
+		if (numCritters < maxCritters)
+		{
+			return callLimiter.CheckCallServerTime(serverTime);
+		}
+		return false;
 	}
 
 	protected override void OnEnable()

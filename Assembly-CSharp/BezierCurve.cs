@@ -1,37 +1,40 @@
-﻿using System;
 using UnityEngine;
 
 public class BezierCurve : MonoBehaviour
 {
+	public Transform referenceTransform;
+
+	public Vector3[] points;
+
 	public Vector3 GetPoint(float t)
 	{
-		Vector3 vector = (this.points.Length == 3) ? Bezier.GetPoint(this.points[0], this.points[1], this.points[2], t) : Bezier.GetPoint(this.points[0], this.points[1], this.points[2], this.points[3], t);
-		if (!this.referenceTransform)
+		Vector3 vector = ((points.Length == 3) ? Bezier.GetPoint(points[0], points[1], points[2], t) : Bezier.GetPoint(points[0], points[1], points[2], points[3], t));
+		if (!referenceTransform)
 		{
 			return vector;
 		}
-		return this.referenceTransform.TransformPoint(vector);
+		return referenceTransform.TransformPoint(vector);
 	}
 
 	public Vector3 GetVelocity(float t)
 	{
-		Vector3 vector = (this.points.Length == 3) ? Bezier.GetFirstDerivative(this.points[0], this.points[1], this.points[2], t) : Bezier.GetFirstDerivative(this.points[0], this.points[1], this.points[2], this.points[3], t);
-		if (!this.referenceTransform)
+		Vector3 vector = ((points.Length == 3) ? Bezier.GetFirstDerivative(points[0], points[1], points[2], t) : Bezier.GetFirstDerivative(points[0], points[1], points[2], points[3], t));
+		if (!referenceTransform)
 		{
 			return vector;
 		}
-		return this.referenceTransform.TransformPoint(vector) - this.referenceTransform.position;
+		return referenceTransform.TransformPoint(vector) - referenceTransform.position;
 	}
 
 	public Vector3 GetDirection(float t)
 	{
-		return this.GetVelocity(t).normalized;
+		return GetVelocity(t).normalized;
 	}
 
 	public void Reset()
 	{
-		this.referenceTransform = base.transform;
-		this.points = new Vector3[]
+		referenceTransform = base.transform;
+		points = new Vector3[4]
 		{
 			new Vector3(1f, 0f, 0f),
 			new Vector3(2f, 0f, 0f),
@@ -39,8 +42,4 @@ public class BezierCurve : MonoBehaviour
 			new Vector3(4f, 0f, 0f)
 		};
 	}
-
-	public Transform referenceTransform;
-
-	public Vector3[] points;
 }

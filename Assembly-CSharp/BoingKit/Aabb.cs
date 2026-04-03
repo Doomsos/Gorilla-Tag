@@ -1,188 +1,194 @@
-﻿using System;
 using UnityEngine;
 
-namespace BoingKit
+namespace BoingKit;
+
+public struct Aabb
 {
-	public struct Aabb
+	public Vector3 Min;
+
+	public Vector3 Max;
+
+	public float MinX
 	{
-		public float MinX
+		get
 		{
-			get
-			{
-				return this.Min.x;
-			}
-			set
-			{
-				this.Min.x = value;
-			}
+			return Min.x;
 		}
-
-		public float MinY
+		set
 		{
-			get
-			{
-				return this.Min.y;
-			}
-			set
-			{
-				this.Min.y = value;
-			}
+			Min.x = value;
 		}
+	}
 
-		public float MinZ
+	public float MinY
+	{
+		get
 		{
-			get
-			{
-				return this.Min.z;
-			}
-			set
-			{
-				this.Min.z = value;
-			}
+			return Min.y;
 		}
-
-		public float MaxX
+		set
 		{
-			get
-			{
-				return this.Max.x;
-			}
-			set
-			{
-				this.Max.x = value;
-			}
+			Min.y = value;
 		}
+	}
 
-		public float MaxY
+	public float MinZ
+	{
+		get
 		{
-			get
-			{
-				return this.Max.y;
-			}
-			set
-			{
-				this.Max.y = value;
-			}
+			return Min.z;
 		}
-
-		public float MaxZ
+		set
 		{
-			get
-			{
-				return this.Max.z;
-			}
-			set
-			{
-				this.Max.z = value;
-			}
+			Min.z = value;
 		}
+	}
 
-		public Vector3 Center
+	public float MaxX
+	{
+		get
 		{
-			get
-			{
-				return 0.5f * (this.Min + this.Max);
-			}
+			return Max.x;
 		}
-
-		public Vector3 Size
+		set
 		{
-			get
-			{
-				Vector3 vector = this.Max - this.Min;
-				vector.x = Mathf.Max(0f, vector.x);
-				vector.y = Mathf.Max(0f, vector.y);
-				vector.z = Mathf.Max(0f, vector.z);
-				return vector;
-			}
+			Max.x = value;
 		}
+	}
 
-		public static Aabb Empty
+	public float MaxY
+	{
+		get
 		{
-			get
-			{
-				return new Aabb(new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), new Vector3(float.MinValue, float.MinValue, float.MinValue));
-			}
+			return Max.y;
 		}
-
-		public static Aabb FromPoint(Vector3 p)
+		set
 		{
-			Aabb empty = Aabb.Empty;
-			empty.Include(p);
-			return empty;
+			Max.y = value;
 		}
+	}
 
-		public static Aabb FromPoints(Vector3 a, Vector3 b)
+	public float MaxZ
+	{
+		get
 		{
-			Aabb empty = Aabb.Empty;
-			empty.Include(a);
-			empty.Include(b);
-			return empty;
+			return Max.z;
 		}
-
-		public Aabb(Vector3 min, Vector3 max)
+		set
 		{
-			this.Min = min;
-			this.Max = max;
+			Max.z = value;
 		}
+	}
 
-		public void Include(Vector3 p)
+	public Vector3 Center => 0.5f * (Min + Max);
+
+	public Vector3 Size
+	{
+		get
 		{
-			this.MinX = Mathf.Min(this.MinX, p.x);
-			this.MinY = Mathf.Min(this.MinY, p.y);
-			this.MinZ = Mathf.Min(this.MinZ, p.z);
-			this.MaxX = Mathf.Max(this.MaxX, p.x);
-			this.MaxY = Mathf.Max(this.MaxY, p.y);
-			this.MaxZ = Mathf.Max(this.MaxZ, p.z);
+			Vector3 result = Max - Min;
+			result.x = Mathf.Max(0f, result.x);
+			result.y = Mathf.Max(0f, result.y);
+			result.z = Mathf.Max(0f, result.z);
+			return result;
 		}
+	}
 
-		public bool Contains(Vector3 p)
+	public static Aabb Empty => new Aabb(new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), new Vector3(float.MinValue, float.MinValue, float.MinValue));
+
+	public static Aabb FromPoint(Vector3 p)
+	{
+		Aabb empty = Empty;
+		empty.Include(p);
+		return empty;
+	}
+
+	public static Aabb FromPoints(Vector3 a, Vector3 b)
+	{
+		Aabb empty = Empty;
+		empty.Include(a);
+		empty.Include(b);
+		return empty;
+	}
+
+	public Aabb(Vector3 min, Vector3 max)
+	{
+		Min = min;
+		Max = max;
+	}
+
+	public void Include(Vector3 p)
+	{
+		MinX = Mathf.Min(MinX, p.x);
+		MinY = Mathf.Min(MinY, p.y);
+		MinZ = Mathf.Min(MinZ, p.z);
+		MaxX = Mathf.Max(MaxX, p.x);
+		MaxY = Mathf.Max(MaxY, p.y);
+		MaxZ = Mathf.Max(MaxZ, p.z);
+	}
+
+	public bool Contains(Vector3 p)
+	{
+		if (MinX <= p.x && MinY <= p.y && MinZ <= p.z && MaxX >= p.x && MaxY >= p.y)
 		{
-			return this.MinX <= p.x && this.MinY <= p.y && this.MinZ <= p.z && this.MaxX >= p.x && this.MaxY >= p.y && this.MaxZ >= p.z;
+			return MaxZ >= p.z;
 		}
+		return false;
+	}
 
-		public bool ContainsX(Vector3 p)
+	public bool ContainsX(Vector3 p)
+	{
+		if (MinX <= p.x)
 		{
-			return this.MinX <= p.x && this.MaxX >= p.x;
+			return MaxX >= p.x;
 		}
+		return false;
+	}
 
-		public bool ContainsY(Vector3 p)
+	public bool ContainsY(Vector3 p)
+	{
+		if (MinY <= p.y)
 		{
-			return this.MinY <= p.y && this.MaxY >= p.y;
+			return MaxY >= p.y;
 		}
+		return false;
+	}
 
-		public bool ContainsZ(Vector3 p)
+	public bool ContainsZ(Vector3 p)
+	{
+		if (MinZ <= p.z)
 		{
-			return this.MinZ <= p.z && this.MaxZ >= p.z;
+			return MaxZ >= p.z;
 		}
+		return false;
+	}
 
-		public bool Intersects(Aabb rhs)
+	public bool Intersects(Aabb rhs)
+	{
+		if (MinX <= rhs.MaxX && MinY <= rhs.MaxY && MinZ <= rhs.MaxZ && MaxX >= rhs.MinX && MaxY >= rhs.MinY)
 		{
-			return this.MinX <= rhs.MaxX && this.MinY <= rhs.MaxY && this.MinZ <= rhs.MaxZ && this.MaxX >= rhs.MinX && this.MaxY >= rhs.MinY && this.MaxZ >= rhs.MinZ;
+			return MaxZ >= rhs.MinZ;
 		}
+		return false;
+	}
 
-		public bool Intersects(ref BoingEffector.Params effector)
+	public bool Intersects(ref BoingEffector.Params effector)
+	{
+		if (!effector.Bits.IsBitSet(0))
 		{
-			if (!effector.Bits.IsBitSet(0))
-			{
-				return this.Intersects(Aabb.FromPoint(effector.CurrPosition).Expand(effector.Radius));
-			}
-			return this.Intersects(Aabb.FromPoints(effector.PrevPosition, effector.CurrPosition).Expand(effector.Radius));
+			return Intersects(FromPoint(effector.CurrPosition).Expand(effector.Radius));
 		}
+		return Intersects(FromPoints(effector.PrevPosition, effector.CurrPosition).Expand(effector.Radius));
+	}
 
-		public Aabb Expand(float amount)
-		{
-			this.MinX -= amount;
-			this.MinY -= amount;
-			this.MinZ -= amount;
-			this.MaxX += amount;
-			this.MaxY += amount;
-			this.MaxZ += amount;
-			return this;
-		}
-
-		public Vector3 Min;
-
-		public Vector3 Max;
+	public Aabb Expand(float amount)
+	{
+		MinX -= amount;
+		MinY -= amount;
+		MinZ -= amount;
+		MaxX += amount;
+		MaxY += amount;
+		MaxZ += amount;
+		return this;
 	}
 }

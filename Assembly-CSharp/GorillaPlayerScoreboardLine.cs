@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaNetworking;
 using GorillaTagScripts.VirtualStumpCustomMaps;
@@ -9,342 +9,7 @@ using UnityEngine.UI;
 
 public class GorillaPlayerScoreboardLine : MonoBehaviour
 {
-	public void Start()
-	{
-		this.emptyRigCount = 0;
-		this.reportedCheating = false;
-		this.reportedHateSpeech = false;
-		this.reportedToxicity = false;
-	}
-
-	public void InitializeLine()
-	{
-		this.currentNickname = string.Empty;
-		this.UpdatePlayerText();
-		if (this.linePlayer == NetworkSystem.Instance.LocalPlayer)
-		{
-			this.muteButton.gameObject.SetActive(false);
-			this.reportButton.gameObject.SetActive(false);
-			this.hateSpeechButton.SetActive(false);
-			this.toxicityButton.SetActive(false);
-			this.cheatingButton.SetActive(false);
-			this.cancelButton.SetActive(false);
-			return;
-		}
-		this.muteButton.gameObject.SetActive(true);
-		if (GorillaScoreboardTotalUpdater.instance != null && GorillaScoreboardTotalUpdater.instance.reportDict.ContainsKey(this.playerActorNumber))
-		{
-			GorillaScoreboardTotalUpdater.PlayerReports playerReports = GorillaScoreboardTotalUpdater.instance.reportDict[this.playerActorNumber];
-			this.reportedCheating = playerReports.cheating;
-			this.reportedHateSpeech = playerReports.hateSpeech;
-			this.reportedToxicity = playerReports.toxicity;
-			this.reportInProgress = playerReports.pressedReport;
-		}
-		else
-		{
-			this.reportedCheating = false;
-			this.reportedHateSpeech = false;
-			this.reportedToxicity = false;
-			this.reportInProgress = false;
-		}
-		this.reportButton.isOn = (this.reportedCheating || this.reportedHateSpeech || this.reportedToxicity);
-		this.reportButton.UpdateColor();
-		this.SwapToReportState(this.reportInProgress);
-		this.muteButton.gameObject.SetActive(true);
-		this.isMuteManual = PlayerPrefs.HasKey(this.linePlayer.UserId);
-		this.mute = PlayerPrefs.GetInt(this.linePlayer.UserId, 0);
-		this.muteButton.isOn = (this.mute != 0);
-		this.muteButton.isAutoOn = false;
-		this.muteButton.UpdateColor();
-		if (this.rigContainer != null)
-		{
-			this.rigContainer.hasManualMute = this.isMuteManual;
-			this.rigContainer.Muted = (this.mute != 0);
-		}
-	}
-
-	public void SetLineData(NetPlayer netPlayer)
-	{
-		if (!netPlayer.InRoom || netPlayer == this.linePlayer)
-		{
-			return;
-		}
-		if (this.playerActorNumber != netPlayer.ActorNumber)
-		{
-			this.initTime = Time.time;
-		}
-		this.playerActorNumber = netPlayer.ActorNumber;
-		this.linePlayer = netPlayer;
-		this.playerNameValue = (netPlayer.NickName ?? "");
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(netPlayer, out rigContainer))
-		{
-			this.rigContainer = rigContainer;
-			this.playerVRRig = rigContainer.Rig;
-		}
-		this.InitializeLine();
-	}
-
-	public void UpdateLine()
-	{
-		if (this.linePlayer != null)
-		{
-			if (this.playerNameVisible != this.playerVRRig.playerNameVisible)
-			{
-				this.UpdatePlayerText();
-				this.parentScoreboard.IsDirty = true;
-				if (this.playerVRRig.creator.IsMasterClient && GorillaComputer.instance.IsPlayerInVirtualStump())
-				{
-					CustomMapModeSelector.RefreshHostName();
-				}
-			}
-			if (this.rigContainer != null)
-			{
-				if (Time.time > this.initTime + this.emptyRigCooldown)
-				{
-					if (this.playerVRRig.netView != null)
-					{
-						this.emptyRigCount = 0;
-					}
-					else
-					{
-						this.emptyRigCount++;
-						if (this.emptyRigCount > 30)
-						{
-							MonkeAgent.instance.SendReport("empty rig", this.linePlayer.UserId, this.linePlayer.NickName);
-						}
-					}
-				}
-				Material material;
-				if (this.playerVRRig.setMatIndex == 0)
-				{
-					material = this.playerVRRig.scoreboardMaterial;
-				}
-				else
-				{
-					material = this.playerVRRig.materialsToChangeTo[this.playerVRRig.setMatIndex];
-				}
-				if (this.playerSwatch.material != material)
-				{
-					this.playerSwatch.material = material;
-				}
-				if (this.playerSwatch.color != this.playerVRRig.materialsToChangeTo[0].color)
-				{
-					this.playerSwatch.color = this.playerVRRig.materialsToChangeTo[0].color;
-				}
-				if (this.myRecorder == null)
-				{
-					this.myRecorder = NetworkSystem.Instance.LocalRecorder;
-				}
-				if (this.playerVRRig != null)
-				{
-					if (this.playerVRRig.remoteUseReplacementVoice || this.playerVRRig.localUseReplacementVoice || GorillaComputer.instance.voiceChatOn == "FALSE")
-					{
-						if (this.playerVRRig.SpeakingLoudness > this.playerVRRig.replacementVoiceLoudnessThreshold && !this.rigContainer.ForceMute && !this.rigContainer.Muted)
-						{
-							this.speakerIcon.enabled = true;
-						}
-						else
-						{
-							this.speakerIcon.enabled = false;
-						}
-					}
-					else if ((this.rigContainer.Voice != null && this.rigContainer.Voice.IsSpeaking) || (this.playerVRRig.rigSerializer != null && this.playerVRRig.rigSerializer.IsLocallyOwned && this.myRecorder != null && this.myRecorder.IsCurrentlyTransmitting))
-					{
-						this.speakerIcon.enabled = true;
-					}
-					else
-					{
-						this.speakerIcon.enabled = false;
-					}
-				}
-				else
-				{
-					this.speakerIcon.enabled = false;
-				}
-				if (!this.isMuteManual)
-				{
-					bool isPlayerAutoMuted = this.rigContainer.GetIsPlayerAutoMuted();
-					if (this.muteButton.isAutoOn != isPlayerAutoMuted)
-					{
-						this.muteButton.isAutoOn = isPlayerAutoMuted;
-						this.muteButton.UpdateColor();
-					}
-				}
-			}
-		}
-	}
-
-	private void UpdatePlayerText()
-	{
-		try
-		{
-			if (this.rigContainer.IsNull() || this.playerVRRig.IsNull())
-			{
-				this.playerNameVisible = this.NormalizeName(this.linePlayer.NickName != this.currentNickname, this.linePlayer.NickName);
-				this.currentNickname = this.linePlayer.NickName;
-			}
-			else if (this.rigContainer.Initialized)
-			{
-				this.playerNameVisible = this.playerVRRig.playerNameVisible;
-			}
-			else if (this.currentNickname.IsNullOrEmpty() || GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(this.linePlayer.UserId))
-			{
-				this.playerNameVisible = this.NormalizeName(this.linePlayer.NickName != this.currentNickname, this.linePlayer.NickName);
-			}
-			bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
-			this.currentNickname = this.linePlayer.NickName;
-			this.playerName.text = (flag ? this.playerNameVisible : this.linePlayer.DefaultName);
-		}
-		catch (Exception)
-		{
-			this.playerNameVisible = this.linePlayer.DefaultName;
-			MonkeAgent.instance.SendReport("NmError", this.linePlayer.UserId, this.linePlayer.NickName);
-		}
-	}
-
-	public void PressButton(bool isOn, GorillaPlayerLineButton.ButtonType buttonType)
-	{
-		if (buttonType != GorillaPlayerLineButton.ButtonType.Mute)
-		{
-			if (buttonType == GorillaPlayerLineButton.ButtonType.Report)
-			{
-				this.SetReportState(true, buttonType);
-				return;
-			}
-			this.SetReportState(false, buttonType);
-		}
-		else if (this.linePlayer != null && this.playerVRRig != null)
-		{
-			this.isMuteManual = true;
-			this.muteButton.isAutoOn = false;
-			this.mute = (isOn ? 1 : 0);
-			PlayerPrefs.SetInt(this.linePlayer.UserId, this.mute);
-			if (this.rigContainer != null)
-			{
-				this.rigContainer.hasManualMute = this.isMuteManual;
-				this.rigContainer.Muted = (this.mute != 0);
-			}
-			PlayerPrefs.Save();
-			this.muteButton.UpdateColor();
-			GorillaScoreboardTotalUpdater.ReportMute(this.linePlayer, this.mute);
-			return;
-		}
-	}
-
-	public void SetReportState(bool reportState, GorillaPlayerLineButton.ButtonType buttonType)
-	{
-		this.canPressNextReportButton = (buttonType != GorillaPlayerLineButton.ButtonType.Toxicity && buttonType != GorillaPlayerLineButton.ButtonType.Report);
-		this.reportInProgress = reportState;
-		if (reportState)
-		{
-			this.SwapToReportState(true);
-		}
-		else
-		{
-			this.SwapToReportState(false);
-			if (this.linePlayer != null && buttonType != GorillaPlayerLineButton.ButtonType.Cancel)
-			{
-				if ((!this.reportedHateSpeech && buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech) || (!this.reportedToxicity && buttonType == GorillaPlayerLineButton.ButtonType.Toxicity) || (!this.reportedCheating && buttonType == GorillaPlayerLineButton.ButtonType.Cheating))
-				{
-					GorillaPlayerScoreboardLine.ReportPlayer(this.linePlayer.UserId, buttonType, this.playerNameVisible);
-					this.doneReporting = true;
-				}
-				this.reportedCheating = (this.reportedCheating || buttonType == GorillaPlayerLineButton.ButtonType.Cheating);
-				this.reportedToxicity = (this.reportedToxicity || buttonType == GorillaPlayerLineButton.ButtonType.Toxicity);
-				this.reportedHateSpeech = (this.reportedHateSpeech || buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech);
-				this.reportButton.isOn = true;
-				this.reportButton.UpdateColor();
-			}
-		}
-		if (GorillaScoreboardTotalUpdater.instance != null)
-		{
-			GorillaScoreboardTotalUpdater.instance.UpdateLineState(this);
-		}
-		this.parentScoreboard.RedrawPlayerLines();
-	}
-
-	public static void ReportPlayer(string PlayerID, GorillaPlayerLineButton.ButtonType buttonType, string OtherPlayerNickName)
-	{
-		if (OtherPlayerNickName.Length > 12)
-		{
-			OtherPlayerNickName.Remove(12);
-		}
-		WebFlags flags = new WebFlags(3);
-		NetEventOptions options = new NetEventOptions
-		{
-			Flags = flags,
-			TargetActors = GorillaPlayerScoreboardLine.targetActors
-		};
-		byte code = 50;
-		object[] data = new object[]
-		{
-			PlayerID,
-			buttonType,
-			OtherPlayerNickName,
-			NetworkSystem.Instance.LocalPlayer.NickName,
-			!NetworkSystem.Instance.SessionIsPrivate,
-			NetworkSystem.Instance.RoomStringStripped()
-		};
-		NetworkSystemRaiseEvent.RaiseEvent(code, data, options, true);
-	}
-
-	public string NormalizeName(bool doIt, string text)
-	{
-		if (doIt)
-		{
-			int length = text.Length;
-			text = new string(Array.FindAll<char>(text.ToCharArray(), (char c) => Utils.IsASCIILetterOrDigit(c)));
-			int length2 = text.Length;
-			if (length2 > 0 && length == length2 && GorillaComputer.instance.CheckAutoBanListForName(text))
-			{
-				if (text.Length > 12)
-				{
-					text = text.Substring(0, 12);
-				}
-				text = text.ToUpper();
-			}
-			else
-			{
-				text = "BADGORILLA";
-				MonkeAgent.instance.SendReport("evading the name ban", this.linePlayer.UserId, this.linePlayer.NickName);
-			}
-		}
-		return text;
-	}
-
-	public void ResetData()
-	{
-		this.emptyRigCount = 0;
-		this.playerActorNumber = -1;
-		this.linePlayer = null;
-		this.playerNameValue = string.Empty;
-		this.currentNickname = string.Empty;
-	}
-
-	private void OnEnable()
-	{
-		GorillaScoreboardTotalUpdater.RegisterSL(this);
-	}
-
-	private void OnDisable()
-	{
-		GorillaScoreboardTotalUpdater.UnregisterSL(this);
-	}
-
-	private void SwapToReportState(bool reportInProgress)
-	{
-		this.reportButton.gameObject.SetActive(!reportInProgress);
-		this.hateSpeechButton.SetActive(reportInProgress);
-		this.toxicityButton.SetActive(reportInProgress);
-		this.cheatingButton.SetActive(reportInProgress);
-		this.cancelButton.SetActive(reportInProgress);
-	}
-
-	private static int[] targetActors = new int[]
-	{
-		-1
-	};
+	private static int[] targetActors = new int[1] { -1 };
 
 	public Text playerName;
 
@@ -425,4 +90,329 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 	public float emptyRigCooldown = 10f;
 
 	internal RigContainer rigContainer;
+
+	public void Start()
+	{
+		emptyRigCount = 0;
+		reportedCheating = false;
+		reportedHateSpeech = false;
+		reportedToxicity = false;
+	}
+
+	public void InitializeLine()
+	{
+		currentNickname = string.Empty;
+		UpdatePlayerText();
+		if (linePlayer == NetworkSystem.Instance.LocalPlayer)
+		{
+			muteButton.gameObject.SetActive(value: false);
+			reportButton.gameObject.SetActive(value: false);
+			hateSpeechButton.SetActive(value: false);
+			toxicityButton.SetActive(value: false);
+			cheatingButton.SetActive(value: false);
+			cancelButton.SetActive(value: false);
+			return;
+		}
+		muteButton.gameObject.SetActive(value: true);
+		if (GorillaScoreboardTotalUpdater.instance != null && GorillaScoreboardTotalUpdater.instance.reportDict.ContainsKey(playerActorNumber))
+		{
+			GorillaScoreboardTotalUpdater.PlayerReports playerReports = GorillaScoreboardTotalUpdater.instance.reportDict[playerActorNumber];
+			reportedCheating = playerReports.cheating;
+			reportedHateSpeech = playerReports.hateSpeech;
+			reportedToxicity = playerReports.toxicity;
+			reportInProgress = playerReports.pressedReport;
+		}
+		else
+		{
+			reportedCheating = false;
+			reportedHateSpeech = false;
+			reportedToxicity = false;
+			reportInProgress = false;
+		}
+		reportButton.isOn = reportedCheating || reportedHateSpeech || reportedToxicity;
+		reportButton.UpdateColor();
+		SwapToReportState(reportInProgress);
+		muteButton.gameObject.SetActive(value: true);
+		isMuteManual = PlayerPrefs.HasKey(linePlayer.UserId);
+		mute = PlayerPrefs.GetInt(linePlayer.UserId, 0);
+		muteButton.isOn = ((mute != 0) ? true : false);
+		muteButton.isAutoOn = false;
+		muteButton.UpdateColor();
+		if (rigContainer != null)
+		{
+			rigContainer.hasManualMute = isMuteManual;
+			rigContainer.Muted = ((mute != 0) ? true : false);
+		}
+	}
+
+	public void SetLineData(NetPlayer netPlayer)
+	{
+		if (netPlayer.InRoom && netPlayer != linePlayer)
+		{
+			if (playerActorNumber != netPlayer.ActorNumber)
+			{
+				initTime = Time.time;
+			}
+			playerActorNumber = netPlayer.ActorNumber;
+			linePlayer = netPlayer;
+			playerNameValue = netPlayer.NickName ?? "";
+			if (VRRigCache.Instance.TryGetVrrig(netPlayer, out var playerRig))
+			{
+				rigContainer = playerRig;
+				playerVRRig = playerRig.Rig;
+			}
+			InitializeLine();
+		}
+	}
+
+	public void UpdateLine()
+	{
+		if (linePlayer == null)
+		{
+			return;
+		}
+		if (playerNameVisible != playerVRRig.playerNameVisible)
+		{
+			UpdatePlayerText();
+			parentScoreboard.IsDirty = true;
+			if (playerVRRig.creator.IsMasterClient && GorillaComputer.instance.IsPlayerInVirtualStump())
+			{
+				CustomMapModeSelector.RefreshHostName();
+			}
+		}
+		if (!(rigContainer != null))
+		{
+			return;
+		}
+		if (Time.time > initTime + emptyRigCooldown)
+		{
+			if (playerVRRig.netView != null)
+			{
+				emptyRigCount = 0;
+			}
+			else
+			{
+				emptyRigCount++;
+				if (emptyRigCount > 30)
+				{
+					MonkeAgent.instance.SendReport("empty rig", linePlayer.UserId, linePlayer.NickName);
+				}
+			}
+		}
+		Material material = ((playerVRRig.setMatIndex != 0) ? playerVRRig.materialsToChangeTo[playerVRRig.setMatIndex] : playerVRRig.scoreboardMaterial);
+		if (playerSwatch.material != material)
+		{
+			playerSwatch.material = material;
+		}
+		if (playerSwatch.color != playerVRRig.materialsToChangeTo[0].color)
+		{
+			playerSwatch.color = playerVRRig.materialsToChangeTo[0].color;
+		}
+		if (myRecorder == null)
+		{
+			myRecorder = NetworkSystem.Instance.LocalRecorder;
+		}
+		if (playerVRRig != null)
+		{
+			if (playerVRRig.remoteUseReplacementVoice || playerVRRig.localUseReplacementVoice || GorillaComputer.instance.voiceChatOn == "FALSE")
+			{
+				if (playerVRRig.SpeakingLoudness > playerVRRig.replacementVoiceLoudnessThreshold && !rigContainer.ForceMute && !rigContainer.Muted)
+				{
+					speakerIcon.enabled = true;
+				}
+				else
+				{
+					speakerIcon.enabled = false;
+				}
+			}
+			else if ((rigContainer.Voice != null && rigContainer.Voice.IsSpeaking) || (playerVRRig.rigSerializer != null && playerVRRig.rigSerializer.IsLocallyOwned && myRecorder != null && myRecorder.IsCurrentlyTransmitting))
+			{
+				speakerIcon.enabled = true;
+			}
+			else
+			{
+				speakerIcon.enabled = false;
+			}
+		}
+		else
+		{
+			speakerIcon.enabled = false;
+		}
+		if (!isMuteManual)
+		{
+			bool isPlayerAutoMuted = rigContainer.GetIsPlayerAutoMuted();
+			if (muteButton.isAutoOn != isPlayerAutoMuted)
+			{
+				muteButton.isAutoOn = isPlayerAutoMuted;
+				muteButton.UpdateColor();
+			}
+		}
+	}
+
+	private void UpdatePlayerText()
+	{
+		try
+		{
+			if (rigContainer.IsNull() || playerVRRig.IsNull())
+			{
+				playerNameVisible = NormalizeName(linePlayer.NickName != currentNickname, linePlayer.NickName);
+				currentNickname = linePlayer.NickName;
+			}
+			else if (rigContainer.Initialized)
+			{
+				playerNameVisible = playerVRRig.playerNameVisible;
+			}
+			else if (currentNickname.IsNullOrEmpty() || GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(linePlayer.UserId))
+			{
+				playerNameVisible = NormalizeName(linePlayer.NickName != currentNickname, linePlayer.NickName);
+			}
+			bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
+			currentNickname = linePlayer.NickName;
+			playerName.text = (flag ? playerNameVisible : linePlayer.DefaultName);
+		}
+		catch (Exception)
+		{
+			playerNameVisible = linePlayer.DefaultName;
+			MonkeAgent.instance.SendReport("NmError", linePlayer.UserId, linePlayer.NickName);
+		}
+	}
+
+	public void PressButton(bool isOn, GorillaPlayerLineButton.ButtonType buttonType)
+	{
+		switch (buttonType)
+		{
+		case GorillaPlayerLineButton.ButtonType.Mute:
+			if (linePlayer != null && playerVRRig != null)
+			{
+				isMuteManual = true;
+				muteButton.isAutoOn = false;
+				mute = (isOn ? 1 : 0);
+				PlayerPrefs.SetInt(linePlayer.UserId, mute);
+				if (rigContainer != null)
+				{
+					rigContainer.hasManualMute = isMuteManual;
+					rigContainer.Muted = ((mute != 0) ? true : false);
+				}
+				PlayerPrefs.Save();
+				muteButton.UpdateColor();
+				GorillaScoreboardTotalUpdater.ReportMute(linePlayer, mute);
+			}
+			break;
+		case GorillaPlayerLineButton.ButtonType.Report:
+			SetReportState(reportState: true, buttonType);
+			break;
+		default:
+			SetReportState(reportState: false, buttonType);
+			break;
+		}
+	}
+
+	public void SetReportState(bool reportState, GorillaPlayerLineButton.ButtonType buttonType)
+	{
+		canPressNextReportButton = buttonType != GorillaPlayerLineButton.ButtonType.Toxicity && buttonType != GorillaPlayerLineButton.ButtonType.Report;
+		reportInProgress = reportState;
+		if (reportState)
+		{
+			SwapToReportState(reportInProgress: true);
+		}
+		else
+		{
+			SwapToReportState(reportInProgress: false);
+			if (linePlayer != null && buttonType != GorillaPlayerLineButton.ButtonType.Cancel)
+			{
+				if ((!reportedHateSpeech && buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech) || (!reportedToxicity && buttonType == GorillaPlayerLineButton.ButtonType.Toxicity) || (!reportedCheating && buttonType == GorillaPlayerLineButton.ButtonType.Cheating))
+				{
+					ReportPlayer(linePlayer.UserId, buttonType, playerNameVisible);
+					doneReporting = true;
+				}
+				reportedCheating = reportedCheating || buttonType == GorillaPlayerLineButton.ButtonType.Cheating;
+				reportedToxicity = reportedToxicity || buttonType == GorillaPlayerLineButton.ButtonType.Toxicity;
+				reportedHateSpeech = reportedHateSpeech || buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech;
+				reportButton.isOn = true;
+				reportButton.UpdateColor();
+			}
+		}
+		if (GorillaScoreboardTotalUpdater.instance != null)
+		{
+			GorillaScoreboardTotalUpdater.instance.UpdateLineState(this);
+		}
+		parentScoreboard.RedrawPlayerLines();
+	}
+
+	public static void ReportPlayer(string PlayerID, GorillaPlayerLineButton.ButtonType buttonType, string OtherPlayerNickName)
+	{
+		if (OtherPlayerNickName.Length > 12)
+		{
+			OtherPlayerNickName.Remove(12);
+		}
+		WebFlags flags = new WebFlags(3);
+		NetEventOptions options = new NetEventOptions
+		{
+			Flags = flags,
+			TargetActors = targetActors
+		};
+		byte code = 50;
+		object[] data = new object[6]
+		{
+			PlayerID,
+			buttonType,
+			OtherPlayerNickName,
+			NetworkSystem.Instance.LocalPlayer.NickName,
+			!NetworkSystem.Instance.SessionIsPrivate,
+			NetworkSystem.Instance.RoomStringStripped()
+		};
+		NetworkSystemRaiseEvent.RaiseEvent(code, data, options, reliable: true);
+	}
+
+	public string NormalizeName(bool doIt, string text)
+	{
+		if (doIt)
+		{
+			int length = text.Length;
+			text = new string(Array.FindAll(text.ToCharArray(), (char c) => Utils.IsASCIILetterOrDigit(c)));
+			int length2 = text.Length;
+			if (length2 > 0 && length == length2 && GorillaComputer.instance.CheckAutoBanListForName(text))
+			{
+				if (text.Length > 12)
+				{
+					text = text.Substring(0, 12);
+				}
+				text = text.ToUpper();
+			}
+			else
+			{
+				text = "BADGORILLA";
+				MonkeAgent.instance.SendReport("evading the name ban", linePlayer.UserId, linePlayer.NickName);
+			}
+		}
+		return text;
+	}
+
+	public void ResetData()
+	{
+		emptyRigCount = 0;
+		playerActorNumber = -1;
+		linePlayer = null;
+		playerNameValue = string.Empty;
+		currentNickname = string.Empty;
+	}
+
+	private void OnEnable()
+	{
+		GorillaScoreboardTotalUpdater.RegisterSL(this);
+	}
+
+	private void OnDisable()
+	{
+		GorillaScoreboardTotalUpdater.UnregisterSL(this);
+	}
+
+	private void SwapToReportState(bool reportInProgress)
+	{
+		reportButton.gameObject.SetActive(!reportInProgress);
+		hateSpeechButton.SetActive(reportInProgress);
+		toxicityButton.SetActive(reportInProgress);
+		cheatingButton.SetActive(reportInProgress);
+		cancelButton.SetActive(reportInProgress);
+	}
 }

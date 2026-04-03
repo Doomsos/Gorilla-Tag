@@ -1,53 +1,10 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using Photon.Pun;
 using UnityEngine;
 
 public class TappableBeeHive : Tappable
 {
-	private void Awake()
-	{
-		if (this.swarmEmergeFromPoint == null || this.swarmEmergeToPoint == null)
-		{
-			Debug.LogError("TappableBeeHive: Disabling because swarmEmergePoint is null at: " + base.transform.GetPath(), this);
-			base.enabled = false;
-			return;
-		}
-		base.GetComponent<SlingshotProjectileHitNotifier>().OnProjectileHit += this.OnSlingshotHit;
-	}
-
-	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
-	{
-		if (!Application.isPlaying)
-		{
-			return;
-		}
-		if (this.swarmEmergeFromPoint == null || this.swarmEmergeToPoint == null)
-		{
-			return;
-		}
-		if (NetworkSystem.Instance.IsMasterClient && AngryBeeSwarm.instance.isDormant)
-		{
-			AngryBeeSwarm.instance.Emerge(this.swarmEmergeFromPoint.transform.position, this.swarmEmergeToPoint.transform.position);
-		}
-	}
-
-	public void OnSlingshotHit(SlingshotProjectile projectile, Collision collision)
-	{
-		if (!Application.isPlaying)
-		{
-			return;
-		}
-		if (this.swarmEmergeFromPoint == null || this.swarmEmergeToPoint == null)
-		{
-			return;
-		}
-		if (PhotonNetwork.IsMasterClient && AngryBeeSwarm.instance.isDormant)
-		{
-			AngryBeeSwarm.instance.Emerge(this.swarmEmergeFromPoint.transform.position, this.swarmEmergeToPoint.transform.position);
-		}
-	}
-
 	[SerializeField]
 	private GameObject swarmEmergeFromPoint;
 
@@ -66,4 +23,33 @@ public class TappableBeeHive : Tappable
 	private float reenableHoneycombAtTimestamp;
 
 	private Coroutine reenableHoneycombCoroutine;
+
+	private void Awake()
+	{
+		if (swarmEmergeFromPoint == null || swarmEmergeToPoint == null)
+		{
+			Debug.LogError("TappableBeeHive: Disabling because swarmEmergePoint is null at: " + base.transform.GetPath(), this);
+			base.enabled = false;
+		}
+		else
+		{
+			GetComponent<SlingshotProjectileHitNotifier>().OnProjectileHit += OnSlingshotHit;
+		}
+	}
+
+	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
+	{
+		if (Application.isPlaying && !(swarmEmergeFromPoint == null) && !(swarmEmergeToPoint == null) && NetworkSystem.Instance.IsMasterClient && AngryBeeSwarm.instance.isDormant)
+		{
+			AngryBeeSwarm.instance.Emerge(swarmEmergeFromPoint.transform.position, swarmEmergeToPoint.transform.position);
+		}
+	}
+
+	public void OnSlingshotHit(SlingshotProjectile projectile, Collision collision)
+	{
+		if (Application.isPlaying && !(swarmEmergeFromPoint == null) && !(swarmEmergeToPoint == null) && PhotonNetwork.IsMasterClient && AngryBeeSwarm.instance.isDormant)
+		{
+			AngryBeeSwarm.instance.Emerge(swarmEmergeFromPoint.transform.position, swarmEmergeToPoint.transform.position);
+		}
+	}
 }

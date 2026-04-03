@@ -1,18 +1,16 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTagScripts
-{
-	public class BuilderAttachPoint : MonoBehaviour
-	{
-		private void Awake()
-		{
-			if (this.center == null)
-			{
-				this.center = base.transform;
-			}
-		}
+namespace GorillaTagScripts;
 
-		public Transform center;
+public class BuilderAttachPoint : MonoBehaviour
+{
+	public Transform center;
+
+	private void Awake()
+	{
+		if (center == null)
+		{
+			center = base.transform;
+		}
 	}
 }

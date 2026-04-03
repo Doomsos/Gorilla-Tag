@@ -1,52 +1,54 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
 
 public class CompositeTriggerEvents : MonoBehaviour
 {
-	private Dictionary<Collider, int> CollderMasks
-	{
-		get
-		{
-			return this.overlapMask;
-		}
-	}
+	public delegate void TriggerEvent(Collider collider);
 
-	public event CompositeTriggerEvents.TriggerEvent CompositeTriggerEnter;
+	[SerializeField]
+	private List<Collider> individualTriggerColliders = new List<Collider>();
 
-	public event CompositeTriggerEvents.TriggerEvent CompositeTriggerExit;
+	private List<TriggerEventNotifier> triggerEventNotifiers = new List<TriggerEventNotifier>();
+
+	private Dictionary<Collider, int> overlapMask = new Dictionary<Collider, int>();
+
+	private Dictionary<Collider, int> CollderMasks => overlapMask;
+
+	public event TriggerEvent CompositeTriggerEnter;
+
+	public event TriggerEvent CompositeTriggerExit;
 
 	private void Awake()
 	{
-		if (this.individualTriggerColliders.Count > 32)
+		if (individualTriggerColliders.Count > 32)
 		{
 			Debug.LogError("The max number of triggers was exceeded in this composite trigger event sender on GameObject: " + base.gameObject.name + ".");
 		}
-		for (int i = 0; i < this.individualTriggerColliders.Count; i++)
+		for (int i = 0; i < individualTriggerColliders.Count; i++)
 		{
-			TriggerEventNotifier triggerEventNotifier = this.individualTriggerColliders[i].gameObject.AddComponent<TriggerEventNotifier>();
+			TriggerEventNotifier triggerEventNotifier = individualTriggerColliders[i].gameObject.AddComponent<TriggerEventNotifier>();
 			triggerEventNotifier.maskIndex = i;
-			triggerEventNotifier.TriggerEnterEvent += this.TriggerEnterReceiver;
-			triggerEventNotifier.TriggerExitEvent += this.TriggerExitReceiver;
-			this.triggerEventNotifiers.Add(triggerEventNotifier);
+			triggerEventNotifier.TriggerEnterEvent += TriggerEnterReceiver;
+			triggerEventNotifier.TriggerExitEvent += TriggerExitReceiver;
+			triggerEventNotifiers.Add(triggerEventNotifier);
 		}
 	}
 
 	public void AddCollider(Collider colliderToAdd)
 	{
-		if (this.individualTriggerColliders.Count >= 32)
+		if (individualTriggerColliders.Count >= 32)
 		{
 			Debug.LogError("The max number of triggers are already present in this composite trigger event sender on GameObject: " + base.gameObject.name + ".");
 			return;
 		}
-		this.individualTriggerColliders.Add(colliderToAdd);
+		individualTriggerColliders.Add(colliderToAdd);
 		TriggerEventNotifier triggerEventNotifier = colliderToAdd.gameObject.AddComponent<TriggerEventNotifier>();
-		triggerEventNotifier.maskIndex = this.GetNextMaskIndex();
-		triggerEventNotifier.TriggerEnterEvent += this.TriggerEnterReceiver;
-		triggerEventNotifier.TriggerExitEvent += this.TriggerExitReceiver;
-		this.triggerEventNotifiers.Add(triggerEventNotifier);
-		this.triggerEventNotifiers.Sort((TriggerEventNotifier a, TriggerEventNotifier b) => a.maskIndex.CompareTo(b.maskIndex));
+		triggerEventNotifier.maskIndex = GetNextMaskIndex();
+		triggerEventNotifier.TriggerEnterEvent += TriggerEnterReceiver;
+		triggerEventNotifier.TriggerExitEvent += TriggerExitReceiver;
+		triggerEventNotifiers.Add(triggerEventNotifier);
+		triggerEventNotifiers.Sort((TriggerEventNotifier a, TriggerEventNotifier b) => a.maskIndex.CompareTo(b.maskIndex));
 	}
 
 	public void RemoveCollider(Collider colliderToRemove)
@@ -54,171 +56,139 @@ public class CompositeTriggerEvents : MonoBehaviour
 		TriggerEventNotifier component = colliderToRemove.gameObject.GetComponent<TriggerEventNotifier>();
 		if (component.IsNotNull())
 		{
-			foreach (KeyValuePair<Collider, int> keyValuePair in new Dictionary<Collider, int>(this.overlapMask))
+			foreach (KeyValuePair<Collider, int> item in new Dictionary<Collider, int>(overlapMask))
 			{
-				this.TriggerExitReceiver(component, keyValuePair.Key);
+				TriggerExitReceiver(component, item.Key);
 			}
 			component.maskIndex = -1;
-			component.TriggerEnterEvent -= this.TriggerEnterReceiver;
-			component.TriggerExitEvent -= this.TriggerExitReceiver;
-			this.triggerEventNotifiers.Remove(component);
+			component.TriggerEnterEvent -= TriggerEnterReceiver;
+			component.TriggerExitEvent -= TriggerExitReceiver;
+			triggerEventNotifiers.Remove(component);
 		}
-		this.individualTriggerColliders.Remove(colliderToRemove);
+		individualTriggerColliders.Remove(colliderToRemove);
 	}
 
 	public void ResetColliders(bool sendExitEvent = true)
 	{
-		this.individualTriggerColliders.Clear();
-		for (int i = this.triggerEventNotifiers.Count - 1; i >= 0; i--)
+		individualTriggerColliders.Clear();
+		for (int num = triggerEventNotifiers.Count - 1; num >= 0; num--)
 		{
-			if (this.triggerEventNotifiers[i].IsNull())
+			if (triggerEventNotifiers[num].IsNull())
 			{
-				this.triggerEventNotifiers.RemoveAt(i);
+				triggerEventNotifiers.RemoveAt(num);
 			}
 			else
 			{
-				this.triggerEventNotifiers[i].maskIndex = -1;
-				this.triggerEventNotifiers[i].TriggerEnterEvent -= this.TriggerEnterReceiver;
-				this.triggerEventNotifiers[i].TriggerExitEvent -= this.TriggerExitReceiver;
-				this.triggerEventNotifiers.RemoveAt(i);
+				triggerEventNotifiers[num].maskIndex = -1;
+				triggerEventNotifiers[num].TriggerEnterEvent -= TriggerEnterReceiver;
+				triggerEventNotifiers[num].TriggerExitEvent -= TriggerExitReceiver;
+				triggerEventNotifiers.RemoveAt(num);
 			}
 		}
 		if (sendExitEvent)
 		{
-			foreach (KeyValuePair<Collider, int> keyValuePair in this.overlapMask)
+			foreach (KeyValuePair<Collider, int> item in overlapMask)
 			{
-				CompositeTriggerEvents.TriggerEvent compositeTriggerExit = this.CompositeTriggerExit;
-				if (compositeTriggerExit != null)
-				{
-					compositeTriggerExit(keyValuePair.Key);
-				}
+				this.CompositeTriggerExit?.Invoke(item.Key);
 			}
 		}
-		this.overlapMask.Clear();
+		overlapMask.Clear();
 	}
 
 	public int GetNumColliders()
 	{
-		return this.individualTriggerColliders.Count;
+		return individualTriggerColliders.Count;
 	}
 
 	public int GetNextMaskIndex()
 	{
-		if (this.individualTriggerColliders.Count >= 32)
+		if (individualTriggerColliders.Count >= 32)
 		{
 			Debug.LogError("The max number of triggers are already present in this composite trigger event sender on GameObject: " + base.gameObject.name + ".");
 			return -1;
 		}
 		int num = 0;
-		int num2 = 0;
-		while (num2 < this.triggerEventNotifiers.Count && this.triggerEventNotifiers[num2].maskIndex == num)
+		for (int i = 0; i < triggerEventNotifiers.Count && triggerEventNotifiers[i].maskIndex == num; i++)
 		{
 			num++;
-			num2++;
 		}
 		return num;
 	}
 
 	private void OnDestroy()
 	{
-		for (int i = 0; i < this.triggerEventNotifiers.Count; i++)
+		for (int i = 0; i < triggerEventNotifiers.Count; i++)
 		{
-			if (this.triggerEventNotifiers[i] != null)
+			if (triggerEventNotifiers[i] != null)
 			{
-				this.triggerEventNotifiers[i].TriggerEnterEvent -= this.TriggerEnterReceiver;
-				this.triggerEventNotifiers[i].TriggerExitEvent -= this.TriggerExitReceiver;
+				triggerEventNotifiers[i].TriggerEnterEvent -= TriggerEnterReceiver;
+				triggerEventNotifiers[i].TriggerExitEvent -= TriggerExitReceiver;
 			}
 		}
 	}
 
 	public void TriggerEnterReceiver(TriggerEventNotifier notifier, Collider other)
 	{
-		int num;
-		if (this.overlapMask.TryGetValue(other, out num))
+		if (overlapMask.TryGetValue(other, out var value))
 		{
-			num = this.SetMaskIndexTrue(num, notifier.maskIndex);
-			this.overlapMask[other] = num;
-			return;
+			value = SetMaskIndexTrue(value, notifier.maskIndex);
+			overlapMask[other] = value;
 		}
-		int value = this.SetMaskIndexTrue(0, notifier.maskIndex);
-		this.overlapMask.Add(other, value);
-		CompositeTriggerEvents.TriggerEvent compositeTriggerEnter = this.CompositeTriggerEnter;
-		if (compositeTriggerEnter == null)
+		else
 		{
-			return;
+			int value2 = SetMaskIndexTrue(0, notifier.maskIndex);
+			overlapMask.Add(other, value2);
+			this.CompositeTriggerEnter?.Invoke(other);
 		}
-		compositeTriggerEnter(other);
 	}
 
 	public void TriggerExitReceiver(TriggerEventNotifier notifier, Collider other)
 	{
-		int num;
-		if (this.overlapMask.TryGetValue(other, out num))
+		if (overlapMask.TryGetValue(other, out var value))
 		{
-			num = this.SetMaskIndexFalse(num, notifier.maskIndex);
-			if (num == 0)
+			value = SetMaskIndexFalse(value, notifier.maskIndex);
+			if (value == 0)
 			{
-				this.overlapMask.Remove(other);
-				CompositeTriggerEvents.TriggerEvent compositeTriggerExit = this.CompositeTriggerExit;
-				if (compositeTriggerExit == null)
-				{
-					return;
-				}
-				compositeTriggerExit(other);
-				return;
+				overlapMask.Remove(other);
+				this.CompositeTriggerExit?.Invoke(other);
 			}
 			else
 			{
-				this.overlapMask[other] = num;
+				overlapMask[other] = value;
 			}
 		}
 	}
 
 	public void ResetColliderMask(Collider other)
 	{
-		int num;
-		if (this.overlapMask.TryGetValue(other, out num))
+		if (overlapMask.TryGetValue(other, out var value))
 		{
-			if (num != 0)
+			if (value != 0)
 			{
-				CompositeTriggerEvents.TriggerEvent compositeTriggerExit = this.CompositeTriggerExit;
-				if (compositeTriggerExit != null)
-				{
-					compositeTriggerExit(other);
-				}
+				this.CompositeTriggerExit?.Invoke(other);
 			}
-			this.overlapMask.Remove(other);
+			overlapMask.Remove(other);
 		}
 	}
 
 	public void CompositeTriggerEnterReceiver(Collider other)
 	{
-		CompositeTriggerEvents.TriggerEvent compositeTriggerEnter = this.CompositeTriggerEnter;
-		if (compositeTriggerEnter == null)
-		{
-			return;
-		}
-		compositeTriggerEnter(other);
+		this.CompositeTriggerEnter?.Invoke(other);
 	}
 
 	public void CompositeTriggerExitReceiver(Collider other)
 	{
-		CompositeTriggerEvents.TriggerEvent compositeTriggerExit = this.CompositeTriggerExit;
-		if (compositeTriggerExit == null)
-		{
-			return;
-		}
-		compositeTriggerExit(other);
+		this.CompositeTriggerExit?.Invoke(other);
 	}
 
 	private bool TestMaskIndex(int mask, int index)
 	{
-		return (mask & 1 << index) != 0;
+		return (mask & (1 << index)) != 0;
 	}
 
 	private int SetMaskIndexTrue(int mask, int index)
 	{
-		return mask | 1 << index;
+		return mask | (1 << index);
 	}
 
 	private int SetMaskIndexFalse(int mask, int index)
@@ -229,19 +199,10 @@ public class CompositeTriggerEvents : MonoBehaviour
 	private string MaskToString(int mask)
 	{
 		string text = "";
-		for (int i = 31; i >= 0; i--)
+		for (int num = 31; num >= 0; num--)
 		{
-			text += (this.TestMaskIndex(mask, i) ? "1" : "0");
+			text += (TestMaskIndex(mask, num) ? "1" : "0");
 		}
 		return text;
 	}
-
-	[SerializeField]
-	private List<Collider> individualTriggerColliders = new List<Collider>();
-
-	private List<TriggerEventNotifier> triggerEventNotifiers = new List<TriggerEventNotifier>();
-
-	private Dictionary<Collider, int> overlapMask = new Dictionary<Collider, int>();
-
-	public delegate void TriggerEvent(Collider collider);
 }

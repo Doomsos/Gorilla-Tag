@@ -1,70 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class AudioFader : MonoBehaviour
 {
-	private void Start()
-	{
-		this.fadeInSpeed = this.maxVolume / this.fadeInDuration;
-		this.fadeOutSpeed = this.maxVolume / this.fadeOutDuration;
-	}
-
-	public void FadeIn()
-	{
-		this.targetVolume = this.maxVolume;
-		if (this.fadeInDuration > 0f)
-		{
-			base.enabled = true;
-			this.currentFadeSpeed = this.fadeInSpeed;
-		}
-		else
-		{
-			this.currentVolume = this.maxVolume;
-		}
-		this.audioToFade.volume = this.currentVolume;
-		if (!this.audioToFade.isPlaying)
-		{
-			this.audioToFade.GTPlay();
-		}
-	}
-
-	public void FadeOut()
-	{
-		this.targetVolume = 0f;
-		if (this.fadeOutDuration > 0f)
-		{
-			base.enabled = true;
-			this.currentFadeSpeed = this.fadeOutSpeed;
-		}
-		else
-		{
-			this.currentVolume = 0f;
-			if (this.audioToFade.isPlaying)
-			{
-				this.audioToFade.Stop();
-			}
-		}
-		if (this.outro != null && this.currentVolume > 0f)
-		{
-			this.outro.volume = this.currentVolume;
-			this.outro.GTPlay();
-		}
-	}
-
-	private void Update()
-	{
-		this.currentVolume = Mathf.MoveTowards(this.currentVolume, this.targetVolume, this.currentFadeSpeed * Time.deltaTime);
-		this.audioToFade.volume = this.currentVolume;
-		if (this.currentVolume == this.targetVolume)
-		{
-			base.enabled = false;
-			if (this.currentVolume == 0f && this.audioToFade.isPlaying)
-			{
-				this.audioToFade.Stop();
-			}
-		}
-	}
-
 	[SerializeField]
 	private AudioSource audioToFade;
 
@@ -89,4 +26,66 @@ public class AudioFader : MonoBehaviour
 	private float fadeInSpeed;
 
 	private float fadeOutSpeed;
+
+	private void Start()
+	{
+		fadeInSpeed = maxVolume / fadeInDuration;
+		fadeOutSpeed = maxVolume / fadeOutDuration;
+	}
+
+	public void FadeIn()
+	{
+		targetVolume = maxVolume;
+		if (fadeInDuration > 0f)
+		{
+			base.enabled = true;
+			currentFadeSpeed = fadeInSpeed;
+		}
+		else
+		{
+			currentVolume = maxVolume;
+		}
+		audioToFade.volume = currentVolume;
+		if (!audioToFade.isPlaying)
+		{
+			audioToFade.GTPlay();
+		}
+	}
+
+	public void FadeOut()
+	{
+		targetVolume = 0f;
+		if (fadeOutDuration > 0f)
+		{
+			base.enabled = true;
+			currentFadeSpeed = fadeOutSpeed;
+		}
+		else
+		{
+			currentVolume = 0f;
+			if (audioToFade.isPlaying)
+			{
+				audioToFade.Stop();
+			}
+		}
+		if (outro != null && currentVolume > 0f)
+		{
+			outro.volume = currentVolume;
+			outro.GTPlay();
+		}
+	}
+
+	private void Update()
+	{
+		currentVolume = Mathf.MoveTowards(currentVolume, targetVolume, currentFadeSpeed * Time.deltaTime);
+		audioToFade.volume = currentVolume;
+		if (currentVolume == targetVolume)
+		{
+			base.enabled = false;
+			if (currentVolume == 0f && audioToFade.isPlaying)
+			{
+				audioToFade.Stop();
+			}
+		}
+	}
 }

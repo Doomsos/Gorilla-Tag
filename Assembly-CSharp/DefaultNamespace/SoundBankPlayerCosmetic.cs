@@ -1,87 +1,77 @@
-﻿using System;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace DefaultNamespace;
+
+[RequireComponent(typeof(SoundBankPlayer))]
+public class SoundBankPlayerCosmetic : MonoBehaviour, ITickSystemTick
 {
-	[RequireComponent(typeof(SoundBankPlayer))]
-	public class SoundBankPlayerCosmetic : MonoBehaviour, ITickSystemTick
+	[SerializeField]
+	private SoundBankPlayer soundBankPlayer;
+
+	private bool playAudioLoop;
+
+	public bool TickRunning { get; set; }
+
+	private void Awake()
 	{
-		public bool TickRunning { get; set; }
+		playAudioLoop = false;
+	}
 
-		private void Awake()
+	private void OnEnable()
+	{
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private void OnDisable()
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void Tick()
+	{
+		if (playAudioLoop && soundBankPlayer != null && soundBankPlayer.audioSource != null && soundBankPlayer.soundBank != null && !soundBankPlayer.audioSource.isPlaying)
 		{
-			this.playAudioLoop = false;
+			soundBankPlayer.Play();
 		}
+	}
 
-		private void OnEnable()
+	public void PlayAudio()
+	{
+		if (soundBankPlayer != null && soundBankPlayer.audioSource != null && soundBankPlayer.soundBank != null)
 		{
-			TickSystem<object>.AddTickCallback(this);
+			soundBankPlayer.Play();
 		}
+	}
 
-		private void OnDisable()
+	public void PlayAudioLoop()
+	{
+		playAudioLoop = true;
+	}
+
+	public void PlayAudioNonInterrupting()
+	{
+		if (soundBankPlayer != null && soundBankPlayer.audioSource != null && soundBankPlayer.soundBank != null && !soundBankPlayer.audioSource.isPlaying)
 		{
-			TickSystem<object>.RemoveTickCallback(this);
+			soundBankPlayer.Play();
 		}
+	}
 
-		public void Tick()
+	public void PlayAudioWithTunableVolume(bool leftHand, float fingerValue)
+	{
+		if (soundBankPlayer != null && soundBankPlayer.audioSource != null && soundBankPlayer.soundBank != null)
 		{
-			if (!this.playAudioLoop)
-			{
-				return;
-			}
-			if (this.soundBankPlayer != null && this.soundBankPlayer.audioSource != null && this.soundBankPlayer.soundBank != null && !this.soundBankPlayer.audioSource.isPlaying)
-			{
-				this.soundBankPlayer.Play();
-			}
+			float volume = Mathf.Clamp01(fingerValue);
+			soundBankPlayer.audioSource.volume = volume;
+			soundBankPlayer.Play();
 		}
+	}
 
-		public void PlayAudio()
+	public void StopAudio()
+	{
+		if (soundBankPlayer != null && soundBankPlayer.audioSource != null && soundBankPlayer.soundBank != null)
 		{
-			if (this.soundBankPlayer != null && this.soundBankPlayer.audioSource != null && this.soundBankPlayer.soundBank != null)
-			{
-				this.soundBankPlayer.Play();
-			}
+			soundBankPlayer.audioSource.Stop();
 		}
-
-		public void PlayAudioLoop()
-		{
-			this.playAudioLoop = true;
-		}
-
-		public void PlayAudioNonInterrupting()
-		{
-			if (this.soundBankPlayer != null && this.soundBankPlayer.audioSource != null && this.soundBankPlayer.soundBank != null)
-			{
-				if (this.soundBankPlayer.audioSource.isPlaying)
-				{
-					return;
-				}
-				this.soundBankPlayer.Play();
-			}
-		}
-
-		public void PlayAudioWithTunableVolume(bool leftHand, float fingerValue)
-		{
-			if (this.soundBankPlayer != null && this.soundBankPlayer.audioSource != null && this.soundBankPlayer.soundBank != null)
-			{
-				float volume = Mathf.Clamp01(fingerValue);
-				this.soundBankPlayer.audioSource.volume = volume;
-				this.soundBankPlayer.Play();
-			}
-		}
-
-		public void StopAudio()
-		{
-			if (this.soundBankPlayer != null && this.soundBankPlayer.audioSource != null && this.soundBankPlayer.soundBank != null)
-			{
-				this.soundBankPlayer.audioSource.Stop();
-			}
-			this.playAudioLoop = false;
-		}
-
-		[SerializeField]
-		private SoundBankPlayer soundBankPlayer;
-
-		private bool playAudioLoop;
+		playAudioLoop = false;
 	}
 }

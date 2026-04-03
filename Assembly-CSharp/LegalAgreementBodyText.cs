@@ -1,83 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GorillaNetworking;
 using PlayFab;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LegalAgreementBodyText : MonoBehaviour
 {
-	private void Awake()
+	private enum State
 	{
-		this.textCollection.Add(this.textBox);
-	}
-
-	public void SetText(string text)
-	{
-		text = Regex.Unescape(text);
-		string[] array = text.Split(new string[]
-		{
-			Environment.NewLine,
-			"\\r\\n",
-			"\n"
-		}, StringSplitOptions.None);
-		for (int i = 0; i < array.Length; i++)
-		{
-			Text text2;
-			if (i >= this.textCollection.Count)
-			{
-				text2 = Object.Instantiate<Text>(this.textBox, base.transform);
-				this.textCollection.Add(text2);
-			}
-			else
-			{
-				text2 = this.textCollection[i];
-			}
-			text2.text = array[i];
-		}
-	}
-
-	public void ClearText()
-	{
-		foreach (Text text in this.textCollection)
-		{
-			text.text = string.Empty;
-		}
-		this.state = LegalAgreementBodyText.State.Ready;
-	}
-
-	public Task<bool> UpdateTextFromPlayFabTitleData(string key, string version)
-	{
-		LegalAgreementBodyText.<UpdateTextFromPlayFabTitleData>d__10 <UpdateTextFromPlayFabTitleData>d__;
-		<UpdateTextFromPlayFabTitleData>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
-		<UpdateTextFromPlayFabTitleData>d__.<>4__this = this;
-		<UpdateTextFromPlayFabTitleData>d__.key = key;
-		<UpdateTextFromPlayFabTitleData>d__.version = version;
-		<UpdateTextFromPlayFabTitleData>d__.<>1__state = -1;
-		<UpdateTextFromPlayFabTitleData>d__.<>t__builder.Start<LegalAgreementBodyText.<UpdateTextFromPlayFabTitleData>d__10>(ref <UpdateTextFromPlayFabTitleData>d__);
-		return <UpdateTextFromPlayFabTitleData>d__.<>t__builder.Task;
-	}
-
-	private void OnPlayFabError(PlayFabError obj)
-	{
-		Debug.LogError("ERROR: " + obj.ErrorMessage);
-		this.state = LegalAgreementBodyText.State.Error;
-	}
-
-	private void OnTitleDataReceived(string text)
-	{
-		this.cachedText = text;
-		this.state = LegalAgreementBodyText.State.Ready;
-	}
-
-	public float Height
-	{
-		get
-		{
-			return this.rectTransform.rect.height;
-		}
+		Ready,
+		Loading,
+		Error
 	}
 
 	[SerializeField]
@@ -93,12 +29,75 @@ public class LegalAgreementBodyText : MonoBehaviour
 
 	private string cachedText;
 
-	private LegalAgreementBodyText.State state;
+	private State state;
 
-	private enum State
+	public float Height => rectTransform.rect.height;
+
+	private void Awake()
 	{
-		Ready,
-		Loading,
-		Error
+		textCollection.Add(textBox);
+	}
+
+	public void SetText(string text)
+	{
+		text = Regex.Unescape(text);
+		string[] array = text.Split(new string[3]
+		{
+			Environment.NewLine,
+			"\\r\\n",
+			"\n"
+		}, StringSplitOptions.None);
+		for (int i = 0; i < array.Length; i++)
+		{
+			Text text2 = null;
+			if (i >= textCollection.Count)
+			{
+				text2 = UnityEngine.Object.Instantiate(textBox, base.transform);
+				textCollection.Add(text2);
+			}
+			else
+			{
+				text2 = textCollection[i];
+			}
+			text2.text = array[i];
+		}
+	}
+
+	public void ClearText()
+	{
+		foreach (Text item in textCollection)
+		{
+			item.text = string.Empty;
+		}
+		state = State.Ready;
+	}
+
+	public async Task<bool> UpdateTextFromPlayFabTitleData(string key, string version)
+	{
+		string text = key + "_" + version;
+		state = State.Loading;
+		PlayFabTitleDataCache.Instance.GetTitleData(text, OnTitleDataReceived, OnPlayFabError);
+		while (state == State.Loading)
+		{
+			await Task.Yield();
+		}
+		if (cachedText != null)
+		{
+			SetText(cachedText.Substring(1, cachedText.Length - 2));
+			return true;
+		}
+		return false;
+	}
+
+	private void OnPlayFabError(PlayFabError obj)
+	{
+		Debug.LogError("ERROR: " + obj.ErrorMessage);
+		state = State.Error;
+	}
+
+	private void OnTitleDataReceived(string text)
+	{
+		cachedText = text;
+		state = State.Ready;
 	}
 }

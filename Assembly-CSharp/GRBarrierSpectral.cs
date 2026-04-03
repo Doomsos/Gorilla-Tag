@@ -1,93 +1,8 @@
-﻿using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHittable
 {
-	public void Awake()
-	{
-		this.hitFx.SetActive(false);
-		this.destroyedFx.SetActive(false);
-	}
-
-	public void OnEntityInit()
-	{
-		this.entity.SetState((long)this.health);
-		Vector3 localScale = BitPackUtils.UnpackWorldPosFromNetwork(this.entity.createData);
-		base.transform.localScale = localScale;
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long newState)
-	{
-		int nextHealth = (int)newState;
-		this.ChangeHealth(nextHealth);
-	}
-
-	public void OnImpact(GameHitType hitType)
-	{
-		if (hitType == GameHitType.Flash)
-		{
-			int nextHealth = Mathf.Max(this.health - 1, 0);
-			this.ChangeHealth(nextHealth);
-			if (this.entity.IsAuthority())
-			{
-				this.entity.RequestState(this.entity.id, (long)this.health);
-			}
-		}
-	}
-
-	private void ChangeHealth(int nextHealth)
-	{
-		if (this.health != nextHealth)
-		{
-			this.health = nextHealth;
-			if (this.health == 0)
-			{
-				this.collider.enabled = false;
-				this.visualMesh.enabled = false;
-				this.audioSource.PlayOneShot(this.onDestroyedClip, this.onDestroyedVolume);
-				this.destroyedFx.SetActive(false);
-				this.destroyedFx.SetActive(true);
-			}
-			else
-			{
-				this.audioSource.PlayOneShot(this.onDamageClip, this.onDamageVolume);
-				this.hitFx.SetActive(false);
-				this.hitFx.SetActive(true);
-			}
-			this.RefreshVisuals();
-		}
-	}
-
-	public bool IsHitValid(GameHitData hit)
-	{
-		return true;
-	}
-
-	public void OnHit(GameHitData hit)
-	{
-		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
-		if (this.entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId) != null)
-		{
-			this.OnImpact(hitTypeId);
-		}
-	}
-
-	public void RefreshVisuals()
-	{
-		if (this.lastVisualUpdateHealth != this.health)
-		{
-			this.lastVisualUpdateHealth = this.health;
-			Color color = this.visualMesh.material.GetColor("_BaseColor");
-			color.a = (float)this.health / (float)this.maxHealth;
-			this.visualMesh.material.SetColor("_BaseColor", color);
-		}
-	}
-
 	public GameEntity entity;
 
 	public MeshRenderer visualMesh;
@@ -116,4 +31,88 @@ public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHitta
 	public int health = 3;
 
 	private int lastVisualUpdateHealth = -1;
+
+	public void Awake()
+	{
+		hitFx.SetActive(value: false);
+		destroyedFx.SetActive(value: false);
+	}
+
+	public void OnEntityInit()
+	{
+		entity.SetState(health);
+		Vector3 localScale = BitPackUtils.UnpackWorldPosFromNetwork(entity.createData);
+		base.transform.localScale = localScale;
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long newState)
+	{
+		int nextHealth = (int)newState;
+		ChangeHealth(nextHealth);
+	}
+
+	public void OnImpact(GameHitType hitType)
+	{
+		if (hitType == GameHitType.Flash)
+		{
+			int nextHealth = Mathf.Max(health - 1, 0);
+			ChangeHealth(nextHealth);
+			if (entity.IsAuthority())
+			{
+				entity.RequestState(entity.id, health);
+			}
+		}
+	}
+
+	private void ChangeHealth(int nextHealth)
+	{
+		if (health != nextHealth)
+		{
+			health = nextHealth;
+			if (health == 0)
+			{
+				collider.enabled = false;
+				visualMesh.enabled = false;
+				audioSource.PlayOneShot(onDestroyedClip, onDestroyedVolume);
+				destroyedFx.SetActive(value: false);
+				destroyedFx.SetActive(value: true);
+			}
+			else
+			{
+				audioSource.PlayOneShot(onDamageClip, onDamageVolume);
+				hitFx.SetActive(value: false);
+				hitFx.SetActive(value: true);
+			}
+			RefreshVisuals();
+		}
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		return true;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
+		if (entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId) != null)
+		{
+			OnImpact(hitTypeId);
+		}
+	}
+
+	public void RefreshVisuals()
+	{
+		if (lastVisualUpdateHealth != health)
+		{
+			lastVisualUpdateHealth = health;
+			Color color = visualMesh.material.GetColor("_BaseColor");
+			color.a = (float)health / (float)maxHealth;
+			visualMesh.material.SetColor("_BaseColor", color);
+		}
+	}
 }

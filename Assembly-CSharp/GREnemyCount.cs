@@ -1,28 +1,28 @@
-﻿using System;
+using System;
 using GorillaTagScripts.GhostReactor;
 
 [Serializable]
 public struct GREnemyCount
 {
+	public GREnemyType EnemyType;
+
+	public int Count;
+
 	public GREnemyType GetEnemyType()
 	{
-		if (this.EnemyType == GREnemyType.MoonBoss_Phase1 || this.EnemyType == GREnemyType.MoonBoss_Phase2)
+		if (EnemyType == GREnemyType.MoonBoss_Phase1 || EnemyType == GREnemyType.MoonBoss_Phase2)
 		{
 			return GREnemyType.MoonBoss;
 		}
-		return this.EnemyType;
+		return EnemyType;
 	}
 
 	public string GetEnemyName()
 	{
-		if (this.GetEnemyType() == GREnemyType.MoonBoss)
+		if (GetEnemyType() == GREnemyType.MoonBoss)
 		{
 			return "Meteor Monster";
 		}
-		return this.GetEnemyType().ToString();
+		return GetEnemyType().ToString();
 	}
-
-	public GREnemyType EnemyType;
-
-	public int Count;
 }

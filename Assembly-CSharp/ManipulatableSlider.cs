@@ -1,116 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class ManipulatableSlider : ManipulatableObject
 {
-	private void Awake()
-	{
-		this.localSpace = base.transform.worldToLocalMatrix;
-		this.startingPos = base.transform.localPosition;
-	}
-
-	protected override void OnStartManipulation(GameObject grabbingHand)
-	{
-	}
-
-	protected override void OnStopManipulation(GameObject releasingHand, Vector3 releaseVelocity)
-	{
-		if (this.applyReleaseVelocity)
-		{
-			this.velocity = this.localSpace.MultiplyVector(releaseVelocity);
-		}
-	}
-
-	protected override bool ShouldHandDetach(GameObject hand)
-	{
-		Vector3 position = base.transform.position;
-		Vector3 position2 = hand.transform.position;
-		return Vector3.SqrMagnitude(position - position2) > this.breakDistance * this.breakDistance;
-	}
-
-	protected override void OnHeldUpdate(GameObject hand)
-	{
-		Vector3 vector = this.localSpace.MultiplyPoint3x4(hand.transform.position);
-		vector.x = Mathf.Clamp(vector.x, this.minXOffset, this.maxXOffset);
-		vector.y = Mathf.Clamp(vector.y, this.minYOffset, this.maxYOffset);
-		vector.z = Mathf.Clamp(vector.z, this.minZOffset, this.maxZOffset);
-		vector += this.startingPos;
-		base.transform.localPosition = vector;
-	}
-
-	protected override void OnReleasedUpdate()
-	{
-		if (this.velocity != Vector3.zero)
-		{
-			Vector3 vector = this.localSpace.MultiplyPoint(base.transform.position);
-			vector += this.velocity * Time.deltaTime;
-			if (vector.x < this.minXOffset)
-			{
-				vector.x = this.minXOffset;
-				this.velocity.x = 0f;
-			}
-			else if (vector.x > this.maxXOffset)
-			{
-				vector.x = this.maxXOffset;
-				this.velocity.x = 0f;
-			}
-			if (vector.y < this.minYOffset)
-			{
-				vector.y = this.minYOffset;
-				this.velocity.y = 0f;
-			}
-			else if (vector.y > this.maxYOffset)
-			{
-				vector.y = this.maxYOffset;
-				this.velocity.y = 0f;
-			}
-			if (vector.z < this.minZOffset)
-			{
-				vector.z = this.minZOffset;
-				this.velocity.z = 0f;
-			}
-			else if (vector.z > this.maxZOffset)
-			{
-				vector.z = this.maxZOffset;
-				this.velocity.z = 0f;
-			}
-			vector += this.startingPos;
-			base.transform.localPosition = vector;
-			this.velocity *= 1f - this.releaseDrag * Time.deltaTime;
-			if (this.velocity.sqrMagnitude < 0.001f)
-			{
-				this.velocity = Vector3.zero;
-			}
-		}
-	}
-
-	public void SetProgress(float x, float y, float z)
-	{
-		x = Mathf.Clamp(x, 0f, 1f);
-		y = Mathf.Clamp(y, 0f, 1f);
-		z = Mathf.Clamp(z, 0f, 1f);
-		Vector3 localPosition = this.startingPos;
-		localPosition.x += Mathf.Lerp(this.minXOffset, this.maxXOffset, x);
-		localPosition.y += Mathf.Lerp(this.minYOffset, this.maxYOffset, y);
-		localPosition.z += Mathf.Lerp(this.minZOffset, this.maxZOffset, z);
-		base.transform.localPosition = localPosition;
-	}
-
-	public float GetProgressX()
-	{
-		return ((base.transform.localPosition - this.startingPos).x - this.minXOffset) / (this.maxXOffset - this.minXOffset);
-	}
-
-	public float GetProgressY()
-	{
-		return ((base.transform.localPosition - this.startingPos).y - this.minYOffset) / (this.maxYOffset - this.minYOffset);
-	}
-
-	public float GetProgressZ()
-	{
-		return ((base.transform.localPosition - this.startingPos).z - this.minZOffset) / (this.maxZOffset - this.minZOffset);
-	}
-
 	public float breakDistance = 0.2f;
 
 	public float maxXOffset;
@@ -134,4 +25,112 @@ public class ManipulatableSlider : ManipulatableObject
 	private Vector3 startingPos;
 
 	private Vector3 velocity;
+
+	private void Awake()
+	{
+		localSpace = base.transform.worldToLocalMatrix;
+		startingPos = base.transform.localPosition;
+	}
+
+	protected override void OnStartManipulation(GameObject grabbingHand)
+	{
+	}
+
+	protected override void OnStopManipulation(GameObject releasingHand, Vector3 releaseVelocity)
+	{
+		if (applyReleaseVelocity)
+		{
+			velocity = localSpace.MultiplyVector(releaseVelocity);
+		}
+	}
+
+	protected override bool ShouldHandDetach(GameObject hand)
+	{
+		Vector3 position = base.transform.position;
+		Vector3 position2 = hand.transform.position;
+		return Vector3.SqrMagnitude(position - position2) > breakDistance * breakDistance;
+	}
+
+	protected override void OnHeldUpdate(GameObject hand)
+	{
+		Vector3 localPosition = localSpace.MultiplyPoint3x4(hand.transform.position);
+		localPosition.x = Mathf.Clamp(localPosition.x, minXOffset, maxXOffset);
+		localPosition.y = Mathf.Clamp(localPosition.y, minYOffset, maxYOffset);
+		localPosition.z = Mathf.Clamp(localPosition.z, minZOffset, maxZOffset);
+		localPosition += startingPos;
+		base.transform.localPosition = localPosition;
+	}
+
+	protected override void OnReleasedUpdate()
+	{
+		if (velocity != Vector3.zero)
+		{
+			Vector3 localPosition = localSpace.MultiplyPoint(base.transform.position);
+			localPosition += velocity * Time.deltaTime;
+			if (localPosition.x < minXOffset)
+			{
+				localPosition.x = minXOffset;
+				velocity.x = 0f;
+			}
+			else if (localPosition.x > maxXOffset)
+			{
+				localPosition.x = maxXOffset;
+				velocity.x = 0f;
+			}
+			if (localPosition.y < minYOffset)
+			{
+				localPosition.y = minYOffset;
+				velocity.y = 0f;
+			}
+			else if (localPosition.y > maxYOffset)
+			{
+				localPosition.y = maxYOffset;
+				velocity.y = 0f;
+			}
+			if (localPosition.z < minZOffset)
+			{
+				localPosition.z = minZOffset;
+				velocity.z = 0f;
+			}
+			else if (localPosition.z > maxZOffset)
+			{
+				localPosition.z = maxZOffset;
+				velocity.z = 0f;
+			}
+			localPosition += startingPos;
+			base.transform.localPosition = localPosition;
+			velocity *= 1f - releaseDrag * Time.deltaTime;
+			if (velocity.sqrMagnitude < 0.001f)
+			{
+				velocity = Vector3.zero;
+			}
+		}
+	}
+
+	public void SetProgress(float x, float y, float z)
+	{
+		x = Mathf.Clamp(x, 0f, 1f);
+		y = Mathf.Clamp(y, 0f, 1f);
+		z = Mathf.Clamp(z, 0f, 1f);
+		Vector3 localPosition = startingPos;
+		localPosition.x += Mathf.Lerp(minXOffset, maxXOffset, x);
+		localPosition.y += Mathf.Lerp(minYOffset, maxYOffset, y);
+		localPosition.z += Mathf.Lerp(minZOffset, maxZOffset, z);
+		base.transform.localPosition = localPosition;
+	}
+
+	public float GetProgressX()
+	{
+		return ((base.transform.localPosition - startingPos).x - minXOffset) / (maxXOffset - minXOffset);
+	}
+
+	public float GetProgressY()
+	{
+		return ((base.transform.localPosition - startingPos).y - minYOffset) / (maxYOffset - minYOffset);
+	}
+
+	public float GetProgressZ()
+	{
+		return ((base.transform.localPosition - startingPos).z - minZOffset) / (maxZOffset - minZOffset);
+	}
 }

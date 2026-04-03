@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
@@ -6,280 +6,9 @@ using UnityEngine.Audio;
 
 public class GameStateFx : MonoBehaviour, IGameStateReceiver, IDelayedExecListener
 {
-	protected void Awake()
-	{
-		IGameStateProvider gameStateProvider = this.m_stateProvider as IGameStateProvider;
-		if (gameStateProvider == null)
-		{
-			GTDev.LogError<string>("[GT/GameStateFx]  ERROR!!!  Awake: The supplied State Provider is not type `IGameStateProvider`. Path=" + base.transform.GetPathQ(), null);
-			this._isValid = false;
-			base.enabled = false;
-			return;
-		}
-		this._stateProvider = gameStateProvider;
-		if (!this._IsAllValid())
-		{
-			return;
-		}
-		foreach (GameStateFx.StateReaction[] array in this.m_stateMap.Values)
-		{
-			if (array != null)
-			{
-				Array.Sort<GameStateFx.StateReaction>(array, new Comparison<GameStateFx.StateReaction>(GameStateFx._DelaySortCompare));
-			}
-		}
-	}
-
-	private static int _DelaySortCompare(GameStateFx.StateReaction a, GameStateFx.StateReaction b)
-	{
-		return a.delay.CompareTo(b.delay);
-	}
-
-	protected void OnEnable()
-	{
-		if (!this._isValid || ApplicationQuittingState.IsQuitting)
-		{
-			base.enabled = false;
-			return;
-		}
-		this._stateProvider.GameStateReceiverRegister(this);
-	}
-
-	protected void OnDisable()
-	{
-		if (!this._isValid || ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this._stateProvider.GameStateReceiverUnregister(this);
-	}
-
-	void IGameStateReceiver.GameStateReceiverOnStateChanged(long oldState, long newState)
-	{
-		GameStateFx.StateReaction[] array;
-		if (!this.m_stateMap.TryGet(newState, out array))
-		{
-			return;
-		}
-		this._delayedExecContextFrameNum = Time.frameCount;
-		this._reactionQueue.Clear();
-		foreach (GameStateFx.StateReaction stateReaction in array)
-		{
-			if ((stateReaction.options & GameStateFx.StateReaction.EOptions.Delay) != (GameStateFx.StateReaction.EOptions)0)
-			{
-				this._reactionQueue.Enqueue(stateReaction);
-				GTDelayedExec.Add(this, stateReaction.delay, Time.frameCount);
-			}
-			else
-			{
-				GameStateFx._PerformReactions(stateReaction);
-			}
-		}
-	}
-
-	void IDelayedExecListener.OnDelayedAction(int contextFrameNum)
-	{
-		if (contextFrameNum != this._delayedExecContextFrameNum || !base.isActiveAndEnabled)
-		{
-			return;
-		}
-		GameStateFx._PerformReactions(this._reactionQueue.Dequeue());
-	}
-
-	private static void _PerformReactions(GameStateFx.StateReaction reaction)
-	{
-		if ((reaction.options & GameStateFx.StateReaction.EOptions.Sound) != (GameStateFx.StateReaction.EOptions)0)
-		{
-			if ((reaction.soundInfo.options & GameStateFx.SoundEntry.EOptions.Sound) != (GameStateFx.SoundEntry.EOptions)0)
-			{
-				reaction.soundInfo.source.resource = reaction.soundInfo.sound;
-			}
-			if ((reaction.soundInfo.options & GameStateFx.SoundEntry.EOptions.Volume) != (GameStateFx.SoundEntry.EOptions)0)
-			{
-				reaction.soundInfo.source.volume = reaction.soundInfo.volume;
-			}
-			if ((reaction.soundInfo.options & GameStateFx.SoundEntry.EOptions.Pitch) != (GameStateFx.SoundEntry.EOptions)0)
-			{
-				reaction.soundInfo.source.pitch = reaction.soundInfo.pitch;
-			}
-			reaction.soundInfo.source.GTPlay();
-		}
-		if ((reaction.options & GameStateFx.StateReaction.EOptions.GameObjects) != (GameStateFx.StateReaction.EOptions)0)
-		{
-			foreach (GameStateFx.GameObjectInfo gameObjectInfo in reaction.gameObjectInfos)
-			{
-				gameObjectInfo.gameObject.SetActive(gameObjectInfo.activate);
-			}
-		}
-		if ((reaction.options & GameStateFx.StateReaction.EOptions.Behaviours) != (GameStateFx.StateReaction.EOptions)0)
-		{
-			foreach (GameStateFx.BehaviourInfo behaviourInfo in reaction.behaviourInfos)
-			{
-				behaviourInfo.behaviour.enabled = behaviourInfo.enable;
-			}
-		}
-		if ((reaction.options & GameStateFx.StateReaction.EOptions.Renderers) != (GameStateFx.StateReaction.EOptions)0)
-		{
-			foreach (GameStateFx.RenderInfo renderInfo in reaction.renderers)
-			{
-				renderInfo.renderer.enabled = renderInfo.enable;
-			}
-		}
-		if ((reaction.options & GameStateFx.StateReaction.EOptions.Materials) != (GameStateFx.StateReaction.EOptions)0)
-		{
-			GameStateFx.MaterialInfo[] materialInfos = reaction.materialInfos;
-			for (int i = 0; i < materialInfos.Length; i++)
-			{
-				foreach (GameStateFx.MaterialInfo.Entry entry in materialInfos[i].entries)
-				{
-					entry.slotInfo.renderer.GetSharedMaterials(GameStateFx._g_materialsCache);
-					if (entry.slotInfo.slot >= 0 && entry.slotInfo.slot < GameStateFx._g_materialsCache.Count)
-					{
-						GameStateFx._g_materialsCache[entry.slotInfo.slot] = entry.material;
-						entry.slotInfo.renderer.SetSharedMaterials(GameStateFx._g_materialsCache);
-					}
-				}
-			}
-		}
-	}
-
-	private bool _IsAllValid()
-	{
-		this._isValid = true;
-		bool flag = false;
-		this._hasDefaultAudioSource = (this.m_defaultAudioSource != null);
-		foreach (GameStateFx.StateReaction[] array in this.m_stateMap.Values)
-		{
-			foreach (GameStateFx.StateReaction stateReaction in array)
-			{
-				if ((stateReaction.options & GameStateFx.StateReaction.EOptions.Sound) != (GameStateFx.StateReaction.EOptions)0)
-				{
-					if ((stateReaction.soundInfo.options & GameStateFx.SoundEntry.EOptions.Source) != (GameStateFx.SoundEntry.EOptions)0)
-					{
-						if (!this._IsOneValid(stateReaction.soundInfo.source != null, "an AudioSource is unassigned."))
-						{
-							return false;
-						}
-					}
-					else
-					{
-						flag = true;
-						stateReaction.soundInfo.source = this.m_defaultAudioSource;
-					}
-					if (!this._IsOneValid(stateReaction.soundInfo.sound != null, "A sound is unassigned."))
-					{
-						return false;
-					}
-				}
-				if ((stateReaction.options & GameStateFx.StateReaction.EOptions.GameObjects) != (GameStateFx.StateReaction.EOptions)0)
-				{
-					foreach (GameStateFx.GameObjectInfo gameObjectInfo in stateReaction.gameObjectInfos)
-					{
-						if (!this._IsOneValid(gameObjectInfo.gameObject != null, "A GameObject is unassigned."))
-						{
-							return false;
-						}
-					}
-				}
-				if ((stateReaction.options & GameStateFx.StateReaction.EOptions.Behaviours) != (GameStateFx.StateReaction.EOptions)0)
-				{
-					foreach (GameStateFx.BehaviourInfo behaviourInfo in stateReaction.behaviourInfos)
-					{
-						if (!this._IsOneValid(behaviourInfo.behaviour != null, "A Behaviour is unassigned."))
-						{
-							return false;
-						}
-					}
-				}
-				if ((stateReaction.options & GameStateFx.StateReaction.EOptions.Renderers) != (GameStateFx.StateReaction.EOptions)0)
-				{
-					foreach (GameStateFx.RenderInfo renderInfo in stateReaction.renderers)
-					{
-						if (!this._IsOneValid(renderInfo.renderer != null, "A Renderer is unassigned."))
-						{
-							return false;
-						}
-					}
-				}
-				if ((stateReaction.options & GameStateFx.StateReaction.EOptions.Materials) != (GameStateFx.StateReaction.EOptions)0)
-				{
-					GameStateFx.MaterialInfo[] materialInfos = stateReaction.materialInfos;
-					for (int j = 0; j < materialInfos.Length; j++)
-					{
-						foreach (GameStateFx.MaterialInfo.Entry entry in materialInfos[j].entries)
-						{
-							if (!this._IsOneValid(entry.slotInfo.renderer != null, "A mat swap Renderer is unassigned"))
-							{
-								return false;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (flag && !this._hasDefaultAudioSource)
-		{
-			base.enabled = false;
-			this._isValid = false;
-			return false;
-		}
-		return true;
-	}
-
-	private bool _IsOneValid(bool isValidCondition, string msgFailReason)
-	{
-		if (isValidCondition)
-		{
-			return true;
-		}
-		this._isValid = false;
-		base.enabled = false;
-		return false;
-	}
-
-	private const string preLog = "[GT/GameStateFx]  ";
-
-	private const string preErr = "[GT/GameStateFx]  ERROR!!!  ";
-
-	private bool _isValid;
-
-	[SerializeField]
-	private MonoBehaviour m_stateProvider;
-
-	private IGameStateProvider _stateProvider;
-
-	[SerializeField]
-	private AudioSource m_defaultAudioSource;
-
-	private bool _hasDefaultAudioSource;
-
-	[SerializeField]
-	private GTEnumValueMap<GameStateFx.StateReaction[]> m_stateMap;
-
-	private int _delayedExecContextFrameNum;
-
-	private Queue<GameStateFx.StateReaction> _reactionQueue = new Queue<GameStateFx.StateReaction>(4);
-
-	private static readonly List<Material> _g_materialsCache = new List<Material>(8);
-
 	[Serializable]
 	internal class StateReaction
 	{
-		[Tooltip("Options for what this reaction should do.")]
-		public GameStateFx.StateReaction.EOptions options;
-
-		public float delay;
-
-		public GameStateFx.SoundEntry soundInfo;
-
-		public GameStateFx.GameObjectInfo[] gameObjectInfos;
-
-		public GameStateFx.BehaviourInfo[] behaviourInfos;
-
-		public GameStateFx.RenderInfo[] renderers;
-
-		public GameStateFx.MaterialInfo[] materialInfos;
-
 		[Flags]
 		public enum EOptions
 		{
@@ -287,24 +16,29 @@ public class GameStateFx : MonoBehaviour, IGameStateReceiver, IDelayedExecListen
 			Sound = 2,
 			GameObjects = 4,
 			Behaviours = 8,
-			Renderers = 16,
-			Materials = 32
+			Renderers = 0x10,
+			Materials = 0x20
 		}
+
+		[Tooltip("Options for what this reaction should do.")]
+		public EOptions options;
+
+		public float delay;
+
+		public SoundEntry soundInfo;
+
+		public GameObjectInfo[] gameObjectInfos;
+
+		public BehaviourInfo[] behaviourInfos;
+
+		public RenderInfo[] renderers;
+
+		public MaterialInfo[] materialInfos;
 	}
 
 	[Serializable]
 	public struct SoundEntry
 	{
-		public GameStateFx.SoundEntry.EOptions options;
-
-		public AudioSource source;
-
-		public AudioResource sound;
-
-		public float volume;
-
-		public float pitch;
-
 		[Flags]
 		public enum EOptions
 		{
@@ -313,6 +47,16 @@ public class GameStateFx : MonoBehaviour, IGameStateReceiver, IDelayedExecListen
 			Volume = 4,
 			Pitch = 8
 		}
+
+		public EOptions options;
+
+		public AudioSource source;
+
+		public AudioResource sound;
+
+		public float volume;
+
+		public float pitch;
 	}
 
 	[Serializable]
@@ -342,8 +86,6 @@ public class GameStateFx : MonoBehaviour, IGameStateReceiver, IDelayedExecListen
 	[Serializable]
 	internal struct MaterialInfo
 	{
-		public GameStateFx.MaterialInfo.Entry[] entries;
-
 		[Serializable]
 		internal struct Entry
 		{
@@ -351,5 +93,280 @@ public class GameStateFx : MonoBehaviour, IGameStateReceiver, IDelayedExecListen
 
 			public Material material;
 		}
+
+		public Entry[] entries;
+	}
+
+	private const string preLog = "[GT/GameStateFx]  ";
+
+	private const string preErr = "[GT/GameStateFx]  ERROR!!!  ";
+
+	private bool _isValid;
+
+	[SerializeField]
+	private MonoBehaviour m_stateProvider;
+
+	private IGameStateProvider _stateProvider;
+
+	[SerializeField]
+	private AudioSource m_defaultAudioSource;
+
+	private bool _hasDefaultAudioSource;
+
+	[SerializeField]
+	private GTEnumValueMap<StateReaction[]> m_stateMap;
+
+	private int _delayedExecContextFrameNum;
+
+	private Queue<StateReaction> _reactionQueue = new Queue<StateReaction>(4);
+
+	private static readonly List<Material> _g_materialsCache = new List<Material>(8);
+
+	protected void Awake()
+	{
+		if (!(m_stateProvider is IGameStateProvider stateProvider))
+		{
+			GTDev.LogError("[GT/GameStateFx]  ERROR!!!  Awake: The supplied State Provider is not type `IGameStateProvider`. Path=" + base.transform.GetPathQ());
+			_isValid = false;
+			base.enabled = false;
+			return;
+		}
+		_stateProvider = stateProvider;
+		if (!_IsAllValid())
+		{
+			return;
+		}
+		foreach (StateReaction[] value in m_stateMap.Values)
+		{
+			if (value != null)
+			{
+				Array.Sort(value, _DelaySortCompare);
+			}
+		}
+	}
+
+	private static int _DelaySortCompare(StateReaction a, StateReaction b)
+	{
+		return a.delay.CompareTo(b.delay);
+	}
+
+	protected void OnEnable()
+	{
+		if (!_isValid || ApplicationQuittingState.IsQuitting)
+		{
+			base.enabled = false;
+		}
+		else
+		{
+			_stateProvider.GameStateReceiverRegister(this);
+		}
+	}
+
+	protected void OnDisable()
+	{
+		if (_isValid && !ApplicationQuittingState.IsQuitting)
+		{
+			_stateProvider.GameStateReceiverUnregister(this);
+		}
+	}
+
+	void IGameStateReceiver.GameStateReceiverOnStateChanged(long oldState, long newState)
+	{
+		if (!m_stateMap.TryGet(newState, out var o))
+		{
+			return;
+		}
+		_delayedExecContextFrameNum = Time.frameCount;
+		_reactionQueue.Clear();
+		StateReaction[] array = o;
+		foreach (StateReaction stateReaction in array)
+		{
+			if ((stateReaction.options & StateReaction.EOptions.Delay) != 0)
+			{
+				_reactionQueue.Enqueue(stateReaction);
+				GTDelayedExec.Add(this, stateReaction.delay, Time.frameCount);
+			}
+			else
+			{
+				_PerformReactions(stateReaction);
+			}
+		}
+	}
+
+	void IDelayedExecListener.OnDelayedAction(int contextFrameNum)
+	{
+		if (contextFrameNum == _delayedExecContextFrameNum && base.isActiveAndEnabled)
+		{
+			_PerformReactions(_reactionQueue.Dequeue());
+		}
+	}
+
+	private static void _PerformReactions(StateReaction reaction)
+	{
+		if ((reaction.options & StateReaction.EOptions.Sound) != 0)
+		{
+			if ((reaction.soundInfo.options & SoundEntry.EOptions.Sound) != 0)
+			{
+				reaction.soundInfo.source.resource = reaction.soundInfo.sound;
+			}
+			if ((reaction.soundInfo.options & SoundEntry.EOptions.Volume) != 0)
+			{
+				reaction.soundInfo.source.volume = reaction.soundInfo.volume;
+			}
+			if ((reaction.soundInfo.options & SoundEntry.EOptions.Pitch) != 0)
+			{
+				reaction.soundInfo.source.pitch = reaction.soundInfo.pitch;
+			}
+			reaction.soundInfo.source.GTPlay();
+		}
+		if ((reaction.options & StateReaction.EOptions.GameObjects) != 0)
+		{
+			GameObjectInfo[] gameObjectInfos = reaction.gameObjectInfos;
+			for (int i = 0; i < gameObjectInfos.Length; i++)
+			{
+				GameObjectInfo gameObjectInfo = gameObjectInfos[i];
+				gameObjectInfo.gameObject.SetActive(gameObjectInfo.activate);
+			}
+		}
+		if ((reaction.options & StateReaction.EOptions.Behaviours) != 0)
+		{
+			BehaviourInfo[] behaviourInfos = reaction.behaviourInfos;
+			for (int i = 0; i < behaviourInfos.Length; i++)
+			{
+				BehaviourInfo behaviourInfo = behaviourInfos[i];
+				behaviourInfo.behaviour.enabled = behaviourInfo.enable;
+			}
+		}
+		if ((reaction.options & StateReaction.EOptions.Renderers) != 0)
+		{
+			RenderInfo[] renderers = reaction.renderers;
+			for (int i = 0; i < renderers.Length; i++)
+			{
+				RenderInfo renderInfo = renderers[i];
+				renderInfo.renderer.enabled = renderInfo.enable;
+			}
+		}
+		if ((reaction.options & StateReaction.EOptions.Materials) == 0)
+		{
+			return;
+		}
+		MaterialInfo[] materialInfos = reaction.materialInfos;
+		for (int i = 0; i < materialInfos.Length; i++)
+		{
+			MaterialInfo.Entry[] entries = materialInfos[i].entries;
+			for (int j = 0; j < entries.Length; j++)
+			{
+				MaterialInfo.Entry entry = entries[j];
+				entry.slotInfo.renderer.GetSharedMaterials(_g_materialsCache);
+				if (entry.slotInfo.slot >= 0 && entry.slotInfo.slot < _g_materialsCache.Count)
+				{
+					_g_materialsCache[entry.slotInfo.slot] = entry.material;
+					entry.slotInfo.renderer.SetSharedMaterials(_g_materialsCache);
+				}
+			}
+		}
+	}
+
+	private bool _IsAllValid()
+	{
+		_isValid = true;
+		bool flag = false;
+		_hasDefaultAudioSource = m_defaultAudioSource != null;
+		foreach (StateReaction[] value in m_stateMap.Values)
+		{
+			foreach (StateReaction stateReaction in value)
+			{
+				if ((stateReaction.options & StateReaction.EOptions.Sound) != 0)
+				{
+					if ((stateReaction.soundInfo.options & SoundEntry.EOptions.Source) != 0)
+					{
+						if (!_IsOneValid(stateReaction.soundInfo.source != null, "an AudioSource is unassigned."))
+						{
+							return false;
+						}
+					}
+					else
+					{
+						flag = true;
+						stateReaction.soundInfo.source = m_defaultAudioSource;
+					}
+					if (!_IsOneValid(stateReaction.soundInfo.sound != null, "A sound is unassigned."))
+					{
+						return false;
+					}
+				}
+				if ((stateReaction.options & StateReaction.EOptions.GameObjects) != 0)
+				{
+					GameObjectInfo[] gameObjectInfos = stateReaction.gameObjectInfos;
+					for (int j = 0; j < gameObjectInfos.Length; j++)
+					{
+						GameObjectInfo gameObjectInfo = gameObjectInfos[j];
+						if (!_IsOneValid(gameObjectInfo.gameObject != null, "A GameObject is unassigned."))
+						{
+							return false;
+						}
+					}
+				}
+				if ((stateReaction.options & StateReaction.EOptions.Behaviours) != 0)
+				{
+					BehaviourInfo[] behaviourInfos = stateReaction.behaviourInfos;
+					for (int j = 0; j < behaviourInfos.Length; j++)
+					{
+						BehaviourInfo behaviourInfo = behaviourInfos[j];
+						if (!_IsOneValid(behaviourInfo.behaviour != null, "A Behaviour is unassigned."))
+						{
+							return false;
+						}
+					}
+				}
+				if ((stateReaction.options & StateReaction.EOptions.Renderers) != 0)
+				{
+					RenderInfo[] renderers = stateReaction.renderers;
+					for (int j = 0; j < renderers.Length; j++)
+					{
+						RenderInfo renderInfo = renderers[j];
+						if (!_IsOneValid(renderInfo.renderer != null, "A Renderer is unassigned."))
+						{
+							return false;
+						}
+					}
+				}
+				if ((stateReaction.options & StateReaction.EOptions.Materials) == 0)
+				{
+					continue;
+				}
+				MaterialInfo[] materialInfos = stateReaction.materialInfos;
+				for (int j = 0; j < materialInfos.Length; j++)
+				{
+					MaterialInfo.Entry[] entries = materialInfos[j].entries;
+					for (int k = 0; k < entries.Length; k++)
+					{
+						MaterialInfo.Entry entry = entries[k];
+						if (!_IsOneValid(entry.slotInfo.renderer != null, "A mat swap Renderer is unassigned"))
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		if (flag && !_hasDefaultAudioSource)
+		{
+			base.enabled = false;
+			_isValid = false;
+			return false;
+		}
+		return true;
+	}
+
+	private bool _IsOneValid(bool isValidCondition, string msgFailReason)
+	{
+		if (isValidCondition)
+		{
+			return true;
+		}
+		_isValid = false;
+		base.enabled = false;
+		return false;
 	}
 }

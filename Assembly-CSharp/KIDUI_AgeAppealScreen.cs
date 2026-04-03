@@ -1,9 +1,18 @@
-﻿using System;
 using System.Threading;
 using UnityEngine;
 
 public class KIDUI_AgeAppealScreen : MonoBehaviour
 {
+	[SerializeField]
+	private KIDUIButton _changeAgeButton;
+
+	[SerializeField]
+	private int _minimumDelay = 1000;
+
+	private string _submittedEmailAddress;
+
+	private CancellationTokenSource _cancellationTokenSource;
+
 	private void Awake()
 	{
 	}
@@ -14,31 +23,16 @@ public class KIDUI_AgeAppealScreen : MonoBehaviour
 
 	public void OnDisable()
 	{
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
 	public void ShowRestrictedAccessScreen()
 	{
-		base.gameObject.SetActive(true);
+		base.gameObject.SetActive(value: true);
 	}
 
 	public void OnChangeAgePressed()
 	{
-		base.gameObject.SetActive(false);
+		base.gameObject.SetActive(value: false);
 	}
-
-	[SerializeField]
-	private KIDUIButton _changeAgeButton;
-
-	[SerializeField]
-	private int _minimumDelay = 1000;
-
-	private string _submittedEmailAddress;
-
-	private CancellationTokenSource _cancellationTokenSource;
 }

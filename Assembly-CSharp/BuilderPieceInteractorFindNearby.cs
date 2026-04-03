@@ -1,18 +1,16 @@
-﻿using System;
-
 public class BuilderPieceInteractorFindNearby : MonoBehaviourPostTick
 {
+	public BuilderPieceInteractor pieceInteractor;
+
 	private void Awake()
 	{
 	}
 
 	public override void PostTick()
 	{
-		if (this.pieceInteractor != null)
+		if (pieceInteractor != null)
 		{
-			this.pieceInteractor.StartFindNearbyPieces();
+			pieceInteractor.StartFindNearbyPieces();
 		}
 	}
-
-	public BuilderPieceInteractor pieceInteractor;
 }

@@ -1,97 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class TimeOfDayEvent : TimeEvent
 {
-	public float currentTime
-	{
-		get
-		{
-			return this._currentTime;
-		}
-	}
-
-	public float timeStart
-	{
-		get
-		{
-			return this._timeStart;
-		}
-		set
-		{
-			this._timeStart = Mathf.Clamp01(value);
-		}
-	}
-
-	public float timeEnd
-	{
-		get
-		{
-			return this._timeEnd;
-		}
-		set
-		{
-			this._timeEnd = Mathf.Clamp01(value);
-		}
-	}
-
-	public bool isOngoing
-	{
-		get
-		{
-			return this._ongoing;
-		}
-	}
-
-	private void Start()
-	{
-		if (!this._dayNightManager)
-		{
-			this._dayNightManager = BetterDayNightManager.instance;
-		}
-		if (!this._dayNightManager)
-		{
-			return;
-		}
-		for (int i = 0; i < this._dayNightManager.timeOfDayRange.Length; i++)
-		{
-			this._totalSecondsInRange += this._dayNightManager.timeOfDayRange[i] * 3600.0;
-		}
-		this._totalSecondsInRange = Math.Floor(this._totalSecondsInRange);
-	}
-
-	private void Update()
-	{
-		this._elapsed += Time.deltaTime;
-		if (this._elapsed < 1f)
-		{
-			return;
-		}
-		this._elapsed = 0f;
-		this.UpdateTime();
-	}
-
-	private void UpdateTime()
-	{
-		this._currentSeconds = ((ITimeOfDaySystem)this._dayNightManager).currentTimeInSeconds;
-		this._currentSeconds = Math.Floor(this._currentSeconds);
-		this._currentTime = (float)(this._currentSeconds / this._totalSecondsInRange);
-		bool flag = this._currentTime >= 0f && this._currentTime >= this._timeStart && this._currentTime <= this._timeEnd;
-		if (!this._ongoing && flag)
-		{
-			base.StartEvent();
-		}
-		if (this._ongoing && !flag)
-		{
-			base.StopEvent();
-		}
-	}
-
-	public static implicit operator bool(TimeOfDayEvent ev)
-	{
-		return ev && ev.isOngoing;
-	}
-
 	[SerializeField]
 	[Range(0f, 1f)]
 	private float _timeStart;
@@ -115,4 +26,83 @@ public class TimeOfDayEvent : TimeEvent
 
 	[SerializeField]
 	private BetterDayNightManager _dayNightManager;
+
+	public float currentTime => _currentTime;
+
+	public float timeStart
+	{
+		get
+		{
+			return _timeStart;
+		}
+		set
+		{
+			_timeStart = Mathf.Clamp01(value);
+		}
+	}
+
+	public float timeEnd
+	{
+		get
+		{
+			return _timeEnd;
+		}
+		set
+		{
+			_timeEnd = Mathf.Clamp01(value);
+		}
+	}
+
+	public bool isOngoing => _ongoing;
+
+	private void Start()
+	{
+		if (!_dayNightManager)
+		{
+			_dayNightManager = BetterDayNightManager.instance;
+		}
+		if ((bool)_dayNightManager)
+		{
+			for (int i = 0; i < _dayNightManager.timeOfDayRange.Length; i++)
+			{
+				_totalSecondsInRange += _dayNightManager.timeOfDayRange[i] * 3600.0;
+			}
+			_totalSecondsInRange = Math.Floor(_totalSecondsInRange);
+		}
+	}
+
+	private void Update()
+	{
+		_elapsed += Time.deltaTime;
+		if (!(_elapsed < 1f))
+		{
+			_elapsed = 0f;
+			UpdateTime();
+		}
+	}
+
+	private void UpdateTime()
+	{
+		_currentSeconds = ((ITimeOfDaySystem)_dayNightManager).currentTimeInSeconds;
+		_currentSeconds = Math.Floor(_currentSeconds);
+		_currentTime = (float)(_currentSeconds / _totalSecondsInRange);
+		bool flag = _currentTime >= 0f && _currentTime >= _timeStart && _currentTime <= _timeEnd;
+		if (!_ongoing && flag)
+		{
+			StartEvent();
+		}
+		if (_ongoing && !flag)
+		{
+			StopEvent();
+		}
+	}
+
+	public static implicit operator bool(TimeOfDayEvent ev)
+	{
+		if ((bool)(UnityEngine.Object)ev)
+		{
+			return ev.isOngoing;
+		}
+		return false;
+	}
 }

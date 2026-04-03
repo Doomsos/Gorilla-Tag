@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
@@ -6,99 +5,6 @@ using UnityEngine;
 
 public class HoseSimulator : MonoBehaviour, ISpawnable
 {
-	bool ISpawnable.IsSpawned { get; set; }
-
-	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
-
-	void ISpawnable.OnDespawn()
-	{
-	}
-
-	void ISpawnable.OnSpawn(VRRig rig)
-	{
-		this.anchors = rig.cosmeticReferences.Get(this.startAnchorRef).GetComponent<HoseSimulatorAnchors>();
-		if (this.skinnedMeshRenderer != null)
-		{
-			Bounds localBounds = this.skinnedMeshRenderer.localBounds;
-			localBounds.extents = this.localBoundsOverride;
-			this.skinnedMeshRenderer.localBounds = localBounds;
-		}
-		this.hoseSectionLengths = new float[this.hoseBones.Length - 1];
-		this.hoseBonePositions = new Vector3[this.hoseBones.Length];
-		this.hoseBoneVelocities = new Vector3[this.hoseBones.Length];
-		for (int i = 0; i < this.hoseSectionLengths.Length; i++)
-		{
-			float num = 1f;
-			this.hoseSectionLengths[i] = num;
-			this.totalHoseLength += num;
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (this.myHoldable.InLeftHand())
-		{
-			this.isLeftHanded = true;
-		}
-		else if (this.myHoldable.InRightHand())
-		{
-			this.isLeftHanded = false;
-		}
-		for (int i = 0; i < this.miscBones.Length; i++)
-		{
-			Transform transform = this.isLeftHanded ? this.anchors.miscAnchorsLeft[i] : this.anchors.miscAnchorsRight[i];
-			this.miscBones[i].transform.position = transform.position;
-			this.miscBones[i].transform.rotation = transform.rotation;
-		}
-		this.startAnchor = (this.isLeftHanded ? this.anchors.leftAnchorPoint : this.anchors.rightAnchorPoint);
-		float x = this.myHoldable.transform.lossyScale.x;
-		float num = 0f;
-		Vector3 position = this.startAnchor.position;
-		Vector3 ctrl = position + this.startAnchor.forward * this.startStiffness * x;
-		Vector3 position2 = this.endAnchor.position;
-		Vector3 ctrl2 = position2 - this.endAnchor.forward * this.endStiffness * x;
-		for (int j = 0; j < this.hoseBones.Length; j++)
-		{
-			float num2 = num / this.totalHoseLength;
-			Vector3 vector = BezierUtils.BezierSolve(num2, position, ctrl, ctrl2, position2);
-			Vector3 a = BezierUtils.BezierSolve(num2 + 0.1f, position, ctrl, ctrl2, position2);
-			if (this.firstUpdate)
-			{
-				this.hoseBones[j].transform.position = vector;
-				this.hoseBonePositions[j] = vector;
-				this.hoseBoneVelocities[j] = Vector3.zero;
-			}
-			else
-			{
-				this.hoseBoneVelocities[j] *= this.damping;
-				this.hoseBonePositions[j] += this.hoseBoneVelocities[j] * Time.deltaTime;
-				float num3 = this.hoseBoneMaxDisplacement[j] * x;
-				if ((vector - this.hoseBonePositions[j]).IsLongerThan(num3))
-				{
-					Vector3 vector2 = vector + (this.hoseBonePositions[j] - vector).normalized * num3;
-					this.hoseBoneVelocities[j] += (vector2 - this.hoseBonePositions[j]) / Time.deltaTime;
-					this.hoseBonePositions[j] = vector2;
-				}
-				this.hoseBones[j].transform.position = this.hoseBonePositions[j];
-			}
-			this.hoseBones[j].transform.rotation = Quaternion.LookRotation(a - vector, this.endAnchor.transform.up);
-			if (j < this.hoseSectionLengths.Length)
-			{
-				num += this.hoseSectionLengths[j];
-			}
-		}
-		this.firstUpdate = false;
-	}
-
-	private void OnDrawGizmosSelected()
-	{
-		if (this.hoseBonePositions != null)
-		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawLineStrip(this.hoseBonePositions, false);
-		}
-	}
-
 	[SerializeField]
 	private SkinnedMeshRenderer skinnedMeshRenderer;
 
@@ -147,4 +53,97 @@ public class HoseSimulator : MonoBehaviour, ISpawnable
 	private TransferrableObject myHoldable;
 
 	private bool isLeftHanded;
+
+	bool ISpawnable.IsSpawned { get; set; }
+
+	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
+
+	void ISpawnable.OnDespawn()
+	{
+	}
+
+	void ISpawnable.OnSpawn(VRRig rig)
+	{
+		anchors = rig.cosmeticReferences.Get(startAnchorRef).GetComponent<HoseSimulatorAnchors>();
+		if (skinnedMeshRenderer != null)
+		{
+			Bounds localBounds = skinnedMeshRenderer.localBounds;
+			localBounds.extents = localBoundsOverride;
+			skinnedMeshRenderer.localBounds = localBounds;
+		}
+		hoseSectionLengths = new float[hoseBones.Length - 1];
+		hoseBonePositions = new Vector3[hoseBones.Length];
+		hoseBoneVelocities = new Vector3[hoseBones.Length];
+		for (int i = 0; i < hoseSectionLengths.Length; i++)
+		{
+			float num = 1f;
+			hoseSectionLengths[i] = num;
+			totalHoseLength += num;
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (myHoldable.InLeftHand())
+		{
+			isLeftHanded = true;
+		}
+		else if (myHoldable.InRightHand())
+		{
+			isLeftHanded = false;
+		}
+		for (int i = 0; i < miscBones.Length; i++)
+		{
+			Transform transform = (isLeftHanded ? anchors.miscAnchorsLeft[i] : anchors.miscAnchorsRight[i]);
+			miscBones[i].transform.position = transform.position;
+			miscBones[i].transform.rotation = transform.rotation;
+		}
+		startAnchor = (isLeftHanded ? anchors.leftAnchorPoint : anchors.rightAnchorPoint);
+		float x = myHoldable.transform.lossyScale.x;
+		float num = 0f;
+		Vector3 position = startAnchor.position;
+		Vector3 ctrl = position + startAnchor.forward * startStiffness * x;
+		Vector3 position2 = endAnchor.position;
+		Vector3 ctrl2 = position2 - endAnchor.forward * endStiffness * x;
+		for (int j = 0; j < hoseBones.Length; j++)
+		{
+			float num2 = num / totalHoseLength;
+			Vector3 vector = BezierUtils.BezierSolve(num2, position, ctrl, ctrl2, position2);
+			Vector3 vector2 = BezierUtils.BezierSolve(num2 + 0.1f, position, ctrl, ctrl2, position2);
+			if (firstUpdate)
+			{
+				hoseBones[j].transform.position = vector;
+				hoseBonePositions[j] = vector;
+				hoseBoneVelocities[j] = Vector3.zero;
+			}
+			else
+			{
+				hoseBoneVelocities[j] *= damping;
+				hoseBonePositions[j] += hoseBoneVelocities[j] * Time.deltaTime;
+				float num3 = hoseBoneMaxDisplacement[j] * x;
+				if ((vector - hoseBonePositions[j]).IsLongerThan(num3))
+				{
+					Vector3 vector3 = vector + (hoseBonePositions[j] - vector).normalized * num3;
+					hoseBoneVelocities[j] += (vector3 - hoseBonePositions[j]) / Time.deltaTime;
+					hoseBonePositions[j] = vector3;
+				}
+				hoseBones[j].transform.position = hoseBonePositions[j];
+			}
+			hoseBones[j].transform.rotation = Quaternion.LookRotation(vector2 - vector, endAnchor.transform.up);
+			if (j < hoseSectionLengths.Length)
+			{
+				num += hoseSectionLengths[j];
+			}
+		}
+		firstUpdate = false;
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		if (hoseBonePositions != null)
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLineStrip(hoseBonePositions, looped: false);
+		}
+	}
 }

@@ -1,8 +1,6 @@
-﻿using System;
-
 internal interface IUserCosmeticsCallback
 {
-	bool OnGetUserCosmetics(string cosmetics);
-
 	bool PendingUpdate { get; set; }
+
+	bool OnGetUserCosmetics(string cosmetics);
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaNetworking;
 using GorillaTag;
@@ -6,273 +6,31 @@ using UnityEngine;
 
 public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSimple
 {
-	public void UpdateLineState(GorillaPlayerScoreboardLine line)
+	public struct PlayerReports
 	{
-		if (line.playerActorNumber == -1)
-		{
-			return;
-		}
-		if (this.reportDict.ContainsKey(line.playerActorNumber))
-		{
-			this.reportDict[line.playerActorNumber] = new GorillaScoreboardTotalUpdater.PlayerReports(this.reportDict[line.playerActorNumber], line);
-			return;
-		}
-		this.reportDict.Add(line.playerActorNumber, new GorillaScoreboardTotalUpdater.PlayerReports(line));
-	}
+		public bool cheating;
 
-	protected void Awake()
-	{
-		if (GorillaScoreboardTotalUpdater.hasInstance && GorillaScoreboardTotalUpdater.instance != this)
-		{
-			Object.Destroy(this);
-			return;
-		}
-		GorillaScoreboardTotalUpdater.SetInstance(this);
-	}
+		public bool toxicity;
 
-	private void Start()
-	{
-		RoomSystem.JoinedRoomEvent += new Action(this.JoinedRoom);
-		RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
-		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(this.OnPlayerEnteredRoom);
-		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(this.OnPlayerLeftRoom);
-	}
+		public bool hateSpeech;
 
-	public static void CreateManager()
-	{
-		GorillaScoreboardTotalUpdater.SetInstance(new GameObject("GorillaScoreboardTotalUpdater").AddComponent<GorillaScoreboardTotalUpdater>());
-	}
+		public bool pressedReport;
 
-	private static void SetInstance(GorillaScoreboardTotalUpdater manager)
-	{
-		GorillaScoreboardTotalUpdater.instance = manager;
-		GorillaScoreboardTotalUpdater.hasInstance = true;
-		if (Application.isPlaying)
+		public PlayerReports(PlayerReports reportToUpdate, GorillaPlayerScoreboardLine lineToUpdate)
 		{
-			Object.DontDestroyOnLoad(manager);
+			cheating = reportToUpdate.cheating || lineToUpdate.reportedCheating;
+			toxicity = reportToUpdate.toxicity || lineToUpdate.reportedToxicity;
+			hateSpeech = reportToUpdate.hateSpeech || lineToUpdate.reportedHateSpeech;
+			pressedReport = lineToUpdate.reportInProgress;
 		}
-	}
 
-	public static void RegisterSL(GorillaPlayerScoreboardLine sL)
-	{
-		if (!GorillaScoreboardTotalUpdater.hasInstance)
+		public PlayerReports(GorillaPlayerScoreboardLine lineToUpdate)
 		{
-			GorillaScoreboardTotalUpdater.CreateManager();
+			cheating = lineToUpdate.reportedCheating;
+			toxicity = lineToUpdate.reportedToxicity;
+			hateSpeech = lineToUpdate.reportedHateSpeech;
+			pressedReport = lineToUpdate.reportInProgress;
 		}
-		if (!GorillaScoreboardTotalUpdater.allScoreboardLines.Contains(sL))
-		{
-			GorillaScoreboardTotalUpdater.allScoreboardLines.Add(sL);
-		}
-	}
-
-	public static void UnregisterSL(GorillaPlayerScoreboardLine sL)
-	{
-		if (!GorillaScoreboardTotalUpdater.hasInstance)
-		{
-			GorillaScoreboardTotalUpdater.CreateManager();
-		}
-		if (GorillaScoreboardTotalUpdater.allScoreboardLines.Contains(sL))
-		{
-			GorillaScoreboardTotalUpdater.allScoreboardLines.Remove(sL);
-		}
-	}
-
-	public static void RegisterScoreboard(GorillaScoreBoard sB)
-	{
-		if (!GorillaScoreboardTotalUpdater.hasInstance)
-		{
-			GorillaScoreboardTotalUpdater.CreateManager();
-		}
-		if (!GorillaScoreboardTotalUpdater.allScoreboards.Contains(sB))
-		{
-			GorillaScoreboardTotalUpdater.allScoreboards.Add(sB);
-			GorillaScoreboardTotalUpdater.instance.UpdateScoreboard(sB);
-		}
-	}
-
-	public static void UnregisterScoreboard(GorillaScoreBoard sB)
-	{
-		if (!GorillaScoreboardTotalUpdater.hasInstance)
-		{
-			GorillaScoreboardTotalUpdater.CreateManager();
-		}
-		if (GorillaScoreboardTotalUpdater.allScoreboards.Contains(sB))
-		{
-			GorillaScoreboardTotalUpdater.allScoreboards.Remove(sB);
-		}
-	}
-
-	public void UpdateActiveScoreboards()
-	{
-		for (int i = 0; i < GorillaScoreboardTotalUpdater.allScoreboards.Count; i++)
-		{
-			this.UpdateScoreboard(GorillaScoreboardTotalUpdater.allScoreboards[i]);
-		}
-	}
-
-	public void SetOfflineFailureText(string failureText)
-	{
-		this.offlineTextErrorString = failureText;
-		this.UpdateActiveScoreboards();
-	}
-
-	public void ClearOfflineFailureText()
-	{
-		this.offlineTextErrorString = null;
-		this.UpdateActiveScoreboards();
-	}
-
-	public void UpdateScoreboard(GorillaScoreBoard sB)
-	{
-		sB.SetSleepState(this.joinedRoom);
-		if (GorillaComputer.instance == null)
-		{
-			return;
-		}
-		if (!this.joinedRoom)
-		{
-			if (sB.notInRoomText != null)
-			{
-				sB.notInRoomText.gameObject.SetActive(true);
-				sB.notInRoomText.text = ((this.offlineTextErrorString != null) ? this.offlineTextErrorString : GorillaComputer.instance.offlineTextInitialString);
-			}
-			for (int i = 0; i < sB.lines.Count; i++)
-			{
-				sB.lines[i].ResetData();
-			}
-			return;
-		}
-		if (sB.notInRoomText != null)
-		{
-			sB.notInRoomText.gameObject.SetActive(false);
-		}
-		for (int j = 0; j < sB.lines.Count; j++)
-		{
-			GorillaPlayerScoreboardLine gorillaPlayerScoreboardLine = sB.lines[j];
-			if (j < this.playersInRoom.Count)
-			{
-				gorillaPlayerScoreboardLine.gameObject.SetActive(true);
-				gorillaPlayerScoreboardLine.SetLineData(this.playersInRoom[j]);
-			}
-			else
-			{
-				gorillaPlayerScoreboardLine.ResetData();
-				gorillaPlayerScoreboardLine.gameObject.SetActive(false);
-			}
-		}
-		sB.RedrawPlayerLines();
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void SliceUpdate()
-	{
-		if (GorillaScoreboardTotalUpdater.allScoreboardLines.Count == 0)
-		{
-			return;
-		}
-		for (int i = 0; i < GorillaScoreboardTotalUpdater.linesPerFrame; i++)
-		{
-			if (GorillaScoreboardTotalUpdater.lineIndex >= GorillaScoreboardTotalUpdater.allScoreboardLines.Count)
-			{
-				GorillaScoreboardTotalUpdater.lineIndex = 0;
-			}
-			GorillaScoreboardTotalUpdater.allScoreboardLines[GorillaScoreboardTotalUpdater.lineIndex].UpdateLine();
-			GorillaScoreboardTotalUpdater.lineIndex++;
-		}
-		for (int j = 0; j < GorillaScoreboardTotalUpdater.allScoreboards.Count; j++)
-		{
-			if (GorillaScoreboardTotalUpdater.allScoreboards[j].IsDirty)
-			{
-				this.UpdateScoreboard(GorillaScoreboardTotalUpdater.allScoreboards[j]);
-			}
-		}
-	}
-
-	private void OnPlayerEnteredRoom(NetPlayer netPlayer)
-	{
-		if (netPlayer == null)
-		{
-			Debug.LogError("Null netplayer");
-		}
-		if (!this.playersInRoom.Contains(netPlayer))
-		{
-			this.playersInRoom.Add(netPlayer);
-		}
-		this.UpdateActiveScoreboards();
-	}
-
-	private void OnPlayerLeftRoom(NetPlayer netPlayer)
-	{
-		if (netPlayer == null)
-		{
-			Debug.LogError("Null netplayer");
-		}
-		this.playersInRoom.Remove(netPlayer);
-		this.UpdateActiveScoreboards();
-		ReportMuteTimer reportMuteTimer;
-		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(netPlayer.ActorNumber, out reportMuteTimer))
-		{
-			GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.Remove(netPlayer.ActorNumber);
-			GorillaScoreboardTotalUpdater.m_reportMuteTimerPool.Return(reportMuteTimer);
-		}
-	}
-
-	internal void JoinedRoom()
-	{
-		this.joinedRoom = true;
-		foreach (NetPlayer item in NetworkSystem.Instance.AllNetPlayers)
-		{
-			this.playersInRoom.Add(item);
-		}
-		this.playersInRoom.Sort((NetPlayer x, NetPlayer y) => x.ActorNumber.CompareTo(y.ActorNumber));
-		foreach (GorillaScoreBoard sB in GorillaScoreboardTotalUpdater.allScoreboards)
-		{
-			this.UpdateScoreboard(sB);
-		}
-	}
-
-	private void OnLeftRoom()
-	{
-		this.joinedRoom = false;
-		this.playersInRoom.Clear();
-		this.reportDict.Clear();
-		foreach (GorillaScoreBoard sB in GorillaScoreboardTotalUpdater.allScoreboards)
-		{
-			this.UpdateScoreboard(sB);
-		}
-		foreach (KeyValuePair<int, ReportMuteTimer> keyValuePair in GorillaScoreboardTotalUpdater.m_reportMuteTimerDict)
-		{
-			GorillaScoreboardTotalUpdater.m_reportMuteTimerPool.Return(keyValuePair.Value);
-		}
-		GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.Clear();
-	}
-
-	public static void ReportMute(NetPlayer player, int muted)
-	{
-		ReportMuteTimer reportMuteTimer;
-		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(player.ActorNumber, out reportMuteTimer))
-		{
-			reportMuteTimer.Muted = muted;
-			if (!reportMuteTimer.Running)
-			{
-				reportMuteTimer.Start();
-			}
-			return;
-		}
-		reportMuteTimer = GorillaScoreboardTotalUpdater.m_reportMuteTimerPool.Take();
-		reportMuteTimer.SetReportData(player.UserId, player.NickName, muted);
-		reportMuteTimer.coolDown = 5f;
-		reportMuteTimer.Start();
-		GorillaScoreboardTotalUpdater.m_reportMuteTimerDict[player.ActorNumber] = reportMuteTimer;
 	}
 
 	public static GorillaScoreboardTotalUpdater instance;
@@ -300,36 +58,282 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 
 	public string offlineTextErrorString;
 
-	public Dictionary<int, GorillaScoreboardTotalUpdater.PlayerReports> reportDict = new Dictionary<int, GorillaScoreboardTotalUpdater.PlayerReports>();
+	public Dictionary<int, PlayerReports> reportDict = new Dictionary<int, PlayerReports>();
 
 	private static readonly Dictionary<int, ReportMuteTimer> m_reportMuteTimerDict = new Dictionary<int, ReportMuteTimer>(20);
 
 	private static readonly ObjectPool<ReportMuteTimer> m_reportMuteTimerPool = new ObjectPool<ReportMuteTimer>(20);
 
-	public struct PlayerReports
+	public void UpdateLineState(GorillaPlayerScoreboardLine line)
 	{
-		public PlayerReports(GorillaScoreboardTotalUpdater.PlayerReports reportToUpdate, GorillaPlayerScoreboardLine lineToUpdate)
+		if (line.playerActorNumber != -1)
 		{
-			this.cheating = (reportToUpdate.cheating || lineToUpdate.reportedCheating);
-			this.toxicity = (reportToUpdate.toxicity || lineToUpdate.reportedToxicity);
-			this.hateSpeech = (reportToUpdate.hateSpeech || lineToUpdate.reportedHateSpeech);
-			this.pressedReport = lineToUpdate.reportInProgress;
+			if (reportDict.ContainsKey(line.playerActorNumber))
+			{
+				reportDict[line.playerActorNumber] = new PlayerReports(reportDict[line.playerActorNumber], line);
+			}
+			else
+			{
+				reportDict.Add(line.playerActorNumber, new PlayerReports(line));
+			}
 		}
+	}
 
-		public PlayerReports(GorillaPlayerScoreboardLine lineToUpdate)
+	protected void Awake()
+	{
+		if (hasInstance && instance != this)
 		{
-			this.cheating = lineToUpdate.reportedCheating;
-			this.toxicity = lineToUpdate.reportedToxicity;
-			this.hateSpeech = lineToUpdate.reportedHateSpeech;
-			this.pressedReport = lineToUpdate.reportInProgress;
+			UnityEngine.Object.Destroy(this);
 		}
+		else
+		{
+			SetInstance(this);
+		}
+	}
 
-		public bool cheating;
+	private void Start()
+	{
+		RoomSystem.JoinedRoomEvent += new Action(JoinedRoom);
+		RoomSystem.LeftRoomEvent += new Action(OnLeftRoom);
+		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(OnPlayerEnteredRoom);
+		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(OnPlayerLeftRoom);
+	}
 
-		public bool toxicity;
+	public static void CreateManager()
+	{
+		SetInstance(new GameObject("GorillaScoreboardTotalUpdater").AddComponent<GorillaScoreboardTotalUpdater>());
+	}
 
-		public bool hateSpeech;
+	private static void SetInstance(GorillaScoreboardTotalUpdater manager)
+	{
+		instance = manager;
+		hasInstance = true;
+		if (Application.isPlaying)
+		{
+			UnityEngine.Object.DontDestroyOnLoad(manager);
+		}
+	}
 
-		public bool pressedReport;
+	public static void RegisterSL(GorillaPlayerScoreboardLine sL)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		if (!allScoreboardLines.Contains(sL))
+		{
+			allScoreboardLines.Add(sL);
+		}
+	}
+
+	public static void UnregisterSL(GorillaPlayerScoreboardLine sL)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		if (allScoreboardLines.Contains(sL))
+		{
+			allScoreboardLines.Remove(sL);
+		}
+	}
+
+	public static void RegisterScoreboard(GorillaScoreBoard sB)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		if (!allScoreboards.Contains(sB))
+		{
+			allScoreboards.Add(sB);
+			instance.UpdateScoreboard(sB);
+		}
+	}
+
+	public static void UnregisterScoreboard(GorillaScoreBoard sB)
+	{
+		if (!hasInstance)
+		{
+			CreateManager();
+		}
+		if (allScoreboards.Contains(sB))
+		{
+			allScoreboards.Remove(sB);
+		}
+	}
+
+	public void UpdateActiveScoreboards()
+	{
+		for (int i = 0; i < allScoreboards.Count; i++)
+		{
+			UpdateScoreboard(allScoreboards[i]);
+		}
+	}
+
+	public void SetOfflineFailureText(string failureText)
+	{
+		offlineTextErrorString = failureText;
+		UpdateActiveScoreboards();
+	}
+
+	public void ClearOfflineFailureText()
+	{
+		offlineTextErrorString = null;
+		UpdateActiveScoreboards();
+	}
+
+	public void UpdateScoreboard(GorillaScoreBoard sB)
+	{
+		sB.SetSleepState(joinedRoom);
+		if (GorillaComputer.instance == null)
+		{
+			return;
+		}
+		if (!joinedRoom)
+		{
+			if (sB.notInRoomText != null)
+			{
+				sB.notInRoomText.gameObject.SetActive(value: true);
+				sB.notInRoomText.text = ((offlineTextErrorString != null) ? offlineTextErrorString : GorillaComputer.instance.offlineTextInitialString);
+			}
+			for (int i = 0; i < sB.lines.Count; i++)
+			{
+				sB.lines[i].ResetData();
+			}
+			return;
+		}
+		if (sB.notInRoomText != null)
+		{
+			sB.notInRoomText.gameObject.SetActive(value: false);
+		}
+		for (int j = 0; j < sB.lines.Count; j++)
+		{
+			GorillaPlayerScoreboardLine gorillaPlayerScoreboardLine = sB.lines[j];
+			if (j < playersInRoom.Count)
+			{
+				gorillaPlayerScoreboardLine.gameObject.SetActive(value: true);
+				gorillaPlayerScoreboardLine.SetLineData(playersInRoom[j]);
+			}
+			else
+			{
+				gorillaPlayerScoreboardLine.ResetData();
+				gorillaPlayerScoreboardLine.gameObject.SetActive(value: false);
+			}
+		}
+		sB.RedrawPlayerLines();
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void SliceUpdate()
+	{
+		if (allScoreboardLines.Count == 0)
+		{
+			return;
+		}
+		for (int i = 0; i < linesPerFrame; i++)
+		{
+			if (lineIndex >= allScoreboardLines.Count)
+			{
+				lineIndex = 0;
+			}
+			allScoreboardLines[lineIndex].UpdateLine();
+			lineIndex++;
+		}
+		for (int j = 0; j < allScoreboards.Count; j++)
+		{
+			if (allScoreboards[j].IsDirty)
+			{
+				UpdateScoreboard(allScoreboards[j]);
+			}
+		}
+	}
+
+	private void OnPlayerEnteredRoom(NetPlayer netPlayer)
+	{
+		if (netPlayer == null)
+		{
+			Debug.LogError("Null netplayer");
+		}
+		if (!playersInRoom.Contains(netPlayer))
+		{
+			playersInRoom.Add(netPlayer);
+		}
+		UpdateActiveScoreboards();
+	}
+
+	private void OnPlayerLeftRoom(NetPlayer netPlayer)
+	{
+		if (netPlayer == null)
+		{
+			Debug.LogError("Null netplayer");
+		}
+		playersInRoom.Remove(netPlayer);
+		UpdateActiveScoreboards();
+		if (m_reportMuteTimerDict.TryGetValue(netPlayer.ActorNumber, out var value))
+		{
+			m_reportMuteTimerDict.Remove(netPlayer.ActorNumber);
+			m_reportMuteTimerPool.Return(value);
+		}
+	}
+
+	internal void JoinedRoom()
+	{
+		joinedRoom = true;
+		NetPlayer[] allNetPlayers = NetworkSystem.Instance.AllNetPlayers;
+		foreach (NetPlayer item in allNetPlayers)
+		{
+			playersInRoom.Add(item);
+		}
+		playersInRoom.Sort((NetPlayer x, NetPlayer y) => x.ActorNumber.CompareTo(y.ActorNumber));
+		foreach (GorillaScoreBoard allScoreboard in allScoreboards)
+		{
+			UpdateScoreboard(allScoreboard);
+		}
+	}
+
+	private void OnLeftRoom()
+	{
+		joinedRoom = false;
+		playersInRoom.Clear();
+		reportDict.Clear();
+		foreach (GorillaScoreBoard allScoreboard in allScoreboards)
+		{
+			UpdateScoreboard(allScoreboard);
+		}
+		foreach (KeyValuePair<int, ReportMuteTimer> item in m_reportMuteTimerDict)
+		{
+			m_reportMuteTimerPool.Return(item.Value);
+		}
+		m_reportMuteTimerDict.Clear();
+	}
+
+	public static void ReportMute(NetPlayer player, int muted)
+	{
+		if (m_reportMuteTimerDict.TryGetValue(player.ActorNumber, out var value))
+		{
+			value.Muted = muted;
+			if (!value.Running)
+			{
+				value.Start();
+			}
+		}
+		else
+		{
+			value = m_reportMuteTimerPool.Take();
+			value.SetReportData(player.UserId, player.NickName, muted);
+			value.coolDown = 5f;
+			value.Start();
+			m_reportMuteTimerDict[player.ActorNumber] = value;
+		}
 	}
 }

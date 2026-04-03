@@ -1,138 +1,130 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using KID.Model;
 using TMPro;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class PlayerTimerBoard : MonoBehaviour
 {
-	public class PlayerTimerBoard : MonoBehaviour
+	[SerializeField]
+	private GameObject linesParent;
+
+	public List<PlayerTimerBoardLine> lines;
+
+	public TextMeshPro notInRoomText;
+
+	public TextMeshPro playerColumn;
+
+	public TextMeshPro timeColumn;
+
+	[SerializeField]
+	private int startingYValue;
+
+	[SerializeField]
+	private int lineHeight;
+
+	private StringBuilder stringBuilder = new StringBuilder(220);
+
+	private StringBuilder stringBuilderTime = new StringBuilder(220);
+
+	private const string MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER_KEY = "MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER";
+
+	private const string MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES_KEY = "MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES";
+
+	private bool isInitialized;
+
+	public bool IsDirty { get; set; } = true;
+
+	private void Start()
 	{
-		public bool IsDirty { get; set; } = true;
+		TryInit();
+	}
 
-		private void Start()
-		{
-			this.TryInit();
-		}
+	private void OnEnable()
+	{
+		TryInit();
+		LocalisationManager.RegisterOnLanguageChanged(RedrawPlayerLines);
+	}
 
-		private void OnEnable()
+	private void TryInit()
+	{
+		if (!isInitialized && !(PlayerTimerManager.instance == null))
 		{
-			this.TryInit();
-			LocalisationManager.RegisterOnLanguageChanged(new Action(this.RedrawPlayerLines));
-		}
-
-		private void TryInit()
-		{
-			if (this.isInitialized)
-			{
-				return;
-			}
-			if (PlayerTimerManager.instance == null)
-			{
-				return;
-			}
 			PlayerTimerManager.instance.RegisterTimerBoard(this);
-			this.isInitialized = true;
+			isInitialized = true;
 		}
+	}
 
-		private void OnDisable()
+	private void OnDisable()
+	{
+		if (PlayerTimerManager.instance != null)
 		{
-			if (PlayerTimerManager.instance != null)
-			{
-				PlayerTimerManager.instance.UnregisterTimerBoard(this);
-			}
-			this.isInitialized = false;
-			LocalisationManager.UnregisterOnLanguageChanged(new Action(this.RedrawPlayerLines));
+			PlayerTimerManager.instance.UnregisterTimerBoard(this);
 		}
+		isInitialized = false;
+		LocalisationManager.UnregisterOnLanguageChanged(RedrawPlayerLines);
+	}
 
-		public void SetSleepState(bool awake)
+	public void SetSleepState(bool awake)
+	{
+		playerColumn.enabled = awake;
+		timeColumn.enabled = awake;
+		if (linesParent != null)
 		{
-			this.playerColumn.enabled = awake;
-			this.timeColumn.enabled = awake;
-			if (this.linesParent != null)
-			{
-				this.linesParent.SetActive(awake);
-			}
+			linesParent.SetActive(awake);
 		}
+	}
 
-		public void SortLines()
+	public void SortLines()
+	{
+		lines.Sort(PlayerTimerBoardLine.CompareByTotalTime);
+	}
+
+	public void RedrawPlayerLines()
+	{
+		stringBuilder.Clear();
+		stringBuilderTime.Clear();
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER", out var result, "<b><color=yellow>PLAYER</color></b>"))
 		{
-			this.lines.Sort(new Comparison<PlayerTimerBoardLine>(PlayerTimerBoardLine.CompareByTotalTime));
+			Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER]");
 		}
-
-		public void RedrawPlayerLines()
+		stringBuilder.Append("<b><color=yellow>");
+		stringBuilder.Append(result);
+		stringBuilder.Append("</color></b>");
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES", out result, "<b><color=yellow>LATEST TIME</color></b>"))
 		{
-			this.stringBuilder.Clear();
-			this.stringBuilderTime.Clear();
-			string value;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER", out value, "<b><color=yellow>PLAYER</color></b>"))
+			Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES]");
+		}
+		stringBuilderTime.Append("<b><color=yellow>");
+		stringBuilderTime.Append(result);
+		stringBuilderTime.Append("</color></b>");
+		SortLines();
+		Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Custom_Nametags);
+		bool flag = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER) && permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.PROHIBITED;
+		for (int i = 0; i < lines.Count; i++)
+		{
+			try
 			{
-				Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER]");
-			}
-			this.stringBuilder.Append("<b><color=yellow>");
-			this.stringBuilder.Append(value);
-			this.stringBuilder.Append("</color></b>");
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES", out value, "<b><color=yellow>LATEST TIME</color></b>"))
-			{
-				Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES]");
-			}
-			this.stringBuilderTime.Append("<b><color=yellow>");
-			this.stringBuilderTime.Append(value);
-			this.stringBuilderTime.Append("</color></b>");
-			this.SortLines();
-			Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Custom_Nametags);
-			bool flag = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER) && permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.PROHIBITED;
-			for (int i = 0; i < this.lines.Count; i++)
-			{
-				try
+				if (lines[i].gameObject.activeInHierarchy)
 				{
-					if (this.lines[i].gameObject.activeInHierarchy)
+					lines[i].gameObject.GetComponent<RectTransform>().localPosition = new Vector3(0f, startingYValue - lineHeight * i, 0f);
+					if (lines[i].linePlayer != null && lines[i].linePlayer.InRoom)
 					{
-						this.lines[i].gameObject.GetComponent<RectTransform>().localPosition = new Vector3(0f, (float)(this.startingYValue - this.lineHeight * i), 0f);
-						if (this.lines[i].linePlayer != null && this.lines[i].linePlayer.InRoom)
-						{
-							this.stringBuilder.Append("\n ");
-							this.stringBuilder.Append(flag ? this.lines[i].playerNameVisible : this.lines[i].linePlayer.DefaultName);
-							this.stringBuilderTime.Append("\n ");
-							this.stringBuilderTime.Append(this.lines[i].playerTimeStr);
-						}
+						stringBuilder.Append("\n ");
+						stringBuilder.Append(flag ? lines[i].playerNameVisible : lines[i].linePlayer.DefaultName);
+						stringBuilderTime.Append("\n ");
+						stringBuilderTime.Append(lines[i].playerTimeStr);
 					}
 				}
-				catch
-				{
-				}
 			}
-			this.playerColumn.text = this.stringBuilder.ToString();
-			this.timeColumn.text = this.stringBuilderTime.ToString();
-			this.IsDirty = false;
+			catch
+			{
+			}
 		}
-
-		[SerializeField]
-		private GameObject linesParent;
-
-		public List<PlayerTimerBoardLine> lines;
-
-		public TextMeshPro notInRoomText;
-
-		public TextMeshPro playerColumn;
-
-		public TextMeshPro timeColumn;
-
-		[SerializeField]
-		private int startingYValue;
-
-		[SerializeField]
-		private int lineHeight;
-
-		private StringBuilder stringBuilder = new StringBuilder(220);
-
-		private StringBuilder stringBuilderTime = new StringBuilder(220);
-
-		private const string MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER_KEY = "MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER";
-
-		private const string MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES_KEY = "MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES";
-
-		private bool isInitialized;
+		playerColumn.text = stringBuilder.ToString();
+		timeColumn.text = stringBuilderTime.ToString();
+		IsDirty = false;
 	}
 }

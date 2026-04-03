@@ -1,486 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using UnityEngine;
 
 public class GrowingSnowballThrowable : SnowballThrowable
 {
-	public int SizeLevel
-	{
-		get
-		{
-			return this.sizeLevel;
-		}
-	}
-
-	public int MaxSizeLevel
-	{
-		get
-		{
-			return Mathf.Max(this.snowballSizeLevels.Count - 1, 0);
-		}
-	}
-
-	public float CurrentSnowballRadius
-	{
-		get
-		{
-			if (this.snowballSizeLevels.Count > 0 && this.sizeLevel > -1 && this.sizeLevel < this.snowballSizeLevels.Count)
-			{
-				return this.snowballSizeLevels[this.sizeLevel].snowballScale * this.modelRadius * base.transform.lossyScale.x;
-			}
-			return this.modelRadius * base.transform.lossyScale.x;
-		}
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		if (NetworkSystem.Instance != null)
-		{
-			NetworkSystem.Instance.OnMultiplayerStarted += this.StartedMultiplayerSession;
-		}
-		else
-		{
-			Debug.LogError("NetworkSystem.Instance was null in SnowballThrowable Awake");
-		}
-		VRRigCache.OnRigActivated += this.VRRigActivated;
-		VRRigCache.OnRigDeactivated += this.VRRigDeactivated;
-	}
-
-	public override void OnEnable()
-	{
-		base.OnEnable();
-		this.snowballModelParentTransform.localPosition = this.modelParentOffset;
-		this.snowballModelTransform.localPosition = this.modelOffset;
-		this.otherHandSnowball = (this.isLeftHanded ? (EquipmentInteractor.instance.rightHandHeldEquipment as GrowingSnowballThrowable) : (EquipmentInteractor.instance.leftHandHeldEquipment as GrowingSnowballThrowable));
-		if (Time.time > this.maintainSizeLevelUntilLocalTime)
-		{
-			this.SetSizeLevelLocal(0);
-		}
-		this.CreatePhotonEventsIfNull();
-	}
-
-	protected override void OnDestroy()
-	{
-		this.DestroyPhotonEvents();
-	}
-
-	private void VRRigActivated(RigContainer rigContainer)
-	{
-		this.targetRig = base.GetComponentInParent<VRRig>(true);
-		this.isOfflineRig = (this.targetRig != null && this.targetRig.isOfflineVRRig);
-		if (rigContainer.Rig == this.targetRig)
-		{
-			this.CreatePhotonEventsIfNull();
-		}
-	}
-
-	private void VRRigDeactivated(RigContainer rigContainer)
-	{
-		if (rigContainer.Rig == this.targetRig)
-		{
-			this.DestroyPhotonEvents();
-		}
-	}
-
-	private void StartedMultiplayerSession()
-	{
-		this.targetRig = base.GetComponentInParent<VRRig>(true);
-		this.isOfflineRig = (this.targetRig != null && this.targetRig.isOfflineVRRig);
-		if (this.isOfflineRig)
-		{
-			this.DestroyPhotonEvents();
-			this.CreatePhotonEventsIfNull();
-		}
-	}
-
-	private void CreatePhotonEventsIfNull()
-	{
-		if (this.targetRig == null)
-		{
-			this.targetRig = base.GetComponentInParent<VRRig>(true);
-			this.isOfflineRig = (this.targetRig != null && this.targetRig.isOfflineVRRig);
-		}
-		if (this.targetRig == null || this.targetRig.netView == null)
-		{
-			return;
-		}
-		if (this.changeSizeEvent == null)
-		{
-			"SnowballThrowable" + base.gameObject.name + (this.isLeftHanded ? "ChangeSizeEventLeft" : "ChangeSizeEventRight") + this.targetRig.netView.ViewID.ToString();
-			int eventId = StaticHash.Compute("SnowballThrowable", base.gameObject.name, this.isLeftHanded ? "ChangeSizeEventLeft" : "ChangeSizeEventRight", this.targetRig.netView.ViewID.ToString());
-			this.changeSizeEvent = new PhotonEvent(eventId);
-			this.changeSizeEvent.reliable = true;
-			this.changeSizeEvent += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ChangeSizeEventReceiver);
-		}
-		if (this.snowballThrowEvent == null)
-		{
-			"SnowballThrowable" + base.gameObject.name + (this.isLeftHanded ? "SnowballThrowEventLeft" : "SnowballThrowEventRight") + this.targetRig.netView.ViewID.ToString();
-			int eventId2 = StaticHash.Compute("SnowballThrowable", base.gameObject.name, this.isLeftHanded ? "SnowballThrowEventLeft" : "SnowballThrowEventRight", this.targetRig.netView.ViewID.ToString());
-			this.snowballThrowEvent = new PhotonEvent(eventId2);
-			this.snowballThrowEvent.reliable = true;
-			this.snowballThrowEvent += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.SnowballThrowEventReceiver);
-		}
-	}
-
-	private void DestroyPhotonEvents()
-	{
-		if (this.changeSizeEvent != null)
-		{
-			this.changeSizeEvent -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ChangeSizeEventReceiver);
-			this.changeSizeEvent.Dispose();
-			this.changeSizeEvent = null;
-		}
-		if (this.snowballThrowEvent != null)
-		{
-			this.snowballThrowEvent -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.SnowballThrowEventReceiver);
-			this.snowballThrowEvent.Dispose();
-			this.snowballThrowEvent = null;
-		}
-	}
-
-	public void IncreaseSize(int increase)
-	{
-		this.SetSizeLevelAuthority(this.sizeLevel + increase);
-	}
-
-	private void SetSizeLevelAuthority(int sizeLevel)
-	{
-		if (this.targetRig != null && this.targetRig.creator != null && this.targetRig.creator.IsLocal)
-		{
-			int validSizeLevel = this.GetValidSizeLevel(sizeLevel);
-			if (validSizeLevel > this.sizeLevel)
-			{
-				this.sizeIncreaseSoundBankPlayer.Play();
-			}
-			this.SetSizeLevelLocal(validSizeLevel);
-			PhotonEvent photonEvent = this.changeSizeEvent;
-			if (photonEvent == null)
-			{
-				return;
-			}
-			photonEvent.RaiseOthers(new object[]
-			{
-				validSizeLevel
-			});
-		}
-	}
-
-	private int GetValidSizeLevel(int inputSizeLevel)
-	{
-		int max = Mathf.Max(this.snowballSizeLevels.Count - 1, 0);
-		return Mathf.Clamp(inputSizeLevel, 0, max);
-	}
-
-	private void SetSizeLevelLocal(int sizeLevel)
-	{
-		int validSizeLevel = this.GetValidSizeLevel(sizeLevel);
-		if (validSizeLevel >= 0 && validSizeLevel != this.sizeLevel)
-		{
-			this.sizeLevel = validSizeLevel;
-			this.snowballModelParentTransform.localScale = Vector3.one * this.snowballSizeLevels[this.sizeLevel].snowballScale;
-		}
-	}
-
-	private void ChangeSizeEventReceiver(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
-	{
-		if (sender != receiver)
-		{
-			return;
-		}
-		if (args == null || args.Length < 1)
-		{
-			return;
-		}
-		int num = (this.targetRig != null && this.targetRig.gameObject.activeInHierarchy && this.targetRig.netView != null && this.targetRig.netView.Owner != null) ? this.targetRig.netView.Owner.ActorNumber : -1;
-		if (info.senderID != num)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "ChangeSizeEventReceiver");
-		int num2 = (int)args[0];
-		if (this.GetValidSizeLevel(num2) > this.sizeLevel && this.sizeIncreaseSoundBankPlayer.gameObject.activeInHierarchy)
-		{
-			this.sizeIncreaseSoundBankPlayer.Play();
-		}
-		this.SetSizeLevelLocal(num2);
-		if (!base.gameObject.activeSelf)
-		{
-			this.maintainSizeLevelUntilLocalTime = Time.time + 0.1f;
-		}
-	}
-
-	private void SnowballThrowEventReceiver(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
-	{
-		if (sender != receiver)
-		{
-			return;
-		}
-		if (args == null || args.Length < 3)
-		{
-			return;
-		}
-		if (this.targetRig.IsNull() || !this.targetRig.gameObject.activeSelf)
-		{
-			return;
-		}
-		NetPlayer creator = this.targetRig.creator;
-		if (info.senderID != this.targetRig.creator.ActorNumber)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "SnowballThrowEventReceiver");
-		if (!FXSystem.CheckCallSpam(this.targetRig.fxSettings, 4, info.SentServerTime))
-		{
-			return;
-		}
-		object obj = args[0];
-		if (obj is Vector3)
-		{
-			Vector3 vector = (Vector3)obj;
-			obj = args[1];
-			if (obj is Vector3)
-			{
-				Vector3 inVel = (Vector3)obj;
-				obj = args[2];
-				if (obj is int)
-				{
-					int index = (int)obj;
-					Vector3 velocity = this.targetRig.ClampVelocityRelativeToPlayerSafe(inVel, 50f, 100f);
-					float x = this.snowballModelTransform.lossyScale.x;
-					float num = 10000f;
-					if (!vector.IsValid(num) || !this.targetRig.IsPositionInRange(vector, 4f))
-					{
-						return;
-					}
-					this.LaunchSnowballRemote(vector, velocity, x, index, info);
-					return;
-				}
-			}
-		}
-	}
-
-	protected override void LateUpdateLocal()
-	{
-		base.LateUpdateLocal();
-		if (GrowingSnowballThrowable.twoHandedSnowballGrowing)
-		{
-			if (this.otherHandSnowball != null && this.otherHandSnowball.isActiveAndEnabled)
-			{
-				IHoldableObject holdableObject = this.isLeftHanded ? EquipmentInteractor.instance.rightHandHeldEquipment : EquipmentInteractor.instance.leftHandHeldEquipment;
-				if (holdableObject != null && this.otherHandSnowball != (GrowingSnowballThrowable)holdableObject)
-				{
-					this.otherHandSnowball = null;
-					return;
-				}
-				float num = this.otherHandSnowball.CurrentSnowballRadius + this.CurrentSnowballRadius;
-				if (this.SizeLevel < this.MaxSizeLevel && this.otherHandSnowball.SizeLevel < this.otherHandSnowball.MaxSizeLevel && (this.otherHandSnowball.snowballModelTransform.position - this.snowballModelTransform.position).sqrMagnitude < num * num)
-				{
-					int num2 = this.SizeLevel - this.otherHandSnowball.SizeLevel;
-					float magnitude = this.velocityEstimator.linearVelocity.magnitude;
-					float magnitude2 = this.otherHandSnowball.velocityEstimator.linearVelocity.magnitude;
-					bool flag;
-					if (Mathf.Abs(magnitude - magnitude2) > this.combineBasedOnSpeedThreshold || num2 == 0)
-					{
-						flag = (magnitude > magnitude2);
-					}
-					else
-					{
-						flag = (num2 < 0);
-					}
-					if (flag)
-					{
-						this.otherHandSnowball.IncreaseSize(this.sizeLevel + 1);
-						GorillaTagger.Instance.StartVibration(!this.isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
-						base.SetSnowballActiveLocal(false);
-						return;
-					}
-					this.IncreaseSize(this.otherHandSnowball.SizeLevel + 1);
-					GorillaTagger.Instance.StartVibration(this.isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
-					this.otherHandSnowball.SetSnowballActiveLocal(false);
-					return;
-				}
-			}
-			else
-			{
-				this.otherHandSnowball = null;
-			}
-		}
-	}
-
-	protected override void OnSnowballRelease()
-	{
-		if (base.isActiveAndEnabled)
-		{
-			this.PerformSnowballThrowAuthority();
-		}
-	}
-
-	protected override void PerformSnowballThrowAuthority()
-	{
-		if (!(this.targetRig != null) || this.targetRig.creator == null || !this.targetRig.creator.IsLocal)
-		{
-			return;
-		}
-		Vector3 b = Vector3.zero;
-		Rigidbody component = GorillaTagger.Instance.GetComponent<Rigidbody>();
-		if (component != null)
-		{
-			b = component.linearVelocity;
-		}
-		Vector3 a = this.velocityEstimator.linearVelocity - b;
-		float magnitude = a.magnitude;
-		if (magnitude > 0.001f)
-		{
-			float num = Mathf.Clamp(magnitude * this.linSpeedMultiplier, 0f, this.maxLinSpeed);
-			a *= num / magnitude;
-		}
-		Vector3 vector = a + b;
-		this.targetRig.GetThrowableProjectileColor(this.isLeftHanded);
-		Transform transform = this.snowballModelTransform;
-		Vector3 position = transform.position;
-		float x = transform.lossyScale.x;
-		SlingshotProjectile slingshotProjectile = this.LaunchSnowballLocal(position, vector, x);
-		base.SetSnowballActiveLocal(false);
-		if (this.randModelIndex > -1 && this.randModelIndex < this.localModels.Count && this.localModels[this.randModelIndex].destroyAfterRelease)
-		{
-			slingshotProjectile.DestroyAfterRelease();
-		}
-		PhotonEvent photonEvent = this.snowballThrowEvent;
-		if (photonEvent == null)
-		{
-			return;
-		}
-		photonEvent.RaiseOthers(new object[]
-		{
-			position,
-			vector,
-			slingshotProjectile.myProjectileCount
-		});
-	}
-
-	protected virtual SlingshotProjectile LaunchSnowballLocal(Vector3 location, Vector3 velocity, float scale)
-	{
-		return this.LaunchSnowballLocal(location, velocity, scale, false, Color.white);
-	}
-
-	protected override SlingshotProjectile LaunchSnowballLocal(Vector3 location, Vector3 velocity, float scale, bool randomizeColour, Color colour)
-	{
-		SlingshotProjectile slingshotProjectile = this.SpawnGrowingSnowball(ref velocity, scale);
-		int projectileCount = ProjectileTracker.AddAndIncrementLocalProjectile(slingshotProjectile, velocity, location, scale);
-		slingshotProjectile.Launch(location, velocity, NetworkSystem.Instance.LocalPlayer, false, false, projectileCount, scale, randomizeColour, colour);
-		if (string.IsNullOrEmpty(this.throwEventName))
-		{
-			PlayerGameEvents.LaunchedProjectile(this.projectilePrefab.name);
-		}
-		else
-		{
-			PlayerGameEvents.LaunchedProjectile(this.throwEventName);
-		}
-		slingshotProjectile.OnImpact += this.OnProjectileImpact;
-		return slingshotProjectile;
-	}
-
-	protected virtual SlingshotProjectile LaunchSnowballRemote(Vector3 location, Vector3 velocity, float scale, int index, PhotonMessageInfoWrapped info)
-	{
-		return this.LaunchSnowballRemote(location, velocity, scale, index, false, Color.white, info);
-	}
-
-	protected virtual SlingshotProjectile LaunchSnowballRemote(Vector3 location, Vector3 velocity, float scale, int index, bool randomizeColour, Color colour, PhotonMessageInfoWrapped info)
-	{
-		SlingshotProjectile slingshotProjectile = this.SpawnGrowingSnowball(ref velocity, scale);
-		ProjectileTracker.AddRemotePlayerProjectile(info.Sender, slingshotProjectile, index, info.SentServerTime, velocity, location, scale);
-		slingshotProjectile.Launch(location, velocity, info.Sender, false, false, index, scale, randomizeColour, Color.white);
-		if (string.IsNullOrEmpty(this.throwEventName))
-		{
-			PlayerGameEvents.LaunchedProjectile(this.projectilePrefab.name);
-		}
-		else
-		{
-			PlayerGameEvents.LaunchedProjectile(this.throwEventName);
-		}
-		slingshotProjectile.OnImpact += this.OnProjectileImpact;
-		return slingshotProjectile;
-	}
-
-	private SlingshotProjectile SpawnGrowingSnowball(ref Vector3 velocity, float scale)
-	{
-		SlingshotProjectile component = ObjectPools.instance.Instantiate(this.randomModelSelection ? this.localModels[this.randModelIndex].projectilePrefab : this.projectilePrefab, true).GetComponent<SlingshotProjectile>();
-		if (this.snowballSizeLevels.Count > 0 && this.sizeLevel >= 0 && this.sizeLevel < this.snowballSizeLevels.Count)
-		{
-			float num = scale / this.snowballSizeLevels[this.sizeLevel].snowballScale;
-			SlingshotProjectile.AOEKnockbackConfig aoeKnockbackConfig = this.snowballSizeLevels[this.sizeLevel].aoeKnockbackConfig;
-			aoeKnockbackConfig.aeoInnerRadius *= num;
-			aoeKnockbackConfig.aeoOuterRadius *= num;
-			aoeKnockbackConfig.knockbackVelocity *= num;
-			aoeKnockbackConfig.impactVelocityThreshold *= num;
-			velocity *= this.snowballSizeLevels[this.sizeLevel].throwSpeedMultiplier;
-			component.gravityMultiplier = this.snowballSizeLevels[this.sizeLevel].gravityMultiplier;
-			component.impactEffectScaleMultiplier = this.snowballSizeLevels[this.sizeLevel].impactEffectScale;
-			component.aoeKnockbackConfig = new SlingshotProjectile.AOEKnockbackConfig?(aoeKnockbackConfig);
-			component.impactSoundVolumeOverride = new float?(this.snowballSizeLevels[this.sizeLevel].impactSoundVolume);
-			component.impactSoundPitchOverride = new float?(this.snowballSizeLevels[this.sizeLevel].impactSoundPitch);
-		}
-		return component;
-	}
-
-	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-	{
-		if (!(this.targetRig != null) || this.targetRig.creator == null || !this.targetRig.creator.IsLocal)
-		{
-			return;
-		}
-		SnowballThrowable snowballThrowable;
-		if (((this.isLeftHanded && grabbingHand == EquipmentInteractor.instance.rightHand && EquipmentInteractor.instance.rightHandHeldEquipment == null) || (!this.isLeftHanded && grabbingHand == EquipmentInteractor.instance.leftHand && EquipmentInteractor.instance.leftHandHeldEquipment == null)) && (this.isLeftHanded ? SnowballMaker.rightHandInstance : SnowballMaker.leftHandInstance).TryCreateSnowball(this.matDataIndexes[0], out snowballThrowable))
-		{
-			GrowingSnowballThrowable growingSnowballThrowable = snowballThrowable as GrowingSnowballThrowable;
-			if (growingSnowballThrowable != null)
-			{
-				growingSnowballThrowable.IncreaseSize(this.sizeLevel);
-				GorillaTagger.Instance.StartVibration(!this.isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
-				base.SetSnowballActiveLocal(false);
-			}
-		}
-	}
-
-	public Transform snowballModelParentTransform;
-
-	public Transform snowballModelTransform;
-
-	public Vector3 modelParentOffset = Vector3.zero;
-
-	public Vector3 modelOffset = Vector3.zero;
-
-	public float modelRadius = 0.055f;
-
-	[Tooltip("Snowballs will combine into the larger snowball unless they are moving faster than this threshold.Then the faster moving snowball will go in to the more stationary hand")]
-	public float combineBasedOnSpeedThreshold = 0.5f;
-
-	public SoundBankPlayer sizeIncreaseSoundBankPlayer;
-
-	public List<GrowingSnowballThrowable.SizeParameters> snowballSizeLevels = new List<GrowingSnowballThrowable.SizeParameters>();
-
-	private int sizeLevel;
-
-	private float maintainSizeLevelUntilLocalTime;
-
-	private PhotonEvent changeSizeEvent;
-
-	private PhotonEvent snowballThrowEvent;
-
-	[HideInInspector]
-	public static bool debugDrawAOERange = false;
-
-	[HideInInspector]
-	public static bool twoHandedSnowballGrowing = true;
-
-	private Queue<GrowingSnowballThrowable.AOERangeDebugDraw> aoeRangeDebugDrawQueue = new Queue<GrowingSnowballThrowable.AOERangeDebugDraw>();
-
-	private GrowingSnowballThrowable otherHandSnowball;
-
-	private float debugDrawAOERangeTime = 1.5f;
-
 	[Serializable]
 	public struct SizeParameters
 	{
@@ -508,5 +32,405 @@ public class GrowingSnowballThrowable : SnowballThrowable
 		public float innerRadius;
 
 		public float outerRadius;
+	}
+
+	public Transform snowballModelParentTransform;
+
+	public Transform snowballModelTransform;
+
+	public Vector3 modelParentOffset = Vector3.zero;
+
+	public Vector3 modelOffset = Vector3.zero;
+
+	public float modelRadius = 0.055f;
+
+	[Tooltip("Snowballs will combine into the larger snowball unless they are moving faster than this threshold.Then the faster moving snowball will go in to the more stationary hand")]
+	public float combineBasedOnSpeedThreshold = 0.5f;
+
+	public SoundBankPlayer sizeIncreaseSoundBankPlayer;
+
+	public List<SizeParameters> snowballSizeLevels = new List<SizeParameters>();
+
+	private int sizeLevel;
+
+	private float maintainSizeLevelUntilLocalTime;
+
+	private PhotonEvent changeSizeEvent;
+
+	private PhotonEvent snowballThrowEvent;
+
+	[HideInInspector]
+	public static bool debugDrawAOERange = false;
+
+	[HideInInspector]
+	public static bool twoHandedSnowballGrowing = true;
+
+	private Queue<AOERangeDebugDraw> aoeRangeDebugDrawQueue = new Queue<AOERangeDebugDraw>();
+
+	private GrowingSnowballThrowable otherHandSnowball;
+
+	private float debugDrawAOERangeTime = 1.5f;
+
+	public int SizeLevel => sizeLevel;
+
+	public int MaxSizeLevel => Mathf.Max(snowballSizeLevels.Count - 1, 0);
+
+	public float CurrentSnowballRadius
+	{
+		get
+		{
+			if (snowballSizeLevels.Count > 0 && sizeLevel > -1 && sizeLevel < snowballSizeLevels.Count)
+			{
+				return snowballSizeLevels[sizeLevel].snowballScale * modelRadius * base.transform.lossyScale.x;
+			}
+			return modelRadius * base.transform.lossyScale.x;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		if (NetworkSystem.Instance != null)
+		{
+			NetworkSystem.Instance.OnMultiplayerStarted += new Action(StartedMultiplayerSession);
+		}
+		else
+		{
+			Debug.LogError("NetworkSystem.Instance was null in SnowballThrowable Awake");
+		}
+		VRRigCache.OnRigActivated += VRRigActivated;
+		VRRigCache.OnRigDeactivated += VRRigDeactivated;
+	}
+
+	public override void OnEnable()
+	{
+		base.OnEnable();
+		snowballModelParentTransform.localPosition = modelParentOffset;
+		snowballModelTransform.localPosition = modelOffset;
+		otherHandSnowball = (isLeftHanded ? (EquipmentInteractor.instance.rightHandHeldEquipment as GrowingSnowballThrowable) : (EquipmentInteractor.instance.leftHandHeldEquipment as GrowingSnowballThrowable));
+		if (Time.time > maintainSizeLevelUntilLocalTime)
+		{
+			SetSizeLevelLocal(0);
+		}
+		CreatePhotonEventsIfNull();
+	}
+
+	protected override void OnDestroy()
+	{
+		DestroyPhotonEvents();
+	}
+
+	private void VRRigActivated(RigContainer rigContainer)
+	{
+		targetRig = GetComponentInParent<VRRig>(includeInactive: true);
+		isOfflineRig = targetRig != null && targetRig.isOfflineVRRig;
+		if (rigContainer.Rig == targetRig)
+		{
+			CreatePhotonEventsIfNull();
+		}
+	}
+
+	private void VRRigDeactivated(RigContainer rigContainer)
+	{
+		if (rigContainer.Rig == targetRig)
+		{
+			DestroyPhotonEvents();
+		}
+	}
+
+	private void StartedMultiplayerSession()
+	{
+		targetRig = GetComponentInParent<VRRig>(includeInactive: true);
+		isOfflineRig = targetRig != null && targetRig.isOfflineVRRig;
+		if (isOfflineRig)
+		{
+			DestroyPhotonEvents();
+			CreatePhotonEventsIfNull();
+		}
+	}
+
+	private void CreatePhotonEventsIfNull()
+	{
+		if (targetRig == null)
+		{
+			targetRig = GetComponentInParent<VRRig>(includeInactive: true);
+			isOfflineRig = targetRig != null && targetRig.isOfflineVRRig;
+		}
+		if (!(targetRig == null) && !(targetRig.netView == null))
+		{
+			if (changeSizeEvent == null)
+			{
+				_ = "SnowballThrowable" + base.gameObject.name + (isLeftHanded ? "ChangeSizeEventLeft" : "ChangeSizeEventRight") + targetRig.netView.ViewID;
+				int eventId = StaticHash.Compute("SnowballThrowable", base.gameObject.name, isLeftHanded ? "ChangeSizeEventLeft" : "ChangeSizeEventRight", targetRig.netView.ViewID.ToString());
+				changeSizeEvent = new PhotonEvent(eventId);
+				changeSizeEvent.reliable = true;
+				changeSizeEvent += new Action<int, int, object[], PhotonMessageInfoWrapped>(ChangeSizeEventReceiver);
+			}
+			if (snowballThrowEvent == null)
+			{
+				_ = "SnowballThrowable" + base.gameObject.name + (isLeftHanded ? "SnowballThrowEventLeft" : "SnowballThrowEventRight") + targetRig.netView.ViewID;
+				int eventId2 = StaticHash.Compute("SnowballThrowable", base.gameObject.name, isLeftHanded ? "SnowballThrowEventLeft" : "SnowballThrowEventRight", targetRig.netView.ViewID.ToString());
+				snowballThrowEvent = new PhotonEvent(eventId2);
+				snowballThrowEvent.reliable = true;
+				snowballThrowEvent += new Action<int, int, object[], PhotonMessageInfoWrapped>(SnowballThrowEventReceiver);
+			}
+		}
+	}
+
+	private void DestroyPhotonEvents()
+	{
+		if (changeSizeEvent != null)
+		{
+			changeSizeEvent -= new Action<int, int, object[], PhotonMessageInfoWrapped>(ChangeSizeEventReceiver);
+			changeSizeEvent.Dispose();
+			changeSizeEvent = null;
+		}
+		if (snowballThrowEvent != null)
+		{
+			snowballThrowEvent -= new Action<int, int, object[], PhotonMessageInfoWrapped>(SnowballThrowEventReceiver);
+			snowballThrowEvent.Dispose();
+			snowballThrowEvent = null;
+		}
+	}
+
+	public void IncreaseSize(int increase)
+	{
+		SetSizeLevelAuthority(sizeLevel + increase);
+	}
+
+	private void SetSizeLevelAuthority(int sizeLevel)
+	{
+		if (targetRig != null && targetRig.creator != null && targetRig.creator.IsLocal)
+		{
+			int validSizeLevel = GetValidSizeLevel(sizeLevel);
+			if (validSizeLevel > this.sizeLevel)
+			{
+				sizeIncreaseSoundBankPlayer.Play();
+			}
+			SetSizeLevelLocal(validSizeLevel);
+			changeSizeEvent?.RaiseOthers(validSizeLevel);
+		}
+	}
+
+	private int GetValidSizeLevel(int inputSizeLevel)
+	{
+		int max = Mathf.Max(snowballSizeLevels.Count - 1, 0);
+		return Mathf.Clamp(inputSizeLevel, 0, max);
+	}
+
+	private void SetSizeLevelLocal(int sizeLevel)
+	{
+		int validSizeLevel = GetValidSizeLevel(sizeLevel);
+		if (validSizeLevel >= 0 && validSizeLevel != this.sizeLevel)
+		{
+			this.sizeLevel = validSizeLevel;
+			snowballModelParentTransform.localScale = Vector3.one * snowballSizeLevels[this.sizeLevel].snowballScale;
+		}
+	}
+
+	private void ChangeSizeEventReceiver(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
+	{
+		if (sender != receiver || args == null || args.Length < 1)
+		{
+			return;
+		}
+		int num = ((targetRig != null && targetRig.gameObject.activeInHierarchy && targetRig.netView != null && targetRig.netView.Owner != null) ? targetRig.netView.Owner.ActorNumber : (-1));
+		if (info.senderID == num)
+		{
+			MonkeAgent.IncrementRPCCall(info, "ChangeSizeEventReceiver");
+			int num2 = (int)args[0];
+			if (GetValidSizeLevel(num2) > sizeLevel && sizeIncreaseSoundBankPlayer.gameObject.activeInHierarchy)
+			{
+				sizeIncreaseSoundBankPlayer.Play();
+			}
+			SetSizeLevelLocal(num2);
+			if (!base.gameObject.activeSelf)
+			{
+				maintainSizeLevelUntilLocalTime = Time.time + 0.1f;
+			}
+		}
+	}
+
+	private void SnowballThrowEventReceiver(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
+	{
+		if (sender != receiver || args == null || args.Length < 3 || targetRig.IsNull() || !targetRig.gameObject.activeSelf)
+		{
+			return;
+		}
+		_ = targetRig.creator;
+		if (info.senderID != targetRig.creator.ActorNumber)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "SnowballThrowEventReceiver");
+		if (FXSystem.CheckCallSpam(targetRig.fxSettings, 4, info.SentServerTime) && args[0] is Vector3 v && args[1] is Vector3 inVel && args[2] is int index)
+		{
+			Vector3 velocity = targetRig.ClampVelocityRelativeToPlayerSafe(inVel, 50f);
+			float x = snowballModelTransform.lossyScale.x;
+			if (v.IsValid(10000f) && targetRig.IsPositionInRange(v, 4f))
+			{
+				LaunchSnowballRemote(v, velocity, x, index, info);
+			}
+		}
+	}
+
+	protected override void LateUpdateLocal()
+	{
+		base.LateUpdateLocal();
+		if (!twoHandedSnowballGrowing)
+		{
+			return;
+		}
+		if (otherHandSnowball != null && otherHandSnowball.isActiveAndEnabled)
+		{
+			IHoldableObject holdableObject = (isLeftHanded ? EquipmentInteractor.instance.rightHandHeldEquipment : EquipmentInteractor.instance.leftHandHeldEquipment);
+			if (holdableObject != null && otherHandSnowball != (GrowingSnowballThrowable)holdableObject)
+			{
+				otherHandSnowball = null;
+				return;
+			}
+			float num = otherHandSnowball.CurrentSnowballRadius + CurrentSnowballRadius;
+			if (SizeLevel < MaxSizeLevel && otherHandSnowball.SizeLevel < otherHandSnowball.MaxSizeLevel && (otherHandSnowball.snowballModelTransform.position - snowballModelTransform.position).sqrMagnitude < num * num)
+			{
+				int num2 = SizeLevel - otherHandSnowball.SizeLevel;
+				float magnitude = velocityEstimator.linearVelocity.magnitude;
+				float magnitude2 = otherHandSnowball.velocityEstimator.linearVelocity.magnitude;
+				bool flag = false;
+				if ((!(Mathf.Abs(magnitude - magnitude2) > combineBasedOnSpeedThreshold) && num2 != 0) ? (num2 < 0) : (magnitude > magnitude2))
+				{
+					otherHandSnowball.IncreaseSize(sizeLevel + 1);
+					GorillaTagger.Instance.StartVibration(!isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
+					SetSnowballActiveLocal(enabled: false);
+				}
+				else
+				{
+					IncreaseSize(otherHandSnowball.SizeLevel + 1);
+					GorillaTagger.Instance.StartVibration(isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
+					otherHandSnowball.SetSnowballActiveLocal(enabled: false);
+				}
+			}
+		}
+		else
+		{
+			otherHandSnowball = null;
+		}
+	}
+
+	protected override void OnSnowballRelease()
+	{
+		if (base.isActiveAndEnabled)
+		{
+			PerformSnowballThrowAuthority();
+		}
+	}
+
+	protected override void PerformSnowballThrowAuthority()
+	{
+		if (targetRig != null && targetRig.creator != null && targetRig.creator.IsLocal)
+		{
+			Vector3 vector = Vector3.zero;
+			Rigidbody component = GorillaTagger.Instance.GetComponent<Rigidbody>();
+			if (component != null)
+			{
+				vector = component.linearVelocity;
+			}
+			Vector3 vector2 = velocityEstimator.linearVelocity - vector;
+			float magnitude = vector2.magnitude;
+			if (magnitude > 0.001f)
+			{
+				float num = Mathf.Clamp(magnitude * linSpeedMultiplier, 0f, maxLinSpeed);
+				vector2 *= num / magnitude;
+			}
+			Vector3 vector3 = vector2 + vector;
+			targetRig.GetThrowableProjectileColor(isLeftHanded);
+			Transform obj = snowballModelTransform;
+			Vector3 position = obj.position;
+			float x = obj.lossyScale.x;
+			SlingshotProjectile slingshotProjectile = LaunchSnowballLocal(position, vector3, x);
+			SetSnowballActiveLocal(enabled: false);
+			if (randModelIndex > -1 && randModelIndex < localModels.Count && localModels[randModelIndex].destroyAfterRelease)
+			{
+				slingshotProjectile.DestroyAfterRelease();
+			}
+			snowballThrowEvent?.RaiseOthers(position, vector3, slingshotProjectile.myProjectileCount);
+		}
+	}
+
+	protected virtual SlingshotProjectile LaunchSnowballLocal(Vector3 location, Vector3 velocity, float scale)
+	{
+		return LaunchSnowballLocal(location, velocity, scale, false, Color.white);
+	}
+
+	protected override SlingshotProjectile LaunchSnowballLocal(Vector3 location, Vector3 velocity, float scale, bool randomizeColour, Color colour)
+	{
+		SlingshotProjectile slingshotProjectile = SpawnGrowingSnowball(ref velocity, scale);
+		slingshotProjectile.Launch(projectileCount: ProjectileTracker.AddAndIncrementLocalProjectile(slingshotProjectile, velocity, location, scale), position: location, velocity: velocity, player: NetworkSystem.Instance.LocalPlayer, blueTeam: false, orangeTeam: false, scale: scale, shouldOverrideColor: randomizeColour, overrideColor: colour);
+		if (string.IsNullOrEmpty(throwEventName))
+		{
+			PlayerGameEvents.LaunchedProjectile(projectilePrefab.name);
+		}
+		else
+		{
+			PlayerGameEvents.LaunchedProjectile(throwEventName);
+		}
+		slingshotProjectile.OnImpact += OnProjectileImpact;
+		return slingshotProjectile;
+	}
+
+	protected virtual SlingshotProjectile LaunchSnowballRemote(Vector3 location, Vector3 velocity, float scale, int index, PhotonMessageInfoWrapped info)
+	{
+		return LaunchSnowballRemote(location, velocity, scale, index, randomizeColour: false, Color.white, info);
+	}
+
+	protected virtual SlingshotProjectile LaunchSnowballRemote(Vector3 location, Vector3 velocity, float scale, int index, bool randomizeColour, Color colour, PhotonMessageInfoWrapped info)
+	{
+		SlingshotProjectile slingshotProjectile = SpawnGrowingSnowball(ref velocity, scale);
+		ProjectileTracker.AddRemotePlayerProjectile(info.Sender, slingshotProjectile, index, info.SentServerTime, velocity, location, scale);
+		slingshotProjectile.Launch(location, velocity, info.Sender, blueTeam: false, orangeTeam: false, index, scale, randomizeColour, Color.white);
+		if (string.IsNullOrEmpty(throwEventName))
+		{
+			PlayerGameEvents.LaunchedProjectile(projectilePrefab.name);
+		}
+		else
+		{
+			PlayerGameEvents.LaunchedProjectile(throwEventName);
+		}
+		slingshotProjectile.OnImpact += OnProjectileImpact;
+		return slingshotProjectile;
+	}
+
+	private SlingshotProjectile SpawnGrowingSnowball(ref Vector3 velocity, float scale)
+	{
+		SlingshotProjectile component = ObjectPools.instance.Instantiate(randomModelSelection ? localModels[randModelIndex].projectilePrefab : projectilePrefab).GetComponent<SlingshotProjectile>();
+		if (snowballSizeLevels.Count > 0 && sizeLevel >= 0 && sizeLevel < snowballSizeLevels.Count)
+		{
+			float num = scale / snowballSizeLevels[sizeLevel].snowballScale;
+			SlingshotProjectile.AOEKnockbackConfig aoeKnockbackConfig = snowballSizeLevels[sizeLevel].aoeKnockbackConfig;
+			aoeKnockbackConfig.aeoInnerRadius *= num;
+			aoeKnockbackConfig.aeoOuterRadius *= num;
+			aoeKnockbackConfig.knockbackVelocity *= num;
+			aoeKnockbackConfig.impactVelocityThreshold *= num;
+			velocity *= snowballSizeLevels[sizeLevel].throwSpeedMultiplier;
+			component.gravityMultiplier = snowballSizeLevels[sizeLevel].gravityMultiplier;
+			component.impactEffectScaleMultiplier = snowballSizeLevels[sizeLevel].impactEffectScale;
+			component.aoeKnockbackConfig = aoeKnockbackConfig;
+			component.impactSoundVolumeOverride = snowballSizeLevels[sizeLevel].impactSoundVolume;
+			component.impactSoundPitchOverride = snowballSizeLevels[sizeLevel].impactSoundPitch;
+		}
+		return component;
+	}
+
+	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		if (targetRig != null && targetRig.creator != null && targetRig.creator.IsLocal && ((isLeftHanded && grabbingHand == EquipmentInteractor.instance.rightHand && EquipmentInteractor.instance.rightHandHeldEquipment == null) || (!isLeftHanded && grabbingHand == EquipmentInteractor.instance.leftHand && EquipmentInteractor.instance.leftHandHeldEquipment == null)) && (isLeftHanded ? SnowballMaker.rightHandInstance : SnowballMaker.leftHandInstance).TryCreateSnowball(matDataIndexes[0], out var result))
+		{
+			GrowingSnowballThrowable growingSnowballThrowable = result as GrowingSnowballThrowable;
+			if (growingSnowballThrowable != null)
+			{
+				growingSnowballThrowable.IncreaseSize(sizeLevel);
+				GorillaTagger.Instance.StartVibration(!isLeftHanded, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
+				SetSnowballActiveLocal(enabled: false);
+			}
+		}
 	}
 }

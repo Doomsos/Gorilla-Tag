@@ -1,119 +1,9 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using UnityEngine;
 
 public class TransformOscillation : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this.useRigidbodyMotion && !this.targetRigidbody)
-		{
-			this.targetRigidbody = base.GetComponent<Rigidbody>();
-		}
-		this.lastRotOffs = Quaternion.identity;
-		this.startTime = Time.time;
-		this.isRunning = false;
-	}
-
-	private void OnEnable()
-	{
-		this.lastPosOffs = Vector3.zero;
-		this.lastRotOffs = Quaternion.identity;
-		if (this.startOnEnable)
-		{
-			this.StartOscillation();
-			return;
-		}
-		this.isRunning = false;
-	}
-
-	public void StartOscillation()
-	{
-		this.startTime = Time.time;
-		this.isRunning = true;
-	}
-
-	private float GetTimeSeconds()
-	{
-		if (!this.useServerTime)
-		{
-			return Time.timeSinceLevelLoad;
-		}
-		if (GorillaComputer.instance == null)
-		{
-			return Time.timeSinceLevelLoad;
-		}
-		this.dt = GorillaComputer.instance.GetServerTime();
-		return (float)this.dt.Minute * 60f + (float)this.dt.Second + (float)this.dt.Millisecond / 1000f;
-	}
-
-	private void ComputeOffsets(float t)
-	{
-		this.offsPos.x = this.PosAmp.x * Mathf.Sin(t * this.PosFreq.x);
-		this.offsPos.y = this.PosAmp.y * Mathf.Sin(t * this.PosFreq.y);
-		this.offsPos.z = this.PosAmp.z * Mathf.Sin(t * this.PosFreq.z);
-		this.offsRot.x = this.RotAmp.x * Mathf.Sin(t * this.RotFreq.x);
-		this.offsRot.y = this.RotAmp.y * Mathf.Sin(t * this.RotFreq.y);
-		this.offsRot.z = this.RotAmp.z * Mathf.Sin(t * this.RotFreq.z);
-	}
-
-	private void LateUpdate()
-	{
-		if (!this.isRunning)
-		{
-			return;
-		}
-		if (this.useTimeLimit && Time.time - this.startTime >= this.timer)
-		{
-			return;
-		}
-		if (this.useRigidbodyMotion && this.targetRigidbody)
-		{
-			return;
-		}
-		float timeSeconds = this.GetTimeSeconds();
-		this.ComputeOffsets(timeSeconds);
-		Transform transform = base.transform;
-		Quaternion rhs = Quaternion.Euler(this.offsRot);
-		Vector3 a = transform.localPosition - this.lastPosOffs;
-		Quaternion lhs = transform.localRotation * Quaternion.Inverse(this.lastRotOffs);
-		transform.localPosition = a + this.offsPos;
-		transform.localRotation = lhs * rhs;
-		this.lastPosOffs = this.offsPos;
-		this.lastRotOffs = rhs;
-	}
-
-	private void FixedUpdate()
-	{
-		if (!this.isRunning)
-		{
-			return;
-		}
-		if (this.useTimeLimit && Time.time - this.startTime >= this.timer)
-		{
-			return;
-		}
-		if (!this.useRigidbodyMotion || !this.targetRigidbody)
-		{
-			return;
-		}
-		float timeSeconds = this.GetTimeSeconds();
-		this.ComputeOffsets(timeSeconds);
-		Transform transform = base.transform;
-		Quaternion quaternion = Quaternion.Euler(this.offsRot);
-		Transform parent = transform.parent;
-		Vector3 b = parent ? parent.TransformVector(this.lastPosOffs) : this.lastPosOffs;
-		Quaternion rotation = parent ? (parent.rotation * this.lastRotOffs * Quaternion.Inverse(parent.rotation)) : this.lastRotOffs;
-		Vector3 a = transform.position - b;
-		Quaternion lhs = transform.rotation * Quaternion.Inverse(rotation);
-		Vector3 b2 = parent ? parent.TransformVector(this.offsPos) : this.offsPos;
-		Quaternion rhs = parent ? (parent.rotation * quaternion * Quaternion.Inverse(parent.rotation)) : quaternion;
-		this.targetRigidbody.MovePosition(a + b2);
-		this.targetRigidbody.MoveRotation(lhs * rhs);
-		this.lastPosOffs = this.offsPos;
-		this.lastRotOffs = quaternion;
-	}
-
 	[SerializeField]
 	private Vector3 PosAmp;
 
@@ -163,4 +53,98 @@ public class TransformOscillation : MonoBehaviour
 	private float startTime;
 
 	private bool isRunning;
+
+	private void Awake()
+	{
+		if (useRigidbodyMotion && !targetRigidbody)
+		{
+			targetRigidbody = GetComponent<Rigidbody>();
+		}
+		lastRotOffs = Quaternion.identity;
+		startTime = Time.time;
+		isRunning = false;
+	}
+
+	private void OnEnable()
+	{
+		lastPosOffs = Vector3.zero;
+		lastRotOffs = Quaternion.identity;
+		if (startOnEnable)
+		{
+			StartOscillation();
+		}
+		else
+		{
+			isRunning = false;
+		}
+	}
+
+	public void StartOscillation()
+	{
+		startTime = Time.time;
+		isRunning = true;
+	}
+
+	private float GetTimeSeconds()
+	{
+		if (!useServerTime)
+		{
+			return Time.timeSinceLevelLoad;
+		}
+		if (GorillaComputer.instance == null)
+		{
+			return Time.timeSinceLevelLoad;
+		}
+		dt = GorillaComputer.instance.GetServerTime();
+		return (float)dt.Minute * 60f + (float)dt.Second + (float)dt.Millisecond / 1000f;
+	}
+
+	private void ComputeOffsets(float t)
+	{
+		offsPos.x = PosAmp.x * Mathf.Sin(t * PosFreq.x);
+		offsPos.y = PosAmp.y * Mathf.Sin(t * PosFreq.y);
+		offsPos.z = PosAmp.z * Mathf.Sin(t * PosFreq.z);
+		offsRot.x = RotAmp.x * Mathf.Sin(t * RotFreq.x);
+		offsRot.y = RotAmp.y * Mathf.Sin(t * RotFreq.y);
+		offsRot.z = RotAmp.z * Mathf.Sin(t * RotFreq.z);
+	}
+
+	private void LateUpdate()
+	{
+		if (isRunning && (!useTimeLimit || !(Time.time - startTime >= timer)) && (!useRigidbodyMotion || !targetRigidbody))
+		{
+			float timeSeconds = GetTimeSeconds();
+			ComputeOffsets(timeSeconds);
+			Transform obj = base.transform;
+			Quaternion quaternion = Quaternion.Euler(offsRot);
+			Vector3 vector = obj.localPosition - lastPosOffs;
+			Quaternion quaternion2 = obj.localRotation * Quaternion.Inverse(lastRotOffs);
+			obj.localPosition = vector + offsPos;
+			obj.localRotation = quaternion2 * quaternion;
+			lastPosOffs = offsPos;
+			lastRotOffs = quaternion;
+		}
+	}
+
+	private void FixedUpdate()
+	{
+		if (isRunning && (!useTimeLimit || !(Time.time - startTime >= timer)) && useRigidbodyMotion && (bool)targetRigidbody)
+		{
+			float timeSeconds = GetTimeSeconds();
+			ComputeOffsets(timeSeconds);
+			Transform obj = base.transform;
+			Quaternion quaternion = Quaternion.Euler(offsRot);
+			Transform parent = obj.parent;
+			Vector3 vector = (parent ? parent.TransformVector(lastPosOffs) : lastPosOffs);
+			Quaternion rotation = (parent ? (parent.rotation * lastRotOffs * Quaternion.Inverse(parent.rotation)) : lastRotOffs);
+			Vector3 vector2 = obj.position - vector;
+			Quaternion quaternion2 = obj.rotation * Quaternion.Inverse(rotation);
+			Vector3 vector3 = (parent ? parent.TransformVector(offsPos) : offsPos);
+			Quaternion quaternion3 = (parent ? (parent.rotation * quaternion * Quaternion.Inverse(parent.rotation)) : quaternion);
+			targetRigidbody.MovePosition(vector2 + vector3);
+			targetRigidbody.MoveRotation(quaternion2 * quaternion3);
+			lastPosOffs = offsPos;
+			lastRotOffs = quaternion;
+		}
+	}
 }

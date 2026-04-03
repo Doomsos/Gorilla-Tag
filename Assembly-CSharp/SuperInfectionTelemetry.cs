@@ -1,24 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class SuperInfectionTelemetry : MonoBehaviour
 {
-	public static string GameVersionCustomTag
-	{
-		get
-		{
-			return "game_version_" + Application.version;
-		}
-	}
-
-	public static string GameEnvironment
-	{
-		get
-		{
-			return "game_environment_live";
-		}
-	}
-
 	public const string ROOM_LEFT_EVENT_NAME = "super_infection_room_left";
 
 	public const string INTERVAL_EVENT_NAME = "super_infection_interval";
@@ -88,4 +71,8 @@ public class SuperInfectionTelemetry : MonoBehaviour
 	public const string SI_PURCHASE_TYPE = "si_purchase_type";
 
 	public const string SI_TECH_POINTS_PURCHASED = "si_tech_points_purchased";
+
+	public static string GameVersionCustomTag => "game_version_" + Application.version;
+
+	public static string GameEnvironment => "game_environment_live";
 }

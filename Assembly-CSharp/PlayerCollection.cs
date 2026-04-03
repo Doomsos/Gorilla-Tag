@@ -1,34 +1,33 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaTag;
 using UnityEngine;
 
 public class PlayerCollection : MonoBehaviour
 {
+	[NonSerialized]
+	[DebugReadout]
+	public readonly List<VRRig> containedRigs = new List<VRRig>(20);
+
 	private void Start()
 	{
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(OnPlayerLeftRoom);
 	}
 
 	private void OnDestroy()
 	{
-		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(OnPlayerLeftRoom);
 	}
 
 	public void OnTriggerEnter(Collider other)
 	{
-		if (!other.GetComponent<SphereCollider>())
+		if ((bool)other.GetComponent<SphereCollider>())
 		{
-			return;
-		}
-		VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component == null)
-		{
-			return;
-		}
-		if (!this.containedRigs.Contains(component))
-		{
-			this.containedRigs.Add(component);
+			VRRig component = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
+			if (!(component == null) && !containedRigs.Contains(component))
+			{
+				containedRigs.Add(component);
+			}
 		}
 	}
 
@@ -40,32 +39,23 @@ public class PlayerCollection : MonoBehaviour
 			return;
 		}
 		VRRig component2 = other.attachedRigidbody.gameObject.GetComponent<VRRig>();
-		if (component2 == null)
+		if (component2 == null || !containedRigs.Contains(component2))
 		{
 			return;
 		}
-		if (this.containedRigs.Contains(component2))
+		Collider[] components = GetComponents<Collider>();
+		for (int i = 0; i < components.Length; i++)
 		{
-			Collider[] components = base.GetComponents<Collider>();
-			for (int i = 0; i < components.Length; i++)
+			if (Physics.ComputePenetration(components[i], base.transform.position, base.transform.rotation, component, component.transform.position, component.transform.rotation, out var _, out var _))
 			{
-				Vector3 vector;
-				float num;
-				if (Physics.ComputePenetration(components[i], base.transform.position, base.transform.rotation, component, component.transform.position, component.transform.rotation, out vector, out num))
-				{
-					return;
-				}
+				return;
 			}
-			this.containedRigs.Remove(component2);
 		}
+		containedRigs.Remove(component2);
 	}
 
 	public void OnPlayerLeftRoom(NetPlayer otherPlayer)
 	{
-		this.containedRigs.RemoveAll((VRRig r) => r.creator == null || r.creator == otherPlayer);
+		containedRigs.RemoveAll((VRRig r) => r.creator == null || r.creator == otherPlayer);
 	}
-
-	[DebugReadout]
-	[NonSerialized]
-	public readonly List<VRRig> containedRigs = new List<VRRig>(20);
 }

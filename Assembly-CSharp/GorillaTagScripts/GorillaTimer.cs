@@ -1,125 +1,112 @@
-﻿using System;
 using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class GorillaTimer : MonoBehaviourPun
 {
-	public class GorillaTimer : MonoBehaviourPun
+	[SerializeField]
+	private float timerDuration;
+
+	[SerializeField]
+	private bool useRandomDuration;
+
+	[SerializeField]
+	private float randTimeMin;
+
+	[SerializeField]
+	private float randTimeMax;
+
+	private float passedTime;
+
+	private bool startTimer;
+
+	private bool resetTimer;
+
+	public UnityEvent<GorillaTimer> onTimerStarted;
+
+	public UnityEvent<GorillaTimer> onTimerStopped;
+
+	private void Awake()
 	{
-		private void Awake()
+		ResetTimer();
+	}
+
+	public void StartTimer()
+	{
+		startTimer = true;
+		onTimerStarted?.Invoke(this);
+	}
+
+	public IEnumerator DelayedReStartTimer(float delayTime)
+	{
+		yield return new WaitForSeconds(delayTime);
+		RestartTimer();
+	}
+
+	private void StopTimer()
+	{
+		startTimer = false;
+		onTimerStopped?.Invoke(this);
+	}
+
+	private void ResetTimer()
+	{
+		passedTime = 0f;
+	}
+
+	public void RestartTimer()
+	{
+		if (useRandomDuration)
 		{
-			this.ResetTimer();
+			SetTimerDuration(Random.Range(randTimeMin, randTimeMax));
 		}
+		ResetTimer();
+		StartTimer();
+	}
 
-		public void StartTimer()
+	public void SetTimerDuration(float timer)
+	{
+		timerDuration = timer;
+	}
+
+	public void InvokeUpdate()
+	{
+		if (startTimer)
 		{
-			this.startTimer = true;
-			UnityEvent<GorillaTimer> unityEvent = this.onTimerStarted;
-			if (unityEvent == null)
-			{
-				return;
-			}
-			unityEvent.Invoke(this);
+			passedTime += Time.deltaTime;
 		}
-
-		public IEnumerator DelayedReStartTimer(float delayTime)
+		if (startTimer && passedTime >= timerDuration)
 		{
-			yield return new WaitForSeconds(delayTime);
-			this.RestartTimer();
-			yield break;
+			StopTimer();
+			ResetTimer();
 		}
+	}
 
-		private void StopTimer()
-		{
-			this.startTimer = false;
-			UnityEvent<GorillaTimer> unityEvent = this.onTimerStopped;
-			if (unityEvent == null)
-			{
-				return;
-			}
-			unityEvent.Invoke(this);
-		}
+	public float GetPassedTime()
+	{
+		return passedTime;
+	}
 
-		private void ResetTimer()
-		{
-			this.passedTime = 0f;
-		}
+	public void SetPassedTime(float time)
+	{
+		passedTime = time;
+	}
 
-		public void RestartTimer()
-		{
-			if (this.useRandomDuration)
-			{
-				this.SetTimerDuration(Random.Range(this.randTimeMin, this.randTimeMax));
-			}
-			this.ResetTimer();
-			this.StartTimer();
-		}
+	public float GetRemainingTime()
+	{
+		return timerDuration - passedTime;
+	}
 
-		public void SetTimerDuration(float timer)
-		{
-			this.timerDuration = timer;
-		}
+	public void OnEnable()
+	{
+		GorillaTimerManager.RegisterGorillaTimer(this);
+	}
 
-		public void InvokeUpdate()
-		{
-			if (this.startTimer)
-			{
-				this.passedTime += Time.deltaTime;
-			}
-			if (this.startTimer && this.passedTime >= this.timerDuration)
-			{
-				this.StopTimer();
-				this.ResetTimer();
-			}
-		}
-
-		public float GetPassedTime()
-		{
-			return this.passedTime;
-		}
-
-		public void SetPassedTime(float time)
-		{
-			this.passedTime = time;
-		}
-
-		public float GetRemainingTime()
-		{
-			return this.timerDuration - this.passedTime;
-		}
-
-		public void OnEnable()
-		{
-			GorillaTimerManager.RegisterGorillaTimer(this);
-		}
-
-		public void OnDisable()
-		{
-			GorillaTimerManager.UnregisterGorillaTimer(this);
-		}
-
-		[SerializeField]
-		private float timerDuration;
-
-		[SerializeField]
-		private bool useRandomDuration;
-
-		[SerializeField]
-		private float randTimeMin;
-
-		[SerializeField]
-		private float randTimeMax;
-
-		private float passedTime;
-
-		private bool startTimer;
-
-		private bool resetTimer;
-
-		public UnityEvent<GorillaTimer> onTimerStarted;
-
-		public UnityEvent<GorillaTimer> onTimerStopped;
+	public void OnDisable()
+	{
+		GorillaTimerManager.UnregisterGorillaTimer(this);
 	}
 }

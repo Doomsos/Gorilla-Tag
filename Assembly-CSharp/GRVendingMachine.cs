@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,118 +6,28 @@ using UnityEngine;
 
 public class GRVendingMachine : MonoBehaviour
 {
-	public void Setup(GhostReactor reactor)
+	[Serializable]
+	public struct VendingEntry
 	{
-		this.reactor = reactor;
-	}
+		public Transform transportVisual;
 
-	public Transform GetSpawnMarker()
-	{
-		return this.itemSpawnLocation;
-	}
+		public GameEntity entityPrefab;
 
-	public void NavButtonPressedLeft()
-	{
-		this.hIndex = Mathf.Max(0, this.hIndex - 1);
-		this.RefreshCardReaderDisplay();
-	}
+		public string itemName;
 
-	public void NavButtonPressedRight()
-	{
-		this.hIndex = Mathf.Min(this.hIndex + 1, this.horizontalSteps - 1);
-		this.RefreshCardReaderDisplay();
-	}
+		private int entityTypeId;
 
-	public void NavButtonPressedUp()
-	{
-		this.vIndex = Mathf.Max(0, this.vIndex - 1);
-		this.RefreshCardReaderDisplay();
-	}
+		private bool entityTypeIdSet;
 
-	public void NavButtonPressedDown()
-	{
-		this.vIndex = Mathf.Min(this.vIndex + 1, this.verticalSteps - 1);
-		this.RefreshCardReaderDisplay();
-	}
-
-	public void RequestPurchase()
-	{
-		if (!this.currentlyVending)
+		public int GetEntityTypeId()
 		{
-			int num = this.vIndex * this.horizontalSteps + this.hIndex;
-			if (num >= 0 && num < this.vendingEntries.Count)
+			if (!entityTypeIdSet)
 			{
-				this.vendingIndex = num;
-				if (this.vendingCoroutine != null)
-				{
-					base.StopCoroutine(this.vendingCoroutine);
-				}
-				this.vendingCoroutine = base.StartCoroutine(this.VendingCoroutine());
+				entityTypeId = entityPrefab.gameObject.name.GetStaticHash();
+				entityTypeIdSet = true;
 			}
+			return entityTypeId;
 		}
-	}
-
-	private void RefreshCardReaderDisplay()
-	{
-		int num = this.vIndex * this.horizontalSteps + this.hIndex;
-		if (num >= 0 && num < this.vendingEntries.Count)
-		{
-			int entityTypeId = this.vendingEntries[num].GetEntityTypeId();
-			int itemCost = this.reactor.GetItemCost(entityTypeId);
-			this.cardDisplayText.text = this.vendingEntries[num].itemName + "\n" + itemCost.ToString();
-		}
-	}
-
-	private void Update()
-	{
-		if (!this.currentlyVending)
-		{
-			this.MoveTransportToSlot(this.hIndex, this.vIndex, this.horizontalSteps, this.verticalSteps, this.horizontalSpeed, this.verticalSpeed, Time.deltaTime);
-		}
-	}
-
-	private bool MoveTransportToSlot(int x, int y, int rows, int cols, float xSpeed, float ySpeed, float dt)
-	{
-		Vector3 vector = Vector3.Lerp(this.horizontalMin.position, this.horizontalMax.position, (float)x / (float)(rows - 1));
-		Vector3 vector2 = Vector3.Lerp(this.verticalMin.position, this.verticalMax.position, (float)y / (float)(cols - 1));
-		this.horizontalTransport.position = Vector3.MoveTowards(this.horizontalTransport.position, vector, xSpeed * dt);
-		this.verticalTransport.position = Vector3.MoveTowards(this.verticalTransport.position, vector2, ySpeed * dt);
-		float sqrMagnitude = (this.horizontalTransport.position - vector).sqrMagnitude;
-		float sqrMagnitude2 = (this.verticalTransport.position - vector2).sqrMagnitude;
-		return sqrMagnitude > 0.001f || sqrMagnitude2 > 0.001f;
-	}
-
-	private IEnumerator VendingCoroutine()
-	{
-		this.currentlyVending = true;
-		while (this.MoveTransportToSlot(this.hIndex, this.vIndex, this.horizontalSteps, this.verticalSteps, this.horizontalSpeed, this.verticalSpeed, Time.deltaTime))
-		{
-			yield return null;
-		}
-		int entityTypeId = this.vendingEntries[this.vendingIndex].GetEntityTypeId();
-		int itemCost = this.reactor.GetItemCost(entityTypeId);
-		if (this.debugUnlimitedPurchasing || VRRig.LocalRig.GetComponent<GRPlayer>().ShiftCredits >= itemCost)
-		{
-			this.vendingEntries[this.vendingIndex].transportVisual.gameObject.SetActive(true);
-			while (this.MoveTransportToSlot(this.horizontalSteps - 1, this.verticalSteps - 1, this.horizontalSteps, this.verticalSteps, this.horizontalSpeed, this.verticalSpeed, Time.deltaTime))
-			{
-				yield return null;
-			}
-			float depositPosSqDist = (this.horizontalTransport.position - this.depositLocation.position).sqrMagnitude;
-			while (depositPosSqDist > 0.001f)
-			{
-				this.horizontalTransport.position = Vector3.MoveTowards(this.horizontalTransport.position, this.depositLocation.position, this.horizontalSpeed * Time.deltaTime);
-				depositPosSqDist = (this.horizontalTransport.position - this.depositLocation.position).sqrMagnitude;
-				yield return null;
-			}
-			this.vendingEntries[this.vendingIndex].transportVisual.gameObject.SetActive(false);
-			while (this.MoveTransportToSlot(this.horizontalSteps - 1, this.verticalSteps - 1, this.horizontalSteps, this.verticalSteps, this.horizontalSpeed, this.verticalSpeed, Time.deltaTime))
-			{
-				yield return null;
-			}
-		}
-		this.currentlyVending = false;
-		yield break;
 	}
 
 	[SerializeField]
@@ -163,7 +73,7 @@ public class GRVendingMachine : MonoBehaviour
 	private bool debugUnlimitedPurchasing;
 
 	[SerializeField]
-	private List<GRVendingMachine.VendingEntry> vendingEntries = new List<GRVendingMachine.VendingEntry>();
+	private List<VendingEntry> vendingEntries = new List<VendingEntry>();
 
 	private int hIndex;
 
@@ -179,27 +89,121 @@ public class GRVendingMachine : MonoBehaviour
 
 	private GhostReactor reactor;
 
-	[Serializable]
-	public struct VendingEntry
+	public void Setup(GhostReactor reactor)
 	{
-		public int GetEntityTypeId()
+		this.reactor = reactor;
+	}
+
+	public Transform GetSpawnMarker()
+	{
+		return itemSpawnLocation;
+	}
+
+	public void NavButtonPressedLeft()
+	{
+		hIndex = Mathf.Max(0, hIndex - 1);
+		RefreshCardReaderDisplay();
+	}
+
+	public void NavButtonPressedRight()
+	{
+		hIndex = Mathf.Min(hIndex + 1, horizontalSteps - 1);
+		RefreshCardReaderDisplay();
+	}
+
+	public void NavButtonPressedUp()
+	{
+		vIndex = Mathf.Max(0, vIndex - 1);
+		RefreshCardReaderDisplay();
+	}
+
+	public void NavButtonPressedDown()
+	{
+		vIndex = Mathf.Min(vIndex + 1, verticalSteps - 1);
+		RefreshCardReaderDisplay();
+	}
+
+	public void RequestPurchase()
+	{
+		if (currentlyVending)
 		{
-			if (!this.entityTypeIdSet)
-			{
-				this.entityTypeId = this.entityPrefab.gameObject.name.GetStaticHash();
-				this.entityTypeIdSet = true;
-			}
-			return this.entityTypeId;
+			return;
 		}
+		int num = vIndex * horizontalSteps + hIndex;
+		if (num >= 0 && num < vendingEntries.Count)
+		{
+			vendingIndex = num;
+			if (vendingCoroutine != null)
+			{
+				StopCoroutine(vendingCoroutine);
+			}
+			vendingCoroutine = StartCoroutine(VendingCoroutine());
+		}
+	}
 
-		public Transform transportVisual;
+	private void RefreshCardReaderDisplay()
+	{
+		int num = vIndex * horizontalSteps + hIndex;
+		if (num >= 0 && num < vendingEntries.Count)
+		{
+			int entityTypeId = vendingEntries[num].GetEntityTypeId();
+			int itemCost = reactor.GetItemCost(entityTypeId);
+			cardDisplayText.text = vendingEntries[num].itemName + "\n" + itemCost;
+		}
+	}
 
-		public GameEntity entityPrefab;
+	private void Update()
+	{
+		if (!currentlyVending)
+		{
+			MoveTransportToSlot(hIndex, vIndex, horizontalSteps, verticalSteps, horizontalSpeed, verticalSpeed, Time.deltaTime);
+		}
+	}
 
-		public string itemName;
+	private bool MoveTransportToSlot(int x, int y, int rows, int cols, float xSpeed, float ySpeed, float dt)
+	{
+		Vector3 vector = Vector3.Lerp(horizontalMin.position, horizontalMax.position, (float)x / (float)(rows - 1));
+		Vector3 vector2 = Vector3.Lerp(verticalMin.position, verticalMax.position, (float)y / (float)(cols - 1));
+		horizontalTransport.position = Vector3.MoveTowards(horizontalTransport.position, vector, xSpeed * dt);
+		verticalTransport.position = Vector3.MoveTowards(verticalTransport.position, vector2, ySpeed * dt);
+		float sqrMagnitude = (horizontalTransport.position - vector).sqrMagnitude;
+		float sqrMagnitude2 = (verticalTransport.position - vector2).sqrMagnitude;
+		if (!(sqrMagnitude > 0.001f))
+		{
+			return sqrMagnitude2 > 0.001f;
+		}
+		return true;
+	}
 
-		private int entityTypeId;
-
-		private bool entityTypeIdSet;
+	private IEnumerator VendingCoroutine()
+	{
+		currentlyVending = true;
+		while (MoveTransportToSlot(hIndex, vIndex, horizontalSteps, verticalSteps, horizontalSpeed, verticalSpeed, Time.deltaTime))
+		{
+			yield return null;
+		}
+		int entityTypeId = vendingEntries[vendingIndex].GetEntityTypeId();
+		int itemCost = reactor.GetItemCost(entityTypeId);
+		if (debugUnlimitedPurchasing || VRRig.LocalRig.GetComponent<GRPlayer>().ShiftCredits >= itemCost)
+		{
+			vendingEntries[vendingIndex].transportVisual.gameObject.SetActive(value: true);
+			while (MoveTransportToSlot(horizontalSteps - 1, verticalSteps - 1, horizontalSteps, verticalSteps, horizontalSpeed, verticalSpeed, Time.deltaTime))
+			{
+				yield return null;
+			}
+			float depositPosSqDist = (horizontalTransport.position - depositLocation.position).sqrMagnitude;
+			while (depositPosSqDist > 0.001f)
+			{
+				horizontalTransport.position = Vector3.MoveTowards(horizontalTransport.position, depositLocation.position, horizontalSpeed * Time.deltaTime);
+				depositPosSqDist = (horizontalTransport.position - depositLocation.position).sqrMagnitude;
+				yield return null;
+			}
+			vendingEntries[vendingIndex].transportVisual.gameObject.SetActive(value: false);
+			while (MoveTransportToSlot(horizontalSteps - 1, verticalSteps - 1, horizontalSteps, verticalSteps, horizontalSpeed, verticalSpeed, Time.deltaTime))
+			{
+				yield return null;
+			}
+		}
+		currentlyVending = false;
 	}
 }

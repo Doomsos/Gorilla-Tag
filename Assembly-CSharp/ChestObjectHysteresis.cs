@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
@@ -6,24 +5,29 @@ using UnityEngine;
 
 public class ChestObjectHysteresis : MonoBehaviour, ISpawnable
 {
+	public float angleHysteresis;
+
+	public float angleBetween;
+
+	public Transform angleFollower;
+
+	[Delayed]
+	public string angleFollower_path;
+
+	private Quaternion lastAngleQuat;
+
+	private Quaternion currentAngleQuat;
+
 	bool ISpawnable.IsSpawned { get; set; }
 
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
-		if (!this.angleFollower && (string.IsNullOrEmpty(this.angleFollower_path) || base.transform.TryFindByPath(this.angleFollower_path, out this.angleFollower, false)))
+		if (!angleFollower && (string.IsNullOrEmpty(angleFollower_path) || base.transform.TryFindByPath(angleFollower_path, out angleFollower)))
 		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				"ChestObjectHysteresis: DEACTIVATING! Could not find `angleFollower` using path: \"",
-				this.angleFollower_path,
-				"\". For component at: \"",
-				this.GetComponentPath(int.MaxValue),
-				"\""
-			}), this);
-			base.gameObject.SetActive(false);
-			return;
+			Debug.LogError("ChestObjectHysteresis: DEACTIVATING! Could not find `angleFollower` using path: \"" + angleFollower_path + "\". For component at: \"" + this.GetComponentPath() + "\"", this);
+			base.gameObject.SetActive(value: false);
 		}
 	}
 
@@ -33,8 +37,8 @@ public class ChestObjectHysteresis : MonoBehaviour, ISpawnable
 
 	private void Start()
 	{
-		this.lastAngleQuat = base.transform.rotation;
-		this.currentAngleQuat = base.transform.rotation;
+		lastAngleQuat = base.transform.rotation;
+		currentAngleQuat = base.transform.rotation;
 	}
 
 	private void OnEnable()
@@ -49,26 +53,13 @@ public class ChestObjectHysteresis : MonoBehaviour, ISpawnable
 
 	public void InvokeUpdate()
 	{
-		this.currentAngleQuat = this.angleFollower.rotation;
-		this.angleBetween = Quaternion.Angle(this.currentAngleQuat, this.lastAngleQuat);
-		if (this.angleBetween > this.angleHysteresis)
+		currentAngleQuat = angleFollower.rotation;
+		angleBetween = Quaternion.Angle(currentAngleQuat, lastAngleQuat);
+		if (angleBetween > angleHysteresis)
 		{
-			base.transform.rotation = Quaternion.Slerp(this.currentAngleQuat, this.lastAngleQuat, this.angleHysteresis / this.angleBetween);
-			this.lastAngleQuat = base.transform.rotation;
+			base.transform.rotation = Quaternion.Slerp(currentAngleQuat, lastAngleQuat, angleHysteresis / angleBetween);
+			lastAngleQuat = base.transform.rotation;
 		}
-		base.transform.rotation = this.lastAngleQuat;
+		base.transform.rotation = lastAngleQuat;
 	}
-
-	public float angleHysteresis;
-
-	public float angleBetween;
-
-	public Transform angleFollower;
-
-	[Delayed]
-	public string angleFollower_path;
-
-	private Quaternion lastAngleQuat;
-
-	private Quaternion currentAngleQuat;
 }

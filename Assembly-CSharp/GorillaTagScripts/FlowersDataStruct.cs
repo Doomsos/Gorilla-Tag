@@ -1,60 +1,47 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[StructLayout(LayoutKind.Explicit, Size = 52)]
+[NetworkStructWeaved(13)]
+public struct FlowersDataStruct : INetworkStruct
 {
-	[NetworkStructWeaved(13)]
-	[StructLayout(LayoutKind.Explicit, Size = 52)]
-	public struct FlowersDataStruct : INetworkStruct
+	[FieldOffset(4)]
+	[FixedBufferProperty(typeof(NetworkLinkedList<byte>), typeof(UnityLinkedListSurrogate_0040ElementReaderWriterByte), 1, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_00406 _FlowerWateredData;
+
+	[FieldOffset(28)]
+	[FixedBufferProperty(typeof(NetworkLinkedList<int>), typeof(UnityLinkedListSurrogate_0040ElementReaderWriterInt32), 1, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_00406 _FlowerStateData;
+
+	[field: FieldOffset(0)]
+	public int FlowerCount { get; set; }
+
+	[Networked]
+	[NetworkedWeavedLinkedList(1, 1, typeof(Fusion.ElementReaderWriterByte))]
+	[NetworkedWeaved(1, 6)]
+	public unsafe NetworkLinkedList<byte> FlowerWateredData => new NetworkLinkedList<byte>(Native.ReferenceToPointer(ref _FlowerWateredData), 1, Fusion.ElementReaderWriterByte.GetInstance());
+
+	[Networked]
+	[NetworkedWeavedLinkedList(1, 1, typeof(Fusion.ElementReaderWriterInt32))]
+	[NetworkedWeaved(7, 6)]
+	public unsafe NetworkLinkedList<int> FlowerStateData => new NetworkLinkedList<int>(Native.ReferenceToPointer(ref _FlowerStateData), 1, Fusion.ElementReaderWriterInt32.GetInstance());
+
+	public FlowersDataStruct(List<Flower> allFlowers)
 	{
-		public int FlowerCount { readonly get; set; }
-
-		[Networked]
-		[NetworkedWeavedLinkedList(1, 1, typeof(ElementReaderWriterByte))]
-		[NetworkedWeaved(1, 6)]
-		public NetworkLinkedList<byte> FlowerWateredData
+		FlowerCount = allFlowers.Count;
+		foreach (Flower allFlower in allFlowers)
 		{
-			get
-			{
-				return new NetworkLinkedList<byte>(Native.ReferenceToPointer<FixedStorage@6>(ref this._FlowerWateredData), 1, ElementReaderWriterByte.GetInstance());
-			}
+			FlowerWateredData.Add((byte)(allFlower.IsWatered ? 1u : 0u));
+			FlowerStateData.Add((int)allFlower.GetCurrentState());
 		}
-
-		[Networked]
-		[NetworkedWeavedLinkedList(1, 1, typeof(ElementReaderWriterInt32))]
-		[NetworkedWeaved(7, 6)]
-		public NetworkLinkedList<int> FlowerStateData
-		{
-			get
-			{
-				return new NetworkLinkedList<int>(Native.ReferenceToPointer<FixedStorage@6>(ref this._FlowerStateData), 1, ElementReaderWriterInt32.GetInstance());
-			}
-		}
-
-		public FlowersDataStruct(List<Flower> allFlowers)
-		{
-			this.FlowerCount = allFlowers.Count;
-			foreach (Flower flower in allFlowers)
-			{
-				this.FlowerWateredData.Add(flower.IsWatered ? 1 : 0);
-				this.FlowerStateData.Add((int)flower.GetCurrentState());
-			}
-		}
-
-		[FixedBufferProperty(typeof(NetworkLinkedList<byte>), typeof(UnityLinkedListSurrogate@ElementReaderWriterByte), 1, order = -2147483647)]
-		[WeaverGenerated]
-		[SerializeField]
-		[FieldOffset(4)]
-		private FixedStorage@6 _FlowerWateredData;
-
-		[FixedBufferProperty(typeof(NetworkLinkedList<int>), typeof(UnityLinkedListSurrogate@ElementReaderWriterInt32), 1, order = -2147483647)]
-		[WeaverGenerated]
-		[SerializeField]
-		[FieldOffset(28)]
-		private FixedStorage@6 _FlowerStateData;
 	}
 }

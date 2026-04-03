@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 [Serializable]
 public class ErrorContent
@@ -9,6 +9,6 @@ public class ErrorContent
 
 	public override string ToString()
 	{
-		return "Error: " + this.Error + ", Message: " + this.Message;
+		return "Error: " + Error + ", Message: " + Message;
 	}
 }

@@ -1,19 +1,22 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaCameraTriggerIndex : MonoBehaviour
 {
+	public int sceneTriggerIndex;
+
+	public GorillaCameraSceneTrigger parentTrigger;
+
 	private void Start()
 	{
-		this.parentTrigger = base.GetComponentInParent<GorillaCameraSceneTrigger>();
+		parentTrigger = GetComponentInParent<GorillaCameraSceneTrigger>();
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other.gameObject.CompareTag("SceneChanger"))
 		{
-			this.parentTrigger.mostRecentSceneTrigger = this;
-			this.parentTrigger.ChangeScene(this);
+			parentTrigger.mostRecentSceneTrigger = this;
+			parentTrigger.ChangeScene(this);
 		}
 	}
 
@@ -21,11 +24,7 @@ public class GorillaCameraTriggerIndex : MonoBehaviour
 	{
 		if (other.gameObject.CompareTag("SceneChanger"))
 		{
-			this.parentTrigger.ChangeScene(this);
+			parentTrigger.ChangeScene(this);
 		}
 	}
-
-	public int sceneTriggerIndex;
-
-	public GorillaCameraSceneTrigger parentTrigger;
 }

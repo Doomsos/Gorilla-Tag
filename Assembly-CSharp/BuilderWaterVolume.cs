@@ -1,49 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class BuilderWaterVolume : MonoBehaviour, IBuilderPieceComponent
 {
-	public void OnPieceCreate(int pieceType, int pieceId)
-	{
-	}
-
-	public void OnPieceDestroy()
-	{
-	}
-
-	public void OnPiecePlacementDeserialized()
-	{
-		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !this.piece.IsPieceMoving();
-		this.waterVolume.SetActive(flag);
-		this.waterMesh.SetActive(flag);
-		if (this.floatingObjects != null)
-		{
-			this.floatingObjects.localPosition = (flag ? this.floating.localPosition : this.sunk.localPosition);
-		}
-	}
-
-	public void OnPieceActivate()
-	{
-		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !this.piece.IsPieceMoving();
-		this.waterVolume.SetActive(flag);
-		this.waterMesh.SetActive(flag);
-		if (this.floatingObjects != null)
-		{
-			this.floatingObjects.localPosition = (flag ? this.floating.localPosition : this.sunk.localPosition);
-		}
-	}
-
-	public void OnPieceDeactivate()
-	{
-		this.waterVolume.SetActive(false);
-		this.waterMesh.SetActive(true);
-		if (this.floatingObjects != null)
-		{
-			this.floatingObjects.localPosition = this.floating.localPosition;
-		}
-	}
-
 	[SerializeField]
 	private BuilderPiece piece;
 
@@ -62,4 +21,44 @@ public class BuilderWaterVolume : MonoBehaviour, IBuilderPieceComponent
 
 	[SerializeField]
 	private Transform sunk;
+
+	public void OnPieceCreate(int pieceType, int pieceId)
+	{
+	}
+
+	public void OnPieceDestroy()
+	{
+	}
+
+	public void OnPiecePlacementDeserialized()
+	{
+		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !piece.IsPieceMoving();
+		waterVolume.SetActive(flag);
+		waterMesh.SetActive(flag);
+		if (floatingObjects != null)
+		{
+			floatingObjects.localPosition = (flag ? floating.localPosition : sunk.localPosition);
+		}
+	}
+
+	public void OnPieceActivate()
+	{
+		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !piece.IsPieceMoving();
+		waterVolume.SetActive(flag);
+		waterMesh.SetActive(flag);
+		if (floatingObjects != null)
+		{
+			floatingObjects.localPosition = (flag ? floating.localPosition : sunk.localPosition);
+		}
+	}
+
+	public void OnPieceDeactivate()
+	{
+		waterVolume.SetActive(value: false);
+		waterMesh.SetActive(value: true);
+		if (floatingObjects != null)
+		{
+			floatingObjects.localPosition = floating.localPosition;
+		}
+	}
 }

@@ -1,37 +1,12 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
 using UnityEngine;
 
-[NetworkStructWeaved(43)]
 [StructLayout(LayoutKind.Explicit, Size = 172)]
+[NetworkStructWeaved(43)]
 public struct HuntData : INetworkStruct
 {
-	[Networked]
-	[Capacity(20)]
-	[NetworkedWeavedArray(20, 1, typeof(ElementReaderWriterInt32))]
-	[NetworkedWeaved(3, 20)]
-	public NetworkArray<int> currentHuntedArray
-	{
-		get
-		{
-			return new NetworkArray<int>(Native.ReferenceToPointer<FixedStorage@20>(ref this._currentHuntedArray), 20, ElementReaderWriterInt32.GetInstance());
-		}
-	}
-
-	[Networked]
-	[Capacity(20)]
-	[NetworkedWeavedArray(20, 1, typeof(ElementReaderWriterInt32))]
-	[NetworkedWeaved(23, 20)]
-	public NetworkArray<int> currentTargetArray
-	{
-		get
-		{
-			return new NetworkArray<int>(Native.ReferenceToPointer<FixedStorage@20>(ref this._currentTargetArray), 20, ElementReaderWriterInt32.GetInstance());
-		}
-	}
-
 	[FieldOffset(0)]
 	public NetworkBool huntStarted;
 
@@ -41,15 +16,27 @@ public struct HuntData : INetworkStruct
 	[FieldOffset(8)]
 	public int countDownTime;
 
-	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate@ElementReaderWriterInt32), 20, order = -2147483647)]
-	[WeaverGenerated]
-	[SerializeField]
 	[FieldOffset(12)]
-	private FixedStorage@20 _currentHuntedArray;
-
-	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate@ElementReaderWriterInt32), 20, order = -2147483647)]
+	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate_0040ElementReaderWriterInt32), 20, order = -2147483647)]
 	[WeaverGenerated]
 	[SerializeField]
+	private FixedStorage_004020 _currentHuntedArray;
+
 	[FieldOffset(92)]
-	private FixedStorage@20 _currentTargetArray;
+	[FixedBufferProperty(typeof(NetworkArray<int>), typeof(UnityArraySurrogate_0040ElementReaderWriterInt32), 20, order = -2147483647)]
+	[WeaverGenerated]
+	[SerializeField]
+	private FixedStorage_004020 _currentTargetArray;
+
+	[Networked]
+	[Capacity(20)]
+	[NetworkedWeavedArray(20, 1, typeof(Fusion.ElementReaderWriterInt32))]
+	[NetworkedWeaved(3, 20)]
+	public unsafe NetworkArray<int> currentHuntedArray => new NetworkArray<int>(Native.ReferenceToPointer(ref _currentHuntedArray), 20, Fusion.ElementReaderWriterInt32.GetInstance());
+
+	[Networked]
+	[Capacity(20)]
+	[NetworkedWeavedArray(20, 1, typeof(Fusion.ElementReaderWriterInt32))]
+	[NetworkedWeaved(23, 20)]
+	public unsafe NetworkArray<int> currentTargetArray => new NetworkArray<int>(Native.ReferenceToPointer(ref _currentTargetArray), 20, Fusion.ElementReaderWriterInt32.GetInstance());
 }

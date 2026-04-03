@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -6,106 +6,17 @@ using UnityEngine.Events;
 
 public class MaterialCycler : MonoBehaviour
 {
-	private void Awake()
+	[Serializable]
+	private class MaterialPack
 	{
-		this.materialCyclerNetworked = base.GetComponent<MaterialCyclerNetworked>();
-		this.SetMaterials();
-	}
+		[SerializeField]
+		private Material[] materials;
 
-	private void OnEnable()
-	{
-		if (this.materialCyclerNetworked != null)
-		{
-			this.materialCyclerNetworked.OnSynchronize += this.MaterialCyclerNetworked_OnSynchronize;
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.materialCyclerNetworked != null)
-		{
-			this.materialCyclerNetworked.OnSynchronize -= this.MaterialCyclerNetworked_OnSynchronize;
-		}
-	}
-
-	private void MaterialCyclerNetworked_OnSynchronize(int idx, int3 rgb)
-	{
-		if (idx < 0 || idx >= this.materials.Length)
-		{
-			return;
-		}
-		this.index = idx;
-		for (int i = 0; i < this.renderers.Length; i++)
-		{
-			this.renderers[i].material = this.materials[this.index].Materials[i];
-			this.renderers[i].material.SetColor(this.setColorTarget, new Color((float)rgb.x / 9f, (float)rgb.y / 9f, (float)rgb.z / 9f));
-		}
-		this.reset.Invoke(new Vector3(this.renderers[0].material.color.r, this.renderers[0].material.color.g, this.renderers[0].material.color.b));
-	}
-
-	private void SetMaterials()
-	{
-		for (int i = 0; i < this.renderers.Length; i++)
-		{
-			if (this.materials[this.index].Materials.Length > i)
-			{
-				this.renderers[i].material = this.materials[this.index].Materials[i];
-			}
-			else
-			{
-				this.renderers[i].material = null;
-			}
-		}
-		this.reset.Invoke(new Vector3(this.renderers[0].material.color.r, this.renderers[0].material.color.g, this.renderers[0].material.color.b));
-	}
-
-	public void NextMaterial()
-	{
-		this.index = (this.index + 1) % this.materials.Length;
-		this.SetMaterials();
-		this.SetDirty();
-	}
-
-	private void SetDirty()
-	{
-		if (this.materialCyclerNetworked == null)
-		{
-			return;
-		}
-		this.synchTime = Time.time + this.materialCyclerNetworked.SyncTimeOut;
-		if (this.crDirty == null)
-		{
-			this.crDirty = base.StartCoroutine(this.timeOutDirty());
-		}
-	}
-
-	private IEnumerator timeOutDirty()
-	{
-		while (this.synchTime > Time.time)
-		{
-			yield return null;
-		}
-		this.synchronize();
-		this.crDirty = null;
-		yield break;
-	}
-
-	private void synchronize()
-	{
-		this.materialCyclerNetworked.Synchronize(this.index, this.renderers[0].material.color);
-	}
-
-	public void SetColor(Vector3 rgb)
-	{
-		for (int i = 0; i < this.renderers.Length; i++)
-		{
-			this.renderers[i].material.SetColor(this.setColorTarget, new Color(rgb.x, rgb.y, rgb.z));
-		}
-		this.SetDirty();
+		public Material[] Materials => materials;
 	}
 
 	[SerializeField]
-	private MaterialCycler.MaterialPack[] materials;
+	private MaterialPack[] materials;
 
 	[SerializeField]
 	private Renderer[] renderers;
@@ -124,18 +35,98 @@ public class MaterialCycler : MonoBehaviour
 
 	private MaterialCyclerNetworked materialCyclerNetworked;
 
-	[Serializable]
-	private class MaterialPack
+	private void Awake()
 	{
-		public Material[] Materials
+		materialCyclerNetworked = GetComponent<MaterialCyclerNetworked>();
+		SetMaterials();
+	}
+
+	private void OnEnable()
+	{
+		if (materialCyclerNetworked != null)
 		{
-			get
+			materialCyclerNetworked.OnSynchronize += MaterialCyclerNetworked_OnSynchronize;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (materialCyclerNetworked != null)
+		{
+			materialCyclerNetworked.OnSynchronize -= MaterialCyclerNetworked_OnSynchronize;
+		}
+	}
+
+	private void MaterialCyclerNetworked_OnSynchronize(int idx, int3 rgb)
+	{
+		if (idx >= 0 && idx < materials.Length)
+		{
+			index = idx;
+			for (int i = 0; i < renderers.Length; i++)
 			{
-				return this.materials;
+				renderers[i].material = materials[index].Materials[i];
+				renderers[i].material.SetColor(setColorTarget, new Color((float)rgb.x / 9f, (float)rgb.y / 9f, (float)rgb.z / 9f));
+			}
+			reset.Invoke(new Vector3(renderers[0].material.color.r, renderers[0].material.color.g, renderers[0].material.color.b));
+		}
+	}
+
+	private void SetMaterials()
+	{
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			if (materials[index].Materials.Length > i)
+			{
+				renderers[i].material = materials[index].Materials[i];
+			}
+			else
+			{
+				renderers[i].material = null;
 			}
 		}
+		reset.Invoke(new Vector3(renderers[0].material.color.r, renderers[0].material.color.g, renderers[0].material.color.b));
+	}
 
-		[SerializeField]
-		private Material[] materials;
+	public void NextMaterial()
+	{
+		index = (index + 1) % materials.Length;
+		SetMaterials();
+		SetDirty();
+	}
+
+	private void SetDirty()
+	{
+		if (!(materialCyclerNetworked == null))
+		{
+			synchTime = Time.time + materialCyclerNetworked.SyncTimeOut;
+			if (crDirty == null)
+			{
+				crDirty = StartCoroutine(timeOutDirty());
+			}
+		}
+	}
+
+	private IEnumerator timeOutDirty()
+	{
+		while (synchTime > Time.time)
+		{
+			yield return null;
+		}
+		synchronize();
+		crDirty = null;
+	}
+
+	private void synchronize()
+	{
+		materialCyclerNetworked.Synchronize(index, renderers[0].material.color);
+	}
+
+	public void SetColor(Vector3 rgb)
+	{
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			renderers[i].material.SetColor(setColorTarget, new Color(rgb.x, rgb.y, rgb.z));
+		}
+		SetDirty();
 	}
 }

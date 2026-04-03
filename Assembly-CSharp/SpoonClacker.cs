@@ -1,64 +1,9 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 public class SpoonClacker : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.Setup();
-	}
-
-	private void Setup()
-	{
-		JointLimits limits = this.hingeJoint.limits;
-		this.hingeMin = limits.min;
-		this.hingeMax = limits.max;
-	}
-
-	private void Update()
-	{
-		if (!this.transferObject)
-		{
-			return;
-		}
-		TransferrableObject.PositionState currentState = this.transferObject.currentState;
-		if (currentState != TransferrableObject.PositionState.InLeftHand && currentState != TransferrableObject.PositionState.InRightHand)
-		{
-			return;
-		}
-		float num = MathUtils.Linear(this.hingeJoint.angle, this.hingeMin, this.hingeMax, 0f, 1f);
-		float value = (this.invertOut ? (1f - num) : num) * 100f;
-		this.skinnedMesh.SetBlendShapeWeight(this.targetBlendShape, value);
-		if (!this._lockMin && num <= this.minThreshold)
-		{
-			this.OnHitMin.Invoke();
-			this._lockMin = true;
-		}
-		else if (!this._lockMax && num >= 1f - this.maxThreshold)
-		{
-			this.OnHitMax.Invoke();
-			this._lockMax = true;
-			if (this._sincelastHit.HasElapsed(this.multiHitCutoff, true))
-			{
-				this.soundsSingle.Play();
-			}
-			else
-			{
-				this.soundsMulti.Play();
-			}
-		}
-		if (this._lockMin && num > this.minThreshold * this.hysterisisFactor)
-		{
-			this._lockMin = false;
-		}
-		if (this._lockMax && num < 1f - this.maxThreshold * this.hysterisisFactor)
-		{
-			this._lockMax = false;
-		}
-	}
-
 	public TransferrableObject transferObject;
 
 	public SkinnedMeshRenderer skinnedMesh;
@@ -95,4 +40,58 @@ public class SpoonClacker : MonoBehaviour
 
 	[FormerlySerializedAs("multiHitInterval")]
 	public float multiHitCutoff = 0.1f;
+
+	private void Awake()
+	{
+		Setup();
+	}
+
+	private void Setup()
+	{
+		JointLimits limits = hingeJoint.limits;
+		hingeMin = limits.min;
+		hingeMax = limits.max;
+	}
+
+	private void Update()
+	{
+		if (!transferObject)
+		{
+			return;
+		}
+		TransferrableObject.PositionState currentState = transferObject.currentState;
+		if (currentState != TransferrableObject.PositionState.InLeftHand && currentState != TransferrableObject.PositionState.InRightHand)
+		{
+			return;
+		}
+		float num = MathUtils.Linear(hingeJoint.angle, hingeMin, hingeMax, 0f, 1f);
+		float value = (invertOut ? (1f - num) : num) * 100f;
+		skinnedMesh.SetBlendShapeWeight(targetBlendShape, value);
+		if (!_lockMin && num <= minThreshold)
+		{
+			OnHitMin.Invoke();
+			_lockMin = true;
+		}
+		else if (!_lockMax && num >= 1f - maxThreshold)
+		{
+			OnHitMax.Invoke();
+			_lockMax = true;
+			if (_sincelastHit.HasElapsed(multiHitCutoff, resetOnElapsed: true))
+			{
+				soundsSingle.Play();
+			}
+			else
+			{
+				soundsMulti.Play();
+			}
+		}
+		if (_lockMin && num > minThreshold * hysterisisFactor)
+		{
+			_lockMin = false;
+		}
+		if (_lockMax && num < 1f - maxThreshold * hysterisisFactor)
+		{
+			_lockMax = false;
+		}
+	}
 }

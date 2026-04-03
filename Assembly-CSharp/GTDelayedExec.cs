@@ -1,70 +1,13 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GTDelayedExec : ITickSystemTick
 {
-	public static GTDelayedExec instance { get; private set; }
-
-	public static int listenerCount { get; private set; }
-
-	[OnEnterPlay_Run]
-	private static void EdReInit()
+	private struct Listener(IDelayedExecListener listener, int contextId)
 	{
-		GTDelayedExec._listenerDelays = new float[1024];
-		GTDelayedExec._listeners = new GTDelayedExec.Listener[1024];
-	}
+		public readonly IDelayedExecListener listener = listener;
 
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-	private static void InitializeAfterAssemblies()
-	{
-		GTDelayedExec.listenerCount = 0;
-		GTDelayedExec.instance = new GTDelayedExec();
-		TickSystem<object>.AddTickCallback(GTDelayedExec.instance);
-	}
-
-	internal static void Add(IDelayedExecListener listener, float delay, int contextId)
-	{
-		if (GTDelayedExec.listenerCount >= GTDelayedExec.maxListenersCount)
-		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				"ERROR!!!  GTDelayedExec: Recovering from default maximum number of delayed listeners ",
-				1024.ToString(),
-				" reached. Please set the k_defaultMaxListenersCount value to ",
-				(GTDelayedExec.maxListenersCount * 2).ToString(),
-				"."
-			}));
-			GTDelayedExec.maxListenersCount *= 2;
-			Array.Resize<float>(ref GTDelayedExec._listenerDelays, GTDelayedExec.maxListenersCount);
-			Array.Resize<GTDelayedExec.Listener>(ref GTDelayedExec._listeners, GTDelayedExec.maxListenersCount);
-		}
-		GTDelayedExec._listenerDelays[GTDelayedExec.listenerCount] = Time.unscaledTime + delay;
-		GTDelayedExec._listeners[GTDelayedExec.listenerCount] = new GTDelayedExec.Listener(listener, contextId);
-		GTDelayedExec.listenerCount++;
-	}
-
-	bool ITickSystemTick.TickRunning { get; set; }
-
-	void ITickSystemTick.Tick()
-	{
-		for (int i = 0; i < GTDelayedExec.listenerCount; i++)
-		{
-			if (Time.unscaledTime >= GTDelayedExec._listenerDelays[i])
-			{
-				try
-				{
-					GTDelayedExec._listeners[i].listener.OnDelayedAction(GTDelayedExec._listeners[i].contextId);
-				}
-				catch (Exception exception)
-				{
-					Debug.LogException(exception);
-				}
-				GTDelayedExec.listenerCount--;
-				GTDelayedExec._listenerDelays[i] = GTDelayedExec._listenerDelays[GTDelayedExec.listenerCount];
-				GTDelayedExec._listeners[i] = GTDelayedExec._listeners[GTDelayedExec.listenerCount];
-				i--;
-			}
-		}
+		public readonly int contextId = contextId;
 	}
 
 	public const int k_defaultMaxListenersCount = 1024;
@@ -73,18 +16,62 @@ public class GTDelayedExec : ITickSystemTick
 
 	private static float[] _listenerDelays = new float[1024];
 
-	private static GTDelayedExec.Listener[] _listeners = new GTDelayedExec.Listener[1024];
+	private static Listener[] _listeners = new Listener[1024];
 
-	private struct Listener
+	public static GTDelayedExec instance { get; private set; }
+
+	public static int listenerCount { get; private set; }
+
+	bool ITickSystemTick.TickRunning { get; set; }
+
+	[OnEnterPlay_Run]
+	private static void EdReInit()
 	{
-		public Listener(IDelayedExecListener listener, int contextId)
+		_listenerDelays = new float[1024];
+		_listeners = new Listener[1024];
+	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+	private static void InitializeAfterAssemblies()
+	{
+		listenerCount = 0;
+		instance = new GTDelayedExec();
+		TickSystem<object>.AddTickCallback(instance);
+	}
+
+	internal static void Add(IDelayedExecListener listener, float delay, int contextId)
+	{
+		if (listenerCount >= maxListenersCount)
 		{
-			this.listener = listener;
-			this.contextId = contextId;
+			Debug.LogError("ERROR!!!  GTDelayedExec: Recovering from default maximum number of delayed listeners " + 1024 + " reached. Please set the k_defaultMaxListenersCount value to " + maxListenersCount * 2 + ".");
+			maxListenersCount *= 2;
+			Array.Resize(ref _listenerDelays, maxListenersCount);
+			Array.Resize(ref _listeners, maxListenersCount);
 		}
+		_listenerDelays[listenerCount] = Time.unscaledTime + delay;
+		_listeners[listenerCount] = new Listener(listener, contextId);
+		listenerCount++;
+	}
 
-		public readonly IDelayedExecListener listener;
-
-		public readonly int contextId;
+	void ITickSystemTick.Tick()
+	{
+		for (int i = 0; i < listenerCount; i++)
+		{
+			if (Time.unscaledTime >= _listenerDelays[i])
+			{
+				try
+				{
+					_listeners[i].listener.OnDelayedAction(_listeners[i].contextId);
+				}
+				catch (Exception exception)
+				{
+					Debug.LogException(exception);
+				}
+				listenerCount--;
+				_listenerDelays[i] = _listenerDelays[listenerCount];
+				_listeners[i] = _listeners[listenerCount];
+				i--;
+			}
+		}
 	}
 }

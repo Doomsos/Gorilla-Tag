@@ -1,27 +1,22 @@
-﻿using System;
 using UnityEngine;
 
 public class SIResourceCollectionDepositTrigger : MonoBehaviour
 {
+	public GameObject parentCollection;
+
+	private ISIResourceDeposit resourceDeposit;
+
 	private void Awake()
 	{
-		this.resourceDeposit = this.parentCollection.GetComponent<ISIResourceDeposit>();
+		resourceDeposit = parentCollection.GetComponent<ISIResourceDeposit>();
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
 		SIResource componentInParent = other.GetComponentInParent<SIResource>();
-		if (componentInParent == null)
+		if (!(componentInParent == null) && componentInParent.CanDeposit())
 		{
-			return;
-		}
-		if (componentInParent.CanDeposit())
-		{
-			this.resourceDeposit.ResourceDeposited(componentInParent);
+			resourceDeposit.ResourceDeposited(componentInParent);
 		}
 	}
-
-	public GameObject parentCollection;
-
-	private ISIResourceDeposit resourceDeposit;
 }

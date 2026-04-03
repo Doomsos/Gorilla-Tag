@@ -1,38 +1,34 @@
-﻿using System;
 using UnityEngine;
 
-namespace Docking
+namespace Docking;
+
+public class Dockable : MonoBehaviour
 {
-	public class Dockable : MonoBehaviour
+	protected Transform potentialDock;
+
+	protected virtual void OnTriggerEnter(Collider other)
 	{
-		protected virtual void OnTriggerEnter(Collider other)
+		if (other.TryGetComponent<Dock>(out var _))
 		{
-			Dock dock;
-			if (other.TryGetComponent<Dock>(out dock))
-			{
-				this.potentialDock = other.transform;
-			}
+			potentialDock = other.transform;
 		}
+	}
 
-		protected virtual void OnTriggerExit(Collider other)
+	protected virtual void OnTriggerExit(Collider other)
+	{
+		if (potentialDock == other.transform)
 		{
-			if (this.potentialDock == other.transform)
-			{
-				this.potentialDock = null;
-			}
+			potentialDock = null;
 		}
+	}
 
-		public virtual void Dock()
+	public virtual void Dock()
+	{
+		if (!(potentialDock == null))
 		{
-			if (this.potentialDock == null)
-			{
-				return;
-			}
-			base.transform.position = this.potentialDock.position;
-			base.transform.rotation = this.potentialDock.rotation;
-			this.potentialDock = null;
+			base.transform.position = potentialDock.position;
+			base.transform.rotation = potentialDock.rotation;
+			potentialDock = null;
 		}
-
-		protected Transform potentialDock;
 	}
 }

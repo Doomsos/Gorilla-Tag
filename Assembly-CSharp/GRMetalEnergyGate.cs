@@ -1,145 +1,31 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GRMetalEnergyGate : MonoBehaviour
 {
-	private void OnEnable()
+	public enum State
 	{
-		this.tool.OnEnergyChange += this.OnEnergyChange;
-		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
+		Closed,
+		Open
 	}
 
-	private void OnDisable()
+	[Serializable]
+	public struct DoorParams
 	{
-		if (this.tool != null)
-		{
-			this.tool.OnEnergyChange -= this.OnEnergyChange;
-		}
-		if (this.gameEntity != null)
-		{
-			this.gameEntity.OnStateChanged -= this.OnEntityStateChanged;
-		}
-	}
+		public Transform doorTransform;
 
-	private void OnEnergyChange(GRTool tool, int energyChange, GameEntityId chargingEntityId)
-	{
-		GameEntity gameEntity = this.gameEntity.manager.GetGameEntity(chargingEntityId);
-		GRPlayer grplayer = null;
-		if (gameEntity != null)
-		{
-			grplayer = GRPlayer.Get(gameEntity.heldByActorNumber);
-		}
-		if (grplayer != null)
-		{
-			grplayer.IncrementCoresSpentPlayer(energyChange);
-		}
-		if (this.state == GRMetalEnergyGate.State.Closed && tool.energy >= tool.GetEnergyMax())
-		{
-			if (grplayer != null)
-			{
-				grplayer.IncrementGatesUnlocked(1);
-			}
-			this.SetState(GRMetalEnergyGate.State.Open);
-			if (this.gameEntity.IsAuthority())
-			{
-				this.gameEntity.RequestState(this.gameEntity.id, 1L);
-			}
-		}
-	}
+		public Transform doorClosedPosition;
 
-	private void OnEntityStateChanged(long prevState, long nextState)
-	{
-		if (!this.gameEntity.IsAuthority())
-		{
-			this.SetState((GRMetalEnergyGate.State)nextState);
-		}
-	}
-
-	public void SetState(GRMetalEnergyGate.State newState)
-	{
-		if (this.state != newState)
-		{
-			this.state = newState;
-			GRMetalEnergyGate.State state = this.state;
-			if (state != GRMetalEnergyGate.State.Closed)
-			{
-				if (state == GRMetalEnergyGate.State.Open)
-				{
-					this.audioSource.PlayOneShot(this.doorOpenClip);
-					for (int i = 0; i < this.enableObjectsOnOpen.Count; i++)
-					{
-						this.enableObjectsOnOpen[i].gameObject.SetActive(true);
-					}
-					for (int j = 0; j < this.disableObjectsOnOpen.Count; j++)
-					{
-						this.disableObjectsOnOpen[j].gameObject.SetActive(false);
-					}
-				}
-			}
-			else
-			{
-				this.audioSource.PlayOneShot(this.doorCloseClip);
-				for (int k = 0; k < this.enableObjectsOnOpen.Count; k++)
-				{
-					this.enableObjectsOnOpen[k].gameObject.SetActive(false);
-				}
-				for (int l = 0; l < this.disableObjectsOnOpen.Count; l++)
-				{
-					this.disableObjectsOnOpen[l].gameObject.SetActive(true);
-				}
-			}
-			if (this.doorAnimationCoroutine == null)
-			{
-				this.doorAnimationCoroutine = base.StartCoroutine(this.UpdateDoorAnimation());
-			}
-		}
-	}
-
-	public void OpenGate()
-	{
-		this.SetState(GRMetalEnergyGate.State.Open);
-	}
-
-	public void CloseGate()
-	{
-		this.SetState(GRMetalEnergyGate.State.Closed);
-	}
-
-	private IEnumerator UpdateDoorAnimation()
-	{
-		while ((this.state == GRMetalEnergyGate.State.Open && this.openProgress < 1f) || (this.state == GRMetalEnergyGate.State.Closed && this.openProgress > 0f))
-		{
-			GRMetalEnergyGate.State state = this.state;
-			if (state != GRMetalEnergyGate.State.Closed)
-			{
-				if (state == GRMetalEnergyGate.State.Open)
-				{
-					this.openProgress = Mathf.MoveTowards(this.openProgress, 1f, Time.deltaTime / this.doorOpenTime);
-					float t = this.doorOpenCurve.Evaluate(this.openProgress);
-					this.upperDoor.doorTransform.localPosition = Vector3.Lerp(this.upperDoor.doorClosedPosition.localPosition, this.upperDoor.doorOpenPosition.localPosition, t);
-					this.lowerDoor.doorTransform.localPosition = Vector3.Lerp(this.lowerDoor.doorClosedPosition.localPosition, this.lowerDoor.doorOpenPosition.localPosition, t);
-				}
-			}
-			else
-			{
-				this.openProgress = Mathf.MoveTowards(this.openProgress, 0f, Time.deltaTime / this.doorOpenTime);
-				float t2 = this.doorCloseCurve.Evaluate(this.openProgress);
-				this.upperDoor.doorTransform.localPosition = Vector3.Lerp(this.upperDoor.doorClosedPosition.localPosition, this.upperDoor.doorOpenPosition.localPosition, t2);
-				this.lowerDoor.doorTransform.localPosition = Vector3.Lerp(this.lowerDoor.doorClosedPosition.localPosition, this.lowerDoor.doorOpenPosition.localPosition, t2);
-			}
-			yield return null;
-		}
-		this.doorAnimationCoroutine = null;
-		yield break;
+		public Transform doorOpenPosition;
 	}
 
 	[SerializeField]
-	public GRMetalEnergyGate.DoorParams upperDoor;
+	public DoorParams upperDoor;
 
 	[SerializeField]
-	public GRMetalEnergyGate.DoorParams lowerDoor;
+	public DoorParams lowerDoor;
 
 	[SerializeField]
 	private float doorOpenTime = 1.5f;
@@ -174,25 +60,141 @@ public class GRMetalEnergyGate : MonoBehaviour
 	[SerializeField]
 	private AudioSource audioSource;
 
-	public GRMetalEnergyGate.State state;
+	public State state;
 
 	private float openProgress;
 
 	private Coroutine doorAnimationCoroutine;
 
-	public enum State
+	private void OnEnable()
 	{
-		Closed,
-		Open
+		tool.OnEnergyChange += OnEnergyChange;
+		gameEntity.OnStateChanged += OnEntityStateChanged;
 	}
 
-	[Serializable]
-	public struct DoorParams
+	private void OnDisable()
 	{
-		public Transform doorTransform;
+		if (tool != null)
+		{
+			tool.OnEnergyChange -= OnEnergyChange;
+		}
+		if (gameEntity != null)
+		{
+			gameEntity.OnStateChanged -= OnEntityStateChanged;
+		}
+	}
 
-		public Transform doorClosedPosition;
+	private void OnEnergyChange(GRTool tool, int energyChange, GameEntityId chargingEntityId)
+	{
+		GameEntity gameEntity = this.gameEntity.manager.GetGameEntity(chargingEntityId);
+		GRPlayer gRPlayer = null;
+		if (gameEntity != null)
+		{
+			gRPlayer = GRPlayer.Get(gameEntity.heldByActorNumber);
+		}
+		if (gRPlayer != null)
+		{
+			gRPlayer.IncrementCoresSpentPlayer(energyChange);
+		}
+		if (state == State.Closed && tool.energy >= tool.GetEnergyMax())
+		{
+			if (gRPlayer != null)
+			{
+				gRPlayer.IncrementGatesUnlocked(1);
+			}
+			SetState(State.Open);
+			if (this.gameEntity.IsAuthority())
+			{
+				this.gameEntity.RequestState(this.gameEntity.id, 1L);
+			}
+		}
+	}
 
-		public Transform doorOpenPosition;
+	private void OnEntityStateChanged(long prevState, long nextState)
+	{
+		if (!gameEntity.IsAuthority())
+		{
+			SetState((State)nextState);
+		}
+	}
+
+	public void SetState(State newState)
+	{
+		if (state == newState)
+		{
+			return;
+		}
+		state = newState;
+		switch (state)
+		{
+		case State.Open:
+		{
+			audioSource.PlayOneShot(doorOpenClip);
+			for (int k = 0; k < enableObjectsOnOpen.Count; k++)
+			{
+				enableObjectsOnOpen[k].gameObject.SetActive(value: true);
+			}
+			for (int l = 0; l < disableObjectsOnOpen.Count; l++)
+			{
+				disableObjectsOnOpen[l].gameObject.SetActive(value: false);
+			}
+			break;
+		}
+		case State.Closed:
+		{
+			audioSource.PlayOneShot(doorCloseClip);
+			for (int i = 0; i < enableObjectsOnOpen.Count; i++)
+			{
+				enableObjectsOnOpen[i].gameObject.SetActive(value: false);
+			}
+			for (int j = 0; j < disableObjectsOnOpen.Count; j++)
+			{
+				disableObjectsOnOpen[j].gameObject.SetActive(value: true);
+			}
+			break;
+		}
+		}
+		if (doorAnimationCoroutine == null)
+		{
+			doorAnimationCoroutine = StartCoroutine(UpdateDoorAnimation());
+		}
+	}
+
+	public void OpenGate()
+	{
+		SetState(State.Open);
+	}
+
+	public void CloseGate()
+	{
+		SetState(State.Closed);
+	}
+
+	private IEnumerator UpdateDoorAnimation()
+	{
+		while ((state == State.Open && openProgress < 1f) || (state == State.Closed && openProgress > 0f))
+		{
+			switch (state)
+			{
+			case State.Open:
+			{
+				openProgress = Mathf.MoveTowards(openProgress, 1f, Time.deltaTime / doorOpenTime);
+				float t2 = doorOpenCurve.Evaluate(openProgress);
+				upperDoor.doorTransform.localPosition = Vector3.Lerp(upperDoor.doorClosedPosition.localPosition, upperDoor.doorOpenPosition.localPosition, t2);
+				lowerDoor.doorTransform.localPosition = Vector3.Lerp(lowerDoor.doorClosedPosition.localPosition, lowerDoor.doorOpenPosition.localPosition, t2);
+				break;
+			}
+			case State.Closed:
+			{
+				openProgress = Mathf.MoveTowards(openProgress, 0f, Time.deltaTime / doorOpenTime);
+				float t = doorCloseCurve.Evaluate(openProgress);
+				upperDoor.doorTransform.localPosition = Vector3.Lerp(upperDoor.doorClosedPosition.localPosition, upperDoor.doorOpenPosition.localPosition, t);
+				lowerDoor.doorTransform.localPosition = Vector3.Lerp(lowerDoor.doorClosedPosition.localPosition, lowerDoor.doorOpenPosition.localPosition, t);
+				break;
+			}
+			}
+			yield return null;
+		}
+		doorAnimationCoroutine = null;
 	}
 }

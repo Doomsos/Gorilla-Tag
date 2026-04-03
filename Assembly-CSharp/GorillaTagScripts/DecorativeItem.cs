@@ -1,232 +1,228 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class DecorativeItem : TransferrableObject
 {
-	public class DecorativeItem : TransferrableObject
+	private enum DecorativeItemState
 	{
-		public override bool ShouldBeKinematic()
-		{
-			return this.itemState == TransferrableObject.ItemStates.State2 || this.itemState == TransferrableObject.ItemStates.State4 || base.ShouldBeKinematic();
-		}
+		isHeld = 1,
+		dropped = 2,
+		snapped = 4,
+		respawn = 8,
+		none = 0x10
+	}
 
-		public override void OnSpawn(VRRig rig)
-		{
-			base.OnSpawn(rig);
-			this.parent = base.transform.parent;
-		}
+	public DecorativeItemReliableState reliableState;
 
-		protected override void Start()
-		{
-			base.Start();
-			this.itemState = TransferrableObject.ItemStates.State4;
-			this.currentState = TransferrableObject.PositionState.Dropped;
-		}
+	public UnityAction<DecorativeItem> respawnItem;
 
-		private new void OnStateChanged()
-		{
-			TransferrableObject.ItemStates itemState = this.itemState;
-			if (itemState == TransferrableObject.ItemStates.State2)
-			{
-				this.SnapItem(this.reliableState.isSnapped, this.reliableState.snapPosition);
-				return;
-			}
-			if (itemState != TransferrableObject.ItemStates.State3)
-			{
-				return;
-			}
-			this.Respawn(this.reliableState.respawnPosition, this.reliableState.respawnRotation);
-		}
+	public LayerMask breakItemLayerMask;
 
-		protected override void LateUpdateShared()
-		{
-			base.LateUpdateShared();
-			if (base.InHand())
-			{
-				this.itemState = TransferrableObject.ItemStates.State0;
-			}
-			DecorativeItem.DecorativeItemState itemState = (DecorativeItem.DecorativeItemState)this.itemState;
-			if (itemState != this.previousItemState)
-			{
-				this.OnStateChanged();
-			}
-			this.previousItemState = itemState;
-		}
+	private Coroutine respawnTimer;
 
-		protected override void LateUpdateLocal()
-		{
-			base.LateUpdateLocal();
-			if (this.itemState == TransferrableObject.ItemStates.State4 && this.worldShareableInstance && this.worldShareableInstance.guard.isTrulyMine)
-			{
-				this.InvokeRespawn();
-			}
-		}
+	private Transform parent;
 
-		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-		{
-			base.OnGrab(pointGrabbed, grabbingHand);
-			this.itemState = TransferrableObject.ItemStates.State0;
-		}
+	private float _respawnTimestamp;
 
-		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-		{
-			if (!base.OnRelease(zoneReleased, releasingHand))
-			{
-				return false;
-			}
-			this.itemState = TransferrableObject.ItemStates.State1;
-			this.Reparent(null);
-			return true;
-		}
+	private bool isSnapped;
 
-		private void SetWillTeleport()
-		{
-			this.worldShareableInstance.SetWillTeleport();
-		}
+	private Vector3 currentPosition;
 
-		public void Respawn(Vector3 randPosition, Quaternion randRotation)
-		{
-			if (base.InHand())
-			{
-				return;
-			}
-			if (this.shatterVFX && this.ShouldPlayFX())
-			{
-				this.PlayVFX(this.shatterVFX);
-			}
-			this.itemState = TransferrableObject.ItemStates.State3;
-			this.SetWillTeleport();
-			Transform transform = base.transform;
-			transform.position = randPosition;
-			transform.rotation = randRotation;
-			if (this.reliableState)
-			{
-				this.reliableState.respawnPosition = randPosition;
-				this.reliableState.respawnRotation = randRotation;
-			}
-		}
+	[SerializeField]
+	private AudioSource audioSource;
 
-		private void PlayVFX(GameObject vfx)
-		{
-			ObjectPools.instance.Instantiate(vfx, base.transform.position, true);
-		}
+	public AudioClip snapAudio;
 
-		private bool Reparent(Transform _transform)
+	public GameObject shatterVFX;
+
+	private new DecorativeItemState previousItemState = DecorativeItemState.dropped;
+
+	public override bool ShouldBeKinematic()
+	{
+		if (itemState != ItemStates.State2 && itemState != ItemStates.State4)
 		{
-			if (!this.allowReparenting)
-			{
-				return false;
-			}
-			if (this.parent)
-			{
-				this.parent.SetParent(_transform);
-				base.transform.SetParent(this.parent);
-				return true;
-			}
+			return base.ShouldBeKinematic();
+		}
+		return true;
+	}
+
+	public override void OnSpawn(VRRig rig)
+	{
+		base.OnSpawn(rig);
+		parent = base.transform.parent;
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		itemState = ItemStates.State4;
+		currentState = PositionState.Dropped;
+	}
+
+	private new void OnStateChanged()
+	{
+		switch (itemState)
+		{
+		case ItemStates.State2:
+			SnapItem(reliableState.isSnapped, reliableState.snapPosition);
+			break;
+		case ItemStates.State3:
+			Respawn(reliableState.respawnPosition, reliableState.respawnRotation);
+			break;
+		}
+	}
+
+	protected override void LateUpdateShared()
+	{
+		base.LateUpdateShared();
+		if (InHand())
+		{
+			itemState = ItemStates.State0;
+		}
+		DecorativeItemState decorativeItemState = (DecorativeItemState)itemState;
+		if (decorativeItemState != previousItemState)
+		{
+			OnStateChanged();
+		}
+		previousItemState = decorativeItemState;
+	}
+
+	protected override void LateUpdateLocal()
+	{
+		base.LateUpdateLocal();
+		if (itemState == ItemStates.State4 && (bool)worldShareableInstance && worldShareableInstance.guard.isTrulyMine)
+		{
+			InvokeRespawn();
+		}
+	}
+
+	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		base.OnGrab(pointGrabbed, grabbingHand);
+		itemState = ItemStates.State0;
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
 			return false;
 		}
+		itemState = ItemStates.State1;
+		Reparent(null);
+		return true;
+	}
 
-		public void SnapItem(bool snap, Vector3 attachPoint)
+	private void SetWillTeleport()
+	{
+		worldShareableInstance.SetWillTeleport();
+	}
+
+	public void Respawn(Vector3 randPosition, Quaternion randRotation)
+	{
+		if (!InHand())
 		{
-			if (!this.reliableState)
+			if ((bool)shatterVFX && ShouldPlayFX())
 			{
+				PlayVFX(shatterVFX);
+			}
+			itemState = ItemStates.State3;
+			SetWillTeleport();
+			Transform obj = base.transform;
+			obj.position = randPosition;
+			obj.rotation = randRotation;
+			if ((bool)reliableState)
+			{
+				reliableState.respawnPosition = randPosition;
+				reliableState.respawnRotation = randRotation;
+			}
+		}
+	}
+
+	private void PlayVFX(GameObject vfx)
+	{
+		ObjectPools.instance.Instantiate(vfx, base.transform.position);
+	}
+
+	private bool Reparent(Transform _transform)
+	{
+		if (!allowReparenting)
+		{
+			return false;
+		}
+		if ((bool)parent)
+		{
+			parent.SetParent(_transform);
+			base.transform.SetParent(parent);
+			return true;
+		}
+		return false;
+	}
+
+	public void SnapItem(bool snap, Vector3 attachPoint)
+	{
+		if (!reliableState)
+		{
+			return;
+		}
+		if (snap)
+		{
+			AttachPoint currentAttachPointByPosition = DecorativeItemsManager.Instance.getCurrentAttachPointByPosition(attachPoint);
+			if (!currentAttachPointByPosition)
+			{
+				reliableState.isSnapped = false;
+				reliableState.snapPosition = Vector3.zero;
 				return;
 			}
-			if (snap)
+			Transform attachPoint2 = currentAttachPointByPosition.attachPoint;
+			if (!Reparent(attachPoint2))
 			{
-				AttachPoint currentAttachPointByPosition = DecorativeItemsManager.Instance.getCurrentAttachPointByPosition(attachPoint);
-				if (!currentAttachPointByPosition)
-				{
-					this.reliableState.isSnapped = false;
-					this.reliableState.snapPosition = Vector3.zero;
-					return;
-				}
-				Transform attachPoint2 = currentAttachPointByPosition.attachPoint;
-				if (!this.Reparent(attachPoint2))
-				{
-					this.reliableState.isSnapped = false;
-					this.reliableState.snapPosition = Vector3.zero;
-					return;
-				}
-				this.itemState = TransferrableObject.ItemStates.State2;
-				base.transform.parent.localPosition = Vector3.zero;
-				base.transform.localPosition = Vector3.zero;
-				this.reliableState.isSnapped = true;
-				if (this.audioSource && this.snapAudio && this.ShouldPlayFX())
-				{
-					this.audioSource.GTPlayOneShot(this.snapAudio, 1f);
-				}
-				currentAttachPointByPosition.SetIsHook(true);
-			}
-			else
-			{
-				this.Reparent(null);
-				this.reliableState.isSnapped = false;
-			}
-			this.reliableState.snapPosition = attachPoint;
-		}
-
-		private void InvokeRespawn()
-		{
-			if (this.itemState == TransferrableObject.ItemStates.State2)
-			{
+				reliableState.isSnapped = false;
+				reliableState.snapPosition = Vector3.zero;
 				return;
 			}
-			UnityAction<DecorativeItem> unityAction = this.respawnItem;
-			if (unityAction == null)
+			itemState = ItemStates.State2;
+			base.transform.parent.localPosition = Vector3.zero;
+			base.transform.localPosition = Vector3.zero;
+			reliableState.isSnapped = true;
+			if ((bool)audioSource && (bool)snapAudio && ShouldPlayFX())
 			{
-				return;
+				audioSource.GTPlayOneShot(snapAudio);
 			}
-			unityAction(this);
+			currentAttachPointByPosition.SetIsHook(isHooked: true);
 		}
-
-		private bool ShouldPlayFX()
+		else
 		{
-			return this.previousItemState == DecorativeItem.DecorativeItemState.isHeld || this.previousItemState == DecorativeItem.DecorativeItemState.dropped;
+			Reparent(null);
+			reliableState.isSnapped = false;
 		}
+		reliableState.snapPosition = attachPoint;
+	}
 
-		private void OnCollisionEnter(Collision other)
+	private void InvokeRespawn()
+	{
+		if (itemState != ItemStates.State2)
 		{
-			if (this.breakItemLayerMask != (this.breakItemLayerMask | 1 << other.gameObject.layer))
-			{
-				return;
-			}
-			this.InvokeRespawn();
+			respawnItem?.Invoke(this);
 		}
+	}
 
-		public DecorativeItemReliableState reliableState;
-
-		public UnityAction<DecorativeItem> respawnItem;
-
-		public LayerMask breakItemLayerMask;
-
-		private Coroutine respawnTimer;
-
-		private Transform parent;
-
-		private float _respawnTimestamp;
-
-		private bool isSnapped;
-
-		private Vector3 currentPosition;
-
-		[SerializeField]
-		private AudioSource audioSource;
-
-		public AudioClip snapAudio;
-
-		public GameObject shatterVFX;
-
-		private new DecorativeItem.DecorativeItemState previousItemState = DecorativeItem.DecorativeItemState.dropped;
-
-		private enum DecorativeItemState
+	private bool ShouldPlayFX()
+	{
+		if (previousItemState == DecorativeItemState.isHeld || previousItemState == DecorativeItemState.dropped)
 		{
-			isHeld = 1,
-			dropped,
-			snapped = 4,
-			respawn = 8,
-			none = 16
+			return true;
+		}
+		return false;
+	}
+
+	private void OnCollisionEnter(Collision other)
+	{
+		if ((int)breakItemLayerMask == ((int)breakItemLayerMask | (1 << other.gameObject.layer)))
+		{
+			InvokeRespawn();
 		}
 	}
 }

@@ -1,20 +1,19 @@
-﻿using System;
+using System;
 
-namespace Utilities
+namespace Utilities;
+
+public sealed class GTProfiler : IDisposable
 {
-	public sealed class GTProfiler : IDisposable
+	private GTProfiler()
 	{
-		private GTProfiler()
-		{
-		}
+	}
 
-		public static GTProfiler BeginSample(string sampleName)
-		{
-			return null;
-		}
+	public static GTProfiler BeginSample(string sampleName)
+	{
+		return null;
+	}
 
-		public void Dispose()
-		{
-		}
+	public void Dispose()
+	{
 	}
 }

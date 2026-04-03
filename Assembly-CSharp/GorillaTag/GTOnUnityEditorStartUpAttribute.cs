@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class GTOnUnityEditorStartUpAttribute : Attribute
 {
-	[AttributeUsage(AttributeTargets.Method)]
-	public class GTOnUnityEditorStartUpAttribute : Attribute
-	{
-	}
 }

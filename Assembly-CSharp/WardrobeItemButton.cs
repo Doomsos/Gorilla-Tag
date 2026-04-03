@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaNetworking;
 
 public class WardrobeItemButton : GorillaPressableButton

@@ -1,48 +1,9 @@
-﻿using System;
+using System;
 using Photon.Pun;
 using UnityEngine;
 
 public class GRCurrencyDepositor : MonoBehaviour
 {
-	public void Init(GhostReactor reactor)
-	{
-		this.reactor = reactor;
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		if (other.attachedRigidbody != null)
-		{
-			GRCollectible component = other.attachedRigidbody.GetComponent<GRCollectible>();
-			if (component != null)
-			{
-				if ((component.type == ProgressionManager.CoreType.ChaosSeed && !this.collectSentientCores) || (component.type != ProgressionManager.CoreType.ChaosSeed && this.collectSentientCores))
-				{
-					return;
-				}
-				if (this.reactor.grManager.IsAuthority())
-				{
-					this.reactor.grManager.RequestDepositCollectible(component.entity.id);
-				}
-				this.collectibleDepositedEffect.Play();
-				this.audioSource.volume = this.collectibleDepositedClipVolume;
-				this.audioSource.PlayOneShot(this.collectibleDepositedClip);
-				if (component.entity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-				{
-					if (GamePlayerLocal.instance.gamePlayer.GetGrabbedGameEntityId(0) == component.entity.id)
-					{
-						GorillaTagger.Instance.StartVibration(true, 0.5f, 0.15f);
-						return;
-					}
-					if (GamePlayerLocal.instance.gamePlayer.GetGrabbedGameEntityId(1) == component.entity.id)
-					{
-						GorillaTagger.Instance.StartVibration(false, 0.5f, 0.15f);
-					}
-				}
-			}
-		}
-	}
-
 	public Transform depositingChargePoint;
 
 	[SerializeField]
@@ -66,4 +27,40 @@ public class GRCurrencyDepositor : MonoBehaviour
 
 	[NonSerialized]
 	public GhostReactor reactor;
+
+	public void Init(GhostReactor reactor)
+	{
+		this.reactor = reactor;
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (!(other.attachedRigidbody != null))
+		{
+			return;
+		}
+		GRCollectible component = other.attachedRigidbody.GetComponent<GRCollectible>();
+		if (!(component != null) || (component.type == ProgressionManager.CoreType.ChaosSeed && !collectSentientCores) || (component.type != ProgressionManager.CoreType.ChaosSeed && collectSentientCores))
+		{
+			return;
+		}
+		if (reactor.grManager.IsAuthority())
+		{
+			reactor.grManager.RequestDepositCollectible(component.entity.id);
+		}
+		collectibleDepositedEffect.Play();
+		audioSource.volume = collectibleDepositedClipVolume;
+		audioSource.PlayOneShot(collectibleDepositedClip);
+		if (component.entity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+		{
+			if (GamePlayerLocal.instance.gamePlayer.GetGrabbedGameEntityId(0) == component.entity.id)
+			{
+				GorillaTagger.Instance.StartVibration(forLeftController: true, 0.5f, 0.15f);
+			}
+			else if (GamePlayerLocal.instance.gamePlayer.GetGrabbedGameEntityId(1) == component.entity.id)
+			{
+				GorillaTagger.Instance.StartVibration(forLeftController: false, 0.5f, 0.15f);
+			}
+		}
+	}
 }

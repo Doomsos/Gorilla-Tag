@@ -1,12 +1,9 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class GorillaATMKeyButton : GorillaKeyButton<GorillaATMKeyBindings>
 {
-	public class GorillaATMKeyButton : GorillaKeyButton<GorillaATMKeyBindings>
+	protected override void OnButtonPressedEvent()
 	{
-		protected override void OnButtonPressedEvent()
-		{
-			GameEvents.OnGorrillaATMKeyButtonPressedEvent.Invoke(this.Binding);
-		}
+		GameEvents.OnGorrillaATMKeyButtonPressedEvent.Invoke(Binding);
 	}
 }

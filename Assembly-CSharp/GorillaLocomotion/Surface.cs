@@ -1,10 +1,8 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaLocomotion
+namespace GorillaLocomotion;
+
+public class Surface : MonoBehaviour
 {
-	public class Surface : MonoBehaviour
-	{
-		public float slipPercentage;
-	}
+	public float slipPercentage;
 }

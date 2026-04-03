@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using GorillaNetworking;
@@ -7,120 +6,108 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace CosmeticRoom
+namespace CosmeticRoom;
+
+public class ItemCheckout : MonoBehaviour
 {
-	public class ItemCheckout : MonoBehaviour
+	public CheckoutCartButton[] checkoutCartButtons;
+
+	public PurchaseItemButton leftPurchaseButton;
+
+	public PurchaseItemButton rightPurchaseButton;
+
+	[HideInInspector]
+	public Text purchaseText;
+
+	public TMP_Text purchaseTextTMP;
+
+	public HeadModel checkoutHeadModel;
+
+	public Collider checkoutTryOnArea;
+
+	public GameObject checkoutCounterMesh;
+
+	public GameObject purchaseScreenMesh;
+
+	private Scene originalScene;
+
+	private int iterator;
+
+	public bool addOnEnable;
+
+	private void OnEnable()
 	{
-		private void OnEnable()
+		if (addOnEnable)
 		{
-			if (this.addOnEnable)
-			{
-				CosmeticsController.instance.AddItemCheckout(this);
-			}
-		}
-
-		private void OnDisable()
-		{
-			if (this.addOnEnable)
-			{
-				CosmeticsController.instance.RemoveItemCheckout(this);
-			}
-		}
-
-		public void InitializeForCustomMap(CompositeTriggerEvents customMapTryOnArea, Scene customMapScene, bool useCustomCounterMesh = true)
-		{
-			GameObject gameObject = this.checkoutCounterMesh;
-			if (gameObject != null)
-			{
-				gameObject.SetActive(!useCustomCounterMesh);
-			}
-			GameObject gameObject2 = this.purchaseScreenMesh;
-			if (gameObject2 != null)
-			{
-				gameObject2.SetActive(useCustomCounterMesh);
-			}
-			this.originalScene = customMapScene;
-			customMapTryOnArea.AddCollider(this.checkoutTryOnArea);
 			CosmeticsController.instance.AddItemCheckout(this);
 		}
+	}
 
-		public void RemoveFromCustomMap(CompositeTriggerEvents customMapTryOnArea)
+	private void OnDisable()
+	{
+		if (addOnEnable)
 		{
-			if (customMapTryOnArea.IsNull())
-			{
-				return;
-			}
-			customMapTryOnArea.RemoveCollider(this.checkoutTryOnArea);
+			CosmeticsController.instance.RemoveItemCheckout(this);
 		}
+	}
 
-		public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticItem itemToBuy)
+	public void InitializeForCustomMap(CompositeTriggerEvents customMapTryOnArea, Scene customMapScene, bool useCustomCounterMesh = true)
+	{
+		checkoutCounterMesh?.SetActive(!useCustomCounterMesh);
+		purchaseScreenMesh?.SetActive(useCustomCounterMesh);
+		originalScene = customMapScene;
+		customMapTryOnArea.AddCollider(checkoutTryOnArea);
+		CosmeticsController.instance.AddItemCheckout(this);
+	}
+
+	public void RemoveFromCustomMap(CompositeTriggerEvents customMapTryOnArea)
+	{
+		if (!customMapTryOnArea.IsNull())
 		{
-			this.iterator = 0;
-			while (this.iterator < this.checkoutCartButtons.Length)
-			{
-				if (this.iterator < currentCart.Count)
-				{
-					bool isCurrentItemToBuy = currentCart[this.iterator].itemName == itemToBuy.itemName;
-					this.checkoutCartButtons[this.iterator].SetItem(currentCart[this.iterator], isCurrentItemToBuy);
-				}
-				else
-				{
-					this.checkoutCartButtons[this.iterator].ClearItem();
-				}
-				this.iterator++;
-			}
+			customMapTryOnArea.RemoveCollider(checkoutTryOnArea);
 		}
+	}
 
-		public void UpdatePurchaseText(string newText, string leftPurchaseButtonText, string rightPurchaseButtonText, bool leftButtonOn, bool rightButtonOn)
+	public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticItem itemToBuy)
+	{
+		for (iterator = 0; iterator < checkoutCartButtons.Length; iterator++)
 		{
-			if (this.purchaseText.IsNotNull())
+			if (iterator < currentCart.Count)
 			{
-				this.purchaseText.text = newText;
+				bool isCurrentItemToBuy = currentCart[iterator].itemName == itemToBuy.itemName;
+				checkoutCartButtons[iterator].SetItem(currentCart[iterator], isCurrentItemToBuy);
 			}
-			if (this.purchaseTextTMP.IsNotNull())
+			else
 			{
-				this.purchaseTextTMP.text = newText;
-			}
-			if (!leftPurchaseButtonText.IsNullOrEmpty())
-			{
-				this.leftPurchaseButton.SetText(leftPurchaseButtonText);
-				this.leftPurchaseButton.buttonRenderer.material = (leftButtonOn ? this.leftPurchaseButton.pressedMaterial : this.leftPurchaseButton.unpressedMaterial);
-			}
-			if (!rightPurchaseButtonText.IsNullOrEmpty())
-			{
-				this.rightPurchaseButton.SetText(rightPurchaseButtonText);
-				this.rightPurchaseButton.buttonRenderer.material = (rightButtonOn ? this.rightPurchaseButton.pressedMaterial : this.rightPurchaseButton.unpressedMaterial);
+				checkoutCartButtons[iterator].ClearItem();
 			}
 		}
+	}
 
-		public bool IsFromScene(Scene unloadingScene)
+	public void UpdatePurchaseText(string newText, string leftPurchaseButtonText, string rightPurchaseButtonText, bool leftButtonOn, bool rightButtonOn)
+	{
+		if (purchaseText.IsNotNull())
 		{
-			return unloadingScene == this.originalScene;
+			purchaseText.text = newText;
 		}
+		if (purchaseTextTMP.IsNotNull())
+		{
+			purchaseTextTMP.text = newText;
+		}
+		if (!leftPurchaseButtonText.IsNullOrEmpty())
+		{
+			leftPurchaseButton.SetText(leftPurchaseButtonText);
+			leftPurchaseButton.buttonRenderer.material = (leftButtonOn ? leftPurchaseButton.pressedMaterial : leftPurchaseButton.unpressedMaterial);
+		}
+		if (!rightPurchaseButtonText.IsNullOrEmpty())
+		{
+			rightPurchaseButton.SetText(rightPurchaseButtonText);
+			rightPurchaseButton.buttonRenderer.material = (rightButtonOn ? rightPurchaseButton.pressedMaterial : rightPurchaseButton.unpressedMaterial);
+		}
+	}
 
-		public CheckoutCartButton[] checkoutCartButtons;
-
-		public PurchaseItemButton leftPurchaseButton;
-
-		public PurchaseItemButton rightPurchaseButton;
-
-		[HideInInspector]
-		public Text purchaseText;
-
-		public TMP_Text purchaseTextTMP;
-
-		public HeadModel checkoutHeadModel;
-
-		public Collider checkoutTryOnArea;
-
-		public GameObject checkoutCounterMesh;
-
-		public GameObject purchaseScreenMesh;
-
-		private Scene originalScene;
-
-		private int iterator;
-
-		public bool addOnEnable;
+	public bool IsFromScene(Scene unloadingScene)
+	{
+		return unloadingScene == originalScene;
 	}
 }

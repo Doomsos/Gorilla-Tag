@@ -1,41 +1,58 @@
-﻿using System;
 using UnityEngine;
 
 public class OwnerRig : MonoBehaviour, IVariable<VRRig>, IVariable, IRigAware
 {
+	[SerializeField]
+	private VRRig _rig;
+
 	public void TryFindRig()
 	{
-		this._rig = base.GetComponentInParent<VRRig>();
-		if (this._rig != null)
+		_rig = GetComponentInParent<VRRig>();
+		if (!(_rig != null))
 		{
-			return;
+			_rig = GetComponentInChildren<VRRig>();
 		}
-		this._rig = base.GetComponentInChildren<VRRig>();
 	}
 
 	public VRRig Get()
 	{
-		return this._rig;
+		return _rig;
 	}
 
 	public void Set(VRRig value)
 	{
-		this._rig = value;
+		_rig = value;
 	}
 
 	public void Set(GameObject obj)
 	{
-		this._rig = ((obj != null) ? obj.GetComponentInParent<VRRig>() : null);
+		_rig = ((obj != null) ? obj.GetComponentInParent<VRRig>() : null);
 	}
 
 	void IRigAware.SetRig(VRRig rig)
 	{
-		this._rig = rig;
+		_rig = rig;
 	}
 
 	public static implicit operator bool(OwnerRig or)
 	{
-		return or != null && !(or == null) && or._rig != null && !(or._rig == null);
+		if ((object)or == null)
+		{
+			return false;
+		}
+		if (or == null)
+		{
+			return false;
+		}
+		if ((object)or._rig == null)
+		{
+			return false;
+		}
+		if (or._rig == null)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	public static implicit operator VRRig(OwnerRig or)
@@ -46,7 +63,4 @@ public class OwnerRig : MonoBehaviour, IVariable<VRRig>, IVariable, IRigAware
 		}
 		return or._rig;
 	}
-
-	[SerializeField]
-	private VRRig _rig;
 }

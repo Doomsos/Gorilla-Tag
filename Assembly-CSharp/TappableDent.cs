@@ -1,30 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class TappableDent : Tappable
 {
-	private void Start()
-	{
-		if (this.parent == null)
-		{
-			this.parent = base.gameObject;
-		}
-		this.offsetPerTap = base.transform.parent.InverseTransformVector(base.transform.TransformVector(this.finalLocalOffset / (float)this.numTapsToDestroy));
-		this.scaleOffsetPerTap = (this.finalLocalScale - base.transform.localScale) / (float)this.numTapsToDestroy;
-	}
-
-	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
-	{
-		this.numTapsSoFar++;
-		if (this.numTapsSoFar >= this.numTapsToDestroy)
-		{
-			this.parent.SetActive(false);
-			return;
-		}
-		base.transform.localPosition += this.offsetPerTap;
-		base.transform.localScale += this.scaleOffsetPerTap;
-	}
-
 	[SerializeField]
 	private int numTapsToDestroy = 3;
 
@@ -42,4 +19,26 @@ public class TappableDent : Tappable
 	private Vector3 offsetPerTap;
 
 	private Vector3 scaleOffsetPerTap;
+
+	private void Start()
+	{
+		if (parent == null)
+		{
+			parent = base.gameObject;
+		}
+		offsetPerTap = base.transform.parent.InverseTransformVector(base.transform.TransformVector(finalLocalOffset / numTapsToDestroy));
+		scaleOffsetPerTap = (finalLocalScale - base.transform.localScale) / numTapsToDestroy;
+	}
+
+	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
+	{
+		numTapsSoFar++;
+		if (numTapsSoFar >= numTapsToDestroy)
+		{
+			parent.SetActive(value: false);
+			return;
+		}
+		base.transform.localPosition += offsetPerTap;
+		base.transform.localScale += scaleOffsetPerTap;
+	}
 }

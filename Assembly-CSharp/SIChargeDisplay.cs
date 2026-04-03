@@ -1,16 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class SIChargeDisplay : MonoBehaviour
 {
-	public void UpdateDisplay(int chargeCount)
-	{
-		for (int i = 0; i < this.chargeDisplay.Length; i++)
-		{
-			this.chargeDisplay[i].material = ((i < chargeCount) ? this.chargedMat : this.unchargedMat);
-		}
-	}
-
 	[SerializeField]
 	private MeshRenderer[] chargeDisplay;
 
@@ -19,4 +10,12 @@ public class SIChargeDisplay : MonoBehaviour
 
 	[SerializeField]
 	private Material unchargedMat;
+
+	public void UpdateDisplay(int chargeCount)
+	{
+		for (int i = 0; i < chargeDisplay.Length; i++)
+		{
+			chargeDisplay[i].material = ((i < chargeCount) ? chargedMat : unchargedMat);
+		}
+	}
 }

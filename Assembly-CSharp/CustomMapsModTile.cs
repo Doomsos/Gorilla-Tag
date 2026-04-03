@@ -1,103 +1,13 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
+using Modio;
+using Modio.Errors;
 using Modio.Mods;
+using Modio.Unity;
 using TMPro;
 using UnityEngine;
 
 public class CustomMapsModTile : CustomMapsScreenTouchPoint
 {
-	public Mod CurrentMod
-	{
-		get
-		{
-			return this.currentMod;
-		}
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		this.defaultLogo = this.touchPointRenderer.sprite;
-		this.highlight.SetActive(false);
-	}
-
-	public void ShowTileText(bool show, bool useMapName)
-	{
-		if (!show)
-		{
-			this.ratingsText.gameObject.SetActive(false);
-			this.mapNameText.gameObject.SetActive(false);
-			this.thumsbUp.SetActive(false);
-			return;
-		}
-		if (useMapName)
-		{
-			this.mapNameText.gameObject.SetActive(true);
-			this.ratingsText.gameObject.SetActive(false);
-			this.thumsbUp.SetActive(false);
-			return;
-		}
-		this.ratingsText.gameObject.SetActive(true);
-		this.thumsbUp.SetActive(true);
-		this.mapNameText.gameObject.SetActive(false);
-	}
-
-	public void ActivateTile(bool useMapName)
-	{
-		this.isActive = true;
-		base.gameObject.SetActive(true);
-		this.ShowTileText(true, useMapName);
-		CustomMapsScreenTouchPoint.pressTime = Time.time;
-	}
-
-	public void DeactivateTile()
-	{
-		this.isActive = false;
-		base.gameObject.SetActive(false);
-		this.highlight.SetActive(false);
-		this.ShowTileText(false, false);
-		this.ResetLogo();
-	}
-
-	public override void PressButtonColourUpdate()
-	{
-	}
-
-	protected override void OnButtonPressedEvent()
-	{
-	}
-
-	public void SetMod(Mod mod, bool useMapName)
-	{
-		CustomMapsModTile.<SetMod>d__19 <SetMod>d__;
-		<SetMod>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<SetMod>d__.<>4__this = this;
-		<SetMod>d__.mod = mod;
-		<SetMod>d__.useMapName = useMapName;
-		<SetMod>d__.<>1__state = -1;
-		<SetMod>d__.<>t__builder.Start<CustomMapsModTile.<SetMod>d__19>(ref <SetMod>d__);
-	}
-
-	public void ResetLogo()
-	{
-		this.touchPointRenderer.sprite = this.defaultLogo;
-	}
-
-	public void ShowDetails()
-	{
-		CustomMapsTerminal.ShowDetailsScreen(this.currentMod);
-	}
-
-	public void HighlightTile()
-	{
-		this.highlight.SetActive(true);
-	}
-
-	public bool IsCurrentModHidden()
-	{
-		return this.currentMod.Creator == null || (!ModIOManager.IsLoggedIn() && this.currentMod.IsHidden());
-	}
-
 	[SerializeField]
 	private TMP_Text ratingsText;
 
@@ -123,4 +33,150 @@ public class CustomMapsModTile : CustomMapsScreenTouchPoint
 	private bool newDownloadRequest;
 
 	private bool isActive;
+
+	public Mod CurrentMod => currentMod;
+
+	protected override void Awake()
+	{
+		base.Awake();
+		defaultLogo = touchPointRenderer.sprite;
+		highlight.SetActive(value: false);
+	}
+
+	public void ShowTileText(bool show, bool useMapName)
+	{
+		if (!show)
+		{
+			ratingsText.gameObject.SetActive(value: false);
+			mapNameText.gameObject.SetActive(value: false);
+			thumsbUp.SetActive(value: false);
+		}
+		else if (useMapName)
+		{
+			mapNameText.gameObject.SetActive(value: true);
+			ratingsText.gameObject.SetActive(value: false);
+			thumsbUp.SetActive(value: false);
+		}
+		else
+		{
+			ratingsText.gameObject.SetActive(value: true);
+			thumsbUp.SetActive(value: true);
+			mapNameText.gameObject.SetActive(value: false);
+		}
+	}
+
+	public void ActivateTile(bool useMapName)
+	{
+		isActive = true;
+		base.gameObject.SetActive(value: true);
+		ShowTileText(show: true, useMapName);
+		CustomMapsScreenTouchPoint.pressTime = Time.time;
+	}
+
+	public void DeactivateTile()
+	{
+		isActive = false;
+		base.gameObject.SetActive(value: false);
+		highlight.SetActive(value: false);
+		ShowTileText(show: false, useMapName: false);
+		ResetLogo();
+	}
+
+	public override void PressButtonColourUpdate()
+	{
+	}
+
+	protected override void OnButtonPressedEvent()
+	{
+	}
+
+	public async void SetMod(Mod mod, bool useMapName)
+	{
+		ActivateTile(useMapName);
+		touchPointRenderer.sprite = defaultLogo;
+		highlight.SetActive(value: false);
+		currentMod = mod;
+		if (IsCurrentModHidden())
+		{
+			mapNameText.text = "HIDDEN MAP";
+			ratingsText.text = "0%";
+			return;
+		}
+		mapNameText.text = currentMod.Name;
+		long num = currentMod.Stats.RatingsNegative + currentMod.Stats.RatingsPositive;
+		string text;
+		if (num < 1000)
+		{
+			text = $"({num})";
+		}
+		else if (num < 1000000)
+		{
+			num = Mathf.FloorToInt(num / 100);
+			text = $"({num / 10}K)";
+		}
+		else
+		{
+			num = Mathf.FloorToInt(num / 100);
+			text = $"({num / 10000}mil)";
+		}
+		ratingsText.text = currentMod.Stats.RatingsPercent + "% " + text;
+		if (isDownloadingThumbnail)
+		{
+			newDownloadRequest = true;
+			return;
+		}
+		isDownloadingThumbnail = true;
+		Error error = new Error(ErrorCode.NONE);
+		Texture2D tex = new Texture2D(320, 180);
+		try
+		{
+			(error, tex) = await mod.Logo.DownloadAsTexture2D(Mod.LogoResolution.X320_Y180);
+		}
+		catch (Exception arg)
+		{
+			GTDev.Log($"CustomMapsModTile::DownloadThumbnail error {arg}");
+		}
+		isDownloadingThumbnail = false;
+		if (newDownloadRequest)
+		{
+			newDownloadRequest = false;
+			SetMod(currentMod, useMapName);
+		}
+		else if ((bool)error)
+		{
+			GTDev.LogError($"CustomMapsListScreen::DownloadThumbnail {error}");
+		}
+		else
+		{
+			touchPointRenderer.sprite = Sprite.Create(tex, new Rect(0f, 0f, 320f, 180f), new Vector2(0.5f, 0.5f));
+		}
+	}
+
+	public void ResetLogo()
+	{
+		touchPointRenderer.sprite = defaultLogo;
+	}
+
+	public void ShowDetails()
+	{
+		CustomMapsTerminal.ShowDetailsScreen(currentMod);
+	}
+
+	public void HighlightTile()
+	{
+		highlight.SetActive(value: true);
+	}
+
+	public bool IsCurrentModHidden()
+	{
+		if (!(currentMod.Creator == null))
+		{
+			if (!ModIOManager.IsLoggedIn())
+			{
+				return currentMod.IsHidden();
+			}
+			return false;
+		}
+		return true;
+	}
 }

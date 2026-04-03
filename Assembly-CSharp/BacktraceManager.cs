@@ -1,4 +1,3 @@
-﻿using System;
 using System.Globalization;
 using Backtrace.Unity;
 using Backtrace.Unity.Model;
@@ -9,16 +8,11 @@ using UnityEngine;
 
 public class BacktraceManager : MonoBehaviour
 {
+	public double backtraceSampleRate = 0.01;
+
 	public virtual void Awake()
 	{
-		base.GetComponent<BacktraceClient>().BeforeSend = delegate(BacktraceData data)
-		{
-			if (new Unity.Mathematics.Random((uint)(Time.realtimeSinceStartupAsDouble * 1000.0)).NextDouble() > this.backtraceSampleRate)
-			{
-				return null;
-			}
-			return data;
-		};
+		GetComponent<BacktraceClient>().BeforeSend = (BacktraceData data) => (!(new Unity.Mathematics.Random((uint)(Time.realtimeSinceStartupAsDouble * 1000.0)).NextDouble() <= backtraceSampleRate)) ? null : data;
 	}
 
 	private void Start()
@@ -27,14 +21,12 @@ public class BacktraceManager : MonoBehaviour
 		{
 			if (data != null)
 			{
-				double.TryParse(data.Trim('"'), NumberStyles.Any, CultureInfo.InvariantCulture, out this.backtraceSampleRate);
-				Debug.Log(string.Format("Set backtrace sample rate to: {0}", this.backtraceSampleRate));
+				double.TryParse(data.Trim('"'), NumberStyles.Any, CultureInfo.InvariantCulture, out backtraceSampleRate);
+				Debug.Log($"Set backtrace sample rate to: {backtraceSampleRate}");
 			}
 		}, delegate(PlayFabError e)
 		{
-			Debug.LogError(string.Format("Error getting Backtrace sample rate: {0}", e));
-		}, false);
+			Debug.LogError($"Error getting Backtrace sample rate: {e}");
+		});
 	}
-
-	public double backtraceSampleRate = 0.01;
 }

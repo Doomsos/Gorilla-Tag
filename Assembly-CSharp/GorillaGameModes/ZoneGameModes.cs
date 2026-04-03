@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 
-namespace GorillaGameModes
+namespace GorillaGameModes;
+
+[Serializable]
+public struct ZoneGameModes
 {
-	[Serializable]
-	public struct ZoneGameModes
-	{
-		public GTZone[] zone;
+	public GTZone[] zone;
 
-		public GameModeType[] modes;
+	public GameModeType[] modes;
 
-		public GameModeType[] privateModes;
-	}
+	public GameModeType[] privateModes;
 }

@@ -1,166 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
 public class RigOwnedPhysicsBody : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.hasTransformView = (this.transformView != null);
-		this.hasRigidbodyView = (this.rigidbodyView != null);
-		if (!this.hasTransformView && !this.hasRigidbodyView && this.otherComponents.Length == 0)
-		{
-			GTDev.LogError<string>("RigOwnedPhysicsBody has nothing to do! No TransformView, RigidbodyView, or otherComponents", null);
-		}
-		if (this.detachTransform)
-		{
-			if (this.hasTransformView)
-			{
-				this.transformView.transform.parent = null;
-				return;
-			}
-			if (this.hasRigidbodyView)
-			{
-				this.rigidbodyView.transform.parent = null;
-			}
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (!base.gameObject.activeInHierarchy)
-		{
-			return;
-		}
-		NetworkSystem.Instance.OnJoinedRoomEvent += this.OnNetConnect;
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnNetDisconnect;
-		if (!this.hasRig)
-		{
-			this.rig = base.GetComponentInParent<VRRig>();
-			this.hasRig = (this.rig != null);
-		}
-		if (this.detachTransform)
-		{
-			if (this.hasTransformView)
-			{
-				this.transformView.gameObject.SetActive(true);
-			}
-			else if (this.hasRigidbodyView)
-			{
-				this.rigidbodyView.gameObject.SetActive(true);
-			}
-		}
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.OnNetConnect();
-			return;
-		}
-		this.OnNetDisconnect();
-	}
-
-	private void OnDisable()
-	{
-		NetworkSystem.Instance.OnJoinedRoomEvent -= this.OnNetConnect;
-		NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnNetDisconnect;
-		if (this.detachTransform)
-		{
-			if (this.hasTransformView)
-			{
-				this.transformView.gameObject.SetActive(false);
-			}
-			else if (this.hasRigidbodyView)
-			{
-				this.rigidbodyView.gameObject.SetActive(false);
-			}
-		}
-		this.OnNetDisconnect();
-	}
-
-	private void OnNetConnect()
-	{
-		if (this.hasTransformView)
-		{
-			this.transformView.enabled = this.hasRig;
-		}
-		if (this.hasRigidbodyView)
-		{
-			this.rigidbodyView.enabled = this.hasRig;
-		}
-		MonoBehaviourPun[] array = this.otherComponents;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = this.hasRig;
-		}
-		if (!this.hasRig)
-		{
-			return;
-		}
-		PhotonView getView = this.rig.netView.GetView;
-		List<Component> observedComponents = getView.ObservedComponents;
-		if (this.hasTransformView)
-		{
-			this.transformView.SetIsMine(getView.IsMine);
-			if (!observedComponents.Contains(this.transformView))
-			{
-				observedComponents.Add(this.transformView);
-			}
-		}
-		if (this.hasRigidbodyView)
-		{
-			this.rigidbodyView.SetIsMine(getView.IsMine);
-			if (!observedComponents.Contains(this.rigidbodyView))
-			{
-				observedComponents.Add(this.rigidbodyView);
-			}
-		}
-		foreach (MonoBehaviourPun item in this.otherComponents)
-		{
-			if (!observedComponents.Contains(item))
-			{
-				observedComponents.Add(item);
-			}
-		}
-	}
-
-	private void OnNetDisconnect()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		if (this.hasTransformView)
-		{
-			this.transformView.enabled = false;
-		}
-		if (this.hasRigidbodyView)
-		{
-			this.rigidbodyView.enabled = false;
-		}
-		MonoBehaviourPun[] array = this.otherComponents;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].enabled = false;
-		}
-		if (!this.hasRig || !NetworkSystem.Instance.InRoom)
-		{
-			return;
-		}
-		List<Component> observedComponents = this.rig.netView.GetView.ObservedComponents;
-		if (this.hasTransformView)
-		{
-			observedComponents.Remove(this.transformView);
-		}
-		if (this.hasRigidbodyView)
-		{
-			observedComponents.Remove(this.rigidbodyView);
-		}
-		foreach (MonoBehaviourPun item in this.otherComponents)
-		{
-			observedComponents.Remove(item);
-		}
-	}
-
 	private VRRig rig;
 
 	public RigOwnedTransformView transformView;
@@ -178,4 +22,162 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 	[Tooltip("To make a rigidbody unaffected by the movement of the holdable part, put this script on the holdable, make the RigOwnedRigidbodyView a child of it, and check this box")]
 	[SerializeField]
 	private bool detachTransform;
+
+	private void Awake()
+	{
+		hasTransformView = transformView != null;
+		hasRigidbodyView = rigidbodyView != null;
+		if (!hasTransformView && !hasRigidbodyView && otherComponents.Length == 0)
+		{
+			GTDev.LogError("RigOwnedPhysicsBody has nothing to do! No TransformView, RigidbodyView, or otherComponents");
+		}
+		if (detachTransform)
+		{
+			if (hasTransformView)
+			{
+				transformView.transform.parent = null;
+			}
+			else if (hasRigidbodyView)
+			{
+				rigidbodyView.transform.parent = null;
+			}
+		}
+	}
+
+	private void OnEnable()
+	{
+		if (!base.gameObject.activeInHierarchy)
+		{
+			return;
+		}
+		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(OnNetConnect);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(OnNetDisconnect);
+		if (!hasRig)
+		{
+			rig = GetComponentInParent<VRRig>();
+			hasRig = rig != null;
+		}
+		if (detachTransform)
+		{
+			if (hasTransformView)
+			{
+				transformView.gameObject.SetActive(value: true);
+			}
+			else if (hasRigidbodyView)
+			{
+				rigidbodyView.gameObject.SetActive(value: true);
+			}
+		}
+		if (NetworkSystem.Instance.InRoom)
+		{
+			OnNetConnect();
+		}
+		else
+		{
+			OnNetDisconnect();
+		}
+	}
+
+	private void OnDisable()
+	{
+		NetworkSystem.Instance.OnJoinedRoomEvent -= new Action(OnNetConnect);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(OnNetDisconnect);
+		if (detachTransform)
+		{
+			if (hasTransformView)
+			{
+				transformView.gameObject.SetActive(value: false);
+			}
+			else if (hasRigidbodyView)
+			{
+				rigidbodyView.gameObject.SetActive(value: false);
+			}
+		}
+		OnNetDisconnect();
+	}
+
+	private void OnNetConnect()
+	{
+		if (hasTransformView)
+		{
+			transformView.enabled = hasRig;
+		}
+		if (hasRigidbodyView)
+		{
+			rigidbodyView.enabled = hasRig;
+		}
+		MonoBehaviourPun[] array = otherComponents;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].enabled = hasRig;
+		}
+		if (!hasRig)
+		{
+			return;
+		}
+		PhotonView getView = rig.netView.GetView;
+		List<Component> observedComponents = getView.ObservedComponents;
+		if (hasTransformView)
+		{
+			transformView.SetIsMine(getView.IsMine);
+			if (!observedComponents.Contains(transformView))
+			{
+				observedComponents.Add(transformView);
+			}
+		}
+		if (hasRigidbodyView)
+		{
+			rigidbodyView.SetIsMine(getView.IsMine);
+			if (!observedComponents.Contains(rigidbodyView))
+			{
+				observedComponents.Add(rigidbodyView);
+			}
+		}
+		array = otherComponents;
+		foreach (MonoBehaviourPun item in array)
+		{
+			if (!observedComponents.Contains(item))
+			{
+				observedComponents.Add(item);
+			}
+		}
+	}
+
+	private void OnNetDisconnect()
+	{
+		if (ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
+		if (hasTransformView)
+		{
+			transformView.enabled = false;
+		}
+		if (hasRigidbodyView)
+		{
+			rigidbodyView.enabled = false;
+		}
+		MonoBehaviourPun[] array = otherComponents;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].enabled = false;
+		}
+		if (hasRig && NetworkSystem.Instance.InRoom)
+		{
+			List<Component> observedComponents = rig.netView.GetView.ObservedComponents;
+			if (hasTransformView)
+			{
+				observedComponents.Remove(transformView);
+			}
+			if (hasRigidbodyView)
+			{
+				observedComponents.Remove(rigidbodyView);
+			}
+			array = otherComponents;
+			foreach (MonoBehaviourPun item in array)
+			{
+				observedComponents.Remove(item);
+			}
+		}
+	}
 }

@@ -1,10 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public static class SceneIndexExtensions
 {
+	private const int SceneIndex_COUNT = 22;
+
+	[OnEnterPlay_SetNull]
+	private static List<Action>[] onSceneLoadCallbacks;
+
+	[OnEnterPlay_SetNull]
+	private static List<Action>[] onSceneUnloadCallbacks;
+
 	public static SceneIndex GetSceneIndex(this Scene scene)
 	{
 		return (SceneIndex)scene.buildIndex;
@@ -22,87 +30,81 @@ public static class SceneIndexExtensions
 
 	public static void AddCallbackOnSceneLoad(this SceneIndex scene, Action callback)
 	{
-		if (SceneIndexExtensions.onSceneLoadCallbacks == null)
+		if (onSceneLoadCallbacks == null)
 		{
-			SceneIndexExtensions.onSceneLoadCallbacks = new List<Action>[22];
-			for (int i = 0; i < SceneIndexExtensions.onSceneLoadCallbacks.Length; i++)
+			onSceneLoadCallbacks = new List<Action>[22];
+			for (int i = 0; i < onSceneLoadCallbacks.Length; i++)
 			{
-				SceneIndexExtensions.onSceneLoadCallbacks[i] = new List<Action>();
+				onSceneLoadCallbacks[i] = new List<Action>();
 			}
-			SceneManager.sceneLoaded += SceneIndexExtensions.OnSceneLoad;
+			SceneManager.sceneLoaded += OnSceneLoad;
 		}
-		SceneIndexExtensions.onSceneLoadCallbacks[(int)scene].Add(callback);
+		onSceneLoadCallbacks[(int)scene].Add(callback);
 	}
 
 	public static void RemoveCallbackOnSceneLoad(this SceneIndex scene, Action callback)
 	{
-		if (SceneIndexExtensions.onSceneLoadCallbacks != null)
+		if (onSceneLoadCallbacks != null)
 		{
-			SceneIndexExtensions.onSceneLoadCallbacks[(int)scene].Remove(callback);
+			onSceneLoadCallbacks[(int)scene].Remove(callback);
 		}
 	}
 
 	public static void OnSceneLoad(Scene scene, LoadSceneMode mode)
 	{
-		if (scene.buildIndex != -1)
+		if (scene.buildIndex == -1)
 		{
-			foreach (Action action in SceneIndexExtensions.onSceneLoadCallbacks[scene.buildIndex])
-			{
-				action();
-			}
+			return;
+		}
+		foreach (Action item in onSceneLoadCallbacks[scene.buildIndex])
+		{
+			item();
 		}
 	}
 
 	public static void AddCallbackOnSceneUnload(this SceneIndex scene, Action callback)
 	{
-		if (SceneIndexExtensions.onSceneUnloadCallbacks == null)
+		if (onSceneUnloadCallbacks == null)
 		{
-			SceneIndexExtensions.onSceneUnloadCallbacks = new List<Action>[22];
-			for (int i = 0; i < SceneIndexExtensions.onSceneUnloadCallbacks.Length; i++)
+			onSceneUnloadCallbacks = new List<Action>[22];
+			for (int i = 0; i < onSceneUnloadCallbacks.Length; i++)
 			{
-				SceneIndexExtensions.onSceneUnloadCallbacks[i] = new List<Action>();
+				onSceneUnloadCallbacks[i] = new List<Action>();
 			}
-			SceneManager.sceneUnloaded += SceneIndexExtensions.OnSceneUnload;
+			SceneManager.sceneUnloaded += OnSceneUnload;
 		}
-		SceneIndexExtensions.onSceneUnloadCallbacks[(int)scene].Add(callback);
+		onSceneUnloadCallbacks[(int)scene].Add(callback);
 	}
 
 	public static void RemoveCallbackOnSceneUnload(this SceneIndex scene, Action callback)
 	{
-		SceneIndexExtensions.onSceneUnloadCallbacks[(int)scene].Remove(callback);
+		onSceneUnloadCallbacks[(int)scene].Remove(callback);
 	}
 
 	public static void OnSceneUnload(Scene scene)
 	{
-		if (scene.buildIndex != -1)
+		if (scene.buildIndex == -1)
 		{
-			foreach (Action action in SceneIndexExtensions.onSceneUnloadCallbacks[scene.buildIndex])
-			{
-				action();
-			}
+			return;
+		}
+		foreach (Action item in onSceneUnloadCallbacks[scene.buildIndex])
+		{
+			item();
 		}
 	}
 
 	[OnEnterPlay_Run]
 	private static void Reset()
 	{
-		if (SceneIndexExtensions.onSceneLoadCallbacks != null)
+		if (onSceneLoadCallbacks != null)
 		{
-			SceneIndexExtensions.onSceneLoadCallbacks = null;
-			SceneManager.sceneLoaded -= SceneIndexExtensions.OnSceneLoad;
+			onSceneLoadCallbacks = null;
+			SceneManager.sceneLoaded -= OnSceneLoad;
 		}
-		if (SceneIndexExtensions.onSceneUnloadCallbacks != null)
+		if (onSceneUnloadCallbacks != null)
 		{
-			SceneIndexExtensions.onSceneUnloadCallbacks = null;
-			SceneManager.sceneUnloaded -= SceneIndexExtensions.OnSceneUnload;
+			onSceneUnloadCallbacks = null;
+			SceneManager.sceneUnloaded -= OnSceneUnload;
 		}
 	}
-
-	private const int SceneIndex_COUNT = 22;
-
-	[OnEnterPlay_SetNull]
-	private static List<Action>[] onSceneLoadCallbacks;
-
-	[OnEnterPlay_SetNull]
-	private static List<Action>[] onSceneUnloadCallbacks;
 }

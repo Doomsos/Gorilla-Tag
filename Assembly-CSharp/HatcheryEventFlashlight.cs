@@ -1,125 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class HatcheryEventFlashlight : MonoBehaviourTick, IGorillaSliceableSimple
 {
-	private void Awake()
-	{
-		this.parentRig = base.GetComponentInParent<VRRig>();
-		this.playerLight = this.parentRig.isOfflineVRRig;
-		this.currentEnergy = 10f;
-		this.lightComponents = new Light[this.lights.Length];
-		this.gameLightComponents = new GameLight[this.lights.Length];
-		for (int i = 0; i < this.lights.Length; i++)
-		{
-			this.lightComponents[i] = this.lights[i].GetComponent<Light>();
-			this.gameLightComponents[i] = this.lights[i].GetComponent<GameLight>();
-		}
-		this.startingBrightness = this.lightComponents[0].intensity;
-		this.lightsParent.gameObject.SetActive(false);
-	}
-
-	private new void OnEnable()
-	{
-		base.OnEnable();
-		if (!this.playerLight)
-		{
-			GorillaSlicerSimpleManager.RegisterSliceable(this);
-		}
-	}
-
-	private new void OnDisable()
-	{
-		base.OnDisable();
-		if (!this.playerLight)
-		{
-			GorillaSlicerSimpleManager.UnregisterSliceable(this);
-		}
-	}
-
-	private float MaxEnergy()
-	{
-		if (NetworkSystem.Instance.CurrentRoom == null)
-		{
-			return 10f;
-		}
-		return 10f * (1f / Mathf.Log((float)NetworkSystem.Instance.RoomPlayerCount + 1.72f));
-	}
-
-	public override void Tick()
-	{
-		if (this.playerLight)
-		{
-			this.SliceUpdate();
-		}
-	}
-
-	public void SliceUpdate()
-	{
-		if (GameLightingManager.instance.IsDynamicLightingEnabled != this.flashlight.gameObject.activeSelf)
-		{
-			this.flashlight.gameObject.SetActive(GameLightingManager.instance.IsDynamicLightingEnabled);
-		}
-		if (!GameLightingManager.instance.IsDynamicLightingEnabled)
-		{
-			return;
-		}
-		float time = Time.time;
-		float num = this.MaxEnergy();
-		if (this.wasLightEnabled)
-		{
-			this.currentEnergy -= (time - this.lastUpdated) * 1f;
-		}
-		else
-		{
-			this.currentEnergy += (time - this.lastUpdated) * 0.66f;
-		}
-		this.currentEnergy = Mathf.Clamp(this.currentEnergy, 0f, this.MaxEnergy());
-		bool flag = this.parentRig.rightIndex.calcT >= 0.33f;
-		bool flag2 = flag && (!this.wasLightSwitchedOn || this.wasLightEnabled) && this.currentEnergy > 0f;
-		if (flag2 != this.wasLightEnabled)
-		{
-			this.lightsParent.gameObject.SetActive(flag2);
-			this.clickSource.Play();
-		}
-		if (flag2)
-		{
-			this.UpdateLightPositioning();
-			this.UpdateLightBrightness(num);
-		}
-		this.lastUpdated = Time.time;
-		this.wasLightSwitchedOn = flag;
-		this.wasLightEnabled = flag2;
-	}
-
-	private void UpdateLightPositioning()
-	{
-		int num = Physics.RaycastNonAlloc(this.lightStart.position, this.lightStart.forward, this.hits, 6f, -1, QueryTriggerInteraction.Ignore);
-		float num2 = 6f;
-		for (int i = 0; i < num; i++)
-		{
-			if (this.hits[i].distance <= num2)
-			{
-				num2 = this.hits[i].distance;
-			}
-		}
-		float num3 = (num2 >= 2f) ? (num2 - 1f) : (num2 / 2f);
-		for (int j = 0; j < this.lights.Length; j++)
-		{
-			this.lights[j].position = this.lightStart.position + this.lightStart.forward * (num3 * (float)(j + 1) / (float)this.lights.Length);
-		}
-	}
-
-	private void UpdateLightBrightness(float _maxEnergy)
-	{
-		float intensity = this.startingBrightness / 5f * (1f + 4f * this.currentEnergy / _maxEnergy);
-		for (int i = 0; i < this.lightComponents.Length; i++)
-		{
-			this.lightComponents[i].intensity = intensity;
-			this.gameLightComponents[i].UpdateCachedLightColorAndIntensity();
-		}
-	}
-
 	private const float lightMaxDistance = 6f;
 
 	private const float surfaceOffset = 1f;
@@ -161,4 +43,120 @@ public class HatcheryEventFlashlight : MonoBehaviourTick, IGorillaSliceableSimpl
 	public Transform[] lights;
 
 	public AudioSource clickSource;
+
+	private void Awake()
+	{
+		parentRig = GetComponentInParent<VRRig>();
+		playerLight = parentRig.isOfflineVRRig;
+		currentEnergy = 10f;
+		lightComponents = new Light[lights.Length];
+		gameLightComponents = new GameLight[lights.Length];
+		for (int i = 0; i < lights.Length; i++)
+		{
+			lightComponents[i] = lights[i].GetComponent<Light>();
+			gameLightComponents[i] = lights[i].GetComponent<GameLight>();
+		}
+		startingBrightness = lightComponents[0].intensity;
+		lightsParent.gameObject.SetActive(value: false);
+	}
+
+	private new void OnEnable()
+	{
+		base.OnEnable();
+		if (!playerLight)
+		{
+			GorillaSlicerSimpleManager.RegisterSliceable(this);
+		}
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		if (!playerLight)
+		{
+			GorillaSlicerSimpleManager.UnregisterSliceable(this);
+		}
+	}
+
+	private float MaxEnergy()
+	{
+		if (NetworkSystem.Instance.CurrentRoom == null)
+		{
+			return 10f;
+		}
+		return 10f * (1f / Mathf.Log((float)NetworkSystem.Instance.RoomPlayerCount + 1.72f));
+	}
+
+	public override void Tick()
+	{
+		if (playerLight)
+		{
+			SliceUpdate();
+		}
+	}
+
+	public void SliceUpdate()
+	{
+		if (GameLightingManager.instance.IsDynamicLightingEnabled != flashlight.gameObject.activeSelf)
+		{
+			flashlight.gameObject.SetActive(GameLightingManager.instance.IsDynamicLightingEnabled);
+		}
+		if (GameLightingManager.instance.IsDynamicLightingEnabled)
+		{
+			float time = Time.time;
+			float num = MaxEnergy();
+			if (wasLightEnabled)
+			{
+				currentEnergy -= (time - lastUpdated) * 1f;
+			}
+			else
+			{
+				currentEnergy += (time - lastUpdated) * 0.66f;
+			}
+			currentEnergy = Mathf.Clamp(currentEnergy, 0f, MaxEnergy());
+			bool flag = parentRig.rightIndex.calcT >= 0.33f;
+			bool flag2 = flag && (!wasLightSwitchedOn || wasLightEnabled) && currentEnergy > 0f;
+			if (flag2 != wasLightEnabled)
+			{
+				lightsParent.gameObject.SetActive(flag2);
+				clickSource.Play();
+			}
+			if (flag2)
+			{
+				UpdateLightPositioning();
+				UpdateLightBrightness(num);
+			}
+			lastUpdated = Time.time;
+			wasLightSwitchedOn = flag;
+			wasLightEnabled = flag2;
+		}
+	}
+
+	private void UpdateLightPositioning()
+	{
+		int num = Physics.RaycastNonAlloc(lightStart.position, lightStart.forward, hits, 6f, -1, QueryTriggerInteraction.Ignore);
+		float num2 = 6f;
+		for (int i = 0; i < num; i++)
+		{
+			if (!(hits[i].distance > num2))
+			{
+				num2 = hits[i].distance;
+			}
+		}
+		float num3 = ((num2 >= 2f) ? (num2 - 1f) : (num2 / 2f));
+		for (int j = 0; j < lights.Length; j++)
+		{
+			lights[j].position = lightStart.position + lightStart.forward * (num3 * (float)(j + 1) / (float)lights.Length);
+		}
+	}
+
+	private void UpdateLightBrightness(float _maxEnergy)
+	{
+		float intensity = startingBrightness / 5f * (1f + 4f * currentEnergy / _maxEnergy);
+		for (int i = 0; i < lightComponents.Length; i++)
+		{
+			lightComponents[i].intensity = intensity;
+			gameLightComponents[i].UpdateCachedLightColorAndIntensity();
+		}
+	}
 }

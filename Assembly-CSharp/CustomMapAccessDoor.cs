@@ -1,33 +1,32 @@
-﻿using System;
 using UnityEngine;
 
 public class CustomMapAccessDoor : MonoBehaviour
 {
+	public GameObject openDoorObject;
+
+	public GameObject closedDoorObject;
+
 	public void OpenDoor()
 	{
-		if (this.openDoorObject != null)
+		if (openDoorObject != null)
 		{
-			this.openDoorObject.SetActive(true);
+			openDoorObject.SetActive(value: true);
 		}
-		if (this.closedDoorObject != null)
+		if (closedDoorObject != null)
 		{
-			this.closedDoorObject.SetActive(false);
+			closedDoorObject.SetActive(value: false);
 		}
 	}
 
 	public void CloseDoor()
 	{
-		if (this.openDoorObject != null)
+		if (openDoorObject != null)
 		{
-			this.openDoorObject.SetActive(false);
+			openDoorObject.SetActive(value: false);
 		}
-		if (this.closedDoorObject != null)
+		if (closedDoorObject != null)
 		{
-			this.closedDoorObject.SetActive(true);
+			closedDoorObject.SetActive(value: true);
 		}
 	}
-
-	public GameObject openDoorObject;
-
-	public GameObject closedDoorObject;
 }

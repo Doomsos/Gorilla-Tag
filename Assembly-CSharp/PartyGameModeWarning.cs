@@ -1,69 +1,9 @@
-﻿using System;
 using System.Collections;
 using GorillaTagScripts;
 using UnityEngine;
 
 public class PartyGameModeWarning : MonoBehaviour
 {
-	public bool ShouldShowWarning
-	{
-		get
-		{
-			return FriendshipGroupDetection.Instance.IsInParty && FriendshipGroupDetection.Instance.AnyPartyMembersOutsideFriendCollider();
-		}
-	}
-
-	private void Awake()
-	{
-		GameObject[] array = this.showParts;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(false);
-		}
-	}
-
-	public void Show()
-	{
-		this.visibleUntilTimestamp = Time.time + this.visibleDuration;
-		if (this.hideCoroutine == null)
-		{
-			this.hideCoroutine = base.StartCoroutine(this.HideCo());
-		}
-	}
-
-	private IEnumerator HideCo()
-	{
-		GameObject[] array = this.showParts;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(true);
-		}
-		array = this.hideParts;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(false);
-		}
-		float lastVisible;
-		do
-		{
-			lastVisible = this.visibleUntilTimestamp;
-			yield return new WaitForSeconds(this.visibleUntilTimestamp - Time.time);
-		}
-		while (lastVisible != this.visibleUntilTimestamp);
-		array = this.showParts;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(false);
-		}
-		array = this.hideParts;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].SetActive(true);
-		}
-		this.hideCoroutine = null;
-		yield break;
-	}
-
 	[SerializeField]
 	private GameObject[] showParts;
 
@@ -76,4 +16,66 @@ public class PartyGameModeWarning : MonoBehaviour
 	private float visibleUntilTimestamp;
 
 	private Coroutine hideCoroutine;
+
+	public bool ShouldShowWarning
+	{
+		get
+		{
+			if (FriendshipGroupDetection.Instance.IsInParty)
+			{
+				return FriendshipGroupDetection.Instance.AnyPartyMembersOutsideFriendCollider();
+			}
+			return false;
+		}
+	}
+
+	private void Awake()
+	{
+		GameObject[] array = showParts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: false);
+		}
+	}
+
+	public void Show()
+	{
+		visibleUntilTimestamp = Time.time + visibleDuration;
+		if (hideCoroutine == null)
+		{
+			hideCoroutine = StartCoroutine(HideCo());
+		}
+	}
+
+	private IEnumerator HideCo()
+	{
+		GameObject[] array = showParts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: true);
+		}
+		array = hideParts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: false);
+		}
+		float lastVisible;
+		do
+		{
+			lastVisible = visibleUntilTimestamp;
+			yield return new WaitForSeconds(visibleUntilTimestamp - Time.time);
+		}
+		while (lastVisible != visibleUntilTimestamp);
+		array = showParts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: false);
+		}
+		array = hideParts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(value: true);
+		}
+		hideCoroutine = null;
+	}
 }

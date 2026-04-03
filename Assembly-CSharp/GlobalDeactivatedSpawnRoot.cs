@@ -1,19 +1,18 @@
-﻿using System;
 using UnityEngine;
 
 public static class GlobalDeactivatedSpawnRoot
 {
+	private static Transform _xform;
+
 	public static Transform GetOrCreate()
 	{
-		if (!GlobalDeactivatedSpawnRoot._xform)
+		if (!_xform)
 		{
-			GlobalDeactivatedSpawnRoot._xform = new GameObject("GlobalDeactivatedSpawnRoot").transform;
-			GlobalDeactivatedSpawnRoot._xform.gameObject.SetActive(false);
-			Object.DontDestroyOnLoad(GlobalDeactivatedSpawnRoot._xform.gameObject);
+			_xform = new GameObject("GlobalDeactivatedSpawnRoot").transform;
+			_xform.gameObject.SetActive(value: false);
+			Object.DontDestroyOnLoad(_xform.gameObject);
 		}
-		GlobalDeactivatedSpawnRoot._xform.gameObject.SetActive(false);
-		return GlobalDeactivatedSpawnRoot._xform;
+		_xform.gameObject.SetActive(value: false);
+		return _xform;
 	}
-
-	private static Transform _xform;
 }

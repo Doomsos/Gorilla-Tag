@@ -1,176 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GTAnimator : MonoBehaviour, IDelayedExecListener
 {
-	public Animation animationComponent
+	[Serializable]
+	public struct AnimClipAndGObjs
 	{
-		get
-		{
-			return this.m_animationComponent;
-		}
-	}
+		public AnimationClip animClip;
 
-	public bool hasAnimationComponent { get; private set; }
+		public SoundBankPlayer soundBankToPlayOnStart;
 
-	protected void Awake()
-	{
-		this.Init();
-	}
-
-	public void Init()
-	{
-		if (this._wasInitCalled)
-		{
-			return;
-		}
-		this._wasInitCalled = true;
-		this.hasAnimationComponent = (this.m_animationComponent != null);
-		bool hasAnimationComponent = this.hasAnimationComponent;
-		this.m_animationMap.Init();
-		foreach (GTAnimator.AnimClipAndGObjs animClipAndGObjs in this.m_animationMap.Values)
-		{
-			this._allStaticGobjs.UnionWith(animClipAndGObjs.endStaticGameObjects);
-		}
-	}
-
-	public void OnEnable()
-	{
-	}
-
-	public bool IsPlaying
-	{
-		get
-		{
-			return this.m_animationComponent.isPlaying;
-		}
-	}
-
-	public void SetState(long enumValueAsLong)
-	{
-		if (!this._wasInitCalled)
-		{
-			this.Init();
-		}
-		if (this._currentStateAsLong != enumValueAsLong)
-		{
-			this.TryPlay(enumValueAsLong);
-		}
-	}
-
-	public bool TryPlay(long enumValueAsLong)
-	{
-		GTAnimator.AnimClipAndGObjs animClipAndGObjs;
-		if (!this.hasAnimationComponent || !this.m_animationMap.TryGet(enumValueAsLong, out animClipAndGObjs))
-		{
-			return false;
-		}
-		foreach (GameObject gameObject in this._allStaticGobjs)
-		{
-			gameObject.SetActive(false);
-		}
-		GameObject[] animatedGameObjects = this.m_animatedGameObjects;
-		for (int i = 0; i < animatedGameObjects.Length; i++)
-		{
-			animatedGameObjects[i].SetActive(true);
-		}
-		this._currentStateAsLong = enumValueAsLong;
-		this.m_animationComponent.clip = animClipAndGObjs.animClip;
-		this.m_animationComponent.Play();
-		if (animClipAndGObjs.soundBankToPlayOnStart)
-		{
-			animClipAndGObjs.soundBankToPlayOnStart.Play();
-		}
-		if (!animClipAndGObjs.animClip.isLooping)
-		{
-			this._frameCountWhenLastPlayed = Time.frameCount;
-			GTDelayedExec.Add(this, animClipAndGObjs.animClip.length, this._frameCountWhenLastPlayed);
-		}
-		return true;
-	}
-
-	void IDelayedExecListener.OnDelayedAction(int contextId)
-	{
-		if (!base.enabled || this._frameCountWhenLastPlayed != contextId)
-		{
-			return;
-		}
-		this.m_animationComponent.Stop();
-		for (int i = 0; i < this.m_animatedGameObjects.Length; i++)
-		{
-			if (this.m_animatedGameObjects[i] != null)
-			{
-				this.m_animatedGameObjects[i].SetActive(false);
-			}
-		}
-		GTAnimator.AnimClipAndGObjs animClipAndGObjs;
-		GameObject[] array;
-		if (this.m_animationMap.TryGet(this._currentStateAsLong, out animClipAndGObjs) && animClipAndGObjs.endStaticGameObjects != null && animClipAndGObjs.endStaticGameObjects.Length != 0)
-		{
-			array = animClipAndGObjs.endStaticGameObjects;
-		}
-		else
-		{
-			array = this.m_defaultStaticGameObjects;
-		}
-		if (array != null)
-		{
-			for (int j = 0; j < array.Length; j++)
-			{
-				if (array[j] != null)
-				{
-					array[j].SetActive(true);
-				}
-			}
-		}
-		if (this._queuedStateAsLong != -9223372036854775808L)
-		{
-			long queuedStateAsLong = this._queuedStateAsLong;
-			this._queuedStateAsLong = long.MinValue;
-			this.TryPlay(queuedStateAsLong);
-		}
-	}
-
-	public void Stop()
-	{
-		if (this.m_animationComponent != null)
-		{
-			this.m_animationComponent.Stop();
-		}
-	}
-
-	public void QueueState(long enumValueAsLong)
-	{
-		if (!this._wasInitCalled)
-		{
-			this.Init();
-		}
-		if (this._queuedStateAsLong == enumValueAsLong || this._currentStateAsLong == enumValueAsLong)
-		{
-			return;
-		}
-		if (!this.IsPlaying || this._IsCurrentClipLoopable())
-		{
-			this.TryPlay(enumValueAsLong);
-			return;
-		}
-		this._queuedStateAsLong = enumValueAsLong;
-	}
-
-	private bool _IsCurrentClipLoopable()
-	{
-		if (this.m_animationComponent == null)
-		{
-			return false;
-		}
-		AnimationClip clip = this.m_animationComponent.clip;
-		if (clip == null)
-		{
-			return false;
-		}
-		WrapMode wrapMode = clip.wrapMode;
-		return wrapMode == WrapMode.Loop || wrapMode == WrapMode.PingPong;
+		[Tooltip("These GameObjects will be activated when the animation clip finishes playing.")]
+		public GameObject[] endStaticGameObjects;
 	}
 
 	private const string preLog = "[GTAnimator]  ";
@@ -194,11 +36,11 @@ public class GTAnimator : MonoBehaviour, IDelayedExecListener
 	[Header("Enum To Animation Mapping")]
 	[Tooltip("Map an enum's values to specific AnimationClips.")]
 	[SerializeField]
-	internal GTEnumValueMap<GTAnimator.AnimClipAndGObjs> m_animationMap;
+	internal GTEnumValueMap<AnimClipAndGObjs> m_animationMap;
 
 	private readonly HashSet<GameObject> _allStaticGobjs = new HashSet<GameObject>();
 
-	private const long _k_invalidState = -9223372036854775808L;
+	private const long _k_invalidState = long.MinValue;
 
 	private long _currentStateAsLong = long.MinValue;
 
@@ -208,14 +50,152 @@ public class GTAnimator : MonoBehaviour, IDelayedExecListener
 
 	private long _queuedStateAsLong = long.MinValue;
 
-	[Serializable]
-	public struct AnimClipAndGObjs
+	public Animation animationComponent => m_animationComponent;
+
+	public bool hasAnimationComponent { get; private set; }
+
+	public bool IsPlaying => m_animationComponent.isPlaying;
+
+	protected void Awake()
 	{
-		public AnimationClip animClip;
+		Init();
+	}
 
-		public SoundBankPlayer soundBankToPlayOnStart;
+	public void Init()
+	{
+		if (_wasInitCalled)
+		{
+			return;
+		}
+		_wasInitCalled = true;
+		hasAnimationComponent = m_animationComponent != null;
+		_ = hasAnimationComponent;
+		m_animationMap.Init();
+		foreach (AnimClipAndGObjs value in m_animationMap.Values)
+		{
+			_allStaticGobjs.UnionWith(value.endStaticGameObjects);
+		}
+	}
 
-		[Tooltip("These GameObjects will be activated when the animation clip finishes playing.")]
-		public GameObject[] endStaticGameObjects;
+	public void OnEnable()
+	{
+	}
+
+	public void SetState(long enumValueAsLong)
+	{
+		if (!_wasInitCalled)
+		{
+			Init();
+		}
+		if (_currentStateAsLong != enumValueAsLong)
+		{
+			TryPlay(enumValueAsLong);
+		}
+	}
+
+	public bool TryPlay(long enumValueAsLong)
+	{
+		if (!hasAnimationComponent || !m_animationMap.TryGet(enumValueAsLong, out var o))
+		{
+			return false;
+		}
+		foreach (GameObject allStaticGobj in _allStaticGobjs)
+		{
+			allStaticGobj.SetActive(value: false);
+		}
+		GameObject[] animatedGameObjects = m_animatedGameObjects;
+		for (int i = 0; i < animatedGameObjects.Length; i++)
+		{
+			animatedGameObjects[i].SetActive(value: true);
+		}
+		_currentStateAsLong = enumValueAsLong;
+		m_animationComponent.clip = o.animClip;
+		m_animationComponent.Play();
+		if ((bool)o.soundBankToPlayOnStart)
+		{
+			o.soundBankToPlayOnStart.Play();
+		}
+		if (!o.animClip.isLooping)
+		{
+			_frameCountWhenLastPlayed = Time.frameCount;
+			GTDelayedExec.Add(this, o.animClip.length, _frameCountWhenLastPlayed);
+		}
+		return true;
+	}
+
+	void IDelayedExecListener.OnDelayedAction(int contextId)
+	{
+		if (!base.enabled || _frameCountWhenLastPlayed != contextId)
+		{
+			return;
+		}
+		m_animationComponent.Stop();
+		for (int i = 0; i < m_animatedGameObjects.Length; i++)
+		{
+			if (m_animatedGameObjects[i] != null)
+			{
+				m_animatedGameObjects[i].SetActive(value: false);
+			}
+		}
+		AnimClipAndGObjs o;
+		GameObject[] array = ((!m_animationMap.TryGet(_currentStateAsLong, out o) || o.endStaticGameObjects == null || o.endStaticGameObjects.Length == 0) ? m_defaultStaticGameObjects : o.endStaticGameObjects);
+		if (array != null)
+		{
+			for (int j = 0; j < array.Length; j++)
+			{
+				if (array[j] != null)
+				{
+					array[j].SetActive(value: true);
+				}
+			}
+		}
+		if (_queuedStateAsLong != long.MinValue)
+		{
+			long queuedStateAsLong = _queuedStateAsLong;
+			_queuedStateAsLong = long.MinValue;
+			TryPlay(queuedStateAsLong);
+		}
+	}
+
+	public void Stop()
+	{
+		if (m_animationComponent != null)
+		{
+			m_animationComponent.Stop();
+		}
+	}
+
+	public void QueueState(long enumValueAsLong)
+	{
+		if (!_wasInitCalled)
+		{
+			Init();
+		}
+		if (_queuedStateAsLong != enumValueAsLong && _currentStateAsLong != enumValueAsLong)
+		{
+			if (!IsPlaying || _IsCurrentClipLoopable())
+			{
+				TryPlay(enumValueAsLong);
+			}
+			else
+			{
+				_queuedStateAsLong = enumValueAsLong;
+			}
+		}
+	}
+
+	private bool _IsCurrentClipLoopable()
+	{
+		if (m_animationComponent == null)
+		{
+			return false;
+		}
+		AnimationClip clip = m_animationComponent.clip;
+		if (clip == null)
+		{
+			return false;
+		}
+		WrapMode wrapMode = clip.wrapMode;
+		return wrapMode == WrapMode.Loop || wrapMode == WrapMode.PingPong;
 	}
 }

@@ -1,5 +1,3 @@
-﻿using System;
-
 public class SlingshotTestScenarioBothHolding2 : SlingshotTestScenario
 {
 	public TransferrableObject testObject1;

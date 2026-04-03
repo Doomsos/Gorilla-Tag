@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ExitGames.Client.Photon;
@@ -6,130 +6,205 @@ using UnityEngine;
 
 public static class PhotonUtils
 {
+	private static class EmptyArray<T>
+	{
+		private static readonly T[] gEmpty = Array.Empty<T>();
+
+		public static ref readonly T[] Ref()
+		{
+			return ref gEmpty;
+		}
+	}
+
+	public static class CustomTypes
+	{
+		private const short LEN_C32 = 4;
+
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void InitOnLoad()
+		{
+			PhotonPeer.RegisterType(typeof(Color32), 67, SerializeColor32, DeserializeColor32);
+		}
+
+		public static byte[] SerializeColor32(object value)
+		{
+			return CastToBytes((Color32)value);
+		}
+
+		public static object DeserializeColor32(byte[] data)
+		{
+			return CastToStruct<Color32>(data);
+		}
+
+		private static T CastToStruct<T>(byte[] bytes) where T : struct
+		{
+			GCHandle gCHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+			T result = Marshal.PtrToStructure<T>(gCHandle.AddrOfPinnedObject());
+			gCHandle.Free();
+			return result;
+		}
+
+		private static byte[] CastToBytes<T>(T data) where T : struct
+		{
+			byte[] array = new byte[Marshal.SizeOf<T>()];
+			GCHandle gCHandle = GCHandle.Alloc(array, GCHandleType.Pinned);
+			IntPtr ptr = gCHandle.AddrOfPinnedObject();
+			Marshal.StructureToPtr(data, ptr, fDeleteOld: true);
+			gCHandle.Free();
+			return array;
+		}
+	}
+
+	private static NetworkSystem gNetSystem;
+
+	private static NetPlayer gLocalNetPlayer;
+
+	private static readonly Dictionary<int, object[]> gLengthToArgsArray;
+
+	private const int ARG_ARRAYS = 16;
+
+	public static int LocalActorNumber => LocalNetPlayer?.ActorNumber ?? (-1);
+
+	public static NetPlayer LocalNetPlayer
+	{
+		get
+		{
+			if (gLocalNetPlayer != null)
+			{
+				return gLocalNetPlayer;
+			}
+			if (TryGetNetSystem(out var ns))
+			{
+				gLocalNetPlayer = ns.GetLocalPlayer();
+			}
+			return gLocalNetPlayer;
+		}
+	}
+
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10, out T11 arg11, out T12 arg12)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
-		arg8 = (T8)((object)args[startIndex + 7]);
-		arg9 = (T9)((object)args[startIndex + 8]);
-		arg10 = (T10)((object)args[startIndex + 9]);
-		arg11 = (T11)((object)args[startIndex + 10]);
-		arg12 = (T12)((object)args[startIndex + 11]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
+		arg8 = (T8)args[startIndex + 7];
+		arg9 = (T9)args[startIndex + 8];
+		arg10 = (T10)args[startIndex + 9];
+		arg11 = (T11)args[startIndex + 10];
+		arg12 = (T12)args[startIndex + 11];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10, out T11 arg11)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
-		arg8 = (T8)((object)args[startIndex + 7]);
-		arg9 = (T9)((object)args[startIndex + 8]);
-		arg10 = (T10)((object)args[startIndex + 9]);
-		arg11 = (T11)((object)args[startIndex + 10]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
+		arg8 = (T8)args[startIndex + 7];
+		arg9 = (T9)args[startIndex + 8];
+		arg10 = (T10)args[startIndex + 9];
+		arg11 = (T11)args[startIndex + 10];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
-		arg8 = (T8)((object)args[startIndex + 7]);
-		arg9 = (T9)((object)args[startIndex + 8]);
-		arg10 = (T10)((object)args[startIndex + 9]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
+		arg8 = (T8)args[startIndex + 7];
+		arg9 = (T9)args[startIndex + 8];
+		arg10 = (T10)args[startIndex + 9];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
-		arg8 = (T8)((object)args[startIndex + 7]);
-		arg9 = (T9)((object)args[startIndex + 8]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
+		arg8 = (T8)args[startIndex + 7];
+		arg9 = (T9)args[startIndex + 8];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
-		arg8 = (T8)((object)args[startIndex + 7]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
+		arg8 = (T8)args[startIndex + 7];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6, T7>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
-		arg7 = (T7)((object)args[startIndex + 6]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
+		arg7 = (T7)args[startIndex + 6];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5, T6>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
-		arg6 = (T6)((object)args[startIndex + 5]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
+		arg6 = (T6)args[startIndex + 5];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4, T5>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
-		arg5 = (T5)((object)args[startIndex + 4]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
+		arg5 = (T5)args[startIndex + 4];
 	}
 
 	public static void ParseArgs<T1, T2, T3, T4>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
-		arg4 = (T4)((object)args[startIndex + 3]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
+		arg4 = (T4)args[startIndex + 3];
 	}
 
 	public static void ParseArgs<T1, T2, T3>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
-		arg3 = (T3)((object)args[startIndex + 2]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
+		arg3 = (T3)args[startIndex + 2];
 	}
 
 	public static void ParseArgs<T1, T2>(this object[] args, int startIndex, out T1 arg1, out T2 arg2)
 	{
-		arg1 = (T1)((object)args[startIndex]);
-		arg2 = (T2)((object)args[startIndex + 1]);
+		arg1 = (T1)args[startIndex];
+		arg2 = (T2)args[startIndex + 1];
 	}
 
 	public static void ParseArgs<T1>(this object[] args, int startIndex, out T1 arg1)
 	{
-		arg1 = (T1)((object)args[startIndex]);
+		arg1 = (T1)args[startIndex];
 	}
 
 	public static bool TryParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this object[] args, int startIndex, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10, out T11 arg11, out T12 arg12)
@@ -152,7 +227,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10, out arg11, out arg12);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10, out arg11, out arg12);
 		}
 		catch
 		{
@@ -180,7 +255,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10, out arg11);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10, out arg11);
 		}
 		catch
 		{
@@ -207,7 +282,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9, out arg10);
 		}
 		catch
 		{
@@ -233,7 +308,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8, T9>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8, out arg9);
 		}
 		catch
 		{
@@ -258,7 +333,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7, T8>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7, out arg8);
 		}
 		catch
 		{
@@ -282,7 +357,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6, T7>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6, out arg7);
 		}
 		catch
 		{
@@ -305,7 +380,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6);
+			args.ParseArgs<T1, T2, T3, T4, T5, T6>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5, out arg6);
 		}
 		catch
 		{
@@ -327,7 +402,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5);
+			args.ParseArgs<T1, T2, T3, T4, T5>(startIndex, out arg1, out arg2, out arg3, out arg4, out arg5);
 		}
 		catch
 		{
@@ -348,7 +423,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3, out arg4);
+			args.ParseArgs<T1, T2, T3, T4>(startIndex, out arg1, out arg2, out arg3, out arg4);
 		}
 		catch
 		{
@@ -368,7 +443,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2, out arg3);
+			args.ParseArgs<T1, T2, T3>(startIndex, out arg1, out arg2, out arg3);
 		}
 		catch
 		{
@@ -387,7 +462,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1, out arg2);
+			args.ParseArgs<T1, T2>(startIndex, out arg1, out arg2);
 		}
 		catch
 		{
@@ -405,7 +480,7 @@ public static class PhotonUtils
 		}
 		try
 		{
-			args.ParseArgs(startIndex, out arg1);
+			args.ParseArgs<T1>(startIndex, out arg1);
 		}
 		catch
 		{
@@ -418,9 +493,9 @@ public static class PhotonUtils
 	{
 		if (@delegate == null)
 		{
-			return PhotonUtils.EmptyArray<T>.Ref();
+			return ref EmptyArray<T>.Ref();
 		}
-		return @delegate.GetInvocationListUnsafe<T>();
+		return ref @delegate.GetInvocationListUnsafe();
 	}
 
 	public static object[] FetchScratchArray(int size)
@@ -429,132 +504,44 @@ public static class PhotonUtils
 		{
 			throw new Exception("Size cannot be less than 0.");
 		}
-		object[] array;
-		if (!PhotonUtils.gLengthToArgsArray.TryGetValue(size, out array))
+		if (!gLengthToArgsArray.TryGetValue(size, out var value))
 		{
-			array = new object[size];
-			PhotonUtils.gLengthToArgsArray.Add(size, array);
+			value = new object[size];
+			gLengthToArgsArray.Add(size, value);
 		}
-		return array;
+		return value;
 	}
 
 	public static NetPlayer GetNetPlayer(int actorNumber)
 	{
-		NetworkSystem networkSystem;
-		if (!PhotonUtils.TryGetNetSystem(out networkSystem))
+		if (!TryGetNetSystem(out var ns))
 		{
 			return null;
 		}
-		return networkSystem.GetPlayer(actorNumber);
-	}
-
-	public static int LocalActorNumber
-	{
-		get
-		{
-			NetPlayer localNetPlayer = PhotonUtils.LocalNetPlayer;
-			if (localNetPlayer == null)
-			{
-				return -1;
-			}
-			return localNetPlayer.ActorNumber;
-		}
-	}
-
-	public static NetPlayer LocalNetPlayer
-	{
-		get
-		{
-			if (PhotonUtils.gLocalNetPlayer != null)
-			{
-				return PhotonUtils.gLocalNetPlayer;
-			}
-			NetworkSystem networkSystem;
-			if (PhotonUtils.TryGetNetSystem(out networkSystem))
-			{
-				PhotonUtils.gLocalNetPlayer = networkSystem.GetLocalPlayer();
-			}
-			return PhotonUtils.gLocalNetPlayer;
-		}
+		return ns.GetPlayer(actorNumber);
 	}
 
 	private static bool TryGetNetSystem(out NetworkSystem ns)
 	{
-		if (!PhotonUtils.gNetSystem)
+		if (!gNetSystem)
 		{
-			PhotonUtils.gNetSystem = NetworkSystem.Instance;
+			gNetSystem = NetworkSystem.Instance;
 		}
-		if (!PhotonUtils.gNetSystem)
+		if (!gNetSystem)
 		{
 			ns = null;
 			return false;
 		}
-		ns = PhotonUtils.gNetSystem;
+		ns = gNetSystem;
 		return true;
 	}
 
 	static PhotonUtils()
 	{
+		gLengthToArgsArray = new Dictionary<int, object[]>(16);
 		for (int i = 0; i <= 16; i++)
 		{
-			PhotonUtils.gLengthToArgsArray.Add(i, new object[i]);
+			gLengthToArgsArray.Add(i, new object[i]);
 		}
-	}
-
-	private static NetworkSystem gNetSystem;
-
-	private static NetPlayer gLocalNetPlayer;
-
-	private static readonly Dictionary<int, object[]> gLengthToArgsArray = new Dictionary<int, object[]>(16);
-
-	private const int ARG_ARRAYS = 16;
-
-	private static class EmptyArray<T>
-	{
-		public static ref readonly T[] Ref()
-		{
-			return ref PhotonUtils.EmptyArray<T>.gEmpty;
-		}
-
-		private static readonly T[] gEmpty = Array.Empty<T>();
-	}
-
-	public static class CustomTypes
-	{
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void InitOnLoad()
-		{
-			PhotonPeer.RegisterType(typeof(Color32), 67, new SerializeMethod(PhotonUtils.CustomTypes.SerializeColor32), new DeserializeMethod(PhotonUtils.CustomTypes.DeserializeColor32));
-		}
-
-		public static byte[] SerializeColor32(object value)
-		{
-			return PhotonUtils.CustomTypes.CastToBytes<Color32>((Color32)value);
-		}
-
-		public static object DeserializeColor32(byte[] data)
-		{
-			return PhotonUtils.CustomTypes.CastToStruct<Color32>(data);
-		}
-
-		private static T CastToStruct<T>(byte[] bytes) where T : struct
-		{
-			GCHandle gchandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-			T result = Marshal.PtrToStructure<T>(gchandle.AddrOfPinnedObject());
-			gchandle.Free();
-			return result;
-		}
-
-		private static byte[] CastToBytes<T>(T data) where T : struct
-		{
-			byte[] array = new byte[Marshal.SizeOf<T>()];
-			GCHandle gchandle = GCHandle.Alloc(array, GCHandleType.Pinned);
-			IntPtr ptr = gchandle.AddrOfPinnedObject();
-			Marshal.StructureToPtr<T>(data, ptr, true);
-			gchandle.Free();
-			return array;
-		}
-
-		private const short LEN_C32 = 4;
 	}
 }

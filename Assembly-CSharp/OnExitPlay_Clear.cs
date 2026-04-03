@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -9,9 +9,11 @@ public class OnExitPlay_Clear : OnExitPlay_Attribute
 	{
 		if (!field.IsStatic)
 		{
-			Debug.LogError(string.Format("Can't Clear non-static field {0}.{1}", field.DeclaringType, field.Name));
-			return;
+			Debug.LogError($"Can't Clear non-static field {field.DeclaringType}.{field.Name}");
 		}
-		field.FieldType.GetMethod("Clear").Invoke(field.GetValue(null), new object[0]);
+		else
+		{
+			field.FieldType.GetMethod("Clear").Invoke(field.GetValue(null), new object[0]);
+		}
 	}
 }

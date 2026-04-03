@@ -1,15 +1,22 @@
-﻿using System;
 using UnityEngine;
 
 public class SizeChangerTrigger : MonoBehaviour, IBuilderPieceComponent
 {
-	public event SizeChangerTrigger.SizeChangerTriggerEvent OnEnter;
+	public delegate void SizeChangerTriggerEvent(Collider other);
 
-	public event SizeChangerTrigger.SizeChangerTriggerEvent OnExit;
+	private Collider myCollider;
+
+	public bool builderEnterTrigger;
+
+	public bool builderExitOnEnterTrigger;
+
+	public event SizeChangerTriggerEvent OnEnter;
+
+	public event SizeChangerTriggerEvent OnExit;
 
 	private void Awake()
 	{
-		this.myCollider = base.GetComponent<Collider>();
+		myCollider = GetComponent<Collider>();
 	}
 
 	public void OnTriggerEnter(Collider other)
@@ -30,7 +37,7 @@ public class SizeChangerTrigger : MonoBehaviour, IBuilderPieceComponent
 
 	public Vector3 ClosestPoint(Vector3 position)
 	{
-		return this.myCollider.ClosestPoint(position);
+		return myCollider.ClosestPoint(position);
 	}
 
 	public void OnPieceCreate(int pieceType, int pieceId)
@@ -54,12 +61,4 @@ public class SizeChangerTrigger : MonoBehaviour, IBuilderPieceComponent
 	{
 		Debug.LogError("Size Trigger Pieces no longer work, need reimplementation");
 	}
-
-	private Collider myCollider;
-
-	public bool builderEnterTrigger;
-
-	public bool builderExitOnEnterTrigger;
-
-	public delegate void SizeChangerTriggerEvent(Collider other);
 }

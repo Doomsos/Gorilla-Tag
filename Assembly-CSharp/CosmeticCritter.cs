@@ -1,9 +1,19 @@
-﻿using System;
+using System;
 using Photon.Pun;
 using UnityEngine;
 
 public abstract class CosmeticCritter : MonoBehaviour
 {
+	[Tooltip("After this many seconds the critter will forcibly despawn.")]
+	[SerializeField]
+	protected float lifetime;
+
+	[Tooltip("The maximum number of this kind of critter that can be in the room at any given time.")]
+	[SerializeField]
+	private int globalMaxCritters;
+
+	protected double startTime;
+
 	public int Seed { get; protected set; }
 
 	public CosmeticCritterSpawner Spawner { get; protected set; }
@@ -12,15 +22,15 @@ public abstract class CosmeticCritter : MonoBehaviour
 
 	public int GetGlobalMaxCritters()
 	{
-		return this.globalMaxCritters;
+		return globalMaxCritters;
 	}
 
 	public void SetSeedSpawnerTypeAndTime(int seed, CosmeticCritterSpawner spawner, Type type, double time)
 	{
-		this.Seed = seed;
-		this.Spawner = spawner;
-		this.CachedType = type;
-		this.startTime = time;
+		Seed = seed;
+		Spawner = spawner;
+		CachedType = type;
+		startTime = time;
 	}
 
 	public virtual void OnSpawn()
@@ -41,23 +51,17 @@ public abstract class CosmeticCritter : MonoBehaviour
 	{
 		if (!PhotonNetwork.InRoom)
 		{
-			return Time.timeAsDouble - this.startTime;
+			return Time.timeAsDouble - startTime;
 		}
-		return PhotonNetwork.Time - this.startTime;
+		return PhotonNetwork.Time - startTime;
 	}
 
 	public virtual bool Expired()
 	{
-		return this.GetAliveTime() > (double)this.lifetime || this.GetAliveTime() < 0.0;
+		if (!(GetAliveTime() > (double)lifetime))
+		{
+			return GetAliveTime() < 0.0;
+		}
+		return true;
 	}
-
-	[Tooltip("After this many seconds the critter will forcibly despawn.")]
-	[SerializeField]
-	protected float lifetime;
-
-	[Tooltip("The maximum number of this kind of critter that can be in the room at any given time.")]
-	[SerializeField]
-	private int globalMaxCritters;
-
-	protected double startTime;
 }

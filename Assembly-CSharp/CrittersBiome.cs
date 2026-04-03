@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum CrittersBiome
@@ -7,7 +7,7 @@ public enum CrittersBiome
 	Mountain = 2,
 	Desert = 4,
 	Grassland = 8,
-	Cave = 16,
-	IntroArea = 1073741824,
+	Cave = 0x10,
+	IntroArea = 0x40000000,
 	Any = -1
 }

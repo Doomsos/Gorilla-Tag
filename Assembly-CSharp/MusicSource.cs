@@ -1,42 +1,33 @@
-﻿using System;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class MusicSource : MonoBehaviour
 {
-	public AudioSource AudioSource
-	{
-		get
-		{
-			return this.audioSource;
-		}
-	}
+	[SerializeField]
+	private float defaultVolume = 1f;
 
-	public float DefaultVolume
-	{
-		get
-		{
-			return this.defaultVolume;
-		}
-	}
+	[SerializeField]
+	private bool setDefaultVolumeFromAudioSourceOnAwake = true;
 
-	public bool VolumeOverridden
-	{
-		get
-		{
-			return this.volumeOverride != null;
-		}
-	}
+	private AudioSource audioSource;
+
+	private float? volumeOverride;
+
+	public AudioSource AudioSource => audioSource;
+
+	public float DefaultVolume => defaultVolume;
+
+	public bool VolumeOverridden => volumeOverride.HasValue;
 
 	private void Awake()
 	{
-		if (this.audioSource == null)
+		if (audioSource == null)
 		{
-			this.audioSource = base.GetComponent<AudioSource>();
+			audioSource = GetComponent<AudioSource>();
 		}
-		if (this.setDefaultVolumeFromAudioSourceOnAwake)
+		if (setDefaultVolumeFromAudioSourceOnAwake)
 		{
-			this.defaultVolume = this.audioSource.volume;
+			defaultVolume = audioSource.volume;
 		}
 	}
 
@@ -58,23 +49,13 @@ public class MusicSource : MonoBehaviour
 
 	public void SetVolumeOverride(float volume)
 	{
-		this.volumeOverride = new float?(volume);
-		this.audioSource.volume = this.volumeOverride.Value;
+		volumeOverride = volume;
+		audioSource.volume = volumeOverride.Value;
 	}
 
 	public void UnsetVolumeOverride()
 	{
-		this.volumeOverride = null;
-		this.audioSource.volume = this.defaultVolume;
+		volumeOverride = null;
+		audioSource.volume = defaultVolume;
 	}
-
-	[SerializeField]
-	private float defaultVolume = 1f;
-
-	[SerializeField]
-	private bool setDefaultVolumeFromAudioSourceOnAwake = true;
-
-	private AudioSource audioSource;
-
-	private float? volumeOverride;
 }

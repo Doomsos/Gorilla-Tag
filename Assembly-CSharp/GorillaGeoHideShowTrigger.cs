@@ -1,10 +1,25 @@
-﻿using System;
 using GorillaExtensions;
 using GorillaTag.GuidedRefs;
 using UnityEngine;
 
 public class GorillaGeoHideShowTrigger : GorillaTriggerBox, IGuidedRefReceiverMono, IGuidedRefMonoBehaviour, IGuidedRefObject
 {
+	[SerializeField]
+	private GameObject[] makeSureThisIsDisabled;
+
+	[SerializeField]
+	private GuidedRefReceiverArrayInfo makeSureThisIsDisabled_gRefs = new GuidedRefReceiverArrayInfo(useRecommendedDefaults: false);
+
+	[SerializeField]
+	private GameObject[] makeSureThisIsEnabled;
+
+	[SerializeField]
+	private GuidedRefReceiverArrayInfo makeSureThisIsEnabled_gRefs = new GuidedRefReceiverArrayInfo(useRecommendedDefaults: false);
+
+	private bool _guidedRefsAreFullyResolved;
+
+	int IGuidedRefReceiverMono.GuidedRefsWaitingToResolveCount { get; set; }
+
 	protected void Awake()
 	{
 		((IGuidedRefObject)this).GuidedRefInitialize();
@@ -12,81 +27,72 @@ public class GorillaGeoHideShowTrigger : GorillaTriggerBox, IGuidedRefReceiverMo
 
 	public override void OnBoxTriggered()
 	{
-		if (!this._guidedRefsAreFullyResolved)
+		if (!_guidedRefsAreFullyResolved)
 		{
 			return;
 		}
-		if (this.makeSureThisIsDisabled != null)
+		GameObject[] array;
+		if (makeSureThisIsDisabled != null)
 		{
-			foreach (GameObject gameObject in this.makeSureThisIsDisabled)
+			array = makeSureThisIsDisabled;
+			foreach (GameObject gameObject in array)
 			{
 				if (gameObject == null)
 				{
 					Debug.LogError("GorillaGeoHideShowTrigger: null item in makeSureThisIsDisabled. \"" + base.transform.GetPath() + "\"", this);
 					return;
 				}
-				gameObject.SetActive(false);
+				gameObject.SetActive(value: false);
 			}
 		}
-		if (this.makeSureThisIsEnabled != null)
+		if (makeSureThisIsEnabled == null)
 		{
-			foreach (GameObject gameObject2 in this.makeSureThisIsEnabled)
+			return;
+		}
+		array = makeSureThisIsEnabled;
+		foreach (GameObject gameObject2 in array)
+		{
+			if (gameObject2 == null)
 			{
-				if (gameObject2 == null)
-				{
-					Debug.LogError("GorillaGeoHideShowTrigger: null item in makeSureThisIsDisabled. \"" + base.transform.GetPath() + "\"", this);
-					return;
-				}
-				gameObject2.SetActive(true);
+				Debug.LogError("GorillaGeoHideShowTrigger: null item in makeSureThisIsDisabled. \"" + base.transform.GetPath() + "\"", this);
+				break;
 			}
+			gameObject2.SetActive(value: true);
 		}
 	}
 
 	void IGuidedRefObject.GuidedRefInitialize()
 	{
-		GuidedRefHub.RegisterReceiverArray<GorillaGeoHideShowTrigger, GameObject>(this, "makeSureThisIsDisabled", ref this.makeSureThisIsDisabled, ref this.makeSureThisIsDisabled_gRefs);
-		GuidedRefHub.RegisterReceiverArray<GorillaGeoHideShowTrigger, GameObject>(this, "makeSureThisIsEnabled", ref this.makeSureThisIsEnabled, ref this.makeSureThisIsEnabled_gRefs);
-		GuidedRefHub.ReceiverFullyRegistered<GorillaGeoHideShowTrigger>(this);
+		GuidedRefHub.RegisterReceiverArray(this, "makeSureThisIsDisabled", ref makeSureThisIsDisabled, ref makeSureThisIsDisabled_gRefs);
+		GuidedRefHub.RegisterReceiverArray(this, "makeSureThisIsEnabled", ref makeSureThisIsEnabled, ref makeSureThisIsEnabled_gRefs);
+		GuidedRefHub.ReceiverFullyRegistered(this);
 	}
 
 	bool IGuidedRefReceiverMono.GuidedRefTryResolveReference(GuidedRefTryResolveInfo target)
 	{
-		return GuidedRefHub.TryResolveArrayItem<GorillaGeoHideShowTrigger, GameObject>(this, this.makeSureThisIsDisabled, this.makeSureThisIsDisabled_gRefs, target) || GuidedRefHub.TryResolveArrayItem<GorillaGeoHideShowTrigger, GameObject>(this, this.makeSureThisIsDisabled, this.makeSureThisIsEnabled_gRefs, target);
+		if (GuidedRefHub.TryResolveArrayItem(this, makeSureThisIsDisabled, makeSureThisIsDisabled_gRefs, target))
+		{
+			return true;
+		}
+		if (GuidedRefHub.TryResolveArrayItem(this, makeSureThisIsDisabled, makeSureThisIsEnabled_gRefs, target))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	void IGuidedRefReceiverMono.OnAllGuidedRefsResolved()
 	{
-		this._guidedRefsAreFullyResolved = true;
+		_guidedRefsAreFullyResolved = true;
 	}
 
 	void IGuidedRefReceiverMono.OnGuidedRefTargetDestroyed(int fieldId)
 	{
-		this._guidedRefsAreFullyResolved = false;
-	}
-
-	int IGuidedRefReceiverMono.GuidedRefsWaitingToResolveCount { get; set; }
-
-	Transform IGuidedRefMonoBehaviour.get_transform()
-	{
-		return base.transform;
+		_guidedRefsAreFullyResolved = false;
 	}
 
 	int IGuidedRefObject.GetInstanceID()
 	{
-		return base.GetInstanceID();
+		return GetInstanceID();
 	}
-
-	[SerializeField]
-	private GameObject[] makeSureThisIsDisabled;
-
-	[SerializeField]
-	private GuidedRefReceiverArrayInfo makeSureThisIsDisabled_gRefs = new GuidedRefReceiverArrayInfo(false);
-
-	[SerializeField]
-	private GameObject[] makeSureThisIsEnabled;
-
-	[SerializeField]
-	private GuidedRefReceiverArrayInfo makeSureThisIsEnabled_gRefs = new GuidedRefReceiverArrayInfo(false);
-
-	private bool _guidedRefsAreFullyResolved;
 }

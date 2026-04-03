@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ExitGames.Client.Photon;
 using GorillaExtensions;
 using GorillaLocomotion;
@@ -9,294 +9,6 @@ using UnityEngine;
 
 public class PaperPlaneThrowable : TransferrableObject
 {
-	private void OnLaunchRPC(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
-	{
-		if (info.senderID != this.ownerRig.creator.ActorNumber)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(info, "OnLaunchRPC");
-		if (sender != receiver)
-		{
-			return;
-		}
-		if (!this)
-		{
-			return;
-		}
-		int num = PaperPlaneThrowable.FetchViewID(this);
-		int num2 = (int)args[0];
-		if (num == -1)
-		{
-			return;
-		}
-		if (num2 == -1)
-		{
-			return;
-		}
-		if (num != num2)
-		{
-			return;
-		}
-		int num3 = (int)args[1];
-		int throwableId = this.GetThrowableId();
-		if (num3 != throwableId)
-		{
-			return;
-		}
-		Vector3 launchPos = (Vector3)args[2];
-		Quaternion launchRot = (Quaternion)args[3];
-		Vector3 releaseVel = (Vector3)args[4];
-		float num4 = 10000f;
-		if (launchPos.IsValid(num4) && launchRot.IsValid())
-		{
-			float num5 = 10000f;
-			if (releaseVel.IsValid(num5) && !this._renderer.forceRenderingOff)
-			{
-				this.LaunchProjectileLocal(launchPos, launchRot, releaseVel);
-				return;
-			}
-		}
-	}
-
-	internal override void OnEnable()
-	{
-		PhotonNetwork.NetworkingClient.EventReceived += this.OnPhotonEvent;
-		this._lastWorldPos = base.transform.position;
-		this._renderer.forceRenderingOff = false;
-		base.OnEnable();
-	}
-
-	internal override void OnDisable()
-	{
-		PhotonNetwork.NetworkingClient.EventReceived -= this.OnPhotonEvent;
-		base.OnDisable();
-	}
-
-	private void OnPhotonEvent(EventData evData)
-	{
-		if (evData.Code != 176)
-		{
-			return;
-		}
-		object[] array = (object[])evData.CustomData;
-		object obj = array[0];
-		if (!(obj is int))
-		{
-			return;
-		}
-		int num = (int)obj;
-		if (num != PaperPlaneThrowable.kProjectileEvent)
-		{
-			return;
-		}
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(evData.Sender);
-		NetPlayer netPlayer = base.OwningPlayer();
-		if (player != netPlayer)
-		{
-			return;
-		}
-		MonkeAgent.IncrementRPCCall(new PhotonMessageInfo(netPlayer.GetPlayerRef(), PhotonNetwork.ServerTimestamp, null), "OnPhotonEvent");
-		if (!this.m_spamCheck.CheckCallTime(Time.unscaledTime))
-		{
-			return;
-		}
-		TransferrableObject.PositionState positionState = (TransferrableObject.PositionState)array[1];
-		Vector3 vector = (Vector3)array[2];
-		Quaternion launchRot = (Quaternion)array[3];
-		Vector3 releaseVel = (Vector3)array[4];
-		TransferrableObject.PositionState positionState2 = positionState;
-		if (positionState2 != TransferrableObject.PositionState.InLeftHand)
-		{
-			if (positionState2 != TransferrableObject.PositionState.InRightHand)
-			{
-				goto IL_CE;
-			}
-			if (base.InRightHand())
-			{
-				goto IL_CE;
-			}
-		}
-		else if (base.InLeftHand())
-		{
-			goto IL_CE;
-		}
-		return;
-		IL_CE:
-		float num2 = 10000f;
-		if (vector.IsValid(num2) && launchRot.IsValid())
-		{
-			float num3 = 10000f;
-			if (releaseVel.IsValid(num3) && !this._renderer.forceRenderingOff && !base.myOnlineRig.IsNull() && base.myOnlineRig.IsPositionInRange(vector, 4f))
-			{
-				this.LaunchProjectileLocal(vector, launchRot, releaseVel);
-				return;
-			}
-		}
-	}
-
-	protected override void Start()
-	{
-		base.Start();
-		if (PaperPlaneThrowable._playerView == null)
-		{
-			PaperPlaneThrowable._playerView = Camera.main;
-		}
-	}
-
-	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
-	{
-		if (this._renderer.forceRenderingOff)
-		{
-			return;
-		}
-		base.OnGrab(pointGrabbed, grabbingHand);
-	}
-
-	private static int FetchViewID(PaperPlaneThrowable ppt)
-	{
-		NetPlayer netPlayer = (ppt.myOnlineRig != null) ? ppt.myOnlineRig.creator : ((ppt.myRig != null) ? ((ppt.myRig.creator != null) ? ppt.myRig.creator : NetworkSystem.Instance.LocalPlayer) : null);
-		if (netPlayer == null)
-		{
-			return -1;
-		}
-		RigContainer rigContainer;
-		if (!VRRigCache.Instance.TryGetVrrig(netPlayer, out rigContainer))
-		{
-			return -1;
-		}
-		if (rigContainer.Rig.netView == null)
-		{
-			return -1;
-		}
-		return rigContainer.Rig.netView.ViewID;
-	}
-
-	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-	{
-		TransferrableObject.PositionState currentState = this.currentState;
-		if (!base.OnRelease(zoneReleased, releasingHand))
-		{
-			return false;
-		}
-		if (VRRigCache.Instance.localRig.Rig != this.ownerRig)
-		{
-			return false;
-		}
-		if (this._renderer.forceRenderingOff)
-		{
-			return false;
-		}
-		bool isLeftHand = releasingHand == EquipmentInteractor.instance.leftHand;
-		GorillaVelocityTracker interactPointVelocityTracker = GTPlayer.Instance.GetInteractPointVelocityTracker(isLeftHand);
-		Vector3 vector = base.transform.TransformPoint(Vector3.zero);
-		Quaternion rotation = base.transform.rotation;
-		Vector3 averageVelocity = interactPointVelocityTracker.GetAverageVelocity(true, 0.15f, false);
-		PaperPlaneThrowable.FetchViewID(this);
-		this.GetThrowableId();
-		this.LaunchProjectileLocal(vector, rotation, averageVelocity);
-		if (PaperPlaneThrowable.gRaiseOpts == null)
-		{
-			PaperPlaneThrowable.gRaiseOpts = RaiseEventOptions.Default;
-			PaperPlaneThrowable.gRaiseOpts.Receivers = ReceiverGroup.Others;
-		}
-		PaperPlaneThrowable.gEventArgs[0] = PaperPlaneThrowable.kProjectileEvent;
-		PaperPlaneThrowable.gEventArgs[1] = currentState;
-		PaperPlaneThrowable.gEventArgs[2] = vector;
-		PaperPlaneThrowable.gEventArgs[3] = rotation;
-		PaperPlaneThrowable.gEventArgs[4] = averageVelocity;
-		PhotonNetwork.RaiseEvent(176, PaperPlaneThrowable.gEventArgs, PaperPlaneThrowable.gRaiseOpts, SendOptions.SendReliable);
-		return true;
-	}
-
-	private int GetThrowableId()
-	{
-		int num = this._throwableIdHash.GetValueOrDefault();
-		if (this._throwableIdHash == null)
-		{
-			num = StaticHash.Compute(this._throwableID);
-			this._throwableIdHash = new int?(num);
-			return num;
-		}
-		return num;
-	}
-
-	private void LaunchProjectileLocal(Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel)
-	{
-		if (releaseVel.sqrMagnitude <= this.minThrowSpeed * base.transform.lossyScale.z * base.transform.lossyScale.z)
-		{
-			return;
-		}
-		GameObject gameObject = ObjectPools.instance.Instantiate(this._projectilePrefab.gameObject, launchPos, true);
-		gameObject.transform.localScale = base.transform.lossyScale;
-		PaperPlaneProjectile component = gameObject.GetComponent<PaperPlaneProjectile>();
-		component.OnHit += this.OnProjectileHit;
-		if (this.networkedStateEvents != TransferrableObject.SyncOptions.None)
-		{
-			int state = (int)(this.itemState & (TransferrableObject.ItemStates)(-65));
-			component.SetTransferrableState(this.networkedStateEvents, state);
-		}
-		component.ResetProjectile();
-		component.SetVRRig(base.myRig);
-		component.Launch(launchPos, launchRot, releaseVel);
-		this._renderer.forceRenderingOff = true;
-	}
-
-	private void OnProjectileHit(Vector3 endPoint)
-	{
-		this._renderer.forceRenderingOff = false;
-		if (base.IsLocalObject() && this.networkedStateEvents != TransferrableObject.SyncOptions.None && this.resetOnDocked)
-		{
-			TransferrableObject.SyncOptions networkedStateEvents = this.networkedStateEvents;
-			if (networkedStateEvents == TransferrableObject.SyncOptions.Bool)
-			{
-				base.ResetStateBools();
-				return;
-			}
-			if (networkedStateEvents != TransferrableObject.SyncOptions.Int)
-			{
-				return;
-			}
-			base.SetItemStateInt(0);
-		}
-	}
-
-	protected override void LateUpdateLocal()
-	{
-		base.LateUpdateLocal();
-		Transform transform = base.transform;
-		Vector3 position = transform.position;
-		this._itemWorldVel = (position - this._lastWorldPos) / Time.deltaTime;
-		Quaternion localRotation = transform.localRotation;
-		this._itemWorldAngVel = PaperPlaneThrowable.CalcAngularVelocity(this._lastWorldRot, localRotation, Time.deltaTime);
-		this._lastWorldRot = localRotation;
-		this._lastWorldPos = position;
-	}
-
-	private static Vector3 CalcAngularVelocity(Quaternion from, Quaternion to, float dt)
-	{
-		Vector3 vector = (to * Quaternion.Inverse(from)).eulerAngles;
-		if (vector.x > 180f)
-		{
-			vector.x -= 360f;
-		}
-		if (vector.y > 180f)
-		{
-			vector.y -= 360f;
-		}
-		if (vector.z > 180f)
-		{
-			vector.z -= 360f;
-		}
-		vector *= 0.017453292f / dt;
-		return vector;
-	}
-
-	public override void DropItem()
-	{
-		base.DropItem();
-	}
-
 	[Tooltip("Renderer on the body to disable when spawning the projectile")]
 	[SerializeField]
 	private Renderer _renderer;
@@ -335,4 +47,252 @@ public class PaperPlaneThrowable : TransferrableObject
 	private Vector3 _itemWorldVel;
 
 	private Vector3 _itemWorldAngVel;
+
+	private void OnLaunchRPC(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
+	{
+		if (info.senderID != ownerRig.creator.ActorNumber)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "OnLaunchRPC");
+		if (sender != receiver || !this)
+		{
+			return;
+		}
+		int num = FetchViewID(this);
+		int num2 = (int)args[0];
+		if (num == -1 || num2 == -1 || num != num2)
+		{
+			return;
+		}
+		int num3 = (int)args[1];
+		int throwableId = GetThrowableId();
+		if (num3 == throwableId)
+		{
+			Vector3 v = (Vector3)args[2];
+			Quaternion q = (Quaternion)args[3];
+			Vector3 v2 = (Vector3)args[4];
+			if (v.IsValid(10000f) && q.IsValid() && v2.IsValid(10000f) && !_renderer.forceRenderingOff)
+			{
+				LaunchProjectileLocal(v, q, v2);
+			}
+		}
+	}
+
+	internal override void OnEnable()
+	{
+		PhotonNetwork.NetworkingClient.EventReceived += OnPhotonEvent;
+		_lastWorldPos = base.transform.position;
+		_renderer.forceRenderingOff = false;
+		base.OnEnable();
+	}
+
+	internal override void OnDisable()
+	{
+		PhotonNetwork.NetworkingClient.EventReceived -= OnPhotonEvent;
+		base.OnDisable();
+	}
+
+	private void OnPhotonEvent(EventData evData)
+	{
+		if (evData.Code != 176)
+		{
+			return;
+		}
+		object[] array = (object[])evData.CustomData;
+		if (!(array[0] is int num) || num != kProjectileEvent)
+		{
+			return;
+		}
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(evData.Sender);
+		NetPlayer netPlayer = OwningPlayer();
+		if (player != netPlayer)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(new PhotonMessageInfo(netPlayer.GetPlayerRef(), PhotonNetwork.ServerTimestamp, null), "OnPhotonEvent");
+		if (!m_spamCheck.CheckCallTime(Time.unscaledTime))
+		{
+			return;
+		}
+		PositionState positionState = (PositionState)array[1];
+		Vector3 v = (Vector3)array[2];
+		Quaternion q = (Quaternion)array[3];
+		Vector3 v2 = (Vector3)array[4];
+		switch (positionState)
+		{
+		case PositionState.InLeftHand:
+			if (InLeftHand())
+			{
+				break;
+			}
+			return;
+		case PositionState.InRightHand:
+			if (!InRightHand())
+			{
+				return;
+			}
+			break;
+		}
+		if (v.IsValid(10000f) && q.IsValid() && v2.IsValid(10000f) && !_renderer.forceRenderingOff && !base.myOnlineRig.IsNull() && base.myOnlineRig.IsPositionInRange(v, 4f))
+		{
+			LaunchProjectileLocal(v, q, v2);
+		}
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		if (_playerView == null)
+		{
+			_playerView = Camera.main;
+		}
+	}
+
+	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
+	{
+		if (!_renderer.forceRenderingOff)
+		{
+			base.OnGrab(pointGrabbed, grabbingHand);
+		}
+	}
+
+	private static int FetchViewID(PaperPlaneThrowable ppt)
+	{
+		NetPlayer netPlayer = ((ppt.myOnlineRig != null) ? ppt.myOnlineRig.creator : ((!(ppt.myRig != null)) ? null : ((ppt.myRig.creator != null) ? ppt.myRig.creator : NetworkSystem.Instance.LocalPlayer)));
+		if (netPlayer == null)
+		{
+			return -1;
+		}
+		if (VRRigCache.Instance.TryGetVrrig(netPlayer, out var playerRig))
+		{
+			if (playerRig.Rig.netView == null)
+			{
+				return -1;
+			}
+			return playerRig.Rig.netView.ViewID;
+		}
+		return -1;
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		PositionState positionState = currentState;
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
+			return false;
+		}
+		if (VRRigCache.Instance.localRig.Rig != ownerRig)
+		{
+			return false;
+		}
+		if (_renderer.forceRenderingOff)
+		{
+			return false;
+		}
+		bool isLeftHand = releasingHand == EquipmentInteractor.instance.leftHand;
+		GorillaVelocityTracker interactPointVelocityTracker = GTPlayer.Instance.GetInteractPointVelocityTracker(isLeftHand);
+		Vector3 vector = base.transform.TransformPoint(Vector3.zero);
+		Quaternion rotation = base.transform.rotation;
+		Vector3 averageVelocity = interactPointVelocityTracker.GetAverageVelocity(worldSpace: true);
+		FetchViewID(this);
+		GetThrowableId();
+		LaunchProjectileLocal(vector, rotation, averageVelocity);
+		if (gRaiseOpts == null)
+		{
+			gRaiseOpts = RaiseEventOptions.Default;
+			gRaiseOpts.Receivers = ReceiverGroup.Others;
+		}
+		gEventArgs[0] = kProjectileEvent;
+		gEventArgs[1] = positionState;
+		gEventArgs[2] = vector;
+		gEventArgs[3] = rotation;
+		gEventArgs[4] = averageVelocity;
+		PhotonNetwork.RaiseEvent(176, gEventArgs, gRaiseOpts, SendOptions.SendReliable);
+		return true;
+	}
+
+	private int GetThrowableId()
+	{
+		int valueOrDefault = _throwableIdHash.GetValueOrDefault();
+		if (!_throwableIdHash.HasValue)
+		{
+			valueOrDefault = StaticHash.Compute(_throwableID);
+			_throwableIdHash = valueOrDefault;
+			return valueOrDefault;
+		}
+		return valueOrDefault;
+	}
+
+	private void LaunchProjectileLocal(Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel)
+	{
+		if (!(releaseVel.sqrMagnitude <= minThrowSpeed * base.transform.lossyScale.z * base.transform.lossyScale.z))
+		{
+			GameObject obj = ObjectPools.instance.Instantiate(_projectilePrefab.gameObject, launchPos);
+			obj.transform.localScale = base.transform.lossyScale;
+			PaperPlaneProjectile component = obj.GetComponent<PaperPlaneProjectile>();
+			component.OnHit += OnProjectileHit;
+			if (networkedStateEvents != SyncOptions.None)
+			{
+				int state = (int)(itemState & (ItemStates)(-65));
+				component.SetTransferrableState(networkedStateEvents, state);
+			}
+			component.ResetProjectile();
+			component.SetVRRig(base.myRig);
+			component.Launch(launchPos, launchRot, releaseVel);
+			_renderer.forceRenderingOff = true;
+		}
+	}
+
+	private void OnProjectileHit(Vector3 endPoint)
+	{
+		_renderer.forceRenderingOff = false;
+		if (IsLocalObject() && networkedStateEvents != SyncOptions.None && resetOnDocked)
+		{
+			switch (networkedStateEvents)
+			{
+			case SyncOptions.Bool:
+				ResetStateBools();
+				break;
+			case SyncOptions.Int:
+				SetItemStateInt(0);
+				break;
+			}
+		}
+	}
+
+	protected override void LateUpdateLocal()
+	{
+		base.LateUpdateLocal();
+		Transform obj = base.transform;
+		Vector3 position = obj.position;
+		_itemWorldVel = (position - _lastWorldPos) / Time.deltaTime;
+		Quaternion localRotation = obj.localRotation;
+		_itemWorldAngVel = CalcAngularVelocity(_lastWorldRot, localRotation, Time.deltaTime);
+		_lastWorldRot = localRotation;
+		_lastWorldPos = position;
+	}
+
+	private static Vector3 CalcAngularVelocity(Quaternion from, Quaternion to, float dt)
+	{
+		Vector3 eulerAngles = (to * Quaternion.Inverse(from)).eulerAngles;
+		if (eulerAngles.x > 180f)
+		{
+			eulerAngles.x -= 360f;
+		}
+		if (eulerAngles.y > 180f)
+		{
+			eulerAngles.y -= 360f;
+		}
+		if (eulerAngles.z > 180f)
+		{
+			eulerAngles.z -= 360f;
+		}
+		return eulerAngles * (MathF.PI / 180f / dt);
+	}
+
+	public override void DropItem()
+	{
+		base.DropItem();
+	}
 }

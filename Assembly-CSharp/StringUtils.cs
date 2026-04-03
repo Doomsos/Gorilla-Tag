@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,6 +9,20 @@ using UnityEngine;
 
 public static class StringUtils
 {
+	public const string kForwardSlash = "/";
+
+	public const string kBackSlash = "/";
+
+	public const string kBackTick = "`";
+
+	public const string kMinusDash = "-";
+
+	public const string kPeriod = ".";
+
+	public const string kUnderScore = "_";
+
+	public const string kColon = ":";
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNullOrEmpty(this string s)
 	{
@@ -27,19 +41,15 @@ public static class StringUtils
 		{
 			return string.Empty;
 		}
-		string result;
-		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder())
+		using Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder();
+		foreach (char c in s)
 		{
-			foreach (char c in s)
+			if (char.IsLetterOrDigit(c))
 			{
-				if (char.IsLetterOrDigit(c))
-				{
-					utf16ValueStringBuilder.Append(c);
-				}
+				utf16ValueStringBuilder.Append(c);
 			}
-			result = utf16ValueStringBuilder.ToString();
 		}
-		return result;
+		return utf16ValueStringBuilder.ToString();
 	}
 
 	public static string Capitalize(this string s)
@@ -65,7 +75,7 @@ public static class StringUtils
 
 	public static string Join(this IEnumerable<string> source, char separator)
 	{
-		return string.Join<string>(separator, source);
+		return string.Join(separator, source);
 	}
 
 	public static string RemoveAll(this string s, string value, StringComparison mode = StringComparison.OrdinalIgnoreCase)
@@ -108,8 +118,7 @@ public static class StringUtils
 		{
 			return null;
 		}
-		return "?" + string.Join("&", from x in d
-		select x.Key + "=" + x.Value);
+		return "?" + string.Join("&", d.Select((KeyValuePair<string, string> x) => x.Key + "=" + x.Value));
 	}
 
 	public static string Combine(string separator, params string[] values)
@@ -142,20 +151,19 @@ public static class StringUtils
 		{
 			if (array[i].Length > 0)
 			{
-				string[] array2 = array;
 				int num = i;
-				string str = char.ToUpper(array[i][0]).ToString();
-				string str2;
+				string text = char.ToUpper(array[i][0]).ToString();
+				object obj;
 				if (array[i].Length <= 1)
 				{
-					str2 = "";
+					obj = "";
 				}
 				else
 				{
-					string text = array[i];
-					str2 = text.Substring(1, text.Length - 1).ToLower();
+					string text2 = array[i];
+					obj = text2.Substring(1, text2.Length - 1).ToLower();
 				}
-				array2[num] = str + str2;
+				array[num] = text + (string)obj;
 			}
 		}
 		return string.Join("", array);
@@ -168,22 +176,18 @@ public static class StringUtils
 			return input;
 		}
 		input = input.Trim();
-		string result;
-		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder())
+		using Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder();
+		bool flag = true;
+		foreach (char c in input)
 		{
-			bool flag = true;
-			foreach (char c in input)
+			if (char.IsUpper(c) && !flag)
 			{
-				if (char.IsUpper(c) && !flag)
-				{
-					utf16ValueStringBuilder.Append(' ');
-				}
-				utf16ValueStringBuilder.Append(char.ToUpper(c));
-				flag = char.IsUpper(c);
+				utf16ValueStringBuilder.Append(' ');
 			}
-			result = utf16ValueStringBuilder.ToString().Trim();
+			utf16ValueStringBuilder.Append(char.ToUpper(c));
+			flag = char.IsUpper(c);
 		}
-		return result;
+		return utf16ValueStringBuilder.ToString().Trim();
 	}
 
 	public static string RemoveStart(this string s, string value, StringComparison comparison = StringComparison.CurrentCultureIgnoreCase)
@@ -222,18 +226,4 @@ public static class StringUtils
 		}
 		return s + " ";
 	}
-
-	public const string kForwardSlash = "/";
-
-	public const string kBackSlash = "/";
-
-	public const string kBackTick = "`";
-
-	public const string kMinusDash = "-";
-
-	public const string kPeriod = ".";
-
-	public const string kUnderScore = "_";
-
-	public const string kColon = ":";
 }

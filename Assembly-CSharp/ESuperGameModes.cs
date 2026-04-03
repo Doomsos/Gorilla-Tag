@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 
 [Flags]
 public enum ESuperGameModes
 {
-	SuperInfect = 2048,
-	SuperCasual = 4096
+	SuperInfect = 0x800,
+	SuperCasual = 0x1000
 }

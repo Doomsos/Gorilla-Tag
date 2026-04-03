@@ -1,88 +1,11 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
 public class KIDUI_ConfirmScreen : MonoBehaviour
 {
-	private void Awake()
-	{
-		if (this._emailToConfirmTxt == null)
-		{
-			Debug.LogErrorFormat("[KID::UI::Setup] Email To Confirm Field is NULL", Array.Empty<object>());
-			return;
-		}
-		if (this._setupScreen == null)
-		{
-			Debug.LogErrorFormat("[KID::UI::Setup] Setup K-ID Screen is NULL", Array.Empty<object>());
-			return;
-		}
-		if (this._mainScreen == null)
-		{
-			Debug.LogErrorFormat("[KID::UI::Setup] Main Screen is NULL", Array.Empty<object>());
-			return;
-		}
-		this._cancellationTokenSource = new CancellationTokenSource();
-	}
-
-	private void OnEnable()
-	{
-		this._confirmButton.interactable = true;
-		this._backButton.interactable = true;
-	}
-
-	public void OnEmailSubmitted(string emailAddress)
-	{
-		this._submittedEmailAddress = emailAddress;
-		this._emailToConfirmTxt.text = this._submittedEmailAddress;
-		base.gameObject.SetActive(true);
-	}
-
-	public void OnConfirmPressed()
-	{
-		KIDUI_ConfirmScreen.<OnConfirmPressed>d__16 <OnConfirmPressed>d__;
-		<OnConfirmPressed>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<OnConfirmPressed>d__.<>4__this = this;
-		<OnConfirmPressed>d__.<>1__state = -1;
-		<OnConfirmPressed>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<OnConfirmPressed>d__16>(ref <OnConfirmPressed>d__);
-	}
-
-	public void OnBackPressed()
-	{
-		KIDUI_ConfirmScreen.<OnBackPressed>d__17 <OnBackPressed>d__;
-		<OnBackPressed>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<OnBackPressed>d__.<>4__this = this;
-		<OnBackPressed>d__.<>1__state = -1;
-		<OnBackPressed>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<OnBackPressed>d__17>(ref <OnBackPressed>d__);
-	}
-
-	public void NotifyOfResult(bool success)
-	{
-		this._hasCompletedSendEmailRequest = true;
-		this._emailRequestResult = success;
-	}
-
-	private void ShowErrorScreen(string errorMessage)
-	{
-		KIDUI_ConfirmScreen.<ShowErrorScreen>d__19 <ShowErrorScreen>d__;
-		<ShowErrorScreen>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<ShowErrorScreen>d__.<>4__this = this;
-		<ShowErrorScreen>d__.errorMessage = errorMessage;
-		<ShowErrorScreen>d__.<>1__state = -1;
-		<ShowErrorScreen>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<ShowErrorScreen>d__19>(ref <ShowErrorScreen>d__);
-	}
-
-	public void OnDisable()
-	{
-		KIDAudioManager instance = KIDAudioManager.Instance;
-		if (instance == null)
-		{
-			return;
-		}
-		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
-	}
-
 	[SerializeField]
 	private TMP_Text _emailToConfirmTxt;
 
@@ -117,4 +40,118 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 	private bool _hasCompletedSendEmailRequest;
 
 	private bool _emailRequestResult;
+
+	private void Awake()
+	{
+		if (_emailToConfirmTxt == null)
+		{
+			Debug.LogErrorFormat("[KID::UI::Setup] Email To Confirm Field is NULL");
+		}
+		else if (_setupScreen == null)
+		{
+			Debug.LogErrorFormat("[KID::UI::Setup] Setup K-ID Screen is NULL");
+		}
+		else if (_mainScreen == null)
+		{
+			Debug.LogErrorFormat("[KID::UI::Setup] Main Screen is NULL");
+		}
+		else
+		{
+			_cancellationTokenSource = new CancellationTokenSource();
+		}
+	}
+
+	private void OnEnable()
+	{
+		_confirmButton.interactable = true;
+		_backButton.interactable = true;
+	}
+
+	public void OnEmailSubmitted(string emailAddress)
+	{
+		_submittedEmailAddress = emailAddress;
+		_emailToConfirmTxt.text = _submittedEmailAddress;
+		base.gameObject.SetActive(value: true);
+	}
+
+	public async void OnConfirmPressed()
+	{
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_email_confirm",
+			CustomTags = new string[3]
+			{
+				"kid_setup",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string> { { "button_pressed", "confirm" } }
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		_confirmButton.interactable = false;
+		_backButton.interactable = false;
+		await _animatedEllipsis.StartAnimation();
+		Debug.Log("[KID::UI::CONFIRM_EMAIL] Ellipsis Animation Complete, proceeding to send email");
+		(bool success, string message) result = await KIDManager.SetAndSendEmail(_submittedEmailAddress);
+		do
+		{
+			await Task.Yield();
+		}
+		while (!_hasCompletedSendEmailRequest);
+		Debug.Log($"[KID::UI::CONFIRM_EMAIL] Email has been sent, awaiting minimum duration {_minimumDelay}");
+		if (_minimumDelay > 0)
+		{
+			await Task.Delay(_minimumDelay);
+		}
+		base.gameObject.SetActive(value: false);
+		if (!result.success)
+		{
+			ShowErrorScreen(result.message);
+			return;
+		}
+		Debug.Log("[KID::UI::CONFIRM_EMAIL] Minimum duration passed, result is successful. Proceeding to Success screen");
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+		_mainScreen.OnConfirmedEmailAddress(_submittedEmailAddress);
+		_successScreen.ShowSuccessScreen(_submittedEmailAddress);
+	}
+
+	public async void OnBackPressed()
+	{
+		TelemetryData telemetryData = new TelemetryData
+		{
+			EventName = "kid_email_confirm",
+			CustomTags = new string[3]
+			{
+				"kid_setup",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string> { { "button_pressed", "go_back" } }
+		};
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		_cancellationTokenSource.Cancel();
+		await _animatedEllipsis.StopAnimation();
+		base.gameObject.SetActive(value: false);
+		_setupScreen.OnStartSetup();
+	}
+
+	public void NotifyOfResult(bool success)
+	{
+		_hasCompletedSendEmailRequest = true;
+		_emailRequestResult = success;
+	}
+
+	private async void ShowErrorScreen(string errorMessage)
+	{
+		Debug.LogErrorFormat("[KID::UI::Setup] K-ID Confirmation Failed - Failed to send email");
+		_cancellationTokenSource.Cancel();
+		await _animatedEllipsis.StopAnimation();
+		base.gameObject.SetActive(value: false);
+		_errorScreen.ShowErrorScreen("Confirmation Error", _submittedEmailAddress, errorMessage);
+	}
+
+	public void OnDisable()
+	{
+		KIDAudioManager.Instance?.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
+	}
 }

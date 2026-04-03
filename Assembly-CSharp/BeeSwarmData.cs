@@ -1,21 +1,23 @@
-﻿using System;
 using System.Runtime.InteropServices;
 using Fusion;
 
-[NetworkStructWeaved(3)]
 [StructLayout(LayoutKind.Explicit, Size = 12)]
+[NetworkStructWeaved(3)]
 public struct BeeSwarmData : INetworkStruct
 {
-	public int TargetActorNumber { readonly get; set; }
+	[field: FieldOffset(0)]
+	public int TargetActorNumber { get; set; }
 
-	public int CurrentState { readonly get; set; }
+	[field: FieldOffset(4)]
+	public int CurrentState { get; set; }
 
-	public float CurrentSpeed { readonly get; set; }
+	[field: FieldOffset(8)]
+	public float CurrentSpeed { get; set; }
 
 	public BeeSwarmData(int actorNr, int state, float speed)
 	{
-		this.TargetActorNumber = actorNr;
-		this.CurrentState = state;
-		this.CurrentSpeed = speed;
+		TargetActorNumber = actorNr;
+		CurrentState = state;
+		CurrentSpeed = speed;
 	}
 }

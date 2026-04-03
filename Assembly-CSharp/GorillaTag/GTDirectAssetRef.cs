@@ -1,79 +1,81 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Serializable]
+public struct GTDirectAssetRef<T> : IEquatable<T> where T : UnityEngine.Object
 {
-	[Serializable]
-	public struct GTDirectAssetRef<T> : IEquatable<T> where T : Object
+	[SerializeField]
+	[HideInInspector]
+	internal T _obj;
+
+	[FormerlySerializedAs("assetPath")]
+	public string edAssetPath;
+
+	public T obj
 	{
-		public T obj
+		get
 		{
-			get
-			{
-				return this._obj;
-			}
-			set
-			{
-				this._obj = value;
-				this.edAssetPath = null;
-			}
+			return _obj;
 		}
-
-		public GTDirectAssetRef(T theObj)
+		set
 		{
-			this._obj = theObj;
-			this.edAssetPath = null;
+			_obj = value;
+			edAssetPath = null;
 		}
+	}
 
-		public static implicit operator T(GTDirectAssetRef<T> refObject)
+	public GTDirectAssetRef(T theObj)
+	{
+		_obj = theObj;
+		edAssetPath = null;
+	}
+
+	public static implicit operator T(GTDirectAssetRef<T> refObject)
+	{
+		return refObject.obj;
+	}
+
+	public static implicit operator GTDirectAssetRef<T>(T other)
+	{
+		return new GTDirectAssetRef<T>
 		{
-			return refObject.obj;
-		}
+			obj = other
+		};
+	}
 
-		public static implicit operator GTDirectAssetRef<T>(T other)
+	public bool Equals(T other)
+	{
+		return obj == other;
+	}
+
+	public override bool Equals(object other)
+	{
+		if (other is T other2)
 		{
-			return new GTDirectAssetRef<T>
-			{
-				obj = other
-			};
+			return Equals(other2);
 		}
+		return false;
+	}
 
-		public bool Equals(T other)
+	public override int GetHashCode()
+	{
+		if (!(obj != null))
 		{
-			return this.obj == other;
+			return 0;
 		}
+		return obj.GetHashCode();
+	}
 
-		public override bool Equals(object other)
-		{
-			T t = other as T;
-			return t != null && this.Equals(t);
-		}
+	public static bool operator ==(GTDirectAssetRef<T> left, T right)
+	{
+		return left.Equals(right);
+	}
 
-		public override int GetHashCode()
-		{
-			if (!(this.obj != null))
-			{
-				return 0;
-			}
-			return this.obj.GetHashCode();
-		}
-
-		public static bool operator ==(GTDirectAssetRef<T> left, T right)
-		{
-			return left.Equals(right);
-		}
-
-		public static bool operator !=(GTDirectAssetRef<T> left, T right)
-		{
-			return !(left == right);
-		}
-
-		[SerializeField]
-		[HideInInspector]
-		internal T _obj;
-
-		[FormerlySerializedAs("assetPath")]
-		public string edAssetPath;
+	public static bool operator !=(GTDirectAssetRef<T> left, T right)
+	{
+		return !(left == right);
 	}
 }

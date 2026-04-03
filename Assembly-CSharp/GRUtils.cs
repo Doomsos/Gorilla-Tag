@@ -1,56 +1,36 @@
-﻿using System;
-
 public class GRUtils
 {
 	public static string GetToolName(GRTool.GRToolType toolType)
 	{
-		switch (toolType)
+		return toolType switch
 		{
-		case GRTool.GRToolType.Club:
-			return "Baton";
-		case GRTool.GRToolType.Collector:
-			return "Collector";
-		case GRTool.GRToolType.Flash:
-			return "Flash";
-		case GRTool.GRToolType.Lantern:
-			return "Lantern";
-		case GRTool.GRToolType.Revive:
-			return "Revive";
-		case GRTool.GRToolType.ShieldGun:
-			return "Shield";
-		case GRTool.GRToolType.DirectionalShield:
-			return "Deflector";
-		case GRTool.GRToolType.DockWrist:
-			return "Dock";
-		case GRTool.GRToolType.HockeyStick:
-			return "Stick";
-		}
-		return "Unknown";
+			GRTool.GRToolType.Club => "Baton", 
+			GRTool.GRToolType.Collector => "Collector", 
+			GRTool.GRToolType.Flash => "Flash", 
+			GRTool.GRToolType.Lantern => "Lantern", 
+			GRTool.GRToolType.Revive => "Revive", 
+			GRTool.GRToolType.ShieldGun => "Shield", 
+			GRTool.GRToolType.DirectionalShield => "Deflector", 
+			GRTool.GRToolType.HockeyStick => "Stick", 
+			GRTool.GRToolType.DockWrist => "Dock", 
+			_ => "Unknown", 
+		};
 	}
 
 	public static GRToolProgressionManager.ToolParts GetToolPart(GRTool.GRToolType toolType)
 	{
-		switch (toolType)
+		return toolType switch
 		{
-		case GRTool.GRToolType.Club:
-			return GRToolProgressionManager.ToolParts.Baton;
-		case GRTool.GRToolType.Collector:
-			return GRToolProgressionManager.ToolParts.Collector;
-		case GRTool.GRToolType.Flash:
-			return GRToolProgressionManager.ToolParts.Flash;
-		case GRTool.GRToolType.Lantern:
-			return GRToolProgressionManager.ToolParts.Lantern;
-		case GRTool.GRToolType.Revive:
-			return GRToolProgressionManager.ToolParts.Revive;
-		case GRTool.GRToolType.ShieldGun:
-			return GRToolProgressionManager.ToolParts.ShieldGun;
-		case GRTool.GRToolType.DirectionalShield:
-			return GRToolProgressionManager.ToolParts.DirectionalShield;
-		case GRTool.GRToolType.DockWrist:
-			return GRToolProgressionManager.ToolParts.DockWrist;
-		case GRTool.GRToolType.HockeyStick:
-			return GRToolProgressionManager.ToolParts.HockeyStick;
-		}
-		return GRToolProgressionManager.ToolParts.None;
+			GRTool.GRToolType.Club => GRToolProgressionManager.ToolParts.Baton, 
+			GRTool.GRToolType.Collector => GRToolProgressionManager.ToolParts.Collector, 
+			GRTool.GRToolType.Flash => GRToolProgressionManager.ToolParts.Flash, 
+			GRTool.GRToolType.Lantern => GRToolProgressionManager.ToolParts.Lantern, 
+			GRTool.GRToolType.Revive => GRToolProgressionManager.ToolParts.Revive, 
+			GRTool.GRToolType.ShieldGun => GRToolProgressionManager.ToolParts.ShieldGun, 
+			GRTool.GRToolType.DirectionalShield => GRToolProgressionManager.ToolParts.DirectionalShield, 
+			GRTool.GRToolType.HockeyStick => GRToolProgressionManager.ToolParts.HockeyStick, 
+			GRTool.GRToolType.DockWrist => GRToolProgressionManager.ToolParts.DockWrist, 
+			_ => GRToolProgressionManager.ToolParts.None, 
+		};
 	}
 }

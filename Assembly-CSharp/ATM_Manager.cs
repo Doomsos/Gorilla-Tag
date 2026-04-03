@@ -1,485 +1,23 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using GorillaNetworking;
 using GorillaNetworking.Store;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class ATM_Manager : MonoBehaviour, IBuildValidation
 {
-	public ATM_Manager.ATMStages CurrentATMStage
+	public enum ATMStages
 	{
-		get
-		{
-			return this.currentATMStage;
-		}
-	}
-
-	public void Awake()
-	{
-		if (ATM_Manager.instance)
-		{
-			Object.Destroy(this);
-		}
-		else
-		{
-			ATM_Manager.instance = this;
-		}
-		string defaultResult = "CREATOR CODE: ";
-		string text;
-		if (!LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE", out text, defaultResult))
-		{
-			Debug.LogError("[LOCALIZATION::ATM_MANAGER] Failed to get key for [ATM_CREATOR_CODE]");
-		}
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeTitle.text = text;
-		}
-		this.SwitchToStage(ATM_Manager.ATMStages.Unavailable);
-		this.smallDisplays = new List<CreatorCodeSmallDisplay>();
-		this.ATM_TERMINAL_ID = string.Empty;
-		for (int i = 0; i < this.nexusGroups.Length; i++)
-		{
-			string atm_TERMINAL_ID = this.ATM_TERMINAL_ID;
-			NexusGroupId nexusGroupId = this.nexusGroups[i];
-			this.ATM_TERMINAL_ID = atm_TERMINAL_ID + ((nexusGroupId != null) ? nexusGroupId.ToString() : null);
-		}
-		this.HookupToCreatorCodes();
-	}
-
-	public void Start()
-	{
-		Debug.Log("ATM COUNT: " + this.atmUIs.Count.ToString());
-		Debug.Log("SMALL DISPLAY COUNT: " + this.smallDisplays.Count.ToString());
-		GameEvents.OnGorrillaATMKeyButtonPressedEvent.AddListener(new UnityAction<GorillaATMKeyBindings>(this.PressButton));
-	}
-
-	public void HookupToCreatorCodes()
-	{
-		CreatorCodes.InitializedEvent += this.CreatorCodesInitialized;
-		CreatorCodes.OnCreatorCodeChangedEvent += this.OnCreatorCodeChanged;
-		CreatorCodes.OnCreatorCodeFailureEvent += this.OnOnCreatorCodeFailureEvent;
-		if (CreatorCodes.Intialized)
-		{
-			this.CreatorCodesInitialized();
-		}
-	}
-
-	public void CreatorCodesInitialized()
-	{
-		foreach (CreatorCodeSmallDisplay creatorCodeSmallDisplay in this.smallDisplays)
-		{
-			creatorCodeSmallDisplay.SetCode(CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID));
-		}
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID);
-		}
-	}
-
-	public void OnCreatorCodeChanged(string id)
-	{
-		if (id != this.ATM_TERMINAL_ID)
-		{
-			return;
-		}
-		foreach (CreatorCodeSmallDisplay creatorCodeSmallDisplay in this.smallDisplays)
-		{
-			creatorCodeSmallDisplay.SetCode(CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID));
-		}
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID);
-		}
-		string text = "CREATOR CODE:";
-		CreatorCodes.CreatorCodeStatus currentCreatorCodeStatus = CreatorCodes.getCurrentCreatorCodeStatus(this.ATM_TERMINAL_ID);
-		if (currentCreatorCodeStatus != CreatorCodes.CreatorCodeStatus.Validating)
-		{
-			if (currentCreatorCodeStatus == CreatorCodes.CreatorCodeStatus.Valid)
-			{
-				text += " VALID";
-			}
-		}
-		else
-		{
-			text += " VALIDATING";
-		}
-		foreach (ATM_UI atm_UI2 in this.atmUIs)
-		{
-			atm_UI2.creatorCodeTitle.text = text;
-		}
-	}
-
-	private void OnOnCreatorCodeFailureEvent(string id)
-	{
-		if (id != this.ATM_TERMINAL_ID)
-		{
-			return;
-		}
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeTitle.text = "CREATOR CODE: INVALID";
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE_INVALID", out text, atm_UI.atmText.text);
-			atm_UI.creatorCodeTitle.text = text;
-		}
-		Debug.Log("ATM CODE FAILURE");
-	}
-
-	public void OnCreatorCodeInvalid(string id)
-	{
-		if (id != this.ATM_TERMINAL_ID)
-		{
-			return;
-		}
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeTitle.text = "CREATOR CODE: INVALID";
-		}
-	}
-
-	private void OnEnable()
-	{
-		LocalisationManager.RegisterOnLanguageChanged(new Action(this.OnLanguageChanged));
-		this.SwitchToStage(this.currentATMStage);
-	}
-
-	private void OnDisable()
-	{
-		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
-	}
-
-	private void OnLanguageChanged()
-	{
-		this.SwitchToStage(this.currentATMStage);
-	}
-
-	public void PressButton(GorillaATMKeyBindings buttonPressed)
-	{
-		if (this.currentATMStage == ATM_Manager.ATMStages.Confirm && CreatorCodes.getCurrentCreatorCodeStatus(this.ATM_TERMINAL_ID) != CreatorCodes.CreatorCodeStatus.Validating)
-		{
-			string defaultResult = "CREATOR CODE: ";
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE", out text, defaultResult);
-			foreach (ATM_UI atm_UI in this.atmUIs)
-			{
-				atm_UI.creatorCodeTitle.text = text;
-			}
-			if (buttonPressed == GorillaATMKeyBindings.delete)
-			{
-				CreatorCodes.DeleteCharacter(this.ATM_TERMINAL_ID);
-				return;
-			}
-			string atm_TERMINAL_ID = this.ATM_TERMINAL_ID;
-			string input;
-			if (buttonPressed >= GorillaATMKeyBindings.delete)
-			{
-				input = buttonPressed.ToString();
-			}
-			else
-			{
-				int num = (int)buttonPressed;
-				input = num.ToString();
-			}
-			CreatorCodes.AppendKey(atm_TERMINAL_ID, input);
-		}
-	}
-
-	public void ProcessATMState(string currencyButton)
-	{
-		ATM_Manager.<ProcessATMState>d__55 <ProcessATMState>d__;
-		<ProcessATMState>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<ProcessATMState>d__.<>4__this = this;
-		<ProcessATMState>d__.currencyButton = currencyButton;
-		<ProcessATMState>d__.<>1__state = -1;
-		<ProcessATMState>d__.<>t__builder.Start<ATM_Manager.<ProcessATMState>d__55>(ref <ProcessATMState>d__);
-	}
-
-	public void AddATM(ATM_UI newATM)
-	{
-		this.atmUIs.Add(newATM);
-		newATM.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID);
-		this.SwitchToStage(this.currentATMStage);
-	}
-
-	public void RemoveATM(ATM_UI atmToRemove)
-	{
-		this.atmUIs.Remove(atmToRemove);
-	}
-
-	public void CreatorCodeValidating()
-	{
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeTitle.text = "CREATOR CODE: VALIDATING";
-		}
-	}
-
-	public void CreatorCodeValid()
-	{
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.creatorCodeTitle.text = "CREATOR CODE: VALIDATING";
-		}
-		if (this.currentATMStage == ATM_Manager.ATMStages.Confirm)
-		{
-			this.SwitchToStage(ATM_Manager.ATMStages.Purchasing);
-		}
-	}
-
-	public void SwitchToStage(ATM_Manager.ATMStages newStage)
-	{
-		this.currentATMStage = newStage;
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			if (atm_UI.atmText)
-			{
-				string text = "";
-				string text2 = "";
-				string text3 = "";
-				string text4 = "";
-				string text5 = "";
-				switch (newStage)
-				{
-				case ATM_Manager.ATMStages.Unavailable:
-					atm_UI.atmText.text = "ATM NOT AVAILABLE! PLEASE TRY AGAIN LATER!";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_NOT_AVAILABLE", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.Begin:
-					atm_UI.atmText.text = "WELCOME! PRESS ANY BUTTON TO BEGIN.";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_STARTUP", out text, atm_UI.atmText.text);
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_BEGIN", out text5, "BEGIN");
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = text5;
-					atm_UI.ATM_RightColumnArrowText[3].enabled = true;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.Menu:
-					if (PlayFabAuthenticator.instance.GetSafety())
-					{
-						atm_UI.atmText.text = "CHECK YOUR BALANCE.";
-						LocalisationManager.TryGetKeyForCurrentLocale("ATM_CHECK_YOUR_BALANCE", out text, atm_UI.atmText.text);
-						LocalisationManager.TryGetKeyForCurrentLocale("ATM_BALANCE", out text2, atm_UI.atmText.text);
-						atm_UI.atmText.text = text;
-						atm_UI.ATM_RightColumnButtonText[0].text = text2;
-						atm_UI.ATM_RightColumnArrowText[0].enabled = true;
-						atm_UI.ATM_RightColumnButtonText[1].text = "";
-						atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-						atm_UI.ATM_RightColumnButtonText[2].text = "";
-						atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-						atm_UI.ATM_RightColumnButtonText[3].text = "";
-						atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-						atm_UI.creatorCodeObject.SetActive(false);
-					}
-					else
-					{
-						atm_UI.atmText.text = "CHECK YOUR BALANCE OR PURCHASE MORE SHINY ROCKS.";
-						LocalisationManager.TryGetKeyForCurrentLocale("ATM_MAIN_SCREEN", out text, atm_UI.atmText.text);
-						LocalisationManager.TryGetKeyForCurrentLocale("ATM_BALANCE", out text2, atm_UI.atmText.text);
-						LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE", out text3, atm_UI.atmText.text);
-						atm_UI.atmText.text = text;
-						atm_UI.ATM_RightColumnButtonText[0].text = text2;
-						atm_UI.ATM_RightColumnArrowText[0].enabled = true;
-						atm_UI.ATM_RightColumnButtonText[1].text = text3;
-						atm_UI.ATM_RightColumnArrowText[1].enabled = true;
-						atm_UI.ATM_RightColumnButtonText[2].text = "";
-						atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-						atm_UI.ATM_RightColumnButtonText[3].text = "";
-						atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-						atm_UI.creatorCodeObject.SetActive(false);
-					}
-					break;
-				case ATM_Manager.ATMStages.Balance:
-					atm_UI.atmText.text = "CURRENT BALANCE:\n\n" + CosmeticsController.instance.CurrencyBalance.ToString();
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_CURRENT_BALANCE", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text + "\n\n" + CosmeticsController.instance.CurrencyBalance.ToString();
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.Choose:
-				{
-					string defaultResult = "{numShinyRocksToBuy} - {currencySymbol}{shinyRocksCost}";
-					string defaultResult2 = "{numShinyRocksToBuy} - {currencySymbol}{shinyRocksCost}\r\n({discount}% BONUS!";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_FIRST", out text2, defaultResult);
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out text3, defaultResult2);
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out text4, defaultResult2);
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out text5, defaultResult2);
-					text2 = text2.Replace("{numShinyRocksToBuy}", "1000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "4.99");
-					text3 = text3.Replace("{numShinyRocksToBuy}", "2200").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "9.99").Replace("{discount}", "10");
-					text4 = text4.Replace("{numShinyRocksToBuy}", "5000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "19.99").Replace("{discount}", "25");
-					text5 = text5.Replace("{numShinyRocksToBuy}", "11000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "39.99").Replace("{discount}", "37");
-					atm_UI.atmText.text = "CHOOSE AN AMOUNT OF SHINY ROCKS TO PURCHASE.";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_CHOOSE_PURCHASE", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = text2;
-					atm_UI.ATM_RightColumnArrowText[0].enabled = true;
-					atm_UI.ATM_RightColumnButtonText[1].text = text3;
-					atm_UI.ATM_RightColumnArrowText[1].enabled = true;
-					atm_UI.ATM_RightColumnButtonText[2].text = text4;
-					atm_UI.ATM_RightColumnArrowText[2].enabled = true;
-					atm_UI.ATM_RightColumnButtonText[3].text = text5;
-					atm_UI.ATM_RightColumnArrowText[3].enabled = true;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				}
-				case ATM_Manager.ATMStages.Confirm:
-					atm_UI.atmText.text = string.Concat(new string[]
-					{
-						"YOU HAVE CHOSEN TO PURCHASE ",
-						this.numShinyRocksToBuy.ToString(),
-						" SHINY ROCKS FOR $",
-						this.shinyRocksCost.ToString(),
-						". CONFIRM TO LAUNCH A STEAM WINDOW TO COMPLETE YOUR PURCHASE."
-					});
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_CONFIRMATION_STEAM", out text, atm_UI.atmText.text);
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_CONFIRM", out text2, "CONFIRM");
-					text = text.Replace("{numShinyRocksToBuy}", this.numShinyRocksToBuy.ToString());
-					text = text.Replace("{currencySymbol}", "$");
-					text = text.Replace("{shinyRocksCost}", this.shinyRocksCost.ToString());
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = text2;
-					atm_UI.ATM_RightColumnArrowText[0].enabled = true;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(true);
-					break;
-				case ATM_Manager.ATMStages.Purchasing:
-					atm_UI.atmText.text = "PURCHASING IN STEAM...";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASING", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.Success:
-					atm_UI.atmText.text = "SUCCESS! NEW SHINY ROCKS BALANCE: " + (CosmeticsController.instance.CurrencyBalance + this.numShinyRocksToBuy).ToString();
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_SUCCESS_NEW_BALANCE", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text + (CosmeticsController.instance.CurrencyBalance + this.numShinyRocksToBuy).ToString();
-					if (CreatorCodes.getCurrentCreatorCodeStatus(this.ATM_TERMINAL_ID) == CreatorCodes.CreatorCodeStatus.Valid)
-					{
-						string name = CreatorCodes.supportedMember.name;
-						if (!string.IsNullOrEmpty(name))
-						{
-							TMP_Text atmText = atm_UI.atmText;
-							atmText.text = atmText.text + "\n\nTHIS PURCHASE SUPPORTED\n" + name + "!";
-							foreach (CreatorCodeSmallDisplay creatorCodeSmallDisplay in this.smallDisplays)
-							{
-								creatorCodeSmallDisplay.SuccessfulPurchase(name);
-							}
-						}
-					}
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.Failure:
-					atm_UI.atmText.text = "PURCHASE CANCELLED. NO FUNDS WERE SPENT.";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_CANCELLED", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				case ATM_Manager.ATMStages.SafeAccount:
-					atm_UI.atmText.text = "Out Of Order.";
-					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASING_DISABLED_OUT_OF_ORDER", out text, atm_UI.atmText.text);
-					atm_UI.atmText.text = text;
-					atm_UI.ATM_RightColumnButtonText[0].text = "";
-					atm_UI.ATM_RightColumnArrowText[0].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[1].text = "";
-					atm_UI.ATM_RightColumnArrowText[1].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[2].text = "";
-					atm_UI.ATM_RightColumnArrowText[2].enabled = false;
-					atm_UI.ATM_RightColumnButtonText[3].text = "";
-					atm_UI.ATM_RightColumnArrowText[3].enabled = false;
-					atm_UI.creatorCodeObject.SetActive(false);
-					break;
-				}
-			}
-		}
-	}
-
-	public void SetATMText(string newText)
-	{
-		foreach (ATM_UI atm_UI in this.atmUIs)
-		{
-			atm_UI.atmText.text = newText;
-		}
-	}
-
-	public void PressCurrencyPurchaseButton(string currencyPurchaseSize)
-	{
-		this.ProcessATMState(currencyPurchaseSize);
-	}
-
-	public void LeaveSystemMenu()
-	{
-	}
-
-	bool IBuildValidation.BuildValidationCheck()
-	{
-		if (this.nexusGroups.Length == 0)
-		{
-			Debug.LogError("You have to set at least one nexusGroup in " + base.name + " or things will not work!");
-			return false;
-		}
-		return true;
-	}
-
-	internal void SetTemporaryCreatorCode(string code)
-	{
-		if (code == null)
-		{
-			CreatorCodes.ResetCreatorCode(this.ATM_TERMINAL_ID);
-			CreatorCodes.AppendKey(this.ATM_TERMINAL_ID, this._tempCreatorCodeOveride);
-			this._tempCreatorCodeOveride = null;
-			return;
-		}
-		if (this._tempCreatorCodeOveride == null)
-		{
-			this._tempCreatorCodeOveride = CreatorCodes.getCurrentCreatorCode(this.ATM_TERMINAL_ID);
-		}
-		CreatorCodes.ResetCreatorCode(this.ATM_TERMINAL_ID);
-		CreatorCodes.AppendKey(this.ATM_TERMINAL_ID, code);
+		Unavailable,
+		Begin,
+		Menu,
+		Balance,
+		Choose,
+		Confirm,
+		Purchasing,
+		Success,
+		Failure,
+		SafeAccount
 	}
 
 	private const string ATM_STARTUP_KEY = "ATM_STARTUP";
@@ -552,7 +90,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 	[HideInInspector]
 	public List<CreatorCodeSmallDisplay> smallDisplays;
 
-	private ATM_Manager.ATMStages currentATMStage;
+	private ATMStages currentATMStage;
 
 	public int numShinyRocksToBuy;
 
@@ -567,17 +105,569 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 
 	private string ATM_TERMINAL_ID = "atm_terminal_id";
 
-	public enum ATMStages
+	public ATMStages CurrentATMStage => currentATMStage;
+
+	public void Awake()
 	{
-		Unavailable,
-		Begin,
-		Menu,
-		Balance,
-		Choose,
-		Confirm,
-		Purchasing,
-		Success,
-		Failure,
-		SafeAccount
+		if ((bool)instance)
+		{
+			Object.Destroy(this);
+		}
+		else
+		{
+			instance = this;
+		}
+		string defaultResult = "CREATOR CODE: ";
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE", out var result, defaultResult))
+		{
+			Debug.LogError("[LOCALIZATION::ATM_MANAGER] Failed to get key for [ATM_CREATOR_CODE]");
+		}
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = result;
+		}
+		SwitchToStage(ATMStages.Unavailable);
+		smallDisplays = new List<CreatorCodeSmallDisplay>();
+		ATM_TERMINAL_ID = string.Empty;
+		for (int i = 0; i < nexusGroups.Length; i++)
+		{
+			ATM_TERMINAL_ID += nexusGroups[i];
+		}
+		HookupToCreatorCodes();
+	}
+
+	public void Start()
+	{
+		Debug.Log("ATM COUNT: " + atmUIs.Count);
+		Debug.Log("SMALL DISPLAY COUNT: " + smallDisplays.Count);
+		GameEvents.OnGorrillaATMKeyButtonPressedEvent.AddListener(PressButton);
+	}
+
+	public void HookupToCreatorCodes()
+	{
+		CreatorCodes.InitializedEvent += CreatorCodesInitialized;
+		CreatorCodes.OnCreatorCodeChangedEvent += OnCreatorCodeChanged;
+		CreatorCodes.OnCreatorCodeFailureEvent += OnOnCreatorCodeFailureEvent;
+		if (CreatorCodes.Intialized)
+		{
+			CreatorCodesInitialized();
+		}
+	}
+
+	public void CreatorCodesInitialized()
+	{
+		foreach (CreatorCodeSmallDisplay smallDisplay in smallDisplays)
+		{
+			smallDisplay.SetCode(CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID));
+		}
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID);
+		}
+	}
+
+	public void OnCreatorCodeChanged(string id)
+	{
+		if (id != ATM_TERMINAL_ID)
+		{
+			return;
+		}
+		foreach (CreatorCodeSmallDisplay smallDisplay in smallDisplays)
+		{
+			smallDisplay.SetCode(CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID));
+		}
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID);
+		}
+		string text = "CREATOR CODE:";
+		switch (CreatorCodes.getCurrentCreatorCodeStatus(ATM_TERMINAL_ID))
+		{
+		case CreatorCodes.CreatorCodeStatus.Valid:
+			text += " VALID";
+			break;
+		case CreatorCodes.CreatorCodeStatus.Validating:
+			text += " VALIDATING";
+			break;
+		}
+		foreach (ATM_UI atmUI2 in atmUIs)
+		{
+			atmUI2.creatorCodeTitle.text = text;
+		}
+	}
+
+	private void OnOnCreatorCodeFailureEvent(string id)
+	{
+		if (id != ATM_TERMINAL_ID)
+		{
+			return;
+		}
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = "CREATOR CODE: INVALID";
+			LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE_INVALID", out var result, atmUI.atmText.text);
+			atmUI.creatorCodeTitle.text = result;
+		}
+		Debug.Log("ATM CODE FAILURE");
+	}
+
+	public void OnCreatorCodeInvalid(string id)
+	{
+		if (id != ATM_TERMINAL_ID)
+		{
+			return;
+		}
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = "CREATOR CODE: INVALID";
+		}
+	}
+
+	private void OnEnable()
+	{
+		LocalisationManager.RegisterOnLanguageChanged(OnLanguageChanged);
+		SwitchToStage(currentATMStage);
+	}
+
+	private void OnDisable()
+	{
+		LocalisationManager.UnregisterOnLanguageChanged(OnLanguageChanged);
+	}
+
+	private void OnLanguageChanged()
+	{
+		SwitchToStage(currentATMStage);
+	}
+
+	public void PressButton(GorillaATMKeyBindings buttonPressed)
+	{
+		if (currentATMStage != ATMStages.Confirm || CreatorCodes.getCurrentCreatorCodeStatus(ATM_TERMINAL_ID) == CreatorCodes.CreatorCodeStatus.Validating)
+		{
+			return;
+		}
+		string defaultResult = "CREATOR CODE: ";
+		LocalisationManager.TryGetKeyForCurrentLocale("ATM_CREATOR_CODE", out var result, defaultResult);
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = result;
+		}
+		if (buttonPressed == GorillaATMKeyBindings.delete)
+		{
+			CreatorCodes.DeleteCharacter(ATM_TERMINAL_ID);
+			return;
+		}
+		string aTM_TERMINAL_ID = ATM_TERMINAL_ID;
+		string input;
+		if (buttonPressed >= GorillaATMKeyBindings.delete)
+		{
+			input = buttonPressed.ToString();
+		}
+		else
+		{
+			int num = (int)buttonPressed;
+			input = num.ToString();
+		}
+		CreatorCodes.AppendKey(aTM_TERMINAL_ID, input);
+	}
+
+	public async void ProcessATMState(string currencyButton)
+	{
+		switch (currentATMStage)
+		{
+		case ATMStages.Begin:
+			SwitchToStage(ATMStages.Menu);
+			break;
+		case ATMStages.Menu:
+			if (PlayFabAuthenticator.instance.GetSafety())
+			{
+				string text = currencyButton;
+				if (!(text == "one"))
+				{
+					if (text == "four")
+					{
+						SwitchToStage(ATMStages.Begin);
+					}
+				}
+				else
+				{
+					SwitchToStage(ATMStages.Balance);
+				}
+				break;
+			}
+			switch (currencyButton)
+			{
+			case "one":
+				SwitchToStage(ATMStages.Balance);
+				break;
+			case "two":
+				SwitchToStage(ATMStages.Choose);
+				break;
+			case "back":
+				SwitchToStage(ATMStages.Begin);
+				break;
+			}
+			break;
+		case ATMStages.Balance:
+			if (currencyButton == "back")
+			{
+				SwitchToStage(ATMStages.Menu);
+			}
+			break;
+		case ATMStages.Choose:
+			switch (currencyButton)
+			{
+			case "one":
+				numShinyRocksToBuy = 1000;
+				shinyRocksCost = 4.99f;
+				CosmeticsController.instance.itemToPurchase = "1000SHINYROCKS";
+				CosmeticsController.instance.buyingBundle = false;
+				SwitchToStage(ATMStages.Confirm);
+				break;
+			case "two":
+				numShinyRocksToBuy = 2200;
+				shinyRocksCost = 9.99f;
+				CosmeticsController.instance.itemToPurchase = "2200SHINYROCKS";
+				CosmeticsController.instance.buyingBundle = false;
+				SwitchToStage(ATMStages.Confirm);
+				break;
+			case "three":
+				numShinyRocksToBuy = 5000;
+				shinyRocksCost = 19.99f;
+				CosmeticsController.instance.itemToPurchase = "5000SHINYROCKS";
+				CosmeticsController.instance.buyingBundle = false;
+				SwitchToStage(ATMStages.Confirm);
+				break;
+			case "four":
+				numShinyRocksToBuy = 11000;
+				shinyRocksCost = 39.99f;
+				CosmeticsController.instance.itemToPurchase = "11000SHINYROCKS";
+				CosmeticsController.instance.buyingBundle = false;
+				SwitchToStage(ATMStages.Confirm);
+				break;
+			case "back":
+				SwitchToStage(ATMStages.Menu);
+				break;
+			}
+			break;
+		case ATMStages.Confirm:
+		{
+			string text = currencyButton;
+			if (!(text == "one"))
+			{
+				if (text == "back")
+				{
+					SwitchToStage(ATMStages.Choose);
+				}
+				break;
+			}
+			if (CreatorCodes.getCurrentCreatorCodeStatus(ATM_TERMINAL_ID) == CreatorCodes.CreatorCodeStatus.Empty)
+			{
+				CosmeticsController.instance.SteamPurchase();
+				SwitchToStage(ATMStages.Purchasing);
+				break;
+			}
+			CreatorCodeValidating();
+			NexusManager.MemberCode memberCode = await CreatorCodes.CheckValidationCoroutineJIT(ATM_TERMINAL_ID, CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID), nexusGroups);
+			if (memberCode != null)
+			{
+				SwitchToStage(ATMStages.Purchasing);
+				CosmeticsController.instance.SetValidatedCreatorCode(memberCode.memberCode, memberCode.groupId.Code, ATM_TERMINAL_ID);
+				CosmeticsController.instance.SteamPurchase();
+			}
+			else
+			{
+				OnCreatorCodeInvalid(ATM_TERMINAL_ID);
+			}
+			break;
+		}
+		default:
+			SwitchToStage(ATMStages.Menu);
+			break;
+		case ATMStages.Unavailable:
+		case ATMStages.Purchasing:
+			break;
+		}
+	}
+
+	public void AddATM(ATM_UI newATM)
+	{
+		atmUIs.Add(newATM);
+		newATM.creatorCodeField.text = CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID);
+		SwitchToStage(currentATMStage);
+	}
+
+	public void RemoveATM(ATM_UI atmToRemove)
+	{
+		atmUIs.Remove(atmToRemove);
+	}
+
+	public void CreatorCodeValidating()
+	{
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = "CREATOR CODE: VALIDATING";
+		}
+	}
+
+	public void CreatorCodeValid()
+	{
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.creatorCodeTitle.text = "CREATOR CODE: VALIDATING";
+		}
+		if (currentATMStage == ATMStages.Confirm)
+		{
+			SwitchToStage(ATMStages.Purchasing);
+		}
+	}
+
+	public void SwitchToStage(ATMStages newStage)
+	{
+		currentATMStage = newStage;
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			if (!atmUI.atmText)
+			{
+				continue;
+			}
+			string result = "";
+			string result2 = "";
+			string result3 = "";
+			string result4 = "";
+			string result5 = "";
+			switch (newStage)
+			{
+			case ATMStages.Unavailable:
+				atmUI.atmText.text = "ATM NOT AVAILABLE! PLEASE TRY AGAIN LATER!";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_NOT_AVAILABLE", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.Begin:
+				atmUI.atmText.text = "WELCOME! PRESS ANY BUTTON TO BEGIN.";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_STARTUP", out result, atmUI.atmText.text);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_BEGIN", out result5, "BEGIN");
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = result5;
+				atmUI.ATM_RightColumnArrowText[3].enabled = true;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.Menu:
+				if (PlayFabAuthenticator.instance.GetSafety())
+				{
+					atmUI.atmText.text = "CHECK YOUR BALANCE.";
+					LocalisationManager.TryGetKeyForCurrentLocale("ATM_CHECK_YOUR_BALANCE", out result, atmUI.atmText.text);
+					LocalisationManager.TryGetKeyForCurrentLocale("ATM_BALANCE", out result2, atmUI.atmText.text);
+					atmUI.atmText.text = result;
+					atmUI.ATM_RightColumnButtonText[0].text = result2;
+					atmUI.ATM_RightColumnArrowText[0].enabled = true;
+					atmUI.ATM_RightColumnButtonText[1].text = "";
+					atmUI.ATM_RightColumnArrowText[1].enabled = false;
+					atmUI.ATM_RightColumnButtonText[2].text = "";
+					atmUI.ATM_RightColumnArrowText[2].enabled = false;
+					atmUI.ATM_RightColumnButtonText[3].text = "";
+					atmUI.ATM_RightColumnArrowText[3].enabled = false;
+					atmUI.creatorCodeObject.SetActive(value: false);
+				}
+				else
+				{
+					atmUI.atmText.text = "CHECK YOUR BALANCE OR PURCHASE MORE SHINY ROCKS.";
+					LocalisationManager.TryGetKeyForCurrentLocale("ATM_MAIN_SCREEN", out result, atmUI.atmText.text);
+					LocalisationManager.TryGetKeyForCurrentLocale("ATM_BALANCE", out result2, atmUI.atmText.text);
+					LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE", out result3, atmUI.atmText.text);
+					atmUI.atmText.text = result;
+					atmUI.ATM_RightColumnButtonText[0].text = result2;
+					atmUI.ATM_RightColumnArrowText[0].enabled = true;
+					atmUI.ATM_RightColumnButtonText[1].text = result3;
+					atmUI.ATM_RightColumnArrowText[1].enabled = true;
+					atmUI.ATM_RightColumnButtonText[2].text = "";
+					atmUI.ATM_RightColumnArrowText[2].enabled = false;
+					atmUI.ATM_RightColumnButtonText[3].text = "";
+					atmUI.ATM_RightColumnArrowText[3].enabled = false;
+					atmUI.creatorCodeObject.SetActive(value: false);
+				}
+				break;
+			case ATMStages.Balance:
+				atmUI.atmText.text = "CURRENT BALANCE:\n\n" + CosmeticsController.instance.CurrencyBalance;
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_CURRENT_BALANCE", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result + "\n\n" + CosmeticsController.instance.CurrencyBalance;
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.Choose:
+			{
+				string defaultResult = "{numShinyRocksToBuy} - {currencySymbol}{shinyRocksCost}";
+				string defaultResult2 = "{numShinyRocksToBuy} - {currencySymbol}{shinyRocksCost}\r\n({discount}% BONUS!";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_FIRST", out result2, defaultResult);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out result3, defaultResult2);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out result4, defaultResult2);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_OPTION_SECOND", out result5, defaultResult2);
+				result2 = result2.Replace("{numShinyRocksToBuy}", "1000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "4.99");
+				result3 = result3.Replace("{numShinyRocksToBuy}", "2200").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "9.99")
+					.Replace("{discount}", "10");
+				result4 = result4.Replace("{numShinyRocksToBuy}", "5000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "19.99")
+					.Replace("{discount}", "25");
+				result5 = result5.Replace("{numShinyRocksToBuy}", "11000").Replace("{currencySymbol}", "$").Replace("{shinyRocksCost}", "39.99")
+					.Replace("{discount}", "37");
+				atmUI.atmText.text = "CHOOSE AN AMOUNT OF SHINY ROCKS TO PURCHASE.";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_CHOOSE_PURCHASE", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = result2;
+				atmUI.ATM_RightColumnArrowText[0].enabled = true;
+				atmUI.ATM_RightColumnButtonText[1].text = result3;
+				atmUI.ATM_RightColumnArrowText[1].enabled = true;
+				atmUI.ATM_RightColumnButtonText[2].text = result4;
+				atmUI.ATM_RightColumnArrowText[2].enabled = true;
+				atmUI.ATM_RightColumnButtonText[3].text = result5;
+				atmUI.ATM_RightColumnArrowText[3].enabled = true;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			}
+			case ATMStages.Confirm:
+				atmUI.atmText.text = "YOU HAVE CHOSEN TO PURCHASE " + numShinyRocksToBuy + " SHINY ROCKS FOR $" + shinyRocksCost + ". CONFIRM TO LAUNCH A STEAM WINDOW TO COMPLETE YOUR PURCHASE.";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_CONFIRMATION_STEAM", out result, atmUI.atmText.text);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_CONFIRM", out result2, "CONFIRM");
+				result = result.Replace("{numShinyRocksToBuy}", numShinyRocksToBuy.ToString());
+				result = result.Replace("{currencySymbol}", "$");
+				result = result.Replace("{shinyRocksCost}", shinyRocksCost.ToString());
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = result2;
+				atmUI.ATM_RightColumnArrowText[0].enabled = true;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: true);
+				break;
+			case ATMStages.Purchasing:
+				atmUI.atmText.text = "PURCHASING IN STEAM...";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASING", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.Success:
+				atmUI.atmText.text = "SUCCESS! NEW SHINY ROCKS BALANCE: " + (CosmeticsController.instance.CurrencyBalance + numShinyRocksToBuy);
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_SUCCESS_NEW_BALANCE", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result + (CosmeticsController.instance.CurrencyBalance + numShinyRocksToBuy);
+				if (CreatorCodes.getCurrentCreatorCodeStatus(ATM_TERMINAL_ID) == CreatorCodes.CreatorCodeStatus.Valid)
+				{
+					string text = CreatorCodes.supportedMember.name;
+					if (!string.IsNullOrEmpty(text))
+					{
+						TMP_Text atmText = atmUI.atmText;
+						atmText.text = atmText.text + "\n\nTHIS PURCHASE SUPPORTED\n" + text + "!";
+						foreach (CreatorCodeSmallDisplay smallDisplay in smallDisplays)
+						{
+							smallDisplay.SuccessfulPurchase(text);
+						}
+					}
+				}
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.Failure:
+				atmUI.atmText.text = "PURCHASE CANCELLED. NO FUNDS WERE SPENT.";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASE_CANCELLED", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			case ATMStages.SafeAccount:
+				atmUI.atmText.text = "Out Of Order.";
+				LocalisationManager.TryGetKeyForCurrentLocale("ATM_PURCHASING_DISABLED_OUT_OF_ORDER", out result, atmUI.atmText.text);
+				atmUI.atmText.text = result;
+				atmUI.ATM_RightColumnButtonText[0].text = "";
+				atmUI.ATM_RightColumnArrowText[0].enabled = false;
+				atmUI.ATM_RightColumnButtonText[1].text = "";
+				atmUI.ATM_RightColumnArrowText[1].enabled = false;
+				atmUI.ATM_RightColumnButtonText[2].text = "";
+				atmUI.ATM_RightColumnArrowText[2].enabled = false;
+				atmUI.ATM_RightColumnButtonText[3].text = "";
+				atmUI.ATM_RightColumnArrowText[3].enabled = false;
+				atmUI.creatorCodeObject.SetActive(value: false);
+				break;
+			}
+		}
+	}
+
+	public void SetATMText(string newText)
+	{
+		foreach (ATM_UI atmUI in atmUIs)
+		{
+			atmUI.atmText.text = newText;
+		}
+	}
+
+	public void PressCurrencyPurchaseButton(string currencyPurchaseSize)
+	{
+		ProcessATMState(currencyPurchaseSize);
+	}
+
+	public void LeaveSystemMenu()
+	{
+	}
+
+	bool IBuildValidation.BuildValidationCheck()
+	{
+		if (nexusGroups.Length == 0)
+		{
+			Debug.LogError("You have to set at least one nexusGroup in " + base.name + " or things will not work!");
+			return false;
+		}
+		return true;
+	}
+
+	internal void SetTemporaryCreatorCode(string code)
+	{
+		if (code == null)
+		{
+			CreatorCodes.ResetCreatorCode(ATM_TERMINAL_ID);
+			CreatorCodes.AppendKey(ATM_TERMINAL_ID, _tempCreatorCodeOveride);
+			_tempCreatorCodeOveride = null;
+			return;
+		}
+		if (_tempCreatorCodeOveride == null)
+		{
+			_tempCreatorCodeOveride = CreatorCodes.getCurrentCreatorCode(ATM_TERMINAL_ID);
+		}
+		CreatorCodes.ResetCreatorCode(ATM_TERMINAL_ID);
+		CreatorCodes.AppendKey(ATM_TERMINAL_ID, code);
 	}
 }

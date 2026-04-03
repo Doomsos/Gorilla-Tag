@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -8,274 +7,6 @@ using UnityEngine;
 [Serializable]
 public class RotatingQuest
 {
-	[JsonIgnore]
-	public bool IsMovementQuest
-	{
-		get
-		{
-			return this.questType == QuestType.moveDistance || this.questType == QuestType.swimDistance;
-		}
-	}
-
-	[JsonIgnore]
-	public GTZone RequiredZone { get; private set; } = GTZone.none;
-
-	public void SetRequiredZone()
-	{
-		this.RequiredZone = ((this.requiredZones.Count > 0) ? this.requiredZones[Random.Range(0, this.requiredZones.Count)] : GTZone.none);
-	}
-
-	public void AddEventListener()
-	{
-		if (this.isQuestComplete)
-		{
-			return;
-		}
-		switch (this.questType)
-		{
-		case QuestType.gameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger += this.OnGameEventOccurence;
-			return;
-		case QuestType.gameModeRound:
-			PlayerGameEvents.OnGameModeCompleteRound += this.OnGameEventOccurence;
-			return;
-		case QuestType.grabObject:
-			PlayerGameEvents.OnGrabbedObject += this.OnGameEventOccurence;
-			return;
-		case QuestType.dropObject:
-			PlayerGameEvents.OnDroppedObject += this.OnGameEventOccurence;
-			return;
-		case QuestType.eatObject:
-			PlayerGameEvents.OnEatObject += this.OnGameEventOccurence;
-			return;
-		case QuestType.tapObject:
-			PlayerGameEvents.OnTapObject += this.OnGameEventOccurence;
-			return;
-		case QuestType.launchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile += this.OnGameEventOccurence;
-			return;
-		case QuestType.moveDistance:
-			PlayerGameEvents.OnPlayerMoved += this.OnGameMoveEvent;
-			return;
-		case QuestType.swimDistance:
-			PlayerGameEvents.OnPlayerSwam += this.OnGameMoveEvent;
-			return;
-		case QuestType.triggerHandEffect:
-			PlayerGameEvents.OnTriggerHandEffect += this.OnGameEventOccurence;
-			return;
-		case QuestType.enterLocation:
-			PlayerGameEvents.OnEnterLocation += this.OnGameEventOccurence;
-			return;
-		case QuestType.misc:
-			PlayerGameEvents.OnMiscEvent += this.OnGameEventOccurence;
-			return;
-		case QuestType.critter:
-			PlayerGameEvents.OnCritterEvent += this.OnGameEventOccurence;
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void RemoveEventListener()
-	{
-		switch (this.questType)
-		{
-		case QuestType.gameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger -= this.OnGameEventOccurence;
-			return;
-		case QuestType.gameModeRound:
-			PlayerGameEvents.OnGameModeCompleteRound -= this.OnGameEventOccurence;
-			return;
-		case QuestType.grabObject:
-			PlayerGameEvents.OnGrabbedObject -= this.OnGameEventOccurence;
-			return;
-		case QuestType.dropObject:
-			PlayerGameEvents.OnDroppedObject -= this.OnGameEventOccurence;
-			return;
-		case QuestType.eatObject:
-			PlayerGameEvents.OnEatObject -= this.OnGameEventOccurence;
-			return;
-		case QuestType.tapObject:
-			PlayerGameEvents.OnTapObject -= this.OnGameEventOccurence;
-			return;
-		case QuestType.launchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile -= this.OnGameEventOccurence;
-			return;
-		case QuestType.moveDistance:
-			PlayerGameEvents.OnPlayerMoved -= this.OnGameMoveEvent;
-			return;
-		case QuestType.swimDistance:
-			PlayerGameEvents.OnPlayerSwam -= this.OnGameMoveEvent;
-			return;
-		case QuestType.triggerHandEffect:
-			PlayerGameEvents.OnTriggerHandEffect -= this.OnGameEventOccurence;
-			return;
-		case QuestType.enterLocation:
-			PlayerGameEvents.OnEnterLocation -= this.OnGameEventOccurence;
-			return;
-		case QuestType.misc:
-			PlayerGameEvents.OnMiscEvent -= this.OnGameEventOccurence;
-			return;
-		case QuestType.critter:
-			PlayerGameEvents.OnCritterEvent -= this.OnGameEventOccurence;
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void ApplySavedProgress(int progress)
-	{
-		if (this.questType == QuestType.moveDistance || this.questType == QuestType.swimDistance)
-		{
-			this.moveDistance = (float)progress;
-			this.occurenceCount = Mathf.FloorToInt(this.moveDistance);
-			this.isQuestComplete = (this.occurenceCount >= this.requiredOccurenceCount);
-			return;
-		}
-		this.occurenceCount = progress;
-		this.isQuestComplete = (this.occurenceCount >= this.requiredOccurenceCount);
-	}
-
-	public int GetProgress()
-	{
-		if (this.questType == QuestType.moveDistance || this.questType == QuestType.swimDistance)
-		{
-			return Mathf.FloorToInt(this.moveDistance);
-		}
-		return this.occurenceCount;
-	}
-
-	private void OnGameEventOccurence(string eventName)
-	{
-		this.OnGameEventOccurence(eventName, 1);
-	}
-
-	private void OnGameEventOccurence(string eventName, int count)
-	{
-		if (this.RequiredZone != GTZone.none && !ZoneManagement.IsInZone(this.RequiredZone))
-		{
-			return;
-		}
-		string.IsNullOrEmpty(this.questOccurenceFilter);
-		if (eventName.StartsWith(this.questOccurenceFilter))
-		{
-			this.SetProgress(this.occurenceCount + count);
-		}
-	}
-
-	private void OnGameMoveEvent(float distance, float speed)
-	{
-		if (this.RequiredZone != GTZone.none && !ZoneManagement.IsInZone(this.RequiredZone))
-		{
-			return;
-		}
-		if (!(this.questOccurenceFilter == "maxSpeed"))
-		{
-			this.moveDistance += distance;
-			this.SetProgress(Mathf.FloorToInt(this.moveDistance));
-			return;
-		}
-		if (speed <= this.moveDistance)
-		{
-			return;
-		}
-		this.moveDistance = speed;
-		this.SetProgress(Mathf.FloorToInt(this.moveDistance));
-	}
-
-	private void SetProgress(int progress)
-	{
-		if (this.isQuestComplete)
-		{
-			return;
-		}
-		if (this.occurenceCount == progress)
-		{
-			return;
-		}
-		this.lastChange = Time.frameCount;
-		this.occurenceCount = progress;
-		if (this.questType == QuestType.moveDistance || this.questType == QuestType.swimDistance)
-		{
-			this.moveDistance = (float)progress;
-		}
-		if (this.occurenceCount >= this.requiredOccurenceCount)
-		{
-			this.Complete();
-		}
-		this.questManager.HandleQuestProgressChanged(false);
-	}
-
-	private void Complete()
-	{
-		if (this.isQuestComplete)
-		{
-			return;
-		}
-		this.isQuestComplete = true;
-		this.RemoveEventListener();
-		this.questManager.HandleQuestCompleted(this.questID);
-	}
-
-	public string GetTextDescription()
-	{
-		return this.<GetTextDescription>g__GetActionName|32_0().ToUpper() + this.<GetTextDescription>g__GetLocationText|32_1().ToUpper();
-	}
-
-	public string GetProgressText()
-	{
-		if (!this.isQuestComplete)
-		{
-			return string.Format("{0}/{1}", this.occurenceCount, this.requiredOccurenceCount);
-		}
-		return "[DONE]";
-	}
-
-	[CompilerGenerated]
-	private string <GetTextDescription>g__GetActionName|32_0()
-	{
-		switch (this.questType)
-		{
-		case QuestType.none:
-			return "[UNDEFINED]";
-		case QuestType.gameModeObjective:
-			return this.questName;
-		case QuestType.gameModeRound:
-			return this.questName;
-		case QuestType.grabObject:
-			return this.questName;
-		case QuestType.dropObject:
-			return this.questName;
-		case QuestType.eatObject:
-			return this.questName;
-		case QuestType.launchedProjectile:
-			return this.questName;
-		case QuestType.moveDistance:
-			return this.questName;
-		case QuestType.swimDistance:
-			return this.questName;
-		case QuestType.triggerHandEffect:
-			return this.questName;
-		case QuestType.enterLocation:
-			return this.questName;
-		case QuestType.misc:
-			return this.questName;
-		}
-		return this.questName;
-	}
-
-	[CompilerGenerated]
-	private string <GetTextDescription>g__GetLocationText|32_1()
-	{
-		if (this.RequiredZone == GTZone.none)
-		{
-			return "";
-		}
-		return string.Format(" IN {0}", this.RequiredZone);
-	}
-
 	public bool disable;
 
 	public int questID;
@@ -295,8 +26,8 @@ public class RotatingQuest
 	[JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
 	public List<GTZone> requiredZones;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	public bool isQuestActive;
 
 	[NonSerialized]
@@ -315,4 +46,251 @@ public class RotatingQuest
 
 	[NonSerialized]
 	public GorillaQuestManager questManager;
+
+	[JsonIgnore]
+	public bool IsMovementQuest
+	{
+		get
+		{
+			if (questType != QuestType.moveDistance)
+			{
+				return questType == QuestType.swimDistance;
+			}
+			return true;
+		}
+	}
+
+	[JsonIgnore]
+	public GTZone RequiredZone { get; private set; } = GTZone.none;
+
+	public void SetRequiredZone()
+	{
+		RequiredZone = ((requiredZones.Count > 0) ? requiredZones[UnityEngine.Random.Range(0, requiredZones.Count)] : GTZone.none);
+	}
+
+	public void AddEventListener()
+	{
+		if (!isQuestComplete)
+		{
+			switch (questType)
+			{
+			case QuestType.gameModeObjective:
+				PlayerGameEvents.OnGameModeObjectiveTrigger += OnGameEventOccurence;
+				break;
+			case QuestType.gameModeRound:
+				PlayerGameEvents.OnGameModeCompleteRound += OnGameEventOccurence;
+				break;
+			case QuestType.grabObject:
+				PlayerGameEvents.OnGrabbedObject += OnGameEventOccurence;
+				break;
+			case QuestType.dropObject:
+				PlayerGameEvents.OnDroppedObject += OnGameEventOccurence;
+				break;
+			case QuestType.eatObject:
+				PlayerGameEvents.OnEatObject += OnGameEventOccurence;
+				break;
+			case QuestType.tapObject:
+				PlayerGameEvents.OnTapObject += OnGameEventOccurence;
+				break;
+			case QuestType.launchedProjectile:
+				PlayerGameEvents.OnLaunchedProjectile += OnGameEventOccurence;
+				break;
+			case QuestType.moveDistance:
+				PlayerGameEvents.OnPlayerMoved += OnGameMoveEvent;
+				break;
+			case QuestType.swimDistance:
+				PlayerGameEvents.OnPlayerSwam += OnGameMoveEvent;
+				break;
+			case QuestType.triggerHandEffect:
+				PlayerGameEvents.OnTriggerHandEffect += OnGameEventOccurence;
+				break;
+			case QuestType.enterLocation:
+				PlayerGameEvents.OnEnterLocation += OnGameEventOccurence;
+				break;
+			case QuestType.misc:
+				PlayerGameEvents.OnMiscEvent += OnGameEventOccurence;
+				break;
+			case QuestType.critter:
+				PlayerGameEvents.OnCritterEvent += OnGameEventOccurence;
+				break;
+			}
+		}
+	}
+
+	public void RemoveEventListener()
+	{
+		switch (questType)
+		{
+		case QuestType.gameModeObjective:
+			PlayerGameEvents.OnGameModeObjectiveTrigger -= OnGameEventOccurence;
+			break;
+		case QuestType.gameModeRound:
+			PlayerGameEvents.OnGameModeCompleteRound -= OnGameEventOccurence;
+			break;
+		case QuestType.grabObject:
+			PlayerGameEvents.OnGrabbedObject -= OnGameEventOccurence;
+			break;
+		case QuestType.dropObject:
+			PlayerGameEvents.OnDroppedObject -= OnGameEventOccurence;
+			break;
+		case QuestType.eatObject:
+			PlayerGameEvents.OnEatObject -= OnGameEventOccurence;
+			break;
+		case QuestType.tapObject:
+			PlayerGameEvents.OnTapObject -= OnGameEventOccurence;
+			break;
+		case QuestType.launchedProjectile:
+			PlayerGameEvents.OnLaunchedProjectile -= OnGameEventOccurence;
+			break;
+		case QuestType.moveDistance:
+			PlayerGameEvents.OnPlayerMoved -= OnGameMoveEvent;
+			break;
+		case QuestType.swimDistance:
+			PlayerGameEvents.OnPlayerSwam -= OnGameMoveEvent;
+			break;
+		case QuestType.triggerHandEffect:
+			PlayerGameEvents.OnTriggerHandEffect -= OnGameEventOccurence;
+			break;
+		case QuestType.enterLocation:
+			PlayerGameEvents.OnEnterLocation -= OnGameEventOccurence;
+			break;
+		case QuestType.misc:
+			PlayerGameEvents.OnMiscEvent -= OnGameEventOccurence;
+			break;
+		case QuestType.critter:
+			PlayerGameEvents.OnCritterEvent -= OnGameEventOccurence;
+			break;
+		}
+	}
+
+	public void ApplySavedProgress(int progress)
+	{
+		if (questType == QuestType.moveDistance || questType == QuestType.swimDistance)
+		{
+			moveDistance = progress;
+			occurenceCount = Mathf.FloorToInt(moveDistance);
+			isQuestComplete = occurenceCount >= requiredOccurenceCount;
+		}
+		else
+		{
+			occurenceCount = progress;
+			isQuestComplete = occurenceCount >= requiredOccurenceCount;
+		}
+	}
+
+	public int GetProgress()
+	{
+		if (questType == QuestType.moveDistance || questType == QuestType.swimDistance)
+		{
+			return Mathf.FloorToInt(moveDistance);
+		}
+		return occurenceCount;
+	}
+
+	private void OnGameEventOccurence(string eventName)
+	{
+		OnGameEventOccurence(eventName, 1);
+	}
+
+	private void OnGameEventOccurence(string eventName, int count)
+	{
+		if (RequiredZone == GTZone.none || ZoneManagement.IsInZone(RequiredZone))
+		{
+			string.IsNullOrEmpty(questOccurenceFilter);
+			if (eventName.StartsWith(questOccurenceFilter))
+			{
+				SetProgress(occurenceCount + count);
+			}
+		}
+	}
+
+	private void OnGameMoveEvent(float distance, float speed)
+	{
+		if (RequiredZone != GTZone.none && !ZoneManagement.IsInZone(RequiredZone))
+		{
+			return;
+		}
+		if (questOccurenceFilter == "maxSpeed")
+		{
+			if (!(speed <= moveDistance))
+			{
+				moveDistance = speed;
+				SetProgress(Mathf.FloorToInt(moveDistance));
+			}
+		}
+		else
+		{
+			moveDistance += distance;
+			SetProgress(Mathf.FloorToInt(moveDistance));
+		}
+	}
+
+	private void SetProgress(int progress)
+	{
+		if (!isQuestComplete && occurenceCount != progress)
+		{
+			lastChange = Time.frameCount;
+			occurenceCount = progress;
+			if (questType == QuestType.moveDistance || questType == QuestType.swimDistance)
+			{
+				moveDistance = progress;
+			}
+			if (occurenceCount >= requiredOccurenceCount)
+			{
+				Complete();
+			}
+			questManager.HandleQuestProgressChanged(initialLoad: false);
+		}
+	}
+
+	private void Complete()
+	{
+		if (!isQuestComplete)
+		{
+			isQuestComplete = true;
+			RemoveEventListener();
+			questManager.HandleQuestCompleted(questID);
+		}
+	}
+
+	public string GetTextDescription()
+	{
+		return GetActionName().ToUpper() + GetLocationText().ToUpper();
+		string GetActionName()
+		{
+			return questType switch
+			{
+				QuestType.none => "[UNDEFINED]", 
+				QuestType.gameModeObjective => questName, 
+				QuestType.gameModeRound => questName, 
+				QuestType.grabObject => questName, 
+				QuestType.dropObject => questName, 
+				QuestType.eatObject => questName, 
+				QuestType.launchedProjectile => questName, 
+				QuestType.moveDistance => questName, 
+				QuestType.swimDistance => questName, 
+				QuestType.triggerHandEffect => questName, 
+				QuestType.enterLocation => questName, 
+				QuestType.misc => questName, 
+				_ => questName, 
+			};
+		}
+		string GetLocationText()
+		{
+			if (RequiredZone == GTZone.none)
+			{
+				return "";
+			}
+			return $" IN {RequiredZone}";
+		}
+	}
+
+	public string GetProgressText()
+	{
+		if (!isQuestComplete)
+		{
+			return $"{occurenceCount}/{requiredOccurenceCount}";
+		}
+		return "[DONE]";
+	}
 }

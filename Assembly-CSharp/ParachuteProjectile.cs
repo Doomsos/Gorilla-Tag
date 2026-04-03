@@ -1,178 +1,8 @@
-﻿using System;
 using GorillaTag.Cosmetics;
 using UnityEngine;
 
 public class ParachuteProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 {
-	private void Awake()
-	{
-		this.rb = base.GetComponent<Rigidbody>();
-	}
-
-	private void OnEnable()
-	{
-		this.launched = false;
-		this.landTime = 0f;
-		this.launchedTime = 0f;
-		this.peakTime = float.MaxValue;
-		this.monkeMeshFilter.mesh = this.launchMesh;
-		this.parachute.SetActive(false);
-		if (!this.TickRunning)
-		{
-			TickSystem<object>.AddCallbackTarget(this);
-		}
-	}
-
-	private void OnDisable()
-	{
-		this.launched = false;
-		if (this.TickRunning)
-		{
-			TickSystem<object>.RemoveCallbackTarget(this);
-		}
-	}
-
-	public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
-	{
-		this.parachuteDeployed = false;
-		this.landed = false;
-		if (this.rb == null)
-		{
-			this.rb = base.GetComponent<Rigidbody>();
-		}
-		this.rb.position = startPosition;
-		this.rb.rotation = startRotation;
-		this.ChangeUp(Vector3.up);
-		this.rb.freezeRotation = true;
-		if (ownerRig == null)
-		{
-			base.transform.localScale = Vector3.one;
-		}
-		else
-		{
-			base.transform.localScale = Vector3.one * ownerRig.scaleFactor;
-		}
-		this.rb.isKinematic = false;
-		this.rb.linearVelocity = velocity;
-		this.rb.linearDamping = this.initialDrag;
-		this.rb.angularDamping = this.initialAngularDrag;
-		this.launchedTime = Time.time;
-		this.monkeMeshFilter.mesh = this.launchMesh;
-		this.parachute.SetActive(false);
-		if (velocity.y > 0f)
-		{
-			this.peakTime = velocity.y / (-1f * Physics.gravity.y);
-		}
-		else
-		{
-			this.peakTime = 0f;
-		}
-		this.launched = true;
-	}
-
-	private void OnPeakReached()
-	{
-		this.parachuteDeployed = true;
-		this.parachute.SetActive(true);
-		this.monkeMeshFilter.mesh = this.parachutingMesh;
-		this.ChangeUp(Vector3.up);
-		this.rb.linearDamping = this.parachuteDrag;
-		this.rb.angularDamping = this.parachuteAngularDrag;
-	}
-
-	private void OnLanded(Collision collision)
-	{
-		this.landTime = Time.time;
-		this.landed = true;
-		ContactPoint contact = collision.GetContact(0);
-		this.rb.isKinematic = true;
-		this.rb.position = contact.point + contact.normal * (this.groundOffset * base.transform.localScale.x);
-		this.ChangeUp(contact.normal);
-		this.monkeMeshFilter.mesh = this.landedMesh;
-		this.parachute.SetActive(false);
-	}
-
-	private void ChangeUp(Vector3 newUp)
-	{
-		Vector3 forward = Vector3.Cross(this.rb.transform.right, newUp);
-		if (forward.sqrMagnitude < 1E-45f)
-		{
-			forward = Vector3.Cross(Vector3.Cross(newUp, this.rb.transform.forward), newUp);
-		}
-		this.rb.rotation = Quaternion.LookRotation(forward, newUp);
-	}
-
-	private void PlayImpactEffects(Vector3 position, Vector3 normal)
-	{
-		if (this.impactEffect != null)
-		{
-			Vector3 position2 = position + this.impactEffectOffset * normal;
-			GameObject gameObject = ObjectPools.instance.Instantiate(this.impactEffect, position2, true);
-			gameObject.transform.localScale = base.transform.localScale * this.impactEffectScaleMultiplier;
-			gameObject.transform.up = normal;
-		}
-		ObjectPools.instance.Destroy(base.gameObject);
-	}
-
-	public void OnTriggerEvent(bool isLeft, Collider col)
-	{
-		if (this.parachuteDeployed)
-		{
-			this.PlayImpactEffects(base.transform.position, Vector3.up);
-			GorillaTriggerColliderHandIndicator componentInParent = col.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
-			if (componentInParent != null)
-			{
-				float amplitude = GorillaTagger.Instance.tapHapticStrength / 2f;
-				float fixedDeltaTime = Time.fixedDeltaTime;
-				GorillaTagger.Instance.StartVibration(componentInParent.isLeftHand, amplitude, fixedDeltaTime);
-			}
-		}
-	}
-
-	private void OnCollisionEnter(Collision collision)
-	{
-		if (!this.launched || this.landed)
-		{
-			return;
-		}
-		ContactPoint contact = collision.GetContact(0);
-		if (collision.collider.attachedRigidbody != null)
-		{
-			this.PlayImpactEffects(contact.point, contact.normal);
-			return;
-		}
-		if (collision.collider.gameObject.IsOnLayer(UnityLayer.GorillaThrowable))
-		{
-			this.PlayImpactEffects(contact.point, contact.normal);
-			return;
-		}
-		if (!this.parachuteDeployed)
-		{
-			this.PlayImpactEffects(contact.point, contact.normal);
-			return;
-		}
-		if (Vector3.Angle(contact.normal, Vector3.up) < this.groudUpThreshold)
-		{
-			this.OnLanded(collision);
-			return;
-		}
-		this.PlayImpactEffects(contact.point, contact.normal);
-	}
-
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		if (!this.parachuteDeployed && Time.time > this.launchedTime + this.parachuteDeployDelay && Time.time >= this.launchedTime + this.peakTime)
-		{
-			this.OnPeakReached();
-		}
-		if (this.landed && Time.time > this.landTime + this.destroyOnLandDelay)
-		{
-			this.PlayImpactEffects(base.transform.position, base.transform.up);
-		}
-	}
-
 	[SerializeField]
 	private MeshFilter monkeMeshFilter;
 
@@ -243,4 +73,171 @@ public class ParachuteProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 	private bool parachuteDeployed;
 
 	private bool landed;
+
+	public bool TickRunning { get; set; }
+
+	private void Awake()
+	{
+		rb = GetComponent<Rigidbody>();
+	}
+
+	private void OnEnable()
+	{
+		launched = false;
+		landTime = 0f;
+		launchedTime = 0f;
+		peakTime = float.MaxValue;
+		monkeMeshFilter.mesh = launchMesh;
+		parachute.SetActive(value: false);
+		if (!TickRunning)
+		{
+			TickSystem<object>.AddCallbackTarget(this);
+		}
+	}
+
+	private void OnDisable()
+	{
+		launched = false;
+		if (TickRunning)
+		{
+			TickSystem<object>.RemoveCallbackTarget(this);
+		}
+	}
+
+	public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
+	{
+		parachuteDeployed = false;
+		landed = false;
+		if (rb == null)
+		{
+			rb = GetComponent<Rigidbody>();
+		}
+		rb.position = startPosition;
+		rb.rotation = startRotation;
+		ChangeUp(Vector3.up);
+		rb.freezeRotation = true;
+		if (ownerRig == null)
+		{
+			base.transform.localScale = Vector3.one;
+		}
+		else
+		{
+			base.transform.localScale = Vector3.one * ownerRig.scaleFactor;
+		}
+		rb.isKinematic = false;
+		rb.linearVelocity = velocity;
+		rb.linearDamping = initialDrag;
+		rb.angularDamping = initialAngularDrag;
+		launchedTime = Time.time;
+		monkeMeshFilter.mesh = launchMesh;
+		parachute.SetActive(value: false);
+		if (velocity.y > 0f)
+		{
+			peakTime = velocity.y / (-1f * Physics.gravity.y);
+		}
+		else
+		{
+			peakTime = 0f;
+		}
+		launched = true;
+	}
+
+	private void OnPeakReached()
+	{
+		parachuteDeployed = true;
+		parachute.SetActive(value: true);
+		monkeMeshFilter.mesh = parachutingMesh;
+		ChangeUp(Vector3.up);
+		rb.linearDamping = parachuteDrag;
+		rb.angularDamping = parachuteAngularDrag;
+	}
+
+	private void OnLanded(Collision collision)
+	{
+		landTime = Time.time;
+		landed = true;
+		ContactPoint contact = collision.GetContact(0);
+		rb.isKinematic = true;
+		rb.position = contact.point + contact.normal * (groundOffset * base.transform.localScale.x);
+		ChangeUp(contact.normal);
+		monkeMeshFilter.mesh = landedMesh;
+		parachute.SetActive(value: false);
+	}
+
+	private void ChangeUp(Vector3 newUp)
+	{
+		Vector3 forward = Vector3.Cross(rb.transform.right, newUp);
+		if (forward.sqrMagnitude < float.Epsilon)
+		{
+			forward = Vector3.Cross(Vector3.Cross(newUp, rb.transform.forward), newUp);
+		}
+		rb.rotation = Quaternion.LookRotation(forward, newUp);
+	}
+
+	private void PlayImpactEffects(Vector3 position, Vector3 normal)
+	{
+		if (impactEffect != null)
+		{
+			Vector3 position2 = position + impactEffectOffset * normal;
+			GameObject obj = ObjectPools.instance.Instantiate(impactEffect, position2);
+			obj.transform.localScale = base.transform.localScale * impactEffectScaleMultiplier;
+			obj.transform.up = normal;
+		}
+		ObjectPools.instance.Destroy(base.gameObject);
+	}
+
+	public void OnTriggerEvent(bool isLeft, Collider col)
+	{
+		if (parachuteDeployed)
+		{
+			PlayImpactEffects(base.transform.position, Vector3.up);
+			GorillaTriggerColliderHandIndicator componentInParent = col.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
+			if (componentInParent != null)
+			{
+				float amplitude = GorillaTagger.Instance.tapHapticStrength / 2f;
+				float fixedDeltaTime = Time.fixedDeltaTime;
+				GorillaTagger.Instance.StartVibration(componentInParent.isLeftHand, amplitude, fixedDeltaTime);
+			}
+		}
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		if (launched && !landed)
+		{
+			ContactPoint contact = collision.GetContact(0);
+			if (collision.collider.attachedRigidbody != null)
+			{
+				PlayImpactEffects(contact.point, contact.normal);
+			}
+			else if (collision.collider.gameObject.IsOnLayer(UnityLayer.GorillaThrowable))
+			{
+				PlayImpactEffects(contact.point, contact.normal);
+			}
+			else if (!parachuteDeployed)
+			{
+				PlayImpactEffects(contact.point, contact.normal);
+			}
+			else if (Vector3.Angle(contact.normal, Vector3.up) < groudUpThreshold)
+			{
+				OnLanded(collision);
+			}
+			else
+			{
+				PlayImpactEffects(contact.point, contact.normal);
+			}
+		}
+	}
+
+	public void Tick()
+	{
+		if (!parachuteDeployed && Time.time > launchedTime + parachuteDeployDelay && Time.time >= launchedTime + peakTime)
+		{
+			OnPeakReached();
+		}
+		if (landed && Time.time > landTime + destroyOnLandDelay)
+		{
+			PlayImpactEffects(base.transform.position, base.transform.up);
+		}
+	}
 }

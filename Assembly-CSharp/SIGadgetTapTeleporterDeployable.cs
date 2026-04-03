@@ -1,172 +1,8 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class SIGadgetTapTeleporterDeployable : MonoBehaviour, IGameEntityComponent
 {
-	private void Awake()
-	{
-	}
-
-	private void OnEnable()
-	{
-		this.activateTime = Time.time + this.activateDelay;
-	}
-
-	private void LateUpdate()
-	{
-		if (Time.time > this.timeToDie && this.gameEntity.IsAuthority())
-		{
-			if (this.linkedPoint != null)
-			{
-				this.linkedPoint.ClearLink();
-			}
-			this.gameEntity.manager.RequestDestroyItem(this.gameEntity.id);
-		}
-	}
-
-	public void OnEntityInit()
-	{
-		int num;
-		BitPackUtils.UnpackIntsFromLong(this.gameEntity.createData, out this.selectionId, out num);
-		if ((float)num < 0f)
-		{
-			this.timeToDie = float.PositiveInfinity;
-		}
-		else
-		{
-			this.timeToDie = Time.time + (float)num;
-		}
-		this.UpdateSelectionDisplay();
-	}
-
-	private void UpdateSelectionDisplay()
-	{
-		if (this.selectionId == 0)
-		{
-			this.selectionColorDisplay.material = this.selectionColor1;
-			return;
-		}
-		if (this.selectionId == 1)
-		{
-			this.selectionColorDisplay.material = this.selectionColor2;
-		}
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long newState)
-	{
-		if (this.gameEntity.IsAuthority())
-		{
-			return;
-		}
-		int netId;
-		int netId2;
-		BitPackUtils.UnpackIntsFromLong(newState, out netId, out netId2);
-		GameEntity gameEntityFromNetId = this.gameEntity.manager.GetGameEntityFromNetId(netId);
-		if (gameEntityFromNetId != null)
-		{
-			SIGadgetTapTeleporter component = gameEntityFromNetId.GetComponent<SIGadgetTapTeleporter>();
-			this._pad = component;
-			this.identifierColor = this._pad.identifierColor;
-		}
-		GameEntity gameEntityFromNetId2 = this.gameEntity.manager.GetGameEntityFromNetId(netId2);
-		if (gameEntityFromNetId2 != null)
-		{
-			this.linkedPoint = gameEntityFromNetId2.GetComponent<SIGadgetTapTeleporterDeployable>();
-			if (this.linkedPoint.linkedPoint == null)
-			{
-				this.linkedPoint.linkedPoint = this;
-				this.linkedPoint._pad = this._pad;
-				this.linkedPoint.identifierColor = this.identifierColor;
-				this.linkedPoint.UpdateLinkDisplay();
-			}
-		}
-		else
-		{
-			this.linkedPoint = null;
-		}
-		this.UpdateLinkDisplay();
-	}
-
-	public void SetLink(SIGadgetTapTeleporter newPad, SIGadgetTapTeleporterDeployable newLink)
-	{
-		this._pad = newPad;
-		this.linkedPoint = newLink;
-		this.identifierColor = this._pad.identifierColor;
-		int value = -1;
-		if (this.linkedPoint != null)
-		{
-			value = this.linkedPoint.gameEntity.GetNetId();
-		}
-		this.gameEntity.RequestState(this.gameEntity.id, BitPackUtils.PackIntsIntoLong(this._pad.gameEntity.GetNetId(), value));
-		this.UpdateLinkDisplay();
-		this.stealth.enabled = this._pad.useStealthTeleporters;
-		this.maintainVelocity = this._pad.isVelocityPreserved;
-	}
-
-	private void ClearLink()
-	{
-		this.linkedPoint = null;
-		this.gameEntity.RequestState(this.gameEntity.id, BitPackUtils.PackIntsIntoLong(this._pad.gameEntity.GetNetId(), -1));
-		this.UpdateLinkDisplay();
-	}
-
-	private void UpdateLinkDisplay()
-	{
-		Renderer[] array = this.identifierColorDisplay;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].material.color = this.identifierColor;
-		}
-		if (this.linkedPoint != null)
-		{
-			Vector3 vector = this.linkedPoint.transform.position - base.transform.position;
-			this.linkDirectionIndicator.gameObject.SetActive(true);
-			this.linkDirectionIndicator.transform.rotation = Quaternion.LookRotation(base.transform.forward, vector.normalized);
-			return;
-		}
-		this.linkDirectionIndicator.gameObject.SetActive(false);
-	}
-
-	public void TryTeleport()
-	{
-		if (this.activateTime < Time.time && SIGadgetTapTeleporterDeployable.reteleportTime < Time.time && (!this.requiresSurfaceTapSinceTeleport || GorillaTagger.Instance.hasTappedSurface))
-		{
-			this.TeleportToLinked();
-		}
-	}
-
-	private void ResetRetriggerBlock()
-	{
-		SIGadgetTapTeleporterDeployable.reteleportTime = Time.time + SIGadgetTapTeleporterDeployable.reteleportDelay;
-	}
-
-	private void TeleportToLinked()
-	{
-		if (this.linkedPoint == null || !this.linkedPoint.gameObject.activeSelf)
-		{
-			return;
-		}
-		Vector3 position = this.destination.position;
-		if (Vector3.Distance(GTPlayer.Instance.transform.position, position) > this.teleportCheckDistance)
-		{
-			return;
-		}
-		this.ResetRetriggerBlock();
-		if (this.requiresSurfaceTapSinceTeleport)
-		{
-			GorillaTagger.Instance.ResetTappedSurfaceCheck();
-		}
-		Vector3 position2 = this.linkedPoint.destination.position;
-		Quaternion rotation = GTPlayer.Instance.transform.rotation;
-		GTPlayer.Instance.TeleportTo(position2, rotation, this.maintainVelocity, true);
-		this.linkedPoint.teleportSoundbank.Play();
-	}
-
 	public GameEntity gameEntity;
 
 	[SerializeField]
@@ -217,4 +53,164 @@ public class SIGadgetTapTeleporterDeployable : MonoBehaviour, IGameEntityCompone
 	private float timeToDie = -1f;
 
 	private float teleportCheckDistance = 2f;
+
+	private void Awake()
+	{
+	}
+
+	private void OnEnable()
+	{
+		activateTime = Time.time + activateDelay;
+	}
+
+	private void LateUpdate()
+	{
+		if (Time.time > timeToDie && gameEntity.IsAuthority())
+		{
+			if (linkedPoint != null)
+			{
+				linkedPoint.ClearLink();
+			}
+			gameEntity.manager.RequestDestroyItem(gameEntity.id);
+		}
+	}
+
+	public void OnEntityInit()
+	{
+		BitPackUtils.UnpackIntsFromLong(gameEntity.createData, out selectionId, out var value);
+		if ((float)value < 0f)
+		{
+			timeToDie = float.PositiveInfinity;
+		}
+		else
+		{
+			timeToDie = Time.time + (float)value;
+		}
+		UpdateSelectionDisplay();
+	}
+
+	private void UpdateSelectionDisplay()
+	{
+		if (selectionId == 0)
+		{
+			selectionColorDisplay.material = selectionColor1;
+		}
+		else if (selectionId == 1)
+		{
+			selectionColorDisplay.material = selectionColor2;
+		}
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long newState)
+	{
+		if (gameEntity.IsAuthority())
+		{
+			return;
+		}
+		BitPackUtils.UnpackIntsFromLong(newState, out var value, out var value2);
+		GameEntity gameEntityFromNetId = gameEntity.manager.GetGameEntityFromNetId(value);
+		if (gameEntityFromNetId != null)
+		{
+			SIGadgetTapTeleporter component = gameEntityFromNetId.GetComponent<SIGadgetTapTeleporter>();
+			_pad = component;
+			identifierColor = _pad.identifierColor;
+		}
+		GameEntity gameEntityFromNetId2 = gameEntity.manager.GetGameEntityFromNetId(value2);
+		if (gameEntityFromNetId2 != null)
+		{
+			linkedPoint = gameEntityFromNetId2.GetComponent<SIGadgetTapTeleporterDeployable>();
+			if (linkedPoint.linkedPoint == null)
+			{
+				linkedPoint.linkedPoint = this;
+				linkedPoint._pad = _pad;
+				linkedPoint.identifierColor = identifierColor;
+				linkedPoint.UpdateLinkDisplay();
+			}
+		}
+		else
+		{
+			linkedPoint = null;
+		}
+		UpdateLinkDisplay();
+	}
+
+	public void SetLink(SIGadgetTapTeleporter newPad, SIGadgetTapTeleporterDeployable newLink)
+	{
+		_pad = newPad;
+		linkedPoint = newLink;
+		identifierColor = _pad.identifierColor;
+		int value = -1;
+		if (linkedPoint != null)
+		{
+			value = linkedPoint.gameEntity.GetNetId();
+		}
+		gameEntity.RequestState(gameEntity.id, BitPackUtils.PackIntsIntoLong(_pad.gameEntity.GetNetId(), value));
+		UpdateLinkDisplay();
+		stealth.enabled = _pad.useStealthTeleporters;
+		maintainVelocity = _pad.isVelocityPreserved;
+	}
+
+	private void ClearLink()
+	{
+		linkedPoint = null;
+		gameEntity.RequestState(gameEntity.id, BitPackUtils.PackIntsIntoLong(_pad.gameEntity.GetNetId(), -1));
+		UpdateLinkDisplay();
+	}
+
+	private void UpdateLinkDisplay()
+	{
+		Renderer[] array = identifierColorDisplay;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].material.color = identifierColor;
+		}
+		if (linkedPoint != null)
+		{
+			Vector3 vector = linkedPoint.transform.position - base.transform.position;
+			linkDirectionIndicator.gameObject.SetActive(value: true);
+			linkDirectionIndicator.transform.rotation = Quaternion.LookRotation(base.transform.forward, vector.normalized);
+		}
+		else
+		{
+			linkDirectionIndicator.gameObject.SetActive(value: false);
+		}
+	}
+
+	public void TryTeleport()
+	{
+		if (activateTime < Time.time && reteleportTime < Time.time && (!requiresSurfaceTapSinceTeleport || GorillaTagger.Instance.hasTappedSurface))
+		{
+			TeleportToLinked();
+		}
+	}
+
+	private void ResetRetriggerBlock()
+	{
+		reteleportTime = Time.time + reteleportDelay;
+	}
+
+	private void TeleportToLinked()
+	{
+		if (linkedPoint == null || !linkedPoint.gameObject.activeSelf)
+		{
+			return;
+		}
+		Vector3 position = destination.position;
+		if (!(Vector3.Distance(GTPlayer.Instance.transform.position, position) > teleportCheckDistance))
+		{
+			ResetRetriggerBlock();
+			if (requiresSurfaceTapSinceTeleport)
+			{
+				GorillaTagger.Instance.ResetTappedSurfaceCheck();
+			}
+			Vector3 position2 = linkedPoint.destination.position;
+			Quaternion rotation = GTPlayer.Instance.transform.rotation;
+			GTPlayer.Instance.TeleportTo(position2, rotation, maintainVelocity, center: true);
+			linkedPoint.teleportSoundbank.Play();
+		}
+	}
 }

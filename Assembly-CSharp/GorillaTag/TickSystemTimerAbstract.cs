@@ -1,65 +1,59 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[Serializable]
+internal abstract class TickSystemTimerAbstract : CoolDownHelper, ITickSystemPre
 {
-	[Serializable]
-	internal abstract class TickSystemTimerAbstract : CoolDownHelper, ITickSystemPre
+	[NonSerialized]
+	internal bool registered;
+
+	bool ITickSystemPre.PreTickRunning
 	{
-		bool ITickSystemPre.PreTickRunning
+		get
 		{
-			get
-			{
-				return this.registered;
-			}
-			set
-			{
-				this.registered = value;
-			}
+			return registered;
 		}
-
-		public bool Running
+		set
 		{
-			get
-			{
-				return this.registered;
-			}
+			registered = value;
 		}
+	}
 
-		protected TickSystemTimerAbstract()
-		{
-		}
+	public bool Running => registered;
 
-		protected TickSystemTimerAbstract(float cd) : base(cd)
-		{
-		}
+	protected TickSystemTimerAbstract()
+	{
+	}
 
-		public override void Start()
-		{
-			base.Start();
-			TickSystem<object>.AddPreTickCallback(this);
-		}
+	protected TickSystemTimerAbstract(float cd)
+		: base(cd)
+	{
+	}
 
-		public override void Stop()
-		{
-			base.Stop();
-			TickSystem<object>.RemovePreTickCallback(this);
-		}
+	public override void Start()
+	{
+		base.Start();
+		TickSystem<object>.AddPreTickCallback(this);
+	}
 
-		public override void OnCheckPass()
-		{
-			this.OnTimedEvent();
-		}
+	public override void Stop()
+	{
+		base.Stop();
+		TickSystem<object>.RemovePreTickCallback(this);
+	}
 
-		public abstract void OnTimedEvent();
+	public override void OnCheckPass()
+	{
+		OnTimedEvent();
+	}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ITickSystemPre.PreTick()
-		{
-			base.CheckCooldown();
-		}
+	public abstract void OnTimedEvent();
 
-		[NonSerialized]
-		internal bool registered;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	void ITickSystemPre.PreTick()
+	{
+		CheckCooldown();
 	}
 }

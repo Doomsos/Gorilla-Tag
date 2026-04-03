@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
@@ -8,153 +8,9 @@ using UnityEngine;
 
 public static class MeshExtensions
 {
-	public static void SplitByAngle(this Mesh mesh, float angleDeg)
-	{
-		float num = Mathf.Cos(angleDeg * 0.017453292f);
-		Vector3[] vertices = mesh.vertices;
-		int[] triangles = mesh.triangles;
-		int num2 = triangles.Length / 3;
-		Vector3[] array = new Vector3[num2];
-		for (int i = 0; i < num2; i++)
-		{
-			Vector3 b = vertices[triangles[i * 3]];
-			Vector3 a = vertices[triangles[i * 3 + 1]];
-			Vector3 a2 = vertices[triangles[i * 3 + 2]];
-			array[i] = Vector3.Cross(a - b, a2 - b).normalized;
-		}
-		List<ValueTuple<int, Vector3>>[] array2 = new List<ValueTuple<int, Vector3>>[vertices.Length];
-		for (int j = 0; j < array2.Length; j++)
-		{
-			array2[j] = new List<ValueTuple<int, Vector3>>();
-		}
-		List<Vector3> list = new List<Vector3>(vertices.Length);
-		int[] array3 = new int[triangles.Length];
-		for (int k = 0; k < num2; k++)
-		{
-			for (int l = 0; l < 3; l++)
-			{
-				int num3 = triangles[k * 3 + l];
-				Vector3 vector = array[k];
-				int num4 = -1;
-				foreach (ValueTuple<int, Vector3> valueTuple in array2[num3])
-				{
-					int item = valueTuple.Item1;
-					if (Vector3.Dot(valueTuple.Item2, vector) >= num)
-					{
-						num4 = item;
-						break;
-					}
-				}
-				if (num4 < 0)
-				{
-					num4 = list.Count;
-					list.Add(vertices[num3]);
-					array2[num3].Add(new ValueTuple<int, Vector3>(num4, vector));
-				}
-				array3[k * 3 + l] = num4;
-			}
-		}
-		mesh.Clear();
-		mesh.SetVertices(list);
-		mesh.triangles = array3;
-		mesh.RecalculateNormals();
-		mesh.RecalculateBounds();
-	}
-
-	public static void SplitByAngleBurst(this Mesh mesh, float angleDeg, bool areaWeight = true, Allocator allocator = Allocator.TempJob)
-	{
-		NativeArray<float3> nativeArray = new NativeArray<float3>(mesh.vertexCount, allocator, NativeArrayOptions.ClearMemory);
-		List<Vector3> list = new List<Vector3>(mesh.vertexCount);
-		mesh.GetVertices(list);
-		for (int i = 0; i < list.Count; i++)
-		{
-			nativeArray[i] = list[i];
-		}
-		NativeArray<int> nativeArray2 = new NativeArray<int>(mesh.triangles, allocator);
-		NativeArray<float3> faceN = new NativeArray<float3>(nativeArray2.Length / 3, allocator, NativeArrayOptions.ClearMemory);
-		new MeshExtensions.FaceNormalJob
-		{
-			Verts = nativeArray,
-			Tris = nativeArray2,
-			FaceN = faceN
-		}.Schedule(faceN.Length, 64, default(JobHandle)).Complete();
-		NativeList<float3> nativeList = new NativeList<float3>(nativeArray.Length, allocator);
-		NativeList<int> nativeList2 = new NativeList<int>(nativeArray2.Length, allocator);
-		new MeshExtensions.SplitJob
-		{
-			CosThresh = math.cos(math.radians(angleDeg)),
-			SrcVerts = nativeArray,
-			SrcTris = nativeArray2,
-			FaceN = faceN,
-			DstVerts = nativeList,
-			DstTris = nativeList2
-		}.Run<MeshExtensions.SplitJob>();
-		NativeArray<float3> nativeArray3 = new NativeArray<float3>(nativeList.Length, allocator, NativeArrayOptions.ClearMemory);
-		MeshExtensions.RecalcNormalsJobified(nativeList, nativeList2, areaWeight, allocator, ref nativeArray3);
-		mesh.Clear();
-		List<Vector3> list2 = new List<Vector3>(nativeList.Length);
-		for (int j = 0; j < nativeList.Length; j++)
-		{
-			list2.Add(nativeList[j]);
-		}
-		mesh.SetVertices(list2);
-		mesh.triangles = nativeList2.AsArray().ToArray();
-		List<Vector3> list3 = new List<Vector3>(nativeArray3.Length);
-		for (int k = 0; k < nativeArray3.Length; k++)
-		{
-			list3.Add(nativeArray3[k]);
-		}
-		mesh.SetNormals(list3);
-		mesh.RecalculateBounds();
-		nativeArray.Dispose();
-		nativeArray2.Dispose();
-		faceN.Dispose();
-		nativeList.Dispose();
-		nativeList2.Dispose();
-		nativeArray3.Dispose();
-	}
-
-	private static void RecalcNormalsJobified(NativeList<float3> verts, NativeList<int> tris, bool areaWeight, Allocator alloc, ref NativeArray<float3> outNormals)
-	{
-		int length = verts.Length;
-		int num = tris.Length / 3;
-		NativeArray<float3> nativeArray = new NativeArray<float3>(num, alloc, NativeArrayOptions.ClearMemory);
-		new MeshExtensions.TriNormalJob
-		{
-			V = verts.AsArray(),
-			T = tris.AsArray(),
-			Out = nativeArray,
-			AreaWeight = (areaWeight ? 1 : 0)
-		}.Schedule(num, 64, default(JobHandle)).Complete();
-		NativeParallelMultiHashMap<int, int> v2T = new NativeParallelMultiHashMap<int, int>(tris.Length, alloc);
-		new MeshExtensions.BuildAdjJob
-		{
-			T = tris.AsArray(),
-			MapW = v2T.AsParallelWriter()
-		}.Schedule(num, 64, default(JobHandle)).Complete();
-		new MeshExtensions.VertexNormalJob
-		{
-			AreaWeight = (areaWeight ? 1 : 0),
-			TriN = nativeArray,
-			V2T = v2T,
-			Out = outNormals
-		}.Schedule(length, 64, default(JobHandle)).Complete();
-		nativeArray.Dispose();
-		v2T.Dispose();
-	}
-
 	[BurstCompile]
 	private struct FaceNormalJob : IJobParallelFor
 	{
-		public void Execute(int index)
-		{
-			int num = index * 3;
-			float3 rhs = this.Verts[this.Tris[num]];
-			float3 lhs = this.Verts[this.Tris[num + 1]];
-			float3 lhs2 = this.Verts[this.Tris[num + 2]];
-			this.FaceN[index] = math.normalize(math.cross(lhs - rhs, lhs2 - rhs));
-		}
-
 		[ReadOnly]
 		public NativeArray<float3> Verts;
 
@@ -163,58 +19,27 @@ public static class MeshExtensions
 
 		[WriteOnly]
 		public NativeArray<float3> FaceN;
+
+		public void Execute(int index)
+		{
+			int num = index * 3;
+			float3 float5 = Verts[Tris[num]];
+			float3 float6 = Verts[Tris[num + 1]];
+			float3 float7 = Verts[Tris[num + 2]];
+			FaceN[index] = math.normalize(math.cross(float6 - float5, float7 - float5));
+		}
 	}
 
 	[BurstCompile]
 	private struct SplitJob : IJob
 	{
-		public void Execute()
+		private struct Bucket
 		{
-			int length = this.SrcVerts.Length;
-			int num = this.SrcTris.Length / 3;
-			NativeArray<int> nativeArray = new NativeArray<int>(length, Allocator.Temp, NativeArrayOptions.ClearMemory);
-			for (int i = 0; i < length; i++)
-			{
-				nativeArray[i] = -1;
-			}
-			NativeList<MeshExtensions.SplitJob.Bucket> nativeList = new NativeList<MeshExtensions.SplitJob.Bucket>(length, Allocator.Temp);
-			this.DstVerts.Clear();
-			this.DstTris.ResizeUninitialized(this.SrcTris.Length);
-			for (int j = 0; j < num; j++)
-			{
-				float3 @float = this.FaceN[j];
-				for (int k = 0; k < 3; k++)
-				{
-					int index = this.SrcTris[j * 3 + k];
-					int num2 = -1;
-					for (int num3 = nativeArray[index]; num3 != -1; num3 = nativeList[num3].next)
-					{
-						MeshExtensions.SplitJob.Bucket bucket = nativeList[num3];
-						if (math.dot(bucket.repN, @float) >= this.CosThresh)
-						{
-							num2 = bucket.newIdx;
-							break;
-						}
-					}
-					if (num2 == -1)
-					{
-						num2 = this.DstVerts.Length;
-						float3 float2 = this.SrcVerts[index];
-						this.DstVerts.Add(float2);
-						MeshExtensions.SplitJob.Bucket bucket2 = new MeshExtensions.SplitJob.Bucket
-						{
-							next = nativeArray[index],
-							newIdx = num2,
-							repN = @float
-						};
-						nativeArray[index] = nativeList.Length;
-						nativeList.Add(bucket2);
-					}
-					this.DstTris[j * 3 + k] = num2;
-				}
-			}
-			nativeArray.Dispose();
-			nativeList.Dispose();
+			public int next;
+
+			public int newIdx;
+
+			public float3 repN;
 		}
 
 		public float CosThresh;
@@ -232,29 +57,58 @@ public static class MeshExtensions
 
 		public NativeList<int> DstTris;
 
-		private struct Bucket
+		public void Execute()
 		{
-			public int next;
-
-			public int newIdx;
-
-			public float3 repN;
+			int length = SrcVerts.Length;
+			int num = SrcTris.Length / 3;
+			NativeArray<int> nativeArray = new NativeArray<int>(length, Allocator.Temp);
+			for (int i = 0; i < length; i++)
+			{
+				nativeArray[i] = -1;
+			}
+			NativeList<Bucket> nativeList = new NativeList<Bucket>(length, Allocator.Temp);
+			DstVerts.Clear();
+			DstTris.ResizeUninitialized(SrcTris.Length);
+			for (int j = 0; j < num; j++)
+			{
+				float3 float5 = FaceN[j];
+				for (int k = 0; k < 3; k++)
+				{
+					int index = SrcTris[j * 3 + k];
+					int num2 = -1;
+					for (int num3 = nativeArray[index]; num3 != -1; num3 = nativeList[num3].next)
+					{
+						Bucket bucket = nativeList[num3];
+						if (math.dot(bucket.repN, float5) >= CosThresh)
+						{
+							num2 = bucket.newIdx;
+							break;
+						}
+					}
+					if (num2 == -1)
+					{
+						num2 = DstVerts.Length;
+						DstVerts.Add(SrcVerts[index]);
+						Bucket value = new Bucket
+						{
+							next = nativeArray[index],
+							newIdx = num2,
+							repN = float5
+						};
+						nativeArray[index] = nativeList.Length;
+						nativeList.Add(in value);
+					}
+					DstTris[j * 3 + k] = num2;
+				}
+			}
+			nativeArray.Dispose();
+			nativeList.Dispose();
 		}
 	}
 
 	[BurstCompile]
 	private struct TriNormalJob : IJobParallelFor
 	{
-		public void Execute(int i)
-		{
-			int num = i * 3;
-			float3 rhs = this.V[this.T[num]];
-			float3 lhs = this.V[this.T[num + 1]];
-			float3 lhs2 = this.V[this.T[num + 2]];
-			float3 @float = math.cross(lhs - rhs, lhs2 - rhs);
-			this.Out[i] = ((this.AreaWeight == 0) ? math.normalize(@float) : @float);
-		}
-
 		[ReadOnly]
 		public NativeArray<float3> V;
 
@@ -265,54 +119,37 @@ public static class MeshExtensions
 		public NativeArray<float3> Out;
 
 		public int AreaWeight;
+
+		public void Execute(int i)
+		{
+			int num = i * 3;
+			float3 float5 = V[T[num]];
+			float3 obj = V[T[num + 1]];
+			float3 float6 = math.cross(y: V[T[num + 2]] - float5, x: obj - float5);
+			Out[i] = ((AreaWeight == 0) ? math.normalize(float6) : float6);
+		}
 	}
 
 	[BurstCompile]
 	private struct BuildAdjJob : IJobParallelFor
 	{
-		public void Execute(int triIdx)
-		{
-			int num = triIdx * 3;
-			this.MapW.Add(this.T[num], triIdx);
-			this.MapW.Add(this.T[num + 1], triIdx);
-			this.MapW.Add(this.T[num + 2], triIdx);
-		}
-
 		[ReadOnly]
 		public NativeArray<int> T;
 
 		public NativeParallelMultiHashMap<int, int>.ParallelWriter MapW;
+
+		public void Execute(int triIdx)
+		{
+			int num = triIdx * 3;
+			MapW.Add(T[num], triIdx);
+			MapW.Add(T[num + 1], triIdx);
+			MapW.Add(T[num + 2], triIdx);
+		}
 	}
 
 	[BurstCompile]
 	private struct VertexNormalJob : IJobParallelFor
 	{
-		public void Execute(int v)
-		{
-			NativeParallelMultiHashMap<int, int>.Enumerator valuesForKey = this.V2T.GetValuesForKey(v);
-			if (!valuesForKey.MoveNext())
-			{
-				this.Out[v] = float3.zero;
-				return;
-			}
-			int index = valuesForKey.Current;
-			float3 @float = this.TriN[index];
-			float3 float2 = (this.AreaWeight == 0) ? @float : math.normalize(@float);
-			float3 float3 = float3.zero;
-			NativeParallelMultiHashMap<int, int>.Enumerator valuesForKey2 = this.V2T.GetValuesForKey(v);
-			while (valuesForKey2.MoveNext())
-			{
-				int index2 = valuesForKey2.Current;
-				float3 float4 = this.TriN[index2];
-				if (this.AreaWeight != 0)
-				{
-					math.normalize(float4);
-				}
-				float3 += float4;
-			}
-			this.Out[v] = ((math.lengthsq(float3) < 1E-09f) ? float2 : math.normalize(float3));
-		}
-
 		public int AreaWeight;
 
 		[ReadOnly]
@@ -323,5 +160,165 @@ public static class MeshExtensions
 
 		[WriteOnly]
 		public NativeArray<float3> Out;
+
+		public void Execute(int v)
+		{
+			NativeParallelMultiHashMap<int, int>.Enumerator valuesForKey = V2T.GetValuesForKey(v);
+			if (!valuesForKey.MoveNext())
+			{
+				Out[v] = float3.zero;
+				return;
+			}
+			int current = valuesForKey.Current;
+			float3 float5 = TriN[current];
+			float3 float6 = ((AreaWeight == 0) ? float5 : math.normalize(float5));
+			float3 zero = float3.zero;
+			NativeParallelMultiHashMap<int, int>.Enumerator valuesForKey2 = V2T.GetValuesForKey(v);
+			while (valuesForKey2.MoveNext())
+			{
+				float3 float7 = TriN[valuesForKey2.Current];
+				if (AreaWeight != 0)
+				{
+					math.normalize(float7);
+				}
+				zero += float7;
+			}
+			Out[v] = ((math.lengthsq(zero) < 1E-09f) ? float6 : math.normalize(zero));
+		}
+	}
+
+	public static void SplitByAngle(this Mesh mesh, float angleDeg)
+	{
+		float num = Mathf.Cos(angleDeg * (MathF.PI / 180f));
+		Vector3[] vertices = mesh.vertices;
+		int[] triangles = mesh.triangles;
+		int num2 = triangles.Length / 3;
+		Vector3[] array = new Vector3[num2];
+		for (int i = 0; i < num2; i++)
+		{
+			Vector3 vector = vertices[triangles[i * 3]];
+			Vector3 vector2 = vertices[triangles[i * 3 + 1]];
+			Vector3 vector3 = vertices[triangles[i * 3 + 2]];
+			array[i] = Vector3.Cross(vector2 - vector, vector3 - vector).normalized;
+		}
+		List<(int, Vector3)>[] array2 = new List<(int, Vector3)>[vertices.Length];
+		for (int j = 0; j < array2.Length; j++)
+		{
+			array2[j] = new List<(int, Vector3)>();
+		}
+		List<Vector3> list = new List<Vector3>(vertices.Length);
+		int[] array3 = new int[triangles.Length];
+		for (int k = 0; k < num2; k++)
+		{
+			for (int l = 0; l < 3; l++)
+			{
+				int num3 = triangles[k * 3 + l];
+				Vector3 vector4 = array[k];
+				int num4 = -1;
+				foreach (var item in array2[num3])
+				{
+					var (num5, _) = item;
+					if (Vector3.Dot(item.Item2, vector4) >= num)
+					{
+						num4 = num5;
+						break;
+					}
+				}
+				if (num4 < 0)
+				{
+					num4 = list.Count;
+					list.Add(vertices[num3]);
+					array2[num3].Add((num4, vector4));
+				}
+				array3[k * 3 + l] = num4;
+			}
+		}
+		mesh.Clear();
+		mesh.SetVertices(list);
+		mesh.triangles = array3;
+		mesh.RecalculateNormals();
+		mesh.RecalculateBounds();
+	}
+
+	public static void SplitByAngleBurst(this Mesh mesh, float angleDeg, bool areaWeight = true, Allocator allocator = Allocator.TempJob)
+	{
+		NativeArray<float3> nativeArray = new NativeArray<float3>(mesh.vertexCount, allocator);
+		List<Vector3> list = new List<Vector3>(mesh.vertexCount);
+		mesh.GetVertices(list);
+		for (int i = 0; i < list.Count; i++)
+		{
+			nativeArray[i] = list[i];
+		}
+		NativeArray<int> nativeArray2 = new NativeArray<int>(mesh.triangles, allocator);
+		NativeArray<float3> faceN = new NativeArray<float3>(nativeArray2.Length / 3, allocator);
+		IJobParallelForExtensions.Schedule(new FaceNormalJob
+		{
+			Verts = nativeArray,
+			Tris = nativeArray2,
+			FaceN = faceN
+		}, faceN.Length, 64).Complete();
+		NativeList<float3> nativeList = new NativeList<float3>(nativeArray.Length, allocator);
+		NativeList<int> nativeList2 = new NativeList<int>(nativeArray2.Length, allocator);
+		new SplitJob
+		{
+			CosThresh = math.cos(math.radians(angleDeg)),
+			SrcVerts = nativeArray,
+			SrcTris = nativeArray2,
+			FaceN = faceN,
+			DstVerts = nativeList,
+			DstTris = nativeList2
+		}.Run();
+		NativeArray<float3> outNormals = new NativeArray<float3>(nativeList.Length, allocator);
+		RecalcNormalsJobified(nativeList, nativeList2, areaWeight, allocator, ref outNormals);
+		mesh.Clear();
+		List<Vector3> list2 = new List<Vector3>(nativeList.Length);
+		for (int j = 0; j < nativeList.Length; j++)
+		{
+			list2.Add(nativeList[j]);
+		}
+		mesh.SetVertices(list2);
+		mesh.triangles = nativeList2.AsArray().ToArray();
+		List<Vector3> list3 = new List<Vector3>(outNormals.Length);
+		for (int k = 0; k < outNormals.Length; k++)
+		{
+			list3.Add(outNormals[k]);
+		}
+		mesh.SetNormals(list3);
+		mesh.RecalculateBounds();
+		nativeArray.Dispose();
+		nativeArray2.Dispose();
+		faceN.Dispose();
+		nativeList.Dispose();
+		nativeList2.Dispose();
+		outNormals.Dispose();
+	}
+
+	private static void RecalcNormalsJobified(NativeList<float3> verts, NativeList<int> tris, bool areaWeight, Allocator alloc, ref NativeArray<float3> outNormals)
+	{
+		int length = verts.Length;
+		int num = tris.Length / 3;
+		NativeArray<float3> nativeArray = new NativeArray<float3>(num, alloc);
+		IJobParallelForExtensions.Schedule(new TriNormalJob
+		{
+			V = verts.AsArray(),
+			T = tris.AsArray(),
+			Out = nativeArray,
+			AreaWeight = (areaWeight ? 1 : 0)
+		}, num, 64).Complete();
+		NativeParallelMultiHashMap<int, int> v2T = new NativeParallelMultiHashMap<int, int>(tris.Length, alloc);
+		IJobParallelForExtensions.Schedule(new BuildAdjJob
+		{
+			T = tris.AsArray(),
+			MapW = v2T.AsParallelWriter()
+		}, num, 64).Complete();
+		IJobParallelForExtensions.Schedule(new VertexNormalJob
+		{
+			AreaWeight = (areaWeight ? 1 : 0),
+			TriN = nativeArray,
+			V2T = v2T,
+			Out = outNormals
+		}, length, 64).Complete();
+		nativeArray.Dispose();
+		v2T.Dispose();
 	}
 }

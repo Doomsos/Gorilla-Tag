@@ -1,39 +1,45 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct XSceneRef
 {
+	public SceneIndex TargetScene;
+
+	public int TargetID;
+
+	private XSceneRefTarget cached;
+
+	private bool didCache;
+
 	public bool TryResolve(out XSceneRefTarget result)
 	{
-		if (this.TargetID == 0)
+		if (TargetID == 0)
 		{
 			result = null;
 			return true;
 		}
-		if (this.didCache && this.cached != null)
+		if (didCache && cached != null)
 		{
-			result = this.cached;
+			result = cached;
 			return true;
 		}
-		XSceneRefTarget xsceneRefTarget;
-		if (!XSceneRefGlobalHub.TryResolve(this.TargetScene, this.TargetID, out xsceneRefTarget))
+		if (!XSceneRefGlobalHub.TryResolve(TargetScene, TargetID, out var result2))
 		{
 			result = null;
 			return false;
 		}
-		this.cached = xsceneRefTarget;
-		this.didCache = true;
-		result = xsceneRefTarget;
+		cached = result2;
+		didCache = true;
+		result = result2;
 		return true;
 	}
 
 	public bool TryResolve(out GameObject result)
 	{
-		XSceneRefTarget xsceneRefTarget;
-		if (this.TryResolve(out xsceneRefTarget))
+		if (TryResolve(out XSceneRefTarget result2))
 		{
-			result = ((xsceneRefTarget == null) ? null : xsceneRefTarget.gameObject);
+			result = ((result2 == null) ? null : result2.gameObject);
 			return true;
 		}
 		result = null;
@@ -42,41 +48,32 @@ public struct XSceneRef
 
 	public bool TryResolve<T>(out T result) where T : Component
 	{
-		XSceneRefTarget xsceneRefTarget;
-		if (this.TryResolve(out xsceneRefTarget))
+		if (TryResolve(out XSceneRefTarget result2))
 		{
-			result = ((xsceneRefTarget == null) ? default(T) : xsceneRefTarget.GetComponent<T>());
+			result = ((result2 == null) ? null : result2.GetComponent<T>());
 			return true;
 		}
-		result = default(T);
+		result = null;
 		return false;
 	}
 
 	public void AddCallbackOnLoad(Action callback)
 	{
-		this.TargetScene.AddCallbackOnSceneLoad(callback);
+		TargetScene.AddCallbackOnSceneLoad(callback);
 	}
 
 	public void RemoveCallbackOnLoad(Action callback)
 	{
-		this.TargetScene.RemoveCallbackOnSceneLoad(callback);
+		TargetScene.RemoveCallbackOnSceneLoad(callback);
 	}
 
 	public void AddCallbackOnUnload(Action callback)
 	{
-		this.TargetScene.AddCallbackOnSceneUnload(callback);
+		TargetScene.AddCallbackOnSceneUnload(callback);
 	}
 
 	public void RemoveCallbackOnUnload(Action callback)
 	{
-		this.TargetScene.RemoveCallbackOnSceneUnload(callback);
+		TargetScene.RemoveCallbackOnSceneUnload(callback);
 	}
-
-	public SceneIndex TargetScene;
-
-	public int TargetID;
-
-	private XSceneRefTarget cached;
-
-	private bool didCache;
 }

@@ -1,22 +1,21 @@
-﻿using System;
 using UnityEngine;
 
 public class DelayedDestroyObject : MonoBehaviour
 {
+	public float lifetime = 10f;
+
+	private float _timeToDie;
+
 	private void Start()
 	{
-		this._timeToDie = Time.time + this.lifetime;
+		_timeToDie = Time.time + lifetime;
 	}
 
 	private void LateUpdate()
 	{
-		if (Time.time >= this._timeToDie)
+		if (Time.time >= _timeToDie)
 		{
 			Object.Destroy(base.gameObject);
 		}
 	}
-
-	public float lifetime = 10f;
-
-	private float _timeToDie;
 }

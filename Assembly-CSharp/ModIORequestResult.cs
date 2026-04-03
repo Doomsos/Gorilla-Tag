@@ -1,11 +1,14 @@
-﻿using System;
 using Modio;
 
 public struct ModIORequestResult
 {
+	public bool success;
+
+	public string message;
+
 	public static ModIORequestResult CreateFailureResult(string inMessage)
 	{
-		ModIORequestResult result;
+		ModIORequestResult result = default(ModIORequestResult);
 		result.success = false;
 		result.message = inMessage;
 		return result;
@@ -13,7 +16,7 @@ public struct ModIORequestResult
 
 	public static ModIORequestResult CreateSuccessResult()
 	{
-		ModIORequestResult result;
+		ModIORequestResult result = default(ModIORequestResult);
 		result.success = true;
 		result.message = "";
 		return result;
@@ -21,8 +24,8 @@ public struct ModIORequestResult
 
 	public static ModIORequestResult CreateFromError(Error error)
 	{
-		ModIORequestResult result;
-		if (error)
+		ModIORequestResult result = default(ModIORequestResult);
+		if ((bool)error)
 		{
 			result.success = false;
 			result.message = error.GetMessage();
@@ -34,8 +37,4 @@ public struct ModIORequestResult
 		}
 		return result;
 	}
-
-	public bool success;
-
-	public string message;
 }

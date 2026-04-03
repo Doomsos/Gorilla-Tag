@@ -1,68 +1,11 @@
-﻿using System;
 using System.Collections.Generic;
 using Fusion;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class DevWatch : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.SearchButton.SearchEvent.AddListener(new UnityAction(this.SearchItems));
-		this.TakeOwnershipButton.onClick.AddListener(new UnityAction(this.TakeOwneshipOfItem));
-		this.DestroyObjectButton.onClick.AddListener(new UnityAction(this.TryDestroyItem));
-	}
-
-	public void SearchItems()
-	{
-		this.FoundNetworkObjects.Clear();
-		RaycastHit[] array = Physics.SphereCastAll(new Ray(this.RayCastStartPos.position, this.RayCastDirection.position - this.RayCastStartPos.position), 0.3f, 100f);
-		if (array.Length != 0)
-		{
-			foreach (RaycastHit raycastHit in array)
-			{
-				NetworkObject item;
-				if (raycastHit.collider.gameObject.TryGetComponent<NetworkObject>(out item))
-				{
-					this.FoundNetworkObjects.Add(item);
-				}
-			}
-		}
-	}
-
-	public void Cleanup()
-	{
-		this.FoundNetworkObjects.Clear();
-		if (this.Items.Count > 0)
-		{
-			for (int i = this.Items.Count - 1; i >= 0; i--)
-			{
-				Object.Destroy(this.Items[i]);
-			}
-		}
-		this.Items.Clear();
-		this.Panel1.SetActive(true);
-		this.Panel2.SetActive(false);
-	}
-
-	public void ItemSelected(DevWatchSelectableItem item)
-	{
-		this.Panel1.SetActive(false);
-		this.Panel2.SetActive(true);
-		this.SelectedItem = item;
-		this.SelectedItemName.text = item.ItemName.text;
-	}
-
-	public void TryDestroyItem()
-	{
-	}
-
-	public void TakeOwneshipOfItem()
-	{
-	}
-
 	public DevWatchButton SearchButton;
 
 	public GameObject Panel1;
@@ -88,4 +31,60 @@ public class DevWatch : MonoBehaviour
 	public TextMeshProUGUI SelectedItemName;
 
 	public DevWatchSelectableItem SelectedItem;
+
+	private void Awake()
+	{
+		SearchButton.SearchEvent.AddListener(SearchItems);
+		TakeOwnershipButton.onClick.AddListener(TakeOwneshipOfItem);
+		DestroyObjectButton.onClick.AddListener(TryDestroyItem);
+	}
+
+	public void SearchItems()
+	{
+		FoundNetworkObjects.Clear();
+		RaycastHit[] array = Physics.SphereCastAll(new Ray(RayCastStartPos.position, RayCastDirection.position - RayCastStartPos.position), 0.3f, 100f);
+		if (array.Length == 0)
+		{
+			return;
+		}
+		RaycastHit[] array2 = array;
+		foreach (RaycastHit raycastHit in array2)
+		{
+			if (raycastHit.collider.gameObject.TryGetComponent<NetworkObject>(out var component))
+			{
+				FoundNetworkObjects.Add(component);
+			}
+		}
+	}
+
+	public void Cleanup()
+	{
+		FoundNetworkObjects.Clear();
+		if (Items.Count > 0)
+		{
+			for (int num = Items.Count - 1; num >= 0; num--)
+			{
+				Object.Destroy(Items[num]);
+			}
+		}
+		Items.Clear();
+		Panel1.SetActive(value: true);
+		Panel2.SetActive(value: false);
+	}
+
+	public void ItemSelected(DevWatchSelectableItem item)
+	{
+		Panel1.SetActive(value: false);
+		Panel2.SetActive(value: true);
+		SelectedItem = item;
+		SelectedItemName.text = item.ItemName.text;
+	}
+
+	public void TryDestroyItem()
+	{
+	}
+
+	public void TakeOwneshipOfItem()
+	{
+	}
 }

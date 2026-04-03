@@ -1,174 +1,147 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace GameObjectScheduling
+namespace GameObjectScheduling;
+
+[CreateAssetMenu(fileName = "New Game Object Schedule", menuName = "Game Object Scheduling/Game Object Schedule", order = 0)]
+public class GameObjectSchedule : ScriptableObject
 {
-	[CreateAssetMenu(fileName = "New Game Object Schedule", menuName = "Game Object Scheduling/Game Object Schedule", order = 0)]
-	public class GameObjectSchedule : ScriptableObject
+	[Serializable]
+	public class GameObjectScheduleNode
 	{
-		public GameObjectSchedule.GameObjectScheduleNode[] Nodes
-		{
-			get
-			{
-				return this.nodes;
-			}
-		}
+		[SerializeField]
+		public string activeDateTime = "1/1/0001 00:00:00";
 
-		public bool InitialState
-		{
-			get
-			{
-				return this.initialState;
-			}
-		}
+		[SerializeField]
+		[Tooltip("Check to turn on. Uncheck to turn off.")]
+		public bool activeState = true;
 
-		public int GetCurrentNodeIndex(DateTime currentDate, out DateTime startDate)
-		{
-			int i = -1;
-			startDate = default(DateTime);
-			while (i < this.nodes.Length - 1)
-			{
-				if (currentDate < this.nodes[i + 1].DateTime)
-				{
-					if (i >= 0)
-					{
-						startDate = this.nodes[i].DateTime;
-					}
-					return i;
-				}
-				i++;
-			}
-			return int.MaxValue;
-		}
+		private DateTime dateTime;
+
+		public bool ActiveState => activeState;
+
+		public DateTime DateTime => dateTime;
 
 		public void Validate()
 		{
-			if (this.validated)
+			try
 			{
-				return;
+				dateTime = DateTime.Parse(activeDateTime, CultureInfo.InvariantCulture);
 			}
-			this._validate();
-			this.validated = true;
+			catch
+			{
+				dateTime = DateTime.MinValue;
+			}
 		}
+	}
 
-		private void _validate()
+	[SerializeField]
+	private bool initialState;
+
+	[SerializeField]
+	private GameObjectScheduleNode[] nodes;
+
+	[SerializeField]
+	private SchedulingOptions options;
+
+	private bool validated;
+
+	public GameObjectScheduleNode[] Nodes => nodes;
+
+	public bool InitialState => initialState;
+
+	public int GetCurrentNodeIndex(DateTime currentDate, out DateTime startDate)
+	{
+		int i = -1;
+		startDate = default(DateTime);
+		for (; i < nodes.Length - 1; i++)
 		{
-			for (int i = 0; i < this.nodes.Length; i++)
+			if (currentDate < nodes[i + 1].DateTime)
 			{
-				this.nodes[i].Validate();
+				if (i >= 0)
+				{
+					startDate = nodes[i].DateTime;
+				}
+				return i;
 			}
-			List<GameObjectSchedule.GameObjectScheduleNode> list = new List<GameObjectSchedule.GameObjectScheduleNode>(this.nodes);
-			list.Sort((GameObjectSchedule.GameObjectScheduleNode e1, GameObjectSchedule.GameObjectScheduleNode e2) => e1.DateTime.CompareTo(e2.DateTime));
-			this.nodes = list.ToArray();
 		}
+		return int.MaxValue;
+	}
 
-		public static void GenerateDailyShuffle(DateTime startDate, DateTime endDate, GameObjectSchedule[] schedules)
+	public void Validate()
+	{
+		if (!validated)
 		{
-			TimeSpan t = TimeSpan.FromDays(1.0);
-			int num = schedules.Length - 1;
-			int num2 = schedules.Length - 2;
-			DateTime dateTime = startDate;
-			List<GameObjectSchedule.GameObjectScheduleNode>[] array = new List<GameObjectSchedule.GameObjectScheduleNode>[schedules.Length];
-			for (int i = 0; i < array.Length; i++)
+			_validate();
+			validated = true;
+		}
+	}
+
+	private void _validate()
+	{
+		for (int i = 0; i < nodes.Length; i++)
+		{
+			nodes[i].Validate();
+		}
+		List<GameObjectScheduleNode> list = new List<GameObjectScheduleNode>(nodes);
+		list.Sort((GameObjectScheduleNode e1, GameObjectScheduleNode e2) => e1.DateTime.CompareTo(e2.DateTime));
+		nodes = list.ToArray();
+	}
+
+	public static void GenerateDailyShuffle(DateTime startDate, DateTime endDate, GameObjectSchedule[] schedules)
+	{
+		TimeSpan timeSpan = TimeSpan.FromDays(1.0);
+		int num = schedules.Length - 1;
+		int num2 = schedules.Length - 2;
+		DateTime dateTime = startDate;
+		List<GameObjectScheduleNode>[] array = new List<GameObjectScheduleNode>[schedules.Length];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = new List<GameObjectScheduleNode>();
+		}
+		while (dateTime < endDate)
+		{
+			int num3 = UnityEngine.Random.Range(0, schedules.Length - 2);
+			if (num <= num3)
 			{
-				array[i] = new List<GameObjectSchedule.GameObjectScheduleNode>();
+				num3++;
+				if (num2 <= num3)
+				{
+					num3++;
+				}
 			}
-			while (dateTime < endDate)
+			else if (num2 <= num3)
 			{
-				int num3 = Random.Range(0, schedules.Length - 2);
+				num3++;
 				if (num <= num3)
 				{
 					num3++;
-					if (num2 <= num3)
-					{
-						num3++;
-					}
 				}
-				else if (num2 <= num3)
-				{
-					num3++;
-					if (num <= num3)
-					{
-						num3++;
-					}
-				}
-				array[num].Add(new GameObjectSchedule.GameObjectScheduleNode
-				{
-					activeDateTime = dateTime.ToString(),
-					activeState = false
-				});
-				array[num3].Add(new GameObjectSchedule.GameObjectScheduleNode
-				{
-					activeDateTime = dateTime.ToString(),
-					activeState = true
-				});
-				dateTime += t;
-				num2 = num;
-				num = num3;
 			}
-			array[num].Add(new GameObjectSchedule.GameObjectScheduleNode
+			array[num].Add(new GameObjectScheduleNode
 			{
 				activeDateTime = dateTime.ToString(),
 				activeState = false
 			});
-			for (int j = 0; j < array.Length; j++)
+			array[num3].Add(new GameObjectScheduleNode
 			{
-				schedules[j].nodes = array[j].ToArray();
-			}
+				activeDateTime = dateTime.ToString(),
+				activeState = true
+			});
+			dateTime += timeSpan;
+			num2 = num;
+			num = num3;
 		}
-
-		[SerializeField]
-		private bool initialState;
-
-		[SerializeField]
-		private GameObjectSchedule.GameObjectScheduleNode[] nodes;
-
-		[SerializeField]
-		private SchedulingOptions options;
-
-		private bool validated;
-
-		[Serializable]
-		public class GameObjectScheduleNode
+		array[num].Add(new GameObjectScheduleNode
 		{
-			public bool ActiveState
-			{
-				get
-				{
-					return this.activeState;
-				}
-			}
-
-			public DateTime DateTime
-			{
-				get
-				{
-					return this.dateTime;
-				}
-			}
-
-			public void Validate()
-			{
-				try
-				{
-					this.dateTime = DateTime.Parse(this.activeDateTime, CultureInfo.InvariantCulture);
-				}
-				catch
-				{
-					this.dateTime = DateTime.MinValue;
-				}
-			}
-
-			[SerializeField]
-			public string activeDateTime = "1/1/0001 00:00:00";
-
-			[SerializeField]
-			[Tooltip("Check to turn on. Uncheck to turn off.")]
-			public bool activeState = true;
-
-			private DateTime dateTime;
+			activeDateTime = dateTime.ToString(),
+			activeState = false
+		});
+		for (int j = 0; j < array.Length; j++)
+		{
+			schedules[j].nodes = array[j].ToArray();
 		}
 	}
 }

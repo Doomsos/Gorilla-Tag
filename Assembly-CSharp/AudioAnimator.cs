@@ -1,39 +1,61 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class AudioAnimator : MonoBehaviour
 {
+	[Serializable]
+	private struct AudioTarget
+	{
+		public AudioSource audioSource;
+
+		public AnimationCurve pitchCurve;
+
+		public AnimationCurve volumeCurve;
+
+		[NonSerialized]
+		public float baseVolume;
+
+		public float riseSmoothing;
+
+		public float lowerSmoothing;
+	}
+
+	private bool didInitBaseVolume;
+
+	[SerializeField]
+	private AudioTarget[] targets;
+
 	private void Start()
 	{
-		if (!this.didInitBaseVolume)
+		if (!didInitBaseVolume)
 		{
-			this.InitBaseVolume();
+			InitBaseVolume();
 		}
 	}
 
 	private void InitBaseVolume()
 	{
-		for (int i = 0; i < this.targets.Length; i++)
+		for (int i = 0; i < targets.Length; i++)
 		{
-			this.targets[i].baseVolume = this.targets[i].audioSource.volume;
+			targets[i].baseVolume = targets[i].audioSource.volume;
 		}
-		this.didInitBaseVolume = true;
+		didInitBaseVolume = true;
 	}
 
 	public void UpdateValue(float value, bool ignoreSmoothing = false)
 	{
-		this.UpdatePitchAndVolume(value, value, ignoreSmoothing);
+		UpdatePitchAndVolume(value, value, ignoreSmoothing);
 	}
 
 	public void UpdatePitchAndVolume(float pitchValue, float volumeValue, bool ignoreSmoothing = false)
 	{
-		if (!this.didInitBaseVolume)
+		if (!didInitBaseVolume)
 		{
-			this.InitBaseVolume();
+			InitBaseVolume();
 		}
-		for (int i = 0; i < this.targets.Length; i++)
+		for (int i = 0; i < targets.Length; i++)
 		{
-			AudioAnimator.AudioTarget audioTarget = this.targets[i];
+			AudioTarget audioTarget = targets[i];
 			float p = audioTarget.pitchCurve.Evaluate(pitchValue);
 			float pitch = Mathf.Pow(1.05946f, p);
 			audioTarget.audioSource.pitch = pitch;
@@ -53,27 +75,5 @@ public class AudioAnimator : MonoBehaviour
 				audioTarget.audioSource.volume = Mathf.MoveTowards(audioTarget.audioSource.volume, audioTarget.baseVolume * num, (1f - audioTarget.riseSmoothing) * audioTarget.baseVolume * Time.deltaTime * 90f);
 			}
 		}
-	}
-
-	private bool didInitBaseVolume;
-
-	[SerializeField]
-	private AudioAnimator.AudioTarget[] targets;
-
-	[Serializable]
-	private struct AudioTarget
-	{
-		public AudioSource audioSource;
-
-		public AnimationCurve pitchCurve;
-
-		public AnimationCurve volumeCurve;
-
-		[NonSerialized]
-		public float baseVolume;
-
-		public float riseSmoothing;
-
-		public float lowerSmoothing;
 	}
 }

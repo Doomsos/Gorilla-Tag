@@ -1,34 +1,22 @@
-﻿using System;
+using System;
 using Photon.Pun;
 
 [Serializable]
-public struct PhotonSignalInfo
+public struct PhotonSignalInfo(NetPlayer sender, int timestamp)
 {
-	public PhotonSignalInfo(NetPlayer sender, int timestamp)
-	{
-		this.sender = sender;
-		this.timestamp = timestamp;
-	}
+	public readonly int timestamp = timestamp;
 
-	public double sentServerTime
-	{
-		get
-		{
-			return this.timestamp / 1000.0;
-		}
-	}
+	public readonly NetPlayer sender = sender;
+
+	public double sentServerTime => (double)(uint)timestamp / 1000.0;
 
 	public override string ToString()
 	{
-		return string.Format("[{0}: Sender = '{1}' sentTime = {2}]", "PhotonSignalInfo", this.sender.ActorNumber, this.sentServerTime);
+		return string.Format("[{0}: Sender = '{1}' sentTime = {2}]", "PhotonSignalInfo", sender.ActorNumber, sentServerTime);
 	}
 
 	public static implicit operator PhotonMessageInfo(PhotonSignalInfo psi)
 	{
 		return new PhotonMessageInfo(psi.sender.GetPlayerRef(), psi.timestamp, null);
 	}
-
-	public readonly int timestamp;
-
-	public readonly NetPlayer sender;
 }

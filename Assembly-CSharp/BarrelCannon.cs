@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using Fusion.CodeGen;
@@ -9,274 +9,83 @@ using UnityEngine;
 [NetworkBehaviourWeaved(3)]
 public class BarrelCannon : NetworkComponent
 {
-	private void Update()
+	private enum BarrelCannonState
 	{
-		if (base.IsMine)
-		{
-			this.AuthorityUpdate();
-		}
-		else
-		{
-			this.ClientUpdate();
-		}
-		this.SharedUpdate();
+		Idle,
+		Loaded,
+		MovingToFirePosition,
+		Firing,
+		PostFireCooldown,
+		ReturningToIdlePosition
 	}
 
-	private void AuthorityUpdate()
+	private class BarrelCannonSyncedState
 	{
-		float time = Time.time;
-		this.syncedState.hasAuthorityPassenger = this.localPlayerInside;
-		switch (this.syncedState.currentState)
-		{
-		default:
-			if (this.localPlayerInside)
-			{
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.Loaded;
-				return;
-			}
-			break;
-		case BarrelCannon.BarrelCannonState.Loaded:
-			if (time - this.stateStartTime > this.cannonEntryDelayTime)
-			{
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.MovingToFirePosition;
-				return;
-			}
-			break;
-		case BarrelCannon.BarrelCannonState.MovingToFirePosition:
-			if (this.moveToFiringPositionTime > Mathf.Epsilon)
-			{
-				this.syncedState.firingPositionLerpValue = Mathf.Clamp01((time - this.stateStartTime) / this.moveToFiringPositionTime);
-			}
-			else
-			{
-				this.syncedState.firingPositionLerpValue = 1f;
-			}
-			if (this.syncedState.firingPositionLerpValue >= 1f - Mathf.Epsilon)
-			{
-				this.syncedState.firingPositionLerpValue = 1f;
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.Firing;
-				return;
-			}
-			break;
-		case BarrelCannon.BarrelCannonState.Firing:
-			if (this.localPlayerInside && this.localPlayerRigidbody != null)
-			{
-				Vector3 b = base.transform.position - GorillaTagger.Instance.headCollider.transform.position;
-				this.localPlayerRigidbody.MovePosition(this.localPlayerRigidbody.position + b);
-			}
-			if (time - this.stateStartTime > this.preFiringDelayTime)
-			{
-				base.transform.localPosition = this.firingPositionOffset;
-				base.transform.localRotation = Quaternion.Euler(this.firingRotationOffset);
-				this.FireBarrelCannonLocal(base.transform.position, base.transform.up);
-				if (PhotonNetwork.InRoom && GorillaGameManager.instance != null)
-				{
-					base.SendRPC("FireBarrelCannonRPC", RpcTarget.Others, new object[]
-					{
-						base.transform.position,
-						base.transform.up
-					});
-				}
-				Collider[] array = this.colliders;
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i].enabled = false;
-				}
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.PostFireCooldown;
-				return;
-			}
-			break;
-		case BarrelCannon.BarrelCannonState.PostFireCooldown:
-			if (time - this.stateStartTime > this.postFiringCooldownTime)
-			{
-				Collider[] array = this.colliders;
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i].enabled = true;
-				}
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.ReturningToIdlePosition;
-				return;
-			}
-			break;
-		case BarrelCannon.BarrelCannonState.ReturningToIdlePosition:
-			if (this.returnToIdlePositionTime > Mathf.Epsilon)
-			{
-				this.syncedState.firingPositionLerpValue = 1f - Mathf.Clamp01((time - this.stateStartTime) / this.returnToIdlePositionTime);
-			}
-			else
-			{
-				this.syncedState.firingPositionLerpValue = 0f;
-			}
-			if (this.syncedState.firingPositionLerpValue <= Mathf.Epsilon)
-			{
-				this.syncedState.firingPositionLerpValue = 0f;
-				this.stateStartTime = time;
-				this.syncedState.currentState = BarrelCannon.BarrelCannonState.Idle;
-			}
-			break;
-		}
+		public BarrelCannonState currentState;
+
+		public bool hasAuthorityPassenger;
+
+		public float firingPositionLerpValue;
 	}
 
-	private void ClientUpdate()
+	[StructLayout(LayoutKind.Explicit, Size = 12)]
+	[NetworkStructWeaved(3)]
+	private struct BarrelCannonSyncedStateData : INetworkStruct
 	{
-		if (!this.syncedState.hasAuthorityPassenger && this.syncedState.currentState == BarrelCannon.BarrelCannonState.Idle && this.localPlayerInside)
-		{
-			base.RequestOwnership();
-		}
-	}
+		[FieldOffset(0)]
+		[FixedBufferProperty(typeof(BarrelCannonState), typeof(UnityValueSurrogate_0040ReaderWriter_0040BarrelCannon__BarrelCannonState), 0, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_00401 _CurrentState;
 
-	private void SharedUpdate()
-	{
-		if (this.syncedState.firingPositionLerpValue != this.localFiringPositionLerpValue)
-		{
-			this.localFiringPositionLerpValue = this.syncedState.firingPositionLerpValue;
-			base.transform.localPosition = Vector3.Lerp(Vector3.zero, this.firingPositionOffset, this.firePositionAnimationCurve.Evaluate(this.localFiringPositionLerpValue));
-			base.transform.localRotation = Quaternion.Euler(Vector3.Lerp(Vector3.zero, this.firingRotationOffset, this.fireRotationAnimationCurve.Evaluate(this.localFiringPositionLerpValue)));
-		}
-	}
+		[FieldOffset(4)]
+		[FixedBufferProperty(typeof(NetworkBool), typeof(UnityValueSurrogate_0040ElementReaderWriterNetworkBool), 0, order = -2147483647)]
+		[WeaverGenerated]
+		[SerializeField]
+		private FixedStorage_00401 _HasAuthorityPassenger;
 
-	private void FireBarrelCannonRPC(Vector3 cannonCenter, Vector3 firingDirection)
-	{
-	}
-
-	private void FireBarrelCannonLocal(Vector3 cannonCenter, Vector3 firingDirection)
-	{
-		if (this.audioSource != null)
+		[Networked]
+		[NetworkedWeaved(0, 1)]
+		public unsafe BarrelCannonState CurrentState
 		{
-			this.audioSource.GTPlay();
-		}
-		if (this.localPlayerInside && this.localPlayerRigidbody != null)
-		{
-			Vector3 b = cannonCenter - GorillaTagger.Instance.headCollider.transform.position;
-			this.localPlayerRigidbody.position = this.localPlayerRigidbody.position + b;
-			this.localPlayerRigidbody.linearVelocity = firingDirection * this.firingSpeed;
-		}
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		Rigidbody rigidbody;
-		if (this.LocalPlayerTriggerFilter(other, out rigidbody))
-		{
-			this.localPlayerInside = true;
-			this.localPlayerRigidbody = rigidbody;
-		}
-	}
-
-	private void OnTriggerExit(Collider other)
-	{
-		Rigidbody rigidbody;
-		if (this.LocalPlayerTriggerFilter(other, out rigidbody))
-		{
-			this.localPlayerInside = false;
-			this.localPlayerRigidbody = null;
-		}
-	}
-
-	private bool LocalPlayerTriggerFilter(Collider other, out Rigidbody rb)
-	{
-		rb = null;
-		if (other.gameObject == GorillaTagger.Instance.headCollider.gameObject)
-		{
-			rb = GorillaTagger.Instance.GetComponent<Rigidbody>();
-		}
-		return rb != null;
-	}
-
-	private bool IsLocalPlayerInCannon()
-	{
-		Vector3 point;
-		Vector3 point2;
-		this.GetCapsulePoints(this.triggerCollider, out point, out point2);
-		Physics.OverlapCapsuleNonAlloc(point, point2, this.triggerCollider.radius, this.triggerOverlapResults);
-		for (int i = 0; i < this.triggerOverlapResults.Length; i++)
-		{
-			Rigidbody rigidbody;
-			if (this.LocalPlayerTriggerFilter(this.triggerOverlapResults[i], out rigidbody))
+			readonly get
 			{
-				return true;
+				return *(BarrelCannonState*)Native.ReferenceToPointer(ref _CurrentState);
+			}
+			set
+			{
+				*(BarrelCannonState*)Native.ReferenceToPointer(ref _CurrentState) = value;
 			}
 		}
-		return false;
-	}
 
-	private void GetCapsulePoints(CapsuleCollider capsule, out Vector3 pointA, out Vector3 pointB)
-	{
-		float d = capsule.height * 0.5f - capsule.radius;
-		pointA = capsule.transform.position + capsule.transform.up * d;
-		pointB = capsule.transform.position - capsule.transform.up * d;
-	}
-
-	[Networked]
-	[NetworkedWeaved(0, 3)]
-	private unsafe BarrelCannon.BarrelCannonSyncedStateData Data
-	{
-		get
+		[Networked]
+		[NetworkedWeaved(1, 1)]
+		public unsafe NetworkBool HasAuthorityPassenger
 		{
-			if (this.Ptr == null)
+			readonly get
 			{
-				throw new InvalidOperationException("Error when accessing BarrelCannon.Data. Networked properties can only be accessed when Spawned() has been called.");
+				return *(NetworkBool*)Native.ReferenceToPointer(ref _HasAuthorityPassenger);
 			}
-			return *(BarrelCannon.BarrelCannonSyncedStateData*)(this.Ptr + 0);
-		}
-		set
-		{
-			if (this.Ptr == null)
+			set
 			{
-				throw new InvalidOperationException("Error when accessing BarrelCannon.Data. Networked properties can only be accessed when Spawned() has been called.");
+				*(NetworkBool*)Native.ReferenceToPointer(ref _HasAuthorityPassenger) = value;
 			}
-			*(BarrelCannon.BarrelCannonSyncedStateData*)(this.Ptr + 0) = value;
 		}
-	}
 
-	public override void WriteDataFusion()
-	{
-		this.Data = this.syncedState;
-	}
+		[field: FieldOffset(8)]
+		public float FiringPositionLerpValue { get; set; }
 
-	public override void ReadDataFusion()
-	{
-		this.syncedState.currentState = this.Data.CurrentState;
-		this.syncedState.hasAuthorityPassenger = this.Data.HasAuthorityPassenger;
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		stream.SendNext(this.syncedState.currentState);
-		stream.SendNext(this.syncedState.hasAuthorityPassenger);
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.syncedState.currentState = (BarrelCannon.BarrelCannonState)stream.ReceiveNext();
-		this.syncedState.hasAuthorityPassenger = (bool)stream.ReceiveNext();
-	}
-
-	public override void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
-	{
-		if (!this.localPlayerInside)
+		public BarrelCannonSyncedStateData(BarrelCannonState state, bool hasAuthPassenger, float firingPosLerpVal)
 		{
-			targetView.TransferOwnership(requestingPlayer);
+			CurrentState = state;
+			HasAuthorityPassenger = hasAuthPassenger;
+			FiringPositionLerpValue = firingPosLerpVal;
 		}
-	}
 
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.Data = this._Data;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._Data = this.Data;
+		public static implicit operator BarrelCannonSyncedStateData(BarrelCannonSyncedState state)
+		{
+			return new BarrelCannonSyncedStateData(state.currentState, state.hasAuthorityPassenger, state.firingPositionLerpValue);
+		}
 	}
 
 	[SerializeField]
@@ -324,7 +133,7 @@ public class BarrelCannon : NetworkComponent
 	[SerializeField]
 	private Collider[] colliders;
 
-	private BarrelCannon.BarrelCannonSyncedState syncedState = new BarrelCannon.BarrelCannonSyncedState();
+	private BarrelCannonSyncedState syncedState = new BarrelCannonSyncedState();
 
 	private Collider[] triggerOverlapResults = new Collider[16];
 
@@ -339,83 +148,261 @@ public class BarrelCannon : NetworkComponent
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 3)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private BarrelCannon.BarrelCannonSyncedStateData _Data;
+	private BarrelCannonSyncedStateData _Data;
 
-	private enum BarrelCannonState
+	[Networked]
+	[NetworkedWeaved(0, 3)]
+	private unsafe BarrelCannonSyncedStateData Data
 	{
-		Idle,
-		Loaded,
-		MovingToFirePosition,
-		Firing,
-		PostFireCooldown,
-		ReturningToIdlePosition
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing BarrelCannon.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(BarrelCannonSyncedStateData*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing BarrelCannon.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(BarrelCannonSyncedStateData*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
 	}
 
-	private class BarrelCannonSyncedState
+	private void Update()
 	{
-		public BarrelCannon.BarrelCannonState currentState;
-
-		public bool hasAuthorityPassenger;
-
-		public float firingPositionLerpValue;
+		if (base.IsMine)
+		{
+			AuthorityUpdate();
+		}
+		else
+		{
+			ClientUpdate();
+		}
+		SharedUpdate();
 	}
 
-	[NetworkStructWeaved(3)]
-	[StructLayout(LayoutKind.Explicit, Size = 12)]
-	private struct BarrelCannonSyncedStateData : INetworkStruct
+	private void AuthorityUpdate()
 	{
-		[Networked]
-		[NetworkedWeaved(0, 1)]
-		public unsafe BarrelCannon.BarrelCannonState CurrentState
+		float time = Time.time;
+		syncedState.hasAuthorityPassenger = localPlayerInside;
+		switch (syncedState.currentState)
 		{
-			readonly get
+		default:
+			if (localPlayerInside)
 			{
-				return *(BarrelCannon.BarrelCannonState*)Native.ReferenceToPointer<FixedStorage@1>(ref this._CurrentState);
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.Loaded;
 			}
-			set
+			break;
+		case BarrelCannonState.Loaded:
+			if (time - stateStartTime > cannonEntryDelayTime)
 			{
-				*(BarrelCannon.BarrelCannonState*)Native.ReferenceToPointer<FixedStorage@1>(ref this._CurrentState) = value;
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.MovingToFirePosition;
+			}
+			break;
+		case BarrelCannonState.MovingToFirePosition:
+			if (moveToFiringPositionTime > Mathf.Epsilon)
+			{
+				syncedState.firingPositionLerpValue = Mathf.Clamp01((time - stateStartTime) / moveToFiringPositionTime);
+			}
+			else
+			{
+				syncedState.firingPositionLerpValue = 1f;
+			}
+			if (syncedState.firingPositionLerpValue >= 1f - Mathf.Epsilon)
+			{
+				syncedState.firingPositionLerpValue = 1f;
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.Firing;
+			}
+			break;
+		case BarrelCannonState.Firing:
+			if (localPlayerInside && localPlayerRigidbody != null)
+			{
+				Vector3 vector = base.transform.position - GorillaTagger.Instance.headCollider.transform.position;
+				localPlayerRigidbody.MovePosition(localPlayerRigidbody.position + vector);
+			}
+			if (time - stateStartTime > preFiringDelayTime)
+			{
+				base.transform.localPosition = firingPositionOffset;
+				base.transform.localRotation = Quaternion.Euler(firingRotationOffset);
+				FireBarrelCannonLocal(base.transform.position, base.transform.up);
+				if (PhotonNetwork.InRoom && GorillaGameManager.instance != null)
+				{
+					SendRPC("FireBarrelCannonRPC", RpcTarget.Others, base.transform.position, base.transform.up);
+				}
+				Collider[] array = colliders;
+				for (int i = 0; i < array.Length; i++)
+				{
+					array[i].enabled = false;
+				}
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.PostFireCooldown;
+			}
+			break;
+		case BarrelCannonState.PostFireCooldown:
+			if (time - stateStartTime > postFiringCooldownTime)
+			{
+				Collider[] array = colliders;
+				for (int i = 0; i < array.Length; i++)
+				{
+					array[i].enabled = true;
+				}
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.ReturningToIdlePosition;
+			}
+			break;
+		case BarrelCannonState.ReturningToIdlePosition:
+			if (returnToIdlePositionTime > Mathf.Epsilon)
+			{
+				syncedState.firingPositionLerpValue = 1f - Mathf.Clamp01((time - stateStartTime) / returnToIdlePositionTime);
+			}
+			else
+			{
+				syncedState.firingPositionLerpValue = 0f;
+			}
+			if (syncedState.firingPositionLerpValue <= Mathf.Epsilon)
+			{
+				syncedState.firingPositionLerpValue = 0f;
+				stateStartTime = time;
+				syncedState.currentState = BarrelCannonState.Idle;
+			}
+			break;
+		}
+	}
+
+	private void ClientUpdate()
+	{
+		if (!syncedState.hasAuthorityPassenger && syncedState.currentState == BarrelCannonState.Idle && localPlayerInside)
+		{
+			RequestOwnership();
+		}
+	}
+
+	private void SharedUpdate()
+	{
+		if (syncedState.firingPositionLerpValue != localFiringPositionLerpValue)
+		{
+			localFiringPositionLerpValue = syncedState.firingPositionLerpValue;
+			base.transform.localPosition = Vector3.Lerp(Vector3.zero, firingPositionOffset, firePositionAnimationCurve.Evaluate(localFiringPositionLerpValue));
+			base.transform.localRotation = Quaternion.Euler(Vector3.Lerp(Vector3.zero, firingRotationOffset, fireRotationAnimationCurve.Evaluate(localFiringPositionLerpValue)));
+		}
+	}
+
+	private void FireBarrelCannonRPC(Vector3 cannonCenter, Vector3 firingDirection)
+	{
+	}
+
+	private void FireBarrelCannonLocal(Vector3 cannonCenter, Vector3 firingDirection)
+	{
+		if (audioSource != null)
+		{
+			audioSource.GTPlay();
+		}
+		if (localPlayerInside && localPlayerRigidbody != null)
+		{
+			Vector3 vector = cannonCenter - GorillaTagger.Instance.headCollider.transform.position;
+			localPlayerRigidbody.position += vector;
+			localPlayerRigidbody.linearVelocity = firingDirection * firingSpeed;
+		}
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (LocalPlayerTriggerFilter(other, out var rb))
+		{
+			localPlayerInside = true;
+			localPlayerRigidbody = rb;
+		}
+	}
+
+	private void OnTriggerExit(Collider other)
+	{
+		if (LocalPlayerTriggerFilter(other, out var _))
+		{
+			localPlayerInside = false;
+			localPlayerRigidbody = null;
+		}
+	}
+
+	private bool LocalPlayerTriggerFilter(Collider other, out Rigidbody rb)
+	{
+		rb = null;
+		if (other.gameObject == GorillaTagger.Instance.headCollider.gameObject)
+		{
+			rb = GorillaTagger.Instance.GetComponent<Rigidbody>();
+		}
+		return rb != null;
+	}
+
+	private bool IsLocalPlayerInCannon()
+	{
+		GetCapsulePoints(triggerCollider, out var pointA, out var pointB);
+		Physics.OverlapCapsuleNonAlloc(pointA, pointB, triggerCollider.radius, triggerOverlapResults);
+		for (int i = 0; i < triggerOverlapResults.Length; i++)
+		{
+			if (LocalPlayerTriggerFilter(triggerOverlapResults[i], out var _))
+			{
+				return true;
 			}
 		}
+		return false;
+	}
 
-		[Networked]
-		[NetworkedWeaved(1, 1)]
-		public unsafe NetworkBool HasAuthorityPassenger
+	private void GetCapsulePoints(CapsuleCollider capsule, out Vector3 pointA, out Vector3 pointB)
+	{
+		float num = capsule.height * 0.5f - capsule.radius;
+		pointA = capsule.transform.position + capsule.transform.up * num;
+		pointB = capsule.transform.position - capsule.transform.up * num;
+	}
+
+	public override void WriteDataFusion()
+	{
+		Data = syncedState;
+	}
+
+	public override void ReadDataFusion()
+	{
+		syncedState.currentState = Data.CurrentState;
+		syncedState.hasAuthorityPassenger = Data.HasAuthorityPassenger;
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		stream.SendNext(syncedState.currentState);
+		stream.SendNext(syncedState.hasAuthorityPassenger);
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		syncedState.currentState = (BarrelCannonState)stream.ReceiveNext();
+		syncedState.hasAuthorityPassenger = (bool)stream.ReceiveNext();
+	}
+
+	public override void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
+	{
+		if (!localPlayerInside)
 		{
-			readonly get
-			{
-				return *(NetworkBool*)Native.ReferenceToPointer<FixedStorage@1>(ref this._HasAuthorityPassenger);
-			}
-			set
-			{
-				*(NetworkBool*)Native.ReferenceToPointer<FixedStorage@1>(ref this._HasAuthorityPassenger) = value;
-			}
+			targetView.TransferOwnership(requestingPlayer);
 		}
+	}
 
-		public float FiringPositionLerpValue { readonly get; set; }
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
 
-		public BarrelCannonSyncedStateData(BarrelCannon.BarrelCannonState state, bool hasAuthPassenger, float firingPosLerpVal)
-		{
-			this.CurrentState = state;
-			this.HasAuthorityPassenger = hasAuthPassenger;
-			this.FiringPositionLerpValue = firingPosLerpVal;
-		}
-
-		public static implicit operator BarrelCannon.BarrelCannonSyncedStateData(BarrelCannon.BarrelCannonSyncedState state)
-		{
-			return new BarrelCannon.BarrelCannonSyncedStateData(state.currentState, state.hasAuthorityPassenger, state.firingPositionLerpValue);
-		}
-
-		[FixedBufferProperty(typeof(BarrelCannon.BarrelCannonState), typeof(UnityValueSurrogate@ReaderWriter@BarrelCannon__BarrelCannonState), 0, order = -2147483647)]
-		[WeaverGenerated]
-		[SerializeField]
-		[FieldOffset(0)]
-		private FixedStorage@1 _CurrentState;
-
-		[FixedBufferProperty(typeof(NetworkBool), typeof(UnityValueSurrogate@ElementReaderWriterNetworkBool), 0, order = -2147483647)]
-		[WeaverGenerated]
-		[SerializeField]
-		[FieldOffset(4)]
-		private FixedStorage@1 _HasAuthorityPassenger;
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

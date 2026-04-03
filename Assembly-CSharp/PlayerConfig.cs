@@ -1,5 +1,3 @@
-﻿using System;
-
 public class PlayerConfig
 {
 	public const string Player_Nickname = "playerName";

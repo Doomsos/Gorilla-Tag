@@ -1,17 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class GRToolUpgrade : ScriptableObject
 {
-	public string upgradeName;
-
-	public string description;
-
-	public string upgradeId;
-
-	[SerializeField]
-	public GRToolUpgrade.ToolUpgradeLevel[] upgradeLevels;
-
 	[Serializable]
 	public struct ToolUpgradeLevel
 	{
@@ -21,4 +12,13 @@ public class GRToolUpgrade : ScriptableObject
 		[SerializeField]
 		public float upgradeAmount;
 	}
+
+	public string upgradeName;
+
+	public string description;
+
+	public string upgradeId;
+
+	[SerializeField]
+	public ToolUpgradeLevel[] upgradeLevels;
 }

@@ -1,5 +1,3 @@
-﻿using System;
-
 public class HandTapArgs : FXSArgs
 {
 	public int soundIndex;

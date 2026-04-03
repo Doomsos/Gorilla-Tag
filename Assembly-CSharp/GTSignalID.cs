@@ -1,36 +1,36 @@
-﻿using System;
+using System;
 
 [Serializable]
 public struct GTSignalID : IEquatable<GTSignalID>, IEquatable<int>
 {
+	private int _id;
+
 	public override bool Equals(object obj)
 	{
-		if (obj is GTSignalID)
+		if (obj is GTSignalID other)
 		{
-			GTSignalID other = (GTSignalID)obj;
-			return this.Equals(other);
+			return Equals(other);
 		}
-		if (obj is int)
+		if (obj is int other2)
 		{
-			int other2 = (int)obj;
-			return this.Equals(other2);
+			return Equals(other2);
 		}
 		return false;
 	}
 
 	public bool Equals(GTSignalID other)
 	{
-		return this._id == other._id;
+		return _id == other._id;
 	}
 
 	public bool Equals(int other)
 	{
-		return this._id == other;
+		return _id == other;
 	}
 
 	public override int GetHashCode()
 	{
-		return this._id;
+		return _id;
 	}
 
 	public static bool operator ==(GTSignalID x, GTSignalID y)
@@ -55,6 +55,4 @@ public struct GTSignalID : IEquatable<GTSignalID>, IEquatable<int>
 			_id = GTSignal.ComputeID(s)
 		};
 	}
-
-	private int _id;
 }

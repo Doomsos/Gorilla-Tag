@@ -1,299 +1,245 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using UnityEngine;
 
-namespace TagEffects
+namespace TagEffects;
+
+public class HandEffectsTrigger : MonoBehaviour, IHandEffectsTrigger
 {
-	public class HandEffectsTrigger : MonoBehaviour, IHandEffectsTrigger
+	[SerializeField]
+	private float triggerRadius = 0.07f;
+
+	[SerializeField]
+	private bool rightHand;
+
+	[SerializeField]
+	private bool isStatic;
+
+	private VRRig rig;
+
+	public GorillaVelocityEstimator velocityEstimator;
+
+	[SerializeField]
+	private GameObject[] debugVisuals;
+
+	private static HandEffectsOverrideCosmetic.HandEffectType[] mappingArray = new HandEffectsOverrideCosmetic.HandEffectType[4]
 	{
-		public bool Static
+		HandEffectsOverrideCosmetic.HandEffectType.None,
+		HandEffectsOverrideCosmetic.HandEffectType.None,
+		HandEffectsOverrideCosmetic.HandEffectType.HighFive,
+		HandEffectsOverrideCosmetic.HandEffectType.FistBump
+	};
+
+	public bool Static => isStatic;
+
+	public bool FingersDown
+	{
+		get
 		{
-			get
+			if (rig == null)
 			{
-				return this.isStatic;
+				return false;
+			}
+			if (rightHand && rig.IsMakingFistRight())
+			{
+				return true;
+			}
+			if (!rightHand && rig.IsMakingFistLeft())
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public bool FingersUp
+	{
+		get
+		{
+			if (rig == null)
+			{
+				return false;
+			}
+			if (rightHand && rig.IsMakingFiveRight())
+			{
+				return true;
+			}
+			if (!rightHand && rig.IsMakingFiveLeft())
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public Vector3 Velocity
+	{
+		get
+		{
+			if (velocityEstimator != null && rig != null && rig.scaleFactor > 0.001f)
+			{
+				return velocityEstimator.linearVelocity / rig.scaleFactor;
+			}
+			return Vector3.zero;
+		}
+	}
+
+	bool IHandEffectsTrigger.RightHand => rightHand;
+
+	public Action<IHandEffectsTrigger.Mode> OnTrigger { get; set; }
+
+	public IHandEffectsTrigger.Mode EffectMode { get; }
+
+	public Transform Transform => base.transform;
+
+	public VRRig Rig => rig;
+
+	public TagEffectPack CosmeticEffectPack
+	{
+		get
+		{
+			if (rig == null)
+			{
+				return null;
+			}
+			return rig.CosmeticEffectPack;
+		}
+	}
+
+	private void Awake()
+	{
+		rig = GetComponentInParent<VRRig>();
+		if (velocityEstimator == null)
+		{
+			velocityEstimator = GetComponentInParent<GorillaVelocityEstimator>();
+		}
+		for (int i = 0; i < debugVisuals.Length; i++)
+		{
+			debugVisuals[i].SetActive(TagEffectsLibrary.DebugMode);
+		}
+	}
+
+	private void OnEnable()
+	{
+		if (!HandEffectsTriggerRegistry.HasInstance)
+		{
+			HandEffectsTriggerRegistry.FindInstance();
+		}
+		HandEffectsTriggerRegistry.Instance.Register(this);
+	}
+
+	private void OnDisable()
+	{
+		HandEffectsTriggerRegistry.Instance.Unregister(this);
+	}
+
+	public void OnTriggerEntered(IHandEffectsTrigger other)
+	{
+		if (!(rig == other.Rig))
+		{
+			if (FingersDown && other.FingersDown && (other.Static || (Vector3.Dot(Vector3.Dot(Velocity, base.transform.up) * base.transform.up - Vector3.Dot(other.Velocity, other.Transform.up) * other.Transform.up, -other.Transform.up) > TagEffectsLibrary.FistBumpSpeedThreshold && Vector3.Dot(base.transform.up, other.Transform.up) < -0.01f)))
+			{
+				PlayHandEffects(TagEffectsLibrary.EffectType.FIST_BUMP, other);
+			}
+			if (FingersUp && other.FingersUp && (other.Static || Mathf.Abs(Vector3.Dot(Vector3.Dot(Velocity, base.transform.right) * base.transform.right - Vector3.Dot(other.Velocity, other.Transform.right) * other.Transform.right, other.Transform.right)) > TagEffectsLibrary.HighFiveSpeedThreshold))
+			{
+				PlayHandEffects(TagEffectsLibrary.EffectType.HIGH_FIVE, other);
 			}
 		}
+	}
 
-		public bool FingersDown
+	private void PlayHandEffects(TagEffectsLibrary.EffectType effectType, IHandEffectsTrigger other)
+	{
+		if (rig.IsNull())
 		{
-			get
+			return;
+		}
+		bool flag = false;
+		if (rig.isOfflineVRRig)
+		{
+			PlayerGameEvents.TriggerHandEffect(effectType.ToString());
+		}
+		if (OnTrigger != null || (other != null && other.OnTrigger != null))
+		{
+			switch (effectType)
 			{
-				return !(this.rig == null) && ((this.rightHand && this.rig.IsMakingFistRight()) || (!this.rightHand && this.rig.IsMakingFistLeft()));
+			case TagEffectsLibrary.EffectType.FIST_BUMP:
+				OnTrigger?.Invoke(IHandEffectsTrigger.Mode.FistBump);
+				other?.OnTrigger?.Invoke(IHandEffectsTrigger.Mode.FistBump);
+				break;
+			case TagEffectsLibrary.EffectType.HIGH_FIVE:
+				OnTrigger?.Invoke(IHandEffectsTrigger.Mode.HighFive);
+				other?.OnTrigger?.Invoke(IHandEffectsTrigger.Mode.HighFive);
+				break;
+			case TagEffectsLibrary.EffectType.FIRST_PERSON:
+				OnTrigger?.Invoke(IHandEffectsTrigger.Mode.Tag1P);
+				other?.OnTrigger?.Invoke(IHandEffectsTrigger.Mode.Tag1P);
+				break;
+			case TagEffectsLibrary.EffectType.THIRD_PERSON:
+				OnTrigger?.Invoke(IHandEffectsTrigger.Mode.Tag3P);
+				other?.OnTrigger?.Invoke(IHandEffectsTrigger.Mode.Tag3P);
+				break;
 			}
 		}
-
-		public bool FingersUp
+		HandEffectsOverrideCosmetic handEffectsOverrideCosmetic = null;
+		HandEffectsOverrideCosmetic handEffectsOverrideCosmetic2 = null;
+		foreach (HandEffectsOverrideCosmetic item in rightHand ? rig.CosmeticHandEffectsOverride_Right : rig.CosmeticHandEffectsOverride_Left)
 		{
-			get
+			if (item.handEffectType == MapEnum(effectType))
 			{
-				return !(this.rig == null) && ((this.rightHand && this.rig.IsMakingFiveRight()) || (!this.rightHand && this.rig.IsMakingFiveLeft()));
+				handEffectsOverrideCosmetic2 = item;
+				break;
 			}
 		}
-
-		public Vector3 Velocity
+		if (rig.isOfflineVRRig && GorillaTagger.Instance != null)
 		{
-			get
+			if ((bool)other.Rig)
 			{
-				if (this.velocityEstimator != null && this.rig != null && this.rig.scaleFactor > 0.001f)
+				foreach (HandEffectsOverrideCosmetic item2 in (other.Rig.CosmeticHandEffectsOverride_Right != null) ? other.Rig.CosmeticHandEffectsOverride_Right : other.Rig.CosmeticHandEffectsOverride_Left)
 				{
-					return this.velocityEstimator.linearVelocity / this.rig.scaleFactor;
-				}
-				return Vector3.zero;
-			}
-		}
-
-		bool IHandEffectsTrigger.RightHand
-		{
-			get
-			{
-				return this.rightHand;
-			}
-		}
-
-		public Action<IHandEffectsTrigger.Mode> OnTrigger { get; set; }
-
-		public IHandEffectsTrigger.Mode EffectMode { get; }
-
-		public Transform Transform
-		{
-			get
-			{
-				return base.transform;
-			}
-		}
-
-		public VRRig Rig
-		{
-			get
-			{
-				return this.rig;
-			}
-		}
-
-		public TagEffectPack CosmeticEffectPack
-		{
-			get
-			{
-				if (this.rig == null)
-				{
-					return null;
-				}
-				return this.rig.CosmeticEffectPack;
-			}
-		}
-
-		private void Awake()
-		{
-			this.rig = base.GetComponentInParent<VRRig>();
-			if (this.velocityEstimator == null)
-			{
-				this.velocityEstimator = base.GetComponentInParent<GorillaVelocityEstimator>();
-			}
-			for (int i = 0; i < this.debugVisuals.Length; i++)
-			{
-				this.debugVisuals[i].SetActive(TagEffectsLibrary.DebugMode);
-			}
-		}
-
-		private void OnEnable()
-		{
-			if (!HandEffectsTriggerRegistry.HasInstance)
-			{
-				HandEffectsTriggerRegistry.FindInstance();
-			}
-			HandEffectsTriggerRegistry.Instance.Register(this);
-		}
-
-		private void OnDisable()
-		{
-			HandEffectsTriggerRegistry.Instance.Unregister(this);
-		}
-
-		public void OnTriggerEntered(IHandEffectsTrigger other)
-		{
-			if (this.rig == other.Rig)
-			{
-				return;
-			}
-			if (this.FingersDown && other.FingersDown && (other.Static || (Vector3.Dot(Vector3.Dot(this.Velocity, base.transform.up) * base.transform.up - Vector3.Dot(other.Velocity, other.Transform.up) * other.Transform.up, -other.Transform.up) > TagEffectsLibrary.FistBumpSpeedThreshold && Vector3.Dot(base.transform.up, other.Transform.up) < -0.01f)))
-			{
-				this.PlayHandEffects(TagEffectsLibrary.EffectType.FIST_BUMP, other);
-			}
-			if (this.FingersUp && other.FingersUp && (other.Static || Mathf.Abs(Vector3.Dot(Vector3.Dot(this.Velocity, base.transform.right) * base.transform.right - Vector3.Dot(other.Velocity, other.Transform.right) * other.Transform.right, other.Transform.right)) > TagEffectsLibrary.HighFiveSpeedThreshold))
-			{
-				this.PlayHandEffects(TagEffectsLibrary.EffectType.HIGH_FIVE, other);
-			}
-		}
-
-		private void PlayHandEffects(TagEffectsLibrary.EffectType effectType, IHandEffectsTrigger other)
-		{
-			if (this.rig.IsNull())
-			{
-				return;
-			}
-			bool flag = false;
-			if (this.rig.isOfflineVRRig)
-			{
-				PlayerGameEvents.TriggerHandEffect(effectType.ToString());
-			}
-			if (this.OnTrigger != null || (other != null && other.OnTrigger != null))
-			{
-				switch (effectType)
-				{
-				case TagEffectsLibrary.EffectType.FIRST_PERSON:
-				{
-					Action<IHandEffectsTrigger.Mode> onTrigger = this.OnTrigger;
-					if (onTrigger != null)
+					if (item2.handEffectType == MapEnum(effectType))
 					{
-						onTrigger(IHandEffectsTrigger.Mode.Tag1P);
-					}
-					if (other != null)
-					{
-						Action<IHandEffectsTrigger.Mode> onTrigger2 = other.OnTrigger;
-						if (onTrigger2 != null)
-						{
-							onTrigger2(IHandEffectsTrigger.Mode.Tag1P);
-						}
-					}
-					break;
-				}
-				case TagEffectsLibrary.EffectType.THIRD_PERSON:
-				{
-					Action<IHandEffectsTrigger.Mode> onTrigger3 = this.OnTrigger;
-					if (onTrigger3 != null)
-					{
-						onTrigger3(IHandEffectsTrigger.Mode.Tag3P);
-					}
-					if (other != null)
-					{
-						Action<IHandEffectsTrigger.Mode> onTrigger4 = other.OnTrigger;
-						if (onTrigger4 != null)
-						{
-							onTrigger4(IHandEffectsTrigger.Mode.Tag3P);
-						}
-					}
-					break;
-				}
-				case TagEffectsLibrary.EffectType.HIGH_FIVE:
-				{
-					Action<IHandEffectsTrigger.Mode> onTrigger5 = this.OnTrigger;
-					if (onTrigger5 != null)
-					{
-						onTrigger5(IHandEffectsTrigger.Mode.HighFive);
-					}
-					if (other != null)
-					{
-						Action<IHandEffectsTrigger.Mode> onTrigger6 = other.OnTrigger;
-						if (onTrigger6 != null)
-						{
-							onTrigger6(IHandEffectsTrigger.Mode.HighFive);
-						}
-					}
-					break;
-				}
-				case TagEffectsLibrary.EffectType.FIST_BUMP:
-				{
-					Action<IHandEffectsTrigger.Mode> onTrigger7 = this.OnTrigger;
-					if (onTrigger7 != null)
-					{
-						onTrigger7(IHandEffectsTrigger.Mode.FistBump);
-					}
-					if (other != null)
-					{
-						Action<IHandEffectsTrigger.Mode> onTrigger8 = other.OnTrigger;
-						if (onTrigger8 != null)
-						{
-							onTrigger8(IHandEffectsTrigger.Mode.FistBump);
-						}
-					}
-					break;
-				}
-				}
-			}
-			HandEffectsOverrideCosmetic handEffectsOverrideCosmetic = null;
-			HandEffectsOverrideCosmetic handEffectsOverrideCosmetic2 = null;
-			foreach (HandEffectsOverrideCosmetic handEffectsOverrideCosmetic3 in (this.rightHand ? this.rig.CosmeticHandEffectsOverride_Right : this.rig.CosmeticHandEffectsOverride_Left))
-			{
-				if (handEffectsOverrideCosmetic3.handEffectType == this.MapEnum(effectType))
-				{
-					handEffectsOverrideCosmetic2 = handEffectsOverrideCosmetic3;
-					break;
-				}
-			}
-			if (this.rig.isOfflineVRRig && GorillaTagger.Instance != null)
-			{
-				if (other.Rig)
-				{
-					foreach (HandEffectsOverrideCosmetic handEffectsOverrideCosmetic4 in ((other.Rig.CosmeticHandEffectsOverride_Right != null) ? other.Rig.CosmeticHandEffectsOverride_Right : other.Rig.CosmeticHandEffectsOverride_Left))
-					{
-						if (handEffectsOverrideCosmetic4.handEffectType == this.MapEnum(effectType))
-						{
-							handEffectsOverrideCosmetic = handEffectsOverrideCosmetic4;
-							break;
-						}
-					}
-					if (handEffectsOverrideCosmetic && handEffectsOverrideCosmetic.handEffectType == this.MapEnum(effectType) && ((!handEffectsOverrideCosmetic.isLeftHand && other.RightHand) || (handEffectsOverrideCosmetic.isLeftHand && !other.RightHand)))
-					{
-						if (handEffectsOverrideCosmetic.thirdPerson.playHaptics)
-						{
-							GorillaTagger.Instance.StartVibration(!this.rightHand, handEffectsOverrideCosmetic.thirdPerson.hapticStrength, handEffectsOverrideCosmetic.thirdPerson.hapticDuration);
-						}
-						TagEffectsLibrary.placeEffects(handEffectsOverrideCosmetic.thirdPerson.effectVFX, base.transform, this.rig.scaleFactor, false, handEffectsOverrideCosmetic.thirdPerson.parentEffect, base.transform.rotation);
-						flag = true;
+						handEffectsOverrideCosmetic = item2;
+						break;
 					}
 				}
-				if (handEffectsOverrideCosmetic2 && handEffectsOverrideCosmetic2.handEffectType == this.MapEnum(effectType) && ((handEffectsOverrideCosmetic2.isLeftHand && !this.rightHand) || (!handEffectsOverrideCosmetic2.isLeftHand && this.rightHand)))
+				if ((bool)handEffectsOverrideCosmetic && handEffectsOverrideCosmetic.handEffectType == MapEnum(effectType) && ((!handEffectsOverrideCosmetic.isLeftHand && other.RightHand) || (handEffectsOverrideCosmetic.isLeftHand && !other.RightHand)))
 				{
-					if (handEffectsOverrideCosmetic2.firstPerson.playHaptics)
+					if (handEffectsOverrideCosmetic.thirdPerson.playHaptics)
 					{
-						GorillaTagger.Instance.StartVibration(!this.rightHand, handEffectsOverrideCosmetic2.firstPerson.hapticStrength, handEffectsOverrideCosmetic2.firstPerson.hapticDuration);
+						GorillaTagger.Instance.StartVibration(!rightHand, handEffectsOverrideCosmetic.thirdPerson.hapticStrength, handEffectsOverrideCosmetic.thirdPerson.hapticDuration);
 					}
-					TagEffectsLibrary.placeEffects(handEffectsOverrideCosmetic2.firstPerson.effectVFX, other.Transform, this.rig.scaleFactor, false, handEffectsOverrideCosmetic2.firstPerson.parentEffect, other.Transform.rotation);
+					TagEffectsLibrary.placeEffects(handEffectsOverrideCosmetic.thirdPerson.effectVFX, base.transform, rig.scaleFactor, flipZAxis: false, handEffectsOverrideCosmetic.thirdPerson.parentEffect, base.transform.rotation);
 					flag = true;
 				}
 			}
-			if (!flag)
+			if ((bool)handEffectsOverrideCosmetic2 && handEffectsOverrideCosmetic2.handEffectType == MapEnum(effectType) && ((handEffectsOverrideCosmetic2.isLeftHand && !rightHand) || (!handEffectsOverrideCosmetic2.isLeftHand && rightHand)))
 			{
-				if (this.rig.isOfflineVRRig)
+				if (handEffectsOverrideCosmetic2.firstPerson.playHaptics)
 				{
-					GorillaTagger.Instance.StartVibration(!this.rightHand, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
+					GorillaTagger.Instance.StartVibration(!rightHand, handEffectsOverrideCosmetic2.firstPerson.hapticStrength, handEffectsOverrideCosmetic2.firstPerson.hapticDuration);
 				}
-				TagEffectsLibrary.PlayEffect(base.transform, !this.rightHand, this.rig.scaleFactor, effectType, this.CosmeticEffectPack, other.CosmeticEffectPack, base.transform.rotation);
+				TagEffectsLibrary.placeEffects(handEffectsOverrideCosmetic2.firstPerson.effectVFX, other.Transform, rig.scaleFactor, flipZAxis: false, handEffectsOverrideCosmetic2.firstPerson.parentEffect, other.Transform.rotation);
+				flag = true;
 			}
 		}
-
-		public bool InTriggerZone(IHandEffectsTrigger t)
+		if (!flag)
 		{
-			return (base.transform.position - t.Transform.position).IsShorterThan(this.triggerRadius * this.rig.scaleFactor);
+			if (rig.isOfflineVRRig)
+			{
+				GorillaTagger.Instance.StartVibration(!rightHand, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
+			}
+			TagEffectsLibrary.PlayEffect(base.transform, !rightHand, rig.scaleFactor, effectType, CosmeticEffectPack, other.CosmeticEffectPack, base.transform.rotation);
 		}
+	}
 
-		private HandEffectsOverrideCosmetic.HandEffectType MapEnum(TagEffectsLibrary.EffectType oldEnum)
-		{
-			return HandEffectsTrigger.mappingArray[(int)oldEnum];
-		}
+	public bool InTriggerZone(IHandEffectsTrigger t)
+	{
+		return (base.transform.position - t.Transform.position).IsShorterThan(triggerRadius * rig.scaleFactor);
+	}
 
-		[SerializeField]
-		private float triggerRadius = 0.07f;
-
-		[SerializeField]
-		private bool rightHand;
-
-		[SerializeField]
-		private bool isStatic;
-
-		private VRRig rig;
-
-		public GorillaVelocityEstimator velocityEstimator;
-
-		[SerializeField]
-		private GameObject[] debugVisuals;
-
-		private static HandEffectsOverrideCosmetic.HandEffectType[] mappingArray = new HandEffectsOverrideCosmetic.HandEffectType[]
-		{
-			HandEffectsOverrideCosmetic.HandEffectType.None,
-			HandEffectsOverrideCosmetic.HandEffectType.None,
-			HandEffectsOverrideCosmetic.HandEffectType.HighFive,
-			HandEffectsOverrideCosmetic.HandEffectType.FistBump
-		};
+	private HandEffectsOverrideCosmetic.HandEffectType MapEnum(TagEffectsLibrary.EffectType oldEnum)
+	{
+		return mappingArray[(int)oldEnum];
 	}
 }

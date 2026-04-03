@@ -1,74 +1,8 @@
-﻿using System;
 using TMPro;
 using UnityEngine;
 
 public class GRUIEmployeeBadgeDispenser : MonoBehaviour
 {
-	public void Setup(GhostReactor reactor, int employeeIndex)
-	{
-		this.reactor = reactor;
-	}
-
-	public void Refresh()
-	{
-		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.actorNr);
-		if (player != null && player.InRoom)
-		{
-			this.playerName.text = player.SanitizedNickName;
-			if (this.idBadge != null)
-			{
-				this.idBadge.RefreshText(player);
-				return;
-			}
-		}
-		else
-		{
-			this.playerName.text = "";
-		}
-	}
-
-	public void CreateBadge(NetPlayer player, GameEntityManager entityManager)
-	{
-		if (entityManager.IsAuthority())
-		{
-			entityManager.RequestCreateItem(this.idBadgePrefab.name.GetStaticHash(), this.spawnLocation.position, this.spawnLocation.rotation, (long)(player.ActorNumber * 100 + this.index));
-		}
-	}
-
-	public Transform GetSpawnMarker()
-	{
-		return this.spawnLocation;
-	}
-
-	public bool IsDispenserForBadge(GRBadge badge)
-	{
-		return badge == this.idBadge;
-	}
-
-	public Vector3 GetSpawnPosition()
-	{
-		return this.spawnLocation.position;
-	}
-
-	public Quaternion GetSpawnRotation()
-	{
-		return this.spawnLocation.rotation;
-	}
-
-	public void ClearBadge()
-	{
-		this.actorNr = -1;
-		this.idBadge = null;
-	}
-
-	public void AttachIDBadge(GRBadge linkedBadge, NetPlayer _player)
-	{
-		this.actorNr = ((_player == null) ? -1 : _player.ActorNumber);
-		this.idBadge = linkedBadge;
-		this.playerName.text = ((_player == null) ? null : _player.SanitizedNickName);
-		this.idBadge.Setup(_player, this.index);
-	}
-
 	[SerializeField]
 	private TMP_Text msg;
 
@@ -99,4 +33,68 @@ public class GRUIEmployeeBadgeDispenser : MonoBehaviour
 	private bool isEmployee;
 
 	private const string GR_DATA_KEY = "GRData";
+
+	public void Setup(GhostReactor reactor, int employeeIndex)
+	{
+		this.reactor = reactor;
+	}
+
+	public void Refresh()
+	{
+		NetPlayer player = NetworkSystem.Instance.GetPlayer(actorNr);
+		if (player != null && player.InRoom)
+		{
+			playerName.text = player.SanitizedNickName;
+			if (idBadge != null)
+			{
+				idBadge.RefreshText(player);
+			}
+		}
+		else
+		{
+			playerName.text = "";
+		}
+	}
+
+	public void CreateBadge(NetPlayer player, GameEntityManager entityManager)
+	{
+		if (entityManager.IsAuthority())
+		{
+			entityManager.RequestCreateItem(idBadgePrefab.name.GetStaticHash(), spawnLocation.position, spawnLocation.rotation, player.ActorNumber * 100 + index);
+		}
+	}
+
+	public Transform GetSpawnMarker()
+	{
+		return spawnLocation;
+	}
+
+	public bool IsDispenserForBadge(GRBadge badge)
+	{
+		return badge == idBadge;
+	}
+
+	public Vector3 GetSpawnPosition()
+	{
+		return spawnLocation.position;
+	}
+
+	public Quaternion GetSpawnRotation()
+	{
+		return spawnLocation.rotation;
+	}
+
+	public void ClearBadge()
+	{
+		actorNr = -1;
+		idBadge = null;
+	}
+
+	public void AttachIDBadge(GRBadge linkedBadge, NetPlayer _player)
+	{
+		actorNr = _player?.ActorNumber ?? (-1);
+		idBadge = linkedBadge;
+		playerName.text = _player?.SanitizedNickName;
+		idBadge.Setup(_player, index);
+	}
 }

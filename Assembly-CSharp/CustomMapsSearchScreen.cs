@@ -1,248 +1,15 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GorillaExtensions;
 using GorillaTagScripts.VirtualStumpCustomMaps.UI;
+using Modio;
+using Modio.API;
 using Modio.Mods;
 using TMPro;
 using UnityEngine;
 
 public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 {
-	public override void Show()
-	{
-		base.Show();
-		this.searchPhraseText.gameObject.SetActive(true);
-		this.customMapsGalleryView.gameObject.SetActive(false);
-		this.searchMessageText.gameObject.SetActive(false);
-		this.leftPageButton.gameObject.SetActive(false);
-		this.rightPageButton.gameObject.SetActive(false);
-		this.searchedMods.Clear();
-		this.filteredSearchedMods.Clear();
-		this.displayedMods.Clear();
-		this.searchPhraseText.text = this.defaultSearchString;
-		this.searchPhrase = string.Empty;
-		this.currentSearchModsRequestPage = 0;
-		this.currentModPage = 0;
-	}
-
-	public override void Hide()
-	{
-		base.Hide();
-		this.customMapsGalleryView.ShowTileText(false, true);
-	}
-
-	public override void Initialize()
-	{
-	}
-
-	public void ReturnFromDetailsScreen()
-	{
-		base.Show();
-		this.customMapsGalleryView.ShowTileText(true, true);
-	}
-
-	public override void PressButton(CustomMapKeyboardBinding pressedButton)
-	{
-		if (Time.time < this.showTime + this.activationTime)
-		{
-			return;
-		}
-		if (!CustomMapsTerminal.IsDriver)
-		{
-			return;
-		}
-		if (CustomMapKeyboardBinding.tile1 <= pressedButton && pressedButton <= CustomMapKeyboardBinding.tile6 && !this.customMapsGalleryView.IsNull())
-		{
-			this.customMapsGalleryView.ShowDetailsForEntry(pressedButton - CustomMapKeyboardBinding.tile1);
-		}
-		if (pressedButton < CustomMapKeyboardBinding.up)
-		{
-			string str = this.searchPhrase;
-			int num = (int)pressedButton;
-			this.searchPhrase = str + num.ToString();
-			this.RefreshSearchText();
-			return;
-		}
-		if (pressedButton > CustomMapKeyboardBinding.option3 && pressedButton < CustomMapKeyboardBinding.at)
-		{
-			this.searchPhrase += pressedButton.ToString();
-			this.RefreshSearchText();
-			return;
-		}
-		if (pressedButton != CustomMapKeyboardBinding.delete)
-		{
-			if (pressedButton != CustomMapKeyboardBinding.enter)
-			{
-				switch (pressedButton)
-				{
-				case CustomMapKeyboardBinding.goback:
-					if (this.loadingSearchMods)
-					{
-						return;
-					}
-					CustomMapsTerminal.ReturnFromSearchScreen();
-					break;
-				case CustomMapKeyboardBinding.left:
-					this.currentModPage--;
-					this.RefreshScreenState();
-					break;
-				case CustomMapKeyboardBinding.right:
-					this.currentModPage++;
-					this.RefreshScreenState();
-					break;
-				}
-			}
-			else
-			{
-				if (this.loadingSearchMods)
-				{
-					return;
-				}
-				this.searchedMods.Clear();
-				this.filteredSearchedMods.Clear();
-				this.currentSearchModsRequestPage = 0;
-				this.searchMessageText.gameObject.SetActive(true);
-				this.searchMessageText.text = this.searchingString;
-				this.RetrieveMods();
-			}
-		}
-		else if (!this.searchPhrase.IsNullOrEmpty())
-		{
-			this.searchPhrase = this.searchPhrase.Remove(this.searchPhrase.Length - 1);
-		}
-		this.RefreshSearchText();
-	}
-
-	private void RefreshSearchText()
-	{
-		if (this.searchPhrase.IsNullOrEmpty())
-		{
-			this.searchPhraseText.text = this.defaultSearchString;
-			return;
-		}
-		this.searchPhraseText.text = this.searchPhrase;
-	}
-
-	private Task RetrieveMods()
-	{
-		CustomMapsSearchScreen.<RetrieveMods>d__26 <RetrieveMods>d__;
-		<RetrieveMods>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<RetrieveMods>d__.<>4__this = this;
-		<RetrieveMods>d__.<>1__state = -1;
-		<RetrieveMods>d__.<>t__builder.Start<CustomMapsSearchScreen.<RetrieveMods>d__26>(ref <RetrieveMods>d__);
-		return <RetrieveMods>d__.<>t__builder.Task;
-	}
-
-	private void FilterSearchMods()
-	{
-		if (this.searchedMods.IsNullOrEmpty<Mod>())
-		{
-			return;
-		}
-		this.filteredSearchedMods.Clear();
-		foreach (Mod mod in this.searchedMods)
-		{
-			ModId right;
-			if (ModIOManager.TryGetNewMapsModId(out right) && mod.Id == right)
-			{
-				this.totalSearchMods = Mathf.Max(0, this.totalSearchMods - 1);
-			}
-			else
-			{
-				this.filteredSearchedMods.Add(mod);
-			}
-		}
-	}
-
-	private void RefreshScreenState()
-	{
-		this.searchMessageText.gameObject.SetActive(false);
-		this.customMapsGalleryView.ResetGallery();
-		this.customMapsGalleryView.gameObject.SetActive(false);
-		this.displayedMods.Clear();
-		if (this.errorLoadingSearchMods)
-		{
-			this.searchMessageText.gameObject.SetActive(true);
-			this.searchMessageText.text = this.errorMessage;
-			this.leftPageButton.SetActive(false);
-			this.rightPageButton.SetActive(false);
-			return;
-		}
-		if (this.filteredSearchedMods.IsNullOrEmpty<Mod>())
-		{
-			this.searchMessageText.gameObject.SetActive(true);
-			this.searchMessageText.text = this.noMapsFoundString;
-			this.leftPageButton.SetActive(false);
-			this.rightPageButton.SetActive(false);
-			return;
-		}
-		int num = 0;
-		int num2 = this.modsPerPage - 1;
-		if (!this.IsOnFirstPage())
-		{
-			num = this.currentModPage * this.modsPerPage;
-			num2 = num + this.modsPerPage - 1;
-			this.leftPageButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.leftPageButton.gameObject.SetActive(false);
-		}
-		if (!this.IsOnLastPage())
-		{
-			this.rightPageButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			this.rightPageButton.gameObject.SetActive(false);
-		}
-		if (this.filteredSearchedMods.Count <= num2 && this.totalSearchMods > this.searchedMods.Count)
-		{
-			this.RetrieveMods();
-			return;
-		}
-		int num3 = num;
-		while (num3 <= num2 && this.filteredSearchedMods.Count > num3)
-		{
-			this.displayedMods.Add(this.filteredSearchedMods[num3]);
-			num3++;
-		}
-		this.customMapsGalleryView.gameObject.SetActive(true);
-		string text;
-		if (!this.customMapsGalleryView.DisplayGallery(this.displayedMods, true, out text))
-		{
-			this.searchMessageText.gameObject.SetActive(true);
-			this.searchMessageText.text = text;
-			this.customMapsGalleryView.gameObject.SetActive(false);
-			this.leftPageButton.SetActive(false);
-			this.rightPageButton.SetActive(false);
-		}
-	}
-
-	private int GetNumPages()
-	{
-		int num = this.totalSearchMods % this.modsPerPage;
-		int num2 = this.totalSearchMods / this.modsPerPage;
-		if (num > 0)
-		{
-			num2++;
-		}
-		return num2;
-	}
-
-	private bool IsOnFirstPage()
-	{
-		return this.currentModPage == 0;
-	}
-
-	private bool IsOnLastPage()
-	{
-		long num = (long)this.GetNumPages();
-		return (long)(this.currentModPage + 1) == num;
-	}
-
 	[SerializeField]
 	private TMP_Text searchPhraseText;
 
@@ -292,4 +59,252 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 	private int currentModPage;
 
 	private string errorMessage = "";
+
+	public override void Show()
+	{
+		base.Show();
+		searchPhraseText.gameObject.SetActive(value: true);
+		customMapsGalleryView.gameObject.SetActive(value: false);
+		searchMessageText.gameObject.SetActive(value: false);
+		leftPageButton.gameObject.SetActive(value: false);
+		rightPageButton.gameObject.SetActive(value: false);
+		searchedMods.Clear();
+		filteredSearchedMods.Clear();
+		displayedMods.Clear();
+		searchPhraseText.text = defaultSearchString;
+		searchPhrase = string.Empty;
+		currentSearchModsRequestPage = 0;
+		currentModPage = 0;
+	}
+
+	public override void Hide()
+	{
+		base.Hide();
+		customMapsGalleryView.ShowTileText(show: false, useMapName: true);
+	}
+
+	public override void Initialize()
+	{
+	}
+
+	public void ReturnFromDetailsScreen()
+	{
+		base.Show();
+		customMapsGalleryView.ShowTileText(show: true, useMapName: true);
+	}
+
+	public override void PressButton(CustomMapKeyboardBinding pressedButton)
+	{
+		if (Time.time < showTime + activationTime || !CustomMapsTerminal.IsDriver)
+		{
+			return;
+		}
+		if (CustomMapKeyboardBinding.tile1 <= pressedButton && pressedButton <= CustomMapKeyboardBinding.tile6 && !customMapsGalleryView.IsNull())
+		{
+			customMapsGalleryView.ShowDetailsForEntry((int)(pressedButton - 62));
+		}
+		if (pressedButton < CustomMapKeyboardBinding.up)
+		{
+			string text = searchPhrase;
+			int num = (int)pressedButton;
+			searchPhrase = text + num;
+			RefreshSearchText();
+			return;
+		}
+		if (pressedButton > CustomMapKeyboardBinding.option3 && pressedButton < CustomMapKeyboardBinding.at)
+		{
+			searchPhrase += pressedButton;
+			RefreshSearchText();
+			return;
+		}
+		switch (pressedButton)
+		{
+		case CustomMapKeyboardBinding.goback:
+			if (loadingSearchMods)
+			{
+				return;
+			}
+			CustomMapsTerminal.ReturnFromSearchScreen();
+			break;
+		case CustomMapKeyboardBinding.enter:
+			if (loadingSearchMods)
+			{
+				return;
+			}
+			searchedMods.Clear();
+			filteredSearchedMods.Clear();
+			currentSearchModsRequestPage = 0;
+			searchMessageText.gameObject.SetActive(value: true);
+			searchMessageText.text = searchingString;
+			RetrieveMods();
+			break;
+		case CustomMapKeyboardBinding.delete:
+			if (!searchPhrase.IsNullOrEmpty())
+			{
+				searchPhrase = searchPhrase.Remove(searchPhrase.Length - 1);
+			}
+			break;
+		case CustomMapKeyboardBinding.right:
+			currentModPage++;
+			RefreshScreenState();
+			break;
+		case CustomMapKeyboardBinding.left:
+			currentModPage--;
+			RefreshScreenState();
+			break;
+		}
+		RefreshSearchText();
+	}
+
+	private void RefreshSearchText()
+	{
+		if (searchPhrase.IsNullOrEmpty())
+		{
+			searchPhraseText.text = defaultSearchString;
+		}
+		else
+		{
+			searchPhraseText.text = searchPhrase;
+		}
+	}
+
+	private async Task RetrieveMods()
+	{
+		if (!loadingSearchMods)
+		{
+			loadingSearchMods = true;
+			ModSearchFilter modSearchFilter = new ModSearchFilter(currentSearchModsRequestPage++, numModsPerRequest);
+			Filtering filtering = Filtering.Like;
+			modSearchFilter.ClearSearchPhrases(filtering);
+			if (!searchPhrase.IsNullOrEmpty())
+			{
+				modSearchFilter.AddSearchPhrase(searchPhrase, filtering);
+			}
+			(Error, ModioPage<Mod>) obj = await ModIOManager.GetMods(modSearchFilter.GetModsFilter());
+			Error item = obj.Item1;
+			ModioPage<Mod> item2 = obj.Item2;
+			loadingSearchMods = false;
+			if ((bool)item)
+			{
+				errorLoadingSearchMods = true;
+				errorMessage = item.GetMessage();
+				GTDev.LogError("[CustomMapsListScreen::OnAvailableModsRetrieved] Failed to retrieve mods. Error: " + item.GetMessage());
+			}
+			else
+			{
+				totalSearchMods = (int)item2.TotalSearchResults;
+				searchedMods.AddRange(item2.Data);
+				FilterSearchMods();
+			}
+			RefreshScreenState();
+		}
+	}
+
+	private void FilterSearchMods()
+	{
+		if (searchedMods.IsNullOrEmpty())
+		{
+			return;
+		}
+		filteredSearchedMods.Clear();
+		foreach (Mod searchedMod in searchedMods)
+		{
+			if (ModIOManager.TryGetNewMapsModId(out var newMapsModId) && searchedMod.Id == newMapsModId)
+			{
+				totalSearchMods = Mathf.Max(0, totalSearchMods - 1);
+			}
+			else
+			{
+				filteredSearchedMods.Add(searchedMod);
+			}
+		}
+	}
+
+	private void RefreshScreenState()
+	{
+		searchMessageText.gameObject.SetActive(value: false);
+		customMapsGalleryView.ResetGallery();
+		customMapsGalleryView.gameObject.SetActive(value: false);
+		displayedMods.Clear();
+		if (errorLoadingSearchMods)
+		{
+			searchMessageText.gameObject.SetActive(value: true);
+			searchMessageText.text = errorMessage;
+			leftPageButton.SetActive(value: false);
+			rightPageButton.SetActive(value: false);
+			return;
+		}
+		if (filteredSearchedMods.IsNullOrEmpty())
+		{
+			searchMessageText.gameObject.SetActive(value: true);
+			searchMessageText.text = noMapsFoundString;
+			leftPageButton.SetActive(value: false);
+			rightPageButton.SetActive(value: false);
+			return;
+		}
+		int num = 0;
+		int num2 = modsPerPage - 1;
+		if (!IsOnFirstPage())
+		{
+			num = currentModPage * modsPerPage;
+			num2 = num + modsPerPage - 1;
+			leftPageButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			leftPageButton.gameObject.SetActive(value: false);
+		}
+		if (!IsOnLastPage())
+		{
+			rightPageButton.gameObject.SetActive(value: true);
+		}
+		else
+		{
+			rightPageButton.gameObject.SetActive(value: false);
+		}
+		if (filteredSearchedMods.Count <= num2 && totalSearchMods > searchedMods.Count)
+		{
+			RetrieveMods();
+			return;
+		}
+		for (int i = num; i <= num2 && filteredSearchedMods.Count > i; i++)
+		{
+			displayedMods.Add(filteredSearchedMods[i]);
+		}
+		customMapsGalleryView.gameObject.SetActive(value: true);
+		if (!customMapsGalleryView.DisplayGallery(displayedMods, useMapName: true, out var error))
+		{
+			searchMessageText.gameObject.SetActive(value: true);
+			searchMessageText.text = error;
+			customMapsGalleryView.gameObject.SetActive(value: false);
+			leftPageButton.SetActive(value: false);
+			rightPageButton.SetActive(value: false);
+		}
+	}
+
+	private int GetNumPages()
+	{
+		int num = totalSearchMods % modsPerPage;
+		int num2 = totalSearchMods / modsPerPage;
+		if (num > 0)
+		{
+			num2++;
+		}
+		return num2;
+	}
+
+	private bool IsOnFirstPage()
+	{
+		return currentModPage == 0;
+	}
+
+	private bool IsOnLastPage()
+	{
+		long num = GetNumPages();
+		if (currentModPage + 1 == num)
+		{
+			return true;
+		}
+		return false;
+	}
 }

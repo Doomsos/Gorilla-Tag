@@ -1,33 +1,28 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class MonkeVoteProximityTrigger : GorillaTriggerBox
 {
-	public event Action OnEnter;
+	private float triggerTime = float.MinValue;
+
+	private float retriggerDelay = 0.25f;
 
 	public bool isPlayerNearby { get; private set; }
 
+	public event Action OnEnter;
+
 	public override void OnBoxTriggered()
 	{
-		this.isPlayerNearby = true;
-		if (this.triggerTime + this.retriggerDelay < Time.unscaledTime)
+		isPlayerNearby = true;
+		if (triggerTime + retriggerDelay < Time.unscaledTime)
 		{
-			this.triggerTime = Time.unscaledTime;
-			Action onEnter = this.OnEnter;
-			if (onEnter == null)
-			{
-				return;
-			}
-			onEnter();
+			triggerTime = Time.unscaledTime;
+			this.OnEnter?.Invoke();
 		}
 	}
 
 	public override void OnBoxExited()
 	{
-		this.isPlayerNearby = false;
+		isPlayerNearby = false;
 	}
-
-	private float triggerTime = float.MinValue;
-
-	private float retriggerDelay = 0.25f;
 }

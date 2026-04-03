@@ -1,4 +1,3 @@
-﻿using System;
 using Fusion;
 using Photon.Pun;
 
@@ -7,13 +6,17 @@ internal abstract class GorillaSerializerMasterOnly : GorillaWrappedSerializer
 {
 	protected override bool ValidOnSerialize(PhotonStream stream, in PhotonMessageInfo info)
 	{
-		return info.Sender == PhotonNetwork.MasterClient;
+		if (info.Sender != PhotonNetwork.MasterClient)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]

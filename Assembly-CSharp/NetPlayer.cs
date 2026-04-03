@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using GorillaTag;
@@ -8,6 +8,18 @@ using UnityEngine;
 [Serializable]
 public abstract class NetPlayer : ObjectPoolEvents
 {
+	public enum SingleCallRPC
+	{
+		CMS_RequestRoomInitialization,
+		CMS_RequestTriggerHistory,
+		CMS_SyncTriggerHistory,
+		CMS_SyncTriggerCounts,
+		RankedSendScoreToLateJoiner,
+		Count
+	}
+
+	private HashSet<int> SingleCallRPCStatus = new HashSet<int>(5);
+
 	public abstract bool IsValid { get; }
 
 	public abstract int ActorNumber { get; }
@@ -36,34 +48,25 @@ public abstract class NetPlayer : ObjectPoolEvents
 
 	public virtual void OnReturned()
 	{
-		this.LeftTime = Time.time;
-		HashSet<int> singleCallRPCStatus = this.SingleCallRPCStatus;
-		if (singleCallRPCStatus != null)
-		{
-			singleCallRPCStatus.Clear();
-		}
-		this.SanitizedNickName = string.Empty;
+		LeftTime = Time.time;
+		SingleCallRPCStatus?.Clear();
+		SanitizedNickName = string.Empty;
 	}
 
 	public virtual void OnTaken()
 	{
-		this.JoinedTime = Time.time;
-		HashSet<int> singleCallRPCStatus = this.SingleCallRPCStatus;
-		if (singleCallRPCStatus == null)
-		{
-			return;
-		}
-		singleCallRPCStatus.Clear();
+		JoinedTime = Time.time;
+		SingleCallRPCStatus?.Clear();
 	}
 
-	public virtual bool CheckSingleCallRPC(NetPlayer.SingleCallRPC RPCType)
+	public virtual bool CheckSingleCallRPC(SingleCallRPC RPCType)
 	{
-		return this.SingleCallRPCStatus.Contains((int)RPCType);
+		return SingleCallRPCStatus.Contains((int)RPCType);
 	}
 
-	public virtual void ReceivedSingleCallRPC(NetPlayer.SingleCallRPC RPCType)
+	public virtual void ReceivedSingleCallRPC(SingleCallRPC RPCType)
 	{
-		this.SingleCallRPCStatus.Add((int)RPCType);
+		SingleCallRPCStatus.Add((int)RPCType);
 	}
 
 	public Player GetPlayerRef()
@@ -73,50 +76,33 @@ public abstract class NetPlayer : ObjectPoolEvents
 
 	public string ToStringFull()
 	{
-		return string.Format("#{0: 0:00} '{1}', Not sure what to do with inactive yet, Or custom props?", this.ActorNumber, this.NickName);
+		return $"#{ActorNumber: 0:00} '{NickName}', Not sure what to do with inactive yet, Or custom props?";
 	}
 
 	public static implicit operator NetPlayer(Player player)
 	{
 		Utils.Log("Using an implicit cast from Player to NetPlayer. Please make sure this was intended as this has potential to cause errors when switching between network backends");
-		NetworkSystem instance = NetworkSystem.Instance;
-		return ((instance != null) ? instance.GetPlayer(player) : null) ?? null;
+		return NetworkSystem.Instance?.GetPlayer(player) ?? null;
 	}
 
 	public static implicit operator NetPlayer(PlayerRef player)
 	{
 		Utils.Log("Using an implicit cast from PlayerRef to NetPlayer. Please make sure this was intended as this has potential to cause errors when switching between network backends");
-		NetworkSystem instance = NetworkSystem.Instance;
-		return ((instance != null) ? instance.GetPlayer(player) : null) ?? null;
+		return NetworkSystem.Instance?.GetPlayer(player) ?? null;
 	}
 
 	public static NetPlayer Get(Player player)
 	{
-		NetworkSystem instance = NetworkSystem.Instance;
-		return ((instance != null) ? instance.GetPlayer(player) : null) ?? null;
+		return NetworkSystem.Instance?.GetPlayer(player) ?? null;
 	}
 
 	public static NetPlayer Get(PlayerRef player)
 	{
-		NetworkSystem instance = NetworkSystem.Instance;
-		return ((instance != null) ? instance.GetPlayer(player) : null) ?? null;
+		return NetworkSystem.Instance?.GetPlayer(player) ?? null;
 	}
 
 	public static NetPlayer Get(int actorNr)
 	{
-		NetworkSystem instance = NetworkSystem.Instance;
-		return ((instance != null) ? instance.GetPlayer(actorNr) : null) ?? null;
-	}
-
-	private HashSet<int> SingleCallRPCStatus = new HashSet<int>(5);
-
-	public enum SingleCallRPC
-	{
-		CMS_RequestRoomInitialization,
-		CMS_RequestTriggerHistory,
-		CMS_SyncTriggerHistory,
-		CMS_SyncTriggerCounts,
-		RankedSendScoreToLateJoiner,
-		Count
+		return NetworkSystem.Instance?.GetPlayer(actorNr) ?? null;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using GorillaNetworking;
@@ -8,411 +8,11 @@ using UnityEngine;
 
 public class VRRigReliableState : MonoBehaviour, IWrappedSerializable, INetworkStruct
 {
-	public bool HasBracelet
+	public enum StateSyncSlots
 	{
-		get
-		{
-			return this.braceletBeadColors.Count > 0;
-		}
-	}
-
-	public bool isDirty { get; private set; } = true;
-
-	private void Awake()
-	{
-		VRRig.newPlayerJoined = (Action)Delegate.Combine(VRRig.newPlayerJoined, new Action(this.SetIsDirty));
-		RoomSystem.JoinedRoomEvent += new Action(this.SetIsDirty);
-	}
-
-	private void OnDestroy()
-	{
-		VRRig.newPlayerJoined = (Action)Delegate.Remove(VRRig.newPlayerJoined, new Action(this.SetIsDirty));
-	}
-
-	public void SetIsDirty()
-	{
-		this.isDirty = true;
-	}
-
-	public void SetIsNotDirty()
-	{
-		this.isDirty = false;
-	}
-
-	public void SharedStart(bool isOfflineVRRig_, BodyDockPositions bDock_)
-	{
-		this.isOfflineVRRig = isOfflineVRRig_;
-		this.bDock = bDock_;
-		this.activeTransferrableObjectIndex = new int[5];
-		for (int i = 0; i < this.activeTransferrableObjectIndex.Length; i++)
-		{
-			this.activeTransferrableObjectIndex[i] = -1;
-		}
-		this.transferrablePosStates = new TransferrableObject.PositionState[5];
-		this.transferrableItemStates = new TransferrableObject.ItemStates[5];
-		this.transferableDockPositions = new BodyDockPositions.DropPositions[5];
-	}
-
-	public void RegisterCosmeticStateSyncTarget(VRRigReliableState.StateSyncSlots slot, ICosmeticStateSync target)
-	{
-		if (this.m_cosmeticStateTargets[(int)slot] != null)
-		{
-			Debug.LogWarning(string.Format("{0}-CosmeticStateSync: instance already registered at slot {1}, this will be overriden", "VRRigReliableState", slot));
-		}
-		this.m_cosmeticStateTargets[(int)slot] = target;
-		if (this.bDock.myRig.isOfflineVRRig)
-		{
-			this.m_cosmeticStates[(int)slot] = target.StateValue;
-			this.isDirty = true;
-			return;
-		}
-		target.OnStateUpdate(this.m_cosmeticStates[(int)slot]);
-	}
-
-	public void UnRegisterCosmeticStateSyncTarget(VRRigReliableState.StateSyncSlots slot, ICosmeticStateSync target)
-	{
-		if (this.m_cosmeticStateTargets[(int)slot] != target)
-		{
-			Debug.LogWarning(string.Format("{0}-CosmeticStateSync: target is not the value stored at slot {1}, ignoring", "VRRigReliableState", slot));
-			return;
-		}
-		this.m_cosmeticStateTargets[(int)slot] = null;
-		this.m_cosmeticStates[(int)slot] = -1;
-		if (this.bDock.myRig.isOfflineVRRig)
-		{
-			this.isDirty = true;
-		}
-	}
-
-	private void CopyStateSyncToSyncArray()
-	{
-		for (int i = 0; i < this.m_cosmeticStateTargets.Length; i++)
-		{
-			ICosmeticStateSync cosmeticStateSync = this.m_cosmeticStateTargets[i];
-			int num = (cosmeticStateSync != null) ? cosmeticStateSync.StateValue : -1;
-			if (num != this.m_cosmeticStates[i])
-			{
-				this.isDirty = true;
-			}
-			this.m_cosmeticStates[i] = num;
-		}
-	}
-
-	public int GetCachedStateAtSlot(VRRigReliableState.StateSyncSlots slot)
-	{
-		if (slot < VRRigReliableState.StateSyncSlots.Hat || slot >= (VRRigReliableState.StateSyncSlots)this.m_cosmeticStates.Length)
-		{
-			return -1;
-		}
-		return this.m_cosmeticStates[(int)slot];
-	}
-
-	void IWrappedSerializable.OnSerializeRead(object newData)
-	{
-		this.Data = (ReliableStateData)newData;
-		long header = this.Data.Header;
-		int num;
-		this.SetHeader(header, out num);
-		for (int i = 0; i < this.activeTransferrableObjectIndex.Length; i++)
-		{
-			if ((header & 1L << (i & 31)) != 0L)
-			{
-				long num2 = this.Data.TransferrableStates[i];
-				this.activeTransferrableObjectIndex[i] = (int)num2;
-				this.transferrablePosStates[i] = (TransferrableObject.PositionState)(num2 >> 32 & 255L);
-				this.transferrableItemStates[i] = (TransferrableObject.ItemStates)(num2 >> 40 & 255L);
-				this.transferableDockPositions[i] = (BodyDockPositions.DropPositions)(num2 >> 48 & 255L);
-			}
-			else
-			{
-				this.activeTransferrableObjectIndex[i] = -1;
-				this.transferrablePosStates[i] = TransferrableObject.PositionState.None;
-				this.transferrableItemStates[i] = (TransferrableObject.ItemStates)0;
-				this.transferableDockPositions[i] = BodyDockPositions.DropPositions.None;
-			}
-		}
-		this.wearablesPackedStates = this.Data.WearablesPackedState;
-		this.lThrowableProjectileIndex = this.Data.LThrowableProjectileIndex;
-		this.rThrowableProjectileIndex = this.Data.RThrowableProjectileIndex;
-		this.sizeLayerMask = this.Data.SizeLayerMask;
-		this.randomThrowableIndex = this.Data.RandomThrowableIndex;
-		this.braceletBeadColors.Clear();
-		if (num > 0)
-		{
-			if (num <= 3)
-			{
-				int num3 = (int)this.Data.PackedBeads;
-				this.braceletSelfIndex = num3 >> 30;
-				VRRigReliableState.UnpackBeadColors((long)num3, 0, num, this.braceletBeadColors);
-			}
-			else
-			{
-				long packedBeads = this.Data.PackedBeads;
-				this.braceletSelfIndex = (int)(packedBeads >> 60);
-				if (num <= 6)
-				{
-					VRRigReliableState.UnpackBeadColors(packedBeads, 0, num, this.braceletBeadColors);
-				}
-				else
-				{
-					VRRigReliableState.UnpackBeadColors(packedBeads, 0, 6, this.braceletBeadColors);
-					VRRigReliableState.UnpackBeadColors(this.Data.PackedBeadsMoreThan6, 6, num, this.braceletBeadColors);
-				}
-			}
-		}
-		this.bDock.RefreshTransferrableItems();
-		this.bDock.myRig.UpdateFriendshipBracelet();
-	}
-
-	object IWrappedSerializable.OnSerializeWrite()
-	{
-		this.isDirty = false;
-		ReliableStateData reliableStateData = default(ReliableStateData);
-		long header = this.GetHeader();
-		reliableStateData.Header = header;
-		long[] array = this.GetTransferrableStates(header).ToArray();
-		reliableStateData.TransferrableStates.CopyFrom(array, 0, array.Length);
-		reliableStateData.WearablesPackedState = this.wearablesPackedStates;
-		reliableStateData.LThrowableProjectileIndex = this.lThrowableProjectileIndex;
-		reliableStateData.RThrowableProjectileIndex = this.rThrowableProjectileIndex;
-		reliableStateData.SizeLayerMask = this.sizeLayerMask;
-		reliableStateData.RandomThrowableIndex = this.randomThrowableIndex;
-		if (this.braceletBeadColors.Count > 0)
-		{
-			long num = VRRigReliableState.PackBeadColors(this.braceletBeadColors, 0);
-			if (this.braceletBeadColors.Count <= 3)
-			{
-				num |= (long)this.braceletSelfIndex << 30;
-				reliableStateData.PackedBeads = num;
-			}
-			else
-			{
-				num |= (long)this.braceletSelfIndex << 60;
-				reliableStateData.PackedBeads = num;
-				if (this.braceletBeadColors.Count > 6)
-				{
-					reliableStateData.PackedBeadsMoreThan6 = VRRigReliableState.PackBeadColors(this.braceletBeadColors, 6);
-				}
-			}
-		}
-		this.Data = reliableStateData;
-		return reliableStateData;
-	}
-
-	void IWrappedSerializable.OnSerializeWrite(PhotonStream stream, PhotonMessageInfo info)
-	{
-		this.CopyStateSyncToSyncArray();
-		if (!this.isDirty)
-		{
-			return;
-		}
-		this.isDirty = false;
-		long header = this.GetHeader();
-		stream.SendNext(header);
-		foreach (long num in this.GetTransferrableStates(header))
-		{
-			stream.SendNext(num);
-		}
-		stream.SendNext(this.wearablesPackedStates);
-		stream.SendNext(this.lThrowableProjectileIndex);
-		stream.SendNext(this.rThrowableProjectileIndex);
-		stream.SendNext(this.sizeLayerMask);
-		stream.SendNext(this.randomThrowableIndex);
-		foreach (int num2 in this.m_cosmeticStates)
-		{
-			stream.SendNext(num2);
-		}
-		if (this.braceletBeadColors.Count > 0)
-		{
-			long num3 = VRRigReliableState.PackBeadColors(this.braceletBeadColors, 0);
-			if (this.braceletBeadColors.Count <= 3)
-			{
-				num3 |= (long)this.braceletSelfIndex << 30;
-				stream.SendNext((int)num3);
-				return;
-			}
-			num3 |= (long)this.braceletSelfIndex << 60;
-			stream.SendNext(num3);
-			if (this.braceletBeadColors.Count > 6)
-			{
-				stream.SendNext(VRRigReliableState.PackBeadColors(this.braceletBeadColors, 6));
-			}
-		}
-	}
-
-	void IWrappedSerializable.OnSerializeRead(PhotonStream stream, PhotonMessageInfo info)
-	{
-		long num = (long)stream.ReceiveNext();
-		this.isMicEnabled = ((num & 32L) != 0L);
-		this.isBraceletLeftHanded = ((num & 64L) != 0L);
-		this.isBuilderWatchEnabled = ((num & 128L) != 0L);
-		int num2 = (int)(num >> 12) & 15;
-		this.lThrowableProjectileColor.r = (byte)(num >> 16);
-		this.lThrowableProjectileColor.g = (byte)(num >> 24);
-		this.lThrowableProjectileColor.b = (byte)(num >> 32);
-		this.rThrowableProjectileColor.r = (byte)(num >> 40);
-		this.rThrowableProjectileColor.g = (byte)(num >> 48);
-		this.rThrowableProjectileColor.b = (byte)(num >> 56);
-		for (int i = 0; i < this.activeTransferrableObjectIndex.Length; i++)
-		{
-			if ((num & 1L << (i & 31)) != 0L)
-			{
-				long num3 = (long)stream.ReceiveNext();
-				this.activeTransferrableObjectIndex[i] = (int)num3;
-				this.transferrablePosStates[i] = (TransferrableObject.PositionState)(num3 >> 32 & 255L);
-				this.transferrableItemStates[i] = (TransferrableObject.ItemStates)(num3 >> 40 & 255L);
-				this.transferableDockPositions[i] = (BodyDockPositions.DropPositions)(num3 >> 48 & 255L);
-			}
-			else
-			{
-				this.activeTransferrableObjectIndex[i] = -1;
-				this.transferrablePosStates[i] = TransferrableObject.PositionState.None;
-				this.transferrableItemStates[i] = (TransferrableObject.ItemStates)0;
-				this.transferableDockPositions[i] = BodyDockPositions.DropPositions.None;
-			}
-		}
-		this.wearablesPackedStates = (int)stream.ReceiveNext();
-		this.lThrowableProjectileIndex = (int)stream.ReceiveNext();
-		this.rThrowableProjectileIndex = (int)stream.ReceiveNext();
-		this.sizeLayerMask = (int)stream.ReceiveNext();
-		this.randomThrowableIndex = (int)stream.ReceiveNext();
-		for (int j = 0; j < this.m_cosmeticStates.Length; j++)
-		{
-			int num4 = (int)stream.ReceiveNext();
-			this.m_cosmeticStates[j] = num4;
-			ICosmeticStateSync cosmeticStateSync = this.m_cosmeticStateTargets[j];
-			if (cosmeticStateSync != null)
-			{
-				cosmeticStateSync.OnStateUpdate(num4);
-			}
-		}
-		this.braceletBeadColors.Clear();
-		if (num2 > 0)
-		{
-			if (num2 <= 3)
-			{
-				int num5 = (int)stream.ReceiveNext();
-				this.braceletSelfIndex = num5 >> 30;
-				VRRigReliableState.UnpackBeadColors((long)num5, 0, num2, this.braceletBeadColors);
-			}
-			else
-			{
-				long num6 = (long)stream.ReceiveNext();
-				this.braceletSelfIndex = (int)(num6 >> 60);
-				if (num2 <= 6)
-				{
-					VRRigReliableState.UnpackBeadColors(num6, 0, num2, this.braceletBeadColors);
-				}
-				else
-				{
-					VRRigReliableState.UnpackBeadColors(num6, 0, 6, this.braceletBeadColors);
-					VRRigReliableState.UnpackBeadColors((long)stream.ReceiveNext(), 6, num2, this.braceletBeadColors);
-				}
-			}
-		}
-		this.bDock.RefreshTransferrableItems();
-		this.bDock.myRig.UpdateFriendshipBracelet();
-		this.bDock.myRig.EnableBuilderResizeWatch(this.isBuilderWatchEnabled);
-	}
-
-	private long GetHeader()
-	{
-		long num = 0L;
-		if (CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
-		{
-			for (int i = 0; i < this.activeTransferrableObjectIndex.Length; i++)
-			{
-				if (this.activeTransferrableObjectIndex[i] != -1 && (this.transferrablePosStates[i] == TransferrableObject.PositionState.InLeftHand || this.transferrablePosStates[i] == TransferrableObject.PositionState.InRightHand))
-				{
-					num |= (long)((ulong)((byte)(1 << i)));
-				}
-			}
-		}
-		else
-		{
-			for (int j = 0; j < this.activeTransferrableObjectIndex.Length; j++)
-			{
-				if (this.activeTransferrableObjectIndex[j] != -1)
-				{
-					num |= (long)((ulong)((byte)(1 << j)));
-				}
-			}
-		}
-		if (this.isBraceletLeftHanded)
-		{
-			num |= 64L;
-		}
-		if (this.isMicEnabled)
-		{
-			num |= 32L;
-		}
-		if (this.isBuilderWatchEnabled && !CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
-		{
-			num |= 128L;
-		}
-		num |= ((long)this.braceletBeadColors.Count & 15L) << 12;
-		num |= (long)((long)((ulong)this.lThrowableProjectileColor.r) << 16);
-		num |= (long)((long)((ulong)this.lThrowableProjectileColor.g) << 24);
-		num |= (long)((long)((ulong)this.lThrowableProjectileColor.b) << 32);
-		num |= (long)((long)((ulong)this.rThrowableProjectileColor.r) << 40);
-		num |= (long)((long)((ulong)this.rThrowableProjectileColor.g) << 48);
-		return num | (long)((long)((ulong)this.rThrowableProjectileColor.b) << 56);
-	}
-
-	private void SetHeader(long header, out int numBeadsToRead)
-	{
-		this.isMicEnabled = ((header & 32L) != 0L);
-		this.isBraceletLeftHanded = ((header & 64L) != 0L);
-		numBeadsToRead = ((int)(header >> 12) & 15);
-		this.lThrowableProjectileColor.r = (byte)(header >> 16);
-		this.lThrowableProjectileColor.g = (byte)(header >> 24);
-		this.lThrowableProjectileColor.b = (byte)(header >> 32);
-		this.rThrowableProjectileColor.r = (byte)(header >> 40);
-		this.rThrowableProjectileColor.g = (byte)(header >> 48);
-		this.rThrowableProjectileColor.b = (byte)(header >> 56);
-	}
-
-	private List<long> GetTransferrableStates(long header)
-	{
-		List<long> list = new List<long>();
-		for (int i = 0; i < this.activeTransferrableObjectIndex.Length; i++)
-		{
-			if ((header & 1L << (i & 31)) != 0L && this.activeTransferrableObjectIndex[i] != -1)
-			{
-				long num = (long)((ulong)this.activeTransferrableObjectIndex[i]);
-				num |= (long)this.transferrablePosStates[i] << 32;
-				num |= (long)this.transferrableItemStates[i] << 40;
-				num |= (long)this.transferableDockPositions[i] << 48;
-				list.Add(num);
-			}
-		}
-		return list;
-	}
-
-	private static long PackBeadColors(List<Color> beadColors, int fromIndex)
-	{
-		long num = 0L;
-		int num2 = Mathf.Min(fromIndex + 6, beadColors.Count);
-		int num3 = 0;
-		for (int i = fromIndex; i < num2; i++)
-		{
-			long num4 = (long)FriendshipGroupDetection.PackColor(beadColors[i]);
-			num |= num4 << num3;
-			num3 += 10;
-		}
-		return num;
-	}
-
-	private static void UnpackBeadColors(long packed, int startIndex, int endIndex, List<Color> beadColorsResult)
-	{
-		int num = Mathf.Min(startIndex + 6, endIndex);
-		int num2 = 0;
-		for (int i = 0; i < num; i++)
-		{
-			short data = (short)(packed >> num2 & 1023L);
-			beadColorsResult.Add(FriendshipGroupDetection.UnpackColor(data));
-			num2 += 10;
-		}
+		Hat,
+		Shirt,
+		length
 	}
 
 	[NonSerialized]
@@ -503,10 +103,401 @@ public class VRRigReliableState : MonoBehaviour, IWrappedSerializable, INetworkS
 
 	private ReliableStateData Data;
 
-	public enum StateSyncSlots
+	public bool HasBracelet => braceletBeadColors.Count > 0;
+
+	public bool isDirty { get; private set; } = true;
+
+	private void Awake()
 	{
-		Hat,
-		Shirt,
-		length
+		VRRig.newPlayerJoined = (Action)Delegate.Combine(VRRig.newPlayerJoined, new Action(SetIsDirty));
+		RoomSystem.JoinedRoomEvent += new Action(SetIsDirty);
+	}
+
+	private void OnDestroy()
+	{
+		VRRig.newPlayerJoined = (Action)Delegate.Remove(VRRig.newPlayerJoined, new Action(SetIsDirty));
+	}
+
+	public void SetIsDirty()
+	{
+		isDirty = true;
+	}
+
+	public void SetIsNotDirty()
+	{
+		isDirty = false;
+	}
+
+	public void SharedStart(bool isOfflineVRRig_, BodyDockPositions bDock_)
+	{
+		isOfflineVRRig = isOfflineVRRig_;
+		bDock = bDock_;
+		activeTransferrableObjectIndex = new int[5];
+		for (int i = 0; i < activeTransferrableObjectIndex.Length; i++)
+		{
+			activeTransferrableObjectIndex[i] = -1;
+		}
+		transferrablePosStates = new TransferrableObject.PositionState[5];
+		transferrableItemStates = new TransferrableObject.ItemStates[5];
+		transferableDockPositions = new BodyDockPositions.DropPositions[5];
+	}
+
+	public void RegisterCosmeticStateSyncTarget(StateSyncSlots slot, ICosmeticStateSync target)
+	{
+		if (m_cosmeticStateTargets[(int)slot] != null)
+		{
+			Debug.LogWarning(string.Format("{0}-CosmeticStateSync: instance already registered at slot {1}, this will be overriden", "VRRigReliableState", slot));
+		}
+		m_cosmeticStateTargets[(int)slot] = target;
+		if (bDock.myRig.isOfflineVRRig)
+		{
+			m_cosmeticStates[(int)slot] = target.StateValue;
+			isDirty = true;
+		}
+		else
+		{
+			target.OnStateUpdate(m_cosmeticStates[(int)slot]);
+		}
+	}
+
+	public void UnRegisterCosmeticStateSyncTarget(StateSyncSlots slot, ICosmeticStateSync target)
+	{
+		if (m_cosmeticStateTargets[(int)slot] != target)
+		{
+			Debug.LogWarning(string.Format("{0}-CosmeticStateSync: target is not the value stored at slot {1}, ignoring", "VRRigReliableState", slot));
+			return;
+		}
+		m_cosmeticStateTargets[(int)slot] = null;
+		m_cosmeticStates[(int)slot] = -1;
+		if (bDock.myRig.isOfflineVRRig)
+		{
+			isDirty = true;
+		}
+	}
+
+	private void CopyStateSyncToSyncArray()
+	{
+		for (int i = 0; i < m_cosmeticStateTargets.Length; i++)
+		{
+			int num = m_cosmeticStateTargets[i]?.StateValue ?? (-1);
+			if (num != m_cosmeticStates[i])
+			{
+				isDirty = true;
+			}
+			m_cosmeticStates[i] = num;
+		}
+	}
+
+	public int GetCachedStateAtSlot(StateSyncSlots slot)
+	{
+		if (slot < StateSyncSlots.Hat || (int)slot >= m_cosmeticStates.Length)
+		{
+			return -1;
+		}
+		return m_cosmeticStates[(int)slot];
+	}
+
+	void IWrappedSerializable.OnSerializeRead(object newData)
+	{
+		Data = (ReliableStateData)newData;
+		long header = Data.Header;
+		SetHeader(header, out var numBeadsToRead);
+		for (int i = 0; i < activeTransferrableObjectIndex.Length; i++)
+		{
+			if ((header & (1 << i)) != 0L)
+			{
+				long num = Data.TransferrableStates[i];
+				activeTransferrableObjectIndex[i] = (int)num;
+				transferrablePosStates[i] = (TransferrableObject.PositionState)((num >> 32) & 0xFF);
+				transferrableItemStates[i] = (TransferrableObject.ItemStates)((num >> 40) & 0xFF);
+				transferableDockPositions[i] = (BodyDockPositions.DropPositions)((num >> 48) & 0xFF);
+			}
+			else
+			{
+				activeTransferrableObjectIndex[i] = -1;
+				transferrablePosStates[i] = TransferrableObject.PositionState.None;
+				transferrableItemStates[i] = (TransferrableObject.ItemStates)0;
+				transferableDockPositions[i] = BodyDockPositions.DropPositions.None;
+			}
+		}
+		wearablesPackedStates = Data.WearablesPackedState;
+		lThrowableProjectileIndex = Data.LThrowableProjectileIndex;
+		rThrowableProjectileIndex = Data.RThrowableProjectileIndex;
+		sizeLayerMask = Data.SizeLayerMask;
+		randomThrowableIndex = Data.RandomThrowableIndex;
+		braceletBeadColors.Clear();
+		if (numBeadsToRead > 0)
+		{
+			if (numBeadsToRead <= 3)
+			{
+				int num2 = (int)Data.PackedBeads;
+				braceletSelfIndex = num2 >> 30;
+				UnpackBeadColors(num2, 0, numBeadsToRead, braceletBeadColors);
+			}
+			else
+			{
+				long packedBeads = Data.PackedBeads;
+				braceletSelfIndex = (int)(packedBeads >> 60);
+				if (numBeadsToRead <= 6)
+				{
+					UnpackBeadColors(packedBeads, 0, numBeadsToRead, braceletBeadColors);
+				}
+				else
+				{
+					UnpackBeadColors(packedBeads, 0, 6, braceletBeadColors);
+					UnpackBeadColors(Data.PackedBeadsMoreThan6, 6, numBeadsToRead, braceletBeadColors);
+				}
+			}
+		}
+		bDock.RefreshTransferrableItems();
+		bDock.myRig.UpdateFriendshipBracelet();
+	}
+
+	object IWrappedSerializable.OnSerializeWrite()
+	{
+		isDirty = false;
+		ReliableStateData reliableStateData = default(ReliableStateData);
+		long header = (reliableStateData.Header = GetHeader());
+		long[] array = GetTransferrableStates(header).ToArray();
+		reliableStateData.TransferrableStates.CopyFrom(array, 0, array.Length);
+		reliableStateData.WearablesPackedState = wearablesPackedStates;
+		reliableStateData.LThrowableProjectileIndex = lThrowableProjectileIndex;
+		reliableStateData.RThrowableProjectileIndex = rThrowableProjectileIndex;
+		reliableStateData.SizeLayerMask = sizeLayerMask;
+		reliableStateData.RandomThrowableIndex = randomThrowableIndex;
+		if (braceletBeadColors.Count > 0)
+		{
+			long num = PackBeadColors(braceletBeadColors, 0);
+			if (braceletBeadColors.Count <= 3)
+			{
+				num |= (long)braceletSelfIndex << 30;
+				reliableStateData.PackedBeads = num;
+			}
+			else
+			{
+				num |= (long)braceletSelfIndex << 60;
+				reliableStateData.PackedBeads = num;
+				if (braceletBeadColors.Count > 6)
+				{
+					reliableStateData.PackedBeadsMoreThan6 = PackBeadColors(braceletBeadColors, 6);
+				}
+			}
+		}
+		Data = reliableStateData;
+		return reliableStateData;
+	}
+
+	void IWrappedSerializable.OnSerializeWrite(PhotonStream stream, PhotonMessageInfo info)
+	{
+		CopyStateSyncToSyncArray();
+		if (!isDirty)
+		{
+			return;
+		}
+		isDirty = false;
+		long header = GetHeader();
+		stream.SendNext(header);
+		foreach (long transferrableState in GetTransferrableStates(header))
+		{
+			stream.SendNext(transferrableState);
+		}
+		stream.SendNext(wearablesPackedStates);
+		stream.SendNext(lThrowableProjectileIndex);
+		stream.SendNext(rThrowableProjectileIndex);
+		stream.SendNext(sizeLayerMask);
+		stream.SendNext(randomThrowableIndex);
+		int[] cosmeticStates = m_cosmeticStates;
+		foreach (int num in cosmeticStates)
+		{
+			stream.SendNext(num);
+		}
+		if (braceletBeadColors.Count <= 0)
+		{
+			return;
+		}
+		long num2 = PackBeadColors(braceletBeadColors, 0);
+		if (braceletBeadColors.Count <= 3)
+		{
+			num2 |= (long)braceletSelfIndex << 30;
+			stream.SendNext((int)num2);
+			return;
+		}
+		num2 |= (long)braceletSelfIndex << 60;
+		stream.SendNext(num2);
+		if (braceletBeadColors.Count > 6)
+		{
+			stream.SendNext(PackBeadColors(braceletBeadColors, 6));
+		}
+	}
+
+	void IWrappedSerializable.OnSerializeRead(PhotonStream stream, PhotonMessageInfo info)
+	{
+		long num = (long)stream.ReceiveNext();
+		isMicEnabled = (num & 0x20) != 0;
+		isBraceletLeftHanded = (num & 0x40) != 0;
+		isBuilderWatchEnabled = (num & 0x80) != 0;
+		int num2 = (int)(num >> 12) & 0xF;
+		lThrowableProjectileColor.r = (byte)(num >> 16);
+		lThrowableProjectileColor.g = (byte)(num >> 24);
+		lThrowableProjectileColor.b = (byte)(num >> 32);
+		rThrowableProjectileColor.r = (byte)(num >> 40);
+		rThrowableProjectileColor.g = (byte)(num >> 48);
+		rThrowableProjectileColor.b = (byte)(num >> 56);
+		for (int i = 0; i < activeTransferrableObjectIndex.Length; i++)
+		{
+			if ((num & (1 << i)) != 0L)
+			{
+				long num3 = (long)stream.ReceiveNext();
+				activeTransferrableObjectIndex[i] = (int)num3;
+				transferrablePosStates[i] = (TransferrableObject.PositionState)((num3 >> 32) & 0xFF);
+				transferrableItemStates[i] = (TransferrableObject.ItemStates)((num3 >> 40) & 0xFF);
+				transferableDockPositions[i] = (BodyDockPositions.DropPositions)((num3 >> 48) & 0xFF);
+			}
+			else
+			{
+				activeTransferrableObjectIndex[i] = -1;
+				transferrablePosStates[i] = TransferrableObject.PositionState.None;
+				transferrableItemStates[i] = (TransferrableObject.ItemStates)0;
+				transferableDockPositions[i] = BodyDockPositions.DropPositions.None;
+			}
+		}
+		wearablesPackedStates = (int)stream.ReceiveNext();
+		lThrowableProjectileIndex = (int)stream.ReceiveNext();
+		rThrowableProjectileIndex = (int)stream.ReceiveNext();
+		sizeLayerMask = (int)stream.ReceiveNext();
+		randomThrowableIndex = (int)stream.ReceiveNext();
+		for (int j = 0; j < m_cosmeticStates.Length; j++)
+		{
+			int num4 = (int)stream.ReceiveNext();
+			m_cosmeticStates[j] = num4;
+			m_cosmeticStateTargets[j]?.OnStateUpdate(num4);
+		}
+		braceletBeadColors.Clear();
+		if (num2 > 0)
+		{
+			if (num2 <= 3)
+			{
+				int num5 = (int)stream.ReceiveNext();
+				braceletSelfIndex = num5 >> 30;
+				UnpackBeadColors(num5, 0, num2, braceletBeadColors);
+			}
+			else
+			{
+				long num6 = (long)stream.ReceiveNext();
+				braceletSelfIndex = (int)(num6 >> 60);
+				if (num2 <= 6)
+				{
+					UnpackBeadColors(num6, 0, num2, braceletBeadColors);
+				}
+				else
+				{
+					UnpackBeadColors(num6, 0, 6, braceletBeadColors);
+					UnpackBeadColors((long)stream.ReceiveNext(), 6, num2, braceletBeadColors);
+				}
+			}
+		}
+		bDock.RefreshTransferrableItems();
+		bDock.myRig.UpdateFriendshipBracelet();
+		bDock.myRig.EnableBuilderResizeWatch(isBuilderWatchEnabled);
+	}
+
+	private long GetHeader()
+	{
+		long num = 0L;
+		if (CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
+		{
+			for (int i = 0; i < activeTransferrableObjectIndex.Length; i++)
+			{
+				if (activeTransferrableObjectIndex[i] != -1 && (transferrablePosStates[i] == TransferrableObject.PositionState.InLeftHand || transferrablePosStates[i] == TransferrableObject.PositionState.InRightHand))
+				{
+					num |= (byte)(1 << i);
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < activeTransferrableObjectIndex.Length; j++)
+			{
+				if (activeTransferrableObjectIndex[j] != -1)
+				{
+					num |= (byte)(1 << j);
+				}
+			}
+		}
+		if (isBraceletLeftHanded)
+		{
+			num |= 0x40;
+		}
+		if (isMicEnabled)
+		{
+			num |= 0x20;
+		}
+		if (isBuilderWatchEnabled && !CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
+		{
+			num |= 0x80;
+		}
+		num |= (long)(((ulong)braceletBeadColors.Count & 0xFuL) << 12);
+		num |= (long)((ulong)lThrowableProjectileColor.r << 16);
+		num |= (long)((ulong)lThrowableProjectileColor.g << 24);
+		num |= (long)((ulong)lThrowableProjectileColor.b << 32);
+		num |= (long)((ulong)rThrowableProjectileColor.r << 40);
+		num |= (long)((ulong)rThrowableProjectileColor.g << 48);
+		return num | (long)((ulong)rThrowableProjectileColor.b << 56);
+	}
+
+	private void SetHeader(long header, out int numBeadsToRead)
+	{
+		isMicEnabled = (header & 0x20) != 0;
+		isBraceletLeftHanded = (header & 0x40) != 0;
+		numBeadsToRead = (int)(header >> 12) & 0xF;
+		lThrowableProjectileColor.r = (byte)(header >> 16);
+		lThrowableProjectileColor.g = (byte)(header >> 24);
+		lThrowableProjectileColor.b = (byte)(header >> 32);
+		rThrowableProjectileColor.r = (byte)(header >> 40);
+		rThrowableProjectileColor.g = (byte)(header >> 48);
+		rThrowableProjectileColor.b = (byte)(header >> 56);
+	}
+
+	private List<long> GetTransferrableStates(long header)
+	{
+		List<long> list = new List<long>();
+		for (int i = 0; i < activeTransferrableObjectIndex.Length; i++)
+		{
+			if ((header & (1 << i)) != 0L && activeTransferrableObjectIndex[i] != -1)
+			{
+				long num = (uint)activeTransferrableObjectIndex[i];
+				num |= (long)transferrablePosStates[i] << 32;
+				num |= (long)transferrableItemStates[i] << 40;
+				num |= (long)transferableDockPositions[i] << 48;
+				list.Add(num);
+			}
+		}
+		return list;
+	}
+
+	private static long PackBeadColors(List<Color> beadColors, int fromIndex)
+	{
+		long num = 0L;
+		int num2 = Mathf.Min(fromIndex + 6, beadColors.Count);
+		int num3 = 0;
+		for (int i = fromIndex; i < num2; i++)
+		{
+			long num4 = FriendshipGroupDetection.PackColor(beadColors[i]);
+			num |= num4 << num3;
+			num3 += 10;
+		}
+		return num;
+	}
+
+	private static void UnpackBeadColors(long packed, int startIndex, int endIndex, List<Color> beadColorsResult)
+	{
+		int num = Mathf.Min(startIndex + 6, endIndex);
+		int num2 = 0;
+		for (int i = 0; i < num; i++)
+		{
+			short data = (short)((packed >> num2) & 0x3FF);
+			beadColorsResult.Add(FriendshipGroupDetection.UnpackColor(data));
+			num2 += 10;
+		}
 	}
 }

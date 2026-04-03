@@ -1,45 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public class VoiceLoudnessReactorParticleSystemTarget
 {
-	public float InitialSpeed
-	{
-		get
-		{
-			return this.initialSpeed;
-		}
-		set
-		{
-			this.initialSpeed = value;
-		}
-	}
-
-	public float InitialRate
-	{
-		get
-		{
-			return this.initialRate;
-		}
-		set
-		{
-			this.initialRate = value;
-		}
-	}
-
-	public float InitialSize
-	{
-		get
-		{
-			return this.initialSize;
-		}
-		set
-		{
-			this.initialSize = value;
-		}
-	}
-
 	public ParticleSystem particleSystem;
 
 	public bool UseSmoothedLoudness;
@@ -63,4 +27,40 @@ public class VoiceLoudnessReactorParticleSystemTarget
 
 	[HideInInspector]
 	public ParticleSystem.EmissionModule Emission;
+
+	public float InitialSpeed
+	{
+		get
+		{
+			return initialSpeed;
+		}
+		set
+		{
+			initialSpeed = value;
+		}
+	}
+
+	public float InitialRate
+	{
+		get
+		{
+			return initialRate;
+		}
+		set
+		{
+			initialRate = value;
+		}
+	}
+
+	public float InitialSize
+	{
+		get
+		{
+			return initialSize;
+		}
+		set
+		{
+			initialSize = value;
+		}
+	}
 }

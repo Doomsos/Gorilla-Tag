@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Unity.XR.CoreUtils;
@@ -7,666 +6,27 @@ using UnityEngine.AI;
 
 public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameEntityDebugComponent, IGameAgentComponent, IGRSummoningEntity
 {
-	private void Awake()
+	public enum Behavior
 	{
-		this.rigidBody = base.GetComponent<Rigidbody>();
-		this.colliders = new List<Collider>(4);
-		this.trackedEntities = new List<int>();
-		base.GetComponentsInChildren<Collider>(this.colliders);
-		this.agent = base.GetComponent<GameAgent>();
-		this.entity = base.GetComponent<GameEntity>();
-		this.enemy = base.GetComponent<GREnemy>();
-		if (this.armor != null)
-		{
-			this.armor.SetHp(0);
-		}
-		this.navAgent.updateRotation = false;
-		this.behaviorStartTime = -1.0;
-		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-		this.senseNearby.Setup(this.headTransform, this.entity);
+		Idle,
+		Wander,
+		Stagger,
+		Destroyed,
+		Summon,
+		KeepDistance,
+		MoveToTarget,
+		Investigate,
+		Jump,
+		Flashed,
+		Count
 	}
 
-	public void OnEntityInit()
+	public enum BodyState
 	{
-		this.abilityIdle.Setup(this.agent, this.anim, this.audioSource, null, null, null);
-		this.abilityWander.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityDie.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilitySummon.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityKeepDistance.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityMoveToTarget.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityStagger.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityInvestigate.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.abilityFlashed.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.SetBehavior(GREnemySummoner.Behavior.Idle, true);
-		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
-		{
-			foreach (GRBonusEntry entry in this.entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
-			{
-				this.attributes.AddBonus(entry);
-			}
-		}
-		this.SetHP(this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax));
-		this.navAgent.speed = (float)this.attributes.CalculateFinalValueForAttribute(GRAttributeType.PatrolSpeed);
-		this.agent.navAgent.autoTraverseOffMeshLink = false;
-		this.agent.onJumpRequested += this.OnAgentJumpRequested;
-		if (this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
-		{
-			this.SetBodyState(GREnemySummoner.BodyState.Shell, true);
-			return;
-		}
-		this.SetBodyState(GREnemySummoner.BodyState.Bones, true);
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnDestroy()
-	{
-		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
-	}
-
-	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
-	{
-		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
-		this.SetBehavior(GREnemySummoner.Behavior.Jump, false);
-	}
-
-	public void OnNetworkBehaviorStateChange(byte newState)
-	{
-		if (newState < 0 || newState >= 10)
-		{
-			return;
-		}
-		this.SetBehavior((GREnemySummoner.Behavior)newState, false);
-	}
-
-	public void SetHP(int hp)
-	{
-		this.hp = hp;
-	}
-
-	public bool TrySetBehavior(GREnemySummoner.Behavior newBehavior)
-	{
-		if (this.currBehavior == GREnemySummoner.Behavior.Jump && newBehavior == GREnemySummoner.Behavior.Stagger)
-		{
-			return false;
-		}
-		this.SetBehavior(newBehavior, false);
-		return true;
-	}
-
-	public void SetBehavior(GREnemySummoner.Behavior newBehavior, bool force = false)
-	{
-		if (this.currBehavior == newBehavior && !force)
-		{
-			return;
-		}
-		switch (this.currBehavior)
-		{
-		case GREnemySummoner.Behavior.Idle:
-			this.abilityIdle.Stop();
-			break;
-		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.Stop();
-			break;
-		case GREnemySummoner.Behavior.Stagger:
-			this.abilityStagger.Stop();
-			break;
-		case GREnemySummoner.Behavior.Destroyed:
-			this.abilityDie.Stop();
-			break;
-		case GREnemySummoner.Behavior.Summon:
-			this.abilitySummon.Stop();
-			if (this.summonLight != null)
-			{
-				this.summonLight.gameObject.SetActive(false);
-			}
-			break;
-		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.Stop();
-			break;
-		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.Stop();
-			break;
-		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.Stop();
-			break;
-		case GREnemySummoner.Behavior.Jump:
-			this.abilityJump.Stop();
-			break;
-		case GREnemySummoner.Behavior.Flashed:
-			this.abilityFlashed.Stop();
-			break;
-		}
-		this.currBehavior = newBehavior;
-		this.behaviorStartTime = Time.timeAsDouble;
-		switch (this.currBehavior)
-		{
-		case GREnemySummoner.Behavior.Idle:
-			this.abilityIdle.Start();
-			break;
-		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.Start();
-			this.soundWander.Play(this.audioSource);
-			break;
-		case GREnemySummoner.Behavior.Stagger:
-			this.abilityStagger.Start();
-			break;
-		case GREnemySummoner.Behavior.Destroyed:
-			if (this.entity.IsAuthority())
-			{
-				this.entity.manager.RequestCreateItem(this.corePrefab.gameObject.name.GetStaticHash(), this.coreMarker.position, this.coreMarker.rotation, 0L);
-			}
-			this.abilityDie.Start();
-			break;
-		case GREnemySummoner.Behavior.Summon:
-			if (this.summonLight != null)
-			{
-				this.summonLight.gameObject.SetActive(true);
-			}
-			this.lastSummonTime = Time.timeAsDouble;
-			this.abilitySummon.SetLookAtTarget(this.GetPlayerTransform(this.agent.targetPlayer));
-			this.abilitySummon.Start();
-			break;
-		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.SetTargetPlayer(this.agent.targetPlayer);
-			this.abilityKeepDistance.Start();
-			break;
-		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.SetTarget(this.GetPlayerTransform(this.agent.targetPlayer));
-			this.abilityMoveToTarget.Start();
-			break;
-		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.Start();
-			break;
-		case GREnemySummoner.Behavior.Jump:
-			this.abilityJump.Start();
-			break;
-		case GREnemySummoner.Behavior.Flashed:
-			this.abilityFlashed.Start();
-			break;
-		}
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestBehaviorChange((byte)this.currBehavior);
-		}
-	}
-
-	private void Update()
-	{
-		this.OnUpdate(Time.deltaTime);
-	}
-
-	public void OnEntityThink(float dt)
-	{
-		if (!this.entity.IsAuthority())
-		{
-			return;
-		}
-		this.lastUpdateTime = Time.time;
-		GREnemySummoner.tempRigs.Clear();
-		GREnemySummoner.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GREnemySummoner.tempRigs);
-		this.senseNearby.UpdateNearby(GREnemySummoner.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		this.agent.RequestTarget((vrrig == null) ? null : vrrig.OwningNetPlayer);
-		switch (this.currBehavior)
-		{
-		case GREnemySummoner.Behavior.Idle:
-			this.abilityIdle.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		case GREnemySummoner.Behavior.Stagger:
-		case GREnemySummoner.Behavior.Destroyed:
-			break;
-		case GREnemySummoner.Behavior.Summon:
-			this.abilitySummon.Think(dt);
-			if (this.abilitySummon.IsDone())
-			{
-				this.ChooseNewBehavior();
-				return;
-			}
-			break;
-		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.Think(dt);
-			this.ChooseNewBehavior();
-			break;
-		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.Think(dt);
-			this.ChooseNewBehavior();
-			return;
-		default:
-			return;
-		}
-	}
-
-	public bool CanSummon()
-	{
-		return !GhostReactorManager.AggroDisabled && (this.currBehavior != GREnemySummoner.Behavior.Summon || !this.abilitySummon.IsDone()) && Time.timeAsDouble - this.lastSummonTime >= (double)this.minSummonInterval && this.trackedEntities.Count < this.maxSimultaneousSummonedEntities;
-	}
-
-	public Transform GetPlayerTransform(NetPlayer targetPlayer)
-	{
-		if (targetPlayer != null)
-		{
-			GRPlayer grplayer = GRPlayer.Get(targetPlayer.ActorNumber);
-			if (grplayer != null && grplayer.State == GRPlayer.GRPlayerState.Alive)
-			{
-				return grplayer.transform;
-			}
-		}
-		return null;
-	}
-
-	private void ChooseNewBehavior()
-	{
-		float num = 0f;
-		VRRig x = this.senseNearby.PickClosest(out num);
-		if (!GhostReactorManager.AggroDisabled && x != null)
-		{
-			this.investigateLocation = null;
-			float num2 = (this.currBehavior == GREnemySummoner.Behavior.KeepDistance) ? (this.keepDistanceThreshold + 1f) : this.keepDistanceThreshold;
-			if (num < num2 * num2)
-			{
-				this.SetBehavior(GREnemySummoner.Behavior.KeepDistance, false);
-				return;
-			}
-			if (this.CanSummon())
-			{
-				this.SetBehavior(GREnemySummoner.Behavior.Summon, false);
-				return;
-			}
-			float num3 = this.tooFarDistanceThreshold * this.tooFarDistanceThreshold;
-			if (num > num3)
-			{
-				this.SetBehavior(GREnemySummoner.Behavior.MoveToTarget, false);
-				return;
-			}
-			this.SetBehavior(GREnemySummoner.Behavior.Idle, false);
-			return;
-		}
-		else
-		{
-			this.investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, this.hearingRadius, this.investigateLocation);
-			if (this.investigateLocation != null)
-			{
-				this.abilityInvestigate.SetTargetPos(this.investigateLocation.Value);
-				this.SetBehavior(GREnemySummoner.Behavior.Investigate, false);
-				return;
-			}
-			double num4 = Time.timeAsDouble - this.abilityIdle.startTime;
-			if (this.currBehavior == GREnemySummoner.Behavior.Idle && num4 < (double)this.idleDuration)
-			{
-				this.SetBehavior(GREnemySummoner.Behavior.Idle, false);
-				return;
-			}
-			this.SetBehavior(GREnemySummoner.Behavior.Wander, false);
-			return;
-		}
-	}
-
-	public void OnUpdate(float dt)
-	{
-		if (this.entity.IsAuthority())
-		{
-			this.OnUpdateAuthority(dt);
-			return;
-		}
-		this.OnUpdateRemote(dt);
-	}
-
-	public void OnUpdateAuthority(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemySummoner.Behavior.Idle:
-			this.abilityIdle.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.Stagger:
-			this.abilityStagger.UpdateAuthority(dt);
-			if (this.abilityStagger.IsDone())
-			{
-				this.SetBehavior(GREnemySummoner.Behavior.Wander, false);
-				return;
-			}
-			break;
-		case GREnemySummoner.Behavior.Destroyed:
-			this.abilityDie.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.Summon:
-			this.abilitySummon.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.UpdateAuthority(dt);
-			return;
-		case GREnemySummoner.Behavior.Jump:
-			this.abilityJump.UpdateAuthority(dt);
-			if (this.abilityJump.IsDone())
-			{
-				this.ChooseNewBehavior();
-				return;
-			}
-			break;
-		case GREnemySummoner.Behavior.Flashed:
-			this.abilityFlashed.UpdateAuthority(dt);
-			if (this.abilityFlashed.IsDone())
-			{
-				this.ChooseNewBehavior();
-			}
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void OnUpdateRemote(float dt)
-	{
-		switch (this.currBehavior)
-		{
-		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Stagger:
-			this.abilityStagger.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Destroyed:
-			this.abilityDie.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Summon:
-			this.abilitySummon.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Jump:
-			this.abilityJump.UpdateRemote(dt);
-			return;
-		case GREnemySummoner.Behavior.Flashed:
-			this.abilityFlashed.UpdateRemote(dt);
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void OnGameEntitySerialize(BinaryWriter writer)
-	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		writer.Write(value);
-		writer.Write(this.hp);
-		writer.Write(value2);
-	}
-
-	public void OnGameEntityDeserialize(BinaryReader reader)
-	{
-		GREnemySummoner.Behavior newBehavior = (GREnemySummoner.Behavior)reader.ReadByte();
-		int num = reader.ReadInt32();
-		GREnemySummoner.BodyState newBodyState = (GREnemySummoner.BodyState)reader.ReadByte();
-		this.SetHP(num);
-		this.SetBehavior(newBehavior, true);
-		this.SetBodyState(newBodyState, true);
-	}
-
-	public bool IsHitValid(GameHitData hit)
-	{
-		return true;
-	}
-
-	public void OnHit(GameHitData hit)
-	{
-		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
-		GRTool gameComponent = this.entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
-		if (gameComponent != null)
-		{
-			switch (hitTypeId)
-			{
-			case GameHitType.Club:
-				this.OnHitByClub(gameComponent, hit);
-				return;
-			case GameHitType.Flash:
-				this.OnHitByFlash(gameComponent, hit);
-				return;
-			case GameHitType.Shield:
-				this.OnHitByShield(gameComponent, hit);
-				break;
-			default:
-				return;
-			}
-		}
-	}
-
-	private void OnHitByClub(GRTool tool, GameHitData hit)
-	{
-		if (this.currBehavior == GREnemySummoner.Behavior.Destroyed)
-		{
-			return;
-		}
-		if (this.currBodyState != GREnemySummoner.BodyState.Bones)
-		{
-			if (this.currBodyState == GREnemySummoner.BodyState.Shell && this.armor != null)
-			{
-				this.armor.PlayBlockFx(hit.hitEntityPosition);
-			}
-			return;
-		}
-		this.hp -= hit.hitAmount;
-		if (this.hp <= 0)
-		{
-			this.abilityDie.SetInstigatingPlayerIndex(this.entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
-			this.abilityDie.SetStaggerVelocity(hit.hitImpulse);
-			this.SetBehavior(GREnemySummoner.Behavior.Destroyed, false);
-			return;
-		}
-		this.abilityStagger.SetStaggerVelocity(hit.hitImpulse);
-		this.TrySetBehavior(GREnemySummoner.Behavior.Stagger);
-	}
-
-	public void InstantDeath()
-	{
-		this.hp = 0;
-		this.SetBehavior(GREnemySummoner.Behavior.Destroyed, false);
-	}
-
-	private void OnHitByFlash(GRTool tool, GameHitData hit)
-	{
-		this.abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
-		if (this.currBodyState == GREnemySummoner.BodyState.Shell)
-		{
-			this.hp -= hit.hitAmount;
-			if (this.armor != null)
-			{
-				this.armor.SetHp(this.hp);
-			}
-			if (this.hp <= 0)
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayDestroyFx(this.armor.transform.position);
-				}
-				this.SetBodyState(GREnemySummoner.BodyState.Bones, false);
-				if (tool.gameEntity.IsHeldByLocalPlayer())
-				{
-					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name, 1);
-				}
-				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
-				{
-					this.armor.FragmentArmor();
-				}
-			}
-			else
-			{
-				if (this.armor != null)
-				{
-					this.armor.PlayHitFx(this.armor.transform.position);
-				}
-				this.RefreshBody();
-			}
-		}
-		GRToolFlash component = tool.GetComponent<GRToolFlash>();
-		if (component != null)
-		{
-			this.abilityFlashed.SetStunTime(component.stunDuration);
-		}
-		this.TrySetBehavior(GREnemySummoner.Behavior.Flashed);
-	}
-
-	public void OnHitByShield(GRTool tool, GameHitData hit)
-	{
-		this.OnHitByClub(tool, hit);
-	}
-
-	private void OnTriggerEnter(Collider collider)
-	{
-		Rigidbody attachedRigidbody = collider.attachedRigidbody;
-		if (attachedRigidbody != null)
-		{
-			GRPlayer component = attachedRigidbody.GetComponent<GRPlayer>();
-			if (component != null && component.gamePlayer.IsLocal())
-			{
-				GhostReactorManager.Get(this.entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Phantom, this.entity.id, component, base.transform.position);
-			}
-			GRBreakable component2 = attachedRigidbody.GetComponent<GRBreakable>();
-			GameHittable component3 = attachedRigidbody.GetComponent<GameHittable>();
-			if (component2 != null && component3 != null)
-			{
-				GameHitData hitData = new GameHitData
-				{
-					hitTypeId = 0,
-					hitEntityId = component3.gameEntity.id,
-					hitByEntityId = this.entity.id,
-					hitEntityPosition = component2.transform.position,
-					hitImpulse = Vector3.zero,
-					hitPosition = component2.transform.position,
-					hittablePoint = component3.FindHittablePoint(collider)
-				};
-				component3.RequestHit(hitData);
-			}
-		}
-	}
-
-	private void RefreshBody()
-	{
-		switch (this.currBodyState)
-		{
-		case GREnemySummoner.BodyState.Destroyed:
-			this.armor.SetHp(0);
-			return;
-		case GREnemySummoner.BodyState.Bones:
-			this.armor.SetHp(0);
-			GREnemy.HideRenderers(this.bones, false);
-			GREnemy.HideRenderers(this.always, false);
-			GREnemy.HideObjects(this.bonesStateVisibleObjects, false);
-			GREnemy.HideObjects(this.alwaysVisibleObjects, false);
-			return;
-		case GREnemySummoner.BodyState.Shell:
-			this.armor.SetHp(this.hp);
-			GREnemy.HideRenderers(this.bones, true);
-			GREnemy.HideRenderers(this.always, false);
-			GREnemy.HideObjects(this.bonesStateVisibleObjects, true);
-			GREnemy.HideObjects(this.alwaysVisibleObjects, false);
-			return;
-		default:
-			return;
-		}
-	}
-
-	public void SetBodyState(GREnemySummoner.BodyState newBodyState, bool force = false)
-	{
-		if (this.currBodyState == newBodyState && !force)
-		{
-			return;
-		}
-		switch (this.currBodyState)
-		{
-		case GREnemySummoner.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemySummoner.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.currBodyState = newBodyState;
-		switch (this.currBodyState)
-		{
-		case GREnemySummoner.BodyState.Destroyed:
-			GhostReactorManager.Get(this.entity).ReportEnemyDeath();
-			break;
-		case GREnemySummoner.BodyState.Bones:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
-			break;
-		case GREnemySummoner.BodyState.Shell:
-			this.hp = this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
-			break;
-		}
-		this.RefreshBody();
-		if (this.entity.IsAuthority())
-		{
-			this.agent.RequestStateChange((byte)newBodyState);
-		}
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("State: <color=\"yellow\">{0}<color=\"white\"> HP: <color=\"yellow\">{1}<color=\"white\">", this.currBehavior.ToString(), this.hp));
-		strings.Add(string.Format("Nearby rigs: <color=\"yellow\">{0}<color=\"white\">", this.senseNearby.rigsNearby.Count));
-		strings.Add(string.Format("Spawned entities: <color=\"yellow\">{0}<color=\"white\">", this.trackedEntities.Count));
-	}
-
-	public void AddTrackedEntity(GameEntity entityToTrack)
-	{
-		int netId = entityToTrack.GetNetId();
-		this.trackedEntities.AddIfNew(netId);
-	}
-
-	public void RemoveTrackedEntity(GameEntity entityToRemove)
-	{
-		int netId = entityToRemove.GetNetId();
-		if (this.trackedEntities.Contains(netId))
-		{
-			this.trackedEntities.Remove(netId);
-		}
-	}
-
-	public void OnSummonedEntityInit(GameEntity entity)
-	{
-		this.AddTrackedEntity(entity);
-	}
-
-	public void OnSummonedEntityDestroy(GameEntity entity)
-	{
-		this.RemoveTrackedEntity(entity);
+		Destroyed,
+		Bones,
+		Shell,
+		Count
 	}
 
 	private GameEntity entity;
@@ -753,13 +113,13 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	public int hp;
 
 	[ReadOnly]
-	public GREnemySummoner.Behavior currBehavior;
+	public Behavior currBehavior;
 
 	[ReadOnly]
 	public double behaviorEndTime;
 
 	[ReadOnly]
-	public GREnemySummoner.BodyState currBodyState;
+	public BodyState currBodyState;
 
 	[ReadOnly]
 	public Vector3 searchPosition;
@@ -779,26 +139,667 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 
 	private static List<VRRig> tempRigs = new List<VRRig>(16);
 
-	public enum Behavior
+	private void Awake()
 	{
-		Idle,
-		Wander,
-		Stagger,
-		Destroyed,
-		Summon,
-		KeepDistance,
-		MoveToTarget,
-		Investigate,
-		Jump,
-		Flashed,
-		Count
+		rigidBody = GetComponent<Rigidbody>();
+		colliders = new List<Collider>(4);
+		trackedEntities = new List<int>();
+		GetComponentsInChildren(colliders);
+		agent = GetComponent<GameAgent>();
+		entity = GetComponent<GameEntity>();
+		enemy = GetComponent<GREnemy>();
+		if (armor != null)
+		{
+			armor.SetHp(0);
+		}
+		navAgent.updateRotation = false;
+		behaviorStartTime = -1.0;
+		agent.onBehaviorStateChanged += OnNetworkBehaviorStateChange;
+		senseNearby.Setup(headTransform, entity);
 	}
 
-	public enum BodyState
+	public void OnEntityInit()
 	{
-		Destroyed,
-		Bones,
-		Shell,
-		Count
+		abilityIdle.Setup(agent, anim, audioSource, null, null, null);
+		abilityWander.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityDie.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilitySummon.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityKeepDistance.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityMoveToTarget.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityStagger.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityInvestigate.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityJump.Setup(agent, anim, audioSource, base.transform, null, null);
+		abilityFlashed.Setup(agent, anim, audioSource, base.transform, null, null);
+		SetBehavior(Behavior.Idle, force: true);
+		if ((bool)entity && (bool)entity.manager && (bool)entity.manager.ghostReactorManager && (bool)entity.manager.ghostReactorManager.reactor)
+		{
+			foreach (GRBonusEntry enemyGlobalBonuse in entity.manager.ghostReactorManager.reactor.GetCurrLevelGenConfig().enemyGlobalBonuses)
+			{
+				attributes.AddBonus(enemyGlobalBonuse);
+			}
+		}
+		SetHP(attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax));
+		navAgent.speed = attributes.CalculateFinalValueForAttribute(GRAttributeType.PatrolSpeed);
+		agent.navAgent.autoTraverseOffMeshLink = false;
+		agent.onJumpRequested += OnAgentJumpRequested;
+		if (attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
+		{
+			SetBodyState(BodyState.Shell, force: true);
+		}
+		else
+		{
+			SetBodyState(BodyState.Bones, force: true);
+		}
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnDestroy()
+	{
+		agent.onBehaviorStateChanged -= OnNetworkBehaviorStateChange;
+	}
+
+	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
+	{
+		abilityJump.SetupJump(start, end, heightScale, speedScale);
+		SetBehavior(Behavior.Jump);
+	}
+
+	public void OnNetworkBehaviorStateChange(byte newState)
+	{
+		if (newState >= 0 && newState < 10)
+		{
+			SetBehavior((Behavior)newState);
+		}
+	}
+
+	public void SetHP(int hp)
+	{
+		this.hp = hp;
+	}
+
+	public bool TrySetBehavior(Behavior newBehavior)
+	{
+		if (currBehavior == Behavior.Jump && newBehavior == Behavior.Stagger)
+		{
+			return false;
+		}
+		SetBehavior(newBehavior);
+		return true;
+	}
+
+	public void SetBehavior(Behavior newBehavior, bool force = false)
+	{
+		if (currBehavior == newBehavior && !force)
+		{
+			return;
+		}
+		switch (currBehavior)
+		{
+		case Behavior.Stagger:
+			abilityStagger.Stop();
+			break;
+		case Behavior.Wander:
+			abilityWander.Stop();
+			break;
+		case Behavior.Idle:
+			abilityIdle.Stop();
+			break;
+		case Behavior.Destroyed:
+			abilityDie.Stop();
+			break;
+		case Behavior.Summon:
+			abilitySummon.Stop();
+			if (summonLight != null)
+			{
+				summonLight.gameObject.SetActive(value: false);
+			}
+			break;
+		case Behavior.KeepDistance:
+			abilityKeepDistance.Stop();
+			break;
+		case Behavior.MoveToTarget:
+			abilityMoveToTarget.Stop();
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Stop();
+			break;
+		case Behavior.Jump:
+			abilityJump.Stop();
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.Stop();
+			break;
+		}
+		currBehavior = newBehavior;
+		behaviorStartTime = Time.timeAsDouble;
+		switch (currBehavior)
+		{
+		case Behavior.Wander:
+			abilityWander.Start();
+			soundWander.Play(audioSource);
+			break;
+		case Behavior.Idle:
+			abilityIdle.Start();
+			break;
+		case Behavior.Stagger:
+			abilityStagger.Start();
+			break;
+		case Behavior.Destroyed:
+			if (entity.IsAuthority())
+			{
+				entity.manager.RequestCreateItem(corePrefab.gameObject.name.GetStaticHash(), coreMarker.position, coreMarker.rotation, 0L);
+			}
+			abilityDie.Start();
+			break;
+		case Behavior.Summon:
+			if (summonLight != null)
+			{
+				summonLight.gameObject.SetActive(value: true);
+			}
+			lastSummonTime = Time.timeAsDouble;
+			abilitySummon.SetLookAtTarget(GetPlayerTransform(agent.targetPlayer));
+			abilitySummon.Start();
+			break;
+		case Behavior.KeepDistance:
+			abilityKeepDistance.SetTargetPlayer(agent.targetPlayer);
+			abilityKeepDistance.Start();
+			break;
+		case Behavior.MoveToTarget:
+			abilityMoveToTarget.SetTarget(GetPlayerTransform(agent.targetPlayer));
+			abilityMoveToTarget.Start();
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Start();
+			break;
+		case Behavior.Jump:
+			abilityJump.Start();
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.Start();
+			break;
+		}
+		if (entity.IsAuthority())
+		{
+			agent.RequestBehaviorChange((byte)currBehavior);
+		}
+	}
+
+	private void Update()
+	{
+		OnUpdate(Time.deltaTime);
+	}
+
+	public void OnEntityThink(float dt)
+	{
+		if (!entity.IsAuthority())
+		{
+			return;
+		}
+		lastUpdateTime = Time.time;
+		tempRigs.Clear();
+		tempRigs.Add(VRRig.LocalRig);
+		VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+		senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+		float outDistanceSq;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		agent.RequestTarget((vRRig == null) ? null : vRRig.OwningNetPlayer);
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			abilityIdle.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Wander:
+			abilityWander.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Summon:
+			abilitySummon.Think(dt);
+			if (abilitySummon.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		case Behavior.KeepDistance:
+			abilityKeepDistance.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.MoveToTarget:
+			abilityMoveToTarget.Think(dt);
+			ChooseNewBehavior();
+			break;
+		case Behavior.Stagger:
+		case Behavior.Destroyed:
+			break;
+		}
+	}
+
+	public bool CanSummon()
+	{
+		if (GhostReactorManager.AggroDisabled)
+		{
+			return false;
+		}
+		if (currBehavior == Behavior.Summon && abilitySummon.IsDone())
+		{
+			return false;
+		}
+		if (Time.timeAsDouble - lastSummonTime < (double)minSummonInterval)
+		{
+			return false;
+		}
+		return trackedEntities.Count < maxSimultaneousSummonedEntities;
+	}
+
+	public Transform GetPlayerTransform(NetPlayer targetPlayer)
+	{
+		if (targetPlayer != null)
+		{
+			GRPlayer gRPlayer = GRPlayer.Get(targetPlayer.ActorNumber);
+			if (gRPlayer != null && gRPlayer.State == GRPlayer.GRPlayerState.Alive)
+			{
+				return gRPlayer.transform;
+			}
+		}
+		return null;
+	}
+
+	private void ChooseNewBehavior()
+	{
+		float outDistanceSq = 0f;
+		VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+		if (!GhostReactorManager.AggroDisabled && vRRig != null)
+		{
+			investigateLocation = null;
+			float num = ((currBehavior == Behavior.KeepDistance) ? (keepDistanceThreshold + 1f) : keepDistanceThreshold);
+			if (outDistanceSq < num * num)
+			{
+				SetBehavior(Behavior.KeepDistance);
+				return;
+			}
+			if (CanSummon())
+			{
+				SetBehavior(Behavior.Summon);
+				return;
+			}
+			float num2 = tooFarDistanceThreshold * tooFarDistanceThreshold;
+			if (outDistanceSq > num2)
+			{
+				SetBehavior(Behavior.MoveToTarget);
+			}
+			else
+			{
+				SetBehavior(Behavior.Idle);
+			}
+			return;
+		}
+		investigateLocation = AbilityHelperFunctions.GetLocationToInvestigate(base.transform.position, hearingRadius, investigateLocation);
+		if (investigateLocation.HasValue)
+		{
+			abilityInvestigate.SetTargetPos(investigateLocation.Value);
+			SetBehavior(Behavior.Investigate);
+			return;
+		}
+		double num3 = Time.timeAsDouble - abilityIdle.startTime;
+		if (currBehavior == Behavior.Idle && num3 < (double)idleDuration)
+		{
+			SetBehavior(Behavior.Idle);
+		}
+		else
+		{
+			SetBehavior(Behavior.Wander);
+		}
+	}
+
+	public void OnUpdate(float dt)
+	{
+		if (entity.IsAuthority())
+		{
+			OnUpdateAuthority(dt);
+		}
+		else
+		{
+			OnUpdateRemote(dt);
+		}
+	}
+
+	public void OnUpdateAuthority(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Idle:
+			abilityIdle.UpdateAuthority(dt);
+			break;
+		case Behavior.Stagger:
+			abilityStagger.UpdateAuthority(dt);
+			if (abilityStagger.IsDone())
+			{
+				SetBehavior(Behavior.Wander);
+			}
+			break;
+		case Behavior.Destroyed:
+			abilityDie.UpdateAuthority(dt);
+			break;
+		case Behavior.Wander:
+			abilityWander.UpdateAuthority(dt);
+			break;
+		case Behavior.Summon:
+			abilitySummon.UpdateAuthority(dt);
+			break;
+		case Behavior.KeepDistance:
+			abilityKeepDistance.UpdateAuthority(dt);
+			break;
+		case Behavior.MoveToTarget:
+			abilityMoveToTarget.UpdateAuthority(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateAuthority(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateAuthority(dt);
+			if (abilityJump.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateAuthority(dt);
+			if (abilityFlashed.IsDone())
+			{
+				ChooseNewBehavior();
+			}
+			break;
+		}
+	}
+
+	public void OnUpdateRemote(float dt)
+	{
+		switch (currBehavior)
+		{
+		case Behavior.Stagger:
+			abilityStagger.UpdateRemote(dt);
+			break;
+		case Behavior.Destroyed:
+			abilityDie.UpdateRemote(dt);
+			break;
+		case Behavior.Wander:
+			abilityWander.UpdateRemote(dt);
+			break;
+		case Behavior.Summon:
+			abilitySummon.UpdateRemote(dt);
+			break;
+		case Behavior.KeepDistance:
+			abilityKeepDistance.UpdateRemote(dt);
+			break;
+		case Behavior.MoveToTarget:
+			abilityMoveToTarget.UpdateRemote(dt);
+			break;
+		case Behavior.Investigate:
+			abilityInvestigate.UpdateRemote(dt);
+			break;
+		case Behavior.Jump:
+			abilityJump.UpdateRemote(dt);
+			break;
+		case Behavior.Flashed:
+			abilityFlashed.UpdateRemote(dt);
+			break;
+		}
+	}
+
+	public void OnGameEntitySerialize(BinaryWriter writer)
+	{
+		byte value = (byte)currBehavior;
+		byte value2 = (byte)currBodyState;
+		writer.Write(value);
+		writer.Write(hp);
+		writer.Write(value2);
+	}
+
+	public void OnGameEntityDeserialize(BinaryReader reader)
+	{
+		Behavior newBehavior = (Behavior)reader.ReadByte();
+		int hP = reader.ReadInt32();
+		BodyState newBodyState = (BodyState)reader.ReadByte();
+		SetHP(hP);
+		SetBehavior(newBehavior, force: true);
+		SetBodyState(newBodyState, force: true);
+	}
+
+	public bool IsHitValid(GameHitData hit)
+	{
+		return true;
+	}
+
+	public void OnHit(GameHitData hit)
+	{
+		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
+		GRTool gameComponent = entity.manager.GetGameComponent<GRTool>(hit.hitByEntityId);
+		if (gameComponent != null)
+		{
+			switch (hitTypeId)
+			{
+			case GameHitType.Club:
+				OnHitByClub(gameComponent, hit);
+				break;
+			case GameHitType.Flash:
+				OnHitByFlash(gameComponent, hit);
+				break;
+			case GameHitType.Shield:
+				OnHitByShield(gameComponent, hit);
+				break;
+			}
+		}
+	}
+
+	private void OnHitByClub(GRTool tool, GameHitData hit)
+	{
+		if (currBehavior == Behavior.Destroyed)
+		{
+			return;
+		}
+		if (currBodyState == BodyState.Bones)
+		{
+			hp -= hit.hitAmount;
+			if (hp <= 0)
+			{
+				abilityDie.SetInstigatingPlayerIndex(entity.GetLastHeldByPlayerForEntityID(hit.hitByEntityId));
+				abilityDie.SetStaggerVelocity(hit.hitImpulse);
+				SetBehavior(Behavior.Destroyed);
+			}
+			else
+			{
+				abilityStagger.SetStaggerVelocity(hit.hitImpulse);
+				TrySetBehavior(Behavior.Stagger);
+			}
+		}
+		else if (currBodyState == BodyState.Shell && armor != null)
+		{
+			armor.PlayBlockFx(hit.hitEntityPosition);
+		}
+	}
+
+	public void InstantDeath()
+	{
+		hp = 0;
+		SetBehavior(Behavior.Destroyed);
+	}
+
+	private void OnHitByFlash(GRTool tool, GameHitData hit)
+	{
+		abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
+		if (currBodyState == BodyState.Shell)
+		{
+			hp -= hit.hitAmount;
+			if (armor != null)
+			{
+				armor.SetHp(hp);
+			}
+			if (hp <= 0)
+			{
+				if (armor != null)
+				{
+					armor.PlayDestroyFx(armor.transform.position);
+				}
+				SetBodyState(BodyState.Bones);
+				if (tool.gameEntity.IsHeldByLocalPlayer())
+				{
+					PlayerGameEvents.MiscEvent("GRArmorBreak_" + base.name);
+				}
+				if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.FlashDamage3))
+				{
+					armor.FragmentArmor();
+				}
+			}
+			else
+			{
+				if (armor != null)
+				{
+					armor.PlayHitFx(armor.transform.position);
+				}
+				RefreshBody();
+			}
+		}
+		GRToolFlash component = tool.GetComponent<GRToolFlash>();
+		if (component != null)
+		{
+			abilityFlashed.SetStunTime(component.stunDuration);
+		}
+		TrySetBehavior(Behavior.Flashed);
+	}
+
+	public void OnHitByShield(GRTool tool, GameHitData hit)
+	{
+		OnHitByClub(tool, hit);
+	}
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		Rigidbody attachedRigidbody = collider.attachedRigidbody;
+		if (attachedRigidbody != null)
+		{
+			GRPlayer component = attachedRigidbody.GetComponent<GRPlayer>();
+			if (component != null && component.gamePlayer.IsLocal())
+			{
+				GhostReactorManager.Get(entity).RequestEnemyHitPlayer(GhostReactor.EnemyType.Phantom, entity.id, component, base.transform.position);
+			}
+			GRBreakable component2 = attachedRigidbody.GetComponent<GRBreakable>();
+			GameHittable component3 = attachedRigidbody.GetComponent<GameHittable>();
+			if (component2 != null && component3 != null)
+			{
+				GameHitData hitData = new GameHitData
+				{
+					hitTypeId = 0,
+					hitEntityId = component3.gameEntity.id,
+					hitByEntityId = entity.id,
+					hitEntityPosition = component2.transform.position,
+					hitImpulse = Vector3.zero,
+					hitPosition = component2.transform.position,
+					hittablePoint = component3.FindHittablePoint(collider)
+				};
+				component3.RequestHit(hitData);
+			}
+		}
+	}
+
+	private void RefreshBody()
+	{
+		switch (currBodyState)
+		{
+		case BodyState.Destroyed:
+			armor.SetHp(0);
+			break;
+		case BodyState.Bones:
+			armor.SetHp(0);
+			GREnemy.HideRenderers(bones, hide: false);
+			GREnemy.HideRenderers(always, hide: false);
+			GREnemy.HideObjects(bonesStateVisibleObjects, hide: false);
+			GREnemy.HideObjects(alwaysVisibleObjects, hide: false);
+			break;
+		case BodyState.Shell:
+			armor.SetHp(hp);
+			GREnemy.HideRenderers(bones, hide: true);
+			GREnemy.HideRenderers(always, hide: false);
+			GREnemy.HideObjects(bonesStateVisibleObjects, hide: true);
+			GREnemy.HideObjects(alwaysVisibleObjects, hide: false);
+			break;
+		}
+	}
+
+	public void SetBodyState(BodyState newBodyState, bool force = false)
+	{
+		if (currBodyState != newBodyState || force)
+		{
+			switch (currBodyState)
+			{
+			case BodyState.Bones:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+				break;
+			case BodyState.Shell:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+				break;
+			}
+			currBodyState = newBodyState;
+			switch (currBodyState)
+			{
+			case BodyState.Destroyed:
+				GhostReactorManager.Get(entity).ReportEnemyDeath();
+				break;
+			case BodyState.Bones:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.HPMax);
+				break;
+			case BodyState.Shell:
+				hp = attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax);
+				break;
+			}
+			RefreshBody();
+			if (entity.IsAuthority())
+			{
+				agent.RequestStateChange((byte)newBodyState);
+			}
+		}
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"State: <color=\"yellow\">{currBehavior.ToString()}<color=\"white\"> HP: <color=\"yellow\">{hp}<color=\"white\">");
+		strings.Add($"Nearby rigs: <color=\"yellow\">{senseNearby.rigsNearby.Count}<color=\"white\">");
+		strings.Add($"Spawned entities: <color=\"yellow\">{trackedEntities.Count}<color=\"white\">");
+	}
+
+	public void AddTrackedEntity(GameEntity entityToTrack)
+	{
+		int netId = entityToTrack.GetNetId();
+		trackedEntities.AddIfNew(netId);
+	}
+
+	public void RemoveTrackedEntity(GameEntity entityToRemove)
+	{
+		int netId = entityToRemove.GetNetId();
+		if (trackedEntities.Contains(netId))
+		{
+			trackedEntities.Remove(netId);
+		}
+	}
+
+	public void OnSummonedEntityInit(GameEntity entity)
+	{
+		AddTrackedEntity(entity);
+	}
+
+	public void OnSummonedEntityDestroy(GameEntity entity)
+	{
+		RemoveTrackedEntity(entity);
 	}
 }

@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ public class HoverboardAreaTrigger : MonoBehaviour
 	{
 		if (other == GTPlayer.Instance.headCollider)
 		{
-			GTPlayer.Instance.SetHoverAllowed(true, false);
+			GTPlayer.Instance.SetHoverAllowed(allowed: true);
 		}
 	}
 
@@ -16,7 +15,7 @@ public class HoverboardAreaTrigger : MonoBehaviour
 	{
 		if (other == GTPlayer.Instance.headCollider)
 		{
-			GTPlayer.Instance.SetHoverAllowed(false, false);
+			GTPlayer.Instance.SetHoverAllowed(allowed: false);
 		}
 	}
 }

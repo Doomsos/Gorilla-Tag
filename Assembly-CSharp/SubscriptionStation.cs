@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaTagScripts;
 using TMPro;
 using UnityEngine;
@@ -6,64 +6,48 @@ using UnityEngine;
 [Obsolete("DEPRECATED! Use SubscriptionKiosk instead")]
 public class SubscriptionStation : MonoBehaviour
 {
+	[SerializeField]
+	private TMP_Text screenText;
+
+	private string formatString;
+
 	private void Awake()
 	{
-		this.formatString = this.screenText.text;
-		this.screenText.text = string.Format(this.formatString, new object[]
-		{
-			"*",
-			"*",
-			"*",
-			"*"
-		});
+		formatString = screenText.text;
+		screenText.text = string.Format(formatString, "*", "*", "*", "*");
 	}
 
 	private void UpdateScreen()
 	{
 		Debug.Log(":::SubscriptionStation::UpdateScreen");
-		bool flag = SubscriptionManager.GetSubscriptionDetails(VRRig.LocalRig).tier > 0;
+		bool num = SubscriptionManager.GetSubscriptionDetails(VRRig.LocalRig).tier > 0;
 		int daysAccrued = SubscriptionManager.GetSubscriptionDetails(VRRig.LocalRig).daysAccrued;
 		bool subsOnlyMatchmaking = SubscriptionManager.SubsOnlyMatchmaking;
 		bool showGoldNameTag = VRRig.LocalRig.ShowGoldNameTag;
-		if (flag)
+		if (num)
 		{
-			this.screenText.text = string.Format(this.formatString, new object[]
-			{
-				"Y",
-				subsOnlyMatchmaking ? "Y" : "N",
-				showGoldNameTag ? "Y" : "N",
-				daysAccrued
-			});
-			return;
+			screenText.text = string.Format(formatString, "Y", subsOnlyMatchmaking ? "Y" : "N", showGoldNameTag ? "Y" : "N", daysAccrued);
 		}
-		this.screenText.text = string.Format(this.formatString, new object[]
+		else
 		{
-			"N",
-			"*",
-			"*",
-			"*"
-		});
+			screenText.text = string.Format(formatString, "N", "*", "*", "*");
+		}
 	}
 
 	public void ToggleSubscriptionStatus()
 	{
 		SubscriptionManager.ForceRecheck();
-		this.UpdateScreen();
+		UpdateScreen();
 	}
 
 	public void ToggleSubsOnly()
 	{
 		SubscriptionManager.SubsOnlyMatchmaking = !SubscriptionManager.SubsOnlyMatchmaking;
-		this.UpdateScreen();
+		UpdateScreen();
 	}
 
 	public void ToggleSubsDecoration()
 	{
-		this.UpdateScreen();
+		UpdateScreen();
 	}
-
-	[SerializeField]
-	private TMP_Text screenText;
-
-	private string formatString;
 }

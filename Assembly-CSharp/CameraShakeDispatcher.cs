@@ -1,44 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class CameraShakeDispatcher : MonoBehaviour
 {
-	private void OnEnable()
-	{
-		if (this.shakeOnEnable)
-		{
-			if (this.maxDistance > 0f)
-			{
-				this.ShakeInProximity(this.maxDistance);
-				return;
-			}
-			this.Shake();
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.haltOnDisable)
-		{
-			this.Halt();
-		}
-	}
-
-	public void Shake()
-	{
-		CameraShaker.Shake(this.duration, this.magnitude, this.freqRange, this.rollOffOverDuration);
-	}
-
-	public void ShakeInProximity(float distance)
-	{
-		CameraShaker.ShakeInProximity(this.duration, this.magnitude, this.freqRange, this.rollOffOverDuration, base.transform, distance);
-	}
-
-	public void Halt()
-	{
-		CameraShaker.Halt();
-	}
-
 	[SerializeField]
 	private float magnitude = 1f;
 
@@ -59,4 +22,42 @@ public class CameraShakeDispatcher : MonoBehaviour
 
 	[SerializeField]
 	private float maxDistance;
+
+	private void OnEnable()
+	{
+		if (shakeOnEnable)
+		{
+			if (maxDistance > 0f)
+			{
+				ShakeInProximity(maxDistance);
+			}
+			else
+			{
+				Shake();
+			}
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (haltOnDisable)
+		{
+			Halt();
+		}
+	}
+
+	public void Shake()
+	{
+		CameraShaker.Shake(duration, magnitude, freqRange, rollOffOverDuration);
+	}
+
+	public void ShakeInProximity(float distance)
+	{
+		CameraShaker.ShakeInProximity(duration, magnitude, freqRange, rollOffOverDuration, base.transform, distance);
+	}
+
+	public void Halt()
+	{
+		CameraShaker.Halt();
+	}
 }

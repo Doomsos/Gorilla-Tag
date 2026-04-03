@@ -1,35 +1,21 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct SerializableBSPNode
 {
-	public int matrixIndex
+	public enum Axis
 	{
-		get
-		{
-			return (int)this.leftChildIndex;
-		}
-	}
-
-	public int outsideChildIndex
-	{
-		get
-		{
-			return (int)this.rightChildIndex;
-		}
-	}
-
-	public int zoneIndex
-	{
-		get
-		{
-			return (int)this.leftChildIndex;
-		}
+		X,
+		Y,
+		Z,
+		MatrixChain,
+		MatrixFinal,
+		Zone
 	}
 
 	[SerializeField]
-	public SerializableBSPNode.Axis axis;
+	public Axis axis;
 
 	[SerializeField]
 	public float splitValue;
@@ -40,13 +26,9 @@ public struct SerializableBSPNode
 	[SerializeField]
 	public short rightChildIndex;
 
-	public enum Axis
-	{
-		X,
-		Y,
-		Z,
-		MatrixChain,
-		MatrixFinal,
-		Zone
-	}
+	public int matrixIndex => leftChildIndex;
+
+	public int outsideChildIndex => rightChildIndex;
+
+	public int zoneIndex => leftChildIndex;
 }

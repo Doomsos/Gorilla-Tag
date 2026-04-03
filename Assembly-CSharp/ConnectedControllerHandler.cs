@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using UnityEngine;
@@ -7,225 +6,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 internal class ConnectedControllerHandler : MonoBehaviour, IGorillaSliceableSimple
 {
-	public static ConnectedControllerHandler Instance { get; private set; }
-
-	[SerializeField]
-	private bool rightValid
-	{
-		get
-		{
-			return this.overrideRightEnable || (ControllerInputPoller.instance.RightHandValid && !this.overriddenControllers.HasFlag(OverrideControllers.RightController));
-		}
-	}
-
-	[SerializeField]
-	private bool leftValid
-	{
-		get
-		{
-			return this.overrideLeftEnable || (ControllerInputPoller.instance.LeftHandValid && !this.overriddenControllers.HasFlag(OverrideControllers.LeftController));
-		}
-	}
-
-	public bool RightValid
-	{
-		get
-		{
-			return this.rightValid;
-		}
-	}
-
-	public bool LeftValid
-	{
-		get
-		{
-			return this.leftValid;
-		}
-	}
-
-	private void Awake()
-	{
-		if (ConnectedControllerHandler.Instance != null && ConnectedControllerHandler.Instance != this)
-		{
-			Object.Destroy(this);
-			return;
-		}
-		ConnectedControllerHandler.Instance = this;
-		if (this.leftHandFollower == null || this.rightHandFollower == null || this.rightXRController == null || this.leftXRController == null || this.snapTurnController == null)
-		{
-			base.enabled = false;
-			return;
-		}
-		this.rightControllerList = new List<XRController>();
-		this.leftcontrollerList = new List<XRController>();
-		this.rightControllerList.Add(this.rightXRController);
-		this.leftcontrollerList.Add(this.leftXRController);
-		this.UpdateControllerStates();
-	}
-
-	private void Start()
-	{
-		if (this.leftHandFollower == null || this.rightHandFollower == null || this.leftXRController == null || this.rightXRController == null || this.snapTurnController == null)
-		{
-			return;
-		}
-		this.playerHandler = GTPlayer.Instance;
-		this.rightHandFollower.followTransform = GorillaTagger.Instance.offlineVRRig.transform;
-		this.leftHandFollower.followTransform = GorillaTagger.Instance.offlineVRRig.transform;
-	}
-
-	public void SetRightHandOffsets(Vector3 positionOffset, Quaternion rotationOffset)
-	{
-		this.rightHandFollower.positionOffset = positionOffset;
-		this.rightHandFollower.rotationOffset = rotationOffset;
-	}
-
-	public void SetLeftHandOffsets(Vector3 positionOffset, Quaternion rotationOffset)
-	{
-		this.leftHandFollower.positionOffset = positionOffset;
-		this.leftHandFollower.rotationOffset = rotationOffset;
-	}
-
-	public void SetOculusOffsets(bool rightHand = true, bool leftHand = true)
-	{
-		if (rightHand)
-		{
-			this.SetRightHandOffsets(this.oculusRightPosOffset, this.oculusRightRotOffset);
-		}
-		if (leftHand)
-		{
-			this.SetLeftHandOffsets(this.oculusLeftPosOffset, this.oculusLeftRotOffset);
-		}
-	}
-
-	private void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this);
-	}
-
-	private void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this);
-	}
-
-	private void OnDestroy()
-	{
-		if (ConnectedControllerHandler.Instance != null && ConnectedControllerHandler.Instance == this)
-		{
-			ConnectedControllerHandler.Instance = null;
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (!this.rightValid)
-		{
-			this.rightHandFollower.UpdatePositionRotation();
-		}
-		if (!this.leftValid)
-		{
-			this.leftHandFollower.UpdatePositionRotation();
-		}
-	}
-
-	public void SliceUpdate()
-	{
-		if (this.playerHandler.inOverlay)
-		{
-			return;
-		}
-		this.updateControllers = false;
-		if (ControllerInputPoller.instance.RightHandValid)
-		{
-			this.tempRightPos = ControllerInputPoller.DevicePosition(XRNode.RightHand);
-			if (this.tempRightPos == this.lastRightPos)
-			{
-				if (Time.time > this.timeStoppedMovingRight + this.stoppedDurationMinimum && !this.overriddenControllers.HasFlag(OverrideControllers.RightController))
-				{
-					this.overriddenControllers |= OverrideControllers.RightController;
-					this.updateControllers = true;
-				}
-			}
-			else
-			{
-				this.timeStoppedMovingRight = Time.time;
-				if (this.overriddenControllers.HasFlag(OverrideControllers.RightController))
-				{
-					this.overriddenControllers &= ~OverrideControllers.RightController;
-					this.updateControllers = true;
-				}
-			}
-			this.lastRightPos = this.tempRightPos;
-		}
-		if (ControllerInputPoller.instance.LeftHandValid)
-		{
-			this.tempLeftPos = ControllerInputPoller.DevicePosition(XRNode.LeftHand);
-			if (this.tempLeftPos == this.lastLeftPos)
-			{
-				if (Time.time > this.timeStoppedMovingLeft + this.stoppedDurationMinimum && !this.overriddenControllers.HasFlag(OverrideControllers.LeftController))
-				{
-					this.overriddenControllers |= OverrideControllers.LeftController;
-					this.updateControllers = true;
-				}
-			}
-			else
-			{
-				this.timeStoppedMovingLeft = Time.time;
-				if (this.overriddenControllers.HasFlag(OverrideControllers.LeftController))
-				{
-					this.overriddenControllers &= ~OverrideControllers.LeftController;
-					this.updateControllers = true;
-				}
-			}
-			this.lastLeftPos = this.tempLeftPos;
-		}
-		if ((!this.leftXRController.enabled && this.leftValid) || (!this.rightXRController.enabled && this.rightValid))
-		{
-			this.updateControllers = true;
-		}
-		if (this.updateControllers)
-		{
-			this.overrideEnabled = (this.overriddenControllers > OverrideControllers.None);
-			this.UpdateControllerStates();
-		}
-	}
-
-	private void UpdateControllerStates()
-	{
-		this.leftXRController.enabled = this.leftValid;
-		this.rightXRController.enabled = this.rightValid;
-		this.AssignSnapturnController();
-	}
-
-	private void AssignSnapturnController()
-	{
-		if (!this.leftValid && this.rightValid)
-		{
-			this.snapTurnController.controllers = this.rightControllerList;
-			return;
-		}
-		if (!this.rightValid && this.leftValid)
-		{
-			this.snapTurnController.controllers = this.leftcontrollerList;
-			return;
-		}
-		this.snapTurnController.controllers = this.rightControllerList;
-	}
-
-	public bool GetValidForXRNode(XRNode controllerNode)
-	{
-		bool result;
-		if (controllerNode != XRNode.LeftHand)
-		{
-			result = (controllerNode != XRNode.RightHand || this.rightValid);
-		}
-		else
-		{
-			result = this.leftValid;
-		}
-		return result;
-	}
-
 	[SerializeField]
 	private HandTransformFollowOffset rightHandFollower;
 
@@ -281,7 +61,227 @@ internal class ConnectedControllerHandler : MonoBehaviour, IGorillaSliceableSimp
 
 	public Quaternion oculusRightRotOffset = Quaternion.Euler(275f, 270f, -5f);
 
-	public Vector3 oculusLeftPosOffset = new Vector3(--0f, -0.27f, 0.09f);
+	public Vector3 oculusLeftPosOffset = new Vector3(-0f, -0.27f, 0.09f);
 
 	public Quaternion oculusLeftRotOffset = Quaternion.Euler(275f, 90f, 5f);
+
+	[field: OnEnterPlay_SetNull]
+	public static ConnectedControllerHandler Instance { get; private set; }
+
+	[SerializeField]
+	private bool rightValid
+	{
+		get
+		{
+			if (!overrideRightEnable)
+			{
+				if (ControllerInputPoller.instance.RightHandValid)
+				{
+					return !overriddenControllers.HasFlag(OverrideControllers.RightController);
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	[SerializeField]
+	private bool leftValid
+	{
+		get
+		{
+			if (!overrideLeftEnable)
+			{
+				if (ControllerInputPoller.instance.LeftHandValid)
+				{
+					return !overriddenControllers.HasFlag(OverrideControllers.LeftController);
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool RightValid => rightValid;
+
+	public bool LeftValid => leftValid;
+
+	private void Awake()
+	{
+		if (Instance != null && Instance != this)
+		{
+			Object.Destroy(this);
+			return;
+		}
+		Instance = this;
+		if (leftHandFollower == null || rightHandFollower == null || rightXRController == null || leftXRController == null || snapTurnController == null)
+		{
+			base.enabled = false;
+			return;
+		}
+		rightControllerList = new List<XRController>();
+		leftcontrollerList = new List<XRController>();
+		rightControllerList.Add(rightXRController);
+		leftcontrollerList.Add(leftXRController);
+		UpdateControllerStates();
+	}
+
+	private void Start()
+	{
+		if (leftHandFollower != null && rightHandFollower != null && !(leftXRController == null) && !(rightXRController == null) && !(snapTurnController == null))
+		{
+			playerHandler = GTPlayer.Instance;
+			rightHandFollower.followTransform = GorillaTagger.Instance.offlineVRRig.transform;
+			leftHandFollower.followTransform = GorillaTagger.Instance.offlineVRRig.transform;
+		}
+	}
+
+	public void SetRightHandOffsets(Vector3 positionOffset, Quaternion rotationOffset)
+	{
+		rightHandFollower.positionOffset = positionOffset;
+		rightHandFollower.rotationOffset = rotationOffset;
+	}
+
+	public void SetLeftHandOffsets(Vector3 positionOffset, Quaternion rotationOffset)
+	{
+		leftHandFollower.positionOffset = positionOffset;
+		leftHandFollower.rotationOffset = rotationOffset;
+	}
+
+	public void SetOculusOffsets(bool rightHand = true, bool leftHand = true)
+	{
+		if (rightHand)
+		{
+			SetRightHandOffsets(oculusRightPosOffset, oculusRightRotOffset);
+		}
+		if (leftHand)
+		{
+			SetLeftHandOffsets(oculusLeftPosOffset, oculusLeftRotOffset);
+		}
+	}
+
+	private void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this);
+	}
+
+	private void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this);
+	}
+
+	private void OnDestroy()
+	{
+		if (Instance != null && Instance == this)
+		{
+			Instance = null;
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (!rightValid)
+		{
+			rightHandFollower.UpdatePositionRotation();
+		}
+		if (!leftValid)
+		{
+			leftHandFollower.UpdatePositionRotation();
+		}
+	}
+
+	public void SliceUpdate()
+	{
+		if (playerHandler.inOverlay)
+		{
+			return;
+		}
+		updateControllers = false;
+		if (ControllerInputPoller.instance.RightHandValid)
+		{
+			tempRightPos = ControllerInputPoller.DevicePosition(XRNode.RightHand);
+			if (tempRightPos == lastRightPos)
+			{
+				if (Time.time > timeStoppedMovingRight + stoppedDurationMinimum && !overriddenControllers.HasFlag(OverrideControllers.RightController))
+				{
+					overriddenControllers |= OverrideControllers.RightController;
+					updateControllers = true;
+				}
+			}
+			else
+			{
+				timeStoppedMovingRight = Time.time;
+				if (overriddenControllers.HasFlag(OverrideControllers.RightController))
+				{
+					overriddenControllers &= ~OverrideControllers.RightController;
+					updateControllers = true;
+				}
+			}
+			lastRightPos = tempRightPos;
+		}
+		if (ControllerInputPoller.instance.LeftHandValid)
+		{
+			tempLeftPos = ControllerInputPoller.DevicePosition(XRNode.LeftHand);
+			if (tempLeftPos == lastLeftPos)
+			{
+				if (Time.time > timeStoppedMovingLeft + stoppedDurationMinimum && !overriddenControllers.HasFlag(OverrideControllers.LeftController))
+				{
+					overriddenControllers |= OverrideControllers.LeftController;
+					updateControllers = true;
+				}
+			}
+			else
+			{
+				timeStoppedMovingLeft = Time.time;
+				if (overriddenControllers.HasFlag(OverrideControllers.LeftController))
+				{
+					overriddenControllers &= ~OverrideControllers.LeftController;
+					updateControllers = true;
+				}
+			}
+			lastLeftPos = tempLeftPos;
+		}
+		if ((!leftXRController.enabled && leftValid) || (!rightXRController.enabled && rightValid))
+		{
+			updateControllers = true;
+		}
+		if (updateControllers)
+		{
+			overrideEnabled = overriddenControllers != OverrideControllers.None;
+			UpdateControllerStates();
+		}
+	}
+
+	private void UpdateControllerStates()
+	{
+		leftXRController.enabled = leftValid;
+		rightXRController.enabled = rightValid;
+		AssignSnapturnController();
+	}
+
+	private void AssignSnapturnController()
+	{
+		if (!leftValid && rightValid)
+		{
+			snapTurnController.controllers = rightControllerList;
+		}
+		else if (!rightValid && leftValid)
+		{
+			snapTurnController.controllers = leftcontrollerList;
+		}
+		else
+		{
+			snapTurnController.controllers = rightControllerList;
+		}
+	}
+
+	public bool GetValidForXRNode(XRNode controllerNode)
+	{
+		return controllerNode switch
+		{
+			XRNode.LeftHand => leftValid, 
+			XRNode.RightHand => rightValid, 
+			_ => true, 
+		};
+	}
 }

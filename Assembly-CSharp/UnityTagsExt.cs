@@ -1,4 +1,3 @@
-﻿using System;
 using System.ComponentModel;
 using UnityEngine;
 
@@ -10,50 +9,55 @@ public static class UnityTagsExt
 		{
 			return UnityTag.Invalid;
 		}
-		UnityTag result;
-		if (!UnityTags.StringToTag.TryGetValue(s, out result))
+		if (!UnityTags.StringToTag.TryGetValue(s, out var value))
 		{
 			return UnityTag.Invalid;
 		}
-		return result;
+		return value;
 	}
 
-	public static void SetTag(this Component c, UnityTag tag)
+	public static void SetTag(this UnityEngine.Component c, UnityTag tag)
 	{
-		if (c == null)
+		if (!(c == null))
 		{
-			return;
+			if (tag == UnityTag.Invalid)
+			{
+				throw new InvalidEnumArgumentException("tag");
+			}
+			c.tag = UnityTags.StringValues[(int)tag];
 		}
-		if (tag == UnityTag.Invalid)
-		{
-			throw new InvalidEnumArgumentException("tag");
-		}
-		c.tag = UnityTags.StringValues[(int)tag];
 	}
 
 	public static void SetTag(this GameObject g, UnityTag tag)
 	{
-		if (g == null)
+		if (!(g == null))
 		{
-			return;
+			if (tag == UnityTag.Invalid)
+			{
+				throw new InvalidEnumArgumentException("tag");
+			}
+			g.tag = UnityTags.StringValues[(int)tag];
 		}
-		if (tag == UnityTag.Invalid)
-		{
-			throw new InvalidEnumArgumentException("tag");
-		}
-		g.tag = UnityTags.StringValues[(int)tag];
 	}
 
 	public static bool TryGetTag(this GameObject g, out UnityTag tag)
 	{
 		tag = UnityTag.Invalid;
-		return !(g == null) && UnityTags.StringToTag.TryGetValue(g.tag, out tag);
+		if (g == null)
+		{
+			return false;
+		}
+		return UnityTags.StringToTag.TryGetValue(g.tag, out tag);
 	}
 
-	public static bool TryGetTag(this Component c, out UnityTag tag)
+	public static bool TryGetTag(this UnityEngine.Component c, out UnityTag tag)
 	{
 		tag = UnityTag.Invalid;
-		return !(c == null) && UnityTags.StringToTag.TryGetValue(c.tag, out tag);
+		if (c == null)
+		{
+			return false;
+		}
+		return UnityTags.StringToTag.TryGetValue(c.tag, out tag);
 	}
 
 	public static bool CompareTag(this GameObject g, UnityTag tag)
@@ -69,7 +73,7 @@ public static class UnityTagsExt
 		return g.CompareTag(UnityTags.StringValues[(int)tag]);
 	}
 
-	public static bool CompareTag(this Component c, UnityTag tag)
+	public static bool CompareTag(this UnityEngine.Component c, UnityTag tag)
 	{
 		if (c == null)
 		{

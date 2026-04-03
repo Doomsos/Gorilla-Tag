@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
+using System.Threading.Tasks;
 using GorillaNetworking;
 using PlayFab;
 using TMPro;
@@ -8,123 +8,28 @@ using UnityEngine;
 [RequireComponent(typeof(TextMeshPro))]
 public class SimpleCountdown : ObservableBehavior
 {
-	private void Start()
+	private enum Mode
 	{
-		SimpleCountdown.<Start>d__11 <Start>d__;
-		<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<Start>d__.<>4__this = this;
-		<Start>d__.<>1__state = -1;
-		<Start>d__.<>t__builder.Start<SimpleCountdown.<Start>d__11>(ref <Start>d__);
+		None,
+		TitleData,
+		FixedDate,
+		TimeSync
 	}
 
-	private void onTD(string s)
+	private enum DisplayFormat
 	{
-		this.date = s;
-		this.ParseDateTime();
-	}
-
-	private void onTDError(PlayFabError error)
-	{
-		Debug.Log(string.Concat(new string[]
-		{
-			"SimpleCountdown component on ",
-			base.name,
-			" failed to get '",
-			this.titleDataKey,
-			"' from title data. Using Fallback: '",
-			this.date,
-			"'"
-		}));
-		this.ParseDateTime();
-	}
-
-	private void ParseDateTime()
-	{
-		if (!DateTime.TryParse(this.date, out this.dt))
-		{
-			Debug.Log(string.Concat(new string[]
-			{
-				"SimpleCountdown component on ",
-				base.name,
-				" has an unparsable date string: '",
-				this.date,
-				"'"
-			}));
-			Object.Destroy(base.gameObject);
-		}
-	}
-
-	protected override void ObservableSliceUpdate()
-	{
-		if (GorillaComputer.instance == null)
-		{
-			return;
-		}
-		DateTime dateTime = this.dt;
-		DateTime serverTime = GorillaComputer.instance.GetServerTime();
-		TimeSpan timeSpan;
-		if (this.overrideDt < serverTime)
-		{
-			if (this.mode == SimpleCountdown.Mode.TimeSync)
-			{
-				this.dt = this.timeSyncRule.GetNext(serverTime);
-			}
-			timeSpan = this.dt - serverTime;
-		}
-		else
-		{
-			timeSpan = this.overrideDt - serverTime;
-		}
-		if (timeSpan.TotalHours <= (double)this.hourRange.x || timeSpan.TotalHours >= (double)this.hourRange.y)
-		{
-			timeSpan = timeSpan.Multiply(0.0);
-		}
-		switch (this.displayFormat)
-		{
-		case SimpleCountdown.DisplayFormat.DD_HH_MM_SS:
-			this.tmp.text = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", new object[]
-			{
-				timeSpan.Days,
-				timeSpan.Hours,
-				timeSpan.Minutes,
-				timeSpan.Seconds
-			});
-			return;
-		case SimpleCountdown.DisplayFormat.HH_MM_SS:
-			this.tmp.text = string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(timeSpan.TotalHours), timeSpan.Minutes, timeSpan.Seconds);
-			return;
-		case SimpleCountdown.DisplayFormat.DD_HH_MM:
-			this.tmp.text = string.Format("{0:00}:{1:00}:{2:00}", timeSpan.Days, timeSpan.Hours, timeSpan.Minutes);
-			return;
-		case SimpleCountdown.DisplayFormat.HH_MM:
-			this.tmp.text = string.Format("{0:00}:{1:00}", Math.Floor(timeSpan.TotalHours), timeSpan.Minutes);
-			return;
-		case SimpleCountdown.DisplayFormat.MM_SS:
-			this.tmp.text = string.Format("{0:00}:{1:00}", Math.Floor(timeSpan.TotalMinutes), timeSpan.Seconds);
-			return;
-		default:
-			return;
-		}
-	}
-
-	protected override void OnBecameObservable()
-	{
-	}
-
-	protected override void OnLostObservable()
-	{
-	}
-
-	public void StartCountdown(int seconds)
-	{
-		this.overrideDt = GorillaComputer.instance.GetServerTime().AddSeconds((double)seconds);
+		DD_HH_MM_SS,
+		HH_MM_SS,
+		DD_HH_MM,
+		HH_MM,
+		MM_SS
 	}
 
 	[SerializeField]
-	private SimpleCountdown.DisplayFormat displayFormat;
+	private DisplayFormat displayFormat;
 
 	[SerializeField]
-	private SimpleCountdown.Mode mode = SimpleCountdown.Mode.TitleData;
+	private Mode mode = Mode.TitleData;
 
 	[SerializeField]
 	private string titleDataKey;
@@ -144,20 +49,107 @@ public class SimpleCountdown : ObservableBehavior
 
 	private DateTime overrideDt = DateTime.MinValue;
 
-	private enum Mode
+	private async void Start()
 	{
-		None,
-		TitleData,
-		FixedDate,
-		TimeSync
+		tmp = GetComponent<TextMeshPro>();
+		switch (mode)
+		{
+		case Mode.TitleData:
+			while (PlayFabTitleDataCache.Instance == null)
+			{
+				await Task.Yield();
+			}
+			PlayFabTitleDataCache.Instance.GetTitleData(titleDataKey, onTD, onTDError);
+			break;
+		case Mode.FixedDate:
+			ParseDateTime();
+			break;
+		case Mode.TimeSync:
+			if (GorillaComputer.instance != null)
+			{
+				DateTime serverTime = GorillaComputer.instance.GetServerTime();
+				dt = timeSyncRule.GetPrevious(serverTime);
+			}
+			break;
+		}
 	}
 
-	private enum DisplayFormat
+	private void onTD(string s)
 	{
-		DD_HH_MM_SS,
-		HH_MM_SS,
-		DD_HH_MM,
-		HH_MM,
-		MM_SS
+		date = s;
+		ParseDateTime();
+	}
+
+	private void onTDError(PlayFabError error)
+	{
+		Debug.Log("SimpleCountdown component on " + base.name + " failed to get '" + titleDataKey + "' from title data. Using Fallback: '" + date + "'");
+		ParseDateTime();
+	}
+
+	private void ParseDateTime()
+	{
+		if (!DateTime.TryParse(date, out dt))
+		{
+			Debug.Log("SimpleCountdown component on " + base.name + " has an unparsable date string: '" + date + "'");
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
+
+	protected override void ObservableSliceUpdate()
+	{
+		if (GorillaComputer.instance == null)
+		{
+			return;
+		}
+		_ = dt;
+		DateTime serverTime = GorillaComputer.instance.GetServerTime();
+		TimeSpan timeSpan;
+		if (overrideDt < serverTime)
+		{
+			if (mode == Mode.TimeSync)
+			{
+				dt = timeSyncRule.GetNext(serverTime);
+			}
+			timeSpan = dt - serverTime;
+		}
+		else
+		{
+			timeSpan = overrideDt - serverTime;
+		}
+		if (timeSpan.TotalHours <= (double)hourRange.x || timeSpan.TotalHours >= (double)hourRange.y)
+		{
+			timeSpan = timeSpan.Multiply(0.0);
+		}
+		switch (displayFormat)
+		{
+		case DisplayFormat.DD_HH_MM_SS:
+			tmp.text = $"{timeSpan.Days:00}:{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+			break;
+		case DisplayFormat.HH_MM_SS:
+			tmp.text = $"{Math.Floor(timeSpan.TotalHours):00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+			break;
+		case DisplayFormat.DD_HH_MM:
+			tmp.text = $"{timeSpan.Days:00}:{timeSpan.Hours:00}:{timeSpan.Minutes:00}";
+			break;
+		case DisplayFormat.HH_MM:
+			tmp.text = $"{Math.Floor(timeSpan.TotalHours):00}:{timeSpan.Minutes:00}";
+			break;
+		case DisplayFormat.MM_SS:
+			tmp.text = $"{Math.Floor(timeSpan.TotalMinutes):00}:{timeSpan.Seconds:00}";
+			break;
+		}
+	}
+
+	protected override void OnBecameObservable()
+	{
+	}
+
+	protected override void OnLostObservable()
+	{
+	}
+
+	public void StartCountdown(int seconds)
+	{
+		overrideDt = GorillaComputer.instance.GetServerTime().AddSeconds(seconds);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using GorillaExtensions;
 using UnityEngine;
@@ -7,192 +7,14 @@ using UnityEngine.Serialization;
 [DisallowMultipleComponent]
 public class VerletLine : MonoBehaviour
 {
-	private void Awake()
+	[Serializable]
+	public struct LineNode
 	{
-		this._nodes = new VerletLine.LineNode[this.segmentNumber];
-		this._positions = new Vector3[this.segmentNumber];
-		for (int i = 0; i < this.segmentNumber; i++)
-		{
-			float t = (float)i / (float)(this.segmentNumber - 1);
-			Vector3 vector = Vector3.Lerp(this.lineStart.position, this.lineEnd.position, t);
-			this._nodes[i] = new VerletLine.LineNode
-			{
-				position = vector,
-				lastPosition = vector,
-				acceleration = this.gravity
-			};
-		}
-		this.line.positionCount = this._nodes.Length;
-		this.endRigidbody = this.lineEnd.GetComponent<Rigidbody>();
-		if (this.endRigidbody)
-		{
-			this.endRigidbody.maxLinearVelocity = this.endMaxSpeed;
-			this.endRigidbodyParent = this.endRigidbody.transform.parent;
-			this.rigidBodyStartingLocalPosition = this.endRigidbody.transform.localPosition;
-			this.endRigidbody.transform.parent = null;
-			this.endRigidbody.gameObject.SetActive(false);
-		}
-		this.totalLineLength = this.segmentLength * (float)this.segmentNumber;
-	}
+		public Vector3 position;
 
-	private void OnEnable()
-	{
-		if (this.endRigidbody)
-		{
-			this.endRigidbody.gameObject.SetActive(true);
-			this.endRigidbody.transform.localPosition = this.endRigidbodyParent.TransformPoint(this.rigidBodyStartingLocalPosition);
-		}
-	}
+		public Vector3 lastPosition;
 
-	private void OnDisable()
-	{
-		if (this.endRigidbody)
-		{
-			this.endRigidbody.gameObject.SetActive(false);
-		}
-	}
-
-	public void SetLength(float total, float delay = 0f)
-	{
-		this.segmentTargetLength = total / (float)this.segmentNumber;
-		if (this.segmentTargetLength < this.segmentMinLength)
-		{
-			this.segmentTargetLength = this.segmentMinLength;
-		}
-		if (this.segmentTargetLength > this.segmentMaxLength)
-		{
-			this.segmentTargetLength = this.segmentMaxLength;
-		}
-		if (delay >= 0.01f)
-		{
-			base.StartCoroutine(this.ResizeAfterDelay(delay));
-		}
-	}
-
-	public void AddSegmentLength(float amount, float delay = 0f)
-	{
-		this.segmentTargetLength = this.segmentLength + amount;
-		if (this.segmentTargetLength <= 0f)
-		{
-			return;
-		}
-		if (this.segmentTargetLength > this.segmentMaxLength)
-		{
-			this.segmentTargetLength = this.segmentMaxLength;
-		}
-		if (delay >= 0.01f)
-		{
-			base.StartCoroutine(this.ResizeAfterDelay(delay));
-		}
-	}
-
-	public void RemoveSegmentLength(float amount, float delay = 0f)
-	{
-		this.segmentTargetLength = this.segmentLength - amount;
-		if (this.segmentTargetLength <= this.segmentMinLength)
-		{
-			this.segmentTargetLength = (this.segmentLength = this.segmentMinLength);
-			return;
-		}
-		if (delay >= 0.01f)
-		{
-			base.StartCoroutine(this.ResizeAfterDelay(delay));
-		}
-	}
-
-	private IEnumerator ResizeAfterDelay(float delay)
-	{
-		yield return new WaitForSeconds(delay);
-		yield break;
-	}
-
-	private void Update()
-	{
-		if (this.segmentLength.Approx(this.segmentTargetLength, 0.1f))
-		{
-			this.segmentLength = this.segmentTargetLength;
-			return;
-		}
-		this.segmentLength = Mathf.Lerp(this.segmentLength, this.segmentTargetLength, this.resizeSpeed * this.resizeScale * Time.deltaTime);
-		if (this.scaleLineWidth)
-		{
-			this.line.widthMultiplier = base.transform.lossyScale.x;
-		}
-	}
-
-	public void ForceTotalLength(float totalLength)
-	{
-		float num = totalLength / (float)((this.segmentNumber < 1) ? 1 : this.segmentNumber);
-		this.segmentLength = (this.segmentTargetLength = num);
-		this.totalLineLength = this.segmentLength * (float)this.segmentNumber;
-	}
-
-	private void FixedUpdate()
-	{
-		for (int i = 0; i < this._nodes.Length; i++)
-		{
-			VerletLine.Simulate(ref this._nodes[i], Time.fixedDeltaTime);
-		}
-		for (int j = 0; j < this.simIterations; j++)
-		{
-			for (int k = 0; k < this._nodes.Length - 1; k++)
-			{
-				VerletLine.LimitDistance(ref this._nodes[k], ref this._nodes[k + 1], this.segmentLength);
-			}
-		}
-		this._nodes[0].position = this.lineStart.position;
-		if (this.endRigidbody)
-		{
-			if (this.onlyPullAtEdges)
-			{
-				if ((this.endRigidbody.transform.position - this.lineStart.position).IsLongerThan(this.totalLineLength))
-				{
-					Vector3 a = this.lineStart.position + (this.endRigidbody.transform.position - this.lineStart.position).normalized * this.totalLineLength;
-					this.endRigidbody.linearVelocity += (a - this.endRigidbody.transform.position) / Time.fixedDeltaTime;
-					if (this.endRigidbody.linearVelocity.IsLongerThan(this.endMaxSpeed))
-					{
-						this.endRigidbody.linearVelocity = this.endRigidbody.linearVelocity.normalized * this.endMaxSpeed;
-					}
-				}
-			}
-			else
-			{
-				VerletLine.LineNode[] nodes = this._nodes;
-				Vector3 force = (nodes[nodes.Length - 1].position - this.lineEnd.position) * (this.tension * this.tensionScale);
-				Quaternion rotation = this.endRigidbody.rotation;
-				VerletLine.LineNode[] nodes2 = this._nodes;
-				Vector3 position = nodes2[nodes2.Length - 1].position;
-				VerletLine.LineNode[] nodes3 = this._nodes;
-				Quaternion.LookRotation(position - nodes3[nodes3.Length - 2].position);
-				if (!this.endRigidbody.isKinematic)
-				{
-					this.endRigidbody.AddForceAtPosition(force, this.endRigidbody.transform.TransformPoint(this.endLineAnchorLocalPosition));
-				}
-			}
-		}
-		VerletLine.LineNode[] nodes4 = this._nodes;
-		nodes4[nodes4.Length - 1].position = this.lineEnd.position;
-		for (int l = 0; l < this._nodes.Length; l++)
-		{
-			this._positions[l] = this._nodes[l].position;
-		}
-		this.line.SetPositions(this._positions);
-	}
-
-	private static void Simulate(ref VerletLine.LineNode p, float dt)
-	{
-		Vector3 position = p.position;
-		p.position += p.position - p.lastPosition + p.acceleration * (dt * dt);
-		p.lastPosition = position;
-	}
-
-	private static void LimitDistance(ref VerletLine.LineNode p1, ref VerletLine.LineNode p2, float restLength)
-	{
-		Vector3 a = p2.position - p1.position;
-		float num = a.magnitude + 1E-05f;
-		float num2 = (num - restLength) / num;
-		p1.position += a * (num2 * 0.5f);
-		p2.position -= a * (num2 * 0.5f);
+		public Vector3 acceleration;
 	}
 
 	public Transform lineStart;
@@ -239,7 +61,7 @@ public class VerletLine : MonoBehaviour
 	public float resizeScale = 1f;
 
 	[NonSerialized]
-	private VerletLine.LineNode[] _nodes = new VerletLine.LineNode[0];
+	private LineNode[] _nodes = new LineNode[0];
 
 	[NonSerialized]
 	private Vector3[] _positions = new Vector3[0];
@@ -252,13 +74,183 @@ public class VerletLine : MonoBehaviour
 	[SerializeField]
 	private bool scaleLineWidth = true;
 
-	[Serializable]
-	public struct LineNode
+	private void Awake()
 	{
-		public Vector3 position;
+		_nodes = new LineNode[segmentNumber];
+		_positions = new Vector3[segmentNumber];
+		for (int i = 0; i < segmentNumber; i++)
+		{
+			float t = (float)i / (float)(segmentNumber - 1);
+			Vector3 vector = Vector3.Lerp(lineStart.position, lineEnd.position, t);
+			_nodes[i] = new LineNode
+			{
+				position = vector,
+				lastPosition = vector,
+				acceleration = gravity
+			};
+		}
+		line.positionCount = _nodes.Length;
+		endRigidbody = lineEnd.GetComponent<Rigidbody>();
+		if ((bool)endRigidbody)
+		{
+			endRigidbody.maxLinearVelocity = endMaxSpeed;
+			endRigidbodyParent = endRigidbody.transform.parent;
+			rigidBodyStartingLocalPosition = endRigidbody.transform.localPosition;
+			endRigidbody.transform.parent = null;
+			endRigidbody.gameObject.SetActive(value: false);
+		}
+		totalLineLength = segmentLength * (float)segmentNumber;
+	}
 
-		public Vector3 lastPosition;
+	private void OnEnable()
+	{
+		if ((bool)endRigidbody)
+		{
+			endRigidbody.gameObject.SetActive(value: true);
+			endRigidbody.transform.localPosition = endRigidbodyParent.TransformPoint(rigidBodyStartingLocalPosition);
+		}
+	}
 
-		public Vector3 acceleration;
+	private void OnDisable()
+	{
+		if ((bool)endRigidbody)
+		{
+			endRigidbody.gameObject.SetActive(value: false);
+		}
+	}
+
+	public void SetLength(float total, float delay = 0f)
+	{
+		segmentTargetLength = total / (float)segmentNumber;
+		if (segmentTargetLength < segmentMinLength)
+		{
+			segmentTargetLength = segmentMinLength;
+		}
+		if (segmentTargetLength > segmentMaxLength)
+		{
+			segmentTargetLength = segmentMaxLength;
+		}
+		if (delay >= 0.01f)
+		{
+			StartCoroutine(ResizeAfterDelay(delay));
+		}
+	}
+
+	public void AddSegmentLength(float amount, float delay = 0f)
+	{
+		segmentTargetLength = segmentLength + amount;
+		if (!(segmentTargetLength <= 0f))
+		{
+			if (segmentTargetLength > segmentMaxLength)
+			{
+				segmentTargetLength = segmentMaxLength;
+			}
+			if (delay >= 0.01f)
+			{
+				StartCoroutine(ResizeAfterDelay(delay));
+			}
+		}
+	}
+
+	public void RemoveSegmentLength(float amount, float delay = 0f)
+	{
+		segmentTargetLength = segmentLength - amount;
+		if (segmentTargetLength <= segmentMinLength)
+		{
+			segmentTargetLength = (segmentLength = segmentMinLength);
+		}
+		else if (delay >= 0.01f)
+		{
+			StartCoroutine(ResizeAfterDelay(delay));
+		}
+	}
+
+	private IEnumerator ResizeAfterDelay(float delay)
+	{
+		yield return new WaitForSeconds(delay);
+	}
+
+	private void Update()
+	{
+		if (segmentLength.Approx(segmentTargetLength, 0.1f))
+		{
+			segmentLength = segmentTargetLength;
+			return;
+		}
+		segmentLength = Mathf.Lerp(segmentLength, segmentTargetLength, resizeSpeed * resizeScale * Time.deltaTime);
+		if (scaleLineWidth)
+		{
+			line.widthMultiplier = base.transform.lossyScale.x;
+		}
+	}
+
+	public void ForceTotalLength(float totalLength)
+	{
+		float num = totalLength / (float)((segmentNumber < 1) ? 1 : segmentNumber);
+		segmentLength = (segmentTargetLength = num);
+		totalLineLength = segmentLength * (float)segmentNumber;
+	}
+
+	private void FixedUpdate()
+	{
+		for (int i = 0; i < _nodes.Length; i++)
+		{
+			Simulate(ref _nodes[i], Time.fixedDeltaTime);
+		}
+		for (int j = 0; j < simIterations; j++)
+		{
+			for (int k = 0; k < _nodes.Length - 1; k++)
+			{
+				LimitDistance(ref _nodes[k], ref _nodes[k + 1], segmentLength);
+			}
+		}
+		_nodes[0].position = lineStart.position;
+		if ((bool)endRigidbody)
+		{
+			if (onlyPullAtEdges)
+			{
+				if ((endRigidbody.transform.position - lineStart.position).IsLongerThan(totalLineLength))
+				{
+					Vector3 vector = lineStart.position + (endRigidbody.transform.position - lineStart.position).normalized * totalLineLength;
+					endRigidbody.linearVelocity += (vector - endRigidbody.transform.position) / Time.fixedDeltaTime;
+					if (endRigidbody.linearVelocity.IsLongerThan(endMaxSpeed))
+					{
+						endRigidbody.linearVelocity = endRigidbody.linearVelocity.normalized * endMaxSpeed;
+					}
+				}
+			}
+			else
+			{
+				Vector3 force = (_nodes[^1].position - lineEnd.position) * (tension * tensionScale);
+				_ = endRigidbody.rotation;
+				Quaternion.LookRotation(_nodes[^1].position - _nodes[^2].position);
+				if (!endRigidbody.isKinematic)
+				{
+					endRigidbody.AddForceAtPosition(force, endRigidbody.transform.TransformPoint(endLineAnchorLocalPosition));
+				}
+			}
+		}
+		_nodes[^1].position = lineEnd.position;
+		for (int l = 0; l < _nodes.Length; l++)
+		{
+			_positions[l] = _nodes[l].position;
+		}
+		line.SetPositions(_positions);
+	}
+
+	private static void Simulate(ref LineNode p, float dt)
+	{
+		Vector3 position = p.position;
+		p.position += p.position - p.lastPosition + p.acceleration * (dt * dt);
+		p.lastPosition = position;
+	}
+
+	private static void LimitDistance(ref LineNode p1, ref LineNode p2, float restLength)
+	{
+		Vector3 vector = p2.position - p1.position;
+		float num = vector.magnitude + 1E-05f;
+		float num2 = (num - restLength) / num;
+		p1.position += vector * (num2 * 0.5f);
+		p2.position -= vector * (num2 * 0.5f);
 	}
 }

@@ -1,17 +1,11 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
-public struct KeyValueStringPair
+public struct KeyValueStringPair(string key, string value)
 {
-	public KeyValueStringPair(string key, string value)
-	{
-		this.Key = key;
-		this.Value = value;
-	}
-
-	public string Key;
+	public string Key = key;
 
 	[Multiline]
-	public string Value;
+	public string Value = value;
 }

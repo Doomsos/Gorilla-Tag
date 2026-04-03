@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaGameModes;
 using TMPro;
@@ -7,414 +7,6 @@ using UnityEngine;
 [DefaultExecutionOrder(1)]
 public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 {
-	public bool IsAuthorityAndActive
-	{
-		get
-		{
-			return this.siManager.gameEntityManager.IsAuthority() && this.siManager.gameEntityManager.IsZoneActive();
-		}
-	}
-
-	public float ResourceSpawnInterval
-	{
-		get
-		{
-			if (!Application.isPlaying)
-			{
-				return 0f;
-			}
-			return this.GetResourceSpawnInterval();
-		}
-	}
-
-	public float TimeSinceLastSpawn
-	{
-		get
-		{
-			return Time.time - this._lastResourceSpawnTime;
-		}
-	}
-
-	public float TimeToNextSpawn
-	{
-		get
-		{
-			if (!Application.isPlaying)
-			{
-				return 0f;
-			}
-			if (this._lastResourceSpawnTime <= 0f)
-			{
-				return 0f;
-			}
-			return this.GetResourceSpawnInterval() - (Time.time - this._lastResourceSpawnTime);
-		}
-	}
-
-	private void Awake()
-	{
-		this.resourceRegions = this.resourceNodeParent.GetComponentsInChildren<SIResourceRegion>(true);
-		this._resourcePrefabs = new List<SIResource>();
-		foreach (SIResourceRegion siresourceRegion in this.resourceRegions)
-		{
-			if (!this._resourcePrefabs.Contains(siresourceRegion.resourcePrefab))
-			{
-				this._resourcePrefabs.Add(siresourceRegion.resourcePrefab);
-			}
-		}
-		this.perRoundResourceRegions = this.perRoundResourceNodeParent.GetComponentsInChildren<SIResourceRegion>(true);
-		this.resourceResetHeight = this.resourceResetLoc.position.y;
-	}
-
-	public void OnEnable()
-	{
-		this.siManager = SuperInfectionManager.GetSIManagerForZone(this.zone);
-		if (this.siManager != null)
-		{
-			this.siManager.OnEnableZoneSuperInfection(this);
-		}
-		if (this.siManager.isActiveAndEnabled)
-		{
-			this.DisableStations();
-		}
-		if (NetworkSystem.Instance != null)
-		{
-			NetworkSystem.Instance.OnPlayerLeft += this.RemovePlayerGadgetsOnLeave;
-		}
-		for (int i = 0; i < this.siTerminals.Length; i++)
-		{
-			this.siTerminals[i].index = i;
-		}
-		for (int j = 0; j < this.siDeposits.Length; j++)
-		{
-			this.siDeposits[j].index = j;
-		}
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnDisable()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		if (this.siManager)
-		{
-			this.siManager.zoneSuperInfection = null;
-		}
-		this.DisableStations();
-		if (NetworkSystem.Instance != null)
-		{
-			NetworkSystem.Instance.OnPlayerLeft -= this.RemovePlayerGadgetsOnLeave;
-		}
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	public void OnZoneInit()
-	{
-		this.EnableStations();
-	}
-
-	public void OnZoneClear(ZoneClearReason reason)
-	{
-		if (reason != ZoneClearReason.JoinZone)
-		{
-			this.DisableStations();
-			SIProgression.Instance.SendTelemetryData();
-		}
-	}
-
-	private void EnableStations()
-	{
-		for (int i = 0; i < this.siTerminals.Length; i++)
-		{
-			this.siTerminals[i].gameObject.SetActive(true);
-			if (this.siTerminals[i].dispenser && this.siTerminals[i].dispenser.isTryOn)
-			{
-				this.siManager.RegisterTryOnDispenser();
-			}
-		}
-		for (int j = 0; j < this.siDeposits.Length; j++)
-		{
-			this.siDeposits[j].gameObject.SetActive(true);
-		}
-		this.questBoard.gameObject.SetActive(true);
-		if (this.purchaseTerminal != null)
-		{
-			this.purchaseTerminal.gameObject.SetActive(true);
-		}
-		for (int k = 0; k < this.zoneObjects.Length; k++)
-		{
-			GameObject gameObject = this.zoneObjects[k];
-			if (gameObject != null)
-			{
-				gameObject.SetActive(true);
-			}
-			else
-			{
-				Debug.LogError("[GT/SuperInfection]  ERROR!!!  " + string.Format("null ref at `zoneObjects[{0}]`.", k));
-			}
-		}
-	}
-
-	private void DisableStations()
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		for (int i = 0; i < this.siTerminals.Length; i++)
-		{
-			if (this.siTerminals[i].dispenser && this.siTerminals[i].dispenser.isTryOn)
-			{
-				this.siManager.UnregisterTryOnDispenser();
-			}
-			this.siTerminals[i].gameObject.SetActive(false);
-			this.siTerminals[i].Reset();
-		}
-		for (int j = 0; j < this.siDeposits.Length; j++)
-		{
-			this.siDeposits[j].gameObject.SetActive(false);
-		}
-		this.questBoard.gameObject.SetActive(false);
-		if (this.purchaseTerminal != null)
-		{
-			this.purchaseTerminal.gameObject.SetActive(false);
-		}
-		for (int k = 0; k < this.zoneObjects.Length; k++)
-		{
-			GameObject gameObject = this.zoneObjects[k];
-			if (gameObject != null)
-			{
-				gameObject.SetActive(false);
-			}
-			else
-			{
-				Debug.LogError("[GT/SuperInfection]  ERROR!!!  " + string.Format("null ref at `zoneObjects[{0}]`.", k));
-			}
-		}
-	}
-
-	public void Update()
-	{
-		if (!this.IsAuthorityAndActive)
-		{
-			return;
-		}
-		if (this.retryCreatePerRoundResources)
-		{
-			this.CreatePerRoundResources();
-		}
-		if (Time.time >= this._nextResourceUpdateTime)
-		{
-			this.GetResourceSpawnInterval();
-			foreach (SIResourceRegion siresourceRegion in this.resourceRegions)
-			{
-				for (int j = siresourceRegion.ItemCount - 1; j >= 0; j--)
-				{
-					GameEntity gameEntity = siresourceRegion.Items[j];
-					if (!gameEntity)
-					{
-						siresourceRegion.Items.RemoveAt(j);
-					}
-					else if (gameEntity.transform.position.y < this.resourceResetHeight)
-					{
-						this.siManager.gameEntityManager.RequestDestroyItem(gameEntity.id);
-					}
-				}
-			}
-			this.CheckResourceSpawn();
-			this._nextResourceUpdateTime = Time.time + 1f;
-		}
-	}
-
-	private void CheckResourceSpawn()
-	{
-		if (Time.time >= this.GetNextResourceSpawnTime())
-		{
-			SIResourceRegion siresourceRegion = null;
-			float num = float.MaxValue;
-			foreach (SIResourceRegion siresourceRegion2 in this.resourceRegions)
-			{
-				if (siresourceRegion2.ItemCount < siresourceRegion2.MaxItems && siresourceRegion2.LastSpawnTime < num)
-				{
-					siresourceRegion = siresourceRegion2;
-					num = siresourceRegion2.LastSpawnTime;
-				}
-			}
-			if (!siresourceRegion)
-			{
-				this._lastResourceSpawnTime = Time.time;
-				return;
-			}
-			ValueTuple<bool, Vector3, Vector3> spawnPointWithNormal = siresourceRegion.GetSpawnPointWithNormal(5);
-			if (!spawnPointWithNormal.Item1)
-			{
-				return;
-			}
-			if (siresourceRegion.resourcePrefab == null)
-			{
-				return;
-			}
-			float spawnPitchVariance = siresourceRegion.resourcePrefab.spawnPitchVariance;
-			Quaternion rhs = Quaternion.Euler(Random.Range(-spawnPitchVariance, spawnPitchVariance), (float)Random.Range(0, 360), Random.Range(-spawnPitchVariance, spawnPitchVariance));
-			Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * rhs;
-			GameEntity gameEntity = this.siManager.gameEntityManager.GetGameEntity(this.siManager.gameEntityManager.RequestCreateItem(siresourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
-			if (gameEntity)
-			{
-				GTDev.Log<string>(string.Format("Spawned {0} at {1}", gameEntity.name, spawnPointWithNormal.Item2), gameEntity, null);
-				siresourceRegion.AddItem(gameEntity);
-				siresourceRegion.LastSpawnTime = (this._lastResourceSpawnTime = Time.time);
-				return;
-			}
-			GTDev.LogError<string>(string.Format("Failed to spawn {0} at {1}", siresourceRegion.resourcePrefab.gameObject.name, spawnPointWithNormal.Item2), null);
-		}
-	}
-
-	private float GetNextResourceSpawnTime()
-	{
-		if (this._lastResourceSpawnTime <= 0f)
-		{
-			return 0f;
-		}
-		return this._lastResourceSpawnTime + this.GetResourceSpawnInterval();
-	}
-
-	private float GetResourceSpawnInterval()
-	{
-		return 3600f / (float)(this.perPlayerHourlyResourceRate * Mathf.Max(GameMode.ParticipatingPlayers.Count, this.minRoomPopulation));
-	}
-
-	public void RemovePlayerGadgetsOnLeave(NetPlayer player)
-	{
-		SIPlayer siplayer = SIPlayer.Get(player.ActorNumber);
-		if (siplayer == null)
-		{
-			return;
-		}
-		if (this.siManager.gameEntityManager.IsAuthority())
-		{
-			for (int i = siplayer.activePlayerGadgets.Count - 1; i >= 0; i--)
-			{
-				this.siManager.gameEntityManager.RequestDestroyItem(this.siManager.gameEntityManager.GetGameEntityFromNetId(siplayer.activePlayerGadgets[i]).id);
-			}
-		}
-		siplayer.activePlayerGadgets.Clear();
-	}
-
-	public void RefreshStations(int actorNr)
-	{
-		for (int i = 0; i < this.siTerminals.Length; i++)
-		{
-			if (!(this.siTerminals[i].activePlayer == null) && this.siTerminals[i].activePlayer.gameObject.activeInHierarchy && this.siTerminals[i].activePlayer.ActorNr == actorNr)
-			{
-				this.siTerminals[i].techTree.UpdateState(this.siTerminals[i].techTree.currentState);
-				this.siTerminals[i].resourceCollection.UpdateState(this.siTerminals[i].resourceCollection.currentState);
-				this.siTerminals[i].dispenser.UpdateState(this.siTerminals[i].dispenser.currentState);
-			}
-		}
-		if (SIPlayer.LocalPlayer.ActorNr == actorNr && this.purchaseTerminal != null)
-		{
-			this.purchaseTerminal.UpdateCurrentTechPoints();
-		}
-	}
-
-	public void SliceUpdate()
-	{
-		if (this.siManager.gameEntityManager.IsAuthority())
-		{
-			for (int i = this.activeGadgets.Count - 1; i >= 0; i--)
-			{
-				if (this.activeGadgets[i] == null)
-				{
-					this.activeGadgets.RemoveAt(i);
-				}
-				else if (this.activeGadgets[i].transform.position.y < this.resourceResetHeight)
-				{
-					this.siManager.gameEntityManager.RequestDestroyItem(this.activeGadgets[i].gameEntity.id);
-				}
-			}
-		}
-	}
-
-	public List<SIResource> ResourcePrefabs
-	{
-		get
-		{
-			return this._resourcePrefabs;
-		}
-	}
-
-	public void AddGadget(SIGadget gadget)
-	{
-		this.activeGadgets.Add(gadget);
-	}
-
-	public void RemoveGadget(SIGadget gadget)
-	{
-		this.activeGadgets.Remove(gadget);
-	}
-
-	public void ResetPerRoundResources()
-	{
-		this.ClearPerRoundResources();
-		this.CreatePerRoundResources();
-	}
-
-	private void CreatePerRoundResources()
-	{
-		if (!this.siManager.gameEntityManager.IsZoneActive())
-		{
-			this.retryCreatePerRoundResources = true;
-			return;
-		}
-		this.retryCreatePerRoundResources = false;
-		foreach (SIResourceRegion siresourceRegion in this.perRoundResourceRegions)
-		{
-			for (int j = siresourceRegion.ItemCount; j < siresourceRegion.MaxItems; j++)
-			{
-				ValueTuple<bool, Vector3, Vector3> spawnPointWithNormal = siresourceRegion.GetSpawnPointWithNormal(5);
-				Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * Quaternion.Euler(0f, (float)Random.Range(0, 360), 0f);
-				GameEntity gameEntity = this.siManager.gameEntityManager.GetGameEntity(this.siManager.gameEntityManager.RequestCreateItem(siresourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
-				if (gameEntity)
-				{
-					siresourceRegion.AddItem(gameEntity);
-					if (!spawnPointWithNormal.Item1)
-					{
-						Rigidbody component = gameEntity.GetComponent<Rigidbody>();
-						if (component != null)
-						{
-							component.isKinematic = false;
-						}
-					}
-				}
-				else
-				{
-					GTDev.LogError<string>(string.Format("Failed to spawn {0} at {1}", siresourceRegion.resourcePrefab.gameObject.name, spawnPointWithNormal.Item2), null);
-				}
-			}
-		}
-	}
-
-	private void ClearPerRoundResources()
-	{
-		foreach (SIResourceRegion siresourceRegion in this.perRoundResourceRegions)
-		{
-			for (int j = siresourceRegion.ItemCount - 1; j >= 0; j--)
-			{
-				GameEntity gameEntity = siresourceRegion.Items[j];
-				if (!gameEntity)
-				{
-					siresourceRegion.Items.RemoveAt(j);
-				}
-				else if (gameEntity.lastHeldByActorNumber == 0 || !(SIPlayer.Get(gameEntity.lastHeldByActorNumber) != null))
-				{
-					this.siManager.gameEntityManager.RequestDestroyItem(gameEntity.id);
-				}
-			}
-		}
-	}
-
 	private const string preLog = "[GT/SuperInfection]  ";
 
 	private const string preErr = "[GT/SuperInfection]  ERROR!!!  ";
@@ -467,4 +59,408 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 	public TextMeshProUGUI authorityName;
 
 	private List<SIResource> _resourcePrefabs;
+
+	public bool IsAuthorityAndActive
+	{
+		get
+		{
+			if (siManager.gameEntityManager.IsAuthority())
+			{
+				return siManager.gameEntityManager.IsZoneActive();
+			}
+			return false;
+		}
+	}
+
+	public float ResourceSpawnInterval
+	{
+		get
+		{
+			if (!Application.isPlaying)
+			{
+				return 0f;
+			}
+			return GetResourceSpawnInterval();
+		}
+	}
+
+	public float TimeSinceLastSpawn => Time.time - _lastResourceSpawnTime;
+
+	public float TimeToNextSpawn
+	{
+		get
+		{
+			if (!Application.isPlaying)
+			{
+				return 0f;
+			}
+			if (!(_lastResourceSpawnTime > 0f))
+			{
+				return 0f;
+			}
+			return GetResourceSpawnInterval() - (Time.time - _lastResourceSpawnTime);
+		}
+	}
+
+	public List<SIResource> ResourcePrefabs => _resourcePrefabs;
+
+	private void Awake()
+	{
+		resourceRegions = resourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true);
+		_resourcePrefabs = new List<SIResource>();
+		SIResourceRegion[] array = resourceRegions;
+		foreach (SIResourceRegion sIResourceRegion in array)
+		{
+			if (!_resourcePrefabs.Contains(sIResourceRegion.resourcePrefab))
+			{
+				_resourcePrefabs.Add(sIResourceRegion.resourcePrefab);
+			}
+		}
+		perRoundResourceRegions = perRoundResourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true);
+		resourceResetHeight = resourceResetLoc.position.y;
+	}
+
+	public void OnEnable()
+	{
+		siManager = SuperInfectionManager.GetSIManagerForZone(zone);
+		if (siManager != null)
+		{
+			siManager.OnEnableZoneSuperInfection(this);
+		}
+		if (siManager.isActiveAndEnabled)
+		{
+			DisableStations();
+		}
+		if (NetworkSystem.Instance != null)
+		{
+			NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(RemovePlayerGadgetsOnLeave);
+		}
+		for (int i = 0; i < siTerminals.Length; i++)
+		{
+			siTerminals[i].index = i;
+		}
+		for (int j = 0; j < siDeposits.Length; j++)
+		{
+			siDeposits[j].index = j;
+		}
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+	}
+
+	public void OnDisable()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			if ((bool)siManager)
+			{
+				siManager.zoneSuperInfection = null;
+			}
+			DisableStations();
+			if (NetworkSystem.Instance != null)
+			{
+				NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(RemovePlayerGadgetsOnLeave);
+			}
+			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		}
+	}
+
+	public void OnZoneInit()
+	{
+		EnableStations();
+	}
+
+	public void OnZoneClear(ZoneClearReason reason)
+	{
+		if (reason != ZoneClearReason.JoinZone)
+		{
+			DisableStations();
+			SIProgression.Instance.SendTelemetryData();
+		}
+	}
+
+	private void EnableStations()
+	{
+		for (int i = 0; i < siTerminals.Length; i++)
+		{
+			siTerminals[i].gameObject.SetActive(value: true);
+			if ((bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn)
+			{
+				siManager.RegisterTryOnDispenser();
+			}
+		}
+		for (int j = 0; j < siDeposits.Length; j++)
+		{
+			siDeposits[j].gameObject.SetActive(value: true);
+		}
+		questBoard.gameObject.SetActive(value: true);
+		if (purchaseTerminal != null)
+		{
+			purchaseTerminal.gameObject.SetActive(value: true);
+		}
+		for (int k = 0; k < zoneObjects.Length; k++)
+		{
+			GameObject gameObject = zoneObjects[k];
+			if (gameObject != null)
+			{
+				gameObject.SetActive(value: true);
+			}
+			else
+			{
+				Debug.LogError("[GT/SuperInfection]  ERROR!!!  " + $"null ref at `zoneObjects[{k}]`.");
+			}
+		}
+	}
+
+	private void DisableStations()
+	{
+		if (ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
+		for (int i = 0; i < siTerminals.Length; i++)
+		{
+			if ((bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn)
+			{
+				siManager.UnregisterTryOnDispenser();
+			}
+			siTerminals[i].gameObject.SetActive(value: false);
+			siTerminals[i].Reset();
+		}
+		for (int j = 0; j < siDeposits.Length; j++)
+		{
+			siDeposits[j].gameObject.SetActive(value: false);
+		}
+		questBoard.gameObject.SetActive(value: false);
+		if (purchaseTerminal != null)
+		{
+			purchaseTerminal.gameObject.SetActive(value: false);
+		}
+		for (int k = 0; k < zoneObjects.Length; k++)
+		{
+			GameObject gameObject = zoneObjects[k];
+			if (gameObject != null)
+			{
+				gameObject.SetActive(value: false);
+			}
+			else
+			{
+				Debug.LogError("[GT/SuperInfection]  ERROR!!!  " + $"null ref at `zoneObjects[{k}]`.");
+			}
+		}
+	}
+
+	public void Update()
+	{
+		if (!IsAuthorityAndActive)
+		{
+			return;
+		}
+		if (retryCreatePerRoundResources)
+		{
+			CreatePerRoundResources();
+		}
+		if (!(Time.time >= _nextResourceUpdateTime))
+		{
+			return;
+		}
+		GetResourceSpawnInterval();
+		SIResourceRegion[] array = resourceRegions;
+		foreach (SIResourceRegion sIResourceRegion in array)
+		{
+			for (int num = sIResourceRegion.ItemCount - 1; num >= 0; num--)
+			{
+				GameEntity gameEntity = sIResourceRegion.Items[num];
+				if (!gameEntity)
+				{
+					sIResourceRegion.Items.RemoveAt(num);
+				}
+				else if (gameEntity.transform.position.y < resourceResetHeight)
+				{
+					siManager.gameEntityManager.RequestDestroyItem(gameEntity.id);
+				}
+			}
+		}
+		CheckResourceSpawn();
+		_nextResourceUpdateTime = Time.time + 1f;
+	}
+
+	private void CheckResourceSpawn()
+	{
+		if (!(Time.time >= GetNextResourceSpawnTime()))
+		{
+			return;
+		}
+		SIResourceRegion sIResourceRegion = null;
+		float num = float.MaxValue;
+		SIResourceRegion[] array = resourceRegions;
+		foreach (SIResourceRegion sIResourceRegion2 in array)
+		{
+			if (sIResourceRegion2.ItemCount < sIResourceRegion2.MaxItems && sIResourceRegion2.LastSpawnTime < num)
+			{
+				sIResourceRegion = sIResourceRegion2;
+				num = sIResourceRegion2.LastSpawnTime;
+			}
+		}
+		if (!sIResourceRegion)
+		{
+			_lastResourceSpawnTime = Time.time;
+			return;
+		}
+		(bool, Vector3, Vector3) spawnPointWithNormal = sIResourceRegion.GetSpawnPointWithNormal();
+		if (spawnPointWithNormal.Item1 && !(sIResourceRegion.resourcePrefab == null))
+		{
+			float spawnPitchVariance = sIResourceRegion.resourcePrefab.spawnPitchVariance;
+			Quaternion quaternion = Quaternion.Euler(UnityEngine.Random.Range(0f - spawnPitchVariance, spawnPitchVariance), UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0f - spawnPitchVariance, spawnPitchVariance));
+			Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * quaternion;
+			GameEntity gameEntity = siManager.gameEntityManager.GetGameEntity(siManager.gameEntityManager.RequestCreateItem(sIResourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
+			if ((bool)gameEntity)
+			{
+				GTDev.Log($"Spawned {gameEntity.name} at {spawnPointWithNormal.Item2}", gameEntity);
+				sIResourceRegion.AddItem(gameEntity);
+				sIResourceRegion.LastSpawnTime = (_lastResourceSpawnTime = Time.time);
+			}
+			else
+			{
+				GTDev.LogError($"Failed to spawn {sIResourceRegion.resourcePrefab.gameObject.name} at {spawnPointWithNormal.Item2}");
+			}
+		}
+	}
+
+	private float GetNextResourceSpawnTime()
+	{
+		if (!(_lastResourceSpawnTime > 0f))
+		{
+			return 0f;
+		}
+		return _lastResourceSpawnTime + GetResourceSpawnInterval();
+	}
+
+	private float GetResourceSpawnInterval()
+	{
+		return 3600f / (float)(perPlayerHourlyResourceRate * Mathf.Max(GameMode.ParticipatingPlayers.Count, minRoomPopulation));
+	}
+
+	public void RemovePlayerGadgetsOnLeave(NetPlayer player)
+	{
+		SIPlayer sIPlayer = SIPlayer.Get(player.ActorNumber);
+		if (sIPlayer == null)
+		{
+			return;
+		}
+		if (siManager.gameEntityManager.IsAuthority())
+		{
+			for (int num = sIPlayer.activePlayerGadgets.Count - 1; num >= 0; num--)
+			{
+				siManager.gameEntityManager.RequestDestroyItem(siManager.gameEntityManager.GetGameEntityFromNetId(sIPlayer.activePlayerGadgets[num]).id);
+			}
+		}
+		sIPlayer.activePlayerGadgets.Clear();
+	}
+
+	public void RefreshStations(int actorNr)
+	{
+		for (int i = 0; i < siTerminals.Length; i++)
+		{
+			if (!(siTerminals[i].activePlayer == null) && siTerminals[i].activePlayer.gameObject.activeInHierarchy && siTerminals[i].activePlayer.ActorNr == actorNr)
+			{
+				siTerminals[i].techTree.UpdateState(siTerminals[i].techTree.currentState);
+				siTerminals[i].resourceCollection.UpdateState(siTerminals[i].resourceCollection.currentState);
+				siTerminals[i].dispenser.UpdateState(siTerminals[i].dispenser.currentState);
+			}
+		}
+		if (SIPlayer.LocalPlayer.ActorNr == actorNr && purchaseTerminal != null)
+		{
+			purchaseTerminal.UpdateCurrentTechPoints();
+		}
+	}
+
+	public void SliceUpdate()
+	{
+		if (!siManager.gameEntityManager.IsAuthority())
+		{
+			return;
+		}
+		for (int num = activeGadgets.Count - 1; num >= 0; num--)
+		{
+			if (activeGadgets[num] == null)
+			{
+				activeGadgets.RemoveAt(num);
+			}
+			else if (activeGadgets[num].transform.position.y < resourceResetHeight)
+			{
+				siManager.gameEntityManager.RequestDestroyItem(activeGadgets[num].gameEntity.id);
+			}
+		}
+	}
+
+	public void AddGadget(SIGadget gadget)
+	{
+		activeGadgets.Add(gadget);
+	}
+
+	public void RemoveGadget(SIGadget gadget)
+	{
+		activeGadgets.Remove(gadget);
+	}
+
+	public void ResetPerRoundResources()
+	{
+		ClearPerRoundResources();
+		CreatePerRoundResources();
+	}
+
+	private void CreatePerRoundResources()
+	{
+		if (!siManager.gameEntityManager.IsZoneActive())
+		{
+			retryCreatePerRoundResources = true;
+			return;
+		}
+		retryCreatePerRoundResources = false;
+		SIResourceRegion[] array = perRoundResourceRegions;
+		foreach (SIResourceRegion sIResourceRegion in array)
+		{
+			for (int j = sIResourceRegion.ItemCount; j < sIResourceRegion.MaxItems; j++)
+			{
+				(bool, Vector3, Vector3) spawnPointWithNormal = sIResourceRegion.GetSpawnPointWithNormal();
+				Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * Quaternion.Euler(0f, UnityEngine.Random.Range(0, 360), 0f);
+				GameEntity gameEntity = siManager.gameEntityManager.GetGameEntity(siManager.gameEntityManager.RequestCreateItem(sIResourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
+				if ((bool)gameEntity)
+				{
+					sIResourceRegion.AddItem(gameEntity);
+					if (!spawnPointWithNormal.Item1)
+					{
+						Rigidbody component = gameEntity.GetComponent<Rigidbody>();
+						if ((object)component != null)
+						{
+							component.isKinematic = false;
+						}
+					}
+				}
+				else
+				{
+					GTDev.LogError($"Failed to spawn {sIResourceRegion.resourcePrefab.gameObject.name} at {spawnPointWithNormal.Item2}");
+				}
+			}
+		}
+	}
+
+	private void ClearPerRoundResources()
+	{
+		SIResourceRegion[] array = perRoundResourceRegions;
+		foreach (SIResourceRegion sIResourceRegion in array)
+		{
+			for (int num = sIResourceRegion.ItemCount - 1; num >= 0; num--)
+			{
+				GameEntity gameEntity = sIResourceRegion.Items[num];
+				if (!gameEntity)
+				{
+					sIResourceRegion.Items.RemoveAt(num);
+				}
+				else if (gameEntity.lastHeldByActorNumber == 0 || !(SIPlayer.Get(gameEntity.lastHeldByActorNumber) != null))
+				{
+					siManager.gameEntityManager.RequestDestroyItem(gameEntity.id);
+				}
+			}
+		}
+	}
 }

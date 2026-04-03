@@ -1,73 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
 public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectileLauncher
 {
-	public void OnEntityInit()
-	{
-		this.gameEntity.MinTimeBetweenTicks = 0.5f;
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnTick = (Action)Delegate.Combine(gameEntity.OnTick, new Action(this.OnThink));
-		this.senseNearby.Setup(this.fireFrom, this.gameEntity);
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	public void OnThink()
-	{
-		if (!this.gameEntity.IsAuthority())
-		{
-			return;
-		}
-		double timeAsDouble = Time.timeAsDouble;
-		if (timeAsDouble < this.nextFireTime)
-		{
-			return;
-		}
-		GRHazardTower.tempRigs.Clear();
-		GRHazardTower.tempRigs.Add(VRRig.LocalRig);
-		VRRigCache.Instance.GetAllUsedRigs(GRHazardTower.tempRigs);
-		this.senseNearby.UpdateNearby(GRHazardTower.tempRigs, this.senseLineOfSight);
-		float num;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		if (vrrig == null)
-		{
-			return;
-		}
-		Vector3 vector = vrrig.transform.position;
-		Vector3 b = Vector3.up * 0.1f;
-		vector += b;
-		GhostReactorManager.Get(this.gameEntity).RequestFireProjectile(this.gameEntity.id, this.fireFrom.position, vector, PhotonNetwork.Time + 0.0);
-		this.nextFireTime = timeAsDouble + (double)this.fireCooldownTime;
-	}
-
-	public void OnFire(Vector3 fireFromPos, Vector3 fireAtPos, double fireAtTime)
-	{
-		Vector3 forward;
-		if (this.gameEntity.IsAuthority() && GREnemyRanged.CalculateLaunchDirection(fireFromPos, fireAtPos, this.projectileSpeed, out forward))
-		{
-			this.gameEntity.manager.RequestCreateItem(this.projectilePrefab.name.GetStaticHash(), fireFromPos, Quaternion.LookRotation(forward, Vector3.up), (long)this.gameEntity.GetNetId());
-		}
-		double timeAsDouble = Time.timeAsDouble;
-		this.nextFireTime = timeAsDouble + (double)this.fireCooldownTime;
-	}
-
-	public void OnProjectileInit(GRRangedEnemyProjectile projectile)
-	{
-	}
-
-	public void OnProjectileHit(GRRangedEnemyProjectile projectile, Collision collision)
-	{
-	}
-
 	public GameEntity gameEntity;
 
 	public GRSenseNearby senseNearby;
@@ -87,4 +24,64 @@ public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectil
 	private double nextFireTime;
 
 	private static List<VRRig> tempRigs = new List<VRRig>(16);
+
+	public void OnEntityInit()
+	{
+		gameEntity.MinTimeBetweenTicks = 0.5f;
+		GameEntity obj = gameEntity;
+		obj.OnTick = (Action)Delegate.Combine(obj.OnTick, new Action(OnThink));
+		senseNearby.Setup(fireFrom, gameEntity);
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	public void OnThink()
+	{
+		if (!gameEntity.IsAuthority())
+		{
+			return;
+		}
+		double timeAsDouble = Time.timeAsDouble;
+		if (!(timeAsDouble < nextFireTime))
+		{
+			tempRigs.Clear();
+			tempRigs.Add(VRRig.LocalRig);
+			VRRigCache.Instance.GetAllUsedRigs(tempRigs);
+			senseNearby.UpdateNearby(tempRigs, senseLineOfSight);
+			float outDistanceSq;
+			VRRig vRRig = senseNearby.PickClosest(out outDistanceSq);
+			if (!(vRRig == null))
+			{
+				Vector3 position = vRRig.transform.position;
+				Vector3 vector = Vector3.up * 0.1f;
+				position += vector;
+				GhostReactorManager.Get(gameEntity).RequestFireProjectile(gameEntity.id, fireFrom.position, position, PhotonNetwork.Time + 0.0);
+				nextFireTime = timeAsDouble + (double)fireCooldownTime;
+			}
+		}
+	}
+
+	public void OnFire(Vector3 fireFromPos, Vector3 fireAtPos, double fireAtTime)
+	{
+		if (gameEntity.IsAuthority() && GREnemyRanged.CalculateLaunchDirection(fireFromPos, fireAtPos, projectileSpeed, out var direction))
+		{
+			gameEntity.manager.RequestCreateItem(projectilePrefab.name.GetStaticHash(), fireFromPos, Quaternion.LookRotation(direction, Vector3.up), gameEntity.GetNetId());
+		}
+		double timeAsDouble = Time.timeAsDouble;
+		nextFireTime = timeAsDouble + (double)fireCooldownTime;
+	}
+
+	public void OnProjectileInit(GRRangedEnemyProjectile projectile)
+	{
+	}
+
+	public void OnProjectileHit(GRRangedEnemyProjectile projectile, Collision collision)
+	{
+	}
 }

@@ -1,35 +1,32 @@
-﻿using System;
 using GorillaGameModes;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class GorillaGuardianEjectWatch : MonoBehaviour
 {
+	[SerializeField]
+	private HeldButton ejectButton;
+
 	private void Start()
 	{
-		if (this.ejectButton != null)
+		if (ejectButton != null)
 		{
-			this.ejectButton.onPressButton.AddListener(new UnityAction(this.OnEjectButtonPressed));
+			ejectButton.onPressButton.AddListener(OnEjectButtonPressed);
 		}
 	}
 
 	private void OnDestroy()
 	{
-		if (this.ejectButton != null)
+		if (ejectButton != null)
 		{
-			this.ejectButton.onPressButton.RemoveListener(new UnityAction(this.OnEjectButtonPressed));
+			ejectButton.onPressButton.RemoveListener(OnEjectButtonPressed);
 		}
 	}
 
 	private void OnEjectButtonPressed()
 	{
-		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
-		if (gorillaGuardianManager != null)
+		if (GameMode.ActiveGameMode is GorillaGuardianManager gorillaGuardianManager)
 		{
 			gorillaGuardianManager.RequestEjectGuardian(NetworkSystem.Instance.LocalPlayer);
 		}
 	}
-
-	[SerializeField]
-	private HeldButton ejectButton;
 }

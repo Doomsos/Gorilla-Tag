@@ -1,38 +1,32 @@
-﻿using System;
+using System;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderOptionButton : GorillaPressableButton
 {
-	public class BuilderOptionButton : GorillaPressableButton
+	private new Action<BuilderOptionButton, bool> onPressed;
+
+	public override void Start()
 	{
-		public override void Start()
-		{
-			base.Start();
-		}
+		base.Start();
+	}
 
-		private void OnDestroy()
-		{
-		}
+	private void OnDestroy()
+	{
+	}
 
-		public void Setup(Action<BuilderOptionButton, bool> onPressed)
-		{
-			this.onPressed = onPressed;
-		}
+	public void Setup(Action<BuilderOptionButton, bool> onPressed)
+	{
+		this.onPressed = onPressed;
+	}
 
-		public override void ButtonActivationWithHand(bool isLeftHand)
-		{
-			Action<BuilderOptionButton, bool> action = this.onPressed;
-			if (action == null)
-			{
-				return;
-			}
-			action(this, isLeftHand);
-		}
+	public override void ButtonActivationWithHand(bool isLeftHand)
+	{
+		onPressed?.Invoke(this, isLeftHand);
+	}
 
-		public void SetPressed(bool pressed)
-		{
-			this.buttonRenderer.material = (pressed ? this.pressedMaterial : this.unpressedMaterial);
-		}
-
-		private new Action<BuilderOptionButton, bool> onPressed;
+	public void SetPressed(bool pressed)
+	{
+		buttonRenderer.material = (pressed ? pressedMaterial : unpressedMaterial);
 	}
 }

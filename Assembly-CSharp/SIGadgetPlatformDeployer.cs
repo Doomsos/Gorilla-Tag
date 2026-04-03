@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Photon.Pun;
 using UnityEngine;
 
@@ -7,455 +7,11 @@ using UnityEngine;
 [RequireComponent(typeof(GameButtonActivatable))]
 public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable, IEnergyGadget
 {
-	private void Start()
+	private enum State
 	{
-		this.previewPlatform.SetActive(false);
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnReleased = (Action)Delegate.Combine(gameEntity.OnReleased, new Action(this.HandleStopInteraction));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnUnsnapped = (Action)Delegate.Combine(gameEntity2.OnUnsnapped, new Action(this.HandleStopInteraction));
-	}
-
-	private void OnDestroy()
-	{
-		GameEntity gameEntity = this.gameEntity;
-		gameEntity.OnReleased = (Action)Delegate.Remove(gameEntity.OnReleased, new Action(this.HandleStopInteraction));
-		GameEntity gameEntity2 = this.gameEntity;
-		gameEntity2.OnUnsnapped = (Action)Delegate.Remove(gameEntity2.OnUnsnapped, new Action(this.HandleStopInteraction));
-	}
-
-	private void HandleStopInteraction()
-	{
-		this.SetState(SIGadgetPlatformDeployer.State.Idle);
-	}
-
-	public bool UsesEnergy
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	public bool IsFull
-	{
-		get
-		{
-			return this.remainingRechargeTime <= 0f;
-		}
-	}
-
-	public void UpdateRecharge(float dt)
-	{
-		if (this.remainingRechargeTime > 0f)
-		{
-			int num = Mathf.CeilToInt(this.remainingRechargeTime / this.chargeRecoveryTime);
-			this.remainingRechargeTime = Mathf.Max(this.remainingRechargeTime - dt, 0f);
-			int num2 = Mathf.CeilToInt(this.remainingRechargeTime / this.chargeRecoveryTime);
-			this.chargeDisplay.UpdateDisplay(this.maxCharges - num2);
-			if (num2 != num && this.gameEntity.IsHeldOrSnappedByLocalPlayer)
-			{
-				this.rechargeSFX.Play();
-				bool forLeftController;
-				if (base.FindAttachedHand(out forLeftController))
-				{
-					GorillaTagger.Instance.StartVibration(forLeftController, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
-				}
-			}
-		}
-	}
-
-	protected override void OnUpdateAuthority(float dt)
-	{
-		SIGadgetPlatformDeployer.State state = this.state;
-		if (state != SIGadgetPlatformDeployer.State.Idle)
-		{
-			if (state != SIGadgetPlatformDeployer.State.Deploying)
-			{
-				return;
-			}
-			if (this.CheckReleaseInputs())
-			{
-				if (this.IsChargeAvailable())
-				{
-					this.TryDeployPlatform();
-				}
-				this.SetStateAuthority(SIGadgetPlatformDeployer.State.Idle);
-				return;
-			}
-			this.UpdatePreview();
-			return;
-		}
-		else
-		{
-			if (this.CheckInitInputs())
-			{
-				if (this.IsChargeAvailable())
-				{
-					if (this.isInstancePlace)
-					{
-						if (!this.wasInputPressed)
-						{
-							this.TryDeployInstantPlatform();
-						}
-					}
-					else
-					{
-						this.SetStateAuthority(SIGadgetPlatformDeployer.State.Deploying);
-					}
-				}
-				this.wasInputPressed = true;
-				return;
-			}
-			this.wasInputPressed = false;
-			return;
-		}
-	}
-
-	protected override void OnUpdateRemote(float dt)
-	{
-		SIGadgetPlatformDeployer.State state = (SIGadgetPlatformDeployer.State)this.gameEntity.GetState();
-		if (state != this.state)
-		{
-			this.SetState(state);
-		}
-		SIGadgetPlatformDeployer.State state2 = this.state;
-		if (state2 != SIGadgetPlatformDeployer.State.Idle && state2 == SIGadgetPlatformDeployer.State.Deploying)
-		{
-			this.UpdatePreview();
-		}
-	}
-
-	private bool CheckInitInputs()
-	{
-		if (!this.buttonActivatable.CheckInput(this.inputSensitivity))
-		{
-			return false;
-		}
-		if (this.isInstancePlace)
-		{
-			return true;
-		}
-		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
-		Vector3 position = gamePlayer.leftHand.position;
-		Vector3 position2 = gamePlayer.rightHand.position;
-		return Vector3.Distance(position, position2) <= this.activationHandDistance;
-	}
-
-	private bool CheckReleaseInputs()
-	{
-		return !this.buttonActivatable.CheckInput(this.inputSensitivity);
-	}
-
-	private bool IsChargeAvailable()
-	{
-		return (float)this.maxCharges * this.chargeRecoveryTime - this.remainingRechargeTime > this.chargeRecoveryTime;
-	}
-
-	private void SpendCharge()
-	{
-		this.remainingRechargeTime += this.chargeRecoveryTime;
-	}
-
-	private static bool IsLeftHandOrSnapSlot(int handIndex)
-	{
-		return handIndex == 0 || handIndex == 2;
-	}
-
-	private void TryDeployInstantPlatform()
-	{
-		if (base.IsBlocked())
-		{
-			this.blockedSFX.Play();
-			return;
-		}
-		GamePlayer gamePlayer;
-		if (!this.TryGetGamePlayer(out gamePlayer))
-		{
-			return;
-		}
-		int num = gamePlayer.FindSnapIndex(this.gameEntity.id);
-		if (num == -1)
-		{
-			num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		}
-		if (num == -1)
-		{
-			return;
-		}
-		Vector3 vector;
-		Quaternion quaternion;
-		if (this.gameEntity.IsHeldByLocalPlayer())
-		{
-			vector = base.transform.position - base.transform.up * this.handDepthOffset;
-			quaternion = base.transform.rotation;
-			Debug.DrawRay(base.transform.position, -base.transform.up * 0.3f, Color.blue, 10f);
-			Debug.DrawRay(base.transform.position, base.transform.forward * 0.3f, Color.blue, 10f);
-			Debug.DrawRay(vector, quaternion * Vector3.forward * 0.3f, Color.green, 10f);
-		}
-		else
-		{
-			Transform transform = SIGadgetPlatformDeployer.IsLeftHandOrSnapSlot(num) ? gamePlayer.leftHand : gamePlayer.rightHand;
-			vector = transform.position;
-			Vector3 up = transform.up;
-			Vector3 right = transform.right;
-			Debug.DrawRay(vector, right * 0.3f, Color.red, 10f);
-			Debug.DrawRay(vector, up * 0.3f, Color.red, 10f);
-			quaternion = Quaternion.LookRotation(up, right);
-			vector += right * this.handDepthOffset;
-			Debug.DrawRay(vector, quaternion * Vector3.forward * 0.3f, Color.green, 10f);
-		}
-		this.DeployPlatform(vector, quaternion);
-	}
-
-	private void TryDeployPlatform()
-	{
-		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
-		Vector3 position = gamePlayer.leftHand.position;
-		Vector3 position2 = gamePlayer.rightHand.position;
-		if (Vector3.Distance(position, position2) > this.deployMinRequiredHandDistance)
-		{
-			if (base.IsBlocked())
-			{
-				this.blockedSFX.Play();
-				return;
-			}
-			Vector3 pos;
-			Quaternion rot;
-			Vector3 vector;
-			if (this.TryGetPlatformPosRotScale(out pos, out rot, out vector))
-			{
-				this.DeployPlatform(pos, rot);
-				return;
-			}
-		}
-	}
-
-	private void DeployPlatform(Vector3 pos, Quaternion rot)
-	{
-		this.SpendCharge();
-		this.CreateLocalPlatformInstance(pos, rot);
-		int actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
-		if (this.gameEntity.IsAuthority())
-		{
-			base.SendAuthorityToClientRPC(0, new object[]
-			{
-				actorNumber,
-				pos,
-				rot
-			});
-			return;
-		}
-		base.SendClientToAuthorityRPC(0, new object[]
-		{
-			actorNumber,
-			pos,
-			rot
-		});
-	}
-
-	public override void ProcessClientToAuthorityRPC(PhotonMessageInfo info, int rpcID, object[] data)
-	{
-		if (rpcID == 0)
-		{
-			if (data == null || data.Length != 3)
-			{
-				return;
-			}
-			int num;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out num))
-			{
-				return;
-			}
-			Vector3 vector;
-			if (!GameEntityManager.ValidateDataType<Vector3>(data[1], out vector))
-			{
-				return;
-			}
-			Quaternion rot;
-			if (!GameEntityManager.ValidateDataType<Quaternion>(data[2], out rot))
-			{
-				return;
-			}
-			if (!this.gameEntity.IsAttachedToPlayer(NetPlayer.Get(info.Sender)))
-			{
-				return;
-			}
-			if (Vector3.Distance(base.transform.position, vector) > 2f)
-			{
-				return;
-			}
-			this.CreateLocalPlatformInstance(vector, rot);
-			base.SendAuthorityToClientRPC(0, data);
-		}
-	}
-
-	public override void ProcessAuthorityToClientRPC(PhotonMessageInfo info, int rpcID, object[] data)
-	{
-		if (rpcID == 0)
-		{
-			if (data == null || data.Length != 3)
-			{
-				return;
-			}
-			int num;
-			if (!GameEntityManager.ValidateDataType<int>(data[0], out num))
-			{
-				return;
-			}
-			Vector3 pos;
-			if (!GameEntityManager.ValidateDataType<Vector3>(data[1], out pos))
-			{
-				return;
-			}
-			Quaternion rot;
-			if (!GameEntityManager.ValidateDataType<Quaternion>(data[2], out rot))
-			{
-				return;
-			}
-			if (num != NetworkSystem.Instance.LocalPlayer.ActorNumber)
-			{
-				this.CreateLocalPlatformInstance(pos, rot);
-			}
-		}
-	}
-
-	private void CreateLocalPlatformInstance(Vector3 pos, Quaternion rot)
-	{
-		if (this.deployedPlatformCount >= this.maxCharges)
-		{
-			return;
-		}
-		GameObject gameObject = ObjectPools.instance.Instantiate(this.platformPrefab, true);
-		if (gameObject != null)
-		{
-			SIGadgetPlatformDeployerPlatform component = gameObject.GetComponent<SIGadgetPlatformDeployerPlatform>();
-			if (component != null)
-			{
-				this.deployedPlatformCount++;
-				SIGadgetPlatformDeployerPlatform sigadgetPlatformDeployerPlatform = component;
-				sigadgetPlatformDeployerPlatform.OnDisabled = (Action)Delegate.Combine(sigadgetPlatformDeployerPlatform.OnDisabled, new Action(delegate()
-				{
-					this.deployedPlatformCount--;
-				}));
-			}
-			gameObject.transform.SetPositionAndRotation(pos, rot);
-			ISIGameDeployable isigameDeployable;
-			if (gameObject.TryGetComponent<ISIGameDeployable>(out isigameDeployable))
-			{
-				isigameDeployable.ApplyUpgrades(this.instanceUpgrades);
-			}
-		}
-	}
-
-	private void SetStateAuthority(SIGadgetPlatformDeployer.State newState)
-	{
-		this.SetState(newState);
-		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-	}
-
-	private void SetState(SIGadgetPlatformDeployer.State newState)
-	{
-		if (newState == this.state || !this.CanChangeState((long)newState))
-		{
-			return;
-		}
-		this.state = newState;
-		SIGadgetPlatformDeployer.State state = this.state;
-		if (state == SIGadgetPlatformDeployer.State.Idle)
-		{
-			this.SetPreviewVisibility(false);
-			return;
-		}
-		if (state != SIGadgetPlatformDeployer.State.Deploying)
-		{
-			return;
-		}
-		this.SetPreviewVisibility(true);
-	}
-
-	public bool CanChangeState(long newStateIndex)
-	{
-		return newStateIndex >= 0L && newStateIndex < 2L;
-	}
-
-	private void SetPreviewVisibility(bool enabled)
-	{
-		this.previewPlatform.SetActive(enabled);
-		if (enabled)
-		{
-			this.UpdatePreview();
-		}
-	}
-
-	private void UpdatePreview()
-	{
-		Vector3 position;
-		Quaternion rotation;
-		Vector3 localScale;
-		if (this.TryGetPlatformPosRotScale(out position, out rotation, out localScale))
-		{
-			this.previewPlatform.transform.SetPositionAndRotation(position, rotation);
-			this.previewPlatform.transform.localScale = localScale;
-			GamePlayer gamePlayer;
-			if (this.TryGetGamePlayer(out gamePlayer))
-			{
-				Vector3 position2 = gamePlayer.leftHand.position;
-				Vector3 position3 = gamePlayer.rightHand.position;
-				if (Vector3.Distance(position2, position3) > this.deployMinRequiredHandDistance)
-				{
-					this.previewMesh.material = this.validPreviewMaterial;
-					return;
-				}
-				this.previewMesh.material = this.invalidPreviewMaterial;
-			}
-		}
-	}
-
-	private bool TryGetPlatformPosRotScale(out Vector3 pos, out Quaternion rot, out Vector3 scale)
-	{
-		pos = Vector3.zero;
-		rot = Quaternion.identity;
-		scale = Vector3.one;
-		GamePlayer gamePlayer;
-		if (this.TryGetGamePlayer(out gamePlayer))
-		{
-			Vector3 position = gamePlayer.leftHand.position;
-			Vector3 position2 = gamePlayer.rightHand.position;
-			Vector3 position3 = gamePlayer.rig.head.rigTarget.position;
-			Vector3 vector = (position + position2) / 2f;
-			Vector3 normalized = (position3 - vector).normalized;
-			Vector3 forward = Vector3.ProjectOnPlane((position - position2).normalized, normalized);
-			pos = vector + -normalized * this.handDepthOffset;
-			rot = Quaternion.LookRotation(forward, normalized);
-			return true;
-		}
-		return false;
-	}
-
-	private bool TryGetGamePlayer(out GamePlayer player)
-	{
-		player = null;
-		return GamePlayer.TryGetGamePlayer(this.gameEntity.snappedByActorNumber, out player) || GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out player);
-	}
-
-	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
-	{
-		this.instanceUpgrades = withUpgrades;
-		bool flag = withUpgrades.Contains(SIUpgradeType.Platform_Capacity);
-		this.maxCharges = (flag ? this.maxChargesHighCapacity : this.maxChargesDefault);
-		this.chargeDisplay = (flag ? this.chargeDisplayHighCapacity : this.chargeDisplayDefault);
-		this.chargeRecoveryTime = (withUpgrades.Contains(SIUpgradeType.Platform_Cooldown) ? this.chargeRecoveryTimeFast : this.chargeRecoveryTimeDefault);
-	}
-
-	public void Disrupt(float disruptTime)
-	{
-		this.remainingRechargeTime = (float)this.maxCharges * this.chargeRecoveryTime + disruptTime;
-	}
-
-	protected override void HandleBlockedActionChanged(bool isBlocked)
-	{
-		this.blockedDisplayMesh.material = (isBlocked ? this.blockedMat : this.unblockedMat);
+		Idle,
+		Deploying,
+		Count
 	}
 
 	[SerializeField]
@@ -536,7 +92,7 @@ public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable, IEnergyGadget
 	[SerializeField]
 	private float chargeRecoveryTimeFast = 5f;
 
-	private SIGadgetPlatformDeployer.State state;
+	private State state;
 
 	private bool wasInputPressed;
 
@@ -548,10 +104,399 @@ public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable, IEnergyGadget
 
 	private int deployedPlatformCount;
 
-	private enum State
+	public bool UsesEnergy => true;
+
+	public bool IsFull => remainingRechargeTime <= 0f;
+
+	private void Start()
 	{
-		Idle,
-		Deploying,
-		Count
+		previewPlatform.SetActive(value: false);
+		GameEntity obj = gameEntity;
+		obj.OnReleased = (Action)Delegate.Combine(obj.OnReleased, new Action(HandleStopInteraction));
+		GameEntity obj2 = gameEntity;
+		obj2.OnUnsnapped = (Action)Delegate.Combine(obj2.OnUnsnapped, new Action(HandleStopInteraction));
+	}
+
+	private void OnDestroy()
+	{
+		GameEntity obj = gameEntity;
+		obj.OnReleased = (Action)Delegate.Remove(obj.OnReleased, new Action(HandleStopInteraction));
+		GameEntity obj2 = gameEntity;
+		obj2.OnUnsnapped = (Action)Delegate.Remove(obj2.OnUnsnapped, new Action(HandleStopInteraction));
+	}
+
+	private void HandleStopInteraction()
+	{
+		SetState(State.Idle);
+	}
+
+	public void UpdateRecharge(float dt)
+	{
+		if (!(remainingRechargeTime > 0f))
+		{
+			return;
+		}
+		int num = Mathf.CeilToInt(remainingRechargeTime / chargeRecoveryTime);
+		remainingRechargeTime = Mathf.Max(remainingRechargeTime - dt, 0f);
+		int num2 = Mathf.CeilToInt(remainingRechargeTime / chargeRecoveryTime);
+		chargeDisplay.UpdateDisplay(maxCharges - num2);
+		if (num2 != num && gameEntity.IsHeldOrSnappedByLocalPlayer)
+		{
+			rechargeSFX.Play();
+			if (FindAttachedHand(out var isLeft))
+			{
+				GorillaTagger.Instance.StartVibration(isLeft, GorillaTagger.Instance.tapHapticStrength * 0.5f, GorillaTagger.Instance.tapHapticDuration * 0.5f);
+			}
+		}
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		switch (state)
+		{
+		case State.Idle:
+			if (CheckInitInputs())
+			{
+				if (IsChargeAvailable())
+				{
+					if (isInstancePlace)
+					{
+						if (!wasInputPressed)
+						{
+							TryDeployInstantPlatform();
+						}
+					}
+					else
+					{
+						SetStateAuthority(State.Deploying);
+					}
+				}
+				wasInputPressed = true;
+			}
+			else
+			{
+				wasInputPressed = false;
+			}
+			break;
+		case State.Deploying:
+			if (CheckReleaseInputs())
+			{
+				if (IsChargeAvailable())
+				{
+					TryDeployPlatform();
+				}
+				SetStateAuthority(State.Idle);
+			}
+			else
+			{
+				UpdatePreview();
+			}
+			break;
+		}
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		State state = (State)gameEntity.GetState();
+		if (state != this.state)
+		{
+			SetState(state);
+		}
+		State state2 = this.state;
+		if (state2 != State.Idle && state2 == State.Deploying)
+		{
+			UpdatePreview();
+		}
+	}
+
+	private bool CheckInitInputs()
+	{
+		if (!buttonActivatable.CheckInput(inputSensitivity))
+		{
+			return false;
+		}
+		if (isInstancePlace)
+		{
+			return true;
+		}
+		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
+		Vector3 position = gamePlayer.leftHand.position;
+		Vector3 position2 = gamePlayer.rightHand.position;
+		if (Vector3.Distance(position, position2) > activationHandDistance)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private bool CheckReleaseInputs()
+	{
+		return !buttonActivatable.CheckInput(inputSensitivity);
+	}
+
+	private bool IsChargeAvailable()
+	{
+		if ((float)maxCharges * chargeRecoveryTime - remainingRechargeTime > chargeRecoveryTime)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private void SpendCharge()
+	{
+		remainingRechargeTime += chargeRecoveryTime;
+	}
+
+	private static bool IsLeftHandOrSnapSlot(int handIndex)
+	{
+		if (handIndex != 0)
+		{
+			return handIndex == 2;
+		}
+		return true;
+	}
+
+	private void TryDeployInstantPlatform()
+	{
+		if (IsBlocked())
+		{
+			blockedSFX.Play();
+		}
+		else
+		{
+			if (!TryGetGamePlayer(out var player))
+			{
+				return;
+			}
+			int num = player.FindSnapIndex(gameEntity.id);
+			if (num == -1)
+			{
+				num = player.FindHandIndex(gameEntity.id);
+			}
+			if (num != -1)
+			{
+				Vector3 vector;
+				Quaternion quaternion;
+				if (gameEntity.IsHeldByLocalPlayer())
+				{
+					vector = base.transform.position - base.transform.up * handDepthOffset;
+					quaternion = base.transform.rotation;
+					Debug.DrawRay(base.transform.position, -base.transform.up * 0.3f, Color.blue, 10f);
+					Debug.DrawRay(base.transform.position, base.transform.forward * 0.3f, Color.blue, 10f);
+					Debug.DrawRay(vector, quaternion * Vector3.forward * 0.3f, Color.green, 10f);
+				}
+				else
+				{
+					Transform obj = (IsLeftHandOrSnapSlot(num) ? player.leftHand : player.rightHand);
+					vector = obj.position;
+					Vector3 up = obj.up;
+					Vector3 right = obj.right;
+					Debug.DrawRay(vector, right * 0.3f, Color.red, 10f);
+					Debug.DrawRay(vector, up * 0.3f, Color.red, 10f);
+					quaternion = Quaternion.LookRotation(up, right);
+					vector += right * handDepthOffset;
+					Debug.DrawRay(vector, quaternion * Vector3.forward * 0.3f, Color.green, 10f);
+				}
+				DeployPlatform(vector, quaternion);
+			}
+		}
+	}
+
+	private void TryDeployPlatform()
+	{
+		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
+		Vector3 position = gamePlayer.leftHand.position;
+		Vector3 position2 = gamePlayer.rightHand.position;
+		if (Vector3.Distance(position, position2) > deployMinRequiredHandDistance)
+		{
+			Vector3 pos;
+			Quaternion rot;
+			Vector3 scale;
+			if (IsBlocked())
+			{
+				blockedSFX.Play();
+			}
+			else if (TryGetPlatformPosRotScale(out pos, out rot, out scale))
+			{
+				DeployPlatform(pos, rot);
+			}
+		}
+	}
+
+	private void DeployPlatform(Vector3 pos, Quaternion rot)
+	{
+		SpendCharge();
+		CreateLocalPlatformInstance(pos, rot);
+		int actorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
+		if (gameEntity.IsAuthority())
+		{
+			SendAuthorityToClientRPC(0, new object[3] { actorNumber, pos, rot });
+		}
+		else
+		{
+			SendClientToAuthorityRPC(0, new object[3] { actorNumber, pos, rot });
+		}
+	}
+
+	public override void ProcessClientToAuthorityRPC(PhotonMessageInfo info, int rpcID, object[] data)
+	{
+		if (rpcID == 0 && data != null && data.Length == 3 && GameEntityManager.ValidateDataType<int>(data[0], out var _) && GameEntityManager.ValidateDataType<Vector3>(data[1], out var dataAsType2) && GameEntityManager.ValidateDataType<Quaternion>(data[2], out var dataAsType3) && gameEntity.IsAttachedToPlayer(NetPlayer.Get(info.Sender)) && !(Vector3.Distance(base.transform.position, dataAsType2) > 2f))
+		{
+			CreateLocalPlatformInstance(dataAsType2, dataAsType3);
+			SendAuthorityToClientRPC(0, data);
+		}
+	}
+
+	public override void ProcessAuthorityToClientRPC(PhotonMessageInfo info, int rpcID, object[] data)
+	{
+		if (rpcID == 0 && data != null && data.Length == 3 && GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType) && GameEntityManager.ValidateDataType<Vector3>(data[1], out var dataAsType2) && GameEntityManager.ValidateDataType<Quaternion>(data[2], out var dataAsType3) && dataAsType != NetworkSystem.Instance.LocalPlayer.ActorNumber)
+		{
+			CreateLocalPlatformInstance(dataAsType2, dataAsType3);
+		}
+	}
+
+	private void CreateLocalPlatformInstance(Vector3 pos, Quaternion rot)
+	{
+		if (deployedPlatformCount >= maxCharges)
+		{
+			return;
+		}
+		GameObject gameObject = ObjectPools.instance.Instantiate(platformPrefab);
+		if (!(gameObject != null))
+		{
+			return;
+		}
+		SIGadgetPlatformDeployerPlatform component = gameObject.GetComponent<SIGadgetPlatformDeployerPlatform>();
+		if (component != null)
+		{
+			deployedPlatformCount++;
+			component.OnDisabled = (Action)Delegate.Combine(component.OnDisabled, (Action)delegate
+			{
+				deployedPlatformCount--;
+			});
+		}
+		gameObject.transform.SetPositionAndRotation(pos, rot);
+		if (gameObject.TryGetComponent<ISIGameDeployable>(out var component2))
+		{
+			component2.ApplyUpgrades(instanceUpgrades);
+		}
+	}
+
+	private void SetStateAuthority(State newState)
+	{
+		SetState(newState);
+		gameEntity.RequestState(gameEntity.id, (long)newState);
+	}
+
+	private void SetState(State newState)
+	{
+		if (newState != state && CanChangeState((long)newState))
+		{
+			state = newState;
+			switch (state)
+			{
+			case State.Idle:
+				SetPreviewVisibility(enabled: false);
+				break;
+			case State.Deploying:
+				SetPreviewVisibility(enabled: true);
+				break;
+			}
+		}
+	}
+
+	public bool CanChangeState(long newStateIndex)
+	{
+		if (newStateIndex < 0 || newStateIndex >= 2)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private void SetPreviewVisibility(bool enabled)
+	{
+		previewPlatform.SetActive(enabled);
+		if (enabled)
+		{
+			UpdatePreview();
+		}
+	}
+
+	private void UpdatePreview()
+	{
+		if (!TryGetPlatformPosRotScale(out var pos, out var rot, out var scale))
+		{
+			return;
+		}
+		previewPlatform.transform.SetPositionAndRotation(pos, rot);
+		previewPlatform.transform.localScale = scale;
+		if (TryGetGamePlayer(out var player))
+		{
+			Vector3 position = player.leftHand.position;
+			Vector3 position2 = player.rightHand.position;
+			if (Vector3.Distance(position, position2) > deployMinRequiredHandDistance)
+			{
+				previewMesh.material = validPreviewMaterial;
+			}
+			else
+			{
+				previewMesh.material = invalidPreviewMaterial;
+			}
+		}
+	}
+
+	private bool TryGetPlatformPosRotScale(out Vector3 pos, out Quaternion rot, out Vector3 scale)
+	{
+		pos = Vector3.zero;
+		rot = Quaternion.identity;
+		scale = Vector3.one;
+		if (TryGetGamePlayer(out var player))
+		{
+			Vector3 position = player.leftHand.position;
+			Vector3 position2 = player.rightHand.position;
+			Vector3 position3 = player.rig.head.rigTarget.position;
+			Vector3 vector = (position + position2) / 2f;
+			Vector3 normalized = (position3 - vector).normalized;
+			Vector3 forward = Vector3.ProjectOnPlane((position - position2).normalized, normalized);
+			pos = vector + -normalized * handDepthOffset;
+			rot = Quaternion.LookRotation(forward, normalized);
+			return true;
+		}
+		return false;
+	}
+
+	private bool TryGetGamePlayer(out GamePlayer player)
+	{
+		player = null;
+		if (GamePlayer.TryGetGamePlayer(gameEntity.snappedByActorNumber, out player))
+		{
+			return true;
+		}
+		if (GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out player))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
+	{
+		instanceUpgrades = withUpgrades;
+		bool flag = withUpgrades.Contains(SIUpgradeType.Platform_Capacity);
+		maxCharges = (flag ? maxChargesHighCapacity : maxChargesDefault);
+		chargeDisplay = (flag ? chargeDisplayHighCapacity : chargeDisplayDefault);
+		chargeRecoveryTime = (withUpgrades.Contains(SIUpgradeType.Platform_Cooldown) ? chargeRecoveryTimeFast : chargeRecoveryTimeDefault);
+	}
+
+	public void Disrupt(float disruptTime)
+	{
+		remainingRechargeTime = (float)maxCharges * chargeRecoveryTime + disruptTime;
+	}
+
+	protected override void HandleBlockedActionChanged(bool isBlocked)
+	{
+		blockedDisplayMesh.material = (isBlocked ? blockedMat : unblockedMat);
 	}
 }

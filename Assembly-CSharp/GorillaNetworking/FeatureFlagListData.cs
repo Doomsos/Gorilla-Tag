@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 
-namespace GorillaNetworking
+namespace GorillaNetworking;
+
+[Serializable]
+internal class FeatureFlagListData
 {
-	[Serializable]
-	internal class FeatureFlagListData
-	{
-		public FeatureFlagData[] flags;
-	}
+	public FeatureFlagData[] flags;
 }

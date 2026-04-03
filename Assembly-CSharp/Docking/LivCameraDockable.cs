@@ -1,45 +1,41 @@
-﻿using System;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
 
-namespace Docking
+namespace Docking;
+
+public class LivCameraDockable : Dockable
 {
-	public class LivCameraDockable : Dockable
+	private LivCameraDock livDock;
+
+	protected override void OnTriggerEnter(Collider other)
 	{
-		protected override void OnTriggerEnter(Collider other)
+		if (other.TryGetComponent<LivCameraDock>(out var component))
 		{
-			LivCameraDock livCameraDock;
-			if (other.TryGetComponent<LivCameraDock>(out livCameraDock))
-			{
-				this.livDock = livCameraDock;
-				this.potentialDock = other.transform;
-			}
+			livDock = component;
+			potentialDock = other.transform;
 		}
+	}
 
-		protected override void OnTriggerExit(Collider other)
+	protected override void OnTriggerExit(Collider other)
+	{
+		if (livDock != null && other.transform == potentialDock.transform)
 		{
-			if (this.livDock != null && other.transform == this.potentialDock.transform)
-			{
-				this.potentialDock = null;
-				this.livDock = null;
-			}
+			potentialDock = null;
+			livDock = null;
 		}
+	}
 
-		public override void Dock()
+	public override void Dock()
+	{
+		base.Dock();
+		if (!(livDock == null))
 		{
-			base.Dock();
-			if (this.livDock == null)
+			GTLckController gTLckController = GetComponent<GTLckController>() ?? GetComponentInParent<GTLckController>();
+			if (gTLckController != null)
 			{
-				return;
+				gTLckController.ApplyCameraSettings(livDock.cameraSettings);
 			}
-			GTLckController gtlckController = base.GetComponent<GTLckController>() ?? base.GetComponentInParent<GTLckController>();
-			if (gtlckController != null)
-			{
-				gtlckController.ApplyCameraSettings(this.livDock.cameraSettings);
-			}
-			this.livDock = null;
+			livDock = null;
 		}
-
-		private LivCameraDock livDock;
 	}
 }

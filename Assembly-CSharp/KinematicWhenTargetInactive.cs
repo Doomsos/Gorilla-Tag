@@ -1,13 +1,18 @@
-﻿using System;
 using UnityEngine;
 
 public class KinematicWhenTargetInactive : MonoBehaviour
 {
+	public Rigidbody[] rigidBodies;
+
+	public GameObject target;
+
 	private void LateUpdate()
 	{
-		if (!this.target.activeSelf)
+		Rigidbody[] array;
+		if (!target.activeSelf)
 		{
-			foreach (Rigidbody rigidbody in this.rigidBodies)
+			array = rigidBodies;
+			foreach (Rigidbody rigidbody in array)
 			{
 				if (!rigidbody.isKinematic)
 				{
@@ -16,7 +21,8 @@ public class KinematicWhenTargetInactive : MonoBehaviour
 			}
 			return;
 		}
-		foreach (Rigidbody rigidbody2 in this.rigidBodies)
+		array = rigidBodies;
+		foreach (Rigidbody rigidbody2 in array)
 		{
 			if (rigidbody2.isKinematic)
 			{
@@ -24,8 +30,4 @@ public class KinematicWhenTargetInactive : MonoBehaviour
 			}
 		}
 	}
-
-	public Rigidbody[] rigidBodies;
-
-	public GameObject target;
 }

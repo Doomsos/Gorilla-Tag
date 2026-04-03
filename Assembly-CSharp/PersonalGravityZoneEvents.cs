@@ -1,4 +1,3 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 

@@ -1,19 +1,28 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using UnityEngine;
 
 [Serializable]
 public struct GTSturdyComponentRef<T> where T : Component
 {
+	[SerializeField]
+	private T _value;
+
+	[SerializeField]
+	private string _relativePath;
+
+	[SerializeField]
+	private Transform _baseXform;
+
 	public Transform BaseXform
 	{
 		get
 		{
-			return this._baseXform;
+			return _baseXform;
 		}
 		set
 		{
-			this._baseXform = value;
+			_baseXform = value;
 		}
 	}
 
@@ -21,26 +30,25 @@ public struct GTSturdyComponentRef<T> where T : Component
 	{
 		get
 		{
-			if (!this._value)
+			if (!_value)
 			{
-				return this._value;
+				return _value;
 			}
-			if (string.IsNullOrEmpty(this._relativePath))
+			if (string.IsNullOrEmpty(_relativePath))
 			{
-				return default(T);
+				return null;
 			}
-			Transform transform;
-			if (!this._baseXform.TryFindByPath(this._relativePath, out transform, false))
+			if (!_baseXform.TryFindByPath(_relativePath, out var result))
 			{
-				return default(T);
+				return null;
 			}
-			this._value = transform.GetComponent<T>();
-			return this._value;
+			_value = result.GetComponent<T>();
+			return _value;
 		}
 		set
 		{
-			this._value = value;
-			this._relativePath = ((!value) ? this._baseXform.GetRelativePath(value.transform) : string.Empty);
+			_value = value;
+			_relativePath = ((!value) ? _baseXform.GetRelativePath(value.transform) : string.Empty);
 		}
 	}
 
@@ -56,13 +64,4 @@ public struct GTSturdyComponentRef<T> where T : Component
 			Value = component
 		};
 	}
-
-	[SerializeField]
-	private T _value;
-
-	[SerializeField]
-	private string _relativePath;
-
-	[SerializeField]
-	private Transform _baseXform;
 }

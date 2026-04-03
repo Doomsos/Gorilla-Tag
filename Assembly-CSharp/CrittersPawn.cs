@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using Photon.Pun;
 using UnityEngine;
@@ -10,1403 +9,101 @@ using UnityEngine.Serialization;
 
 public class CrittersPawn : CrittersActor, IEyeScannable
 {
-	public override void Initialize()
+	public enum CreatureState
 	{
-		base.Initialize();
-		this.rB = base.GetComponentInChildren<Rigidbody>();
-		this.soundsHeard = new Dictionary<int, CrittersActor>();
-		base.transform.eulerAngles = new Vector3(0f, Random.value * 360f, 0f);
-		this.raycastHits = new RaycastHit[20];
-		this.wasSomethingInTheWay = false;
-		this._spawnAnimationDuration = this.spawnInHeighMovement.keys.Last<Keyframe>().time;
-		this._despawnAnimationDuration = this.despawnInHeighMovement.keys.Last<Keyframe>().time;
+		Idle,
+		Eating,
+		AttractedTo,
+		Running,
+		Grabbed,
+		Sleeping,
+		SeekingFood,
+		Captured,
+		Stunned,
+		WaitingToDespawn,
+		Despawning,
+		Spawning
 	}
 
-	private void InitializeTemplateValues()
+	internal struct CreatureUpdateData(CrittersPawn creature)
 	{
-		this.sensoryRange *= this.sensoryRange;
-		this.autoSeeFoodDistance *= this.autoSeeFoodDistance;
-		this.currentSleepiness = Random.value * this.tiredThreshold;
-		this.currentHunger = Random.value * this.hungryThreshold;
-		this.currentFear = 0f;
-		this.currentStruggle = 0f;
-		this.currentAttraction = 0f;
-	}
+		private double lastImpulseTime = creature.lastImpulseTime;
 
-	public float JumpVelocityForDistanceAtAngle(float horizontalDistance, float angle)
-	{
-		return Mathf.Min(this.maxJumpVel, Mathf.Sqrt(horizontalDistance * Physics.gravity.magnitude / Mathf.Sin(2f * angle)));
-	}
+		private CreatureState state = creature.currentState;
 
-	public override void OnEnable()
-	{
-		base.OnEnable();
-		CrittersManager.RegisterCritter(this);
-		this.lifeTimeStart = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
-		EyeScannerMono.Register(this);
-	}
-
-	public override void OnDisable()
-	{
-		base.OnDisable();
-		CrittersManager.DeregisterCritter(this);
-		if (this.currentOngoingStateFX.IsNotNull())
+		internal bool SameData(CrittersPawn creature)
 		{
-			this.currentOngoingStateFX.SetActive(false);
-			this.currentOngoingStateFX = null;
-		}
-		EyeScannerMono.Unregister(this);
-	}
-
-	private float GetAdditiveJumpDelay()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Running)
-		{
-			return 0f;
-		}
-		return Mathf.Max(0f, this.jumpCooldown * Random.value * this.jumpVariabilityTime);
-	}
-
-	public void LocalJump(float maxVel, float jumpAngle)
-	{
-		maxVel *= this.slowSpeedMod;
-		this.lastImpulsePosition = base.transform.position;
-		this.lastImpulseVelocity = base.transform.forward * (Mathf.Sin(0.017453292f * jumpAngle) * maxVel) + Vector3.up * (Mathf.Cos(0.017453292f * jumpAngle) * maxVel);
-		this.lastImpulseTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
-		this.lastImpulseTime += (double)this.GetAdditiveJumpDelay();
-		this.lastImpulseQuaternion = base.transform.rotation;
-		this.rB.linearVelocity = this.lastImpulseVelocity;
-		this.rb.angularVelocity = Vector3.zero;
-	}
-
-	private bool CanSeeActor(Vector3 actorPosition)
-	{
-		Vector3 to = actorPosition - base.transform.position;
-		return to.sqrMagnitude < this.autoSeeFoodDistance || (to.sqrMagnitude < this.sensoryRange && Vector3.Angle(base.transform.forward, to) < this.visionConeAngle);
-	}
-
-	private bool IsGrabPossible(CrittersGrabber actor)
-	{
-		return actor.grabbing && (base.transform.position - actor.grabPosition.position).magnitude < actor.grabDistance;
-	}
-
-	private bool WithinCaptureDistance(CrittersCage actor)
-	{
-		return (this.bodyCollider.bounds.center - actor.grabPosition.position).magnitude < actor.grabDistance;
-	}
-
-	public bool AwareOfActor(CrittersActor actor)
-	{
-		CrittersActor.CrittersActorType crittersActorType = actor.crittersActorType;
-		switch (crittersActorType)
-		{
-		case CrittersActor.CrittersActorType.Creature:
-			return this.CanSeeActor(actor.transform.position);
-		case CrittersActor.CrittersActorType.Food:
-			return ((CrittersFood)actor).currentFood > 0f && this.CanSeeActor(((CrittersFood)actor).food.transform.position);
-		case CrittersActor.CrittersActorType.LoudNoise:
-			return (actor.transform.position - base.transform.position).sqrMagnitude < this.sensoryRange;
-		case CrittersActor.CrittersActorType.BrightLight:
-			return this.CanSeeActor(actor.transform.position);
-		case CrittersActor.CrittersActorType.Darkness:
-		case CrittersActor.CrittersActorType.HidingArea:
-		case CrittersActor.CrittersActorType.Disappear:
-		case CrittersActor.CrittersActorType.Spawn:
-		case CrittersActor.CrittersActorType.Player:
-		case CrittersActor.CrittersActorType.AttachPoint:
-			break;
-		case CrittersActor.CrittersActorType.Grabber:
-			return this.CanSeeActor(actor.transform.position);
-		case CrittersActor.CrittersActorType.Cage:
-			return this.CanSeeActor(actor.transform.position);
-		case CrittersActor.CrittersActorType.FoodSpawner:
-			return this.CanSeeActor(actor.transform.position);
-		case CrittersActor.CrittersActorType.StunBomb:
-			return this.CanSeeActor(actor.transform.position);
-		default:
-			if (crittersActorType == CrittersActor.CrittersActorType.StickyGoo)
+			if (lastImpulseTime == creature.lastImpulseTime)
 			{
-				return ((CrittersStickyGoo)actor).CanAffect(base.transform.position);
+				return state == creature.currentState;
 			}
-			break;
-		}
-		return false;
-	}
-
-	public override bool ProcessLocal()
-	{
-		CrittersPawn.CreatureUpdateData creatureUpdateData = new CrittersPawn.CreatureUpdateData(this);
-		bool flag = base.ProcessLocal();
-		if (!this.isEnabled)
-		{
-			return flag;
-		}
-		this.wasSomethingInTheWay = false;
-		this.UpdateMoodSourceData();
-		this.StuckCheck();
-		switch (this.currentState)
-		{
-		case CrittersPawn.CreatureState.Idle:
-			this.IdleStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.Eating:
-			this.EatingStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.AttractedTo:
-			this.AttractedStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.Running:
-			this.RunningStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.Grabbed:
-			this.GrabbedStateUpdate();
-			break;
-		case CrittersPawn.CreatureState.Sleeping:
-			this.SleepingStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.SeekingFood:
-			this.SeekingFoodStateUpdate();
-			this.DespawnCheck();
-			break;
-		case CrittersPawn.CreatureState.Captured:
-			this.CapturedStateUpdate();
-			break;
-		case CrittersPawn.CreatureState.Stunned:
-			this.StunnedStateUpdate();
-			break;
-		case CrittersPawn.CreatureState.WaitingToDespawn:
-			this.WaitingToDespawnStateUpdate();
-			break;
-		case CrittersPawn.CreatureState.Despawning:
-			this.DespawningStateUpdate();
-			break;
-		case CrittersPawn.CreatureState.Spawning:
-			this.SpawningStateUpdate();
-			break;
-		}
-		this.UpdateStateAnim();
-		this.updatedSinceLastFrame = (flag || this.updatedSinceLastFrame || !creatureUpdateData.SameData(this));
-		return this.updatedSinceLastFrame;
-	}
-
-	private void StuckCheck()
-	{
-		float realtimeSinceStartup = Time.realtimeSinceStartup;
-		if (this._nextStuckCheck > (double)realtimeSinceStartup)
-		{
-			return;
-		}
-		this._nextStuckCheck = (double)(realtimeSinceStartup + 1f);
-		if (!this.canJump && this.rb.IsSleeping())
-		{
-			this.canJump = true;
-		}
-		if (base.transform.position.y < this.killHeight)
-		{
-			this.SetState(CrittersPawn.CreatureState.Despawning);
-		}
-	}
-
-	private void DespawnCheck()
-	{
-		float realtimeSinceStartup = Time.realtimeSinceStartup;
-		if (this._nextDespawnCheck > (double)realtimeSinceStartup)
-		{
-			return;
-		}
-		this._nextDespawnCheck = (double)(realtimeSinceStartup + 1f);
-		bool flag;
-		if (this.lifeTime <= 0.0)
-		{
-			flag = (this.creatureConfiguration != null && !this.creatureConfiguration.ShouldDespawn());
-		}
-		else
-		{
-			flag = ((PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - this.lifeTimeStart > this.lifeTime);
-		}
-		if (flag)
-		{
-			this.SetState(CrittersPawn.CreatureState.WaitingToDespawn);
-			this.spawningStartingPosition = base.gameObject.transform.position;
-			this.despawnStartTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
-		}
-	}
-
-	public void SetTemplate(int templateIndex)
-	{
-		this.TemplateIndex = templateIndex;
-		this.UpdateTemplate();
-	}
-
-	private void UpdateTemplate()
-	{
-		if (this.TemplateIndex != this.LastTemplateIndex)
-		{
-			this.creatureConfiguration = CrittersManager.instance.creatureIndex[this.TemplateIndex];
-			if (this.creatureConfiguration != null)
-			{
-				this.creatureConfiguration.ApplyToCreature(this);
-				this.InitializeAttractors();
-			}
-			this.LastTemplateIndex = this.TemplateIndex;
-			this.InitializeTemplateValues();
-		}
-		if (this.OnDataChange != null)
-		{
-			this.OnDataChange();
-		}
-	}
-
-	private void InitializeAttractors()
-	{
-		this.attractedToTypes = new Dictionary<CrittersActor.CrittersActorType, float>();
-		this.afraidOfTypes = new Dictionary<CrittersActor.CrittersActorType, float>();
-		if (this.attractedToList != null)
-		{
-			for (int i = 0; i < this.attractedToList.Count; i++)
-			{
-				this.attractedToTypes.Add(this.attractedToList[i].type, this.attractedToList[i].multiplier);
-			}
-		}
-		if (this.afraidOfList != null)
-		{
-			for (int j = 0; j < this.afraidOfList.Count; j++)
-			{
-				this.afraidOfTypes.Add(this.afraidOfList[j].type, this.afraidOfList[j].multiplier);
-			}
-		}
-	}
-
-	public override void ProcessRemote()
-	{
-		this.UpdateTemplate();
-		base.ProcessRemote();
-		this.UpdateStateAnim();
-	}
-
-	public void SetState(CrittersPawn.CreatureState newState)
-	{
-		if (this.currentState == newState)
-		{
-			return;
-		}
-		if (this.currentState == CrittersPawn.CreatureState.Captured)
-		{
-			base.transform.localScale = Vector3.one;
-		}
-		this.ClearOngoingStateFX();
-		this.currentState = newState;
-		if (newState != CrittersPawn.CreatureState.Despawning)
-		{
-			if (newState == CrittersPawn.CreatureState.Spawning && CrittersManager.instance.LocalAuthority())
-			{
-				this.spawningStartingPosition = base.gameObject.transform.position;
-				this.spawnStartTime = (double)(PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
-			}
-		}
-		else if (CrittersManager.instance.LocalAuthority())
-		{
-			this.spawningStartingPosition = base.gameObject.transform.position;
-			this.despawnStartTime = (double)(PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
-		}
-		this.StartOngoingStateFX(newState);
-		GameObject valueOrDefault = this.StartStateFX.GetValueOrDefault(this.currentState);
-		if (valueOrDefault.IsNotNull())
-		{
-			GameObject pooled = CrittersPool.GetPooled(valueOrDefault);
-			if (pooled != null)
-			{
-				pooled.transform.position = base.transform.position;
-			}
-		}
-		this.currentAnimTime = 0f;
-		CrittersAnim crittersAnim;
-		if (this.stateAnim.TryGetValue(this.currentState, out crittersAnim))
-		{
-			this.currentAnim = crittersAnim;
-		}
-		else
-		{
-			this.currentAnim = null;
-			this.animTarget.localPosition = Vector3.zero;
-			this.animTarget.localScale = Vector3.one;
-		}
-		if (this.OnDataChange != null)
-		{
-			this.OnDataChange();
-		}
-	}
-
-	private void ClearOngoingStateFX()
-	{
-		if (this.currentOngoingStateFX.IsNotNull())
-		{
-			CrittersPool.Return(this.currentOngoingStateFX);
-			this.currentOngoingStateFX = null;
-		}
-	}
-
-	private void StartOngoingStateFX(CrittersPawn.CreatureState state)
-	{
-		GameObject valueOrDefault = this.OngoingStateFX.GetValueOrDefault(state);
-		if (valueOrDefault.IsNotNull())
-		{
-			this.currentOngoingStateFX = CrittersPool.GetPooled(valueOrDefault);
-			if (this.currentOngoingStateFX.IsNotNull())
-			{
-				this.currentOngoingStateFX.transform.SetParent(base.transform, false);
-				this.currentOngoingStateFX.transform.localPosition = Vector3.zero;
-			}
-		}
-	}
-
-	[Conditional("UNITY_EDITOR")]
-	public void UpdateStateColor()
-	{
-		switch (this.currentState)
-		{
-		case CrittersPawn.CreatureState.Idle:
-			this.debugStateIndicator.material.color = this.debugColorIdle;
-			return;
-		case CrittersPawn.CreatureState.Eating:
-			this.debugStateIndicator.material.color = this.debugColorEating;
-			return;
-		case CrittersPawn.CreatureState.AttractedTo:
-			this.debugStateIndicator.material.color = this.debugColorAttracted;
-			return;
-		case CrittersPawn.CreatureState.Running:
-			this.debugStateIndicator.material.color = this.debugColorScared;
-			return;
-		case CrittersPawn.CreatureState.Grabbed:
-			this.debugStateIndicator.material.color = this.debugColorCaught;
-			return;
-		case CrittersPawn.CreatureState.Sleeping:
-			this.debugStateIndicator.material.color = this.debugColorSleeping;
-			return;
-		case CrittersPawn.CreatureState.SeekingFood:
-			this.debugStateIndicator.material.color = this.debugColorSeekingFood;
-			return;
-		case CrittersPawn.CreatureState.Captured:
-			this.debugStateIndicator.material.color = this.debugColorCaged;
-			return;
-		case CrittersPawn.CreatureState.Stunned:
-			this.debugStateIndicator.material.color = this.debugColorStunned;
-			return;
-		default:
-			this.debugStateIndicator.material.color = new Color(1f, 0f, 1f);
-			return;
-		}
-	}
-
-	public void UpdateStateAnim()
-	{
-		if (this.currentAnim != null)
-		{
-			this.currentAnimTime += Time.deltaTime * this.currentAnim.playSpeed;
-			this.currentAnimTime %= 1f;
-			float num = this.currentAnim.squashAmount.Evaluate(this.currentAnimTime);
-			float z = this.currentAnim.forwardOffset.Evaluate(this.currentAnimTime);
-			float x = this.currentAnim.horizontalOffset.Evaluate(this.currentAnimTime);
-			float y = this.currentAnim.verticalOffset.Evaluate(this.currentAnimTime);
-			this.animTarget.localPosition = new Vector3(x, y, z);
-			float num2 = 1f - num;
-			num2 *= 0.5f;
-			num2 += 1f;
-			this.animTarget.localScale = new Vector3(num2, num, num2);
-		}
-	}
-
-	public void IdleStateUpdate()
-	{
-		if (this.AboveFearThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Running);
-			return;
-		}
-		if (this.AboveAttractedThreshold() && (!this.AboveHungryThreshold() || !CrittersManager.AnyFoodNearby(this)))
-		{
-			this.SetState(CrittersPawn.CreatureState.AttractedTo);
-			return;
-		}
-		if (this.AboveHungryThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.SeekingFood);
-			return;
-		}
-		if (this.AboveSleepyThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Sleeping);
-			return;
-		}
-		if (this.CanJump())
-		{
-			this.RandomJump();
-		}
-	}
-
-	public void EatingStateUpdate()
-	{
-		if (this.AboveFearThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Running);
-			return;
-		}
-		if (this.BelowNotHungryThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Idle);
-			return;
-		}
-		if (!this.withinEatingRadius || this.eatingTarget.IsNull() || this.eatingTarget.currentFood <= 0f)
-		{
-			this.SetState(CrittersPawn.CreatureState.SeekingFood);
-		}
-	}
-
-	public void SleepingStateUpdate()
-	{
-		if (this.AboveFearThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Running);
-			return;
-		}
-		if (this.BelowNotSleepyThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Idle);
-		}
-	}
-
-	public void AttractedStateUpdate()
-	{
-		if (this.AboveFearThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Running);
-			return;
-		}
-		if (this.BelowUnAttractedThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Idle);
-			return;
-		}
-		if (this.CanJump())
-		{
-			if (this.AboveHungryThreshold() && CrittersManager.AnyFoodNearby(this))
-			{
-				this.SetState(CrittersPawn.CreatureState.SeekingFood);
-				return;
-			}
-			if (CrittersManager.instance.awareOfActors[this].Contains(this.attractionTarget))
-			{
-				this.lastSeenAttractionPosition = this.attractionTarget.transform.position;
-			}
-			this.JumpTowards(this.lastSeenAttractionPosition);
-		}
-	}
-
-	public void RunningStateUpdate()
-	{
-		if (this.CanJump())
-		{
-			if (CrittersManager.instance.awareOfActors[this].Contains(this.fearTarget))
-			{
-				this.lastSeenFearPosition = this.fearTarget.transform.position;
-			}
-			this.JumpAwayFrom(this.lastSeenFearPosition);
-		}
-		if (this.BelowNotAfraidThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Idle);
-		}
-	}
-
-	public void SeekingFoodStateUpdate()
-	{
-		if (this.AboveFearThreshold())
-		{
-			this.SetState(CrittersPawn.CreatureState.Running);
-			return;
-		}
-		if (this.CanJump())
-		{
-			if (CrittersManager.CritterAwareOfAny(this))
-			{
-				this.eatingTarget = CrittersManager.ClosestFood(this);
-				if (this.eatingTarget != null)
-				{
-					this.withinEatingRadius = ((this.eatingTarget.food.transform.position - base.transform.position).sqrMagnitude < this.eatingRadiusMaxSquared);
-					if (!this.withinEatingRadius)
-					{
-						this.JumpTowards(this.eatingTarget.food.transform.position);
-						return;
-					}
-					base.transform.forward = (this.eatingTarget.food.transform.position - base.transform.position).X_Z().normalized;
-					this.SetState(CrittersPawn.CreatureState.Eating);
-					this.debugStateIndicator.material.color = this.debugColorEating;
-					return;
-				}
-				else
-				{
-					if (this.AboveAttractedThreshold())
-					{
-						this.SetState(CrittersPawn.CreatureState.AttractedTo);
-						return;
-					}
-					this.RandomJump();
-					return;
-				}
-			}
-			else
-			{
-				this.RandomJump();
-			}
-		}
-	}
-
-	public void GrabbedStateUpdate()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Grabbed && this.grabbedTarget != null)
-		{
-			if (this.currentStruggle >= this.escapeThreshold || !this.grabbedTarget.grabbing)
-			{
-				this.Released(true, default(Quaternion), default(Vector3), default(Vector3), default(Vector3));
-				return;
-			}
-		}
-		else if (this.grabbedTarget == null)
-		{
-			this.Released(true, default(Quaternion), default(Vector3), default(Vector3), default(Vector3));
-		}
-	}
-
-	protected override void HandleRemoteReleased()
-	{
-		base.HandleRemoteReleased();
-		if (this.cageTarget.IsNotNull())
-		{
-			this.fearTarget = this.cageTarget;
-			this.cageTarget.SetHasCritter(false);
-			this.cageTarget = null;
-		}
-		if (this.grabbedTarget.IsNotNull())
-		{
-			this.fearTarget = this.grabbedTarget;
-			this.grabbedTarget = null;
-			if (this.OnReleasedFX)
-			{
-				CrittersPool.GetPooled(this.OnReleasedFX).transform.position = base.transform.position;
-			}
-		}
-	}
-
-	public override void Released(bool keepWorldPosition, Quaternion rotation = default(Quaternion), Vector3 position = default(Vector3), Vector3 impulse = default(Vector3), Vector3 impulseRotation = default(Vector3))
-	{
-		base.Released(keepWorldPosition, rotation, position, impulse, impulseRotation);
-		if (this.currentState != CrittersPawn.CreatureState.Grabbed && this.currentState != CrittersPawn.CreatureState.Captured)
-		{
-			return;
-		}
-		if (this.grabbedTarget.IsNotNull() && this.grabbedTarget.grabbedActors.Contains(this))
-		{
-			this.grabbedTarget.grabbedActors.Remove(this);
-		}
-		if (this.currentState == CrittersPawn.CreatureState.Grabbed)
-		{
-			this.fearTarget = this.grabbedTarget;
-			this.grabbedTarget = null;
-			if (this.OnReleasedFX)
-			{
-				CrittersPool.GetPooled(this.OnReleasedFX).transform.position = base.transform.position;
-			}
-		}
-		else if (this.currentState == CrittersPawn.CreatureState.Captured)
-		{
-			base.transform.localScale = Vector3.one;
-			this.fearTarget = this.cageTarget;
-			this.cageTarget.SetHasCritter(false);
-			this.cageTarget = null;
-		}
-		if (this.struggleGainedPerSecond > 0f)
-		{
-			this.currentFear = this.maxFear;
-			this.SetState(CrittersPawn.CreatureState.Running);
-			this.lastSeenFearPosition = this.fearTarget.transform.position;
-			return;
-		}
-		this.currentFear = 0f;
-		this.SetState(CrittersPawn.CreatureState.Idle);
-	}
-
-	public void CapturedStateUpdate()
-	{
-		if (this.cageTarget.IsNull())
-		{
-			this.cageTarget = (CrittersCage)CrittersManager.instance.actorById[this.actorIdTarget];
-			this.cageTarget.SetHasCritter(false);
-		}
-		if (this.cageTarget.inReleasingPosition && this.cageTarget.heldByPlayer)
-		{
-			this.Released(true, default(Quaternion), default(Vector3), default(Vector3), default(Vector3));
-		}
-	}
-
-	public void StunnedStateUpdate()
-	{
-		this.remainingStunnedTime = Mathf.Max(0f, this.remainingStunnedTime - Time.deltaTime);
-		if (this.remainingStunnedTime <= 0f)
-		{
-			this.currentFear = this.maxFear;
-			this.SetState(CrittersPawn.CreatureState.Running);
-		}
-	}
-
-	public void WaitingToDespawnStateUpdate()
-	{
-		if (Mathf.FloorToInt(this.rb.linearVelocity.magnitude * 10f) == 0)
-		{
-			this.SetState(CrittersPawn.CreatureState.Despawning);
-		}
-	}
-
-	public void DespawningStateUpdate()
-	{
-		this._despawnAnimTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - this.despawnStartTime;
-		if (this._despawnAnimTime >= (double)this._despawnAnimationDuration)
-		{
-			base.gameObject.SetActive(false);
-			this.TemplateIndex = -1;
-		}
-	}
-
-	public void SpawningStateUpdate()
-	{
-		this._spawnAnimTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - this.spawnStartTime;
-		base.MoveActor(this.spawningStartingPosition + new Vector3(0f, this.spawnInHeighMovement.Evaluate(Mathf.Clamp((float)this._spawnAnimTime, 0f, this._spawnAnimationDuration)), 0f), base.transform.rotation, false, true, true);
-		if (this._spawnAnimTime >= (double)this._spawnAnimationDuration)
-		{
-			this.SetState(CrittersPawn.CreatureState.Idle);
-		}
-	}
-
-	public void UpdateMoodSourceData()
-	{
-		this.UpdateHunger();
-		this.UpdateFearAndAttraction();
-		this.UpdateSleepiness();
-		this.UpdateStruggle();
-		this.UpdateSlowed();
-		this.UpdateGrabbed();
-		this.UpdateCaged();
-	}
-
-	public void UpdateHunger()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Eating && !this.eatingTarget.IsNull())
-		{
-			this.eatingTarget.Feed(this.hungerLostPerSecond * Time.deltaTime);
-			this.currentHunger = Mathf.Max(0f, this.currentHunger - this.hungerLostPerSecond * Time.deltaTime);
-			return;
-		}
-		this.currentHunger = Mathf.Min(this.maxHunger, this.currentHunger + this.hungerGainedPerSecond * Time.deltaTime);
-	}
-
-	public void UpdateFearAndAttraction()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Spawning)
-		{
-			return;
-		}
-		this.currentFear = Mathf.Max(0f, this.currentFear - this.fearLostPerSecond * Time.deltaTime);
-		this.currentAttraction = Mathf.Max(0f, this.currentAttraction - this.attractionLostPerSecond * Time.deltaTime);
-		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
-		{
-			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
-			float multiplier;
-			float multiplier2;
-			if (this.afraidOfTypes != null && this.afraidOfTypes.TryGetValue(crittersActor.crittersActorType, out multiplier))
-			{
-				crittersActor.CalculateFear(this, multiplier);
-			}
-			else if (this.attractedToTypes != null && this.attractedToTypes.TryGetValue(crittersActor.crittersActorType, out multiplier2))
-			{
-				crittersActor.CalculateAttraction(this, multiplier2);
-			}
-		}
-	}
-
-	public void IncreaseFear(float fearAmount, CrittersActor actor)
-	{
-		if (fearAmount > 0f)
-		{
-			this.currentFear += fearAmount;
-			this.currentFear = Mathf.Min(this.maxFear, this.currentFear);
-			this.fearTarget = actor;
-			this.lastSeenFearPosition = this.fearTarget.transform.position;
-		}
-	}
-
-	public void IncreaseAttraction(float attractionAmount, CrittersActor actor)
-	{
-		if (attractionAmount > 0f)
-		{
-			this.currentAttraction += attractionAmount;
-			this.currentAttraction = Mathf.Min(this.maxAttraction, this.currentAttraction);
-			this.attractionTarget = actor;
-			this.lastSeenAttractionPosition = this.attractionTarget.transform.position;
-		}
-	}
-
-	public void UpdateSleepiness()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Sleeping)
-		{
-			this.currentSleepiness = Mathf.Max(0f, this.currentSleepiness - Time.deltaTime * this.sleepinessLostPerSecond);
-			return;
-		}
-		this.currentSleepiness = Mathf.Min(this.maxSleepiness, this.currentSleepiness + Time.deltaTime * this.sleepinessGainedPerSecond);
-	}
-
-	public void UpdateStruggle()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Grabbed)
-		{
-			this.currentStruggle = Mathf.Clamp(this.currentStruggle + this.struggleGainedPerSecond * Time.deltaTime, 0f, this.maxStruggle);
-			return;
-		}
-		this.currentStruggle = Mathf.Max(0f, this.currentStruggle - this.struggleLostPerSecond * Time.deltaTime);
-	}
-
-	private void UpdateSlowed()
-	{
-		if (this.remainingSlowedTime > 0f)
-		{
-			this.remainingSlowedTime -= Time.deltaTime;
-			if (this.remainingSlowedTime < 0f)
-			{
-				this.slowSpeedMod = 1f;
-				return;
-			}
-		}
-		else if (this.currentState != CrittersPawn.CreatureState.Captured && this.currentState != CrittersPawn.CreatureState.Despawning && this.currentState != CrittersPawn.CreatureState.Grabbed && this.currentState != CrittersPawn.CreatureState.WaitingToDespawn && this.currentState != CrittersPawn.CreatureState.Spawning)
-		{
-			for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
-			{
-				CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
-				if (crittersActor.crittersActorType == CrittersActor.CrittersActorType.StickyGoo)
-				{
-					CrittersStickyGoo crittersStickyGoo = crittersActor as CrittersStickyGoo;
-					this.slowSpeedMod = crittersStickyGoo.slowModifier;
-					this.remainingSlowedTime = crittersStickyGoo.slowDuration;
-					crittersStickyGoo.EffectApplied(this);
-				}
-			}
-		}
-	}
-
-	public void UpdateGrabbed()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Grabbed || this.currentState == CrittersPawn.CreatureState.Captured)
-		{
-			return;
-		}
-		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
-		{
-			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
-			if (crittersActor.crittersActorType == CrittersActor.CrittersActorType.Grabber && !crittersActor.isOnPlayer && this.IsGrabPossible((CrittersGrabber)crittersActor))
-			{
-				this.GrabbedBy(crittersActor, true, default(Quaternion), default(Vector3), false);
-			}
-		}
-	}
-
-	public void UpdateCaged()
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Captured)
-		{
-			return;
-		}
-		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
-		{
-			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
-			CrittersCage crittersCage = crittersActor as CrittersCage;
-			if (crittersActor.crittersActorType == CrittersActor.CrittersActorType.Cage && crittersCage.IsNotNull() && crittersCage.CanCatch && this.WithinCaptureDistance(crittersCage))
-			{
-				this.GrabbedBy(crittersActor, true, crittersCage.cagePosition.localRotation, crittersCage.cagePosition.localPosition, false);
-			}
-		}
-	}
-
-	public void RandomJump()
-	{
-		for (int i = 0; i < 5; i++)
-		{
-			base.transform.eulerAngles = new Vector3(0f, 360f * Random.value, 0f);
-			if (!this.SomethingInTheWay(default(Vector3)))
-			{
-				break;
-			}
-		}
-		this.LocalJump(this.maxJumpVel, 45f);
-	}
-
-	public void JumpTowards(Vector3 targetPos)
-	{
-		if (this.SomethingInTheWay((targetPos - base.transform.position).X_Z()))
-		{
-			this.RandomJump();
-			return;
-		}
-		base.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(targetPos - base.transform.position, Vector3.up), Vector3.up);
-		this.LocalJump(this.JumpVelocityForDistanceAtAngle(Vector3.ProjectOnPlane(targetPos - base.transform.position, Vector3.up).magnitude * this.fudge, 45f), 45f);
-	}
-
-	public void JumpAwayFrom(Vector3 targetPos)
-	{
-		Vector3 vector = (base.transform.position - targetPos).X_Z();
-		if (vector == Vector3.zero)
-		{
-			vector = base.transform.forward;
-		}
-		Vector3 vector2 = Quaternion.Euler(0f, (float)Random.Range(-30, 30), 0f) * vector;
-		if (this.SomethingInTheWay(vector2))
-		{
-			this.RandomJump();
-			return;
-		}
-		base.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
-		this.LocalJump(this.maxJumpVel, 45f);
-	}
-
-	public bool SomethingInTheWay(Vector3 direction = default(Vector3))
-	{
-		if (direction == default(Vector3))
-		{
-			direction = base.transform.forward;
-		}
-		bool flag = Physics.RaycastNonAlloc(this.bodyCollider.bounds.center, direction, this.raycastHits, this.obstacleSeeDistance, CrittersManager.instance.movementLayers) > 0;
-		this.wasSomethingInTheWay = (this.wasSomethingInTheWay || flag);
-		return flag;
-	}
-
-	public override bool CanBeGrabbed(CrittersActor grabbedBy)
-	{
-		return this.currentState != CrittersPawn.CreatureState.Captured && base.CanBeGrabbed(grabbedBy);
-	}
-
-	public override void GrabbedBy(CrittersActor grabbingActor, bool positionOverride = false, Quaternion localRotation = default(Quaternion), Vector3 localOffset = default(Vector3), bool disableGrabbing = false)
-	{
-		CrittersActor.CrittersActorType crittersActorType = grabbingActor.crittersActorType;
-		if (crittersActorType == CrittersActor.CrittersActorType.Grabber)
-		{
-			this.SetState(CrittersPawn.CreatureState.Grabbed);
-			this.grabbedTarget = (CrittersGrabber)grabbingActor;
-			this.actorIdTarget = this.grabbedTarget.actorId;
-			base.GrabbedBy(grabbingActor, positionOverride, localRotation, localOffset, disableGrabbing);
-			return;
-		}
-		if (crittersActorType != CrittersActor.CrittersActorType.Cage)
-		{
-			return;
-		}
-		this.SetState(CrittersPawn.CreatureState.Captured);
-		this.cageTarget = (CrittersCage)grabbingActor;
-		this.cageTarget.SetHasCritter(true);
-		this.actorIdTarget = this.cageTarget.actorId;
-		if (CrittersManager.instance.LocalAuthority())
-		{
-			base.transform.localScale = this.cageTarget.critterScale;
-		}
-		base.GrabbedBy(grabbingActor, positionOverride, localRotation, localOffset, disableGrabbing);
-	}
-
-	protected override void RemoteGrabbedBy(CrittersActor grabbingActor)
-	{
-		base.RemoteGrabbedBy(grabbingActor);
-		CrittersActor.CrittersActorType crittersActorType = grabbingActor.crittersActorType;
-		if (crittersActorType != CrittersActor.CrittersActorType.Grabber)
-		{
-			if (crittersActorType == CrittersActor.CrittersActorType.Cage)
-			{
-				this.cageTarget = (CrittersCage)grabbingActor;
-				this.cageTarget.SetHasCritter(true);
-				this.actorIdTarget = this.cageTarget.actorId;
-				if (CrittersManager.instance.LocalAuthority())
-				{
-					base.transform.localScale = this.cageTarget.critterScale;
-					return;
-				}
-			}
-		}
-		else
-		{
-			this.grabbedTarget = (CrittersGrabber)grabbingActor;
-			this.actorIdTarget = this.grabbedTarget.actorId;
-		}
-	}
-
-	public void Stunned(float duration)
-	{
-		if (this.currentState == CrittersPawn.CreatureState.Captured || this.currentState == CrittersPawn.CreatureState.Grabbed || this.currentState == CrittersPawn.CreatureState.Despawning || this.currentState == CrittersPawn.CreatureState.WaitingToDespawn)
-		{
-			return;
-		}
-		this.remainingStunnedTime = duration;
-		this.SetState(CrittersPawn.CreatureState.Stunned);
-		this.updatedSinceLastFrame = true;
-	}
-
-	public bool AboveFearThreshold()
-	{
-		return this.currentFear >= this.scaredThreshold;
-	}
-
-	public bool BelowNotAfraidThreshold()
-	{
-		return this.currentFear < this.calmThreshold;
-	}
-
-	public bool AboveAttractedThreshold()
-	{
-		return this.currentAttraction >= this.attractedThreshold;
-	}
-
-	public bool BelowUnAttractedThreshold()
-	{
-		return this.currentAttraction < this.unattractedThreshold;
-	}
-
-	public bool AboveHungryThreshold()
-	{
-		return this.currentHunger >= this.hungryThreshold;
-	}
-
-	public bool BelowNotHungryThreshold()
-	{
-		return this.currentHunger < this.satiatedThreshold;
-	}
-
-	public bool AboveSleepyThreshold()
-	{
-		return this.currentSleepiness >= this.tiredThreshold;
-	}
-
-	public bool BelowNotSleepyThreshold()
-	{
-		return this.currentSleepiness < this.awakeThreshold;
-	}
-
-	public bool CanJump()
-	{
-		if (!this.canJump)
-		{
 			return false;
 		}
-		float num;
-		if (this.currentState == CrittersPawn.CreatureState.Running)
-		{
-			num = this.scaredJumpCooldown;
-		}
-		else
-		{
-			num = this.jumpCooldown;
-		}
-		float num2 = PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time;
-		if (this.lastImpulseTime > (double)(num2 + this.jumpCooldown + this.jumpVariabilityTime))
-		{
-			this.lastImpulseTime = (double)(num2 + this.GetAdditiveJumpDelay());
-		}
-		return (double)num2 > this.lastImpulseTime + (double)num;
 	}
-
-	public void OnCollisionEnter(Collision collision)
-	{
-		this.canJump = true;
-	}
-
-	public void OnCollisionExit(Collision collision)
-	{
-		this.canJump = false;
-	}
-
-	public void SetVelocity(Vector3 linearVelocity)
-	{
-		this.rb.linearVelocity = linearVelocity;
-	}
-
-	public override int AddActorDataToList(ref List<object> objList)
-	{
-		base.AddActorDataToList(ref objList);
-		objList.Add(Mathf.FloorToInt(this.currentFear));
-		objList.Add(Mathf.FloorToInt(this.currentHunger));
-		objList.Add(Mathf.FloorToInt(this.currentSleepiness));
-		objList.Add(Mathf.FloorToInt(this.currentStruggle));
-		objList.Add(this.currentState);
-		objList.Add(this.actorIdTarget);
-		objList.Add(this.lifeTimeStart);
-		objList.Add(this.TemplateIndex);
-		objList.Add(Mathf.FloorToInt(this.remainingStunnedTime));
-		objList.Add(this.spawnStartTime);
-		objList.Add(this.despawnStartTime);
-		objList.AddRange(this.visuals.Appearance.WriteToRPCData());
-		return this.TotalActorDataLength();
-	}
-
-	public override int TotalActorDataLength()
-	{
-		return base.BaseActorDataLength() + 11 + CritterAppearance.DataLength();
-	}
-
-	public override int UpdateFromRPC(object[] data, int startingIndex)
-	{
-		startingIndex += base.UpdateFromRPC(data, startingIndex);
-		int num;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex], out num))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num2;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 1], out num2))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num3;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 2], out num3))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num4;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 3], out num4))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num5;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 4], out num5))
-		{
-			return this.TotalActorDataLength();
-		}
-		if (!Enum.IsDefined(typeof(CrittersPawn.CreatureState), (CrittersPawn.CreatureState)num5))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num6;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 5], out num6))
-		{
-			return this.TotalActorDataLength();
-		}
-		double value;
-		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 6], out value))
-		{
-			return this.TotalActorDataLength();
-		}
-		int templateIndex;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 7], out templateIndex))
-		{
-			return this.TotalActorDataLength();
-		}
-		int num7;
-		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 8], out num7))
-		{
-			return this.TotalActorDataLength();
-		}
-		double value2;
-		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 9], out value2))
-		{
-			return this.TotalActorDataLength();
-		}
-		double value3;
-		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 10], out value3))
-		{
-			return this.TotalActorDataLength();
-		}
-		this.currentFear = (float)num;
-		this.currentHunger = (float)num2;
-		this.currentSleepiness = (float)num3;
-		this.currentStruggle = (float)num4;
-		this.SetState((CrittersPawn.CreatureState)num5);
-		this.actorIdTarget = num6;
-		this.lifeTimeStart = value.GetFinite();
-		this.TemplateIndex = templateIndex;
-		this.remainingStunnedTime = (float)num7;
-		this.spawnStartTime = value2.GetFinite();
-		this.despawnStartTime = value3.GetFinite();
-		CrittersActor crittersActor = null;
-		CrittersPawn.CreatureState creatureState = this.currentState;
-		if (creatureState != CrittersPawn.CreatureState.Grabbed)
-		{
-			if (creatureState != CrittersPawn.CreatureState.Captured)
-			{
-				this.grabbedTarget = null;
-				this.cageTarget = null;
-			}
-			else
-			{
-				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
-				{
-					this.cageTarget = (CrittersCage)crittersActor;
-					if (this.cageTarget != null)
-					{
-						base.transform.localScale = this.cageTarget.critterScale;
-					}
-				}
-				this.grabbedTarget = null;
-			}
-		}
-		else
-		{
-			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
-			{
-				this.grabbedTarget = (CrittersGrabber)crittersActor;
-			}
-			this.cageTarget = null;
-		}
-		this.UpdateTemplate();
-		this.visuals.SetAppearance(CritterAppearance.ReadFromRPCData(RuntimeHelpers.GetSubArray<object>(data, Range.StartAt(startingIndex + 11))));
-		return this.TotalActorDataLength();
-	}
-
-	public override bool UpdateSpecificActor(PhotonStream stream)
-	{
-		int num;
-		int num2;
-		int num3;
-		int num4;
-		int num5;
-		int num6;
-		double num7;
-		int templateIndex;
-		int num8;
-		double num9;
-		double num10;
-		if (!(base.UpdateSpecificActor(stream) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num2) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num3) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num4) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num5) & Enum.IsDefined(typeof(CrittersPawn.CreatureState), (CrittersPawn.CreatureState)num5) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num6) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out num7) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out templateIndex) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num8) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out num9) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out num10)))
-		{
-			return false;
-		}
-		this.currentFear = (float)num;
-		this.currentHunger = (float)num2;
-		this.currentSleepiness = (float)num3;
-		this.currentStruggle = (float)num4;
-		this.SetState((CrittersPawn.CreatureState)num5);
-		this.actorIdTarget = num6;
-		this.lifeTimeStart = num7;
-		this.TemplateIndex = templateIndex;
-		this.remainingStunnedTime = (float)num8;
-		this.spawnStartTime = num9;
-		this.despawnStartTime = num10;
-		this.UpdateTemplate();
-		CrittersActor crittersActor = null;
-		CrittersPawn.CreatureState creatureState = this.currentState;
-		if (creatureState != CrittersPawn.CreatureState.Grabbed)
-		{
-			if (creatureState != CrittersPawn.CreatureState.Captured)
-			{
-				this.grabbedTarget = null;
-				this.cageTarget = null;
-			}
-			else
-			{
-				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
-				{
-					this.cageTarget = (CrittersCage)crittersActor;
-					if (this.cageTarget != null)
-					{
-						base.transform.localScale = this.cageTarget.critterScale;
-					}
-				}
-				this.grabbedTarget = null;
-			}
-		}
-		else
-		{
-			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
-			{
-				this.grabbedTarget = (CrittersGrabber)crittersActor;
-			}
-			this.cageTarget = null;
-		}
-		return true;
-	}
-
-	public override void SendDataByCrittersActorType(PhotonStream stream)
-	{
-		base.SendDataByCrittersActorType(stream);
-		stream.SendNext(Mathf.FloorToInt(this.currentFear));
-		stream.SendNext(Mathf.FloorToInt(this.currentHunger));
-		stream.SendNext(Mathf.FloorToInt(this.currentSleepiness));
-		stream.SendNext(Mathf.FloorToInt(this.currentStruggle));
-		stream.SendNext(this.currentState);
-		stream.SendNext(this.actorIdTarget);
-		stream.SendNext(this.lifeTimeStart);
-		stream.SendNext(this.TemplateIndex);
-		stream.SendNext(Mathf.FloorToInt(this.remainingStunnedTime));
-		stream.SendNext(this.spawnStartTime);
-		stream.SendNext(this.despawnStartTime);
-	}
-
-	public void SetConfiguration(CritterConfiguration getRandomConfiguration)
-	{
-		throw new NotImplementedException();
-	}
-
-	public void SetSpawnData(object[] spawnData)
-	{
-		this.visuals.SetAppearance(CritterAppearance.ReadFromRPCData(spawnData));
-	}
-
-	int IEyeScannable.scannableId
-	{
-		get
-		{
-			return base.gameObject.GetInstanceID();
-		}
-	}
-
-	Vector3 IEyeScannable.Position
-	{
-		get
-		{
-			return this.bodyCollider.bounds.center;
-		}
-	}
-
-	Bounds IEyeScannable.Bounds
-	{
-		get
-		{
-			return this.bodyCollider.bounds;
-		}
-	}
-
-	IList<KeyValueStringPair> IEyeScannable.Entries
-	{
-		get
-		{
-			return this.BuildEyeScannerData();
-		}
-	}
-
-	private IList<KeyValueStringPair> BuildEyeScannerData()
-	{
-		this.eyeScanData[0] = new KeyValueStringPair("Name", this.creatureConfiguration.critterName);
-		this.eyeScanData[1] = new KeyValueStringPair("Type", this.creatureConfiguration.animalType.ToString());
-		this.eyeScanData[2] = new KeyValueStringPair("Temperament", this.creatureConfiguration.behaviour.temperament);
-		this.eyeScanData[3] = new KeyValueStringPair("Habitat", this.creatureConfiguration.biome.GetHabitatDescription());
-		this.eyeScanData[4] = new KeyValueStringPair("Size", this.visuals.Appearance.size.ToString("0.00"));
-		this.eyeScanData[5] = new KeyValueStringPair("State", this.GetCurrentStateName());
-		return this.eyeScanData;
-	}
-
-	private string GetCurrentStateName()
-	{
-		string text;
-		switch (this.currentState)
-		{
-		case CrittersPawn.CreatureState.Idle:
-			text = "Adventuring";
-			break;
-		case CrittersPawn.CreatureState.Eating:
-			text = "Eating";
-			break;
-		case CrittersPawn.CreatureState.AttractedTo:
-			text = "Curious";
-			break;
-		case CrittersPawn.CreatureState.Running:
-			text = "Scared";
-			break;
-		case CrittersPawn.CreatureState.Grabbed:
-			text = ((this.struggleGainedPerSecond > 0f) ? "Struggling" : "Happy");
-			break;
-		case CrittersPawn.CreatureState.Sleeping:
-			text = "Sleeping";
-			break;
-		case CrittersPawn.CreatureState.SeekingFood:
-			text = "Foraging";
-			break;
-		case CrittersPawn.CreatureState.Captured:
-			text = "Captured";
-			break;
-		case CrittersPawn.CreatureState.Stunned:
-			text = "Stunned";
-			break;
-		default:
-			text = "Contemplating Life";
-			break;
-		}
-		string text2 = text;
-		if (this.slowSpeedMod < 1f)
-		{
-			text2 = "Slowed, " + text2;
-		}
-		return text2;
-	}
-
-	public event Action OnDataChange;
 
 	[NonSerialized]
 	public CritterConfiguration creatureConfiguration;
 
 	public Collider bodyCollider;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float maxJumpVel;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float jumpCooldown;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float scaredJumpCooldown;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float jumpVariabilityTime;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float visionConeAngle;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float sensoryRange;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float maxHunger;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float hungryThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float satiatedThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float hungerLostPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float hungerGainedPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float maxFear;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float scaredThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float calmThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float fearLostPerSecond;
 
 	[NonSerialized]
@@ -1421,58 +118,58 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 	[NonSerialized]
 	public float attractionLostPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float maxSleepiness;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float tiredThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float awakeThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float sleepinessGainedPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float sleepinessLostPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float maxStruggle;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float escapeThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float catchableThreshold;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float struggleGainedPerSecond;
 
-	[HideInInspector]
 	[NonSerialized]
+	[HideInInspector]
 	public float struggleLostPerSecond;
 
 	public List<crittersAttractorStruct> attractedToList;
 
 	public List<crittersAttractorStruct> afraidOfList;
 
-	public Dictionary<CrittersActor.CrittersActorType, float> afraidOfTypes;
+	public Dictionary<CrittersActorType, float> afraidOfTypes;
 
-	public Dictionary<CrittersActor.CrittersActorType, float> attractedToTypes;
+	public Dictionary<CrittersActorType, float> attractedToTypes;
 
 	private Rigidbody rB;
 
 	[NonSerialized]
-	public CrittersPawn.CreatureState currentState;
+	public CreatureState currentState;
 
 	[NonSerialized]
 	public float currentHunger;
@@ -1554,10 +251,10 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 	public CritterVisuals visuals;
 
 	[HideInInspector]
-	public Dictionary<CrittersPawn.CreatureState, GameObject> StartStateFX = new Dictionary<CrittersPawn.CreatureState, GameObject>();
+	public Dictionary<CreatureState, GameObject> StartStateFX = new Dictionary<CreatureState, GameObject>();
 
 	[HideInInspector]
-	public Dictionary<CrittersPawn.CreatureState, GameObject> OngoingStateFX = new Dictionary<CrittersPawn.CreatureState, GameObject>();
+	public Dictionary<CreatureState, GameObject> OngoingStateFX = new Dictionary<CreatureState, GameObject>();
 
 	[NonSerialized]
 	public GameObject OnReleasedFX;
@@ -1565,7 +262,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 	private GameObject currentOngoingStateFX;
 
 	[HideInInspector]
-	public Dictionary<CrittersPawn.CreatureState, CrittersAnim> stateAnim = new Dictionary<CrittersPawn.CreatureState, CrittersAnim>();
+	public Dictionary<CreatureState, CrittersAnim> stateAnim = new Dictionary<CreatureState, CrittersAnim>();
 
 	private CrittersAnim currentAnim;
 
@@ -1618,37 +315,1252 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 
 	private KeyValueStringPair[] eyeScanData = new KeyValueStringPair[6];
 
-	public enum CreatureState
+	int IEyeScannable.scannableId => base.gameObject.GetInstanceID();
+
+	Vector3 IEyeScannable.Position => bodyCollider.bounds.center;
+
+	Bounds IEyeScannable.Bounds => bodyCollider.bounds;
+
+	IList<KeyValueStringPair> IEyeScannable.Entries => BuildEyeScannerData();
+
+	public event Action OnDataChange;
+
+	public override void Initialize()
 	{
-		Idle,
-		Eating,
-		AttractedTo,
-		Running,
-		Grabbed,
-		Sleeping,
-		SeekingFood,
-		Captured,
-		Stunned,
-		WaitingToDespawn,
-		Despawning,
-		Spawning
+		base.Initialize();
+		rB = GetComponentInChildren<Rigidbody>();
+		soundsHeard = new Dictionary<int, CrittersActor>();
+		base.transform.eulerAngles = new Vector3(0f, UnityEngine.Random.value * 360f, 0f);
+		raycastHits = new RaycastHit[20];
+		wasSomethingInTheWay = false;
+		_spawnAnimationDuration = spawnInHeighMovement.keys.Last().time;
+		_despawnAnimationDuration = despawnInHeighMovement.keys.Last().time;
 	}
 
-	internal struct CreatureUpdateData
+	private void InitializeTemplateValues()
 	{
-		internal CreatureUpdateData(CrittersPawn creature)
+		sensoryRange *= sensoryRange;
+		autoSeeFoodDistance *= autoSeeFoodDistance;
+		currentSleepiness = UnityEngine.Random.value * tiredThreshold;
+		currentHunger = UnityEngine.Random.value * hungryThreshold;
+		currentFear = 0f;
+		currentStruggle = 0f;
+		currentAttraction = 0f;
+	}
+
+	public float JumpVelocityForDistanceAtAngle(float horizontalDistance, float angle)
+	{
+		return Mathf.Min(maxJumpVel, Mathf.Sqrt(horizontalDistance * Physics.gravity.magnitude / Mathf.Sin(2f * angle)));
+	}
+
+	public override void OnEnable()
+	{
+		base.OnEnable();
+		CrittersManager.RegisterCritter(this);
+		lifeTimeStart = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
+		EyeScannerMono.Register(this);
+	}
+
+	public override void OnDisable()
+	{
+		base.OnDisable();
+		CrittersManager.DeregisterCritter(this);
+		if (currentOngoingStateFX.IsNotNull())
 		{
-			this.lastImpulseTime = creature.lastImpulseTime;
-			this.state = creature.currentState;
+			currentOngoingStateFX.SetActive(value: false);
+			currentOngoingStateFX = null;
 		}
+		EyeScannerMono.Unregister(this);
+	}
 
-		internal bool SameData(CrittersPawn creature)
+	private float GetAdditiveJumpDelay()
+	{
+		if (currentState == CreatureState.Running)
 		{
-			return this.lastImpulseTime == creature.lastImpulseTime && this.state == creature.currentState;
+			return 0f;
 		}
+		return Mathf.Max(0f, jumpCooldown * UnityEngine.Random.value * jumpVariabilityTime);
+	}
 
-		private double lastImpulseTime;
+	public void LocalJump(float maxVel, float jumpAngle)
+	{
+		maxVel *= slowSpeedMod;
+		lastImpulsePosition = base.transform.position;
+		lastImpulseVelocity = base.transform.forward * (Mathf.Sin(MathF.PI / 180f * jumpAngle) * maxVel) + Vector3.up * (Mathf.Cos(MathF.PI / 180f * jumpAngle) * maxVel);
+		lastImpulseTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
+		lastImpulseTime += GetAdditiveJumpDelay();
+		lastImpulseQuaternion = base.transform.rotation;
+		rB.linearVelocity = lastImpulseVelocity;
+		rb.angularVelocity = Vector3.zero;
+	}
 
-		private CrittersPawn.CreatureState state;
+	private bool CanSeeActor(Vector3 actorPosition)
+	{
+		Vector3 to = actorPosition - base.transform.position;
+		if (!(to.sqrMagnitude < autoSeeFoodDistance))
+		{
+			if (to.sqrMagnitude < sensoryRange)
+			{
+				return Vector3.Angle(base.transform.forward, to) < visionConeAngle;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private bool IsGrabPossible(CrittersGrabber actor)
+	{
+		if (actor.grabbing)
+		{
+			return (base.transform.position - actor.grabPosition.position).magnitude < actor.grabDistance;
+		}
+		return false;
+	}
+
+	private bool WithinCaptureDistance(CrittersCage actor)
+	{
+		return (bodyCollider.bounds.center - actor.grabPosition.position).magnitude < actor.grabDistance;
+	}
+
+	public bool AwareOfActor(CrittersActor actor)
+	{
+		switch (actor.crittersActorType)
+		{
+		case CrittersActorType.Food:
+			if (((CrittersFood)actor).currentFood > 0f)
+			{
+				return CanSeeActor(((CrittersFood)actor).food.transform.position);
+			}
+			return false;
+		case CrittersActorType.LoudNoise:
+			return (actor.transform.position - base.transform.position).sqrMagnitude < sensoryRange;
+		case CrittersActorType.StickyGoo:
+			return ((CrittersStickyGoo)actor).CanAffect(base.transform.position);
+		case CrittersActorType.Grabber:
+			return CanSeeActor(actor.transform.position);
+		case CrittersActorType.Cage:
+			return CanSeeActor(actor.transform.position);
+		case CrittersActorType.Creature:
+			return CanSeeActor(actor.transform.position);
+		case CrittersActorType.BrightLight:
+			return CanSeeActor(actor.transform.position);
+		case CrittersActorType.FoodSpawner:
+			return CanSeeActor(actor.transform.position);
+		case CrittersActorType.StunBomb:
+			return CanSeeActor(actor.transform.position);
+		default:
+			return false;
+		}
+	}
+
+	public override bool ProcessLocal()
+	{
+		CreatureUpdateData creatureUpdateData = new CreatureUpdateData(this);
+		bool flag = base.ProcessLocal();
+		if (!isEnabled)
+		{
+			return flag;
+		}
+		wasSomethingInTheWay = false;
+		UpdateMoodSourceData();
+		StuckCheck();
+		switch (currentState)
+		{
+		case CreatureState.Idle:
+			IdleStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.Eating:
+			EatingStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.Sleeping:
+			SleepingStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.AttractedTo:
+			AttractedStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.Running:
+			RunningStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.Grabbed:
+			GrabbedStateUpdate();
+			break;
+		case CreatureState.SeekingFood:
+			SeekingFoodStateUpdate();
+			DespawnCheck();
+			break;
+		case CreatureState.Captured:
+			CapturedStateUpdate();
+			break;
+		case CreatureState.Stunned:
+			StunnedStateUpdate();
+			break;
+		case CreatureState.WaitingToDespawn:
+			WaitingToDespawnStateUpdate();
+			break;
+		case CreatureState.Despawning:
+			DespawningStateUpdate();
+			break;
+		case CreatureState.Spawning:
+			SpawningStateUpdate();
+			break;
+		}
+		UpdateStateAnim();
+		updatedSinceLastFrame = flag || updatedSinceLastFrame || !creatureUpdateData.SameData(this);
+		return updatedSinceLastFrame;
+	}
+
+	private void StuckCheck()
+	{
+		float realtimeSinceStartup = Time.realtimeSinceStartup;
+		if (!(_nextStuckCheck > (double)realtimeSinceStartup))
+		{
+			_nextStuckCheck = realtimeSinceStartup + 1f;
+			if (!canJump && rb.IsSleeping())
+			{
+				canJump = true;
+			}
+			if (base.transform.position.y < killHeight)
+			{
+				SetState(CreatureState.Despawning);
+			}
+		}
+	}
+
+	private void DespawnCheck()
+	{
+		float realtimeSinceStartup = Time.realtimeSinceStartup;
+		if (!(_nextDespawnCheck > (double)realtimeSinceStartup))
+		{
+			_nextDespawnCheck = realtimeSinceStartup + 1f;
+			bool flag = false;
+			if ((!(lifeTime <= 0.0)) ? ((PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - lifeTimeStart > lifeTime) : (creatureConfiguration != null && !creatureConfiguration.ShouldDespawn()))
+			{
+				SetState(CreatureState.WaitingToDespawn);
+				spawningStartingPosition = base.gameObject.transform.position;
+				despawnStartTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time));
+			}
+		}
+	}
+
+	public void SetTemplate(int templateIndex)
+	{
+		TemplateIndex = templateIndex;
+		UpdateTemplate();
+	}
+
+	private void UpdateTemplate()
+	{
+		if (TemplateIndex != LastTemplateIndex)
+		{
+			creatureConfiguration = CrittersManager.instance.creatureIndex[TemplateIndex];
+			if (creatureConfiguration != null)
+			{
+				creatureConfiguration.ApplyToCreature(this);
+				InitializeAttractors();
+			}
+			LastTemplateIndex = TemplateIndex;
+			InitializeTemplateValues();
+		}
+		if (this.OnDataChange != null)
+		{
+			this.OnDataChange();
+		}
+	}
+
+	private void InitializeAttractors()
+	{
+		attractedToTypes = new Dictionary<CrittersActorType, float>();
+		afraidOfTypes = new Dictionary<CrittersActorType, float>();
+		if (attractedToList != null)
+		{
+			for (int i = 0; i < attractedToList.Count; i++)
+			{
+				attractedToTypes.Add(attractedToList[i].type, attractedToList[i].multiplier);
+			}
+		}
+		if (afraidOfList != null)
+		{
+			for (int j = 0; j < afraidOfList.Count; j++)
+			{
+				afraidOfTypes.Add(afraidOfList[j].type, afraidOfList[j].multiplier);
+			}
+		}
+	}
+
+	public override void ProcessRemote()
+	{
+		UpdateTemplate();
+		base.ProcessRemote();
+		UpdateStateAnim();
+	}
+
+	public void SetState(CreatureState newState)
+	{
+		if (currentState == newState)
+		{
+			return;
+		}
+		if (currentState == CreatureState.Captured)
+		{
+			base.transform.localScale = Vector3.one;
+		}
+		ClearOngoingStateFX();
+		currentState = newState;
+		switch (newState)
+		{
+		case CreatureState.Spawning:
+			if (CrittersManager.instance.LocalAuthority())
+			{
+				spawningStartingPosition = base.gameObject.transform.position;
+				spawnStartTime = (PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
+			}
+			break;
+		case CreatureState.Despawning:
+			if (CrittersManager.instance.LocalAuthority())
+			{
+				spawningStartingPosition = base.gameObject.transform.position;
+				despawnStartTime = (PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
+			}
+			break;
+		}
+		StartOngoingStateFX(newState);
+		GameObject valueOrDefault = StartStateFX.GetValueOrDefault(currentState);
+		if (valueOrDefault.IsNotNull())
+		{
+			GameObject pooled = CrittersPool.GetPooled(valueOrDefault);
+			if (pooled != null)
+			{
+				pooled.transform.position = base.transform.position;
+			}
+		}
+		currentAnimTime = 0f;
+		if (stateAnim.TryGetValue(currentState, out var value))
+		{
+			currentAnim = value;
+		}
+		else
+		{
+			currentAnim = null;
+			animTarget.localPosition = Vector3.zero;
+			animTarget.localScale = Vector3.one;
+		}
+		if (this.OnDataChange != null)
+		{
+			this.OnDataChange();
+		}
+	}
+
+	private void ClearOngoingStateFX()
+	{
+		if (currentOngoingStateFX.IsNotNull())
+		{
+			CrittersPool.Return(currentOngoingStateFX);
+			currentOngoingStateFX = null;
+		}
+	}
+
+	private void StartOngoingStateFX(CreatureState state)
+	{
+		GameObject valueOrDefault = OngoingStateFX.GetValueOrDefault(state);
+		if (valueOrDefault.IsNotNull())
+		{
+			currentOngoingStateFX = CrittersPool.GetPooled(valueOrDefault);
+			if (currentOngoingStateFX.IsNotNull())
+			{
+				currentOngoingStateFX.transform.SetParent(base.transform, worldPositionStays: false);
+				currentOngoingStateFX.transform.localPosition = Vector3.zero;
+			}
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public void UpdateStateColor()
+	{
+		switch (currentState)
+		{
+		case CreatureState.Idle:
+			debugStateIndicator.material.color = debugColorIdle;
+			break;
+		case CreatureState.Eating:
+			debugStateIndicator.material.color = debugColorEating;
+			break;
+		case CreatureState.Running:
+			debugStateIndicator.material.color = debugColorScared;
+			break;
+		case CreatureState.Sleeping:
+			debugStateIndicator.material.color = debugColorSleeping;
+			break;
+		case CreatureState.SeekingFood:
+			debugStateIndicator.material.color = debugColorSeekingFood;
+			break;
+		case CreatureState.Grabbed:
+			debugStateIndicator.material.color = debugColorCaught;
+			break;
+		case CreatureState.Captured:
+			debugStateIndicator.material.color = debugColorCaged;
+			break;
+		case CreatureState.Stunned:
+			debugStateIndicator.material.color = debugColorStunned;
+			break;
+		case CreatureState.AttractedTo:
+			debugStateIndicator.material.color = debugColorAttracted;
+			break;
+		default:
+			debugStateIndicator.material.color = new Color(1f, 0f, 1f);
+			break;
+		}
+	}
+
+	public void UpdateStateAnim()
+	{
+		if (currentAnim != null)
+		{
+			currentAnimTime += Time.deltaTime * currentAnim.playSpeed;
+			currentAnimTime %= 1f;
+			float num = currentAnim.squashAmount.Evaluate(currentAnimTime);
+			float z = currentAnim.forwardOffset.Evaluate(currentAnimTime);
+			float x = currentAnim.horizontalOffset.Evaluate(currentAnimTime);
+			float y = currentAnim.verticalOffset.Evaluate(currentAnimTime);
+			animTarget.localPosition = new Vector3(x, y, z);
+			float num2 = 1f - num;
+			num2 *= 0.5f;
+			num2 += 1f;
+			animTarget.localScale = new Vector3(num2, num, num2);
+		}
+	}
+
+	public void IdleStateUpdate()
+	{
+		if (AboveFearThreshold())
+		{
+			SetState(CreatureState.Running);
+		}
+		else if (AboveAttractedThreshold() && (!AboveHungryThreshold() || !CrittersManager.AnyFoodNearby(this)))
+		{
+			SetState(CreatureState.AttractedTo);
+		}
+		else if (AboveHungryThreshold())
+		{
+			SetState(CreatureState.SeekingFood);
+		}
+		else if (AboveSleepyThreshold())
+		{
+			SetState(CreatureState.Sleeping);
+		}
+		else if (CanJump())
+		{
+			RandomJump();
+		}
+	}
+
+	public void EatingStateUpdate()
+	{
+		if (AboveFearThreshold())
+		{
+			SetState(CreatureState.Running);
+		}
+		else if (BelowNotHungryThreshold())
+		{
+			SetState(CreatureState.Idle);
+		}
+		else if (!withinEatingRadius || eatingTarget.IsNull() || eatingTarget.currentFood <= 0f)
+		{
+			SetState(CreatureState.SeekingFood);
+		}
+	}
+
+	public void SleepingStateUpdate()
+	{
+		if (AboveFearThreshold())
+		{
+			SetState(CreatureState.Running);
+		}
+		else if (BelowNotSleepyThreshold())
+		{
+			SetState(CreatureState.Idle);
+		}
+	}
+
+	public void AttractedStateUpdate()
+	{
+		if (AboveFearThreshold())
+		{
+			SetState(CreatureState.Running);
+		}
+		else if (BelowUnAttractedThreshold())
+		{
+			SetState(CreatureState.Idle);
+		}
+		else
+		{
+			if (!CanJump())
+			{
+				return;
+			}
+			if (AboveHungryThreshold() && CrittersManager.AnyFoodNearby(this))
+			{
+				SetState(CreatureState.SeekingFood);
+				return;
+			}
+			if (CrittersManager.instance.awareOfActors[this].Contains(attractionTarget))
+			{
+				lastSeenAttractionPosition = attractionTarget.transform.position;
+			}
+			JumpTowards(lastSeenAttractionPosition);
+		}
+	}
+
+	public void RunningStateUpdate()
+	{
+		if (CanJump())
+		{
+			if (CrittersManager.instance.awareOfActors[this].Contains(fearTarget))
+			{
+				lastSeenFearPosition = fearTarget.transform.position;
+			}
+			JumpAwayFrom(lastSeenFearPosition);
+		}
+		if (BelowNotAfraidThreshold())
+		{
+			SetState(CreatureState.Idle);
+		}
+	}
+
+	public void SeekingFoodStateUpdate()
+	{
+		if (AboveFearThreshold())
+		{
+			SetState(CreatureState.Running);
+		}
+		else
+		{
+			if (!CanJump())
+			{
+				return;
+			}
+			if (CrittersManager.CritterAwareOfAny(this))
+			{
+				eatingTarget = CrittersManager.ClosestFood(this);
+				if (eatingTarget != null)
+				{
+					withinEatingRadius = (eatingTarget.food.transform.position - base.transform.position).sqrMagnitude < eatingRadiusMaxSquared;
+					if (!withinEatingRadius)
+					{
+						JumpTowards(eatingTarget.food.transform.position);
+						return;
+					}
+					base.transform.forward = (eatingTarget.food.transform.position - base.transform.position).X_Z().normalized;
+					SetState(CreatureState.Eating);
+					debugStateIndicator.material.color = debugColorEating;
+				}
+				else if (AboveAttractedThreshold())
+				{
+					SetState(CreatureState.AttractedTo);
+				}
+				else
+				{
+					RandomJump();
+				}
+			}
+			else
+			{
+				RandomJump();
+			}
+		}
+	}
+
+	public void GrabbedStateUpdate()
+	{
+		if (currentState == CreatureState.Grabbed && grabbedTarget != null)
+		{
+			if (currentStruggle >= escapeThreshold || !grabbedTarget.grabbing)
+			{
+				Released(keepWorldPosition: true);
+			}
+		}
+		else if (grabbedTarget == null)
+		{
+			Released(keepWorldPosition: true);
+		}
+	}
+
+	protected override void HandleRemoteReleased()
+	{
+		base.HandleRemoteReleased();
+		if (cageTarget.IsNotNull())
+		{
+			fearTarget = cageTarget;
+			cageTarget.SetHasCritter(value: false);
+			cageTarget = null;
+		}
+		if (grabbedTarget.IsNotNull())
+		{
+			fearTarget = grabbedTarget;
+			grabbedTarget = null;
+			if ((bool)OnReleasedFX)
+			{
+				CrittersPool.GetPooled(OnReleasedFX).transform.position = base.transform.position;
+			}
+		}
+	}
+
+	public override void Released(bool keepWorldPosition, Quaternion rotation = default(Quaternion), Vector3 position = default(Vector3), Vector3 impulse = default(Vector3), Vector3 impulseRotation = default(Vector3))
+	{
+		base.Released(keepWorldPosition, rotation, position, impulse, impulseRotation);
+		if (currentState != CreatureState.Grabbed && currentState != CreatureState.Captured)
+		{
+			return;
+		}
+		if (grabbedTarget.IsNotNull() && grabbedTarget.grabbedActors.Contains(this))
+		{
+			grabbedTarget.grabbedActors.Remove(this);
+		}
+		if (currentState == CreatureState.Grabbed)
+		{
+			fearTarget = grabbedTarget;
+			grabbedTarget = null;
+			if ((bool)OnReleasedFX)
+			{
+				CrittersPool.GetPooled(OnReleasedFX).transform.position = base.transform.position;
+			}
+		}
+		else if (currentState == CreatureState.Captured)
+		{
+			base.transform.localScale = Vector3.one;
+			fearTarget = cageTarget;
+			cageTarget.SetHasCritter(value: false);
+			cageTarget = null;
+		}
+		if (struggleGainedPerSecond > 0f)
+		{
+			currentFear = maxFear;
+			SetState(CreatureState.Running);
+			lastSeenFearPosition = fearTarget.transform.position;
+		}
+		else
+		{
+			currentFear = 0f;
+			SetState(CreatureState.Idle);
+		}
+	}
+
+	public void CapturedStateUpdate()
+	{
+		if (cageTarget.IsNull())
+		{
+			cageTarget = (CrittersCage)CrittersManager.instance.actorById[actorIdTarget];
+			cageTarget.SetHasCritter(value: false);
+		}
+		if (cageTarget.inReleasingPosition && cageTarget.heldByPlayer)
+		{
+			Released(keepWorldPosition: true);
+		}
+	}
+
+	public void StunnedStateUpdate()
+	{
+		remainingStunnedTime = Mathf.Max(0f, remainingStunnedTime - Time.deltaTime);
+		if (remainingStunnedTime <= 0f)
+		{
+			currentFear = maxFear;
+			SetState(CreatureState.Running);
+		}
+	}
+
+	public void WaitingToDespawnStateUpdate()
+	{
+		if (Mathf.FloorToInt(rb.linearVelocity.magnitude * 10f) == 0)
+		{
+			SetState(CreatureState.Despawning);
+		}
+	}
+
+	public void DespawningStateUpdate()
+	{
+		_despawnAnimTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - despawnStartTime;
+		if (_despawnAnimTime >= (double)_despawnAnimationDuration)
+		{
+			base.gameObject.SetActive(value: false);
+			TemplateIndex = -1;
+		}
+	}
+
+	public void SpawningStateUpdate()
+	{
+		_spawnAnimTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time)) - spawnStartTime;
+		MoveActor(spawningStartingPosition + new Vector3(0f, spawnInHeighMovement.Evaluate(Mathf.Clamp((float)_spawnAnimTime, 0f, _spawnAnimationDuration)), 0f), base.transform.rotation);
+		if (_spawnAnimTime >= (double)_spawnAnimationDuration)
+		{
+			SetState(CreatureState.Idle);
+		}
+	}
+
+	public void UpdateMoodSourceData()
+	{
+		UpdateHunger();
+		UpdateFearAndAttraction();
+		UpdateSleepiness();
+		UpdateStruggle();
+		UpdateSlowed();
+		UpdateGrabbed();
+		UpdateCaged();
+	}
+
+	public void UpdateHunger()
+	{
+		if (currentState == CreatureState.Eating && !eatingTarget.IsNull())
+		{
+			eatingTarget.Feed(hungerLostPerSecond * Time.deltaTime);
+			currentHunger = Mathf.Max(0f, currentHunger - hungerLostPerSecond * Time.deltaTime);
+		}
+		else
+		{
+			currentHunger = Mathf.Min(maxHunger, currentHunger + hungerGainedPerSecond * Time.deltaTime);
+		}
+	}
+
+	public void UpdateFearAndAttraction()
+	{
+		if (currentState == CreatureState.Spawning)
+		{
+			return;
+		}
+		currentFear = Mathf.Max(0f, currentFear - fearLostPerSecond * Time.deltaTime);
+		currentAttraction = Mathf.Max(0f, currentAttraction - attractionLostPerSecond * Time.deltaTime);
+		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
+		{
+			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
+			float value2;
+			if (afraidOfTypes != null && afraidOfTypes.TryGetValue(crittersActor.crittersActorType, out var value))
+			{
+				crittersActor.CalculateFear(this, value);
+			}
+			else if (attractedToTypes != null && attractedToTypes.TryGetValue(crittersActor.crittersActorType, out value2))
+			{
+				crittersActor.CalculateAttraction(this, value2);
+			}
+		}
+	}
+
+	public void IncreaseFear(float fearAmount, CrittersActor actor)
+	{
+		if (fearAmount > 0f)
+		{
+			currentFear += fearAmount;
+			currentFear = Mathf.Min(maxFear, currentFear);
+			fearTarget = actor;
+			lastSeenFearPosition = fearTarget.transform.position;
+		}
+	}
+
+	public void IncreaseAttraction(float attractionAmount, CrittersActor actor)
+	{
+		if (attractionAmount > 0f)
+		{
+			currentAttraction += attractionAmount;
+			currentAttraction = Mathf.Min(maxAttraction, currentAttraction);
+			attractionTarget = actor;
+			lastSeenAttractionPosition = attractionTarget.transform.position;
+		}
+	}
+
+	public void UpdateSleepiness()
+	{
+		if (currentState == CreatureState.Sleeping)
+		{
+			currentSleepiness = Mathf.Max(0f, currentSleepiness - Time.deltaTime * sleepinessLostPerSecond);
+		}
+		else
+		{
+			currentSleepiness = Mathf.Min(maxSleepiness, currentSleepiness + Time.deltaTime * sleepinessGainedPerSecond);
+		}
+	}
+
+	public void UpdateStruggle()
+	{
+		if (currentState == CreatureState.Grabbed)
+		{
+			currentStruggle = Mathf.Clamp(currentStruggle + struggleGainedPerSecond * Time.deltaTime, 0f, maxStruggle);
+		}
+		else
+		{
+			currentStruggle = Mathf.Max(0f, currentStruggle - struggleLostPerSecond * Time.deltaTime);
+		}
+	}
+
+	private void UpdateSlowed()
+	{
+		if (remainingSlowedTime > 0f)
+		{
+			remainingSlowedTime -= Time.deltaTime;
+			if (remainingSlowedTime < 0f)
+			{
+				slowSpeedMod = 1f;
+			}
+		}
+		else
+		{
+			if (currentState == CreatureState.Captured || currentState == CreatureState.Despawning || currentState == CreatureState.Grabbed || currentState == CreatureState.WaitingToDespawn || currentState == CreatureState.Spawning)
+			{
+				return;
+			}
+			for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
+			{
+				CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
+				if (crittersActor.crittersActorType == CrittersActorType.StickyGoo)
+				{
+					CrittersStickyGoo crittersStickyGoo = crittersActor as CrittersStickyGoo;
+					slowSpeedMod = crittersStickyGoo.slowModifier;
+					remainingSlowedTime = crittersStickyGoo.slowDuration;
+					crittersStickyGoo.EffectApplied(this);
+				}
+			}
+		}
+	}
+
+	public void UpdateGrabbed()
+	{
+		if (currentState == CreatureState.Grabbed || currentState == CreatureState.Captured)
+		{
+			return;
+		}
+		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
+		{
+			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
+			if (crittersActor.crittersActorType == CrittersActorType.Grabber && !crittersActor.isOnPlayer && IsGrabPossible((CrittersGrabber)crittersActor))
+			{
+				GrabbedBy(crittersActor, positionOverride: true);
+			}
+		}
+	}
+
+	public void UpdateCaged()
+	{
+		if (currentState == CreatureState.Captured)
+		{
+			return;
+		}
+		for (int i = 0; i < CrittersManager.instance.awareOfActors[this].Count; i++)
+		{
+			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
+			CrittersCage crittersCage = crittersActor as CrittersCage;
+			if (crittersActor.crittersActorType == CrittersActorType.Cage && crittersCage.IsNotNull() && crittersCage.CanCatch && WithinCaptureDistance(crittersCage))
+			{
+				GrabbedBy(crittersActor, positionOverride: true, crittersCage.cagePosition.localRotation, crittersCage.cagePosition.localPosition);
+			}
+		}
+	}
+
+	public void RandomJump()
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			base.transform.eulerAngles = new Vector3(0f, 360f * UnityEngine.Random.value, 0f);
+			if (!SomethingInTheWay())
+			{
+				break;
+			}
+		}
+		LocalJump(maxJumpVel, 45f);
+	}
+
+	public void JumpTowards(Vector3 targetPos)
+	{
+		if (SomethingInTheWay((targetPos - base.transform.position).X_Z()))
+		{
+			RandomJump();
+			return;
+		}
+		base.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(targetPos - base.transform.position, Vector3.up), Vector3.up);
+		LocalJump(JumpVelocityForDistanceAtAngle(Vector3.ProjectOnPlane(targetPos - base.transform.position, Vector3.up).magnitude * fudge, 45f), 45f);
+	}
+
+	public void JumpAwayFrom(Vector3 targetPos)
+	{
+		Vector3 vector = (base.transform.position - targetPos).X_Z();
+		if (vector == Vector3.zero)
+		{
+			vector = base.transform.forward;
+		}
+		Vector3 vector2 = Quaternion.Euler(0f, UnityEngine.Random.Range(-30, 30), 0f) * vector;
+		if (SomethingInTheWay(vector2))
+		{
+			RandomJump();
+			return;
+		}
+		base.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
+		LocalJump(maxJumpVel, 45f);
+	}
+
+	public bool SomethingInTheWay(Vector3 direction = default(Vector3))
+	{
+		if (direction == default(Vector3))
+		{
+			direction = base.transform.forward;
+		}
+		bool flag = Physics.RaycastNonAlloc(bodyCollider.bounds.center, direction, raycastHits, obstacleSeeDistance, CrittersManager.instance.movementLayers) > 0;
+		wasSomethingInTheWay |= flag;
+		return flag;
+	}
+
+	public override bool CanBeGrabbed(CrittersActor grabbedBy)
+	{
+		if (currentState == CreatureState.Captured)
+		{
+			return false;
+		}
+		return base.CanBeGrabbed(grabbedBy);
+	}
+
+	public override void GrabbedBy(CrittersActor grabbingActor, bool positionOverride = false, Quaternion localRotation = default(Quaternion), Vector3 localOffset = default(Vector3), bool disableGrabbing = false)
+	{
+		switch (grabbingActor.crittersActorType)
+		{
+		case CrittersActorType.Grabber:
+			SetState(CreatureState.Grabbed);
+			grabbedTarget = (CrittersGrabber)grabbingActor;
+			actorIdTarget = grabbedTarget.actorId;
+			base.GrabbedBy(grabbingActor, positionOverride, localRotation, localOffset, disableGrabbing);
+			break;
+		case CrittersActorType.Cage:
+			SetState(CreatureState.Captured);
+			cageTarget = (CrittersCage)grabbingActor;
+			cageTarget.SetHasCritter(value: true);
+			actorIdTarget = cageTarget.actorId;
+			if (CrittersManager.instance.LocalAuthority())
+			{
+				base.transform.localScale = cageTarget.critterScale;
+			}
+			base.GrabbedBy(grabbingActor, positionOverride, localRotation, localOffset, disableGrabbing);
+			break;
+		}
+	}
+
+	protected override void RemoteGrabbedBy(CrittersActor grabbingActor)
+	{
+		base.RemoteGrabbedBy(grabbingActor);
+		switch (grabbingActor.crittersActorType)
+		{
+		case CrittersActorType.Cage:
+			cageTarget = (CrittersCage)grabbingActor;
+			cageTarget.SetHasCritter(value: true);
+			actorIdTarget = cageTarget.actorId;
+			if (CrittersManager.instance.LocalAuthority())
+			{
+				base.transform.localScale = cageTarget.critterScale;
+			}
+			break;
+		case CrittersActorType.Grabber:
+			grabbedTarget = (CrittersGrabber)grabbingActor;
+			actorIdTarget = grabbedTarget.actorId;
+			break;
+		}
+	}
+
+	public void Stunned(float duration)
+	{
+		if (currentState != CreatureState.Captured && currentState != CreatureState.Grabbed && currentState != CreatureState.Despawning && currentState != CreatureState.WaitingToDespawn)
+		{
+			remainingStunnedTime = duration;
+			SetState(CreatureState.Stunned);
+			updatedSinceLastFrame = true;
+		}
+	}
+
+	public bool AboveFearThreshold()
+	{
+		return currentFear >= scaredThreshold;
+	}
+
+	public bool BelowNotAfraidThreshold()
+	{
+		return currentFear < calmThreshold;
+	}
+
+	public bool AboveAttractedThreshold()
+	{
+		return currentAttraction >= attractedThreshold;
+	}
+
+	public bool BelowUnAttractedThreshold()
+	{
+		return currentAttraction < unattractedThreshold;
+	}
+
+	public bool AboveHungryThreshold()
+	{
+		return currentHunger >= hungryThreshold;
+	}
+
+	public bool BelowNotHungryThreshold()
+	{
+		return currentHunger < satiatedThreshold;
+	}
+
+	public bool AboveSleepyThreshold()
+	{
+		return currentSleepiness >= tiredThreshold;
+	}
+
+	public bool BelowNotSleepyThreshold()
+	{
+		return currentSleepiness < awakeThreshold;
+	}
+
+	public bool CanJump()
+	{
+		if (!canJump)
+		{
+			return false;
+		}
+		float num = ((currentState != CreatureState.Running) ? jumpCooldown : scaredJumpCooldown);
+		float num2 = (PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
+		if (lastImpulseTime > (double)(num2 + jumpCooldown + jumpVariabilityTime))
+		{
+			lastImpulseTime = num2 + GetAdditiveJumpDelay();
+		}
+		return (double)num2 > lastImpulseTime + (double)num;
+	}
+
+	public void OnCollisionEnter(Collision collision)
+	{
+		canJump = true;
+	}
+
+	public void OnCollisionExit(Collision collision)
+	{
+		canJump = false;
+	}
+
+	public void SetVelocity(Vector3 linearVelocity)
+	{
+		rb.linearVelocity = linearVelocity;
+	}
+
+	public override int AddActorDataToList(ref List<object> objList)
+	{
+		base.AddActorDataToList(ref objList);
+		objList.Add(Mathf.FloorToInt(currentFear));
+		objList.Add(Mathf.FloorToInt(currentHunger));
+		objList.Add(Mathf.FloorToInt(currentSleepiness));
+		objList.Add(Mathf.FloorToInt(currentStruggle));
+		objList.Add(currentState);
+		objList.Add(actorIdTarget);
+		objList.Add(lifeTimeStart);
+		objList.Add(TemplateIndex);
+		objList.Add(Mathf.FloorToInt(remainingStunnedTime));
+		objList.Add(spawnStartTime);
+		objList.Add(despawnStartTime);
+		objList.AddRange(visuals.Appearance.WriteToRPCData());
+		return TotalActorDataLength();
+	}
+
+	public override int TotalActorDataLength()
+	{
+		return BaseActorDataLength() + 11 + CritterAppearance.DataLength();
+	}
+
+	public override int UpdateFromRPC(object[] data, int startingIndex)
+	{
+		startingIndex += base.UpdateFromRPC(data, startingIndex);
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex], out var dataAsType))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 1], out var dataAsType2))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 2], out var dataAsType3))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 3], out var dataAsType4))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 4], out var dataAsType5))
+		{
+			return TotalActorDataLength();
+		}
+		if (!Enum.IsDefined(typeof(CreatureState), (CreatureState)dataAsType5))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 5], out var dataAsType6))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 6], out var dataAsType7))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 7], out var dataAsType8))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<int>(data[startingIndex + 8], out var dataAsType9))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 9], out var dataAsType10))
+		{
+			return TotalActorDataLength();
+		}
+		if (!CrittersManager.ValidateDataType<double>(data[startingIndex + 10], out var dataAsType11))
+		{
+			return TotalActorDataLength();
+		}
+		currentFear = dataAsType;
+		currentHunger = dataAsType2;
+		currentSleepiness = dataAsType3;
+		currentStruggle = dataAsType4;
+		SetState((CreatureState)dataAsType5);
+		actorIdTarget = dataAsType6;
+		lifeTimeStart = dataAsType7.GetFinite();
+		TemplateIndex = dataAsType8;
+		remainingStunnedTime = dataAsType9;
+		spawnStartTime = dataAsType10.GetFinite();
+		despawnStartTime = dataAsType11.GetFinite();
+		CrittersActor value = null;
+		switch (currentState)
+		{
+		case CreatureState.Grabbed:
+			if (CrittersManager.instance.actorById.TryGetValue(parentActorId, out value))
+			{
+				grabbedTarget = (CrittersGrabber)value;
+			}
+			cageTarget = null;
+			break;
+		case CreatureState.Captured:
+			if (CrittersManager.instance.actorById.TryGetValue(parentActorId, out value))
+			{
+				cageTarget = (CrittersCage)value;
+				if (cageTarget != null)
+				{
+					base.transform.localScale = cageTarget.critterScale;
+				}
+			}
+			grabbedTarget = null;
+			break;
+		default:
+			grabbedTarget = null;
+			cageTarget = null;
+			break;
+		}
+		UpdateTemplate();
+		visuals.SetAppearance(CritterAppearance.ReadFromRPCData(data[(startingIndex + 11)..]));
+		return TotalActorDataLength();
+	}
+
+	public override bool UpdateSpecificActor(PhotonStream stream)
+	{
+		if (!(base.UpdateSpecificActor(stream) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType2) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType3) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType4) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType5) & Enum.IsDefined(typeof(CreatureState), (CreatureState)dataAsType5) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType6) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out var dataAsType7) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType8) & CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out var dataAsType9) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out var dataAsType10) & CrittersManager.ValidateDataType<double>(stream.ReceiveNext(), out var dataAsType11)))
+		{
+			return false;
+		}
+		currentFear = dataAsType;
+		currentHunger = dataAsType2;
+		currentSleepiness = dataAsType3;
+		currentStruggle = dataAsType4;
+		SetState((CreatureState)dataAsType5);
+		actorIdTarget = dataAsType6;
+		lifeTimeStart = dataAsType7;
+		TemplateIndex = dataAsType8;
+		remainingStunnedTime = dataAsType9;
+		spawnStartTime = dataAsType10;
+		despawnStartTime = dataAsType11;
+		UpdateTemplate();
+		CrittersActor value = null;
+		switch (currentState)
+		{
+		case CreatureState.Grabbed:
+			if (CrittersManager.instance.actorById.TryGetValue(parentActorId, out value))
+			{
+				grabbedTarget = (CrittersGrabber)value;
+			}
+			cageTarget = null;
+			break;
+		case CreatureState.Captured:
+			if (CrittersManager.instance.actorById.TryGetValue(parentActorId, out value))
+			{
+				cageTarget = (CrittersCage)value;
+				if (cageTarget != null)
+				{
+					base.transform.localScale = cageTarget.critterScale;
+				}
+			}
+			grabbedTarget = null;
+			break;
+		default:
+			grabbedTarget = null;
+			cageTarget = null;
+			break;
+		}
+		return true;
+	}
+
+	public override void SendDataByCrittersActorType(PhotonStream stream)
+	{
+		base.SendDataByCrittersActorType(stream);
+		stream.SendNext(Mathf.FloorToInt(currentFear));
+		stream.SendNext(Mathf.FloorToInt(currentHunger));
+		stream.SendNext(Mathf.FloorToInt(currentSleepiness));
+		stream.SendNext(Mathf.FloorToInt(currentStruggle));
+		stream.SendNext(currentState);
+		stream.SendNext(actorIdTarget);
+		stream.SendNext(lifeTimeStart);
+		stream.SendNext(TemplateIndex);
+		stream.SendNext(Mathf.FloorToInt(remainingStunnedTime));
+		stream.SendNext(spawnStartTime);
+		stream.SendNext(despawnStartTime);
+	}
+
+	public void SetConfiguration(CritterConfiguration getRandomConfiguration)
+	{
+		throw new NotImplementedException();
+	}
+
+	public void SetSpawnData(object[] spawnData)
+	{
+		visuals.SetAppearance(CritterAppearance.ReadFromRPCData(spawnData));
+	}
+
+	private IList<KeyValueStringPair> BuildEyeScannerData()
+	{
+		eyeScanData[0] = new KeyValueStringPair("Name", creatureConfiguration.critterName);
+		eyeScanData[1] = new KeyValueStringPair("Type", creatureConfiguration.animalType.ToString());
+		eyeScanData[2] = new KeyValueStringPair("Temperament", creatureConfiguration.behaviour.temperament);
+		eyeScanData[3] = new KeyValueStringPair("Habitat", creatureConfiguration.biome.GetHabitatDescription());
+		eyeScanData[4] = new KeyValueStringPair("Size", visuals.Appearance.size.ToString("0.00"));
+		eyeScanData[5] = new KeyValueStringPair("State", GetCurrentStateName());
+		return eyeScanData;
+	}
+
+	private string GetCurrentStateName()
+	{
+		string text = currentState switch
+		{
+			CreatureState.Idle => "Adventuring", 
+			CreatureState.Eating => "Eating", 
+			CreatureState.AttractedTo => "Curious", 
+			CreatureState.Running => "Scared", 
+			CreatureState.Grabbed => (struggleGainedPerSecond > 0f) ? "Struggling" : "Happy", 
+			CreatureState.Sleeping => "Sleeping", 
+			CreatureState.SeekingFood => "Foraging", 
+			CreatureState.Captured => "Captured", 
+			CreatureState.Stunned => "Stunned", 
+			_ => "Contemplating Life", 
+		};
+		if (slowSpeedMod < 1f)
+		{
+			text = "Slowed, " + text;
+		}
+		return text;
 	}
 }

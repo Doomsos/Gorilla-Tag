@@ -1,41 +1,39 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+public class DestroyOnAwake : MonoBehaviour
 {
-	public class DestroyOnAwake : MonoBehaviour
+	protected void Awake()
 	{
-		protected void Awake()
+		try
 		{
-			try
-			{
-				Object.Destroy(base.gameObject);
-			}
-			catch
-			{
-			}
+			Object.Destroy(base.gameObject);
 		}
-
-		protected void OnEnable()
+		catch
 		{
-			try
-			{
-				Object.Destroy(base.gameObject);
-			}
-			catch
-			{
-			}
 		}
+	}
 
-		protected void Update()
+	protected void OnEnable()
+	{
+		try
 		{
-			try
-			{
-				Object.Destroy(base.gameObject);
-			}
-			catch
-			{
-			}
+			Object.Destroy(base.gameObject);
+		}
+		catch
+		{
+		}
+	}
+
+	protected void Update()
+	{
+		try
+		{
+			Object.Destroy(base.gameObject);
+		}
+		catch
+		{
 		}
 	}
 }

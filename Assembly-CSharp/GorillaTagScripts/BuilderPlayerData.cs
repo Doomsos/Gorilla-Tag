@@ -1,11 +1,8 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public struct BuilderPlayerData
 {
-	public struct BuilderPlayerData
-	{
-		public int playerActorNumber;
+	public int playerActorNumber;
 
-		public float scale;
-	}
+	public float scale;
 }

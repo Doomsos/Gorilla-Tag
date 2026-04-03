@@ -1,12 +1,15 @@
-﻿using System;
 using GorillaLocomotion;
 using UnityEngine;
 
 public class DampenVolumeSpace : MonoBehaviour
 {
+	public AudioSource audioSource;
+
+	public float setVolume;
+
 	private void Awake()
 	{
-		if (this.audioSource == null)
+		if (audioSource == null)
 		{
 			base.enabled = false;
 		}
@@ -15,13 +18,9 @@ public class DampenVolumeSpace : MonoBehaviour
 	private void OnTriggerEnter(Collider other)
 	{
 		GTPlayer componentInParent = other.GetComponentInParent<GTPlayer>();
-		if (componentInParent != null && componentInParent == GTPlayer.Instance)
+		if ((object)componentInParent != null && componentInParent == GTPlayer.Instance)
 		{
-			this.audioSource.volume = this.setVolume;
+			audioSource.volume = setVolume;
 		}
 	}
-
-	public AudioSource audioSource;
-
-	public float setVolume;
 }

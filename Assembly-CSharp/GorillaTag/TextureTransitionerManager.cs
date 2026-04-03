@@ -1,93 +1,87 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[ExecuteAlways]
+public class TextureTransitionerManager : MonoBehaviour
 {
-	[ExecuteAlways]
-	public class TextureTransitionerManager : MonoBehaviour
+	public static readonly List<TextureTransitioner> components = new List<TextureTransitioner>(256);
+
+	private MaterialPropertyBlock matPropBlock;
+
+	public static TextureTransitionerManager instance { get; private set; }
+
+	protected void Awake()
 	{
-		public static TextureTransitionerManager instance { get; private set; }
-
-		protected void Awake()
+		if (instance != null)
 		{
-			if (TextureTransitionerManager.instance != null)
-			{
-				Object.Destroy(base.gameObject);
-				return;
-			}
-			TextureTransitionerManager.instance = this;
-			if (Application.isPlaying)
-			{
-				Object.DontDestroyOnLoad(base.gameObject);
-			}
-			this.matPropBlock = new MaterialPropertyBlock();
+			Object.Destroy(base.gameObject);
+			return;
 		}
-
-		protected void LateUpdate()
+		instance = this;
+		if (Application.isPlaying)
 		{
-			foreach (TextureTransitioner textureTransitioner in TextureTransitionerManager.components)
+			Object.DontDestroyOnLoad(base.gameObject);
+		}
+		matPropBlock = new MaterialPropertyBlock();
+	}
+
+	protected void LateUpdate()
+	{
+		foreach (TextureTransitioner component in components)
+		{
+			int num = component.textures.Length;
+			float num2 = Mathf.Clamp01(component.remapInfo.Remap(component.iDynamicFloat.floatValue));
+			switch (component.directionRetentionMode)
 			{
-				int num = textureTransitioner.textures.Length;
-				float num2 = Mathf.Clamp01(textureTransitioner.remapInfo.Remap(textureTransitioner.iDynamicFloat.floatValue));
-				TextureTransitioner.DirectionRetentionMode directionRetentionMode = textureTransitioner.directionRetentionMode;
-				if (directionRetentionMode != TextureTransitioner.DirectionRetentionMode.IncreaseOnly)
+			case TextureTransitioner.DirectionRetentionMode.IncreaseOnly:
+				num2 = Mathf.Max(num2, component.normalizedValue);
+				break;
+			case TextureTransitioner.DirectionRetentionMode.DecreaseOnly:
+				num2 = Mathf.Min(num2, component.normalizedValue);
+				break;
+			}
+			float num3 = num2 * (float)(num - 1);
+			float num4 = num3 % 1f;
+			int num5 = (int)(num4 * 1000f);
+			int num6 = (int)num3;
+			int num7 = Mathf.Min(num - 1, num6 + 1);
+			if (num5 != component.transitionPercent || num6 != component.tex1Index || num7 != component.tex2Index)
+			{
+				matPropBlock.SetFloat(component.texTransitionShaderParam, num4);
+				matPropBlock.SetTexture(component.tex1ShaderParam, component.textures[num6]);
+				matPropBlock.SetTexture(component.tex2ShaderParam, component.textures[num7]);
+				Renderer[] renderers = component.renderers;
+				for (int i = 0; i < renderers.Length; i++)
 				{
-					if (directionRetentionMode == TextureTransitioner.DirectionRetentionMode.DecreaseOnly)
-					{
-						num2 = Mathf.Min(num2, textureTransitioner.normalizedValue);
-					}
+					renderers[i].SetPropertyBlock(matPropBlock);
 				}
-				else
-				{
-					num2 = Mathf.Max(num2, textureTransitioner.normalizedValue);
-				}
-				float num3 = num2 * (float)(num - 1);
-				float num4 = num3 % 1f;
-				int num5 = (int)(num4 * 1000f);
-				int num6 = (int)num3;
-				int num7 = Mathf.Min(num - 1, num6 + 1);
-				if (num5 != textureTransitioner.transitionPercent || num6 != textureTransitioner.tex1Index || num7 != textureTransitioner.tex2Index)
-				{
-					this.matPropBlock.SetFloat(textureTransitioner.texTransitionShaderParam, num4);
-					this.matPropBlock.SetTexture(textureTransitioner.tex1ShaderParam, textureTransitioner.textures[num6]);
-					this.matPropBlock.SetTexture(textureTransitioner.tex2ShaderParam, textureTransitioner.textures[num7]);
-					Renderer[] renderers = textureTransitioner.renderers;
-					for (int i = 0; i < renderers.Length; i++)
-					{
-						renderers[i].SetPropertyBlock(this.matPropBlock);
-					}
-					textureTransitioner.normalizedValue = num2;
-					textureTransitioner.transitionPercent = num5;
-					textureTransitioner.tex1Index = num6;
-					textureTransitioner.tex2Index = num7;
-				}
+				component.normalizedValue = num2;
+				component.transitionPercent = num5;
+				component.tex1Index = num6;
+				component.tex2Index = num7;
 			}
 		}
+	}
 
-		public static void EnsureInstanceIsAvailable()
+	public static void EnsureInstanceIsAvailable()
+	{
+		if (!(instance != null))
 		{
-			if (TextureTransitionerManager.instance != null)
-			{
-				return;
-			}
-			GameObject gameObject = new GameObject();
-			TextureTransitionerManager.instance = gameObject.AddComponent<TextureTransitionerManager>();
-			gameObject.name = "TextureTransitionerManager (Singleton)";
+			GameObject obj = new GameObject();
+			instance = obj.AddComponent<TextureTransitionerManager>();
+			obj.name = "TextureTransitionerManager (Singleton)";
 		}
+	}
 
-		public static void Register(TextureTransitioner component)
-		{
-			TextureTransitionerManager.components.Add(component);
-		}
+	public static void Register(TextureTransitioner component)
+	{
+		components.Add(component);
+	}
 
-		public static void Unregister(TextureTransitioner component)
-		{
-			TextureTransitionerManager.components.Remove(component);
-		}
-
-		public static readonly List<TextureTransitioner> components = new List<TextureTransitioner>(256);
-
-		private MaterialPropertyBlock matPropBlock;
+	public static void Unregister(TextureTransitioner component)
+	{
+		components.Remove(component);
 	}
 }

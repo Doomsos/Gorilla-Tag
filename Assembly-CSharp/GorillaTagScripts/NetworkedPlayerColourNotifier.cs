@@ -1,82 +1,69 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using Photon.Pun;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public static class NetworkedPlayerColourNotifier
 {
-	public static class NetworkedPlayerColourNotifier
+	private static RigContainer m_localRigContainer;
+
+	private static VRRig m_localRig;
+
+	private static Color m_initialNetColour;
+
+	private static bool m_netColourDirty;
+
+	static NetworkedPlayerColourNotifier()
 	{
-		static NetworkedPlayerColourNotifier()
-		{
-			RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(NetworkedPlayerColourNotifier.OnPlayerJoinedRoom);
-			RoomSystem.JoinedRoomEvent += new Action(NetworkedPlayerColourNotifier.OnJoinedRoom);
-		}
+		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(OnPlayerJoinedRoom);
+		RoomSystem.JoinedRoomEvent += new Action(OnJoinedRoom);
+	}
 
-		public static void SetLocalRigReference(RigContainer rig)
-		{
-			NetworkedPlayerColourNotifier.m_localRigContainer = rig;
-			NetworkedPlayerColourNotifier.m_localRig = rig.Rig;
-			NetworkedPlayerColourNotifier.m_localRig.OnColorChanged += NetworkedPlayerColourNotifier.OnLocalColourChanged;
-			NetworkedPlayerColourNotifier.m_netColourDirty = false;
-		}
+	public static void SetLocalRigReference(RigContainer rig)
+	{
+		m_localRigContainer = rig;
+		m_localRig = rig.Rig;
+		m_localRig.OnColorChanged += OnLocalColourChanged;
+		m_netColourDirty = false;
+	}
 
-		public static void NotifyOthers()
+	public static void NotifyOthers()
+	{
+		if (RoomSystem.JoinedRoom && !m_localRigContainer.netView.IsNull())
 		{
-			if (!RoomSystem.JoinedRoom || NetworkedPlayerColourNotifier.m_localRigContainer.netView.IsNull())
-			{
-				return;
-			}
-			Color playerColor = NetworkedPlayerColourNotifier.m_localRig.playerColor;
+			Color playerColor = m_localRig.playerColor;
 			float r = playerColor.r;
 			float g = playerColor.g;
 			float b = playerColor.b;
-			NetworkedPlayerColourNotifier.m_localRigContainer.netView.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.Others, new object[]
-			{
-				r,
-				g,
-				b
-			});
+			m_localRigContainer.netView.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.Others, r, g, b);
 		}
+	}
 
-		private static void OnLocalColourChanged(Color color)
+	private static void OnLocalColourChanged(Color color)
+	{
+		if (RoomSystem.JoinedRoom)
 		{
-			if (!RoomSystem.JoinedRoom)
-			{
-				return;
-			}
-			NetworkedPlayerColourNotifier.m_netColourDirty = (NetworkedPlayerColourNotifier.m_initialNetColour != color);
+			m_netColourDirty = m_initialNetColour != color;
 		}
+	}
 
-		private static void OnPlayerJoinedRoom(NetPlayer player)
+	private static void OnPlayerJoinedRoom(NetPlayer player)
+	{
+		if (m_netColourDirty && m_localRigContainer.netView.IsNotNull())
 		{
-			if (NetworkedPlayerColourNotifier.m_netColourDirty && NetworkedPlayerColourNotifier.m_localRigContainer.netView.IsNotNull())
-			{
-				Color playerColor = NetworkedPlayerColourNotifier.m_localRig.playerColor;
-				float r = playerColor.r;
-				float g = playerColor.g;
-				float b = playerColor.b;
-				NetworkedPlayerColourNotifier.m_localRigContainer.netView.SendRPC("RPC_InitializeNoobMaterial", player, new object[]
-				{
-					r,
-					g,
-					b
-				});
-			}
+			Color playerColor = m_localRig.playerColor;
+			float r = playerColor.r;
+			float g = playerColor.g;
+			float b = playerColor.b;
+			m_localRigContainer.netView.SendRPC("RPC_InitializeNoobMaterial", player, r, g, b);
 		}
+	}
 
-		private static void OnJoinedRoom()
-		{
-			NetworkedPlayerColourNotifier.m_initialNetColour = NetworkedPlayerColourNotifier.m_localRig.playerColor;
-			NetworkedPlayerColourNotifier.m_netColourDirty = false;
-		}
-
-		private static RigContainer m_localRigContainer;
-
-		private static VRRig m_localRig;
-
-		private static Color m_initialNetColour;
-
-		private static bool m_netColourDirty;
+	private static void OnJoinedRoom()
+	{
+		m_initialNetColour = m_localRig.playerColor;
+		m_netColourDirty = false;
 	}
 }

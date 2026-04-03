@@ -1,21 +1,24 @@
-﻿using System;
 using GorillaTag;
 using UnityEngine;
 
 public class ScienceExperimentSceneElement : MonoBehaviour, ITickSystemPost
 {
+	public ScienceExperimentElementID elementID;
+
+	private Transform followElement;
+
 	bool ITickSystemPost.PostTickRunning { get; set; }
 
 	void ITickSystemPost.PostTick()
 	{
-		base.transform.position = this.followElement.position;
-		base.transform.rotation = this.followElement.rotation;
-		base.transform.localScale = this.followElement.localScale;
+		base.transform.position = followElement.position;
+		base.transform.rotation = followElement.rotation;
+		base.transform.localScale = followElement.localScale;
 	}
 
 	private void Start()
 	{
-		this.followElement = ScienceExperimentManager.instance.GetElement(this.elementID);
+		followElement = ScienceExperimentManager.instance.GetElement(elementID);
 		TickSystem<object>.AddPostTickCallback(this);
 	}
 
@@ -23,8 +26,4 @@ public class ScienceExperimentSceneElement : MonoBehaviour, ITickSystemPost
 	{
 		TickSystem<object>.RemovePostTickCallback(this);
 	}
-
-	public ScienceExperimentElementID elementID;
-
-	private Transform followElement;
 }

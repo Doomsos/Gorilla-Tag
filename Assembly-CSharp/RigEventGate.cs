@@ -1,142 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class RigEventGate : MonoBehaviour, IBuildValidation
 {
-	private void OnEnable()
+	private enum Mode
 	{
-		if (this.rigCollection == null)
-		{
-			return;
-		}
-		VRRigCollection vrrigCollection = this.rigCollection;
-		vrrigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection.playerEnteredCollection, new Action<RigContainer>(this.OnJoined));
-		VRRigCollection vrrigCollection2 = this.rigCollection;
-		vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.OnLeft));
-	}
-
-	private void OnDisable()
-	{
-		if (this.rigCollection == null)
-		{
-			return;
-		}
-		VRRigCollection vrrigCollection = this.rigCollection;
-		vrrigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vrrigCollection.playerEnteredCollection, new Action<RigContainer>(this.OnJoined));
-		VRRigCollection vrrigCollection2 = this.rigCollection;
-		vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.OnLeft));
-	}
-
-	private void OnDestroy()
-	{
-		if (this.rigCollection == null)
-		{
-			return;
-		}
-		VRRigCollection vrrigCollection = this.rigCollection;
-		vrrigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vrrigCollection.playerEnteredCollection, new Action<RigContainer>(this.OnJoined));
-		VRRigCollection vrrigCollection2 = this.rigCollection;
-		vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.OnLeft));
-	}
-
-	private void OnJoined(RigContainer rc)
-	{
-		int num = (this.rigCollection == null) ? 1 : this.rigCollection.Rigs.Count;
-		this.countChanged(this.gameObjects.Count, this.gameObjects.Count, num - 1, num, null);
-	}
-
-	private void OnLeft(RigContainer rc)
-	{
-		RigEventVolumeTrigger rigEventVolumeTrigger = null;
-		for (int i = 0; i < this.gameObjects.Count; i++)
-		{
-			if (this.gameObjects[i].Rig == rc.Rig)
-			{
-				rigEventVolumeTrigger = this.gameObjects[i];
-			}
-		}
-		int num = (this.rigCollection == null) ? 1 : this.rigCollection.Rigs.Count;
-		if (rigEventVolumeTrigger != null)
-		{
-			this.gameObjects.Remove(rigEventVolumeTrigger);
-			this.countChanged(this.gameObjects.Count + 1, this.gameObjects.Count, num + 1, num, null);
-			return;
-		}
-		this.countChanged(this.gameObjects.Count, this.gameObjects.Count, num + 1, num, null);
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		RigEventVolumeTrigger rigEventVolumeTrigger;
-		if (!other.gameObject.TryGetComponent<RigEventVolumeTrigger>(out rigEventVolumeTrigger) || base.transform.InverseTransformPoint(rigEventVolumeTrigger.transform.position).z < 0f)
-		{
-			return;
-		}
-		if (this.gameObjects.Contains(rigEventVolumeTrigger))
-		{
-			int num = (this.rigCollection == null) ? 1 : this.rigCollection.Rigs.Count;
-			int count = this.gameObjects.Count;
-			this.gameObjects.Remove(rigEventVolumeTrigger);
-			this.countChanged(count, this.gameObjects.Count, num, num, rigEventVolumeTrigger);
-		}
-	}
-
-	private void OnTriggerExit(Collider other)
-	{
-		RigEventVolumeTrigger rigEventVolumeTrigger;
-		if (!other.gameObject.TryGetComponent<RigEventVolumeTrigger>(out rigEventVolumeTrigger) || base.transform.InverseTransformPoint(rigEventVolumeTrigger.transform.position).z < 0f)
-		{
-			return;
-		}
-		if (!this.gameObjects.Contains(rigEventVolumeTrigger))
-		{
-			int num = (this.rigCollection == null) ? 1 : this.rigCollection.Rigs.Count;
-			int count = this.gameObjects.Count;
-			this.gameObjects.Add(rigEventVolumeTrigger);
-			this.countChanged(count, this.gameObjects.Count, num, num, rigEventVolumeTrigger);
-		}
-	}
-
-	private void countChanged(int oldValue, int newValue, int oldPlayerCount, int newPlayerCount, RigEventVolumeTrigger rig)
-	{
-		if (newValue > oldValue)
-		{
-			if (rig != null)
-			{
-				UnityEvent<VRRig> rigExits = this.RigExits;
-				if (rigExits != null)
-				{
-					rigExits.Invoke(rig.Rig);
-				}
-			}
-			if ((this.mode == RigEventGate.Mode.RELATIVE && (float)newValue / (float)newPlayerCount >= this.relThreshold && (float)oldValue / (float)oldPlayerCount < this.relThreshold) || (this.mode == RigEventGate.Mode.ABSOLUTE && newValue >= this.absThreshold && oldValue < this.absThreshold))
-			{
-				UnityEvent goesOverThreshold = this.GoesOverThreshold;
-				if (goesOverThreshold == null)
-				{
-					return;
-				}
-				goesOverThreshold.Invoke();
-			}
-		}
-	}
-
-	bool IBuildValidation.BuildValidationCheck()
-	{
-		if (this.mode == RigEventGate.Mode.RELATIVE && this.rigCollection == null)
-		{
-			Debug.Log("RigEventGate on " + base.name + " is set to RELATIVE mode but has no Player Count Source. This will crash!");
-			return false;
-		}
-		return true;
+		RELATIVE,
+		ABSOLUTE
 	}
 
 	private List<RigEventVolumeTrigger> gameObjects = new List<RigEventVolumeTrigger>();
 
 	[SerializeField]
-	private RigEventGate.Mode mode = RigEventGate.Mode.ABSOLUTE;
+	private Mode mode = Mode.ABSOLUTE;
 
 	[Range(0.05f, 1f)]
 	[SerializeField]
@@ -155,9 +33,111 @@ public class RigEventGate : MonoBehaviour, IBuildValidation
 	[SerializeField]
 	private UnityEvent GoesOverThreshold;
 
-	private enum Mode
+	private void OnEnable()
 	{
-		RELATIVE,
-		ABSOLUTE
+		if (!(rigCollection == null))
+		{
+			VRRigCollection vRRigCollection = rigCollection;
+			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
+			VRRigCollection vRRigCollection2 = rigCollection;
+			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (!(rigCollection == null))
+		{
+			VRRigCollection vRRigCollection = rigCollection;
+			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
+			VRRigCollection vRRigCollection2 = rigCollection;
+			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (!(rigCollection == null))
+		{
+			VRRigCollection vRRigCollection = rigCollection;
+			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
+			VRRigCollection vRRigCollection2 = rigCollection;
+			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+		}
+	}
+
+	private void OnJoined(RigContainer rc)
+	{
+		int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+		countChanged(gameObjects.Count, gameObjects.Count, num - 1, num, null);
+	}
+
+	private void OnLeft(RigContainer rc)
+	{
+		RigEventVolumeTrigger rigEventVolumeTrigger = null;
+		for (int i = 0; i < gameObjects.Count; i++)
+		{
+			if (gameObjects[i].Rig == rc.Rig)
+			{
+				rigEventVolumeTrigger = gameObjects[i];
+			}
+		}
+		int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+		if (rigEventVolumeTrigger != null)
+		{
+			gameObjects.Remove(rigEventVolumeTrigger);
+			countChanged(gameObjects.Count + 1, gameObjects.Count, num + 1, num, null);
+		}
+		else
+		{
+			countChanged(gameObjects.Count, gameObjects.Count, num + 1, num, null);
+		}
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.TryGetComponent<RigEventVolumeTrigger>(out var component) && !(base.transform.InverseTransformPoint(component.transform.position).z < 0f) && gameObjects.Contains(component))
+		{
+			int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+			int count = gameObjects.Count;
+			gameObjects.Remove(component);
+			countChanged(count, gameObjects.Count, num, num, component);
+		}
+	}
+
+	private void OnTriggerExit(Collider other)
+	{
+		if (other.gameObject.TryGetComponent<RigEventVolumeTrigger>(out var component) && !(base.transform.InverseTransformPoint(component.transform.position).z < 0f) && !gameObjects.Contains(component))
+		{
+			int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+			int count = gameObjects.Count;
+			gameObjects.Add(component);
+			countChanged(count, gameObjects.Count, num, num, component);
+		}
+	}
+
+	private void countChanged(int oldValue, int newValue, int oldPlayerCount, int newPlayerCount, RigEventVolumeTrigger rig)
+	{
+		if (newValue > oldValue)
+		{
+			if (rig != null)
+			{
+				RigExits?.Invoke(rig.Rig);
+			}
+			if ((mode == Mode.RELATIVE && (float)newValue / (float)newPlayerCount >= relThreshold && (float)oldValue / (float)oldPlayerCount < relThreshold) || (mode == Mode.ABSOLUTE && newValue >= absThreshold && oldValue < absThreshold))
+			{
+				GoesOverThreshold?.Invoke();
+			}
+		}
+	}
+
+	bool IBuildValidation.BuildValidationCheck()
+	{
+		if (mode == Mode.RELATIVE && rigCollection == null)
+		{
+			Debug.Log("RigEventGate on " + base.name + " is set to RELATIVE mode but has no Player Count Source. This will crash!");
+			return false;
+		}
+		return true;
 	}
 }

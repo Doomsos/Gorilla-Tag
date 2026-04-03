@@ -1,5 +1,3 @@
-﻿using System;
-
 public interface IRequestableOwnershipGuardCallbacks
 {
 	void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer);

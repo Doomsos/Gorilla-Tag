@@ -1,60 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GorillaEyeExpressions : MonoBehaviour, IGorillaSliceableSimple
 {
-	private void Awake()
-	{
-		this.loudness = base.GetComponent<GorillaSpeakerLoudness>();
-	}
-
-	public void OnEnable()
-	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-		this.timeLastUpdated = Time.time;
-		this.deltaTime = Time.deltaTime;
-	}
-
-	public void OnDisable()
-	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
-	}
-
-	public void SliceUpdate()
-	{
-		this.deltaTime = Time.time - this.timeLastUpdated;
-		this.timeLastUpdated = Time.time;
-		this.CheckEyeEffects();
-		this.UpdateEyeExpression();
-	}
-
-	private void CheckEyeEffects()
-	{
-		if (this.loudness == null)
-		{
-			this.loudness = base.GetComponent<GorillaSpeakerLoudness>();
-		}
-		if (this.loudness.IsSpeaking && this.loudness.Loudness > this.screamVolume)
-		{
-			this.overrideDuration = this.screamDuration;
-			this.overrideUV = this.ScreamUV;
-			return;
-		}
-		if (this.overrideDuration > 0f)
-		{
-			this.overrideDuration -= this.deltaTime;
-			if (this.overrideDuration <= 0f)
-			{
-				this.overrideUV = this.BaseUV;
-			}
-		}
-	}
-
-	private void UpdateEyeExpression()
-	{
-		this.targetFace.GetComponent<Renderer>().material.SetVector(this._BaseMap_ST, new Vector4(0.5f, 1f, this.overrideUV.x, this.overrideUV.y));
-	}
-
 	public GameObject targetFace;
 
 	[Space]
@@ -80,4 +27,55 @@ public class GorillaEyeExpressions : MonoBehaviour, IGorillaSliceableSimple
 	private float deltaTime;
 
 	private ShaderHashId _BaseMap_ST = "_BaseMap_ST";
+
+	private void Awake()
+	{
+		loudness = GetComponent<GorillaSpeakerLoudness>();
+	}
+
+	public void OnEnable()
+	{
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+		timeLastUpdated = Time.time;
+		deltaTime = Time.deltaTime;
+	}
+
+	public void OnDisable()
+	{
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
+	}
+
+	public void SliceUpdate()
+	{
+		deltaTime = Time.time - timeLastUpdated;
+		timeLastUpdated = Time.time;
+		CheckEyeEffects();
+		UpdateEyeExpression();
+	}
+
+	private void CheckEyeEffects()
+	{
+		if (loudness == null)
+		{
+			loudness = GetComponent<GorillaSpeakerLoudness>();
+		}
+		if (loudness.IsSpeaking && loudness.Loudness > screamVolume)
+		{
+			overrideDuration = screamDuration;
+			overrideUV = ScreamUV;
+		}
+		else if (overrideDuration > 0f)
+		{
+			overrideDuration -= deltaTime;
+			if (overrideDuration <= 0f)
+			{
+				overrideUV = BaseUV;
+			}
+		}
+	}
+
+	private void UpdateEyeExpression()
+	{
+		targetFace.GetComponent<Renderer>().material.SetVector(_BaseMap_ST, new Vector4(0.5f, 1f, overrideUV.x, overrideUV.y));
+	}
 }

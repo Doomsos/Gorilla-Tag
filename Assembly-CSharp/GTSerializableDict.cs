@@ -1,38 +1,47 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GTSerializableDict<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver where TKey : IComparable<TKey>
 {
+	[SerializeField]
+	[HideInInspector]
+	private List<GTSerializableKeyValue<TKey, TValue>> _m_serializedEntries = new List<GTSerializableKeyValue<TKey, TValue>>();
+
 	public void OnBeforeSerialize()
 	{
-		this._m_serializedEntries.Clear();
-		foreach (KeyValuePair<TKey, TValue> keyValuePair in this)
+		_m_serializedEntries.Clear();
+		using (Enumerator enumerator = GetEnumerator())
 		{
-			this._m_serializedEntries.Add(new GTSerializableKeyValue<TKey, TValue>(keyValuePair.Key, keyValuePair.Value));
+			while (enumerator.MoveNext())
+			{
+				KeyValuePair<TKey, TValue> current = enumerator.Current;
+				_m_serializedEntries.Add(new GTSerializableKeyValue<TKey, TValue>(current.Key, current.Value));
+			}
 		}
-		this._m_serializedEntries.Sort((GTSerializableKeyValue<TKey, TValue> entry1, GTSerializableKeyValue<TKey, TValue> entry2) => entry1.k.CompareTo(entry2.k));
+		_m_serializedEntries.Sort(delegate(GTSerializableKeyValue<TKey, TValue> entry1, GTSerializableKeyValue<TKey, TValue> entry2)
+		{
+			ref TKey k = ref entry1.k;
+			TKey k2 = entry2.k;
+			return k.CompareTo(k2);
+		});
 	}
 
 	public void OnAfterDeserialize()
 	{
-		base.Clear();
-		foreach (GTSerializableKeyValue<TKey, TValue> gtserializableKeyValue in this._m_serializedEntries)
+		Clear();
+		foreach (GTSerializableKeyValue<TKey, TValue> m_serializedEntry in _m_serializedEntries)
 		{
 			try
 			{
-				base.Add(gtserializableKeyValue.k, gtserializableKeyValue.v);
+				Add(m_serializedEntry.k, m_serializedEntry.v);
 			}
 			catch (ArgumentException ex)
 			{
-				Debug.LogError("ERROR!!! GTSerializableDict: " + string.Format("Duplicate key found during deserialization: '{0}'. Ignoring duplicate. ", gtserializableKeyValue.k) + "Exception: " + ex.Message);
+				Debug.LogError("ERROR!!! GTSerializableDict: " + $"Duplicate key found during deserialization: '{m_serializedEntry.k}'. Ignoring duplicate. " + "Exception: " + ex.Message);
 			}
 		}
-		this._m_serializedEntries.Clear();
+		_m_serializedEntries.Clear();
 	}
-
-	[SerializeField]
-	[HideInInspector]
-	private List<GTSerializableKeyValue<TKey, TValue>> _m_serializedEntries = new List<GTSerializableKeyValue<TKey, TValue>>();
 }

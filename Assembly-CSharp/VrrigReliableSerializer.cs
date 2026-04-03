@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -21,10 +21,9 @@ internal class VrrigReliableSerializer : GorillaWrappedSerializer
 		{
 			return false;
 		}
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(wrappedInfo.Sender, out rigContainer))
+		if (VRRigCache.Instance.TryGetVrrig(wrappedInfo.Sender, out var playerRig))
 		{
-			outTargetObject = rigContainer.gameObject;
+			outTargetObject = playerRig.gameObject;
 			outTargetType = typeof(VRRigReliableState);
 			return true;
 		}
@@ -36,9 +35,9 @@ internal class VrrigReliableSerializer : GorillaWrappedSerializer
 	}
 
 	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
+	public override void CopyBackingFieldsToState(bool P_0)
 	{
-		base.CopyBackingFieldsToState(A_1);
+		base.CopyBackingFieldsToState(P_0);
 	}
 
 	[WeaverGenerated]

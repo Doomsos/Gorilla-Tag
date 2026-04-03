@@ -1,16 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct FrameStamp
 {
-	public int framesElapsed
-	{
-		get
-		{
-			return Time.frameCount - this._lastFrame;
-		}
-	}
+	private int _lastFrame;
+
+	public int framesElapsed => Time.frameCount - _lastFrame;
 
 	public static FrameStamp Now()
 	{
@@ -22,12 +18,12 @@ public struct FrameStamp
 
 	public override string ToString()
 	{
-		return string.Format("{0} frames elapsed", this.framesElapsed);
+		return $"{framesElapsed} frames elapsed";
 	}
 
 	public override int GetHashCode()
 	{
-		return StaticHash.Compute(this._lastFrame);
+		return StaticHash.Compute(_lastFrame);
 	}
 
 	public static implicit operator int(FrameStamp fs)
@@ -42,6 +38,4 @@ public struct FrameStamp
 			_lastFrame = Time.frameCount - framesElapsed
 		};
 	}
-
-	private int _lastFrame;
 }

@@ -1,12 +1,18 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class ReparentOnAwakeWithRenderer : MonoBehaviour, IBuildValidation
 {
+	public Transform newParent;
+
+	public MeshRenderer myRenderer;
+
+	[Tooltip("We're mostly using this for UI elements like text and images, so this will help you separate these in whatever target parent object.Keep images and texts together, otherwise you'll get extra draw calls. Put images above text or they'll overlap weird tho lol")]
+	public bool sortLast;
+
 	public bool BuildValidationCheck()
 	{
-		if (base.GetComponent<MeshRenderer>() != null && this.myRenderer == null)
+		if (GetComponent<MeshRenderer>() != null && myRenderer == null)
 		{
 			Debug.Log(base.name + " needs a reference to its renderer since it has one - ");
 			return false;
@@ -16,8 +22,8 @@ public class ReparentOnAwakeWithRenderer : MonoBehaviour, IBuildValidation
 
 	private void OnEnable()
 	{
-		base.transform.SetParent(this.newParent, true);
-		if (this.sortLast)
+		base.transform.SetParent(newParent, worldPositionStays: true);
+		if (sortLast)
 		{
 			base.transform.SetAsLastSibling();
 		}
@@ -25,24 +31,17 @@ public class ReparentOnAwakeWithRenderer : MonoBehaviour, IBuildValidation
 		{
 			base.transform.SetAsFirstSibling();
 		}
-		if (this.myRenderer != null)
+		if (myRenderer != null)
 		{
-			this.myRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-			this.myRenderer.lightProbeUsage = LightProbeUsage.Off;
-			this.myRenderer.probeAnchor = this.newParent;
+			myRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+			myRenderer.lightProbeUsage = LightProbeUsage.Off;
+			myRenderer.probeAnchor = newParent;
 		}
 	}
 
 	[ContextMenu("Set Renderer")]
 	public void SetMyRenderer()
 	{
-		this.myRenderer = base.GetComponent<MeshRenderer>();
+		myRenderer = GetComponent<MeshRenderer>();
 	}
-
-	public Transform newParent;
-
-	public MeshRenderer myRenderer;
-
-	[Tooltip("We're mostly using this for UI elements like text and images, so this will help you separate these in whatever target parent object.Keep images and texts together, otherwise you'll get extra draw calls. Put images above text or they'll overlap weird tho lol")]
-	public bool sortLast;
 }

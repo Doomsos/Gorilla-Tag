@@ -1,152 +1,144 @@
-﻿using System;
 using GorillaGameModes;
 using GorillaNetworking;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public sealed class GorillaAmbushManager : GorillaTagManager
 {
-	public sealed class GorillaAmbushManager : GorillaTagManager
+	public GameObject handTapFX;
+
+	public GorillaSkin ambushSkin;
+
+	[SerializeField]
+	private AudioClip[] firstPersonTaggedSounds;
+
+	[SerializeField]
+	private float firstPersonTaggedSoundVolume;
+
+	private static int handTapHash = -1;
+
+	public float handTapScaleFactor = 0.5f;
+
+	public float crawlingSpeedForMaxVolume;
+
+	[SerializeField]
+	private XSceneRef scryingPlaneRef;
+
+	[SerializeField]
+	private XSceneRef scryingPlane3pRef;
+
+	private const int STEALTH_MATERIAL_INDEX = 13;
+
+	private MeshRenderer scryingPlane;
+
+	private bool hasScryingPlane;
+
+	private MeshRenderer scryingPlane3p;
+
+	private bool hasScryingPlane3p;
+
+	public static int HandEffectHash => handTapHash;
+
+	public static float HandFXScaleModifier { get; private set; }
+
+	[field: SerializeField]
+	public bool isGhostTag { get; private set; }
+
+	public override GameModeType GameType()
 	{
-		public override GameModeType GameType()
+		if (!isGhostTag)
 		{
-			if (!this.isGhostTag)
+			return GameModeType.Ambush;
+		}
+		return GameModeType.Ghost;
+	}
+
+	public override void Awake()
+	{
+		base.Awake();
+		if (handTapFX != null)
+		{
+			handTapHash = PoolUtils.GameObjHashCode(handTapFX);
+		}
+		HandFXScaleModifier = handTapScaleFactor;
+	}
+
+	private void Start()
+	{
+		hasScryingPlane = scryingPlaneRef.TryResolve(out scryingPlane);
+		hasScryingPlane3p = scryingPlane3pRef.TryResolve(out scryingPlane3p);
+	}
+
+	public override string GameModeName()
+	{
+		if (!isGhostTag)
+		{
+			return "AMBUSH";
+		}
+		return "GHOST";
+	}
+
+	public override string GameModeNameRoomLabel()
+	{
+		string text = (isGhostTag ? "GAME_MODE_GHOST_ROOM_LABEL" : "GAME_MODE_AMBUSH_ROOM_LABEL");
+		string defaultResult = (isGhostTag ? "(GHOST GAME)" : "(AMBUSH GAME)");
+		if (!LocalisationManager.TryGetKeyForCurrentLocale(text, out var result, defaultResult))
+		{
+			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [" + text + "]");
+		}
+		return result;
+	}
+
+	public override void UpdatePlayerAppearance(VRRig rig)
+	{
+		int materialIndex = MyMatIndex(rig.creator);
+		rig.ChangeMaterialLocal(materialIndex);
+		bool flag = IsInfected(rig.Creator);
+		bool flag2 = IsInfected(NetworkSystem.Instance.LocalPlayer);
+		rig.bodyRenderer.SetGameModeBodyType(flag ? GorillaBodyType.Skeleton : GorillaBodyType.Default);
+		rig.SetInvisibleToLocalPlayer(flag && !flag2);
+		if (isGhostTag && rig.isOfflineVRRig)
+		{
+			CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(flag);
+			if (hasScryingPlane)
 			{
-				return GameModeType.Ambush;
+				scryingPlane.enabled = flag2;
 			}
-			return GameModeType.Ghost;
-		}
-
-		public static int HandEffectHash
-		{
-			get
+			if (hasScryingPlane3p)
 			{
-				return GorillaAmbushManager.handTapHash;
-			}
-		}
-
-		public static float HandFXScaleModifier { get; private set; }
-
-		public bool isGhostTag { get; private set; }
-
-		public override void Awake()
-		{
-			base.Awake();
-			if (this.handTapFX != null)
-			{
-				GorillaAmbushManager.handTapHash = PoolUtils.GameObjHashCode(this.handTapFX);
-			}
-			GorillaAmbushManager.HandFXScaleModifier = this.handTapScaleFactor;
-		}
-
-		private void Start()
-		{
-			this.hasScryingPlane = this.scryingPlaneRef.TryResolve<MeshRenderer>(out this.scryingPlane);
-			this.hasScryingPlane3p = this.scryingPlane3pRef.TryResolve<MeshRenderer>(out this.scryingPlane3p);
-		}
-
-		public override string GameModeName()
-		{
-			if (!this.isGhostTag)
-			{
-				return "AMBUSH";
-			}
-			return "GHOST";
-		}
-
-		public override string GameModeNameRoomLabel()
-		{
-			string text = this.isGhostTag ? "GAME_MODE_GHOST_ROOM_LABEL" : "GAME_MODE_AMBUSH_ROOM_LABEL";
-			string defaultResult = this.isGhostTag ? "(GHOST GAME)" : "(AMBUSH GAME)";
-			string result;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale(text, out result, defaultResult))
-			{
-				Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [" + text + "]");
-			}
-			return result;
-		}
-
-		public override void UpdatePlayerAppearance(VRRig rig)
-		{
-			int materialIndex = this.MyMatIndex(rig.creator);
-			rig.ChangeMaterialLocal(materialIndex);
-			bool flag = base.IsInfected(rig.Creator);
-			bool flag2 = base.IsInfected(NetworkSystem.Instance.LocalPlayer);
-			rig.bodyRenderer.SetGameModeBodyType(flag ? GorillaBodyType.Skeleton : GorillaBodyType.Default);
-			rig.SetInvisibleToLocalPlayer(flag && !flag2);
-			if (this.isGhostTag && rig.isOfflineVRRig)
-			{
-				CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(flag);
-				if (this.hasScryingPlane)
-				{
-					this.scryingPlane.enabled = flag2;
-				}
-				if (this.hasScryingPlane3p)
-				{
-					this.scryingPlane3p.enabled = flag2;
-				}
+				scryingPlane3p.enabled = flag2;
 			}
 		}
+	}
 
-		public override int MyMatIndex(NetPlayer forPlayer)
+	public override int MyMatIndex(NetPlayer forPlayer)
+	{
+		if (!IsInfected(forPlayer))
 		{
-			if (!base.IsInfected(forPlayer))
-			{
-				return 0;
-			}
-			return 13;
+			return 0;
 		}
+		return 13;
+	}
 
-		public override void StopPlaying()
+	public override void StopPlaying()
+	{
+		base.StopPlaying();
+		foreach (RigContainer activeRigContainer in VRRigCache.ActiveRigContainers)
 		{
-			base.StopPlaying();
-			foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
-			{
-				VRRig rig = rigContainer.Rig;
-				GorillaSkin.ApplyToRig(rig, null, GorillaSkin.SkinType.gameMode);
-				rig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Default);
-				rig.SetInvisibleToLocalPlayer(false);
-			}
-			CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(false);
-			if (this.hasScryingPlane)
-			{
-				this.scryingPlane.enabled = false;
-			}
-			if (this.hasScryingPlane3p)
-			{
-				this.scryingPlane3p.enabled = false;
-			}
+			VRRig rig = activeRigContainer.Rig;
+			GorillaSkin.ApplyToRig(rig, null, GorillaSkin.SkinType.gameMode);
+			rig.bodyRenderer.SetGameModeBodyType(GorillaBodyType.Default);
+			rig.SetInvisibleToLocalPlayer(invisible: false);
 		}
-
-		public GameObject handTapFX;
-
-		public GorillaSkin ambushSkin;
-
-		[SerializeField]
-		private AudioClip[] firstPersonTaggedSounds;
-
-		[SerializeField]
-		private float firstPersonTaggedSoundVolume;
-
-		private static int handTapHash = -1;
-
-		public float handTapScaleFactor = 0.5f;
-
-		public float crawlingSpeedForMaxVolume;
-
-		[SerializeField]
-		private XSceneRef scryingPlaneRef;
-
-		[SerializeField]
-		private XSceneRef scryingPlane3pRef;
-
-		private const int STEALTH_MATERIAL_INDEX = 13;
-
-		private MeshRenderer scryingPlane;
-
-		private bool hasScryingPlane;
-
-		private MeshRenderer scryingPlane3p;
-
-		private bool hasScryingPlane3p;
+		CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(hideCosmetics: false);
+		if (hasScryingPlane)
+		{
+			scryingPlane.enabled = false;
+		}
+		if (hasScryingPlane3p)
+		{
+			scryingPlane3p.enabled = false;
+		}
 	}
 }

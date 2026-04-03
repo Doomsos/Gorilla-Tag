@@ -1,64 +1,58 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 {
+	public enum InputButton
+	{
+		Trigger,
+		ButtonA,
+		ButtonB,
+		Grip,
+		Joystick
+	}
+
+	[SerializeField]
+	public InputButton inputButton;
+
+	public GameEntity gameEntity;
+
 	public bool CheckInput(XRNode xrNode, float sensitivity = 0.25f)
 	{
-		switch (this.inputButton)
+		return inputButton switch
 		{
-		case GameButtonActivatable.InputButton.Trigger:
-			return ControllerInputPoller.TriggerFloat(xrNode) > sensitivity;
-		case GameButtonActivatable.InputButton.ButtonA:
-			return ControllerInputPoller.PrimaryButtonPress(xrNode);
-		case GameButtonActivatable.InputButton.ButtonB:
-			return ControllerInputPoller.SecondaryButtonPress(xrNode);
-		case GameButtonActivatable.InputButton.Grip:
-			return ControllerInputPoller.GripFloat(xrNode) > sensitivity;
-		case GameButtonActivatable.InputButton.Joystick:
-			return ControllerInputPoller.TriggerFloat(xrNode) > sensitivity;
-		default:
-			return false;
-		}
+			InputButton.Trigger => ControllerInputPoller.TriggerFloat(xrNode) > sensitivity, 
+			InputButton.ButtonA => ControllerInputPoller.PrimaryButtonPress(xrNode), 
+			InputButton.ButtonB => ControllerInputPoller.SecondaryButtonPress(xrNode), 
+			InputButton.Grip => ControllerInputPoller.GripFloat(xrNode) > sensitivity, 
+			InputButton.Joystick => ControllerInputPoller.TriggerFloat(xrNode) > sensitivity, 
+			_ => false, 
+		};
 	}
 
 	public bool CheckInput(float sensitivity = 0.25f)
 	{
-		int equippedSlotIndex = this.gameEntity.EquippedSlotIndex;
-		if (equippedSlotIndex == -1 || !this.gameEntity.IsHeldOrSnappedByLocalPlayer)
+		int equippedSlotIndex = gameEntity.EquippedSlotIndex;
+		if (equippedSlotIndex == -1 || !gameEntity.IsHeldOrSnappedByLocalPlayer)
 		{
 			return false;
 		}
 		GamePlayer gamePlayer = GamePlayerLocal.instance.gamePlayer;
-		if (this.gameEntity.IsSnappedToHand)
+		if (gameEntity.IsSnappedToHand)
 		{
-			int num;
-			if (equippedSlotIndex != 2)
+			int num = equippedSlotIndex switch
 			{
-				if (equippedSlotIndex != 3)
-				{
-					num = -1;
-				}
-				else
-				{
-					num = 1;
-				}
-			}
-			else
-			{
-				num = 0;
-			}
-			int num2 = num;
-			GameEntity gameEntity;
-			IGameActivatable gameActivatable;
-			if (gamePlayer.TryGetSlotEntity(num2, out gameEntity) && gameEntity.TryGetComponent<IGameActivatable>(out gameActivatable))
+				2 => 0, 
+				3 => 1, 
+				_ => -1, 
+			};
+			if (gamePlayer.TryGetSlotEntity(num, out var out_entity) && out_entity.TryGetComponent<IGameActivatable>(out var _))
 			{
 				return false;
 			}
-			if (this.inputButton == GameButtonActivatable.InputButton.Trigger && GameTriggerInteractable.LocalInteractableTriggers.Count > 0)
+			if (inputButton == InputButton.Trigger && GameTriggerInteractable.LocalInteractableTriggers.Count > 0)
 			{
-				Vector3 position = gamePlayer.GetHandTransform(num2).position;
+				Vector3 position = gamePlayer.GetHandTransform(num).position;
 				for (int i = 0; i < GameTriggerInteractable.LocalInteractableTriggers.Count; i++)
 				{
 					if (GameTriggerInteractable.LocalInteractableTriggers[i].PointWithinInteractableArea(position))
@@ -68,20 +62,6 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 				}
 			}
 		}
-		return this.CheckInput(this.gameEntity.EquippedHandXRNode, sensitivity);
-	}
-
-	[SerializeField]
-	public GameButtonActivatable.InputButton inputButton;
-
-	public GameEntity gameEntity;
-
-	public enum InputButton
-	{
-		Trigger,
-		ButtonA,
-		ButtonB,
-		Grip,
-		Joystick
+		return CheckInput(gameEntity.EquippedHandXRNode, sensitivity);
 	}
 }

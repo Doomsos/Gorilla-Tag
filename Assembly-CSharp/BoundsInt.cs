@@ -1,9 +1,23 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [Serializable]
 public struct BoundsInt
 {
+	private const int SCALE_FACTOR = 1000;
+
+	public Vector3Int min;
+
+	public Vector3Int max;
+
+	public Vector3Int center => (min + max) / 2;
+
+	public Vector3Int size => max - min;
+
+	public Vector3 centerFloat => IntToFloat(center);
+
+	public Vector3 sizeFloat => IntToFloat(size);
+
 	public BoundsInt(Vector3Int min, Vector3Int max)
 	{
 		this.min = min;
@@ -12,41 +26,9 @@ public struct BoundsInt
 
 	public BoundsInt(Vector3 center, Vector3 size)
 	{
-		Vector3 b = size * 0.5f;
-		this.min = global::BoundsInt.FloatToInt(center - b);
-		this.max = global::BoundsInt.FloatToInt(center + b);
-	}
-
-	public Vector3Int center
-	{
-		get
-		{
-			return (this.min + this.max) / 2;
-		}
-	}
-
-	public Vector3Int size
-	{
-		get
-		{
-			return this.max - this.min;
-		}
-	}
-
-	public Vector3 centerFloat
-	{
-		get
-		{
-			return global::BoundsInt.IntToFloat(this.center);
-		}
-	}
-
-	public Vector3 sizeFloat
-	{
-		get
-		{
-			return global::BoundsInt.IntToFloat(this.size);
-		}
+		Vector3 vector = size * 0.5f;
+		min = FloatToInt(center - vector);
+		max = FloatToInt(center + vector);
 	}
 
 	public static Vector3Int FloatToInt(Vector3 v)
@@ -59,14 +41,14 @@ public struct BoundsInt
 		return new Vector3((float)v.x / 1000f, (float)v.y / 1000f, (float)v.z / 1000f);
 	}
 
-	public static global::BoundsInt FromBounds(Bounds bounds)
+	public static BoundsInt FromBounds(Bounds bounds)
 	{
-		return new global::BoundsInt(bounds.center, bounds.size);
+		return new BoundsInt(bounds.center, bounds.size);
 	}
 
 	public Bounds ToBounds()
 	{
-		return new Bounds(this.centerFloat, this.sizeFloat);
+		return new Bounds(centerFloat, sizeFloat);
 	}
 
 	public void SetMinMax(Vector3Int min, Vector3Int max)
@@ -77,95 +59,108 @@ public struct BoundsInt
 
 	public void SetMinMax(Vector3 min, Vector3 max)
 	{
-		this.min = global::BoundsInt.FloatToInt(min);
-		this.max = global::BoundsInt.FloatToInt(max);
+		this.min = FloatToInt(min);
+		this.max = FloatToInt(max);
 	}
 
-	public void Encapsulate(global::BoundsInt other)
+	public void Encapsulate(BoundsInt other)
 	{
-		this.min = new Vector3Int(Mathf.Min(this.min.x, other.min.x), Mathf.Min(this.min.y, other.min.y), Mathf.Min(this.min.z, other.min.z));
-		this.max = new Vector3Int(Mathf.Max(this.max.x, other.max.x), Mathf.Max(this.max.y, other.max.y), Mathf.Max(this.max.z, other.max.z));
+		min = new Vector3Int(Mathf.Min(min.x, other.min.x), Mathf.Min(min.y, other.min.y), Mathf.Min(min.z, other.min.z));
+		max = new Vector3Int(Mathf.Max(max.x, other.max.x), Mathf.Max(max.y, other.max.y), Mathf.Max(max.z, other.max.z));
 	}
 
 	public void Expand(float amount)
 	{
 		int num = Mathf.RoundToInt(amount * 1000f);
-		Vector3Int b = new Vector3Int(num, num, num);
-		this.min -= b;
-		this.max += b;
+		Vector3Int vector3Int = new Vector3Int(num, num, num);
+		min -= vector3Int;
+		max += vector3Int;
 	}
 
-	public bool Intersects(global::BoundsInt other)
+	public bool Intersects(BoundsInt other)
 	{
-		return this.min.x < other.max.x && this.max.x > other.min.x && this.min.y < other.max.y && this.max.y > other.min.y && this.min.z < other.max.z && this.max.z > other.min.z;
+		if (min.x < other.max.x && max.x > other.min.x && min.y < other.max.y && max.y > other.min.y)
+		{
+			if (min.z < other.max.z)
+			{
+				return max.z > other.min.z;
+			}
+			return false;
+		}
+		return false;
 	}
 
-	public bool Contains(global::BoundsInt other)
+	public bool Contains(BoundsInt other)
 	{
-		return this.min.x <= other.min.x && this.min.y <= other.min.y && this.min.z <= other.min.z && this.max.x >= other.max.x && this.max.y >= other.max.y && this.max.z >= other.max.z;
+		if (min.x <= other.min.x && min.y <= other.min.y && min.z <= other.min.z && max.x >= other.max.x && max.y >= other.max.y)
+		{
+			return max.z >= other.max.z;
+		}
+		return false;
 	}
 
 	public bool Contains(Vector3 point)
 	{
-		Vector3Int vector3Int = global::BoundsInt.FloatToInt(point);
-		return vector3Int.x >= this.min.x && vector3Int.x <= this.max.x && vector3Int.y >= this.min.y && vector3Int.y <= this.max.y && vector3Int.z >= this.min.z && vector3Int.z <= this.max.z;
+		Vector3Int vector3Int = FloatToInt(point);
+		if (vector3Int.x >= min.x && vector3Int.x <= max.x && vector3Int.y >= min.y && vector3Int.y <= max.y && vector3Int.z >= min.z)
+		{
+			return vector3Int.z <= max.z;
+		}
+		return false;
 	}
 
-	public global::BoundsInt GetIntersection(global::BoundsInt other)
+	public BoundsInt GetIntersection(BoundsInt other)
 	{
-		Vector3Int vector3Int = new Vector3Int(Mathf.Max(this.min.x, other.min.x), Mathf.Max(this.min.y, other.min.y), Mathf.Max(this.min.z, other.min.z));
-		Vector3Int vector3Int2 = new Vector3Int(Mathf.Min(this.max.x, other.max.x), Mathf.Min(this.max.y, other.max.y), Mathf.Min(this.max.z, other.max.z));
+		Vector3Int vector3Int = new Vector3Int(Mathf.Max(min.x, other.min.x), Mathf.Max(min.y, other.min.y), Mathf.Max(min.z, other.min.z));
+		Vector3Int vector3Int2 = new Vector3Int(Mathf.Min(max.x, other.max.x), Mathf.Min(max.y, other.max.y), Mathf.Min(max.z, other.max.z));
 		if (vector3Int.x > vector3Int2.x || vector3Int.y > vector3Int2.y || vector3Int.z > vector3Int2.z)
 		{
-			return new global::BoundsInt(Vector3Int.zero, Vector3Int.zero);
+			return new BoundsInt(Vector3Int.zero, Vector3Int.zero);
 		}
-		return new global::BoundsInt(vector3Int, vector3Int2);
+		return new BoundsInt(vector3Int, vector3Int2);
 	}
 
 	public long Volume()
 	{
-		Vector3Int size = this.size;
-		return (long)size.x * (long)size.y * (long)size.z;
+		Vector3Int vector3Int = size;
+		return (long)vector3Int.x * (long)vector3Int.y * vector3Int.z;
 	}
 
 	public float VolumeFloat()
 	{
-		return (float)this.Volume() / 1E+09f;
+		return (float)Volume() / 1E+09f;
 	}
 
-	public static bool operator ==(global::BoundsInt a, global::BoundsInt b)
+	public static bool operator ==(BoundsInt a, BoundsInt b)
 	{
-		return a.min == b.min && a.max == b.max;
+		if (a.min == b.min)
+		{
+			return a.max == b.max;
+		}
+		return false;
 	}
 
-	public static bool operator !=(global::BoundsInt a, global::BoundsInt b)
+	public static bool operator !=(BoundsInt a, BoundsInt b)
 	{
 		return !(a == b);
 	}
 
 	public override bool Equals(object obj)
 	{
-		if (obj is global::BoundsInt)
+		if (obj is BoundsInt boundsInt)
 		{
-			global::BoundsInt b = (global::BoundsInt)obj;
-			return this == b;
+			return this == boundsInt;
 		}
 		return false;
 	}
 
 	public override int GetHashCode()
 	{
-		return this.min.GetHashCode() ^ this.max.GetHashCode() << 2;
+		return min.GetHashCode() ^ (max.GetHashCode() << 2);
 	}
 
 	public override string ToString()
 	{
-		return string.Format("BoundsInt(min: {0}, max: {1})", this.min, this.max);
+		return $"BoundsInt(min: {min}, max: {max})";
 	}
-
-	private const int SCALE_FACTOR = 1000;
-
-	public Vector3Int min;
-
-	public Vector3Int max;
 }

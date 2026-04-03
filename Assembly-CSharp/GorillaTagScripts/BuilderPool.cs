@@ -1,326 +1,300 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderPool : MonoBehaviour, IGorillaSimpleBackgroundWorker
 {
-	public class BuilderPool : MonoBehaviour, IGorillaSimpleBackgroundWorker
+	public List<List<BuilderPiece>> piecePools;
+
+	public Dictionary<int, int> piecePoolLookup;
+
+	[HideInInspector]
+	public List<BuilderBumpGlow> bumpGlowPool;
+
+	public BuilderBumpGlow bumpGlowPrefab;
+
+	[HideInInspector]
+	public List<SnapOverlap> snapOverlapPool;
+
+	public static BuilderPool instance;
+
+	private const int POOl_CAPACITY = 128;
+
+	private const int INITIAL_INSTANCE_COUNT_STARTER = 32;
+
+	private const int INITIAL_INSTANCE_COUNT_PREMIUM = 8;
+
+	private bool isSetup;
+
+	private bool hasBuiltPieceSets;
+
+	private Queue<int> piecesToAdd = new Queue<int>();
+
+	private void Awake()
 	{
-		private void Awake()
+		if (instance == null)
 		{
-			if (BuilderPool.instance == null)
-			{
-				BuilderPool.instance = this;
-				return;
-			}
+			instance = this;
+		}
+		else
+		{
 			Object.Destroy(this);
 		}
+	}
 
-		public void Setup()
+	public void Setup()
+	{
+		if (!isSetup)
 		{
-			if (this.isSetup)
-			{
-				return;
-			}
-			this.piecePools = new List<List<BuilderPiece>>(512);
-			this.piecePoolLookup = new Dictionary<int, int>(512);
-			this.bumpGlowPool = new List<BuilderBumpGlow>(256);
-			this.AddToGlowBumpPool(256);
-			this.snapOverlapPool = new List<SnapOverlap>(4096);
-			this.AddToSnapOverlapPool(4096);
-			this.isSetup = true;
+			piecePools = new List<List<BuilderPiece>>(512);
+			piecePoolLookup = new Dictionary<int, int>(512);
+			bumpGlowPool = new List<BuilderBumpGlow>(256);
+			AddToGlowBumpPool(256);
+			snapOverlapPool = new List<SnapOverlap>(4096);
+			AddToSnapOverlapPool(4096);
+			isSetup = true;
 		}
+	}
 
-		public void BuildFromShelves(List<BuilderShelf> shelves)
+	public void BuildFromShelves(List<BuilderShelf> shelves)
+	{
+		for (int i = 0; i < shelves.Count; i++)
 		{
-			for (int i = 0; i < shelves.Count; i++)
+			BuilderShelf builderShelf = shelves[i];
+			for (int j = 0; j < builderShelf.buildPieceSpawns.Count; j++)
 			{
-				BuilderShelf builderShelf = shelves[i];
-				for (int j = 0; j < builderShelf.buildPieceSpawns.Count; j++)
-				{
-					BuilderShelf.BuildPieceSpawn buildPieceSpawn = builderShelf.buildPieceSpawns[j];
-					this.AddToPool(buildPieceSpawn.buildPiecePrefab.name.GetStaticHash(), buildPieceSpawn.count);
-				}
+				BuilderShelf.BuildPieceSpawn buildPieceSpawn = builderShelf.buildPieceSpawns[j];
+				AddToPool(buildPieceSpawn.buildPiecePrefab.name.GetStaticHash(), buildPieceSpawn.count);
 			}
 		}
+	}
 
-		public IEnumerator BuildFromPieceSets()
+	public IEnumerator BuildFromPieceSets()
+	{
+		if (hasBuiltPieceSets)
 		{
-			if (this.hasBuiltPieceSets)
+			yield break;
+		}
+		hasBuiltPieceSets = true;
+		List<BuilderPieceSet> allPieceSets = BuilderSetManager.instance.GetAllPieceSets();
+		foreach (BuilderPieceSet item in allPieceSets)
+		{
+			bool isStarterSet = BuilderSetManager.instance.GetStarterSetsConcat().Contains(item.playfabID);
+			bool isFallbackSet = item.SetName.Equals("HIDDEN");
+			foreach (BuilderPieceSet.BuilderPieceSubset subset in item.subsets)
 			{
-				yield break;
-			}
-			this.hasBuiltPieceSets = true;
-			List<BuilderPieceSet> allPieceSets = BuilderSetManager.instance.GetAllPieceSets();
-			foreach (BuilderPieceSet builderPieceSet in allPieceSets)
-			{
-				bool isStarterSet = BuilderSetManager.instance.GetStarterSetsConcat().Contains(builderPieceSet.playfabID);
-				bool isFallbackSet = builderPieceSet.SetName.Equals("HIDDEN");
-				foreach (BuilderPieceSet.BuilderPieceSubset builderPieceSubset in builderPieceSet.subsets)
+				foreach (BuilderPieceSet.PieceInfo pieceInfo in subset.pieceInfos)
 				{
-					foreach (BuilderPieceSet.PieceInfo pieceInfo in builderPieceSubset.pieceInfos)
+					int staticHash = pieceInfo.piecePrefab.name.GetStaticHash();
+					if (!piecePoolLookup.TryGetValue(staticHash, out var value))
 					{
-						int staticHash = pieceInfo.piecePrefab.name.GetStaticHash();
-						int count;
-						if (!this.piecePoolLookup.TryGetValue(staticHash, out count))
+						value = piecePools.Count;
+						piecePools.Add(new List<BuilderPiece>(128));
+						piecePoolLookup.Add(staticHash, value);
+						if (!isFallbackSet)
 						{
-							count = this.piecePools.Count;
-							this.piecePools.Add(new List<BuilderPiece>(128));
-							this.piecePoolLookup.Add(staticHash, count);
-							if (!isFallbackSet)
+							int num = (isStarterSet ? 32 : 8);
+							int num2 = 0;
+							while (num2 < num)
 							{
-								int num = isStarterSet ? 32 : 8;
-								int i = 0;
-								while (i < num)
+								if (piecesToAdd.Count == 0)
 								{
-									if (this.piecesToAdd.Count == 0)
-									{
-										GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
-									}
-									i += 2;
-									this.piecesToAdd.Enqueue(staticHash);
+									GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
 								}
+								num2 += 2;
+								piecesToAdd.Enqueue(staticHash);
 							}
 						}
-						yield return null;
 					}
-					List<BuilderPieceSet.PieceInfo>.Enumerator enumerator3 = default(List<BuilderPieceSet.PieceInfo>.Enumerator);
+					yield return null;
 				}
-				List<BuilderPieceSet.BuilderPieceSubset>.Enumerator enumerator2 = default(List<BuilderPieceSet.BuilderPieceSubset>.Enumerator);
-			}
-			List<BuilderPieceSet>.Enumerator enumerator = default(List<BuilderPieceSet>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		public void SimpleWork()
-		{
-			int count = 2;
-			if (this.piecesToAdd.Count > 0)
-			{
-				this.AddToPool(this.piecesToAdd.Dequeue(), count);
-			}
-			if (this.piecesToAdd.Count > 0)
-			{
-				GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
 			}
 		}
+	}
 
-		private void AddToPool(int pieceType, int count)
+	public void SimpleWork()
+	{
+		int count = 2;
+		if (piecesToAdd.Count > 0)
 		{
-			int count2;
-			if (!this.piecePoolLookup.TryGetValue(pieceType, out count2))
-			{
-				count2 = this.piecePools.Count;
-				this.piecePools.Add(new List<BuilderPiece>(count * 8));
-				this.piecePoolLookup.Add(pieceType, count2);
-				Debug.LogWarningFormat("Creating Pool for piece {0} of size {1}. Is this piece not in a piece set?", new object[]
-				{
-					pieceType,
-					count * 8
-				});
-			}
-			BuilderPiece piecePrefab = BuilderSetManager.instance.GetPiecePrefab(pieceType);
-			if (piecePrefab == null)
-			{
-				return;
-			}
-			List<BuilderPiece> list = this.piecePools[count2];
+			AddToPool(piecesToAdd.Dequeue(), count);
+		}
+		if (piecesToAdd.Count > 0)
+		{
+			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
+		}
+	}
+
+	private void AddToPool(int pieceType, int count)
+	{
+		if (!piecePoolLookup.TryGetValue(pieceType, out var value))
+		{
+			value = piecePools.Count;
+			piecePools.Add(new List<BuilderPiece>(count * 8));
+			piecePoolLookup.Add(pieceType, value);
+			Debug.LogWarningFormat("Creating Pool for piece {0} of size {1}. Is this piece not in a piece set?", pieceType, count * 8);
+		}
+		BuilderPiece piecePrefab = BuilderSetManager.instance.GetPiecePrefab(pieceType);
+		if (!(piecePrefab == null))
+		{
+			List<BuilderPiece> list = piecePools[value];
 			for (int i = 0; i < count; i++)
 			{
-				BuilderPiece builderPiece = Object.Instantiate<BuilderPiece>(piecePrefab);
+				BuilderPiece builderPiece = Object.Instantiate(piecePrefab);
 				builderPiece.OnCreatedByPool();
-				builderPiece.gameObject.SetActive(false);
+				builderPiece.gameObject.SetActive(value: false);
 				list.Add(builderPiece);
 			}
 		}
+	}
 
-		public BuilderPiece CreatePiece(int pieceType, bool assertNotEmpty)
+	public BuilderPiece CreatePiece(int pieceType, bool assertNotEmpty)
+	{
+		if (!piecePoolLookup.TryGetValue(pieceType, out var value))
 		{
-			int count;
-			if (!this.piecePoolLookup.TryGetValue(pieceType, out count))
+			if (assertNotEmpty)
 			{
-				if (assertNotEmpty)
-				{
-					Debug.LogErrorFormat("No Pool Found for {0} Adding 4", new object[]
-					{
-						pieceType
-					});
-				}
-				count = this.piecePools.Count;
-				this.AddToPool(pieceType, 4);
+				Debug.LogErrorFormat("No Pool Found for {0} Adding 4", pieceType);
 			}
-			List<BuilderPiece> list = this.piecePools[count];
-			if (list.Count == 0)
-			{
-				if (assertNotEmpty)
-				{
-					Debug.LogErrorFormat("Pool for {0} is Empty Adding 4", new object[]
-					{
-						pieceType
-					});
-				}
-				this.AddToPool(pieceType, 4);
-			}
-			BuilderPiece result = list[list.Count - 1];
-			list.RemoveAt(list.Count - 1);
-			return result;
+			value = piecePools.Count;
+			AddToPool(pieceType, 4);
 		}
-
-		public void DestroyPiece(BuilderPiece piece)
+		List<BuilderPiece> list = piecePools[value];
+		if (list.Count == 0)
 		{
-			if (piece == null)
+			if (assertNotEmpty)
 			{
-				Debug.LogError("Why is a null piece being destroyed");
-				return;
+				Debug.LogErrorFormat("Pool for {0} is Empty Adding 4", pieceType);
 			}
-			int index;
-			if (!this.piecePoolLookup.TryGetValue(piece.pieceType, out index))
-			{
-				Debug.LogErrorFormat("No Pool Found for {0} Cannot return to pool", new object[]
-				{
-					piece.pieceType
-				});
-				return;
-			}
-			List<BuilderPiece> list = this.piecePools[index];
-			if (list.Count == 128)
-			{
-				piece.OnReturnToPool();
-				Object.Destroy(piece.gameObject);
-				return;
-			}
-			piece.gameObject.SetActive(false);
-			piece.transform.SetParent(null);
-			piece.transform.SetPositionAndRotation(Vector3.up * 10000f, Quaternion.identity);
+			AddToPool(pieceType, 4);
+		}
+		BuilderPiece result = list[list.Count - 1];
+		list.RemoveAt(list.Count - 1);
+		return result;
+	}
+
+	public void DestroyPiece(BuilderPiece piece)
+	{
+		if (piece == null)
+		{
+			Debug.LogError("Why is a null piece being destroyed");
+			return;
+		}
+		if (!piecePoolLookup.TryGetValue(piece.pieceType, out var value))
+		{
+			Debug.LogErrorFormat("No Pool Found for {0} Cannot return to pool", piece.pieceType);
+			return;
+		}
+		List<BuilderPiece> list = piecePools[value];
+		if (list.Count == 128)
+		{
 			piece.OnReturnToPool();
-			list.Add(piece);
+			Object.Destroy(piece.gameObject);
+			return;
 		}
+		piece.gameObject.SetActive(value: false);
+		piece.transform.SetParent(null);
+		piece.transform.SetPositionAndRotation(Vector3.up * 10000f, Quaternion.identity);
+		piece.OnReturnToPool();
+		list.Add(piece);
+	}
 
-		private void AddToGlowBumpPool(int count)
+	private void AddToGlowBumpPool(int count)
+	{
+		if (!(bumpGlowPrefab == null))
 		{
-			if (this.bumpGlowPrefab == null)
-			{
-				return;
-			}
 			for (int i = 0; i < count; i++)
 			{
-				BuilderBumpGlow builderBumpGlow = Object.Instantiate<BuilderBumpGlow>(this.bumpGlowPrefab);
-				builderBumpGlow.gameObject.SetActive(false);
-				this.bumpGlowPool.Add(builderBumpGlow);
+				BuilderBumpGlow builderBumpGlow = Object.Instantiate(bumpGlowPrefab);
+				builderBumpGlow.gameObject.SetActive(value: false);
+				bumpGlowPool.Add(builderBumpGlow);
 			}
 		}
+	}
 
-		public BuilderBumpGlow CreateGlowBump()
+	public BuilderBumpGlow CreateGlowBump()
+	{
+		if (bumpGlowPool.Count == 0)
 		{
-			if (this.bumpGlowPool.Count == 0)
-			{
-				this.AddToGlowBumpPool(4);
-			}
-			BuilderBumpGlow result = this.bumpGlowPool[this.bumpGlowPool.Count - 1];
-			this.bumpGlowPool.RemoveAt(this.bumpGlowPool.Count - 1);
-			return result;
+			AddToGlowBumpPool(4);
 		}
+		BuilderBumpGlow result = bumpGlowPool[bumpGlowPool.Count - 1];
+		bumpGlowPool.RemoveAt(bumpGlowPool.Count - 1);
+		return result;
+	}
 
-		public void DestroyBumpGlow(BuilderBumpGlow bump)
+	public void DestroyBumpGlow(BuilderBumpGlow bump)
+	{
+		if (!(bump == null))
 		{
-			if (bump == null)
-			{
-				return;
-			}
-			bump.gameObject.SetActive(false);
+			bump.gameObject.SetActive(value: false);
 			bump.transform.SetPositionAndRotation(Vector3.up * 10000f, Quaternion.identity);
-			this.bumpGlowPool.Add(bump);
+			bumpGlowPool.Add(bump);
 		}
+	}
 
-		private void AddToSnapOverlapPool(int count)
+	private void AddToSnapOverlapPool(int count)
+	{
+		snapOverlapPool.Capacity += count;
+		for (int i = 0; i < count; i++)
 		{
-			this.snapOverlapPool.Capacity = this.snapOverlapPool.Capacity + count;
-			for (int i = 0; i < count; i++)
+			snapOverlapPool.Add(new SnapOverlap
 			{
-				this.snapOverlapPool.Add(new SnapOverlap
-				{
-					inPool = true
-				});
-			}
+				inPool = true
+			});
 		}
+	}
 
-		public SnapOverlap CreateSnapOverlap(BuilderAttachGridPlane otherPlane, SnapBounds bounds)
+	public SnapOverlap CreateSnapOverlap(BuilderAttachGridPlane otherPlane, SnapBounds bounds)
+	{
+		if (snapOverlapPool.Count == 0)
 		{
-			if (this.snapOverlapPool.Count == 0)
-			{
-				this.AddToSnapOverlapPool(1024);
-			}
-			SnapOverlap snapOverlap = this.snapOverlapPool[this.snapOverlapPool.Count - 1];
-			this.snapOverlapPool.RemoveAt(this.snapOverlapPool.Count - 1);
-			snapOverlap.otherPlane = otherPlane;
-			snapOverlap.bounds = bounds;
-			snapOverlap.nextOverlap = null;
-			snapOverlap.inPool = false;
-			return snapOverlap;
+			AddToSnapOverlapPool(1024);
 		}
+		SnapOverlap snapOverlap = snapOverlapPool[snapOverlapPool.Count - 1];
+		snapOverlapPool.RemoveAt(snapOverlapPool.Count - 1);
+		snapOverlap.otherPlane = otherPlane;
+		snapOverlap.bounds = bounds;
+		snapOverlap.nextOverlap = null;
+		snapOverlap.inPool = false;
+		return snapOverlap;
+	}
 
-		public void DestroySnapOverlap(SnapOverlap snapOverlap)
+	public void DestroySnapOverlap(SnapOverlap snapOverlap)
+	{
+		if (!snapOverlap.inPool)
 		{
-			if (snapOverlap.inPool)
-			{
-				return;
-			}
 			snapOverlap.otherPlane = null;
 			snapOverlap.nextOverlap = null;
 			snapOverlap.inPool = true;
-			this.snapOverlapPool.Add(snapOverlap);
+			snapOverlapPool.Add(snapOverlap);
 		}
+	}
 
-		private void OnDestroy()
+	private void OnDestroy()
+	{
+		for (int i = 0; i < piecePools.Count; i++)
 		{
-			for (int i = 0; i < this.piecePools.Count; i++)
+			if (piecePools[i] == null)
 			{
-				if (this.piecePools[i] != null)
+				continue;
+			}
+			foreach (BuilderPiece item in piecePools[i])
+			{
+				if (item != null)
 				{
-					foreach (BuilderPiece builderPiece in this.piecePools[i])
-					{
-						if (builderPiece != null)
-						{
-							Object.Destroy(builderPiece);
-						}
-					}
-					this.piecePools[i].Clear();
+					Object.Destroy(item);
 				}
 			}
-			this.piecePoolLookup.Clear();
-			foreach (BuilderBumpGlow obj in this.bumpGlowPool)
-			{
-				Object.Destroy(obj);
-			}
-			this.bumpGlowPool.Clear();
+			piecePools[i].Clear();
 		}
-
-		public List<List<BuilderPiece>> piecePools;
-
-		public Dictionary<int, int> piecePoolLookup;
-
-		[HideInInspector]
-		public List<BuilderBumpGlow> bumpGlowPool;
-
-		public BuilderBumpGlow bumpGlowPrefab;
-
-		[HideInInspector]
-		public List<SnapOverlap> snapOverlapPool;
-
-		public static BuilderPool instance;
-
-		private const int POOl_CAPACITY = 128;
-
-		private const int INITIAL_INSTANCE_COUNT_STARTER = 32;
-
-		private const int INITIAL_INSTANCE_COUNT_PREMIUM = 8;
-
-		private bool isSetup;
-
-		private bool hasBuiltPieceSets;
-
-		private Queue<int> piecesToAdd = new Queue<int>();
+		piecePoolLookup.Clear();
+		foreach (BuilderBumpGlow item2 in bumpGlowPool)
+		{
+			Object.Destroy(item2);
+		}
+		bumpGlowPool.Clear();
 	}
 }

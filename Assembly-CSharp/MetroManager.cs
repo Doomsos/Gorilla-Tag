@@ -1,20 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class MetroManager : MonoBehaviour
 {
-	private void Update()
-	{
-		for (int i = 0; i < this._blimps.Length; i++)
-		{
-			this._blimps[i].Tick();
-		}
-		for (int j = 0; j < this._spotlights.Length; j++)
-		{
-			this._spotlights[j].Tick();
-		}
-	}
-
 	[SerializeField]
 	private MetroBlimp[] _blimps = new MetroBlimp[0];
 
@@ -24,4 +11,16 @@ public class MetroManager : MonoBehaviour
 	[Space]
 	[SerializeField]
 	private Transform _blimpsRotationAnchor;
+
+	private void Update()
+	{
+		for (int i = 0; i < _blimps.Length; i++)
+		{
+			_blimps[i].Tick();
+		}
+		for (int j = 0; j < _spotlights.Length; j++)
+		{
+			_spotlights[j].Tick();
+		}
+	}
 }

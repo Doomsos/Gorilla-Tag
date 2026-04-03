@@ -1,74 +1,73 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NetSynchrony
+namespace NetSynchrony;
+
+[CreateAssetMenu(fileName = "RandomDispatcher", menuName = "NetSynchrony/RandomDispatcher", order = 0)]
+public class RandomDispatcher : ScriptableObject
 {
-	[CreateAssetMenu(fileName = "RandomDispatcher", menuName = "NetSynchrony/RandomDispatcher", order = 0)]
-	public class RandomDispatcher : ScriptableObject
+	public delegate void RandomDispatcherEvent(RandomDispatcher randomDispatcher);
+
+	[SerializeField]
+	private float minWaitTime = 1f;
+
+	[SerializeField]
+	private float maxWaitTime = 10f;
+
+	[SerializeField]
+	private float totalMinutes = 60f;
+
+	private List<float> dispatchTimes;
+
+	private int index = -1;
+
+	public event RandomDispatcherEvent Dispatch;
+
+	public void Init(double seconds)
 	{
-		public event RandomDispatcher.RandomDispatcherEvent Dispatch;
-
-		public void Init(double seconds)
+		seconds %= (double)(totalMinutes * 60f);
+		index = 0;
+		dispatchTimes = new List<float>();
+		float num = 0f;
+		float num2 = totalMinutes * 60f;
+		UnityEngine.Random.InitState(StaticHash.Compute(Application.buildGUID));
+		while (num < num2)
 		{
-			seconds %= (double)(this.totalMinutes * 60f);
-			this.index = 0;
-			this.dispatchTimes = new List<float>();
-			float num = 0f;
-			float num2 = this.totalMinutes * 60f;
-			Random.InitState(StaticHash.Compute(Application.buildGUID));
-			while (num < num2)
+			float num3 = UnityEngine.Random.Range(minWaitTime, maxWaitTime);
+			num += num3;
+			if ((double)num < seconds)
 			{
-				float num3 = Random.Range(this.minWaitTime, this.maxWaitTime);
-				num += num3;
-				if ((double)num < seconds)
-				{
-					this.index = this.dispatchTimes.Count;
-				}
-				this.dispatchTimes.Add(num);
+				index = dispatchTimes.Count;
 			}
-			Random.InitState((int)DateTime.Now.Ticks);
+			dispatchTimes.Add(num);
 		}
+		UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
+	}
 
-		public void Sync(double seconds)
+	public void Sync(double seconds)
+	{
+		seconds %= (double)(totalMinutes * 60f);
+		index = 0;
+		for (int i = 0; i < dispatchTimes.Count; i++)
 		{
-			seconds %= (double)(this.totalMinutes * 60f);
-			this.index = 0;
-			for (int i = 0; i < this.dispatchTimes.Count; i++)
+			if ((double)dispatchTimes[i] < seconds)
 			{
-				if ((double)this.dispatchTimes[i] < seconds)
-				{
-					this.index = i;
-				}
+				index = i;
 			}
 		}
+	}
 
-		public void Tick(double seconds)
+	public void Tick(double seconds)
+	{
+		seconds %= (double)(totalMinutes * 60f);
+		if ((double)dispatchTimes[index] < seconds)
 		{
-			seconds %= (double)(this.totalMinutes * 60f);
-			if ((double)this.dispatchTimes[this.index] < seconds)
+			index = (index + 1) % dispatchTimes.Count;
+			if (this.Dispatch != null)
 			{
-				this.index = (this.index + 1) % this.dispatchTimes.Count;
-				if (this.Dispatch != null)
-				{
-					this.Dispatch(this);
-				}
+				this.Dispatch(this);
 			}
 		}
-
-		[SerializeField]
-		private float minWaitTime = 1f;
-
-		[SerializeField]
-		private float maxWaitTime = 10f;
-
-		[SerializeField]
-		private float totalMinutes = 60f;
-
-		private List<float> dispatchTimes;
-
-		private int index = -1;
-
-		public delegate void RandomDispatcherEvent(RandomDispatcher randomDispatcher);
 	}
 }

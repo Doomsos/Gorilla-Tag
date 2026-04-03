@@ -1,60 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class FortuneResults : ScriptableObject
 {
-	private void OnValidate()
-	{
-		this.totalChance = 0f;
-		for (int i = 0; i < this.fortuneResults.Length; i++)
-		{
-			this.totalChance += this.fortuneResults[i].weightedChance;
-		}
-	}
-
-	public FortuneResults.FortuneResult GetResult()
-	{
-		float num = Random.Range(0f, this.totalChance);
-		int i = 0;
-		while (i < this.fortuneResults.Length)
-		{
-			FortuneResults.FortuneCategory fortuneCategory = this.fortuneResults[i];
-			if (num <= fortuneCategory.weightedChance)
-			{
-				if (fortuneCategory.textResults.Length == 0)
-				{
-					return new FortuneResults.FortuneResult(FortuneResults.FortuneCategoryType.Invalid, -1);
-				}
-				int resultIndex = Random.Range(0, fortuneCategory.textResults.Length);
-				return new FortuneResults.FortuneResult(fortuneCategory.fortuneType, resultIndex);
-			}
-			else
-			{
-				num -= fortuneCategory.weightedChance;
-				i++;
-			}
-		}
-		return new FortuneResults.FortuneResult(FortuneResults.FortuneCategoryType.Invalid, -1);
-	}
-
-	public string GetResultText(FortuneResults.FortuneResult result)
-	{
-		for (int i = 0; i < this.fortuneResults.Length; i++)
-		{
-			if (this.fortuneResults[i].fortuneType == result.fortuneType && result.resultIndex >= 0 && result.resultIndex < this.fortuneResults[i].textResults.Length)
-			{
-				return this.fortuneResults[i].textResults[result.resultIndex];
-			}
-		}
-		return "!! Invalid Fortune !!";
-	}
-
-	[SerializeField]
-	private FortuneResults.FortuneCategory[] fortuneResults;
-
-	[SerializeField]
-	private float totalChance;
-
 	public enum FortuneCategoryType
 	{
 		Invalid,
@@ -67,23 +15,64 @@ public class FortuneResults : ScriptableObject
 	[Serializable]
 	public struct FortuneCategory
 	{
-		public FortuneResults.FortuneCategoryType fortuneType;
+		public FortuneCategoryType fortuneType;
 
 		public float weightedChance;
 
 		public string[] textResults;
 	}
 
-	public struct FortuneResult
+	public struct FortuneResult(FortuneCategoryType fortuneType, int resultIndex)
 	{
-		public FortuneResult(FortuneResults.FortuneCategoryType fortuneType, int resultIndex)
+		public FortuneCategoryType fortuneType = fortuneType;
+
+		public int resultIndex = resultIndex;
+	}
+
+	[SerializeField]
+	private FortuneCategory[] fortuneResults;
+
+	[SerializeField]
+	private float totalChance;
+
+	private void OnValidate()
+	{
+		totalChance = 0f;
+		for (int i = 0; i < fortuneResults.Length; i++)
 		{
-			this.fortuneType = fortuneType;
-			this.resultIndex = resultIndex;
+			totalChance += fortuneResults[i].weightedChance;
 		}
+	}
 
-		public FortuneResults.FortuneCategoryType fortuneType;
+	public FortuneResult GetResult()
+	{
+		float num = UnityEngine.Random.Range(0f, totalChance);
+		for (int i = 0; i < fortuneResults.Length; i++)
+		{
+			FortuneCategory fortuneCategory = fortuneResults[i];
+			if (num <= fortuneCategory.weightedChance)
+			{
+				if (fortuneCategory.textResults.Length == 0)
+				{
+					return new FortuneResult(FortuneCategoryType.Invalid, -1);
+				}
+				int resultIndex = UnityEngine.Random.Range(0, fortuneCategory.textResults.Length);
+				return new FortuneResult(fortuneCategory.fortuneType, resultIndex);
+			}
+			num -= fortuneCategory.weightedChance;
+		}
+		return new FortuneResult(FortuneCategoryType.Invalid, -1);
+	}
 
-		public int resultIndex;
+	public string GetResultText(FortuneResult result)
+	{
+		for (int i = 0; i < fortuneResults.Length; i++)
+		{
+			if (fortuneResults[i].fortuneType == result.fortuneType && result.resultIndex >= 0 && result.resultIndex < fortuneResults[i].textResults.Length)
+			{
+				return fortuneResults[i].textResults[result.resultIndex];
+			}
+		}
+		return "!! Invalid Fortune !!";
 	}
 }

@@ -1,22 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class GRSpotlight : MonoBehaviourTick
 {
-	private void Awake()
-	{
-		this.yStart = base.transform.rotation.eulerAngles.y;
-		this.xStart = base.transform.rotation.eulerAngles.x;
-		this.timeOffset = Random.value * 360f;
-		this.yFrequency += Random.value / 100f;
-		this.xFrequency += Random.value / 100f;
-	}
-
-	public override void Tick()
-	{
-		base.transform.eulerAngles = new Vector3(this.xStart + this.xAmplitude * Mathf.Sin(Time.time * this.xFrequency), this.yStart + this.yAmplitude * Mathf.Cos(Time.time * this.yFrequency), 0f);
-	}
-
 	public float yAmplitude = 75f;
 
 	public float xAmplitude = 40f;
@@ -30,4 +15,18 @@ public class GRSpotlight : MonoBehaviourTick
 	private float xStart;
 
 	private float timeOffset;
+
+	private void Awake()
+	{
+		yStart = base.transform.rotation.eulerAngles.y;
+		xStart = base.transform.rotation.eulerAngles.x;
+		timeOffset = Random.value * 360f;
+		yFrequency += Random.value / 100f;
+		xFrequency += Random.value / 100f;
+	}
+
+	public override void Tick()
+	{
+		base.transform.eulerAngles = new Vector3(xStart + xAmplitude * Mathf.Sin(Time.time * xFrequency), yStart + yAmplitude * Mathf.Cos(Time.time * yFrequency), 0f);
+	}
 }

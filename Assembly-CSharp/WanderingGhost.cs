@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using GorillaExtensions;
@@ -10,283 +10,19 @@ using UnityEngine.Events;
 [NetworkBehaviourWeaved(1)]
 public class WanderingGhost : NetworkComponent
 {
-	protected override void Start()
+	[Serializable]
+	public struct Waypoint(bool visible, Transform tr)
 	{
-		base.Start();
-		this.waypointRegions = this.waypointsContainer.GetComponentsInChildren<ZoneBasedObject>();
-		this.idlePassedTime = 0f;
-		ThrowableSetDressing[] array = this.allFlowers;
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i].anchor.position = this.flowerDisabledPosition;
-		}
-		base.Invoke("DelayedStart", 0.5f);
+		[Tooltip("The ghost will be visible when its reached to this waypoint")]
+		public bool _visible = visible;
+
+		public Transform _transform = tr;
 	}
 
-	private void DelayedStart()
+	private enum ghostState
 	{
-		this.PickNextWaypoint();
-		base.transform.position = this.currentWaypoint._transform.position;
-		this.PickNextWaypoint();
-		this.ChangeState(WanderingGhost.ghostState.patrol);
-	}
-
-	private void LateUpdate()
-	{
-		this.UpdateState();
-		this.hoverVelocity -= this.mrenderer.transform.localPosition * this.hoverRectifyForce * Time.deltaTime;
-		this.hoverVelocity += Random.insideUnitSphere * this.hoverRandomForce * Time.deltaTime;
-		this.hoverVelocity = Vector3.MoveTowards(this.hoverVelocity, Vector3.zero, this.hoverDrag * Time.deltaTime);
-		this.mrenderer.transform.localPosition += this.hoverVelocity * Time.deltaTime;
-	}
-
-	private void PickNextWaypoint()
-	{
-		if (this.waypoints.Count == 0 || this.lastWaypointRegion == null || !this.lastWaypointRegion.IsLocalPlayerInZone())
-		{
-			ZoneBasedObject zoneBasedObject = ZoneBasedObject.SelectRandomEligible(this.waypointRegions, this.debugForceWaypointRegion);
-			if (zoneBasedObject == null)
-			{
-				zoneBasedObject = this.lastWaypointRegion;
-			}
-			if (zoneBasedObject == null)
-			{
-				return;
-			}
-			this.lastWaypointRegion = zoneBasedObject;
-			this.waypoints.Clear();
-			foreach (object obj in zoneBasedObject.transform)
-			{
-				Transform transform = (Transform)obj;
-				this.waypoints.Add(new WanderingGhost.Waypoint(transform.name.Contains("_v_"), transform));
-			}
-		}
-		int index = Random.Range(0, this.waypoints.Count);
-		this.currentWaypoint = this.waypoints[index];
-		this.waypoints.RemoveAt(index);
-	}
-
-	private void Patrol()
-	{
-		this.idlePassedTime = 0f;
-		this.mrenderer.sharedMaterial = this.scryableMaterial;
-		Transform transform = this.currentWaypoint._transform;
-		base.transform.position = Vector3.MoveTowards(base.transform.position, transform.position, this.patrolSpeed * Time.deltaTime);
-		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, Quaternion.LookRotation(transform.position - base.transform.position), 360f * Time.deltaTime);
-	}
-
-	private bool MaybeHideGhost()
-	{
-		int num = Physics.OverlapSphereNonAlloc(base.transform.position, this.sphereColliderRadius, this.hitColliders);
-		for (int i = 0; i < num; i++)
-		{
-			if (this.hitColliders[i].gameObject.IsOnLayer(UnityLayer.GorillaHand) || this.hitColliders[i].gameObject.IsOnLayer(UnityLayer.GorillaBodyCollider))
-			{
-				this.ChangeState(WanderingGhost.ghostState.patrol);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void ChangeState(WanderingGhost.ghostState newState)
-	{
-		this.currentState = newState;
-		this.mrenderer.sharedMaterial = ((newState == WanderingGhost.ghostState.idle) ? this.visibleMaterial : this.scryableMaterial);
-		if (newState == WanderingGhost.ghostState.patrol)
-		{
-			this.audioSource.GTStop();
-			this.audioSource.volume = this.patrolVolume;
-			this.audioSource.clip = this.patrolAudio;
-			this.audioSource.GTPlay();
-			return;
-		}
-		if (newState != WanderingGhost.ghostState.idle)
-		{
-			return;
-		}
-		this.audioSource.GTStop();
-		this.audioSource.volume = this.idleVolume;
-		this.audioSource.GTPlayOneShot(this.appearAudio.GetRandomItem<AudioClip>(), 1f);
-		if (NetworkSystem.Instance.IsMasterClient)
-		{
-			this.SpawnFlowerNearby();
-		}
-	}
-
-	private void UpdateState()
-	{
-		if (!NetworkSystem.Instance.IsMasterClient)
-		{
-			return;
-		}
-		WanderingGhost.ghostState ghostState = this.currentState;
-		if (ghostState != WanderingGhost.ghostState.patrol)
-		{
-			if (ghostState != WanderingGhost.ghostState.idle)
-			{
-				return;
-			}
-			this.idlePassedTime += Time.deltaTime;
-			if (this.idlePassedTime >= this.idleStayDuration || this.MaybeHideGhost())
-			{
-				this.PickNextWaypoint();
-				this.ChangeState(WanderingGhost.ghostState.patrol);
-			}
-		}
-		else
-		{
-			if (this.currentWaypoint._transform == null)
-			{
-				this.PickNextWaypoint();
-				return;
-			}
-			this.Patrol();
-			if (Vector3.Distance(base.transform.position, this.currentWaypoint._transform.position) < 0.2f)
-			{
-				if (this.currentWaypoint._visible)
-				{
-					this.ChangeState(WanderingGhost.ghostState.idle);
-					return;
-				}
-				this.PickNextWaypoint();
-				return;
-			}
-		}
-	}
-
-	private void HauntObjects()
-	{
-		Collider[] array = new Collider[20];
-		int num = Physics.OverlapSphereNonAlloc(base.transform.position, this.sphereColliderRadius, array);
-		for (int i = 0; i < num; i++)
-		{
-			if (array[i].CompareTag("HauntedObject"))
-			{
-				UnityAction<GameObject> triggerHauntedObjects = this.TriggerHauntedObjects;
-				if (triggerHauntedObjects != null)
-				{
-					triggerHauntedObjects(array[i].gameObject);
-				}
-			}
-		}
-	}
-
-	[Networked]
-	[NetworkedWeaved(0, 1)]
-	private unsafe WanderingGhost.ghostState Data
-	{
-		get
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing WanderingGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			return (WanderingGhost.ghostState)this.Ptr[0];
-		}
-		set
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing WanderingGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			this.Ptr[0] = (int)value;
-		}
-	}
-
-	public override void WriteDataFusion()
-	{
-		this.Data = this.currentState;
-	}
-
-	public override void ReadDataFusion()
-	{
-		this.ReadDataShared(this.Data);
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (info.Sender != PhotonNetwork.MasterClient)
-		{
-			return;
-		}
-		stream.SendNext(this.currentState);
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (info.Sender != PhotonNetwork.MasterClient)
-		{
-			return;
-		}
-		WanderingGhost.ghostState state = (WanderingGhost.ghostState)stream.ReceiveNext();
-		this.ReadDataShared(state);
-	}
-
-	private void ReadDataShared(WanderingGhost.ghostState state)
-	{
-		WanderingGhost.ghostState ghostState = this.currentState;
-		this.currentState = state;
-		if (ghostState != this.currentState)
-		{
-			this.ChangeState(this.currentState);
-		}
-	}
-
-	public override void OnOwnerChange(Player newOwner, Player previousOwner)
-	{
-		base.OnOwnerChange(newOwner, previousOwner);
-		if (newOwner == PhotonNetwork.LocalPlayer)
-		{
-			this.ChangeState(this.currentState);
-		}
-	}
-
-	private void SpawnFlowerNearby()
-	{
-		Vector3 position = base.transform.position + Vector3.down * 0.25f;
-		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.flowerSpawnRadius, Vector3.down), out raycastHit, 3f, this.flowerGroundMask))
-		{
-			position = raycastHit.point;
-		}
-		ThrowableSetDressing throwableSetDressing = null;
-		int num = 0;
-		foreach (ThrowableSetDressing throwableSetDressing2 in this.allFlowers)
-		{
-			if (!throwableSetDressing2.InHand())
-			{
-				num++;
-				if (Random.Range(0, num) == 0)
-				{
-					throwableSetDressing = throwableSetDressing2;
-				}
-			}
-		}
-		if (throwableSetDressing != null)
-		{
-			if (!throwableSetDressing.IsLocalOwnedWorldShareable)
-			{
-				throwableSetDressing.WorldShareableRequestOwnership();
-			}
-			throwableSetDressing.SetWillTeleport();
-			throwableSetDressing.transform.position = position;
-			throwableSetDressing.StartRespawnTimer(this.flowerSpawnDuration);
-		}
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.Data = this._Data;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._Data = this.Data;
+		patrol,
+		idle
 	}
 
 	public float patrolSpeed = 3f;
@@ -317,9 +53,9 @@ public class WanderingGhost : NetworkComponent
 
 	private ZoneBasedObject lastWaypointRegion;
 
-	private List<WanderingGhost.Waypoint> waypoints = new List<WanderingGhost.Waypoint>();
+	private List<Waypoint> waypoints = new List<Waypoint>();
 
-	private WanderingGhost.Waypoint currentWaypoint;
+	private Waypoint currentWaypoint;
 
 	public string debugForceWaypointRegion;
 
@@ -334,7 +70,7 @@ public class WanderingGhost : NetworkComponent
 
 	public float patrolVolume;
 
-	private WanderingGhost.ghostState currentState;
+	private ghostState currentState;
 
 	private float idlePassedTime;
 
@@ -355,26 +91,273 @@ public class WanderingGhost : NetworkComponent
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 1)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private WanderingGhost.ghostState _Data;
+	private ghostState _Data;
 
-	[Serializable]
-	public struct Waypoint
+	[Networked]
+	[NetworkedWeaved(0, 1)]
+	private unsafe ghostState Data
 	{
-		public Waypoint(bool visible, Transform tr)
+		get
 		{
-			this._visible = visible;
-			this._transform = tr;
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing WanderingGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(ghostState*)((byte*)((NetworkBehaviour)this).Ptr + 0);
 		}
-
-		[Tooltip("The ghost will be visible when its reached to this waypoint")]
-		public bool _visible;
-
-		public Transform _transform;
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing WanderingGhost.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(ghostState*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
 	}
 
-	private enum ghostState
+	protected override void Start()
 	{
-		patrol,
-		idle
+		base.Start();
+		waypointRegions = waypointsContainer.GetComponentsInChildren<ZoneBasedObject>();
+		idlePassedTime = 0f;
+		ThrowableSetDressing[] array = allFlowers;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].anchor.position = flowerDisabledPosition;
+		}
+		Invoke("DelayedStart", 0.5f);
+	}
+
+	private void DelayedStart()
+	{
+		PickNextWaypoint();
+		base.transform.position = currentWaypoint._transform.position;
+		PickNextWaypoint();
+		ChangeState(ghostState.patrol);
+	}
+
+	private void LateUpdate()
+	{
+		UpdateState();
+		hoverVelocity -= mrenderer.transform.localPosition * hoverRectifyForce * Time.deltaTime;
+		hoverVelocity += UnityEngine.Random.insideUnitSphere * hoverRandomForce * Time.deltaTime;
+		hoverVelocity = Vector3.MoveTowards(hoverVelocity, Vector3.zero, hoverDrag * Time.deltaTime);
+		mrenderer.transform.localPosition += hoverVelocity * Time.deltaTime;
+	}
+
+	private void PickNextWaypoint()
+	{
+		if (waypoints.Count == 0 || lastWaypointRegion == null || !lastWaypointRegion.IsLocalPlayerInZone())
+		{
+			ZoneBasedObject zoneBasedObject = ZoneBasedObject.SelectRandomEligible(waypointRegions, debugForceWaypointRegion);
+			if (zoneBasedObject == null)
+			{
+				zoneBasedObject = lastWaypointRegion;
+			}
+			if (zoneBasedObject == null)
+			{
+				return;
+			}
+			lastWaypointRegion = zoneBasedObject;
+			waypoints.Clear();
+			foreach (Transform item in zoneBasedObject.transform)
+			{
+				waypoints.Add(new Waypoint(item.name.Contains("_v_"), item));
+			}
+		}
+		int index = UnityEngine.Random.Range(0, waypoints.Count);
+		currentWaypoint = waypoints[index];
+		waypoints.RemoveAt(index);
+	}
+
+	private void Patrol()
+	{
+		idlePassedTime = 0f;
+		mrenderer.sharedMaterial = scryableMaterial;
+		Transform transform = currentWaypoint._transform;
+		base.transform.position = Vector3.MoveTowards(base.transform.position, transform.position, patrolSpeed * Time.deltaTime);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, Quaternion.LookRotation(transform.position - base.transform.position), 360f * Time.deltaTime);
+	}
+
+	private bool MaybeHideGhost()
+	{
+		int num = Physics.OverlapSphereNonAlloc(base.transform.position, sphereColliderRadius, hitColliders);
+		for (int i = 0; i < num; i++)
+		{
+			if (hitColliders[i].gameObject.IsOnLayer(UnityLayer.GorillaHand) || hitColliders[i].gameObject.IsOnLayer(UnityLayer.GorillaBodyCollider))
+			{
+				ChangeState(ghostState.patrol);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void ChangeState(ghostState newState)
+	{
+		currentState = newState;
+		mrenderer.sharedMaterial = ((newState == ghostState.idle) ? visibleMaterial : scryableMaterial);
+		switch (newState)
+		{
+		case ghostState.patrol:
+			audioSource.GTStop();
+			audioSource.volume = patrolVolume;
+			audioSource.clip = patrolAudio;
+			audioSource.GTPlay();
+			break;
+		case ghostState.idle:
+			audioSource.GTStop();
+			audioSource.volume = idleVolume;
+			audioSource.GTPlayOneShot(appearAudio.GetRandomItem());
+			if (NetworkSystem.Instance.IsMasterClient)
+			{
+				SpawnFlowerNearby();
+			}
+			break;
+		}
+	}
+
+	private void UpdateState()
+	{
+		if (!NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		switch (currentState)
+		{
+		case ghostState.patrol:
+			if (currentWaypoint._transform == null)
+			{
+				PickNextWaypoint();
+				break;
+			}
+			Patrol();
+			if (Vector3.Distance(base.transform.position, currentWaypoint._transform.position) < 0.2f)
+			{
+				if (currentWaypoint._visible)
+				{
+					ChangeState(ghostState.idle);
+				}
+				else
+				{
+					PickNextWaypoint();
+				}
+			}
+			break;
+		case ghostState.idle:
+			idlePassedTime += Time.deltaTime;
+			if (idlePassedTime >= idleStayDuration || MaybeHideGhost())
+			{
+				PickNextWaypoint();
+				ChangeState(ghostState.patrol);
+			}
+			break;
+		}
+	}
+
+	private void HauntObjects()
+	{
+		Collider[] array = new Collider[20];
+		int num = Physics.OverlapSphereNonAlloc(base.transform.position, sphereColliderRadius, array);
+		for (int i = 0; i < num; i++)
+		{
+			if (array[i].CompareTag("HauntedObject"))
+			{
+				TriggerHauntedObjects?.Invoke(array[i].gameObject);
+			}
+		}
+	}
+
+	public override void WriteDataFusion()
+	{
+		Data = currentState;
+	}
+
+	public override void ReadDataFusion()
+	{
+		ReadDataShared(Data);
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
+		{
+			stream.SendNext(currentState);
+		}
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
+		{
+			ghostState state = (ghostState)stream.ReceiveNext();
+			ReadDataShared(state);
+		}
+	}
+
+	private void ReadDataShared(ghostState state)
+	{
+		ghostState num = currentState;
+		currentState = state;
+		if (num != currentState)
+		{
+			ChangeState(currentState);
+		}
+	}
+
+	public override void OnOwnerChange(Player newOwner, Player previousOwner)
+	{
+		base.OnOwnerChange(newOwner, previousOwner);
+		if (newOwner == PhotonNetwork.LocalPlayer)
+		{
+			ChangeState(currentState);
+		}
+	}
+
+	private void SpawnFlowerNearby()
+	{
+		Vector3 position = base.transform.position + Vector3.down * 0.25f;
+		if (Physics.Raycast(new Ray(base.transform.position + UnityEngine.Random.insideUnitCircle.x0y() * flowerSpawnRadius, Vector3.down), out var hitInfo, 3f, flowerGroundMask))
+		{
+			position = hitInfo.point;
+		}
+		ThrowableSetDressing throwableSetDressing = null;
+		int num = 0;
+		ThrowableSetDressing[] array = allFlowers;
+		foreach (ThrowableSetDressing throwableSetDressing2 in array)
+		{
+			if (!throwableSetDressing2.InHand())
+			{
+				num++;
+				if (UnityEngine.Random.Range(0, num) == 0)
+				{
+					throwableSetDressing = throwableSetDressing2;
+				}
+			}
+		}
+		if (throwableSetDressing != null)
+		{
+			if (!throwableSetDressing.IsLocalOwnedWorldShareable)
+			{
+				throwableSetDressing.WorldShareableRequestOwnership();
+			}
+			throwableSetDressing.SetWillTeleport();
+			throwableSetDressing.transform.position = position;
+			throwableSetDressing.StartRespawnTimer(flowerSpawnDuration);
+		}
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
 	}
 }

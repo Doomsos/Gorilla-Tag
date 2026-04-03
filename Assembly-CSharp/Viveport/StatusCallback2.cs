@@ -1,6 +1,3 @@
-﻿using System;
+namespace Viveport;
 
-namespace Viveport
-{
-	public delegate void StatusCallback2(int nResult, string message);
-}
+public delegate void StatusCallback2(int nResult, string message);

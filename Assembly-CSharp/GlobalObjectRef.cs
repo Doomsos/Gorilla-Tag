@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -6,16 +6,6 @@ using UnityEngine;
 [StructLayout(LayoutKind.Explicit)]
 public struct GlobalObjectRef
 {
-	public static GlobalObjectRef ObjectToRefSlow(Object target)
-	{
-		return default(GlobalObjectRef);
-	}
-
-	public static Object RefToObjectSlow(GlobalObjectRef @ref)
-	{
-		return null;
-	}
-
 	[FieldOffset(0)]
 	public ulong targetObjectId;
 
@@ -25,11 +15,21 @@ public struct GlobalObjectRef
 	[FieldOffset(16)]
 	public Guid assetGUID;
 
-	[HideInInspector]
 	[FieldOffset(32)]
+	[HideInInspector]
 	public int identifierType;
 
-	[NonSerialized]
 	[FieldOffset(32)]
+	[NonSerialized]
 	private GlobalObjectRefType refType;
+
+	public static GlobalObjectRef ObjectToRefSlow(UnityEngine.Object target)
+	{
+		return default(GlobalObjectRef);
+	}
+
+	public static UnityEngine.Object RefToObjectSlow(GlobalObjectRef @ref)
+	{
+		return null;
+	}
 }

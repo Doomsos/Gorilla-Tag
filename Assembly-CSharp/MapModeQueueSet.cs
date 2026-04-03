@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MapModeQueueSet", menuName = "Game Settings/Map Mode Queue Set")]

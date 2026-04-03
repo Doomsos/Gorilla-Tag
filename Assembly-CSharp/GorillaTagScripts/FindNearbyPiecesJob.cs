@@ -1,185 +1,189 @@
-﻿using System;
 using Unity.Burst;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Jobs;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[BurstCompile]
+internal struct FindNearbyPiecesJob : IJobParallelForTransform
 {
-	[BurstCompile]
-	internal struct FindNearbyPiecesJob : IJobParallelForTransform
+	[ReadOnly]
+	public float distanceThreshSq;
+
+	[ReadOnly]
+	public Vector3 leftHandPos;
+
+	[ReadOnly]
+	public int leftPieceInHandIndex;
+
+	[ReadOnly]
+	public Vector3 rightHandPos;
+
+	[ReadOnly]
+	public int rightPieceInHandIndex;
+
+	[ReadOnly]
+	public int localPlayerPlotIndex;
+
+	[ReadOnly]
+	public int localPlayerActorNumber;
+
+	[ReadOnly]
+	public NativeArray<BuilderPieceData> pieceData;
+
+	[ReadOnly]
+	public NativeArray<BuilderGridPlaneData> gridPlaneData;
+
+	[ReadOnly]
+	public NativeArray<BuilderPrivatePlotData> privatePlotData;
+
+	[ReadOnly]
+	public NativeArray<BuilderPlayerData> playerData;
+
+	public NativeList<BuilderGridPlaneData>.ParallelWriter leftHandGridPlanes;
+
+	public NativeList<BuilderGridPlaneData>.ParallelWriter rightHandGridPlanes;
+
+	public void Execute(int index, TransformAccess transform)
 	{
-		public void Execute(int index, TransformAccess transform)
+		if (transform.isValid)
 		{
-			if (!transform.isValid)
-			{
-				return;
-			}
-			this.CheckGridPlane(index, this.leftPieceInHandIndex, transform, this.leftHandPos, true, this.leftHandGridPlanes);
-			this.CheckGridPlane(index, this.rightPieceInHandIndex, transform, this.rightHandPos, false, this.rightHandGridPlanes);
+			CheckGridPlane(index, leftPieceInHandIndex, transform, leftHandPos, isLeft: true, leftHandGridPlanes);
+			CheckGridPlane(index, rightPieceInHandIndex, transform, rightHandPos, isLeft: false, rightHandGridPlanes);
 		}
+	}
 
-		private void CheckGridPlane(int gridPlaneIndex, int handPieceIndex, TransformAccess transform, Vector3 handPos, bool isLeft, NativeList<BuilderGridPlaneData>.ParallelWriter checkGridPlanes)
+	private void CheckGridPlane(int gridPlaneIndex, int handPieceIndex, TransformAccess transform, Vector3 handPos, bool isLeft, NativeList<BuilderGridPlaneData>.ParallelWriter checkGridPlanes)
+	{
+		if (handPieceIndex >= 0 && !((transform.position - handPos).sqrMagnitude > distanceThreshSq))
 		{
-			if (handPieceIndex < 0)
+			BuilderGridPlaneData value = gridPlaneData[gridPlaneIndex];
+			int pieceIndex = value.pieceIndex;
+			int rootPieceIndex = GetRootPieceIndex(pieceIndex);
+			if (rootPieceIndex != handPieceIndex && CanPiecesPotentiallySnap(localPlayerActorNumber, handPieceIndex, pieceIndex, rootPieceIndex, pieceData[pieceIndex].requestedParentPieceIndex, isLeft))
 			{
-				return;
+				transform.GetPositionAndRotation(out value.position, out value.rotation);
+				checkGridPlanes.AddNoResize(value);
 			}
-			if ((transform.position - handPos).sqrMagnitude > this.distanceThreshSq)
-			{
-				return;
-			}
-			BuilderGridPlaneData builderGridPlaneData = this.gridPlaneData[gridPlaneIndex];
-			int pieceIndex = builderGridPlaneData.pieceIndex;
-			int rootPieceIndex = this.GetRootPieceIndex(pieceIndex);
-			if (rootPieceIndex == handPieceIndex)
-			{
-				return;
-			}
-			if (!this.CanPiecesPotentiallySnap(this.localPlayerActorNumber, handPieceIndex, pieceIndex, rootPieceIndex, this.pieceData[pieceIndex].requestedParentPieceIndex, isLeft))
-			{
-				return;
-			}
-			transform.GetPositionAndRotation(out builderGridPlaneData.position, out builderGridPlaneData.rotation);
-			checkGridPlanes.AddNoResize(builderGridPlaneData);
 		}
+	}
 
-		public bool CanPiecesPotentiallySnap(int localActorNumber, int pieceInHandIndex, int attachToPieceIndex, int attachToPieceRootIndex, int requestedParentPieceIndex, bool isLeft)
+	public bool CanPiecesPotentiallySnap(int localActorNumber, int pieceInHandIndex, int attachToPieceIndex, int attachToPieceRootIndex, int requestedParentPieceIndex, bool isLeft)
+	{
+		if (!CanPlayerAttachToRootPiece(localActorNumber, attachToPieceRootIndex, isLeft))
 		{
-			return this.CanPlayerAttachToRootPiece(localActorNumber, attachToPieceRootIndex, isLeft) && (requestedParentPieceIndex == -1 || pieceInHandIndex != this.GetRootPieceIndex(requestedParentPieceIndex));
+			return false;
 		}
-
-		public bool CanPlayerAttachToRootPiece(int playerActorNumber, int attachToPieceRootIndex, bool isLeft)
+		if (requestedParentPieceIndex != -1 && pieceInHandIndex == GetRootPieceIndex(requestedParentPieceIndex))
 		{
-			BuilderPieceData builderPieceData = this.pieceData[attachToPieceRootIndex];
-			if (builderPieceData.state != BuilderPiece.State.AttachedAndPlaced && builderPieceData.privatePlotIndex < 0 && builderPieceData.state != BuilderPiece.State.AttachedToArm)
+			return false;
+		}
+		return true;
+	}
+
+	public bool CanPlayerAttachToRootPiece(int playerActorNumber, int attachToPieceRootIndex, bool isLeft)
+	{
+		BuilderPieceData builderPieceData = pieceData[attachToPieceRootIndex];
+		if (builderPieceData.state != BuilderPiece.State.AttachedAndPlaced && builderPieceData.privatePlotIndex < 0 && builderPieceData.state != BuilderPiece.State.AttachedToArm)
+		{
+			return true;
+		}
+		int attachedBuiltInPiece = GetAttachedBuiltInPiece(attachToPieceRootIndex);
+		if (attachedBuiltInPiece == -1)
+		{
+			return true;
+		}
+		BuilderPieceData builderPieceData2 = pieceData[attachedBuiltInPiece];
+		if (builderPieceData2.privatePlotIndex < 0 && !builderPieceData2.isArmPiece)
+		{
+			return true;
+		}
+		if (builderPieceData2.isArmPiece)
+		{
+			if (builderPieceData2.heldByActorNumber == playerActorNumber)
 			{
-				return true;
-			}
-			int attachedBuiltInPiece = this.GetAttachedBuiltInPiece(attachToPieceRootIndex);
-			if (attachedBuiltInPiece == -1)
-			{
-				return true;
-			}
-			BuilderPieceData builderPieceData2 = this.pieceData[attachedBuiltInPiece];
-			if (builderPieceData2.privatePlotIndex < 0 && !builderPieceData2.isArmPiece)
-			{
-				return true;
-			}
-			if (builderPieceData2.isArmPiece)
-			{
-				if (builderPieceData2.heldByActorNumber == playerActorNumber)
-				{
-					int playerIndex = this.GetPlayerIndex(playerActorNumber);
-					return playerIndex >= 0 && this.playerData[playerIndex].scale >= 1f;
-				}
-				return false;
-			}
-			else
-			{
-				if (builderPieceData2.privatePlotIndex < 0)
-				{
-					return true;
-				}
-				if (!this.CanPlayerAttachToPlot(builderPieceData2.privatePlotIndex, playerActorNumber))
+				int playerIndex = GetPlayerIndex(playerActorNumber);
+				if (playerIndex < 0)
 				{
 					return false;
 				}
+				return playerData[playerIndex].scale >= 1f;
+			}
+			return false;
+		}
+		if (builderPieceData2.privatePlotIndex >= 0)
+		{
+			if (CanPlayerAttachToPlot(builderPieceData2.privatePlotIndex, playerActorNumber))
+			{
 				if (!isLeft)
 				{
-					return this.privatePlotData[builderPieceData2.privatePlotIndex].isUnderCapacityRight;
+					return privatePlotData[builderPieceData2.privatePlotIndex].isUnderCapacityRight;
 				}
-				return this.privatePlotData[builderPieceData2.privatePlotIndex].isUnderCapacityLeft;
+				return privatePlotData[builderPieceData2.privatePlotIndex].isUnderCapacityLeft;
 			}
+			return false;
 		}
+		return true;
+	}
 
-		public bool CanPlayerAttachToPlot(int privatePlotIndex, int actorNumber)
+	public bool CanPlayerAttachToPlot(int privatePlotIndex, int actorNumber)
+	{
+		BuilderPrivatePlotData builderPrivatePlotData = privatePlotData[privatePlotIndex];
+		if (builderPrivatePlotData.plotState != BuilderPiecePrivatePlot.PlotState.Occupied || builderPrivatePlotData.ownerActorNumber != actorNumber)
 		{
-			BuilderPrivatePlotData builderPrivatePlotData = this.privatePlotData[privatePlotIndex];
-			return (builderPrivatePlotData.plotState == BuilderPiecePrivatePlot.PlotState.Occupied && builderPrivatePlotData.ownerActorNumber == actorNumber) || (builderPrivatePlotData.plotState == BuilderPiecePrivatePlot.PlotState.Vacant && this.localPlayerPlotIndex < 0);
-		}
-
-		private int GetPlayerIndex(int playerActorNumber)
-		{
-			for (int i = 0; i < this.playerData.Length; i++)
+			if (builderPrivatePlotData.plotState == BuilderPiecePrivatePlot.PlotState.Vacant)
 			{
-				if (this.playerData[i].playerActorNumber == playerActorNumber)
-				{
-					return i;
-				}
+				return localPlayerPlotIndex < 0;
 			}
+			return false;
+		}
+		return true;
+	}
+
+	private int GetPlayerIndex(int playerActorNumber)
+	{
+		for (int i = 0; i < playerData.Length; i++)
+		{
+			if (playerData[i].playerActorNumber == playerActorNumber)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public int GetAttachedBuiltInPiece(int pieceIndex)
+	{
+		BuilderPieceData builderPieceData = pieceData[pieceIndex];
+		if (builderPieceData.isBuiltIntoTable)
+		{
+			return pieceIndex;
+		}
+		if (builderPieceData.state != BuilderPiece.State.AttachedAndPlaced)
+		{
 			return -1;
 		}
-
-		public int GetAttachedBuiltInPiece(int pieceIndex)
+		int num = GetRootPieceIndex(pieceIndex);
+		int parentPieceIndex = pieceData[num].parentPieceIndex;
+		if (parentPieceIndex != -1)
 		{
-			BuilderPieceData builderPieceData = this.pieceData[pieceIndex];
-			if (builderPieceData.isBuiltIntoTable)
-			{
-				return pieceIndex;
-			}
-			if (builderPieceData.state != BuilderPiece.State.AttachedAndPlaced)
-			{
-				return -1;
-			}
-			int num = this.GetRootPieceIndex(pieceIndex);
-			int parentPieceIndex = this.pieceData[num].parentPieceIndex;
-			if (parentPieceIndex != -1)
-			{
-				num = parentPieceIndex;
-			}
-			if (this.pieceData[num].isBuiltIntoTable)
-			{
-				return num;
-			}
-			return -1;
+			num = parentPieceIndex;
 		}
-
-		private int GetRootPieceIndex(int pieceIndex)
+		if (pieceData[num].isBuiltIntoTable)
 		{
-			int num = pieceIndex;
-			while (num != -1 && this.pieceData[num].parentPieceIndex != -1 && !this.pieceData[this.pieceData[num].parentPieceIndex].isBuiltIntoTable)
-			{
-				num = this.pieceData[num].parentPieceIndex;
-			}
 			return num;
 		}
+		return -1;
+	}
 
-		[ReadOnly]
-		public float distanceThreshSq;
-
-		[ReadOnly]
-		public Vector3 leftHandPos;
-
-		[ReadOnly]
-		public int leftPieceInHandIndex;
-
-		[ReadOnly]
-		public Vector3 rightHandPos;
-
-		[ReadOnly]
-		public int rightPieceInHandIndex;
-
-		[ReadOnly]
-		public int localPlayerPlotIndex;
-
-		[ReadOnly]
-		public int localPlayerActorNumber;
-
-		[ReadOnly]
-		public NativeArray<BuilderPieceData> pieceData;
-
-		[ReadOnly]
-		public NativeArray<BuilderGridPlaneData> gridPlaneData;
-
-		[ReadOnly]
-		public NativeArray<BuilderPrivatePlotData> privatePlotData;
-
-		[ReadOnly]
-		public NativeArray<BuilderPlayerData> playerData;
-
-		public NativeList<BuilderGridPlaneData>.ParallelWriter leftHandGridPlanes;
-
-		public NativeList<BuilderGridPlaneData>.ParallelWriter rightHandGridPlanes;
+	private int GetRootPieceIndex(int pieceIndex)
+	{
+		int num = pieceIndex;
+		while (num != -1 && pieceData[num].parentPieceIndex != -1 && !pieceData[pieceData[num].parentPieceIndex].isBuiltIntoTable)
+		{
+			num = pieceData[num].parentPieceIndex;
+		}
+		return num;
 	}
 }

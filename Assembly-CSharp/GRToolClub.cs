@@ -1,232 +1,13 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugComponent, IGameEntityComponent
 {
-	private void Awake()
+	private enum State
 	{
-		this.retractableSection.localPosition = new Vector3(0f, 0f, 0f);
-	}
-
-	public new void OnEnable()
-	{
-		base.OnEnable();
-		this.SetExtendedAmount(0f);
-		this.gameHitter.hitFx = this.noPowerFx;
-		this.gameHitter.damageAttribute = this.noPowerAttribute;
-		this.SetState(GRToolClub.State.Idle);
-	}
-
-	public void OnEntityInit()
-	{
-		if (this.tool != null)
-		{
-			this.tool.onToolUpgraded += this.OnToolUpgraded;
-			this.OnToolUpgraded(this.tool);
-		}
-	}
-
-	public void OnEntityDestroy()
-	{
-	}
-
-	public void OnEntityStateChange(long prevState, long nextState)
-	{
-	}
-
-	private void OnToolUpgraded(GRTool tool)
-	{
-	}
-
-	private void EnableImpactVFXForCurrentUpgradeLevel()
-	{
-		if (this.tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage1))
-		{
-			this.gameHitter.hitFx = this.upgrade1ImpactVFX;
-			return;
-		}
-		if (this.tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage2))
-		{
-			this.gameHitter.hitFx = this.upgrade2ImpactVFX;
-			return;
-		}
-		if (this.tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage3))
-		{
-			this.gameHitter.hitFx = this.upgrade3ImpactVFX;
-			return;
-		}
-		this.gameHitter.hitFx = this.poweredImpactFx;
-	}
-
-	public override void Tick()
-	{
-		float deltaTime = Time.deltaTime;
-		if (this.gameEntity.IsHeld())
-		{
-			if (this.gameEntity.IsHeldByLocalPlayer())
-			{
-				this.OnUpdateAuthority(deltaTime);
-			}
-			else
-			{
-				this.OnUpdateRemote(deltaTime);
-			}
-		}
-		else
-		{
-			this.SetState(GRToolClub.State.Idle);
-		}
-		this.OnUpdateShared(deltaTime);
-	}
-
-	private void OnUpdateAuthority(float dt)
-	{
-		GRToolClub.State state = this.state;
-		if (state != GRToolClub.State.Idle)
-		{
-			if (state != GRToolClub.State.Extended)
-			{
-				return;
-			}
-			if (!this.IsButtonHeld() || !this.tool.HasEnoughEnergy())
-			{
-				this.SetState(GRToolClub.State.Idle);
-			}
-		}
-		else if (this.IsButtonHeld() && this.tool.HasEnoughEnergy())
-		{
-			this.SetState(GRToolClub.State.Extended);
-			return;
-		}
-	}
-
-	private void OnUpdateRemote(float dt)
-	{
-		GRToolClub.State state = (GRToolClub.State)this.gameEntity.GetState();
-		if (state != this.state)
-		{
-			this.SetState(state);
-		}
-	}
-
-	private void OnUpdateShared(float dt)
-	{
-		GRToolClub.State state = this.state;
-		if (state != GRToolClub.State.Idle)
-		{
-			if (state != GRToolClub.State.Extended)
-			{
-				return;
-			}
-			if (this.extendedAmount < 1f)
-			{
-				float num = Mathf.MoveTowards(this.extendedAmount, 1f, 1f / this.extensionTime * Time.deltaTime);
-				this.SetExtendedAmount(num);
-			}
-		}
-		else if (this.extendedAmount > 0f)
-		{
-			float num2 = Mathf.MoveTowards(this.extendedAmount, 0f, 1f / this.extensionTime * Time.deltaTime);
-			this.SetExtendedAmount(num2);
-			return;
-		}
-	}
-
-	private void SetExtendedAmount(float newExtendedAmount)
-	{
-		this.extendedAmount = newExtendedAmount;
-		float y = Mathf.Lerp(this.retractableSectionMin, this.retractableSectionMax, this.extendedAmount);
-		this.retractableSection.localPosition = new Vector3(0f, y, 0f);
-	}
-
-	private void SetState(GRToolClub.State newState)
-	{
-		if (this.state == newState)
-		{
-			return;
-		}
-		GRToolClub.State state = this.state;
-		if (state != GRToolClub.State.Idle)
-		{
-		}
-		this.state = newState;
-		state = this.state;
-		if (state != GRToolClub.State.Idle)
-		{
-			if (state == GRToolClub.State.Extended)
-			{
-				this.idleCollider.enabled = false;
-				this.extendedCollider.enabled = true;
-				for (int i = 0; i < this.meshAndMaterials.Count; i++)
-				{
-					MaterialUtils.SwapMaterial(this.meshAndMaterials[i], false);
-				}
-				this.humAudioSource.Play();
-				this.dullLight.SetActive(true);
-				this.audioSource.PlayOneShot(this.extendAudio, this.extendVolume);
-				for (int j = 0; j < this.humParticleEffects.Count; j++)
-				{
-					this.humParticleEffects[j].gameObject.SetActive(true);
-				}
-				this.EnableImpactVFXForCurrentUpgradeLevel();
-				this.gameHitter.damageAttribute = this.poweredAttribute;
-				this.openHaptic.PlayIfHeldLocal(this.gameEntity);
-			}
-		}
-		else
-		{
-			this.extendedCollider.enabled = false;
-			this.idleCollider.enabled = true;
-			for (int k = 0; k < this.meshAndMaterials.Count; k++)
-			{
-				MaterialUtils.SwapMaterial(this.meshAndMaterials[k], true);
-			}
-			this.humAudioSource.Stop();
-			this.dullLight.SetActive(false);
-			this.audioSource.PlayOneShot(this.retractAudio, this.retractVolume);
-			for (int l = 0; l < this.humParticleEffects.Count; l++)
-			{
-				this.humParticleEffects[l].gameObject.SetActive(false);
-			}
-			this.gameHitter.hitFx = this.noPowerFx;
-			this.gameHitter.damageAttribute = this.noPowerAttribute;
-			this.closeHaptic.PlayIfHeldLocal(this.gameEntity);
-		}
-		if (this.gameEntity.IsHeldByLocalPlayer())
-		{
-			this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
-		}
-	}
-
-	private bool IsButtonHeld()
-	{
-		if (!this.gameEntity.IsHeldByLocalPlayer())
-		{
-			return false;
-		}
-		GamePlayer gamePlayer;
-		if (!GamePlayer.TryGetGamePlayer(this.gameEntity.heldByActorNumber, out gamePlayer))
-		{
-			return false;
-		}
-		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
-	}
-
-	public void OnSuccessfulHit(GameHitData hitData)
-	{
-		if (this.state == GRToolClub.State.Extended)
-		{
-			this.tool.UseEnergy();
-		}
-	}
-
-	public void GetDebugTextLines(out List<string> strings)
-	{
-		strings = new List<string>();
-		strings.Add(string.Format("Knockback: <color=\"yellow\">x{0}<color=\"white\">", this.gameHitter.knockbackMultiplier));
+		Idle,
+		Extended
 	}
 
 	public GameEntity gameEntity;
@@ -292,11 +73,229 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 
 	private float extendedAmount;
 
-	private GRToolClub.State state;
+	private State state;
 
-	private enum State
+	private void Awake()
 	{
-		Idle,
-		Extended
+		retractableSection.localPosition = new Vector3(0f, 0f, 0f);
+	}
+
+	public new void OnEnable()
+	{
+		base.OnEnable();
+		SetExtendedAmount(0f);
+		gameHitter.hitFx = noPowerFx;
+		gameHitter.damageAttribute = noPowerAttribute;
+		SetState(State.Idle);
+	}
+
+	public void OnEntityInit()
+	{
+		if (tool != null)
+		{
+			tool.onToolUpgraded += OnToolUpgraded;
+			OnToolUpgraded(tool);
+		}
+	}
+
+	public void OnEntityDestroy()
+	{
+	}
+
+	public void OnEntityStateChange(long prevState, long nextState)
+	{
+	}
+
+	private void OnToolUpgraded(GRTool tool)
+	{
+	}
+
+	private void EnableImpactVFXForCurrentUpgradeLevel()
+	{
+		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage1))
+		{
+			gameHitter.hitFx = upgrade1ImpactVFX;
+		}
+		else if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage2))
+		{
+			gameHitter.hitFx = upgrade2ImpactVFX;
+		}
+		else if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage3))
+		{
+			gameHitter.hitFx = upgrade3ImpactVFX;
+		}
+		else
+		{
+			gameHitter.hitFx = poweredImpactFx;
+		}
+	}
+
+	public override void Tick()
+	{
+		float deltaTime = Time.deltaTime;
+		if (gameEntity.IsHeld())
+		{
+			if (gameEntity.IsHeldByLocalPlayer())
+			{
+				OnUpdateAuthority(deltaTime);
+			}
+			else
+			{
+				OnUpdateRemote(deltaTime);
+			}
+		}
+		else
+		{
+			SetState(State.Idle);
+		}
+		OnUpdateShared(deltaTime);
+	}
+
+	private void OnUpdateAuthority(float dt)
+	{
+		switch (state)
+		{
+		case State.Idle:
+			if (IsButtonHeld() && tool.HasEnoughEnergy())
+			{
+				SetState(State.Extended);
+			}
+			break;
+		case State.Extended:
+			if (!IsButtonHeld() || !tool.HasEnoughEnergy())
+			{
+				SetState(State.Idle);
+			}
+			break;
+		}
+	}
+
+	private void OnUpdateRemote(float dt)
+	{
+		State state = (State)gameEntity.GetState();
+		if (state != this.state)
+		{
+			SetState(state);
+		}
+	}
+
+	private void OnUpdateShared(float dt)
+	{
+		switch (state)
+		{
+		case State.Idle:
+			if (extendedAmount > 0f)
+			{
+				float num2 = Mathf.MoveTowards(extendedAmount, 0f, 1f / extensionTime * Time.deltaTime);
+				SetExtendedAmount(num2);
+			}
+			break;
+		case State.Extended:
+			if (extendedAmount < 1f)
+			{
+				float num = Mathf.MoveTowards(extendedAmount, 1f, 1f / extensionTime * Time.deltaTime);
+				SetExtendedAmount(num);
+			}
+			break;
+		}
+	}
+
+	private void SetExtendedAmount(float newExtendedAmount)
+	{
+		extendedAmount = newExtendedAmount;
+		float y = Mathf.Lerp(retractableSectionMin, retractableSectionMax, extendedAmount);
+		retractableSection.localPosition = new Vector3(0f, y, 0f);
+	}
+
+	private void SetState(State newState)
+	{
+		if (state == newState)
+		{
+			return;
+		}
+		if (state != State.Idle)
+		{
+			_ = 1;
+		}
+		state = newState;
+		switch (state)
+		{
+		case State.Idle:
+		{
+			extendedCollider.enabled = false;
+			idleCollider.enabled = true;
+			for (int k = 0; k < meshAndMaterials.Count; k++)
+			{
+				MaterialUtils.SwapMaterial(meshAndMaterials[k], isOnToOff: true);
+			}
+			humAudioSource.Stop();
+			dullLight.SetActive(value: false);
+			audioSource.PlayOneShot(retractAudio, retractVolume);
+			for (int l = 0; l < humParticleEffects.Count; l++)
+			{
+				humParticleEffects[l].gameObject.SetActive(value: false);
+			}
+			gameHitter.hitFx = noPowerFx;
+			gameHitter.damageAttribute = noPowerAttribute;
+			closeHaptic.PlayIfHeldLocal(gameEntity);
+			break;
+		}
+		case State.Extended:
+		{
+			idleCollider.enabled = false;
+			extendedCollider.enabled = true;
+			for (int i = 0; i < meshAndMaterials.Count; i++)
+			{
+				MaterialUtils.SwapMaterial(meshAndMaterials[i], isOnToOff: false);
+			}
+			humAudioSource.Play();
+			dullLight.SetActive(value: true);
+			audioSource.PlayOneShot(extendAudio, extendVolume);
+			for (int j = 0; j < humParticleEffects.Count; j++)
+			{
+				humParticleEffects[j].gameObject.SetActive(value: true);
+			}
+			EnableImpactVFXForCurrentUpgradeLevel();
+			gameHitter.damageAttribute = poweredAttribute;
+			openHaptic.PlayIfHeldLocal(gameEntity);
+			break;
+		}
+		}
+		if (gameEntity.IsHeldByLocalPlayer())
+		{
+			gameEntity.RequestState(gameEntity.id, (long)newState);
+		}
+	}
+
+	private bool IsButtonHeld()
+	{
+		if (!gameEntity.IsHeldByLocalPlayer())
+		{
+			return false;
+		}
+		if (!GamePlayer.TryGetGamePlayer(gameEntity.heldByActorNumber, out var out_gamePlayer))
+		{
+			return false;
+		}
+		int num = out_gamePlayer.FindHandIndex(gameEntity.id);
+		if (num == -1)
+		{
+			return false;
+		}
+		return ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+	}
+
+	public void OnSuccessfulHit(GameHitData hitData)
+	{
+		if (state == State.Extended)
+		{
+			tool.UseEnergy();
+		}
+	}
+
+	public void GetDebugTextLines(out List<string> strings)
+	{
+		strings = new List<string>();
+		strings.Add($"Knockback: <color=\"yellow\">x{gameHitter.knockbackMultiplier}<color=\"white\">");
 	}
 }

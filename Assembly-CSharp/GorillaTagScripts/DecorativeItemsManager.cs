@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Fusion;
 using GorillaExtensions;
@@ -7,409 +7,370 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Scripting;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+[NetworkBehaviourWeaved(1)]
+public class DecorativeItemsManager : NetworkComponent
 {
-	[NetworkBehaviourWeaved(1)]
-	public class DecorativeItemsManager : NetworkComponent
+	public GameObject decorativeItemsContainer;
+
+	public GameObject respawnableHooksContainer;
+
+	public List<GameObject> nonRespawnableHooksContainer = new List<GameObject>();
+
+	private readonly List<DecorativeItem> itemsList = new List<DecorativeItem>();
+
+	private readonly List<AttachPoint> respawnableHooks = new List<AttachPoint>();
+
+	private readonly List<AttachPoint> allHooks = new List<AttachPoint>();
+
+	private int lastIndex;
+
+	private int currentIndex;
+
+	private int arrayIndex = -1;
+
+	private bool shouldRunUpdate;
+
+	private ZoneBasedObject zone;
+
+	private bool wasInZone;
+
+	[OnEnterPlay_SetNull]
+	private static DecorativeItemsManager _instance;
+
+	[WeaverGenerated]
+	[SerializeField]
+	[DefaultForProperty("Data", 0, 1)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	private int _Data;
+
+	public static DecorativeItemsManager Instance => _instance;
+
+	[Networked]
+	[NetworkedWeaved(0, 1)]
+	public unsafe int Data
 	{
-		public static DecorativeItemsManager Instance
+		get
 		{
-			get
+			if (((NetworkBehaviour)this).Ptr == null)
 			{
-				return DecorativeItemsManager._instance;
+				throw new InvalidOperationException("Error when accessing DecorativeItemsManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(int*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing DecorativeItemsManager.Data. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(int*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		if (_instance != null && _instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+		else
+		{
+			_instance = this;
+		}
+		currentIndex = -1;
+		shouldRunUpdate = true;
+		zone = GetComponent<ZoneBasedObject>();
+		DecorativeItem[] componentsInChildren = decorativeItemsContainer.GetComponentsInChildren<DecorativeItem>(includeInactive: false);
+		foreach (DecorativeItem decorativeItem in componentsInChildren)
+		{
+			if ((bool)decorativeItem)
+			{
+				itemsList.Add(decorativeItem);
+				decorativeItem.respawnItem = (UnityAction<DecorativeItem>)Delegate.Combine(decorativeItem.respawnItem, new UnityAction<DecorativeItem>(OnRequestToRespawn));
 			}
 		}
-
-		protected override void Awake()
+		AttachPoint[] componentsInChildren2 = respawnableHooksContainer.GetComponentsInChildren<AttachPoint>(includeInactive: false);
+		foreach (AttachPoint attachPoint in componentsInChildren2)
 		{
-			base.Awake();
-			if (DecorativeItemsManager._instance != null && DecorativeItemsManager._instance != this)
+			if ((bool)attachPoint)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				respawnableHooks.Add(attachPoint);
 			}
-			else
+		}
+		allHooks.AddRange(respawnableHooks);
+		foreach (GameObject item in nonRespawnableHooksContainer)
+		{
+			componentsInChildren2 = item.GetComponentsInChildren<AttachPoint>(includeInactive: false);
+			foreach (AttachPoint attachPoint2 in componentsInChildren2)
 			{
-				DecorativeItemsManager._instance = this;
-			}
-			this.currentIndex = -1;
-			this.shouldRunUpdate = true;
-			this.zone = base.GetComponent<ZoneBasedObject>();
-			foreach (DecorativeItem decorativeItem in this.decorativeItemsContainer.GetComponentsInChildren<DecorativeItem>(false))
-			{
-				if (decorativeItem)
+				if ((bool)attachPoint2)
 				{
-					this.itemsList.Add(decorativeItem);
-					DecorativeItem decorativeItem2 = decorativeItem;
-					decorativeItem2.respawnItem = (UnityAction<DecorativeItem>)Delegate.Combine(decorativeItem2.respawnItem, new UnityAction<DecorativeItem>(this.OnRequestToRespawn));
-				}
-			}
-			foreach (AttachPoint attachPoint in this.respawnableHooksContainer.GetComponentsInChildren<AttachPoint>(false))
-			{
-				if (attachPoint)
-				{
-					this.respawnableHooks.Add(attachPoint);
-				}
-			}
-			this.allHooks.AddRange(this.respawnableHooks);
-			foreach (GameObject gameObject in this.nonRespawnableHooksContainer)
-			{
-				foreach (AttachPoint attachPoint2 in gameObject.GetComponentsInChildren<AttachPoint>(false))
-				{
-					if (attachPoint2)
-					{
-						this.allHooks.Add(attachPoint2);
-					}
+					allHooks.Add(attachPoint2);
 				}
 			}
 		}
+	}
 
-		private void OnDestroy()
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		foreach (DecorativeItem items in itemsList)
 		{
-			NetworkBehaviourUtils.InternalOnDestroy(this);
-			foreach (DecorativeItem decorativeItem in this.itemsList)
-			{
-				decorativeItem.respawnItem = (UnityAction<DecorativeItem>)Delegate.Remove(decorativeItem.respawnItem, new UnityAction<DecorativeItem>(this.OnRequestToRespawn));
-			}
-			this.itemsList.Clear();
-			this.respawnableHooks.Clear();
-			if (DecorativeItemsManager._instance == this)
-			{
-				DecorativeItemsManager._instance = null;
-			}
+			items.respawnItem = (UnityAction<DecorativeItem>)Delegate.Remove(items.respawnItem, new UnityAction<DecorativeItem>(OnRequestToRespawn));
 		}
-
-		private void Update()
+		itemsList.Clear();
+		respawnableHooks.Clear();
+		if (_instance == this)
 		{
-			if (!PhotonNetwork.InRoom)
-			{
-				return;
-			}
-			if (this.wasInZone != this.zone.IsLocalPlayerInZone())
-			{
-				this.shouldRunUpdate = true;
-			}
-			if (!this.shouldRunUpdate)
-			{
-				return;
-			}
-			if (base.IsMine)
-			{
-				if (this.wasInZone != this.zone.IsLocalPlayerInZone())
-				{
-					foreach (AttachPoint attachPoint in this.allHooks)
-					{
-						attachPoint.SetIsHook(false);
-					}
-					for (int i = 0; i < this.itemsList.Count; i++)
-					{
-						this.itemsList[i].itemState = TransferrableObject.ItemStates.State2;
-						this.SpawnItem(i);
-					}
-					this.shouldRunUpdate = false;
-				}
-				this.wasInZone = this.zone.IsLocalPlayerInZone();
-				this.SpawnItem(this.UpdateListPerFrame());
-			}
+			_instance = null;
 		}
+	}
 
-		private void SpawnItem(int index)
+	private void Update()
+	{
+		if (!PhotonNetwork.InRoom)
 		{
-			if (!NetworkSystem.Instance.InRoom)
+			return;
+		}
+		if (wasInZone != zone.IsLocalPlayerInZone())
+		{
+			shouldRunUpdate = true;
+		}
+		if (!shouldRunUpdate || !base.IsMine)
+		{
+			return;
+		}
+		if (wasInZone != zone.IsLocalPlayerInZone())
+		{
+			foreach (AttachPoint allHook in allHooks)
 			{
-				return;
+				allHook.SetIsHook(isHooked: false);
 			}
-			if (index < 0 || index >= this.itemsList.Count)
+			for (int i = 0; i < itemsList.Count; i++)
 			{
-				return;
+				itemsList[i].itemState = TransferrableObject.ItemStates.State2;
+				SpawnItem(i);
 			}
-			if (this.respawnableHooks == null)
-			{
-				return;
-			}
-			if (this.itemsList == null)
-			{
-				return;
-			}
-			if (this.itemsList.Count > this.respawnableHooks.Count)
-			{
-				Debug.LogError("Trying to snap more decorative items than allowed! Some items will be left un-hooked!");
-				return;
-			}
-			Transform transform = this.RandomSpawn();
-			if (transform == null)
-			{
-				return;
-			}
+			shouldRunUpdate = false;
+		}
+		wasInZone = zone.IsLocalPlayerInZone();
+		SpawnItem(UpdateListPerFrame());
+	}
+
+	private void SpawnItem(int index)
+	{
+		if (!NetworkSystem.Instance.InRoom || index < 0 || index >= itemsList.Count || respawnableHooks == null || itemsList == null)
+		{
+			return;
+		}
+		if (itemsList.Count > respawnableHooks.Count)
+		{
+			Debug.LogError("Trying to snap more decorative items than allowed! Some items will be left un-hooked!");
+			return;
+		}
+		Transform transform = RandomSpawn();
+		if (!(transform == null))
+		{
 			Vector3 position = transform.position;
 			Quaternion rotation = transform.rotation;
-			DecorativeItem decorativeItem = this.itemsList[index];
+			DecorativeItem decorativeItem = itemsList[index];
 			decorativeItem.WorldShareableRequestOwnership();
 			decorativeItem.Respawn(position, rotation);
-			base.SendRPC("RespawnItemRPC", RpcTarget.Others, new object[]
-			{
-				index,
-				position,
-				rotation
-			});
+			SendRPC("RespawnItemRPC", RpcTarget.Others, index, position, rotation);
 		}
+	}
 
-		[PunRPC]
-		private void RespawnItemRPC(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfo info)
+	[PunRPC]
+	private void RespawnItemRPC(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfo info)
+	{
+		RespawnItemShared(index, _transformPos, _transformRot, info);
+	}
+
+	[Rpc]
+	private unsafe void RPC_RespawnItem(int index, Vector3 _transformPos, Quaternion _transformRot, RpcInfo info = default(RpcInfo))
+	{
+		if (((NetworkBehaviour)this).InvokeRpc)
 		{
-			this.RespawnItemShared(index, _transformPos, _transformRot, info);
+			((NetworkBehaviour)this).InvokeRpc = false;
 		}
-
-		[Rpc]
-		private unsafe void RPC_RespawnItem(int index, Vector3 _transformPos, Quaternion _transformRot, RpcInfo info = default(RpcInfo))
+		else
 		{
-			if (!this.InvokeRpc)
-			{
-				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
-				{
-					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
-					if ((localAuthorityMask & 7) == 0)
-					{
-						NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTagScripts.DecorativeItemsManager::RPC_RespawnItem(System.Int32,UnityEngine.Vector3,UnityEngine.Quaternion,Fusion.RpcInfo)", base.Object, 7);
-					}
-					else
-					{
-						int num = 8;
-						num += 4;
-						num += 12;
-						num += 16;
-						if (!SimulationMessage.CanAllocateUserPayload(num))
-						{
-							NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTagScripts.DecorativeItemsManager::RPC_RespawnItem(System.Int32,UnityEngine.Vector3,UnityEngine.Quaternion,Fusion.RpcInfo)", num);
-						}
-						else
-						{
-							if (base.Runner.HasAnyActiveConnections())
-							{
-								SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
-								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
-								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
-								int num2 = 8;
-								*(int*)(ptr2 + num2) = index;
-								num2 += 4;
-								*(Vector3*)(ptr2 + num2) = _transformPos;
-								num2 += 12;
-								*(Quaternion*)(ptr2 + num2) = _transformRot;
-								num2 += 16;
-								ptr->Offset = num2 * 8;
-								base.Runner.SendRpc(ptr);
-							}
-							if ((localAuthorityMask & 7) != 0)
-							{
-								info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
-								goto IL_12;
-							}
-						}
-					}
-				}
-				return;
-			}
-			this.InvokeRpc = false;
-			IL_12:
-			this.RespawnItemShared(index, _transformPos, _transformRot, info);
-		}
-
-		protected void RespawnItemShared(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfoWrapped info)
-		{
-			if (index >= 0 && index <= this.itemsList.Count - 1)
-			{
-				float num = 10000f;
-				if (_transformPos.IsValid(num) && _transformRot.IsValid() && info.Sender == NetworkSystem.Instance.MasterClient)
-				{
-					MonkeAgent.IncrementRPCCall(info, "RespawnItemRPC");
-					this.itemsList[index].Respawn(_transformPos, _transformRot);
-					return;
-				}
-			}
-		}
-
-		private Transform RandomSpawn()
-		{
-			this.lastIndex = this.currentIndex;
-			bool flag = false;
-			bool flag2 = this.zone.IsLocalPlayerInZone();
-			int index = Random.Range(0, this.respawnableHooks.Count);
-			while (!flag)
-			{
-				index = Random.Range(0, this.respawnableHooks.Count);
-				if (!this.respawnableHooks[index].inForest == flag2)
-				{
-					flag = true;
-				}
-			}
-			if (!this.respawnableHooks[index].IsHooked())
-			{
-				this.currentIndex = index;
-			}
-			else
-			{
-				this.currentIndex = -1;
-			}
-			if (this.currentIndex != this.lastIndex && this.currentIndex > -1)
-			{
-				return this.respawnableHooks[this.currentIndex].attachPoint;
-			}
-			this.currentIndex = -1;
-			return null;
-		}
-
-		private int UpdateListPerFrame()
-		{
-			this.arrayIndex++;
-			if (this.arrayIndex >= this.itemsList.Count || this.arrayIndex < 0)
-			{
-				this.shouldRunUpdate = false;
-				return -1;
-			}
-			return this.arrayIndex;
-		}
-
-		private void OnRequestToRespawn(DecorativeItem item)
-		{
-			if (base.IsMine)
-			{
-				if (item == null)
-				{
-					return;
-				}
-				int index = this.itemsList.IndexOf(item);
-				this.SpawnItem(index);
-			}
-		}
-
-		public AttachPoint getCurrentAttachPointByPosition(Vector3 _attachPoint)
-		{
-			foreach (AttachPoint attachPoint in this.allHooks)
-			{
-				if (attachPoint.attachPoint.position == _attachPoint)
-				{
-					return attachPoint;
-				}
-			}
-			return null;
-		}
-
-		[Networked]
-		[NetworkedWeaved(0, 1)]
-		public unsafe int Data
-		{
-			get
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing DecorativeItemsManager.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				return this.Ptr[0];
-			}
-			set
-			{
-				if (this.Ptr == null)
-				{
-					throw new InvalidOperationException("Error when accessing DecorativeItemsManager.Data. Networked properties can only be accessed when Spawned() has been called.");
-				}
-				this.Ptr[0] = value;
-			}
-		}
-
-		public override void WriteDataFusion()
-		{
-			this.Data = this.currentIndex;
-		}
-
-		public override void ReadDataFusion()
-		{
-			this.currentIndex = this.Data;
-		}
-
-		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			if (info.Sender != PhotonNetwork.MasterClient)
+			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
+			if (base.Runner.Stage == SimulationStages.Resimulate)
 			{
 				return;
 			}
-			stream.SendNext(this.currentIndex);
-		}
-
-		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-		{
-			if (info.Sender != PhotonNetwork.MasterClient)
+			int localAuthorityMask = base.Object.GetLocalAuthorityMask();
+			if ((localAuthorityMask & 7) == 0)
 			{
+				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTagScripts.DecorativeItemsManager::RPC_RespawnItem(System.Int32,UnityEngine.Vector3,UnityEngine.Quaternion,Fusion.RpcInfo)", base.Object, 7);
 				return;
 			}
-			this.currentIndex = (int)stream.ReceiveNext();
-		}
-
-		[WeaverGenerated]
-		public override void CopyBackingFieldsToState(bool A_1)
-		{
-			base.CopyBackingFieldsToState(A_1);
-			this.Data = this._Data;
-		}
-
-		[WeaverGenerated]
-		public override void CopyStateToBackingFields()
-		{
-			base.CopyStateToBackingFields();
-			this._Data = this.Data;
-		}
-
-		[NetworkRpcWeavedInvoker(1, 7, 7)]
-		[Preserve]
-		[WeaverGenerated]
-		protected unsafe static void RPC_RespawnItem@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
-		{
-			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			int num2 = *(int*)(ptr + num);
 			num += 4;
-			int index = num2;
-			Vector3 vector = *(Vector3*)(ptr + num);
 			num += 12;
-			Vector3 transformPos = vector;
-			Quaternion quaternion = *(Quaternion*)(ptr + num);
 			num += 16;
-			Quaternion transformRot = quaternion;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
-			behaviour.InvokeRpc = true;
-			((DecorativeItemsManager)behaviour).RPC_RespawnItem(index, transformPos, transformRot, info);
+			if (!SimulationMessage.CanAllocateUserPayload(num))
+			{
+				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTagScripts.DecorativeItemsManager::RPC_RespawnItem(System.Int32,UnityEngine.Vector3,UnityEngine.Quaternion,Fusion.RpcInfo)", num);
+				return;
+			}
+			if (base.Runner.HasAnyActiveConnections())
+			{
+				SimulationMessage* ptr = SimulationMessage.Allocate(base.Runner.Simulation, num);
+				byte* ptr2 = (byte*)ptr + 28;
+				*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, ((NetworkBehaviour)this).ObjectIndex, 1);
+				int num2 = 8;
+				*(int*)(ptr2 + num2) = index;
+				num2 += 4;
+				*(Vector3*)(ptr2 + num2) = _transformPos;
+				num2 += 12;
+				*(Quaternion*)(ptr2 + num2) = _transformRot;
+				num2 += 16;
+				ptr->Offset = num2 * 8;
+				base.Runner.SendRpc(ptr);
+			}
+			if ((localAuthorityMask & 7) == 0)
+			{
+				return;
+			}
+			info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 		}
+		RespawnItemShared(index, _transformPos, _transformRot, info);
+	}
 
-		public GameObject decorativeItemsContainer;
+	protected void RespawnItemShared(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfoWrapped info)
+	{
+		if (index >= 0 && index <= itemsList.Count - 1 && _transformPos.IsValid(10000f) && _transformRot.IsValid() && info.Sender == NetworkSystem.Instance.MasterClient)
+		{
+			MonkeAgent.IncrementRPCCall(info, "RespawnItemRPC");
+			itemsList[index].Respawn(_transformPos, _transformRot);
+		}
+	}
 
-		public GameObject respawnableHooksContainer;
+	private Transform RandomSpawn()
+	{
+		lastIndex = currentIndex;
+		bool flag = false;
+		bool flag2 = zone.IsLocalPlayerInZone();
+		int index = UnityEngine.Random.Range(0, respawnableHooks.Count);
+		while (!flag)
+		{
+			index = UnityEngine.Random.Range(0, respawnableHooks.Count);
+			if (!respawnableHooks[index].inForest == flag2)
+			{
+				flag = true;
+			}
+		}
+		if (!respawnableHooks[index].IsHooked())
+		{
+			currentIndex = index;
+		}
+		else
+		{
+			currentIndex = -1;
+		}
+		if (currentIndex != lastIndex && currentIndex > -1)
+		{
+			return respawnableHooks[currentIndex].attachPoint;
+		}
+		currentIndex = -1;
+		return null;
+	}
 
-		public List<GameObject> nonRespawnableHooksContainer = new List<GameObject>();
+	private int UpdateListPerFrame()
+	{
+		arrayIndex++;
+		if (arrayIndex >= itemsList.Count || arrayIndex < 0)
+		{
+			shouldRunUpdate = false;
+			return -1;
+		}
+		return arrayIndex;
+	}
 
-		private readonly List<DecorativeItem> itemsList = new List<DecorativeItem>();
+	private void OnRequestToRespawn(DecorativeItem item)
+	{
+		if (base.IsMine && !(item == null))
+		{
+			int index = itemsList.IndexOf(item);
+			SpawnItem(index);
+		}
+	}
 
-		private readonly List<AttachPoint> respawnableHooks = new List<AttachPoint>();
+	public AttachPoint getCurrentAttachPointByPosition(Vector3 _attachPoint)
+	{
+		foreach (AttachPoint allHook in allHooks)
+		{
+			if (allHook.attachPoint.position == _attachPoint)
+			{
+				return allHook;
+			}
+		}
+		return null;
+	}
 
-		private readonly List<AttachPoint> allHooks = new List<AttachPoint>();
+	public override void WriteDataFusion()
+	{
+		Data = currentIndex;
+	}
 
-		private int lastIndex;
+	public override void ReadDataFusion()
+	{
+		currentIndex = Data;
+	}
 
-		private int currentIndex;
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
+		{
+			stream.SendNext(currentIndex);
+		}
+	}
 
-		private int arrayIndex = -1;
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == PhotonNetwork.MasterClient)
+		{
+			currentIndex = (int)stream.ReceiveNext();
+		}
+	}
 
-		private bool shouldRunUpdate;
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		Data = _Data;
+	}
 
-		private ZoneBasedObject zone;
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_Data = Data;
+	}
 
-		private bool wasInZone;
-
-		[OnEnterPlay_SetNull]
-		private static DecorativeItemsManager _instance;
-
-		[WeaverGenerated]
-		[SerializeField]
-		[DefaultForProperty("Data", 0, 1)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-		private int _Data;
+	[NetworkRpcWeavedInvoker(1, 7, 7)]
+	[Preserve]
+	[WeaverGenerated]
+	protected unsafe static void RPC_RespawnItem_0040Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
+	{
+		byte* ptr = (byte*)message + 28;
+		int num = 8;
+		int num2 = *(int*)(ptr + num);
+		num += 4;
+		int index = num2;
+		Vector3 vector = *(Vector3*)(ptr + num);
+		num += 12;
+		Vector3 transformPos = vector;
+		Quaternion quaternion = *(Quaternion*)(ptr + num);
+		num += 16;
+		Quaternion transformRot = quaternion;
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		behaviour.InvokeRpc = true;
+		((DecorativeItemsManager)behaviour).RPC_RespawnItem(index, transformPos, transformRot, info);
 	}
 }

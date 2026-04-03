@@ -1,20 +1,23 @@
-﻿using System;
 using Photon.Realtime;
 
 public class LegacyWorldTargetItem
 {
+	public Player owner;
+
+	public int itemIdx;
+
 	public bool IsValid()
 	{
-		return this.itemIdx != -1 && this.owner != null;
+		if (itemIdx != -1)
+		{
+			return owner != null;
+		}
+		return false;
 	}
 
 	public void Invalidate()
 	{
-		this.itemIdx = -1;
-		this.owner = null;
+		itemIdx = -1;
+		owner = null;
 	}
-
-	public Player owner;
-
-	public int itemIdx;
 }

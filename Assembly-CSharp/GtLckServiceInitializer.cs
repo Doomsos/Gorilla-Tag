@@ -1,4 +1,3 @@
-﻿using System;
 using Liv.Lck;
 using Liv.Lck.Core.Cosmetics;
 using Liv.Lck.Cosmetics;
@@ -8,6 +7,11 @@ using UnityEngine;
 [DefaultExecutionOrder(-950)]
 public class GtLckServiceInitializer : MonoBehaviour
 {
+	[Header("LCK Configuration")]
+	[Tooltip("Assign the LCK Quality Config ScriptableObject here.")]
+	[SerializeField]
+	private LckQualityConfig _qualityConfig;
+
 	private void Awake()
 	{
 		LckDiContainer instance = LckDiContainer.Instance;
@@ -17,16 +21,11 @@ public class GtLckServiceInitializer : MonoBehaviour
 			return;
 		}
 		Debug.Log("LCK: Initializing with GT-SPECIFIC overrides.");
-		LckServiceInitializer.ConfigureServices(instance, this._qualityConfig, delegate(LckDiContainer container)
+		LckServiceInitializer.ConfigureServices(instance, _qualityConfig, delegate(LckDiContainer container)
 		{
 			container.AddSingleton<ILckCosmeticsFeatureFlagManager, LckCosmeticsFeatureFlagManagerPlayFab>();
 			container.AddSingleton<ILckCosmeticsCoordinator, LckCoreCosmeticsCoordinator>();
 			container.AddSingleton<ILckCosmeticsManager, LckCosmeticsManager>();
 		});
 	}
-
-	[Header("LCK Configuration")]
-	[Tooltip("Assign the LCK Quality Config ScriptableObject here.")]
-	[SerializeField]
-	private LckQualityConfig _qualityConfig;
 }

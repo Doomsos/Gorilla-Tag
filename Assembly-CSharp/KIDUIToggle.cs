@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,400 +7,6 @@ using UnityEngine.UI;
 
 public class KIDUIToggle : Slider
 {
-	public bool CurrentValue { get; private set; }
-
-	public bool IsOn
-	{
-		get
-		{
-			return this.CurrentValue;
-		}
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		this.SetupToggleComponent();
-	}
-
-	protected override void Start()
-	{
-		base.Start();
-		base.interactable = false;
-	}
-
-	protected override void OnEnable()
-	{
-		base.OnEnable();
-		base.interactable = false;
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-		}
-	}
-
-	public override void OnPointerDown(PointerEventData eventData)
-	{
-		base.OnPointerDown(eventData);
-		this.Toggle();
-	}
-
-	public override void OnPointerEnter(PointerEventData pointerEventData)
-	{
-		this.SetHighlighted();
-		this.inside = true;
-	}
-
-	public override void OnPointerExit(PointerEventData pointerEventData)
-	{
-		this.SetNormal();
-		this.inside = false;
-	}
-
-	protected virtual void SetupToggleComponent()
-	{
-		this.SetupSliderComponent();
-		base.handleRect.anchorMin = new Vector2(0f, 0.5f);
-		base.handleRect.anchorMax = new Vector3(0f, 0.5f);
-		base.handleRect.pivot = new Vector2(0f, 0.5f);
-		base.handleRect.sizeDelta = new Vector2(base.handleRect.sizeDelta.x, base.handleRect.sizeDelta.x);
-	}
-
-	protected virtual void SetupSliderComponent()
-	{
-		base.interactable = false;
-		base.colors.disabledColor = Color.white;
-		this.SetColors();
-		base.transition = Selectable.Transition.None;
-	}
-
-	public void RegisterOnChangeEvent(Action onChange)
-	{
-		this._onToggleChanged.AddListener(delegate()
-		{
-			Action onChange2 = onChange;
-			if (onChange2 == null)
-			{
-				return;
-			}
-			onChange2();
-		});
-	}
-
-	public void UnregisterOnChangeEvent(Action onChange)
-	{
-		this._onToggleChanged.RemoveListener(delegate()
-		{
-			Action onChange2 = onChange;
-			if (onChange2 == null)
-			{
-				return;
-			}
-			onChange2();
-		});
-	}
-
-	public void RegisterToggleOnEvent(Action onToggle)
-	{
-		this._onToggleOn.AddListener(delegate()
-		{
-			Action onToggle2 = onToggle;
-			if (onToggle2 == null)
-			{
-				return;
-			}
-			onToggle2();
-		});
-	}
-
-	public void UnregisterToggleOnEvent(Action onToggle)
-	{
-		this._onToggleOn.RemoveListener(delegate()
-		{
-			Action onToggle2 = onToggle;
-			if (onToggle2 == null)
-			{
-				return;
-			}
-			onToggle2();
-		});
-	}
-
-	public void RegisterToggleOffEvent(Action onToggle)
-	{
-		this._onToggleOff.AddListener(delegate()
-		{
-			Action onToggle2 = onToggle;
-			if (onToggle2 == null)
-			{
-				return;
-			}
-			onToggle2();
-		});
-	}
-
-	public void UnregisterToggleOffEvent(Action onToggle)
-	{
-		this._onToggleOff.RemoveListener(delegate()
-		{
-			Action onToggle2 = onToggle;
-			if (onToggle2 == null)
-			{
-				return;
-			}
-			onToggle2();
-		});
-	}
-
-	private void SetColors()
-	{
-		base.colors = this._fillColors;
-	}
-
-	private void Toggle()
-	{
-		if (this._isDisabled)
-		{
-			return;
-		}
-		this.SetStateAndStartAnimation(!this.CurrentValue, false);
-	}
-
-	public void SetValue(bool newValue)
-	{
-		if (newValue == this.CurrentValue)
-		{
-			return;
-		}
-		this.SetStateAndStartAnimation(newValue, false);
-	}
-
-	private void SetStateAndStartAnimation(bool state, bool skipAnim = false)
-	{
-		if (this.CurrentValue == state)
-		{
-			Debug.Log("IS SAME STATE, WILL NOT CHANGE");
-			return;
-		}
-		this.CurrentValue = state;
-		UnityEvent onToggleChanged = this._onToggleChanged;
-		if (onToggleChanged != null)
-		{
-			onToggleChanged.Invoke();
-		}
-		if (this.CurrentValue)
-		{
-			UnityEvent onToggleOn = this._onToggleOn;
-			if (onToggleOn != null)
-			{
-				onToggleOn.Invoke();
-			}
-			KIDAudioManager.Instance.PlaySound(KIDAudioManager.KIDSoundType.Success);
-		}
-		else
-		{
-			UnityEvent onToggleOff = this._onToggleOff;
-			if (onToggleOff != null)
-			{
-				onToggleOff.Invoke();
-			}
-			KIDAudioManager.Instance.PlaySound(KIDAudioManager.KIDSoundType.TurnOffPermission);
-		}
-		if (this._animationCoroutine != null)
-		{
-			base.StopCoroutine(this._animationCoroutine);
-		}
-		this._handleUnlockIcon.gameObject.SetActive(this.CurrentValue);
-		this._handleLockIcon.gameObject.SetActive(!this.CurrentValue);
-		if (this._animationDuration == 0f || skipAnim)
-		{
-			Debug.Log("[KID::UI::SetStateAndStartAnimation] Skipping animation. Setting value to " + (this.CurrentValue ? "1f" : "0f"));
-			this.value = (this.CurrentValue ? 1f : 0f);
-			return;
-		}
-		this._animationCoroutine = base.StartCoroutine(this.AnimateSlider());
-	}
-
-	private IEnumerator AnimateSlider()
-	{
-		Debug.Log(string.Format("[KID::UI::TOGGLE] Toggle: [{0}] is {1}", base.name, this.CurrentValue));
-		float startValue = this.CurrentValue ? 0f : 1f;
-		float endValue = this.CurrentValue ? 1f : 0f;
-		Debug.Log(string.Format("[KID::UI::TOGGLE] Toggle: [{0}] Start: {1}, End: {2}, Value: {3}", new object[]
-		{
-			base.name,
-			startValue,
-			endValue,
-			this.value
-		}));
-		float time = 0f;
-		while (time < this._animationDuration)
-		{
-			time += Time.deltaTime;
-			float t = this._toggleEase.Evaluate(time / this._animationDuration);
-			this.value = Mathf.Lerp(startValue, endValue, t);
-			yield return null;
-		}
-		this.value = endValue;
-		yield break;
-	}
-
-	private void PostUpdate()
-	{
-		if (!this.inside)
-		{
-			return;
-		}
-		if (ControllerBehaviour.Instance)
-		{
-			if (ControllerBehaviour.Instance.TriggerDown && KIDUIToggle._canTrigger)
-			{
-				string text = string.Concat(new string[]
-				{
-					"[",
-					base.transform.parent.parent.parent.name,
-					".",
-					base.transform.parent.parent.name,
-					".",
-					base.transform.parent.name,
-					".",
-					base.transform.name,
-					"]"
-				});
-				Debug.Log(string.Concat(new string[]
-				{
-					"[KID::UIBUTTON::DEBUG] ",
-					text,
-					" - STEAM - OnClick is pressed. Time: [",
-					Time.time.ToString(),
-					"]"
-				}), this);
-				this.Toggle();
-				KIDUIToggle._triggeredThisFrame = true;
-				KIDUIToggle._canTrigger = false;
-				return;
-			}
-			if (!ControllerBehaviour.Instance.TriggerDown)
-			{
-				KIDUIToggle._canTrigger = true;
-			}
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (KIDUIToggle._triggeredThisFrame)
-		{
-			string text = string.Concat(new string[]
-			{
-				"[",
-				base.transform.parent.parent.parent.name,
-				".",
-				base.transform.parent.parent.name,
-				".",
-				base.transform.parent.name,
-				".",
-				base.transform.name,
-				"]"
-			});
-			Debug.Log(string.Concat(new string[]
-			{
-				"[KID::UIBUTTON::DEBUG] ",
-				text,
-				" - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [",
-				Time.time.ToString(),
-				"]"
-			}), this);
-		}
-		KIDUIToggle._triggeredThisFrame = false;
-	}
-
-	protected new void OnDisable()
-	{
-		if (ControllerBehaviour.Instance)
-		{
-			ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-		}
-		this.inside = false;
-	}
-
-	private void SetDisabled(bool isLockedButEnabled)
-	{
-		this.SetSwitchColors(this._borderColors.disabledColor, this._handleColors.disabledColor, this._fillColors.disabledColor);
-		this.SetBorderSize(this._disabledBorderSize);
-		this.SetBackgroundActive(false);
-	}
-
-	private void SetNormal()
-	{
-		if (this._isDisabled)
-		{
-			return;
-		}
-		this.SetSwitchColors(this._borderColors.normalColor, this._handleColors.normalColor, this._fillColors.normalColor);
-		this.SetBorderSize(this._normalBorderSize);
-		this.SetBackgroundActive(false);
-	}
-
-	private void SetSelected()
-	{
-		if (this._isDisabled)
-		{
-			return;
-		}
-		this.SetSwitchColors(this._borderColors.selectedColor, this._handleColors.selectedColor, this._fillColors.selectedColor);
-		this.SetBorderSize(this._selectedBorderSize);
-		this.SetBackgroundActive(true);
-	}
-
-	private void SetHighlighted()
-	{
-		if (this._isDisabled)
-		{
-			return;
-		}
-		this.SetSwitchColors(this._borderColors.highlightedColor, this._handleColors.highlightedColor, this._fillColors.highlightedColor);
-		this.SetBorderSize(this._highlightedBorderSize);
-		this.SetBackgroundActive(true);
-	}
-
-	private void SetPressed()
-	{
-		if (this._isDisabled)
-		{
-			return;
-		}
-		this.SetSwitchColors(this._borderColors.pressedColor, this._handleColors.pressedColor, this._fillColors.pressedColor);
-		this.SetBorderSize(this._pressedBorderSize);
-		this.SetBackgroundActive(true);
-	}
-
-	private void SetSwitchColors(Color borderColor, Color handleColor, Color fillColor)
-	{
-		this._borderImg.color = borderColor;
-		this._handleImg.color = handleColor;
-	}
-
-	private void SetBorderSize(float borderScale)
-	{
-		this._borderImgRef.offsetMin = new Vector2(-borderScale, -borderScale * this._borderHeightRatio);
-		this._borderImgRef.offsetMax = new Vector2(borderScale, borderScale * this._borderHeightRatio);
-	}
-
-	private void SetBackgroundActive(bool isActive)
-	{
-		this._fillImg.gameObject.SetActive(isActive);
-		this._fillInactiveImg.gameObject.SetActive(!isActive);
-		this.SetBackgroundLocksActive(isActive);
-	}
-
-	private void SetBackgroundLocksActive(bool isActive)
-	{
-		Color color = isActive ? this._lockActiveColor : this._lockInactiveColor;
-		this._lockIcon.color = color;
-		this._unlockIcon.color = color;
-	}
-
 	[Header("Toggle Setup")]
 	[SerializeField]
 	[Range(0f, 1f)]
@@ -502,4 +108,299 @@ public class KIDUIToggle : Slider
 	private static bool _triggeredThisFrame = false;
 
 	private static bool _canTrigger = true;
+
+	public bool CurrentValue { get; private set; }
+
+	public bool IsOn => CurrentValue;
+
+	protected override void Awake()
+	{
+		base.Awake();
+		SetupToggleComponent();
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		base.interactable = false;
+	}
+
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+		base.interactable = false;
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction += PostUpdate;
+		}
+	}
+
+	public override void OnPointerDown(PointerEventData eventData)
+	{
+		base.OnPointerDown(eventData);
+		Toggle();
+	}
+
+	public override void OnPointerEnter(PointerEventData pointerEventData)
+	{
+		SetHighlighted();
+		inside = true;
+	}
+
+	public override void OnPointerExit(PointerEventData pointerEventData)
+	{
+		SetNormal();
+		inside = false;
+	}
+
+	protected virtual void SetupToggleComponent()
+	{
+		SetupSliderComponent();
+		base.handleRect.anchorMin = new Vector2(0f, 0.5f);
+		base.handleRect.anchorMax = new Vector3(0f, 0.5f);
+		base.handleRect.pivot = new Vector2(0f, 0.5f);
+		base.handleRect.sizeDelta = new Vector2(base.handleRect.sizeDelta.x, base.handleRect.sizeDelta.x);
+	}
+
+	protected virtual void SetupSliderComponent()
+	{
+		base.interactable = false;
+		ColorBlock colorBlock = base.colors;
+		colorBlock.disabledColor = Color.white;
+		SetColors();
+		base.transition = Transition.None;
+	}
+
+	public void RegisterOnChangeEvent(Action onChange)
+	{
+		_onToggleChanged.AddListener(delegate
+		{
+			onChange?.Invoke();
+		});
+	}
+
+	public void UnregisterOnChangeEvent(Action onChange)
+	{
+		_onToggleChanged.RemoveListener(delegate
+		{
+			onChange?.Invoke();
+		});
+	}
+
+	public void RegisterToggleOnEvent(Action onToggle)
+	{
+		_onToggleOn.AddListener(delegate
+		{
+			onToggle?.Invoke();
+		});
+	}
+
+	public void UnregisterToggleOnEvent(Action onToggle)
+	{
+		_onToggleOn.RemoveListener(delegate
+		{
+			onToggle?.Invoke();
+		});
+	}
+
+	public void RegisterToggleOffEvent(Action onToggle)
+	{
+		_onToggleOff.AddListener(delegate
+		{
+			onToggle?.Invoke();
+		});
+	}
+
+	public void UnregisterToggleOffEvent(Action onToggle)
+	{
+		_onToggleOff.RemoveListener(delegate
+		{
+			onToggle?.Invoke();
+		});
+	}
+
+	private void SetColors()
+	{
+		base.colors = _fillColors;
+	}
+
+	private void Toggle()
+	{
+		if (!_isDisabled)
+		{
+			SetStateAndStartAnimation(!CurrentValue);
+		}
+	}
+
+	public void SetValue(bool newValue)
+	{
+		if (newValue != CurrentValue)
+		{
+			SetStateAndStartAnimation(newValue);
+		}
+	}
+
+	private void SetStateAndStartAnimation(bool state, bool skipAnim = false)
+	{
+		if (CurrentValue == state)
+		{
+			Debug.Log("IS SAME STATE, WILL NOT CHANGE");
+			return;
+		}
+		CurrentValue = state;
+		_onToggleChanged?.Invoke();
+		if (CurrentValue)
+		{
+			_onToggleOn?.Invoke();
+			KIDAudioManager.Instance.PlaySound(KIDAudioManager.KIDSoundType.Success);
+		}
+		else
+		{
+			_onToggleOff?.Invoke();
+			KIDAudioManager.Instance.PlaySound(KIDAudioManager.KIDSoundType.TurnOffPermission);
+		}
+		if (_animationCoroutine != null)
+		{
+			StopCoroutine(_animationCoroutine);
+		}
+		_handleUnlockIcon.gameObject.SetActive(CurrentValue);
+		_handleLockIcon.gameObject.SetActive(!CurrentValue);
+		if (_animationDuration == 0f || skipAnim)
+		{
+			Debug.Log("[KID::UI::SetStateAndStartAnimation] Skipping animation. Setting value to " + (CurrentValue ? "1f" : "0f"));
+			value = (CurrentValue ? 1f : 0f);
+		}
+		else
+		{
+			_animationCoroutine = StartCoroutine(AnimateSlider());
+		}
+	}
+
+	private IEnumerator AnimateSlider()
+	{
+		Debug.Log($"[KID::UI::TOGGLE] Toggle: [{base.name}] is {CurrentValue}");
+		float startValue = (CurrentValue ? 0f : 1f);
+		float endValue = (CurrentValue ? 1f : 0f);
+		Debug.Log($"[KID::UI::TOGGLE] Toggle: [{base.name}] Start: {startValue}, End: {endValue}, Value: {value}");
+		float time = 0f;
+		while (time < _animationDuration)
+		{
+			time += Time.deltaTime;
+			float t = _toggleEase.Evaluate(time / _animationDuration);
+			value = Mathf.Lerp(startValue, endValue, t);
+			yield return null;
+		}
+		value = endValue;
+	}
+
+	private void PostUpdate()
+	{
+		if (inside && (bool)ControllerBehaviour.Instance)
+		{
+			if (ControllerBehaviour.Instance.TriggerDown && _canTrigger)
+			{
+				string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+				Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnClick is pressed. Time: [" + Time.time + "]", this);
+				Toggle();
+				_triggeredThisFrame = true;
+				_canTrigger = false;
+			}
+			else if (!ControllerBehaviour.Instance.TriggerDown)
+			{
+				_canTrigger = true;
+			}
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (_triggeredThisFrame)
+		{
+			string text = "[" + base.transform.parent.parent.parent.name + "." + base.transform.parent.parent.name + "." + base.transform.parent.name + "." + base.transform.name + "]";
+			Debug.Log("[KID::UIBUTTON::DEBUG] " + text + " - STEAM - OnLateUpdate triggered and Triggered Frame Reset. Time: [" + Time.time + "]", this);
+		}
+		_triggeredThisFrame = false;
+	}
+
+	protected new void OnDisable()
+	{
+		if ((bool)ControllerBehaviour.Instance)
+		{
+			ControllerBehaviour.Instance.OnAction -= PostUpdate;
+		}
+		inside = false;
+	}
+
+	private void SetDisabled(bool isLockedButEnabled)
+	{
+		SetSwitchColors(_borderColors.disabledColor, _handleColors.disabledColor, _fillColors.disabledColor);
+		SetBorderSize(_disabledBorderSize);
+		SetBackgroundActive(isActive: false);
+	}
+
+	private void SetNormal()
+	{
+		if (!_isDisabled)
+		{
+			SetSwitchColors(_borderColors.normalColor, _handleColors.normalColor, _fillColors.normalColor);
+			SetBorderSize(_normalBorderSize);
+			SetBackgroundActive(isActive: false);
+		}
+	}
+
+	private void SetSelected()
+	{
+		if (!_isDisabled)
+		{
+			SetSwitchColors(_borderColors.selectedColor, _handleColors.selectedColor, _fillColors.selectedColor);
+			SetBorderSize(_selectedBorderSize);
+			SetBackgroundActive(isActive: true);
+		}
+	}
+
+	private void SetHighlighted()
+	{
+		if (!_isDisabled)
+		{
+			SetSwitchColors(_borderColors.highlightedColor, _handleColors.highlightedColor, _fillColors.highlightedColor);
+			SetBorderSize(_highlightedBorderSize);
+			SetBackgroundActive(isActive: true);
+		}
+	}
+
+	private void SetPressed()
+	{
+		if (!_isDisabled)
+		{
+			SetSwitchColors(_borderColors.pressedColor, _handleColors.pressedColor, _fillColors.pressedColor);
+			SetBorderSize(_pressedBorderSize);
+			SetBackgroundActive(isActive: true);
+		}
+	}
+
+	private void SetSwitchColors(Color borderColor, Color handleColor, Color fillColor)
+	{
+		_borderImg.color = borderColor;
+		_handleImg.color = handleColor;
+	}
+
+	private void SetBorderSize(float borderScale)
+	{
+		_borderImgRef.offsetMin = new Vector2(0f - borderScale, (0f - borderScale) * _borderHeightRatio);
+		_borderImgRef.offsetMax = new Vector2(borderScale, borderScale * _borderHeightRatio);
+	}
+
+	private void SetBackgroundActive(bool isActive)
+	{
+		_fillImg.gameObject.SetActive(isActive);
+		_fillInactiveImg.gameObject.SetActive(!isActive);
+		SetBackgroundLocksActive(isActive);
+	}
+
+	private void SetBackgroundLocksActive(bool isActive)
+	{
+		Color color = (isActive ? _lockActiveColor : _lockInactiveColor);
+		_lockIcon.color = color;
+		_unlockIcon.color = color;
+	}
 }

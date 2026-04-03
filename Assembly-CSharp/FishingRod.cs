@@ -1,268 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.XR;
 
 public class FishingRod : TransferrableObject
 {
-	public override void OnActivate()
-	{
-		base.OnActivate();
-		Transform transform = base.transform;
-		Vector3 force = transform.up + transform.forward * 640f;
-		this.bobRigidbody.AddForce(force, ForceMode.Impulse);
-		this.line.tensionScale = 0.86f;
-		this.ReelOut();
-	}
-
-	public override void OnDeactivate()
-	{
-		base.OnDeactivate();
-		this.line.tensionScale = 1f;
-		this.ReelStop();
-	}
-
-	protected override void Start()
-	{
-		base.Start();
-		this.rig = base.GetComponentInParent<VRRig>();
-	}
-
-	public void SetBobFloat(bool enable)
-	{
-		if (!this.bobRigidbody)
-		{
-			return;
-		}
-		this._bobFloatPlaneY = this.bobRigidbody.position.y;
-		this._bobFloating = enable;
-	}
-
-	private void QuickReel()
-	{
-		if (this._lineResizing)
-		{
-			return;
-		}
-		this.bobCollider.enabled = false;
-		this.ReelIn();
-	}
-
-	public bool IsFreeHandGripping()
-	{
-		bool flag = base.InLeftHand();
-		Transform transform = flag ? this.rig.rightHandTransform : this.rig.leftHandTransform;
-		float magnitude = (this.reelToSync.position - transform.position).magnitude;
-		bool flag2 = this._grippingHand || magnitude <= 0.16f;
-		this.disableStealing = flag2;
-		if (!flag2)
-		{
-			return false;
-		}
-		VRMapThumb vrmapThumb = flag ? this.rig.rightThumb : this.rig.leftThumb;
-		VRMapIndex vrmapIndex = flag ? this.rig.rightIndex : this.rig.leftIndex;
-		VRMap vrmap = flag ? this.rig.rightMiddle : this.rig.leftMiddle;
-		float calcT = vrmapThumb.calcT;
-		float calcT2 = vrmapIndex.calcT;
-		float calcT3 = vrmap.calcT;
-		bool flag3 = calcT >= 0.1f && calcT2 >= 0.2f && calcT3 >= 0.2f;
-		this._grippingHand = (flag3 ? transform : null);
-		return flag3;
-	}
-
-	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
-	{
-		if (!base.OnRelease(zoneReleased, releasingHand))
-		{
-			return false;
-		}
-		if (this._grippingHand)
-		{
-			this._grippingHand = null;
-		}
-		this.ResetLineLength(this.lineLengthMin * 1.32f);
-		return true;
-	}
-
-	public void ReelIn()
-	{
-		this._manualReeling = false;
-		FishingRod.SetHandleMotorUse(true, this.reelSpinRate, this.handleJoint, true);
-		this._lineResizing = true;
-		this._lineExpanding = false;
-		float num = (float)this.line.segmentNumber + 0.0001f;
-		this.line.segmentMinLength = (this._targetSegmentMin = this.lineLengthMin / num);
-		this.line.segmentMaxLength = (this._targetSegmentMax = this.lineLengthMax / num);
-	}
-
-	public void ReelOut()
-	{
-		this._manualReeling = false;
-		FishingRod.SetHandleMotorUse(true, this.reelSpinRate, this.handleJoint, false);
-		this._lineResizing = true;
-		this._lineExpanding = true;
-		float num = (float)this.line.segmentNumber + 0.0001f;
-		this.line.segmentMinLength = (this._targetSegmentMin = this.lineLengthMin / num);
-		this.line.segmentMaxLength = (this._targetSegmentMax = this.lineLengthMax / num);
-	}
-
-	public void ReelStop()
-	{
-		if (this._manualReeling)
-		{
-			this._localRotDelta = 0f;
-		}
-		else
-		{
-			FishingRod.SetHandleMotorUse(false, 0f, this.handleJoint, false);
-		}
-		this.bobCollider.enabled = true;
-		if (this.line)
-		{
-			this.line.resizeScale = 1f;
-		}
-		this._lineResizing = false;
-		this._lineExpanding = false;
-	}
-
-	private static void SetHandleMotorUse(bool useMotor, float spinRate, HingeJoint handleJoint, bool reverse)
-	{
-		JointMotor motor = handleJoint.motor;
-		motor.force = (useMotor ? 1f : 0f) * spinRate;
-		motor.targetVelocity = 16384f * (reverse ? -1f : 1f);
-		handleJoint.motor = motor;
-	}
-
-	public override void TriggeredLateUpdate()
-	{
-		base.TriggeredLateUpdate();
-		this._manualReeling = (this._isGrippingHandle = this.IsFreeHandGripping());
-		if (ControllerInputPoller.instance && ControllerInputPoller.PrimaryButtonPress(base.InLeftHand() ? XRNode.LeftHand : XRNode.RightHand))
-		{
-			this.QuickReel();
-		}
-		if (this._lineResetting && this._sinceReset.HasElapsed(this.line.resizeSpeed))
-		{
-			this.bobCollider.enabled = true;
-			this._lineResetting = false;
-		}
-		this.handleTransform.localPosition = this.reelFreezeLocalPosition;
-	}
-
-	private void ResetLineLength(float length)
-	{
-		if (!this.line)
-		{
-			return;
-		}
-		this._lineResetting = true;
-		this.bobCollider.enabled = false;
-		this.line.ForceTotalLength(length);
-		this._sinceReset = TimeSince.Now();
-	}
-
-	private void FixedUpdate()
-	{
-		Transform transform = base.transform;
-		this.handleRigidbody.useGravity = !this._manualReeling;
-		if (this._bobFloating && this.bobRigidbody)
-		{
-			float y = this.bobRigidbody.position.y;
-			float num = this.bobFloatForce * this.bobRigidbody.mass;
-			float num2 = num * Mathf.Clamp01(this._bobFloatPlaneY - y);
-			num += num2;
-			if (y <= this._bobFloatPlaneY)
-			{
-				this.bobRigidbody.AddForce(0f, num, 0f);
-			}
-		}
-		if (this._manualReeling)
-		{
-			if (this._isGrippingHandle && this._grippingHand)
-			{
-				this.reelTo.position = this._grippingHand.position;
-			}
-			Vector3 vector = this.reelFrom.InverseTransformPoint(this.reelTo.position);
-			vector.x = 0f;
-			vector.Normalize();
-			vector *= 2f;
-			Quaternion quaternion = Quaternion.FromToRotation(Vector3.forward, vector);
-			quaternion = (base.InRightHand() ? quaternion : Quaternion.Inverse(quaternion));
-			this._localRotDelta = FishingRod.GetSignedDeltaYZ(ref this._lastLocalRot, ref quaternion);
-			this._lastLocalRot = quaternion;
-			Quaternion rot = transform.rotation * quaternion;
-			this.handleRigidbody.MoveRotation(rot);
-		}
-		else
-		{
-			this.reelTo.localPosition = transform.InverseTransformPoint(this.reelToSync.position);
-		}
-		if (!this.line)
-		{
-			return;
-		}
-		if (this._manualReeling)
-		{
-			this._lineResizing = (Mathf.Abs(this._localRotDelta) >= 0.001f);
-			this._lineExpanding = (Mathf.Sign(this._localRotDelta) >= 0f);
-		}
-		if (!this._lineResizing)
-		{
-			return;
-		}
-		float num3 = this._manualReeling ? (Mathf.Abs(this._localRotDelta) * 0.66f * Time.fixedDeltaTime) : (this.lineResizeRate * this.lineCastFactor);
-		this.line.resizeScale = this.lineCastFactor;
-		float num4 = num3 * Time.fixedDeltaTime;
-		float num5 = this.line.segmentTargetLength;
-		if (this._manualReeling)
-		{
-			float num6 = 1f / ((float)this.line.segmentNumber + 0.0001f);
-			float num7 = this.lineLengthMin * num6;
-			float num8 = this.lineLengthMax * num6;
-			num4 *= (this._lineExpanding ? 1f : -1f);
-			num4 *= (base.InRightHand() ? -1f : 1f);
-			float num9 = num5 + num4;
-			if (num9 > num7 && num9 < num8)
-			{
-				num5 += num4;
-			}
-		}
-		else if (this._lineExpanding)
-		{
-			if (num5 < this._targetSegmentMax)
-			{
-				num5 += num4;
-			}
-			else
-			{
-				this._lineResizing = false;
-			}
-		}
-		else if (num5 > this._targetSegmentMin)
-		{
-			num5 -= num4;
-		}
-		else
-		{
-			this._lineResizing = false;
-		}
-		if (this._lineResizing)
-		{
-			this.line.segmentTargetLength = num5;
-			return;
-		}
-		this.ReelStop();
-	}
-
-	private static float GetSignedDeltaYZ(ref Quaternion a, ref Quaternion b)
-	{
-		Vector3 forward = Vector3.forward;
-		Vector3 vector = a * forward;
-		Vector3 vector2 = b * forward;
-		float current = Mathf.Atan2(vector.y, vector.z) * 57.29578f;
-		float target = Mathf.Atan2(vector2.y, vector2.z) * 57.29578f;
-		return Mathf.DeltaAngle(current, target);
-	}
-
 	public Transform handleTransform;
 
 	public HingeJoint handleJoint;
@@ -304,8 +45,8 @@ public class FishingRod : TransferrableObject
 
 	public float lineLengthMax = 8f;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private bool _bobFloating;
 
 	public float bobFloatForce = 8f;
@@ -317,15 +58,15 @@ public class FishingRod : TransferrableObject
 	[NonSerialized]
 	private float _bobFloatPlaneY;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private float _targetSegmentMin;
 
 	[NonSerialized]
 	private float _targetSegmentMax;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private bool _manualReeling;
 
 	[NonSerialized]
@@ -340,8 +81,8 @@ public class FishingRod : TransferrableObject
 	[NonSerialized]
 	private TimeSince _sinceReset;
 
-	[Space]
 	[NonSerialized]
+	[Space]
 	private Quaternion _lastLocalRot = Quaternion.identity;
 
 	[NonSerialized]
@@ -354,4 +95,260 @@ public class FishingRod : TransferrableObject
 	private Transform _grippingHand;
 
 	private TimeSince _sinceGripLoss;
+
+	public override void OnActivate()
+	{
+		base.OnActivate();
+		Transform transform = base.transform;
+		Vector3 force = transform.up + transform.forward * 640f;
+		bobRigidbody.AddForce(force, ForceMode.Impulse);
+		line.tensionScale = 0.86f;
+		ReelOut();
+	}
+
+	public override void OnDeactivate()
+	{
+		base.OnDeactivate();
+		line.tensionScale = 1f;
+		ReelStop();
+	}
+
+	protected override void Start()
+	{
+		base.Start();
+		rig = GetComponentInParent<VRRig>();
+	}
+
+	public void SetBobFloat(bool enable)
+	{
+		if ((bool)bobRigidbody)
+		{
+			_bobFloatPlaneY = bobRigidbody.position.y;
+			_bobFloating = enable;
+		}
+	}
+
+	private void QuickReel()
+	{
+		if (!_lineResizing)
+		{
+			bobCollider.enabled = false;
+			ReelIn();
+		}
+	}
+
+	public bool IsFreeHandGripping()
+	{
+		bool flag = InLeftHand();
+		Transform transform = (flag ? rig.rightHandTransform : rig.leftHandTransform);
+		float magnitude = (reelToSync.position - transform.position).magnitude;
+		if (!(disableStealing = (bool)_grippingHand || magnitude <= 0.16f))
+		{
+			return false;
+		}
+		VRMapThumb vRMapThumb = (flag ? rig.rightThumb : rig.leftThumb);
+		VRMapIndex vRMapIndex = (flag ? rig.rightIndex : rig.leftIndex);
+		VRMapMiddle obj = (flag ? rig.rightMiddle : rig.leftMiddle);
+		float calcT = vRMapThumb.calcT;
+		float calcT2 = vRMapIndex.calcT;
+		float calcT3 = obj.calcT;
+		bool flag2 = calcT >= 0.1f && calcT2 >= 0.2f && calcT3 >= 0.2f;
+		_grippingHand = (flag2 ? transform : null);
+		return flag2;
+	}
+
+	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
+	{
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
+			return false;
+		}
+		if ((bool)_grippingHand)
+		{
+			_grippingHand = null;
+		}
+		ResetLineLength(lineLengthMin * 1.32f);
+		return true;
+	}
+
+	public void ReelIn()
+	{
+		_manualReeling = false;
+		SetHandleMotorUse(useMotor: true, reelSpinRate, handleJoint, reverse: true);
+		_lineResizing = true;
+		_lineExpanding = false;
+		float num = (float)line.segmentNumber + 0.0001f;
+		line.segmentMinLength = (_targetSegmentMin = lineLengthMin / num);
+		line.segmentMaxLength = (_targetSegmentMax = lineLengthMax / num);
+	}
+
+	public void ReelOut()
+	{
+		_manualReeling = false;
+		SetHandleMotorUse(useMotor: true, reelSpinRate, handleJoint, reverse: false);
+		_lineResizing = true;
+		_lineExpanding = true;
+		float num = (float)line.segmentNumber + 0.0001f;
+		line.segmentMinLength = (_targetSegmentMin = lineLengthMin / num);
+		line.segmentMaxLength = (_targetSegmentMax = lineLengthMax / num);
+	}
+
+	public void ReelStop()
+	{
+		if (_manualReeling)
+		{
+			_localRotDelta = 0f;
+		}
+		else
+		{
+			SetHandleMotorUse(useMotor: false, 0f, handleJoint, reverse: false);
+		}
+		bobCollider.enabled = true;
+		if ((bool)line)
+		{
+			line.resizeScale = 1f;
+		}
+		_lineResizing = false;
+		_lineExpanding = false;
+	}
+
+	private static void SetHandleMotorUse(bool useMotor, float spinRate, HingeJoint handleJoint, bool reverse)
+	{
+		JointMotor motor = handleJoint.motor;
+		motor.force = (useMotor ? 1f : 0f) * spinRate;
+		motor.targetVelocity = 16384f * (reverse ? (-1f) : 1f);
+		handleJoint.motor = motor;
+	}
+
+	public override void TriggeredLateUpdate()
+	{
+		base.TriggeredLateUpdate();
+		_manualReeling = (_isGrippingHandle = IsFreeHandGripping());
+		if ((bool)ControllerInputPoller.instance && ControllerInputPoller.PrimaryButtonPress(InLeftHand() ? XRNode.LeftHand : XRNode.RightHand))
+		{
+			QuickReel();
+		}
+		if (_lineResetting && _sinceReset.HasElapsed(line.resizeSpeed))
+		{
+			bobCollider.enabled = true;
+			_lineResetting = false;
+		}
+		handleTransform.localPosition = reelFreezeLocalPosition;
+	}
+
+	private void ResetLineLength(float length)
+	{
+		if ((bool)line)
+		{
+			_lineResetting = true;
+			bobCollider.enabled = false;
+			line.ForceTotalLength(length);
+			_sinceReset = TimeSince.Now();
+		}
+	}
+
+	private void FixedUpdate()
+	{
+		Transform transform = base.transform;
+		handleRigidbody.useGravity = !_manualReeling;
+		if (_bobFloating && (bool)bobRigidbody)
+		{
+			float y = bobRigidbody.position.y;
+			float num = bobFloatForce * bobRigidbody.mass;
+			float num2 = num * Mathf.Clamp01(_bobFloatPlaneY - y);
+			num += num2;
+			if (y <= _bobFloatPlaneY)
+			{
+				bobRigidbody.AddForce(0f, num, 0f);
+			}
+		}
+		if (_manualReeling)
+		{
+			if (_isGrippingHandle && (bool)_grippingHand)
+			{
+				reelTo.position = _grippingHand.position;
+			}
+			Vector3 toDirection = reelFrom.InverseTransformPoint(reelTo.position);
+			toDirection.x = 0f;
+			toDirection.Normalize();
+			toDirection *= 2f;
+			Quaternion quaternion = Quaternion.FromToRotation(Vector3.forward, toDirection);
+			quaternion = (InRightHand() ? quaternion : Quaternion.Inverse(quaternion));
+			_localRotDelta = GetSignedDeltaYZ(ref _lastLocalRot, ref quaternion);
+			_lastLocalRot = quaternion;
+			Quaternion rot = transform.rotation * quaternion;
+			handleRigidbody.MoveRotation(rot);
+		}
+		else
+		{
+			reelTo.localPosition = transform.InverseTransformPoint(reelToSync.position);
+		}
+		if (!line)
+		{
+			return;
+		}
+		if (_manualReeling)
+		{
+			_lineResizing = Mathf.Abs(_localRotDelta) >= 0.001f;
+			_lineExpanding = Mathf.Sign(_localRotDelta) >= 0f;
+		}
+		if (!_lineResizing)
+		{
+			return;
+		}
+		float num3 = (_manualReeling ? (Mathf.Abs(_localRotDelta) * 0.66f * Time.fixedDeltaTime) : (lineResizeRate * lineCastFactor));
+		line.resizeScale = lineCastFactor;
+		float num4 = num3 * Time.fixedDeltaTime;
+		float num5 = line.segmentTargetLength;
+		if (_manualReeling)
+		{
+			float num6 = 1f / ((float)line.segmentNumber + 0.0001f);
+			float num7 = lineLengthMin * num6;
+			float num8 = lineLengthMax * num6;
+			num4 *= (_lineExpanding ? 1f : (-1f));
+			num4 *= (InRightHand() ? (-1f) : 1f);
+			float num9 = num5 + num4;
+			if (num9 > num7 && num9 < num8)
+			{
+				num5 += num4;
+			}
+		}
+		else if (_lineExpanding)
+		{
+			if (num5 < _targetSegmentMax)
+			{
+				num5 += num4;
+			}
+			else
+			{
+				_lineResizing = false;
+			}
+		}
+		else if (num5 > _targetSegmentMin)
+		{
+			num5 -= num4;
+		}
+		else
+		{
+			_lineResizing = false;
+		}
+		if (_lineResizing)
+		{
+			line.segmentTargetLength = num5;
+		}
+		else
+		{
+			ReelStop();
+		}
+	}
+
+	private static float GetSignedDeltaYZ(ref Quaternion a, ref Quaternion b)
+	{
+		Vector3 forward = Vector3.forward;
+		Vector3 vector = a * forward;
+		Vector3 vector2 = b * forward;
+		float current = Mathf.Atan2(vector.y, vector.z) * 57.29578f;
+		float target = Mathf.Atan2(vector2.y, vector2.z) * 57.29578f;
+		return Mathf.DeltaAngle(current, target);
+	}
 }

@@ -1,121 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
-using GorillaTag;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class LCKSocialCameraFollower : MonoBehaviour, ITickSystemTick
 {
-	public Transform ScaleTransform
-	{
-		get
-		{
-			return this._scaleTransform;
-		}
-	}
-
-	public GameObject CameraVisualsRoot
-	{
-		get
-		{
-			return this._cameraVisualsRoot;
-		}
-	}
-
-	public List<GameObject> VisualObjects
-	{
-		get
-		{
-			return this._visualObjects;
-		}
-	}
-
-	private void Awake()
-	{
-		this.m_gtCameraVisuals = this._cameraVisualsRoot.GetComponent<IGtCameraVisuals>();
-		if (this.m_rigContainer.Rig.isOfflineVRRig)
-		{
-			base.gameObject.SetActive(false);
-			return;
-		}
-		ListProcessor<Action<RigContainer>> disableEvent = this.m_rigContainer.RigEvents.disableEvent;
-		Action<RigContainer> action = new Action<RigContainer>(this.PreRigDisable);
-		disableEvent.Add(action);
-		ListProcessor<Action<RigContainer>> enableEvent = this.m_rigContainer.RigEvents.enableEvent;
-		action = new Action<RigContainer>(this.PostRigEnable);
-		enableEvent.Add(action);
-	}
-
-	private void Start()
-	{
-		if (!this.isParentedToRig)
-		{
-			base.transform.parent = null;
-		}
-	}
-
-	public void SetParentToRig()
-	{
-		this.isParentedToRig = true;
-		base.transform.parent = this.m_rigContainer.transform;
-		base.transform.localPosition = new Vector3(0f, -0.2f, 0.132f);
-		base.transform.localRotation = Quaternion.identity;
-	}
-
-	public void SetParentNull()
-	{
-		this.isParentedToRig = false;
-		base.transform.parent = null;
-	}
-
-	private void PostRigEnable(RigContainer _)
-	{
-		base.gameObject.SetActive(true);
-		this.m_gtCameraVisuals.SetNetworkedVisualsActive(false);
-		this.m_gtCameraVisuals.SetRecordingState(false);
-	}
-
-	private void PreRigDisable(RigContainer _)
-	{
-		base.gameObject.SetActive(false);
-	}
-
-	public void SetNetworkController(LckSocialCamera networkController)
-	{
-		if (this.m_networkController.IsNotNull() && this.m_networkController != networkController)
-		{
-			this.m_networkController.TurnOff();
-		}
-		this.m_networkController = networkController;
-		this.m_transformToFollow = this.m_networkController.transform;
-		TickSystem<object>.AddTickCallback(this);
-	}
-
-	public void RemoveNetworkController(LckSocialCamera networkController)
-	{
-		if (this.m_networkController != networkController)
-		{
-			return;
-		}
-		this.m_transformToFollow = null;
-		this.m_networkController = null;
-		TickSystem<object>.RemoveTickCallback(this);
-	}
-
-	bool ITickSystemTick.TickRunning { get; set; }
-
-	void ITickSystemTick.Tick()
-	{
-		if (this.isParentedToRig || this.m_transformToFollow == null)
-		{
-			return;
-		}
-		base.transform.position = this.m_transformToFollow.position;
-		base.transform.root.rotation = this.m_transformToFollow.rotation;
-	}
-
 	[SerializeField]
 	private Transform _scaleTransform;
 
@@ -136,4 +27,88 @@ public class LCKSocialCameraFollower : MonoBehaviour, ITickSystemTick
 	private IGtCameraVisuals m_gtCameraVisuals;
 
 	private bool isParentedToRig;
+
+	public Transform ScaleTransform => _scaleTransform;
+
+	public GameObject CameraVisualsRoot => _cameraVisualsRoot;
+
+	public List<GameObject> VisualObjects => _visualObjects;
+
+	bool ITickSystemTick.TickRunning { get; set; }
+
+	private void Awake()
+	{
+		m_gtCameraVisuals = _cameraVisualsRoot.GetComponent<IGtCameraVisuals>();
+		if (m_rigContainer.Rig.isOfflineVRRig)
+		{
+			base.gameObject.SetActive(value: false);
+			return;
+		}
+		m_rigContainer.RigEvents.disableEvent.Add(new Action<RigContainer>(PreRigDisable));
+		m_rigContainer.RigEvents.enableEvent.Add(new Action<RigContainer>(PostRigEnable));
+	}
+
+	private void Start()
+	{
+		if (!isParentedToRig)
+		{
+			base.transform.parent = null;
+		}
+	}
+
+	public void SetParentToRig()
+	{
+		isParentedToRig = true;
+		base.transform.parent = m_rigContainer.transform;
+		base.transform.localPosition = new Vector3(0f, -0.2f, 0.132f);
+		base.transform.localRotation = Quaternion.identity;
+	}
+
+	public void SetParentNull()
+	{
+		isParentedToRig = false;
+		base.transform.parent = null;
+	}
+
+	private void PostRigEnable(RigContainer _)
+	{
+		base.gameObject.SetActive(value: true);
+		m_gtCameraVisuals.SetNetworkedVisualsActive(active: false);
+		m_gtCameraVisuals.SetRecordingState(isRecording: false);
+	}
+
+	private void PreRigDisable(RigContainer _)
+	{
+		base.gameObject.SetActive(value: false);
+	}
+
+	public void SetNetworkController(LckSocialCamera networkController)
+	{
+		if (m_networkController.IsNotNull() && m_networkController != networkController)
+		{
+			m_networkController.TurnOff();
+		}
+		m_networkController = networkController;
+		m_transformToFollow = m_networkController.transform;
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	public void RemoveNetworkController(LckSocialCamera networkController)
+	{
+		if (!(m_networkController != networkController))
+		{
+			m_transformToFollow = null;
+			m_networkController = null;
+			TickSystem<object>.RemoveTickCallback(this);
+		}
+	}
+
+	void ITickSystemTick.Tick()
+	{
+		if (!isParentedToRig && !(m_transformToFollow == null))
+		{
+			base.transform.position = m_transformToFollow.position;
+			base.transform.root.rotation = m_transformToFollow.rotation;
+		}
+	}
 }

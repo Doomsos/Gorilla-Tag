@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
@@ -9,77 +8,27 @@ using UnityEngine.Jobs;
 [DefaultExecutionOrder(0)]
 public class VRRigJobManager : MonoBehaviour
 {
-	public static VRRigJobManager Instance
+	private struct VRRigTransformInput
 	{
-		get
+		public Vector3 rigPosition;
+
+		public Quaternion rigRotaton;
+	}
+
+	[BurstCompile]
+	private struct VRRigTransformJob : IJobParallelForTransform
+	{
+		[ReadOnly]
+		public NativeArray<VRRigTransformInput> input;
+
+		public void Execute(int i, TransformAccess tA)
 		{
-			return VRRigJobManager._instance;
-		}
-	}
-
-	private void Awake()
-	{
-		VRRigJobManager._instance = this;
-		this.cachedInput = new NativeArray<VRRigJobManager.VRRigTransformInput>(19, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		this.tAA = new TransformAccessArray(19, 2);
-		this.job = default(VRRigJobManager.VRRigTransformJob);
-	}
-
-	private void OnDestroy()
-	{
-		this.jobHandle.Complete();
-		this.cachedInput.Dispose();
-		this.tAA.Dispose();
-	}
-
-	public void RegisterVRRig(VRRig rig)
-	{
-		this.rigList.Add(rig);
-		this.tAA.Add(rig.transform);
-		this.actualListSz++;
-	}
-
-	public void DeregisterVRRig(VRRig rig)
-	{
-		if (ApplicationQuittingState.IsQuitting)
-		{
-			return;
-		}
-		this.rigList.Remove(rig);
-		for (int i = this.actualListSz - 1; i >= 0; i--)
-		{
-			if (this.tAA[i] == rig.transform)
+			if (i < input.Length)
 			{
-				this.tAA.RemoveAtSwapBack(i);
-				break;
+				tA.position = input[i].rigPosition;
+				tA.rotation = input[i].rigRotaton;
 			}
 		}
-		this.actualListSz--;
-	}
-
-	private void CopyInput()
-	{
-		for (int i = 0; i < this.actualListSz; i++)
-		{
-			this.cachedInput[i] = new VRRigJobManager.VRRigTransformInput
-			{
-				rigPosition = this.rigList[i].jobPos,
-				rigRotaton = this.rigList[i].jobRotation
-			};
-			this.tAA[i] = this.rigList[i].transform;
-		}
-	}
-
-	public void Update()
-	{
-		this.jobHandle.Complete();
-		for (int i = 0; i < this.rigList.Count; i++)
-		{
-			this.rigList[i].RemoteRigUpdate();
-		}
-		this.CopyInput();
-		this.job.input = this.cachedInput;
-		this.jobHandle = this.job.Schedule(this.tAA, default(JobHandle));
 	}
 
 	[OnEnterPlay_SetNull]
@@ -91,7 +40,7 @@ public class VRRigJobManager : MonoBehaviour
 
 	private List<VRRig> rigList = new List<VRRig>(19);
 
-	private NativeArray<VRRigJobManager.VRRigTransformInput> cachedInput;
+	private NativeArray<VRRigTransformInput> cachedInput;
 
 	private TransformAccessArray tAA;
 
@@ -99,28 +48,72 @@ public class VRRigJobManager : MonoBehaviour
 
 	private JobHandle jobHandle;
 
-	private VRRigJobManager.VRRigTransformJob job;
+	private VRRigTransformJob job;
 
-	private struct VRRigTransformInput
+	public static VRRigJobManager Instance => _instance;
+
+	private void Awake()
 	{
-		public Vector3 rigPosition;
-
-		public Quaternion rigRotaton;
+		_instance = this;
+		cachedInput = new NativeArray<VRRigTransformInput>(19, Allocator.Persistent);
+		tAA = new TransformAccessArray(19, 2);
+		job = default(VRRigTransformJob);
 	}
 
-	[BurstCompile]
-	private struct VRRigTransformJob : IJobParallelForTransform
+	private void OnDestroy()
 	{
-		public void Execute(int i, TransformAccess tA)
+		jobHandle.Complete();
+		cachedInput.Dispose();
+		tAA.Dispose();
+	}
+
+	public void RegisterVRRig(VRRig rig)
+	{
+		rigList.Add(rig);
+		tAA.Add(rig.transform);
+		actualListSz++;
+	}
+
+	public void DeregisterVRRig(VRRig rig)
+	{
+		if (ApplicationQuittingState.IsQuitting)
 		{
-			if (i < this.input.Length)
+			return;
+		}
+		rigList.Remove(rig);
+		for (int num = actualListSz - 1; num >= 0; num--)
+		{
+			if (tAA[num] == rig.transform)
 			{
-				tA.position = this.input[i].rigPosition;
-				tA.rotation = this.input[i].rigRotaton;
+				tAA.RemoveAtSwapBack(num);
+				break;
 			}
 		}
+		actualListSz--;
+	}
 
-		[ReadOnly]
-		public NativeArray<VRRigJobManager.VRRigTransformInput> input;
+	private void CopyInput()
+	{
+		for (int i = 0; i < actualListSz; i++)
+		{
+			cachedInput[i] = new VRRigTransformInput
+			{
+				rigPosition = rigList[i].jobPos,
+				rigRotaton = rigList[i].jobRotation
+			};
+			tAA[i] = rigList[i].transform;
+		}
+	}
+
+	public void Update()
+	{
+		jobHandle.Complete();
+		for (int i = 0; i < rigList.Count; i++)
+		{
+			rigList[i].RemoteRigUpdate();
+		}
+		CopyInput();
+		job.input = cachedInput;
+		jobHandle = job.Schedule(tAA);
 	}
 }

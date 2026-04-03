@@ -1,56 +1,55 @@
-﻿using System;
 using UnityEngine;
 
-namespace GorillaTag
+namespace GorillaTag;
+
+[DefaultExecutionOrder(2000)]
+public class StaticLodGroup : MonoBehaviour, IGorillaSimpleBackgroundWorker
 {
-	[DefaultExecutionOrder(2000)]
-	public class StaticLodGroup : MonoBehaviour, IGorillaSimpleBackgroundWorker
+	public const int k_monoDefaultExecutionOrder = 2000;
+
+	private int index;
+
+	public float collisionEnableDistance = 3f;
+
+	public float uiFadeDistanceMax = 10f;
+
+	private bool initialized;
+
+	protected void OnEnable()
 	{
-		protected void OnEnable()
+		if (initialized)
 		{
-			if (this.initialized)
-			{
-				StaticLodManager.SetEnabled(this.index, true);
-				return;
-			}
+			StaticLodManager.SetEnabled(index, enable: true);
+		}
+		else
+		{
 			GorillaSimpleBackgroundWorkerManager.WorkerSignup(this);
 		}
+	}
 
-		protected void OnDisable()
+	protected void OnDisable()
+	{
+		if (initialized)
 		{
-			if (this.initialized)
-			{
-				StaticLodManager.SetEnabled(this.index, false);
-			}
+			StaticLodManager.SetEnabled(index, enable: false);
 		}
+	}
 
-		private void OnDestroy()
+	private void OnDestroy()
+	{
+		if (initialized)
 		{
-			if (this.initialized)
-			{
-				StaticLodManager.Unregister(this.index);
-			}
+			StaticLodManager.Unregister(index);
 		}
+	}
 
-		public void SimpleWork()
+	public void SimpleWork()
+	{
+		if (!initialized)
 		{
-			if (this.initialized)
-			{
-				return;
-			}
-			this.index = StaticLodManager.Register(this);
-			StaticLodManager.SetEnabled(this.index, true);
-			this.initialized = true;
+			index = StaticLodManager.Register(this);
+			StaticLodManager.SetEnabled(index, enable: true);
+			initialized = true;
 		}
-
-		public const int k_monoDefaultExecutionOrder = 2000;
-
-		private int index;
-
-		public float collisionEnableDistance = 3f;
-
-		public float uiFadeDistanceMax = 10f;
-
-		private bool initialized;
 	}
 }

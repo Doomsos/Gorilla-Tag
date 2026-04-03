@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaExtensions;
 using GorillaTag;
 using UnityEngine;
@@ -6,21 +6,67 @@ using UnityEngine.Events;
 
 public class EdibleHoldable : TransferrableObject
 {
+	private enum EdibleHoldableStates
+	{
+		EatingState0 = 1,
+		EatingState1 = 2,
+		EatingState2 = 4,
+		EatingState3 = 8
+	}
+
+	[Serializable]
+	public class BiteEvent : UnityEvent<VRRig, int>
+	{
+	}
+
+	public AudioClip[] eatSounds;
+
+	public GameObject[] edibleMeshObjects;
+
+	public BiteEvent onBiteView;
+
+	public BiteEvent onBiteWorld;
+
+	[DebugReadout]
+	public float lastEatTime;
+
+	[DebugReadout]
+	public float lastFullyEatenTime;
+
+	public float eatMinimumCooldown = 1f;
+
+	public float respawnTime = 7f;
+
+	public float biteDistance = 0.1666667f;
+
+	public Vector3 biteOffset = new Vector3(0f, 0.0208f, 0.171f);
+
+	public Transform biteSpot;
+
+	public bool inBiteZone;
+
+	public AudioSource eatSoundSource;
+
+	private EdibleHoldableStates previousEdibleState;
+
+	private IResettableItem[] iResettableItems;
+
+	[field: NonSerialized]
 	public int lastBiterActorID { get; private set; } = -1;
 
 	protected override void Start()
 	{
 		base.Start();
-		this.itemState = TransferrableObject.ItemStates.State0;
-		this.previousEdibleState = (EdibleHoldable.EdibleHoldableStates)this.itemState;
-		this.lastFullyEatenTime = -this.respawnTime;
-		this.iResettableItems = base.GetComponentsInChildren<IResettableItem>(true);
+		itemState = ItemStates.State0;
+		previousEdibleState = (EdibleHoldableStates)itemState;
+		lastFullyEatenTime = 0f - respawnTime;
+		iResettableItems = GetComponentsInChildren<IResettableItem>(includeInactive: true);
 	}
 
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		base.OnGrab(pointGrabbed, grabbingHand);
-		this.lastEatTime = Time.time - this.eatMinimumCooldown;
+		lastEatTime = Time.time - eatMinimumCooldown;
 	}
 
 	public override void OnActivate()
@@ -45,31 +91,42 @@ public class EdibleHoldable : TransferrableObject
 
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
-		return base.OnRelease(zoneReleased, releasingHand) && !base.InHand();
+		if (!base.OnRelease(zoneReleased, releasingHand))
+		{
+			return false;
+		}
+		if (InHand())
+		{
+			return false;
+		}
+		return true;
 	}
 
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
-		if (this.itemState == TransferrableObject.ItemStates.State3)
+		if (itemState == ItemStates.State3)
 		{
-			if (Time.time > this.lastFullyEatenTime + this.respawnTime)
+			if (Time.time > lastFullyEatenTime + respawnTime)
 			{
-				this.itemState = TransferrableObject.ItemStates.State0;
-				return;
+				itemState = ItemStates.State0;
 			}
 		}
-		else if (Time.time > this.lastEatTime + this.eatMinimumCooldown)
+		else
 		{
+			if (!(Time.time > lastEatTime + eatMinimumCooldown))
+			{
+				return;
+			}
 			bool flag = false;
 			bool flag2 = false;
-			float num = this.biteDistance * this.biteDistance;
+			float num = biteDistance * biteDistance;
 			if (!GorillaParent.hasInstance)
 			{
 				return;
 			}
-			VRRig vrrig = null;
-			VRRig vrrig2 = null;
+			VRRig vRRig = null;
+			VRRig vRRig2 = null;
 			for (int i = 0; i < VRRigCache.ActiveRigContainers.Count; i++)
 			{
 				VRRig rig = VRRigCache.ActiveRigContainers[i].Rig;
@@ -80,91 +137,63 @@ public class EdibleHoldable : TransferrableObject
 						break;
 					}
 					Transform transform = rig.head.rigTarget.transform;
-					if ((transform.position + transform.rotation * this.biteOffset - this.biteSpot.position).sqrMagnitude < num)
+					if ((transform.position + transform.rotation * biteOffset - biteSpot.position).sqrMagnitude < num)
 					{
 						flag = true;
-						vrrig2 = rig;
+						vRRig2 = rig;
 					}
 				}
 			}
 			Transform transform2 = GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform;
-			if ((transform2.position + transform2.rotation * this.biteOffset - this.biteSpot.position).sqrMagnitude < num)
+			if ((transform2.position + transform2.rotation * biteOffset - biteSpot.position).sqrMagnitude < num)
 			{
 				flag = true;
 				flag2 = true;
-				vrrig = GorillaTagger.Instance.offlineVRRig;
+				vRRig = GorillaTagger.Instance.offlineVRRig;
 			}
-			if (flag && !this.inBiteZone && (!flag2 || base.InHand()) && this.itemState != TransferrableObject.ItemStates.State3)
+			if (flag && !inBiteZone && (!flag2 || InHand()) && itemState != ItemStates.State3)
 			{
-				if (this.itemState == TransferrableObject.ItemStates.State0)
+				if (itemState == ItemStates.State0)
 				{
-					this.itemState = TransferrableObject.ItemStates.State1;
+					itemState = ItemStates.State1;
 				}
-				else if (this.itemState == TransferrableObject.ItemStates.State1)
+				else if (itemState == ItemStates.State1)
 				{
-					this.itemState = TransferrableObject.ItemStates.State2;
+					itemState = ItemStates.State2;
 				}
-				else if (this.itemState == TransferrableObject.ItemStates.State2)
+				else if (itemState == ItemStates.State2)
 				{
-					this.itemState = TransferrableObject.ItemStates.State3;
+					itemState = ItemStates.State3;
 				}
-				this.lastEatTime = Time.time;
-				this.lastFullyEatenTime = Time.time;
+				lastEatTime = Time.time;
+				lastFullyEatenTime = Time.time;
 			}
 			if (flag)
 			{
 				if (flag2)
 				{
-					int lastBiterActorID;
-					if (!vrrig)
-					{
-						lastBiterActorID = -1;
-					}
-					else
-					{
-						NetPlayer owningNetPlayer = vrrig.OwningNetPlayer;
-						lastBiterActorID = ((owningNetPlayer != null) ? owningNetPlayer.ActorNumber : -1);
-					}
-					this.lastBiterActorID = lastBiterActorID;
-					EdibleHoldable.BiteEvent biteEvent = this.onBiteView;
-					if (biteEvent != null)
-					{
-						biteEvent.Invoke(vrrig, (int)this.itemState);
-					}
+					lastBiterActorID = ((!vRRig) ? (-1) : (vRRig.OwningNetPlayer?.ActorNumber ?? (-1)));
+					onBiteView?.Invoke(vRRig, (int)itemState);
 				}
 				else
 				{
-					int lastBiterActorID2;
-					if (!vrrig2)
-					{
-						lastBiterActorID2 = -1;
-					}
-					else
-					{
-						NetPlayer owningNetPlayer2 = vrrig2.OwningNetPlayer;
-						lastBiterActorID2 = ((owningNetPlayer2 != null) ? owningNetPlayer2.ActorNumber : -1);
-					}
-					this.lastBiterActorID = lastBiterActorID2;
-					EdibleHoldable.BiteEvent biteEvent2 = this.onBiteWorld;
-					if (biteEvent2 != null)
-					{
-						biteEvent2.Invoke(vrrig2, (int)this.itemState);
-					}
+					lastBiterActorID = ((!vRRig2) ? (-1) : (vRRig2.OwningNetPlayer?.ActorNumber ?? (-1)));
+					onBiteWorld?.Invoke(vRRig2, (int)itemState);
 				}
 			}
-			this.inBiteZone = flag;
+			inBiteZone = flag;
 		}
 	}
 
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
-		EdibleHoldable.EdibleHoldableStates itemState = (EdibleHoldable.EdibleHoldableStates)this.itemState;
-		if (itemState != this.previousEdibleState)
+		EdibleHoldableStates edibleHoldableStates = (EdibleHoldableStates)itemState;
+		if (edibleHoldableStates != previousEdibleState)
 		{
-			this.OnEdibleHoldableStateChange();
+			OnEdibleHoldableStateChange();
 		}
-		this.previousEdibleState = itemState;
+		previousEdibleState = edibleHoldableStates;
 	}
 
 	protected virtual void OnEdibleHoldableStateChange()
@@ -173,42 +202,40 @@ public class EdibleHoldable : TransferrableObject
 		float fixedDeltaTime = Time.fixedDeltaTime;
 		float volumeScale = 0.08f;
 		int num = 0;
-		if (this.itemState == TransferrableObject.ItemStates.State0)
+		if (itemState == ItemStates.State0)
 		{
 			num = 0;
-			if (this.iResettableItems != null)
+			if (iResettableItems != null)
 			{
-				foreach (IResettableItem resettableItem in this.iResettableItems)
+				IResettableItem[] array = iResettableItems;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (resettableItem != null)
-					{
-						resettableItem.ResetToDefaultState();
-					}
+					array[i]?.ResetToDefaultState();
 				}
 			}
 		}
-		else if (this.itemState == TransferrableObject.ItemStates.State1)
+		else if (itemState == ItemStates.State1)
 		{
 			num = 1;
 		}
-		else if (this.itemState == TransferrableObject.ItemStates.State2)
+		else if (itemState == ItemStates.State2)
 		{
 			num = 2;
 		}
-		else if (this.itemState == TransferrableObject.ItemStates.State3)
+		else if (itemState == ItemStates.State3)
 		{
 			num = 3;
 		}
 		int num2 = num - 1;
 		if (num2 < 0)
 		{
-			num2 = this.edibleMeshObjects.Length - 1;
+			num2 = edibleMeshObjects.Length - 1;
 		}
-		this.edibleMeshObjects[num2].SetActive(false);
-		this.edibleMeshObjects[num].SetActive(true);
-		if ((this.itemState != TransferrableObject.ItemStates.State0 && this.onBiteView != null) || this.onBiteWorld != null)
+		edibleMeshObjects[num2].SetActive(value: false);
+		edibleMeshObjects[num].SetActive(value: true);
+		if ((itemState != ItemStates.State0 && onBiteView != null) || onBiteWorld != null)
 		{
-			VRRig vrrig = null;
+			VRRig vRRig = null;
 			float num3 = float.PositiveInfinity;
 			for (int j = 0; j < VRRigCache.ActiveRigContainers.Count; j++)
 			{
@@ -218,36 +245,32 @@ public class EdibleHoldable : TransferrableObject
 					break;
 				}
 				Transform transform = rig.head.rigTarget.transform;
-				float sqrMagnitude = (transform.position + transform.rotation * this.biteOffset - this.biteSpot.position).sqrMagnitude;
+				float sqrMagnitude = (transform.position + transform.rotation * biteOffset - biteSpot.position).sqrMagnitude;
 				if (sqrMagnitude < num3)
 				{
 					num3 = sqrMagnitude;
-					vrrig = rig;
+					vRRig = rig;
 				}
 			}
-			if (vrrig.IsNotNull())
+			if (vRRig.IsNotNull())
 			{
-				EdibleHoldable.BiteEvent biteEvent = vrrig.isOfflineVRRig ? this.onBiteView : this.onBiteWorld;
-				if (biteEvent != null)
+				(vRRig.isOfflineVRRig ? onBiteView : onBiteWorld)?.Invoke(vRRig, (int)itemState);
+				if (vRRig.isOfflineVRRig && itemState != ItemStates.State0)
 				{
-					biteEvent.Invoke(vrrig, (int)this.itemState);
-				}
-				if (vrrig.isOfflineVRRig && this.itemState != TransferrableObject.ItemStates.State0)
-				{
-					PlayerGameEvents.EatObject(this.interactEventName);
+					PlayerGameEvents.EatObject(interactEventName);
 				}
 			}
 		}
-		this.eatSoundSource.GTPlayOneShot(this.eatSounds[num], volumeScale);
-		if (this.IsMyItem())
+		eatSoundSource.GTPlayOneShot(eatSounds[num], volumeScale);
+		if (IsMyItem())
 		{
-			if (base.InHand())
+			if (InHand())
 			{
-				GorillaTagger.Instance.StartVibration(base.InLeftHand(), amplitude, fixedDeltaTime);
+				GorillaTagger.Instance.StartVibration(InLeftHand(), amplitude, fixedDeltaTime);
 				return;
 			}
-			GorillaTagger.Instance.StartVibration(false, amplitude, fixedDeltaTime);
-			GorillaTagger.Instance.StartVibration(true, amplitude, fixedDeltaTime);
+			GorillaTagger.Instance.StartVibration(forLeftController: false, amplitude, fixedDeltaTime);
+			GorillaTagger.Instance.StartVibration(forLeftController: true, amplitude, fixedDeltaTime);
 		}
 	}
 
@@ -259,50 +282,5 @@ public class EdibleHoldable : TransferrableObject
 	public override bool CanDeactivate()
 	{
 		return true;
-	}
-
-	public AudioClip[] eatSounds;
-
-	public GameObject[] edibleMeshObjects;
-
-	public EdibleHoldable.BiteEvent onBiteView;
-
-	public EdibleHoldable.BiteEvent onBiteWorld;
-
-	[DebugReadout]
-	public float lastEatTime;
-
-	[DebugReadout]
-	public float lastFullyEatenTime;
-
-	public float eatMinimumCooldown = 1f;
-
-	public float respawnTime = 7f;
-
-	public float biteDistance = 0.1666667f;
-
-	public Vector3 biteOffset = new Vector3(0f, 0.0208f, 0.171f);
-
-	public Transform biteSpot;
-
-	public bool inBiteZone;
-
-	public AudioSource eatSoundSource;
-
-	private EdibleHoldable.EdibleHoldableStates previousEdibleState;
-
-	private IResettableItem[] iResettableItems;
-
-	private enum EdibleHoldableStates
-	{
-		EatingState0 = 1,
-		EatingState1,
-		EatingState2 = 4,
-		EatingState3 = 8
-	}
-
-	[Serializable]
-	public class BiteEvent : UnityEvent<VRRig, int>
-	{
 	}
 }

@@ -1,27 +1,34 @@
-﻿using System;
+using System;
 
-namespace TagEffects
+namespace TagEffects;
+
+[Serializable]
+public class TagEffectsCombo : IEquatable<TagEffectsCombo>
 {
-	[Serializable]
-	public class TagEffectsCombo : IEquatable<TagEffectsCombo>
+	public TagEffectPack inputA;
+
+	public TagEffectPack inputB;
+
+	bool IEquatable<TagEffectsCombo>.Equals(TagEffectsCombo other)
 	{
-		bool IEquatable<TagEffectsCombo>.Equals(TagEffectsCombo other)
+		if (!(other.inputA == inputA) || !(other.inputB == inputB))
 		{
-			return (other.inputA == this.inputA && other.inputB == this.inputB) || (other.inputA == this.inputB && other.inputB == this.inputA);
+			if (other.inputA == inputB)
+			{
+				return other.inputB == inputA;
+			}
+			return false;
 		}
+		return true;
+	}
 
-		public override bool Equals(object obj)
-		{
-			return this.Equals((TagEffectsCombo)obj);
-		}
+	public override bool Equals(object obj)
+	{
+		return Equals((TagEffectsCombo)obj);
+	}
 
-		public override int GetHashCode()
-		{
-			return this.inputA.GetHashCode() * this.inputB.GetHashCode();
-		}
-
-		public TagEffectPack inputA;
-
-		public TagEffectPack inputB;
+	public override int GetHashCode()
+	{
+		return inputA.GetHashCode() * inputB.GetHashCode();
 	}
 }

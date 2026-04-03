@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using GorillaGameModes;
@@ -7,143 +7,216 @@ using Ionic.Zlib;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.Events;
 
-namespace GorillaTagScripts
+namespace GorillaTagScripts;
+
+public class BuilderTableNetworking : MonoBehaviourPunCallbacks, ITickSystemTick
 {
-	public class BuilderTableNetworking : MonoBehaviourPunCallbacks, ITickSystemTick
+	public class PlayerTableInitState
 	{
-		public bool TickRunning { get; set; }
+		public Player player;
 
-		private void Awake()
+		public int numSerializedBytes;
+
+		public int totalSerializedBytes;
+
+		public byte[] serializedTableState;
+
+		public byte[] chunk;
+
+		public float waitForInitTimeRemaining;
+
+		public float sendNextChunkTimeRemaining;
+
+		public PlayerTableInitState()
 		{
-			this.masterClientTableInit = new List<BuilderTableNetworking.PlayerTableInitState>(10);
-			this.masterClientTableValidators = new List<BuilderTableNetworking.PlayerTableInitState>(10);
-			this.localClientTableInit = new BuilderTableNetworking.PlayerTableInitState();
-			this.localValidationTable = new BuilderTableNetworking.PlayerTableInitState();
-			this.callLimiters = new CallLimiter[26];
-			this.callLimiters[0] = new CallLimiter(20, 30f, 0.5f);
-			this.callLimiters[1] = new CallLimiter(200, 1f, 0.5f);
-			this.callLimiters[2] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[3] = new CallLimiter(2, 1f, 0.5f);
-			this.callLimiters[4] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[5] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[6] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[7] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[8] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[9] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[10] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[11] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[12] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[13] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[14] = new CallLimiter(100, 1f, 0.5f);
-			this.callLimiters[15] = new CallLimiter(100, 1f, 0.5f);
-			this.callLimiters[16] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[17] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[18] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[19] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[20] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[21] = new CallLimiter(50, 1f, 0.5f);
-			this.callLimiters[22] = new CallLimiter(20, 1f, 0.5f);
-			this.callLimiters[23] = new CallLimiter(20, 1f, 0.5f);
-			this.callLimiters[24] = new CallLimiter(3, 30f, 0.5f);
-			this.callLimiters[25] = new CallLimiter(10, 1f, 0.5f);
-			this.armShelfRequests = new List<Player>(10);
+			serializedTableState = new byte[1048576];
+			chunk = new byte[1000];
+			Reset();
 		}
 
-		private new void OnEnable()
+		public void Reset()
 		{
-			base.OnEnable();
-			TickSystem<object>.AddTickCallback(this);
+			player = null;
+			numSerializedBytes = 0;
+			totalSerializedBytes = 0;
 		}
+	}
 
-		private new void OnDisable()
-		{
-			base.OnDisable();
-			TickSystem<object>.RemoveTickCallback(this);
-		}
+	private enum RPC
+	{
+		PlayerEnterMaster,
+		TableDataMaster,
+		TableData,
+		TableDataStart,
+		PlacePieceMaster,
+		PlacePiece,
+		GrabPieceMaster,
+		GrabPiece,
+		DropPieceMaster,
+		DropPiece,
+		RequestFailed,
+		PieceDropZone,
+		CreatePiece,
+		CreatePieceMaster,
+		CreateShelfPieceMaster,
+		RecyclePieceMaster,
+		PlotClaimedMaster,
+		ArmShelfCreated,
+		ShelfSelection,
+		ShelfSelectionMaster,
+		SetFunctionalState,
+		SetFunctionalStateMaster,
+		RequestTerminalControl,
+		SetTerminalDriver,
+		LoadSharedBlocksMap,
+		SharedTableEvent,
+		Count
+	}
 
-		public void SetTable(BuilderTable table)
-		{
-			this.currTable = table;
-		}
+	private enum SharedTableEventTypes
+	{
+		LOAD_STARTED,
+		LOAD_FAILED,
+		OUT_OF_BOUNDS,
+		COUNT
+	}
 
-		private BuilderTable GetTable()
-		{
-			return this.currTable;
-		}
+	public PhotonView tablePhotonView;
 
-		private int CreateLocalCommandId()
-		{
-			int result = this.nextLocalCommandId;
-			this.nextLocalCommandId++;
-			return result;
-		}
+	private const int MAX_TABLE_BYTES = 1048576;
 
-		public BuilderTableNetworking.PlayerTableInitState GetLocalTableInit()
-		{
-			return this.localClientTableInit;
-		}
+	private const int MAX_TABLE_CHUNK_BYTES = 1000;
 
-		public override void OnMasterClientSwitched(Player newMasterClient)
+	private const float DELAY_CLIENT_TABLE_CREATION_TIME = 1f;
+
+	private const float SEND_INIT_DATA_COOLDOWN = 0f;
+
+	private const int PIECE_SYNC_BYTES = 128;
+
+	private BuilderTable currTable;
+
+	private int nextLocalCommandId;
+
+	private List<PlayerTableInitState> masterClientTableInit;
+
+	private List<PlayerTableInitState> masterClientTableValidators;
+
+	private PlayerTableInitState localClientTableInit;
+
+	private PlayerTableInitState localValidationTable;
+
+	[HideInInspector]
+	public List<Player> armShelfRequests;
+
+	private CallLimiter[] callLimiters;
+
+	public bool TickRunning { get; set; }
+
+	private void Awake()
+	{
+		masterClientTableInit = new List<PlayerTableInitState>(10);
+		masterClientTableValidators = new List<PlayerTableInitState>(10);
+		localClientTableInit = new PlayerTableInitState();
+		localValidationTable = new PlayerTableInitState();
+		callLimiters = new CallLimiter[26];
+		callLimiters[0] = new CallLimiter(20, 30f);
+		callLimiters[1] = new CallLimiter(200, 1f);
+		callLimiters[2] = new CallLimiter(50, 1f);
+		callLimiters[3] = new CallLimiter(2, 1f);
+		callLimiters[4] = new CallLimiter(50, 1f);
+		callLimiters[5] = new CallLimiter(50, 1f);
+		callLimiters[6] = new CallLimiter(50, 1f);
+		callLimiters[7] = new CallLimiter(50, 1f);
+		callLimiters[8] = new CallLimiter(50, 1f);
+		callLimiters[9] = new CallLimiter(50, 1f);
+		callLimiters[10] = new CallLimiter(50, 1f);
+		callLimiters[11] = new CallLimiter(50, 1f);
+		callLimiters[12] = new CallLimiter(50, 1f);
+		callLimiters[13] = new CallLimiter(50, 1f);
+		callLimiters[14] = new CallLimiter(100, 1f);
+		callLimiters[15] = new CallLimiter(100, 1f);
+		callLimiters[16] = new CallLimiter(50, 1f);
+		callLimiters[17] = new CallLimiter(50, 1f);
+		callLimiters[18] = new CallLimiter(50, 1f);
+		callLimiters[19] = new CallLimiter(50, 1f);
+		callLimiters[20] = new CallLimiter(50, 1f);
+		callLimiters[21] = new CallLimiter(50, 1f);
+		callLimiters[22] = new CallLimiter(20, 1f);
+		callLimiters[23] = new CallLimiter(20, 1f);
+		callLimiters[24] = new CallLimiter(3, 30f);
+		callLimiters[25] = new CallLimiter(10, 1f);
+		armShelfRequests = new List<Player>(10);
+	}
+
+	private new void OnEnable()
+	{
+		base.OnEnable();
+		TickSystem<object>.AddTickCallback(this);
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		TickSystem<object>.RemoveTickCallback(this);
+	}
+
+	public void SetTable(BuilderTable table)
+	{
+		currTable = table;
+	}
+
+	private BuilderTable GetTable()
+	{
+		return currTable;
+	}
+
+	private int CreateLocalCommandId()
+	{
+		int result = nextLocalCommandId;
+		nextLocalCommandId++;
+		return result;
+	}
+
+	public PlayerTableInitState GetLocalTableInit()
+	{
+		return localClientTableInit;
+	}
+
+	public override void OnMasterClientSwitched(Player newMasterClient)
+	{
+		if (newMasterClient.IsLocal)
 		{
-			if (!newMasterClient.IsLocal)
-			{
-				this.localClientTableInit.Reset();
-				BuilderTable table = this.GetTable();
-				if (table.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
-				{
-					if (table.GetTableState() == BuilderTable.TableState.Ready)
-					{
-						table.SetTableState(BuilderTable.TableState.WaitForMasterResync);
-					}
-					else if (table.GetTableState() == BuilderTable.TableState.WaitForMasterResync || table.GetTableState() == BuilderTable.TableState.ReceivingMasterResync)
-					{
-						table.SetTableState(BuilderTable.TableState.WaitForMasterResync);
-					}
-					else
-					{
-						table.SetTableState(BuilderTable.TableState.WaitingForInitalBuild);
-					}
-					this.PlayerEnterBuilder();
-				}
-				return;
-			}
-			this.masterClientTableInit.Clear();
-			this.localClientTableInit.Reset();
-			BuilderTable table2 = this.GetTable();
-			BuilderTable.TableState tableState = table2.GetTableState();
-			bool flag = (tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.WaitingForZoneAndRoom && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.ReceivingMasterResync) || table2.pieces.Count <= 0;
+			masterClientTableInit.Clear();
+			localClientTableInit.Reset();
+			BuilderTable table = GetTable();
+			BuilderTable.TableState tableState = table.GetTableState();
+			bool flag = (tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.WaitingForZoneAndRoom && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.ReceivingMasterResync) || table.pieces.Count <= 0;
 			if (!flag)
 			{
-				flag |= (table2.pieces.Count <= 0);
+				flag |= table.pieces.Count <= 0;
 			}
 			if (flag)
 			{
-				table2.ClearTable();
-				table2.ClearQueuedCommands();
-				table2.SetTableState(BuilderTable.TableState.WaitForInitialBuildMaster);
+				table.ClearTable();
+				table.ClearQueuedCommands();
+				table.SetTableState(BuilderTable.TableState.WaitForInitialBuildMaster);
 				return;
 			}
-			for (int i = 0; i < table2.pieces.Count; i++)
+			for (int i = 0; i < table.pieces.Count; i++)
 			{
-				BuilderPiece builderPiece = table2.pieces[i];
-				Player player = PhotonNetwork.CurrentRoom.GetPlayer(builderPiece.heldByPlayerActorNumber, false);
-				if (table2.pieces[i].state == BuilderPiece.State.Grabbed && player == null)
+				BuilderPiece builderPiece = table.pieces[i];
+				Player player = PhotonNetwork.CurrentRoom.GetPlayer(builderPiece.heldByPlayerActorNumber);
+				if (table.pieces[i].state == BuilderPiece.State.Grabbed && player == null)
 				{
 					Vector3 position = builderPiece.transform.position;
 					Quaternion rotation = builderPiece.transform.rotation;
-					Debug.LogErrorFormat("We have a piece {0} {1} held by an invalid player {2} dropping", new object[]
-					{
-						builderPiece.name,
-						builderPiece.pieceId,
-						builderPiece.heldByPlayerActorNumber
-					});
-					this.CreateLocalCommandId();
+					Debug.LogErrorFormat("We have a piece {0} {1} held by an invalid player {2} dropping", builderPiece.name, builderPiece.pieceId, builderPiece.heldByPlayerActorNumber);
+					CreateLocalCommandId();
 					builderPiece.ClearParentHeld();
-					builderPiece.ClearParentPiece(false);
+					builderPiece.ClearParentPiece();
 					builderPiece.transform.localScale = Vector3.one;
-					builderPiece.SetState(BuilderPiece.State.Dropped, false);
+					builderPiece.SetState(BuilderPiece.State.Dropped);
 					builderPiece.transform.SetLocalPositionAndRotation(position, rotation);
 					if (builderPiece.rigidBody != null)
 					{
@@ -154,249 +227,235 @@ namespace GorillaTagScripts
 					}
 				}
 			}
-			table2.ClearQueuedCommands();
-			table2.SetTableState(BuilderTable.TableState.Ready);
+			table.ClearQueuedCommands();
+			table.SetTableState(BuilderTable.TableState.Ready);
+			return;
 		}
-
-		public override void OnPlayerLeftRoom(Player player)
+		localClientTableInit.Reset();
+		BuilderTable table2 = GetTable();
+		if (table2.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
 		{
-			BuilderTable table = this.GetTable();
-			if (table.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
+			if (table2.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				if (table.isTableMutable)
+				table2.SetTableState(BuilderTable.TableState.WaitForMasterResync);
+			}
+			else if (table2.GetTableState() == BuilderTable.TableState.WaitForMasterResync || table2.GetTableState() == BuilderTable.TableState.ReceivingMasterResync)
+			{
+				table2.SetTableState(BuilderTable.TableState.WaitForMasterResync);
+			}
+			else
+			{
+				table2.SetTableState(BuilderTable.TableState.WaitingForInitalBuild);
+			}
+			PlayerEnterBuilder();
+		}
+	}
+
+	public override void OnPlayerLeftRoom(Player player)
+	{
+		BuilderTable table = GetTable();
+		if (table.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
+		{
+			if (table.isTableMutable)
+			{
+				if (!PhotonNetwork.IsMasterClient)
 				{
-					if (!PhotonNetwork.IsMasterClient)
-					{
-						table.DropAllPiecesForPlayerLeaving(player.ActorNumber);
-					}
-					else
-					{
-						table.RecycleAllPiecesForPlayerLeaving(player.ActorNumber);
-					}
+					table.DropAllPiecesForPlayerLeaving(player.ActorNumber);
 				}
-				table.PlayerLeftRoom(player.ActorNumber);
-			}
-			if (!table.isTableMutable && table.linkedTerminal != null && table.linkedTerminal.IsPlayerDriver(player))
-			{
-				table.linkedTerminal.ResetTerminalControl();
-				if (NetworkSystem.Instance.IsMasterClient)
+				else
 				{
-					base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, new object[]
-					{
-						-2
-					});
+					table.RecycleAllPiecesForPlayerLeaving(player.ActorNumber);
 				}
 			}
-			if (!PhotonNetwork.IsMasterClient)
+			table.PlayerLeftRoom(player.ActorNumber);
+		}
+		if (!table.isTableMutable && table.linkedTerminal != null && table.linkedTerminal.IsPlayerDriver(player))
+		{
+			table.linkedTerminal.ResetTerminalControl();
+			if (NetworkSystem.Instance.IsMasterClient)
 			{
-				return;
+				base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, -2);
 			}
+		}
+		if (PhotonNetwork.IsMasterClient)
+		{
 			table.RemoveArmShelfForPlayer(player);
 			table.VerifySetSelections();
 			if (player != PhotonNetwork.LocalPlayer)
 			{
-				this.DestroyPlayerTableInit(player);
+				DestroyPlayerTableInit(player);
 			}
 		}
+	}
 
-		public override void OnJoinedRoom()
+	public override void OnJoinedRoom()
+	{
+		base.OnJoinedRoom();
+		BuilderTable table = GetTable();
+		table.SetPendingMap(null);
+		table.SetInRoom(inRoom: true);
+	}
+
+	public override void OnLeftRoom()
+	{
+		PlayerExitBuilder();
+		BuilderTable table = GetTable();
+		table.SetPendingMap(null);
+		table.SetInRoom(inRoom: false);
+		armShelfRequests.Clear();
+	}
+
+	public void Tick()
+	{
+		if (PhotonNetwork.IsMasterClient)
 		{
-			base.OnJoinedRoom();
-			BuilderTable table = this.GetTable();
-			table.SetPendingMap(null);
-			table.SetInRoom(true);
+			UpdateNewPlayerInit();
 		}
+	}
 
-		public override void OnLeftRoom()
+	public void PlayerEnterBuilder()
+	{
+		tablePhotonView.RPC("PlayerEnterBuilderRPC", PhotonNetwork.MasterClient, PhotonNetwork.LocalPlayer, true);
+		if (GameMode.ActiveGameMode is GorillaGuardianManager { isPlaying: not false } gorillaGuardianManager && gorillaGuardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer))
 		{
-			this.PlayerExitBuilder();
-			BuilderTable table = this.GetTable();
-			table.SetPendingMap(null);
-			table.SetInRoom(false);
-			this.armShelfRequests.Clear();
+			gorillaGuardianManager.RequestEjectGuardian(NetworkSystem.Instance.LocalPlayer);
 		}
+	}
 
-		public void Tick()
+	[PunRPC]
+	public void PlayerEnterBuilderRPC(Player player, bool entered, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PlayerEnterBuilderRPC");
+		if (!PhotonNetwork.IsMasterClient || !ValidateCallLimits(RPC.PlayerEnterMaster, info) || player == null || !player.Equals(info.Sender))
 		{
-			if (PhotonNetwork.IsMasterClient)
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (entered)
+		{
+			BuilderTable.TableState tableState = table.GetTableState();
+			if (tableState == BuilderTable.TableState.WaitingForInitalBuild || (IsPrivateMasterClient() && tableState == BuilderTable.TableState.WaitingForZoneAndRoom))
 			{
-				this.UpdateNewPlayerInit();
+				table.SetTableState(BuilderTable.TableState.WaitForInitialBuildMaster);
+			}
+			if (player != PhotonNetwork.LocalPlayer)
+			{
+				CreateSerializedTableForNewPlayerInit(player);
+			}
+			if (table.isTableMutable)
+			{
+				RequestCreateArmShelfForPlayer(player);
+			}
+			else if (table.linkedTerminal != null)
+			{
+				base.photonView.RPC("SetBlocksTerminalDriverRPC", player, table.linkedTerminal.GetDriverID);
 			}
 		}
-
-		public void PlayerEnterBuilder()
+		else
 		{
-			this.tablePhotonView.RPC("PlayerEnterBuilderRPC", PhotonNetwork.MasterClient, new object[]
+			if (player.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
 			{
-				PhotonNetwork.LocalPlayer,
-				true
-			});
-			GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
-			if (gorillaGuardianManager != null && gorillaGuardianManager.isPlaying && gorillaGuardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer))
+				DestroyPlayerTableInit(player);
+			}
+			if (table.isTableMutable)
 			{
-				gorillaGuardianManager.RequestEjectGuardian(NetworkSystem.Instance.LocalPlayer);
+				table.RemoveArmShelfForPlayer(player);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void PlayerEnterBuilderRPC(Player player, bool entered, PhotonMessageInfo info)
+	public void PlayerExitBuilder()
+	{
+		if (NetworkSystem.Instance.InRoom)
 		{
-			MonkeAgent.IncrementRPCCall(info, "PlayerEnterBuilderRPC");
-			if (!PhotonNetwork.IsMasterClient)
+			tablePhotonView.RPC("PlayerEnterBuilderRPC", PhotonNetwork.MasterClient, PhotonNetwork.LocalPlayer, false);
+		}
+		BuilderTable table = GetTable();
+		table.ClearTable();
+		table.ClearQueuedCommands();
+		localClientTableInit.Reset();
+		armShelfRequests.Clear();
+		masterClientTableInit.Clear();
+	}
+
+	public bool IsPrivateMasterClient()
+	{
+		if (PhotonNetwork.LocalPlayer == PhotonNetwork.MasterClient)
+		{
+			return NetworkSystem.Instance.SessionIsPrivate;
+		}
+		return false;
+	}
+
+	private void UpdateNewPlayerInit()
+	{
+		if (GetTable().GetTableState() != BuilderTable.TableState.Ready)
+		{
+			return;
+		}
+		for (int i = 0; i < masterClientTableInit.Count; i++)
+		{
+			if (masterClientTableInit[i].waitForInitTimeRemaining >= 0f)
 			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.PlayerEnterMaster, info))
-			{
-				return;
-			}
-			if (player == null || !player.Equals(info.Sender))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (entered)
-			{
-				BuilderTable.TableState tableState = table.GetTableState();
-				if (tableState == BuilderTable.TableState.WaitingForInitalBuild || (this.IsPrivateMasterClient() && tableState == BuilderTable.TableState.WaitingForZoneAndRoom))
+				masterClientTableInit[i].waitForInitTimeRemaining -= Time.deltaTime;
+				if (masterClientTableInit[i].waitForInitTimeRemaining <= 0f)
 				{
-					table.SetTableState(BuilderTable.TableState.WaitForInitialBuildMaster);
-				}
-				if (player != PhotonNetwork.LocalPlayer)
-				{
-					this.CreateSerializedTableForNewPlayerInit(player);
-				}
-				if (table.isTableMutable)
-				{
-					this.RequestCreateArmShelfForPlayer(player);
-					return;
-				}
-				if (table.linkedTerminal != null)
-				{
-					base.photonView.RPC("SetBlocksTerminalDriverRPC", player, new object[]
-					{
-						table.linkedTerminal.GetDriverID
-					});
-					return;
+					StartCreatingSerializedTable(masterClientTableInit[i].player);
+					masterClientTableInit[i].waitForInitTimeRemaining = -1f;
+					masterClientTableInit[i].sendNextChunkTimeRemaining = 0f;
 				}
 			}
 			else
 			{
-				if (player.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+				if (!(masterClientTableInit[i].sendNextChunkTimeRemaining >= 0f))
 				{
-					this.DestroyPlayerTableInit(player);
+					continue;
 				}
-				if (table.isTableMutable)
+				masterClientTableInit[i].sendNextChunkTimeRemaining -= Time.deltaTime;
+				if (masterClientTableInit[i].sendNextChunkTimeRemaining <= 0f)
 				{
-					table.RemoveArmShelfForPlayer(player);
-				}
-			}
-		}
-
-		public void PlayerExitBuilder()
-		{
-			if (NetworkSystem.Instance.InRoom)
-			{
-				this.tablePhotonView.RPC("PlayerEnterBuilderRPC", PhotonNetwork.MasterClient, new object[]
-				{
-					PhotonNetwork.LocalPlayer,
-					false
-				});
-			}
-			BuilderTable table = this.GetTable();
-			table.ClearTable();
-			table.ClearQueuedCommands();
-			this.localClientTableInit.Reset();
-			this.armShelfRequests.Clear();
-			this.masterClientTableInit.Clear();
-		}
-
-		public bool IsPrivateMasterClient()
-		{
-			return PhotonNetwork.LocalPlayer == PhotonNetwork.MasterClient && NetworkSystem.Instance.SessionIsPrivate;
-		}
-
-		private void UpdateNewPlayerInit()
-		{
-			if (this.GetTable().GetTableState() == BuilderTable.TableState.Ready)
-			{
-				for (int i = 0; i < this.masterClientTableInit.Count; i++)
-				{
-					if (this.masterClientTableInit[i].waitForInitTimeRemaining >= 0f)
+					SendNextTableData(masterClientTableInit[i].player);
+					if (masterClientTableInit[i].numSerializedBytes < masterClientTableInit[i].totalSerializedBytes)
 					{
-						this.masterClientTableInit[i].waitForInitTimeRemaining -= Time.deltaTime;
-						if (this.masterClientTableInit[i].waitForInitTimeRemaining <= 0f)
-						{
-							this.StartCreatingSerializedTable(this.masterClientTableInit[i].player);
-							this.masterClientTableInit[i].waitForInitTimeRemaining = -1f;
-							this.masterClientTableInit[i].sendNextChunkTimeRemaining = 0f;
-						}
+						masterClientTableInit[i].sendNextChunkTimeRemaining = 0f;
 					}
-					else if (this.masterClientTableInit[i].sendNextChunkTimeRemaining >= 0f)
+					else
 					{
-						this.masterClientTableInit[i].sendNextChunkTimeRemaining -= Time.deltaTime;
-						if (this.masterClientTableInit[i].sendNextChunkTimeRemaining <= 0f)
-						{
-							this.SendNextTableData(this.masterClientTableInit[i].player);
-							if (this.masterClientTableInit[i].numSerializedBytes < this.masterClientTableInit[i].totalSerializedBytes)
-							{
-								this.masterClientTableInit[i].sendNextChunkTimeRemaining = 0f;
-							}
-							else
-							{
-								this.masterClientTableInit[i].sendNextChunkTimeRemaining = -1f;
-							}
-						}
+						masterClientTableInit[i].sendNextChunkTimeRemaining = -1f;
 					}
 				}
 			}
 		}
+	}
 
-		private void StartCreatingSerializedTable(Player newPlayer)
+	private void StartCreatingSerializedTable(Player newPlayer)
+	{
+		BuilderTable table = GetTable();
+		PlayerTableInitState playerTableInit = GetPlayerTableInit(newPlayer);
+		playerTableInit.totalSerializedBytes = table.SerializeTableState(playerTableInit.serializedTableState, 1048576);
+		byte[] array = GZipStream.CompressBuffer(playerTableInit.serializedTableState);
+		playerTableInit.totalSerializedBytes = array.Length;
+		Array.Copy(array, 0, playerTableInit.serializedTableState, 0, playerTableInit.totalSerializedBytes);
+		playerTableInit.numSerializedBytes = 0;
+		tablePhotonView.RPC("StartBuildTableRPC", newPlayer, playerTableInit.totalSerializedBytes);
+	}
+
+	[PunRPC]
+	public void StartBuildTableRPC(int totalBytes, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "StartBuildTableRPC");
+		if (!info.Sender.IsMasterClient || PhotonNetwork.IsMasterClient || !ValidateCallLimits(RPC.TableDataStart, info) || totalBytes <= 0 || totalBytes > 1048576)
 		{
-			BuilderTable table = this.GetTable();
-			BuilderTableNetworking.PlayerTableInitState playerTableInit = this.GetPlayerTableInit(newPlayer);
-			playerTableInit.totalSerializedBytes = table.SerializeTableState(playerTableInit.serializedTableState, 1048576);
-			byte[] array = GZipStream.CompressBuffer(playerTableInit.serializedTableState);
-			playerTableInit.totalSerializedBytes = array.Length;
-			Array.Copy(array, 0, playerTableInit.serializedTableState, 0, playerTableInit.totalSerializedBytes);
-			playerTableInit.numSerializedBytes = 0;
-			this.tablePhotonView.RPC("StartBuildTableRPC", newPlayer, new object[]
-			{
-				playerTableInit.totalSerializedBytes
-			});
+			return;
 		}
-
-		[PunRPC]
-		public void StartBuildTableRPC(int totalBytes, PhotonMessageInfo info)
+		BuilderTable table = GetTable();
+		if (!table.IsInBuilderZone())
 		{
-			MonkeAgent.IncrementRPCCall(info, "StartBuildTableRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.TableDataStart, info))
-			{
-				return;
-			}
-			if (totalBytes <= 0 || totalBytes > 1048576)
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone())
-			{
-				return;
-			}
-			GTDev.Log<string>("StartBuildTableRPC with current state " + table.GetTableState().ToString(), null);
-			if (table.GetTableState() != BuilderTable.TableState.WaitForMasterResync && table.GetTableState() != BuilderTable.TableState.WaitingForInitalBuild)
-			{
-				return;
-			}
+			return;
+		}
+		GTDev.Log("StartBuildTableRPC with current state " + table.GetTableState());
+		if (table.GetTableState() == BuilderTable.TableState.WaitForMasterResync || table.GetTableState() == BuilderTable.TableState.WaitingForInitalBuild)
+		{
 			if (table.GetTableState() == BuilderTable.TableState.WaitForMasterResync)
 			{
 				table.SetTableState(BuilderTable.TableState.ReceivingMasterResync);
@@ -405,1540 +464,952 @@ namespace GorillaTagScripts
 			{
 				table.SetTableState(BuilderTable.TableState.ReceivingInitialBuild);
 			}
-			this.localClientTableInit.Reset();
-			BuilderTableNetworking.PlayerTableInitState playerTableInitState = this.localClientTableInit;
+			localClientTableInit.Reset();
+			PlayerTableInitState playerTableInitState = localClientTableInit;
 			playerTableInitState.player = PhotonNetwork.LocalPlayer;
 			playerTableInitState.totalSerializedBytes = totalBytes;
 			table.ClearQueuedCommands();
 		}
+	}
 
-		private void SendNextTableData(Player requestingPlayer)
+	private void SendNextTableData(Player requestingPlayer)
+	{
+		PlayerTableInitState playerTableInit = GetPlayerTableInit(requestingPlayer);
+		if (playerTableInit == null)
 		{
-			BuilderTableNetworking.PlayerTableInitState playerTableInit = this.GetPlayerTableInit(requestingPlayer);
-			if (playerTableInit == null)
-			{
-				Debug.LogErrorFormat("No Table init found for player {0}", new object[]
-				{
-					requestingPlayer.ActorNumber
-				});
-				return;
-			}
-			int num = Mathf.Min(1000, playerTableInit.totalSerializedBytes - playerTableInit.numSerializedBytes);
-			if (num <= 0)
-			{
-				return;
-			}
+			Debug.LogErrorFormat("No Table init found for player {0}", requestingPlayer.ActorNumber);
+			return;
+		}
+		int num = Mathf.Min(1000, playerTableInit.totalSerializedBytes - playerTableInit.numSerializedBytes);
+		if (num > 0)
+		{
 			Array.Copy(playerTableInit.serializedTableState, playerTableInit.numSerializedBytes, playerTableInit.chunk, 0, num);
 			playerTableInit.numSerializedBytes += num;
-			this.tablePhotonView.RPC("SendTableDataRPC", requestingPlayer, new object[]
-			{
-				num,
-				playerTableInit.chunk
-			});
+			tablePhotonView.RPC("SendTableDataRPC", requestingPlayer, num, playerTableInit.chunk);
 		}
+	}
 
-		[PunRPC]
-		public void SendTableDataRPC(int numBytes, byte[] bytes, PhotonMessageInfo info)
+	[PunRPC]
+	public void SendTableDataRPC(int numBytes, byte[] bytes, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "SendTableDataRPC");
+		if (!info.Sender.IsMasterClient || localClientTableInit.player == null)
 		{
-			MonkeAgent.IncrementRPCCall(info, "SendTableDataRPC");
-			if (!info.Sender.IsMasterClient)
+			return;
+		}
+		if (numBytes <= 0 || numBytes > 1000 || numBytes > bytes.Length)
+		{
+			Debug.LogErrorFormat("Builder Table Send Data numBytes is too large {0}", numBytes);
+		}
+		else
+		{
+			if (bytes.Length > 1000 || PhotonNetwork.IsMasterClient || !ValidateCallLimits(RPC.TableData, info))
 			{
 				return;
 			}
-			if (this.localClientTableInit.player == null)
-			{
-				return;
-			}
-			if (numBytes <= 0 || numBytes > 1000 || numBytes > bytes.Length)
-			{
-				Debug.LogErrorFormat("Builder Table Send Data numBytes is too large {0}", new object[]
-				{
-					numBytes
-				});
-				return;
-			}
-			if (bytes.Length > 1000)
-			{
-				return;
-			}
-			if (PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.TableData, info))
-			{
-				return;
-			}
-			BuilderTableNetworking.PlayerTableInitState playerTableInitState = this.localClientTableInit;
+			PlayerTableInitState playerTableInitState = localClientTableInit;
 			if (playerTableInitState.numSerializedBytes + numBytes > 1048576)
 			{
-				Debug.LogErrorFormat("Builder Table serialized bytes is larger than buffer {0}", new object[]
-				{
-					playerTableInitState.numSerializedBytes + numBytes
-				});
+				Debug.LogErrorFormat("Builder Table serialized bytes is larger than buffer {0}", playerTableInitState.numSerializedBytes + numBytes);
 				return;
 			}
 			Array.Copy(bytes, 0, playerTableInitState.serializedTableState, playerTableInitState.numSerializedBytes, numBytes);
 			playerTableInitState.numSerializedBytes += numBytes;
 			if (playerTableInitState.numSerializedBytes >= playerTableInitState.totalSerializedBytes)
 			{
-				this.GetTable().SetTableState(BuilderTable.TableState.InitialBuild);
+				GetTable().SetTableState(BuilderTable.TableState.InitialBuild);
 			}
 		}
+	}
 
-		private bool DoesTableInitExist(Player player)
+	private bool DoesTableInitExist(Player player)
+	{
+		for (int i = 0; i < masterClientTableInit.Count; i++)
 		{
-			for (int i = 0; i < this.masterClientTableInit.Count; i++)
+			if (masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
 			{
-				if (this.masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private BuilderTableNetworking.PlayerTableInitState CreatePlayerTableInit(Player player)
-		{
-			for (int i = 0; i < this.masterClientTableInit.Count; i++)
-			{
-				if (this.masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
-				{
-					this.masterClientTableInit[i].Reset();
-					return this.masterClientTableInit[i];
-				}
-			}
-			BuilderTableNetworking.PlayerTableInitState playerTableInitState = new BuilderTableNetworking.PlayerTableInitState();
-			playerTableInitState.player = player;
-			this.masterClientTableInit.Add(playerTableInitState);
-			return playerTableInitState;
-		}
-
-		public void ResetSerializedTableForAllPlayers()
-		{
-			for (int i = 0; i < this.masterClientTableInit.Count; i++)
-			{
-				this.masterClientTableInit[i].waitForInitTimeRemaining = 1f;
-				this.masterClientTableInit[i].sendNextChunkTimeRemaining = -1f;
-				this.masterClientTableInit[i].numSerializedBytes = 0;
-				this.masterClientTableInit[i].totalSerializedBytes = 0;
+				return true;
 			}
 		}
+		return false;
+	}
 
-		private void CreateSerializedTableForNewPlayerInit(Player newPlayer)
+	private PlayerTableInitState CreatePlayerTableInit(Player player)
+	{
+		for (int i = 0; i < masterClientTableInit.Count; i++)
 		{
-			if (this.DoesTableInitExist(newPlayer))
+			if (masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
 			{
-				return;
+				masterClientTableInit[i].Reset();
+				return masterClientTableInit[i];
 			}
-			BuilderTableNetworking.PlayerTableInitState playerTableInitState = this.CreatePlayerTableInit(newPlayer);
+		}
+		PlayerTableInitState playerTableInitState = new PlayerTableInitState();
+		playerTableInitState.player = player;
+		masterClientTableInit.Add(playerTableInitState);
+		return playerTableInitState;
+	}
+
+	public void ResetSerializedTableForAllPlayers()
+	{
+		for (int i = 0; i < masterClientTableInit.Count; i++)
+		{
+			masterClientTableInit[i].waitForInitTimeRemaining = 1f;
+			masterClientTableInit[i].sendNextChunkTimeRemaining = -1f;
+			masterClientTableInit[i].numSerializedBytes = 0;
+			masterClientTableInit[i].totalSerializedBytes = 0;
+		}
+	}
+
+	private void CreateSerializedTableForNewPlayerInit(Player newPlayer)
+	{
+		if (!DoesTableInitExist(newPlayer))
+		{
+			PlayerTableInitState playerTableInitState = CreatePlayerTableInit(newPlayer);
 			playerTableInitState.waitForInitTimeRemaining = 1f;
 			playerTableInitState.sendNextChunkTimeRemaining = -1f;
 		}
+	}
 
-		private void DestroyPlayerTableInit(Player player)
+	private void DestroyPlayerTableInit(Player player)
+	{
+		for (int i = 0; i < masterClientTableInit.Count; i++)
 		{
-			for (int i = 0; i < this.masterClientTableInit.Count; i++)
+			if (masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
 			{
-				if (this.masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
-				{
-					this.masterClientTableInit.RemoveAt(i);
-					i--;
-				}
+				masterClientTableInit.RemoveAt(i);
+				i--;
 			}
 		}
+	}
 
-		private BuilderTableNetworking.PlayerTableInitState GetPlayerTableInit(Player player)
+	private PlayerTableInitState GetPlayerTableInit(Player player)
+	{
+		for (int i = 0; i < masterClientTableInit.Count; i++)
 		{
-			for (int i = 0; i < this.masterClientTableInit.Count; i++)
+			if (masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
 			{
-				if (this.masterClientTableInit[i].player.ActorNumber == player.ActorNumber)
-				{
-					return this.masterClientTableInit[i];
-				}
+				return masterClientTableInit[i];
 			}
-			return null;
 		}
+		return null;
+	}
 
-		private bool ValidateMasterClientIsReady(Player player)
+	private bool ValidateMasterClientIsReady(Player player)
+	{
+		if (!PhotonNetwork.IsMasterClient)
 		{
-			if (!PhotonNetwork.IsMasterClient)
+			return false;
+		}
+		if (player != null && !player.IsMasterClient)
+		{
+			PlayerTableInitState playerTableInit = GetPlayerTableInit(player);
+			if (playerTableInit != null && playerTableInit.numSerializedBytes < playerTableInit.totalSerializedBytes)
 			{
 				return false;
 			}
-			if (player != null && !player.IsMasterClient)
-			{
-				BuilderTableNetworking.PlayerTableInitState playerTableInit = this.GetPlayerTableInit(player);
-				if (playerTableInit != null && playerTableInit.numSerializedBytes < playerTableInit.totalSerializedBytes)
-				{
-					return false;
-				}
-			}
-			return this.GetTable().GetTableState() == BuilderTable.TableState.Ready;
 		}
-
-		private bool ValidateCallLimits(BuilderTableNetworking.RPC rpcCall, PhotonMessageInfo info)
+		if (GetTable().GetTableState() != BuilderTable.TableState.Ready)
 		{
-			return rpcCall >= BuilderTableNetworking.RPC.PlayerEnterMaster && rpcCall < BuilderTableNetworking.RPC.Count && this.callLimiters[(int)rpcCall].CheckCallTime(Time.time);
+			return false;
 		}
+		return true;
+	}
 
-		[PunRPC]
-		public void RequestFailedRPC(int localCommandId, PhotonMessageInfo info)
+	private bool ValidateCallLimits(RPC rpcCall, PhotonMessageInfo info)
+	{
+		if (rpcCall < RPC.PlayerEnterMaster || rpcCall >= RPC.Count)
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestFailedRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.RequestFailed, info))
-			{
-				return;
-			}
-			this.GetTable().RollbackFailedCommand(localCommandId);
+			return false;
 		}
+		return callLimiters[(int)rpcCall].CheckCallTime(Time.time);
+	}
 
-		public void RequestCreatePiece(int newPieceType, Vector3 position, Quaternion rotation, int materialType)
+	[PunRPC]
+	public void RequestFailedRPC(int localCommandId, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestFailedRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.RequestFailed, info))
 		{
+			GetTable().RollbackFailedCommand(localCommandId);
 		}
+	}
 
-		public void RequestCreatePieceRPC(int newPieceType, long packedPosition, int packedRotation, int materialType, PhotonMessageInfo info)
+	public void RequestCreatePiece(int newPieceType, Vector3 position, Quaternion rotation, int materialType)
+	{
+	}
+
+	public void RequestCreatePieceRPC(int newPieceType, long packedPosition, int packedRotation, int materialType, PhotonMessageInfo info)
+	{
+	}
+
+	public void PieceCreatedRPC(int pieceType, int pieceId, long packedPosition, int packedRotation, int materialType, Player creatingPlayer, PhotonMessageInfo info)
+	{
+	}
+
+	public void CreateShelfPiece(int pieceType, Vector3 position, Quaternion rotation, int materialType, BuilderPiece.State state, int shelfID)
+	{
+		if (!PhotonNetwork.IsMasterClient)
 		{
+			return;
 		}
-
-		public void PieceCreatedRPC(int pieceType, int pieceId, long packedPosition, int packedRotation, int materialType, Player creatingPlayer, PhotonMessageInfo info)
+		BuilderTable table = GetTable();
+		if (!table.isTableMutable || table.GetTableState() != BuilderTable.TableState.Ready)
 		{
+			return;
 		}
-
-		public void CreateShelfPiece(int pieceType, Vector3 position, Quaternion rotation, int materialType, BuilderPiece.State state, int shelfID)
+		BuilderPiece piecePrefab = table.GetPiecePrefab(pieceType);
+		if (!table.HasEnoughResources(piecePrefab))
 		{
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (table.GetTableState() != BuilderTable.TableState.Ready)
-			{
-				return;
-			}
-			BuilderPiece piecePrefab = table.GetPiecePrefab(pieceType);
-			if (!table.HasEnoughResources(piecePrefab))
-			{
-				Debug.Log("Not Enough Resources");
-				return;
-			}
-			if (state != BuilderPiece.State.OnShelf)
-			{
-				if (state != BuilderPiece.State.OnConveyor)
-				{
-					return;
-				}
-				if (shelfID < 0 || shelfID >= table.conveyors.Count)
-				{
-					return;
-				}
-			}
-			else if (shelfID < 0 || shelfID >= table.dispenserShelves.Count)
-			{
-				return;
-			}
-			int num = table.CreatePieceId();
-			long num2 = BitPackUtils.PackWorldPosForNetwork(position);
-			int num3 = BitPackUtils.PackQuaternionForNetwork(rotation);
-			base.photonView.RPC("PieceCreatedByShelfRPC", RpcTarget.All, new object[]
-			{
-				pieceType,
-				num,
-				num2,
-				num3,
-				materialType,
-				(byte)state,
-				shelfID,
-				PhotonNetwork.LocalPlayer
-			});
+			Debug.Log("Not Enough Resources");
+			return;
 		}
-
-		[PunRPC]
-		public void PieceCreatedByShelfRPC(int pieceType, int pieceId, long packedPosition, int packedRotation, int materialType, byte state, int shelfID, Player creatingPlayer, PhotonMessageInfo info)
+		switch (state)
 		{
-			if (!info.Sender.IsMasterClient)
+		default:
+			return;
+		case BuilderPiece.State.OnShelf:
+			if (shelfID < 0 || shelfID >= table.dispenserShelves.Count)
 			{
 				return;
 			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
+			break;
+		case BuilderPiece.State.OnConveyor:
+			if (shelfID < 0 || shelfID >= table.conveyors.Count)
 			{
 				return;
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.CreateShelfPieceMaster, info))
+			break;
+		}
+		int num = table.CreatePieceId();
+		long num2 = BitPackUtils.PackWorldPosForNetwork(position);
+		int num3 = BitPackUtils.PackQuaternionForNetwork(rotation);
+		base.photonView.RPC("PieceCreatedByShelfRPC", RpcTarget.All, pieceType, num, num2, num3, materialType, (byte)state, shelfID, PhotonNetwork.LocalPlayer);
+	}
+
+	[PunRPC]
+	public void PieceCreatedByShelfRPC(int pieceType, int pieceId, long packedPosition, int packedRotation, int materialType, byte state, int shelfID, Player creatingPlayer, PhotonMessageInfo info)
+	{
+		if (!info.Sender.IsMasterClient)
+		{
+			return;
+		}
+		BuilderTable table = GetTable();
+		if ((!table.IsInBuilderZone() && !info.Sender.IsLocal) || !ValidateCallLimits(RPC.CreateShelfPieceMaster, info) || !table.isTableMutable)
+		{
+			return;
+		}
+		Vector3 position = BitPackUtils.UnpackWorldPosFromNetwork(packedPosition);
+		Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(packedRotation);
+		if (table.ValidatePieceWorldTransform(position, rotation))
+		{
+			switch ((BuilderPiece.State)state)
 			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			Vector3 position = BitPackUtils.UnpackWorldPosFromNetwork(packedPosition);
-			Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(packedRotation);
-			if (!table.ValidatePieceWorldTransform(position, rotation))
-			{
-				return;
-			}
-			if (state == 4)
-			{
+			case BuilderPiece.State.OnShelf:
 				table.CreateDispenserShelfPiece(pieceType, pieceId, position, rotation, materialType, shelfID);
-				return;
+				break;
+			case BuilderPiece.State.OnConveyor:
+				table.CreateConveyorPiece(pieceType, pieceId, position, rotation, materialType, shelfID, info.SentServerTimestamp);
+				break;
 			}
-			if (state != 7)
-			{
-				return;
-			}
-			table.CreateConveyorPiece(pieceType, pieceId, position, rotation, materialType, shelfID, info.SentServerTimestamp);
 		}
+	}
 
-		public void RequestRecyclePiece(int pieceId, Vector3 position, Quaternion rotation, bool playFX, int recyclerID)
+	public void RequestRecyclePiece(int pieceId, Vector3 position, Quaternion rotation, bool playFX, int recyclerID)
+	{
+		if (PhotonNetwork.IsMasterClient)
 		{
-			if (!PhotonNetwork.IsMasterClient)
+			BuilderTable table = GetTable();
+			if (table.GetTableState() == BuilderTable.TableState.Ready && table.isTableMutable && position.IsValid(10000f) && rotation.IsValid() && recyclerID <= 32767 && recyclerID >= -1)
 			{
-				return;
+				long num = BitPackUtils.PackWorldPosForNetwork(position);
+				int num2 = BitPackUtils.PackQuaternionForNetwork(rotation);
+				base.photonView.RPC("PieceDestroyedRPC", RpcTarget.All, pieceId, num, num2, playFX, (short)recyclerID);
 			}
-			BuilderTable table = this.GetTable();
-			if (table.GetTableState() != BuilderTable.TableState.Ready)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			float num = 10000f;
-			if (!position.IsValid(num) || !rotation.IsValid())
-			{
-				return;
-			}
-			if (recyclerID > 32767 || recyclerID < -1)
-			{
-				return;
-			}
-			long num2 = BitPackUtils.PackWorldPosForNetwork(position);
-			int num3 = BitPackUtils.PackQuaternionForNetwork(rotation);
-			base.photonView.RPC("PieceDestroyedRPC", RpcTarget.All, new object[]
-			{
-				pieceId,
-				num2,
-				num3,
-				playFX,
-				(short)recyclerID
-			});
 		}
+	}
 
-		[PunRPC]
-		public void PieceDestroyedRPC(int pieceId, long packedPosition, int packedRotation, bool playFX, short recyclerID, PhotonMessageInfo info)
+	[PunRPC]
+	public void PieceDestroyedRPC(int pieceId, long packedPosition, int packedRotation, bool playFX, short recyclerID, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PieceDestroyedRPC");
+		if (!info.Sender.IsMasterClient || !ValidateCallLimits(RPC.RecyclePieceMaster, info))
 		{
-			MonkeAgent.IncrementRPCCall(info, "PieceDestroyedRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.RecyclePieceMaster, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			Vector3 position = BitPackUtils.UnpackWorldPosFromNetwork(packedPosition);
-			Quaternion rotation = BitPackUtils.UnpackQuaternionFromNetwork(packedRotation);
-			float num = 10000f;
-			if (!position.IsValid(num) || !rotation.IsValid())
-			{
-				return;
-			}
-			table.RecyclePiece(pieceId, position, rotation, playFX, (int)recyclerID, info.Sender);
+			return;
 		}
-
-		public void RequestPlacePiece(BuilderPiece piece, BuilderPiece attachPiece, sbyte bumpOffsetX, sbyte bumpOffsetZ, byte twist, BuilderPiece parentPiece, int attachIndex, int parentAttachIndex)
+		BuilderTable table = GetTable();
+		if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable)
 		{
-			if (piece == null)
+			Vector3 v = BitPackUtils.UnpackWorldPosFromNetwork(packedPosition);
+			Quaternion q = BitPackUtils.UnpackQuaternionFromNetwork(packedRotation);
+			if (v.IsValid(10000f) && q.IsValid())
 			{
-				return;
+				table.RecyclePiece(pieceId, v, q, playFX, recyclerID, info.Sender);
 			}
-			int pieceId = piece.pieceId;
-			int num = (parentPiece != null) ? parentPiece.pieceId : -1;
-			int num2 = (attachPiece != null) ? attachPiece.pieceId : -1;
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (!table.ValidatePlacePieceParams(pieceId, num2, bumpOffsetX, bumpOffsetZ, twist, num, attachIndex, parentAttachIndex, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
-			{
-				return;
-			}
-			int num3 = this.CreateLocalCommandId();
+		}
+	}
+
+	public void RequestPlacePiece(BuilderPiece piece, BuilderPiece attachPiece, sbyte bumpOffsetX, sbyte bumpOffsetZ, byte twist, BuilderPiece parentPiece, int attachIndex, int parentAttachIndex)
+	{
+		if (piece == null)
+		{
+			return;
+		}
+		int pieceId = piece.pieceId;
+		int num = ((parentPiece != null) ? parentPiece.pieceId : (-1));
+		int num2 = ((attachPiece != null) ? attachPiece.pieceId : (-1));
+		BuilderTable table = GetTable();
+		if (table.isTableMutable && table.ValidatePlacePieceParams(pieceId, num2, bumpOffsetX, bumpOffsetZ, twist, num, attachIndex, parentAttachIndex, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
+		{
+			int num3 = CreateLocalCommandId();
 			attachPiece.requestedParentPiece = parentPiece;
 			table.UpdatePieceData(attachPiece);
-			table.PlacePiece(num3, pieceId, num2, bumpOffsetX, bumpOffsetZ, twist, num, attachIndex, parentAttachIndex, NetPlayer.Get(PhotonNetwork.LocalPlayer), PhotonNetwork.ServerTimestamp, true);
+			table.PlacePiece(num3, pieceId, num2, bumpOffsetX, bumpOffsetZ, twist, num, attachIndex, parentAttachIndex, NetPlayer.Get(PhotonNetwork.LocalPlayer), PhotonNetwork.ServerTimestamp, force: true);
 			int num4 = BuilderTable.PackPiecePlacement(twist, bumpOffsetX, bumpOffsetZ);
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestPlacePieceRPC", RpcTarget.MasterClient, new object[]
-				{
-					num3,
-					pieceId,
-					num2,
-					num4,
-					num,
-					attachIndex,
-					parentAttachIndex,
-					PhotonNetwork.LocalPlayer
-				});
+				base.photonView.RPC("RequestPlacePieceRPC", RpcTarget.MasterClient, num3, pieceId, num2, num4, num, attachIndex, parentAttachIndex, PhotonNetwork.LocalPlayer);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void RequestPlacePieceRPC(int localCommandId, int pieceId, int attachPieceId, int placement, int parentPieceId, int attachIndex, int parentAttachIndex, Player placedByPlayer, PhotonMessageInfo info)
+	[PunRPC]
+	public void RequestPlacePieceRPC(int localCommandId, int pieceId, int attachPieceId, int placement, int parentPieceId, int attachIndex, int parentAttachIndex, Player placedByPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestPlacePieceRPC");
+		if (!PhotonNetwork.IsMasterClient || !ValidateMasterClientIsReady(info.Sender) || !ValidateCallLimits(RPC.PlacePieceMaster, info) || placedByPlayer == null || !placedByPlayer.Equals(info.Sender))
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestPlacePieceRPC");
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateMasterClientIsReady(info.Sender))
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.PlacePieceMaster, info) || placedByPlayer == null || !placedByPlayer.Equals(info.Sender))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			bool isMasterClient = info.Sender.IsMasterClient;
-			byte twist;
-			sbyte bumpOffsetX;
-			sbyte bumpOffsetZ;
-			BuilderTable.UnpackPiecePlacement(placement, out twist, out bumpOffsetX, out bumpOffsetZ);
-			bool flag = isMasterClient || table.ValidatePlacePieceParams(pieceId, attachPieceId, bumpOffsetX, bumpOffsetZ, twist, parentPieceId, attachIndex, parentAttachIndex, NetPlayer.Get(placedByPlayer));
-			if (flag)
-			{
-				flag &= (isMasterClient || table.ValidatePlacePieceState(pieceId, attachPieceId, bumpOffsetX, bumpOffsetZ, twist, parentPieceId, attachIndex, parentAttachIndex, placedByPlayer));
-			}
-			if (flag)
-			{
-				BuilderPiece piece = table.GetPiece(parentPieceId);
-				BuilderPiecePrivatePlot builderPiecePrivatePlot;
-				if (piece != null && piece.TryGetPlotComponent(out builderPiecePrivatePlot) && !builderPiecePrivatePlot.IsPlotClaimed())
-				{
-					base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, new object[]
-					{
-						parentPieceId,
-						placedByPlayer,
-						true
-					});
-				}
-				base.photonView.RPC("PiecePlacedRPC", RpcTarget.All, new object[]
-				{
-					localCommandId,
-					pieceId,
-					attachPieceId,
-					placement,
-					parentPieceId,
-					attachIndex,
-					parentAttachIndex,
-					placedByPlayer,
-					info.SentServerTimestamp
-				});
-				return;
-			}
-			base.photonView.RPC("RequestFailedRPC", info.Sender, new object[]
-			{
-				localCommandId
-			});
+			return;
 		}
-
-		[PunRPC]
-		public void PiecePlacedRPC(int localCommandId, int pieceId, int attachPieceId, int placement, int parentPieceId, int attachIndex, int parentAttachIndex, Player placedByPlayer, int timeStamp, PhotonMessageInfo info)
+		BuilderTable table = GetTable();
+		if ((!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone()) || !table.isTableMutable)
 		{
-			MonkeAgent.IncrementRPCCall(info, "PiecePlacedRPC");
-			if (!info.Sender.IsMasterClient)
+			return;
+		}
+		bool isMasterClient = info.Sender.IsMasterClient;
+		BuilderTable.UnpackPiecePlacement(placement, out var twist, out var xOffset, out var zOffset);
+		bool flag = isMasterClient || table.ValidatePlacePieceParams(pieceId, attachPieceId, xOffset, zOffset, twist, parentPieceId, attachIndex, parentAttachIndex, NetPlayer.Get(placedByPlayer));
+		if (flag)
+		{
+			flag &= isMasterClient || table.ValidatePlacePieceState(pieceId, attachPieceId, xOffset, zOffset, twist, parentPieceId, attachIndex, parentAttachIndex, placedByPlayer);
+		}
+		if (flag)
+		{
+			BuilderPiece piece = table.GetPiece(parentPieceId);
+			if (piece != null && piece.TryGetPlotComponent(out var plot) && !plot.IsPlotClaimed())
 			{
-				return;
+				base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, parentPieceId, placedByPlayer, true);
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.PlacePiece, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (placedByPlayer == null)
-			{
-				return;
-			}
-			if ((ulong)(PhotonNetwork.ServerTimestamp - info.SentServerTimestamp) > (ulong)((long)PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout) || (ulong)(info.SentServerTimestamp - timeStamp) > (ulong)((long)PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout))
+			base.photonView.RPC("PiecePlacedRPC", RpcTarget.All, localCommandId, pieceId, attachPieceId, placement, parentPieceId, attachIndex, parentAttachIndex, placedByPlayer, info.SentServerTimestamp);
+		}
+		else
+		{
+			base.photonView.RPC("RequestFailedRPC", info.Sender, localCommandId);
+		}
+	}
+
+	[PunRPC]
+	public void PiecePlacedRPC(int localCommandId, int pieceId, int attachPieceId, int placement, int parentPieceId, int attachIndex, int parentAttachIndex, Player placedByPlayer, int timeStamp, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PiecePlacedRPC");
+		if (!info.Sender.IsMasterClient || !ValidateCallLimits(RPC.PlacePiece, info))
+		{
+			return;
+		}
+		BuilderTable table = GetTable();
+		if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable && placedByPlayer != null)
+		{
+			if ((uint)(PhotonNetwork.ServerTimestamp - info.SentServerTimestamp) > PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout || (uint)(info.SentServerTimestamp - timeStamp) > PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout)
 			{
 				timeStamp = PhotonNetwork.ServerTimestamp;
 			}
-			byte twist;
-			sbyte bumpOffsetX;
-			sbyte bumpOffsetZ;
-			BuilderTable.UnpackPiecePlacement(placement, out twist, out bumpOffsetX, out bumpOffsetZ);
-			table.PlacePiece(localCommandId, pieceId, attachPieceId, bumpOffsetX, bumpOffsetZ, twist, parentPieceId, attachIndex, parentAttachIndex, NetPlayer.Get(placedByPlayer), timeStamp, false);
+			BuilderTable.UnpackPiecePlacement(placement, out var twist, out var xOffset, out var zOffset);
+			table.PlacePiece(localCommandId, pieceId, attachPieceId, xOffset, zOffset, twist, parentPieceId, attachIndex, parentAttachIndex, NetPlayer.Get(placedByPlayer), timeStamp, force: false);
 		}
+	}
 
-		public void RequestGrabPiece(BuilderPiece piece, bool isLefHand, Vector3 localPosition, Quaternion localRotation)
+	public void RequestGrabPiece(BuilderPiece piece, bool isLefHand, Vector3 localPosition, Quaternion localRotation)
+	{
+		if (piece == null)
 		{
-			if (piece == null)
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (!table.ValidateGrabPieceParams(piece.pieceId, isLefHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
-			{
-				return;
-			}
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (table.isTableMutable && table.ValidateGrabPieceParams(piece.pieceId, isLefHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
+		{
 			if (PhotonNetwork.IsMasterClient)
 			{
-				this.CheckForFreedPlot(piece.pieceId, PhotonNetwork.LocalPlayer);
+				CheckForFreedPlot(piece.pieceId, PhotonNetwork.LocalPlayer);
 			}
-			int num = this.CreateLocalCommandId();
-			table.GrabPiece(num, piece.pieceId, isLefHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer), true);
+			int num = CreateLocalCommandId();
+			table.GrabPiece(num, piece.pieceId, isLefHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer), force: true);
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
 				long num2 = BitPackUtils.PackHandPosRotForNetwork(localPosition, localRotation);
-				base.photonView.RPC("RequestGrabPieceRPC", RpcTarget.MasterClient, new object[]
-				{
-					num,
-					piece.pieceId,
-					isLefHand,
-					num2,
-					PhotonNetwork.LocalPlayer
-				});
+				base.photonView.RPC("RequestGrabPieceRPC", RpcTarget.MasterClient, num, piece.pieceId, isLefHand, num2, PhotonNetwork.LocalPlayer);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void RequestGrabPieceRPC(int localCommandId, int pieceId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
+	[PunRPC]
+	public void RequestGrabPieceRPC(int localCommandId, int pieceId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestGrabPieceRPC");
+		if (!PhotonNetwork.IsMasterClient || !ValidateMasterClientIsReady(info.Sender) || !ValidateCallLimits(RPC.GrabPieceMaster, info) || !grabbedByPlayer.Equals(info.Sender))
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestGrabPieceRPC");
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateMasterClientIsReady(info.Sender))
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.GrabPieceMaster, info) || !grabbedByPlayer.Equals(info.Sender))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			Vector3 localPosition;
-			Quaternion localRotation;
-			BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out localPosition, out localRotation);
-			if (table.GetTableState() == BuilderTable.TableState.Ready)
-			{
-				bool isMasterClient = info.Sender.IsMasterClient;
-				bool flag = isMasterClient || table.ValidateGrabPieceParams(pieceId, isLeftHand, localPosition, localRotation, NetPlayer.Get(grabbedByPlayer));
-				if (flag)
-				{
-					flag &= (isMasterClient || table.ValidateGrabPieceState(pieceId, isLeftHand, localPosition, localRotation, grabbedByPlayer));
-				}
-				if (flag)
-				{
-					if (!info.Sender.IsMasterClient)
-					{
-						this.CheckForFreedPlot(pieceId, grabbedByPlayer);
-					}
-					base.photonView.RPC("PieceGrabbedRPC", RpcTarget.All, new object[]
-					{
-						localCommandId,
-						pieceId,
-						isLeftHand,
-						packedPosRot,
-						grabbedByPlayer
-					});
-					return;
-				}
-				base.photonView.RPC("RequestFailedRPC", info.Sender, new object[]
-				{
-					localCommandId
-				});
-			}
+			return;
 		}
-
-		private void CheckForFreedPlot(int pieceId, Player grabbedByPlayer)
+		BuilderTable table = GetTable();
+		if ((!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone()) || !table.isTableMutable)
 		{
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			BuilderPiece piece = this.GetTable().GetPiece(pieceId);
-			if (piece != null && piece.parentPiece != null && piece.parentPiece.IsPrivatePlot() && piece.parentPiece.firstChildPiece.Equals(piece) && piece.nextSiblingPiece == null)
-			{
-				base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, new object[]
-				{
-					piece.parentPiece.pieceId,
-					grabbedByPlayer,
-					false
-				});
-			}
+			return;
 		}
-
-		[PunRPC]
-		public void PieceGrabbedRPC(int localCommandId, int pieceId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
+		BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out var localPos, out var handRot);
+		if (table.GetTableState() != BuilderTable.TableState.Ready)
 		{
-			MonkeAgent.IncrementRPCCall(info, "PieceGrabbedRPC");
+			return;
+		}
+		bool isMasterClient = info.Sender.IsMasterClient;
+		bool flag = isMasterClient || table.ValidateGrabPieceParams(pieceId, isLeftHand, localPos, handRot, NetPlayer.Get(grabbedByPlayer));
+		if (flag)
+		{
+			flag &= isMasterClient || table.ValidateGrabPieceState(pieceId, isLeftHand, localPos, handRot, grabbedByPlayer);
+		}
+		if (flag)
+		{
 			if (!info.Sender.IsMasterClient)
 			{
-				return;
+				CheckForFreedPlot(pieceId, grabbedByPlayer);
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.GrabPiece, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			Vector3 localPosition;
-			Quaternion localRotation;
-			BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out localPosition, out localRotation);
-			table.GrabPiece(localCommandId, pieceId, isLeftHand, localPosition, localRotation, NetPlayer.Get(grabbedByPlayer), false);
+			base.photonView.RPC("PieceGrabbedRPC", RpcTarget.All, localCommandId, pieceId, isLeftHand, packedPosRot, grabbedByPlayer);
 		}
-
-		public void RequestDropPiece(BuilderPiece piece, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity)
+		else
 		{
-			if (piece == null)
+			base.photonView.RPC("RequestFailedRPC", info.Sender, localCommandId);
+		}
+	}
+
+	private void CheckForFreedPlot(int pieceId, Player grabbedByPlayer)
+	{
+		if (PhotonNetwork.IsMasterClient)
+		{
+			BuilderPiece piece = GetTable().GetPiece(pieceId);
+			if (piece != null && piece.parentPiece != null && piece.parentPiece.IsPrivatePlot() && piece.parentPiece.firstChildPiece.Equals(piece) && piece.nextSiblingPiece == null)
 			{
-				return;
+				base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, piece.parentPiece.pieceId, grabbedByPlayer, false);
 			}
-			int pieceId = piece.pieceId;
-			float num = 10000f;
-			if (velocity.IsValid(num) && velocity.sqrMagnitude > BuilderTable.MAX_DROP_VELOCITY * BuilderTable.MAX_DROP_VELOCITY)
+		}
+	}
+
+	[PunRPC]
+	public void PieceGrabbedRPC(int localCommandId, int pieceId, bool isLeftHand, long packedPosRot, Player grabbedByPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PieceGrabbedRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.GrabPiece, info))
+		{
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable)
 			{
-				velocity = velocity.normalized * BuilderTable.MAX_DROP_VELOCITY;
+				BitPackUtils.UnpackHandPosRotFromNetwork(packedPosRot, out var localPos, out var handRot);
+				table.GrabPiece(localCommandId, pieceId, isLeftHand, localPos, handRot, NetPlayer.Get(grabbedByPlayer), force: false);
 			}
-			num = 10000f;
-			if (angVelocity.IsValid(num) && angVelocity.sqrMagnitude > BuilderTable.MAX_DROP_ANG_VELOCITY * BuilderTable.MAX_DROP_ANG_VELOCITY)
-			{
-				angVelocity = angVelocity.normalized * BuilderTable.MAX_DROP_ANG_VELOCITY;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (!table.ValidateDropPieceParams(pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
-			{
-				return;
-			}
-			int num2 = this.CreateLocalCommandId();
-			table.DropPiece(num2, pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer), true);
+		}
+	}
+
+	public void RequestDropPiece(BuilderPiece piece, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity)
+	{
+		if (piece == null)
+		{
+			return;
+		}
+		int pieceId = piece.pieceId;
+		if (velocity.IsValid(10000f) && velocity.sqrMagnitude > BuilderTable.MAX_DROP_VELOCITY * BuilderTable.MAX_DROP_VELOCITY)
+		{
+			velocity = velocity.normalized * BuilderTable.MAX_DROP_VELOCITY;
+		}
+		if (angVelocity.IsValid(10000f) && angVelocity.sqrMagnitude > BuilderTable.MAX_DROP_ANG_VELOCITY * BuilderTable.MAX_DROP_ANG_VELOCITY)
+		{
+			angVelocity = angVelocity.normalized * BuilderTable.MAX_DROP_ANG_VELOCITY;
+		}
+		BuilderTable table = GetTable();
+		if (table.isTableMutable && table.ValidateDropPieceParams(pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer)))
+		{
+			int num = CreateLocalCommandId();
+			table.DropPiece(num, pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer), force: true);
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestDropPieceRPC", RpcTarget.MasterClient, new object[]
-				{
-					num2,
-					pieceId,
-					position,
-					rotation,
-					velocity,
-					angVelocity,
-					PhotonNetwork.LocalPlayer
-				});
+				base.photonView.RPC("RequestDropPieceRPC", RpcTarget.MasterClient, num, pieceId, position, rotation, velocity, angVelocity, PhotonNetwork.LocalPlayer);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void RequestDropPieceRPC(int localCommandId, int pieceId, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player droppedByPlayer, PhotonMessageInfo info)
+	[PunRPC]
+	public void RequestDropPieceRPC(int localCommandId, int pieceId, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player droppedByPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestDropPieceRPC");
+		if (!PhotonNetwork.IsMasterClient || !ValidateMasterClientIsReady(info.Sender) || !ValidateCallLimits(RPC.DropPieceMaster, info) || !droppedByPlayer.Equals(info.Sender))
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestDropPieceRPC");
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateMasterClientIsReady(info.Sender))
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.DropPieceMaster, info) || !droppedByPlayer.Equals(info.Sender))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (table.GetTableState() != BuilderTable.TableState.Ready)
-			{
-				return;
-			}
+			return;
+		}
+		BuilderTable table = GetTable();
+		if ((RoomSystem.WasRoomPrivate || table.IsInBuilderZone()) && table.isTableMutable && table.GetTableState() == BuilderTable.TableState.Ready)
+		{
 			bool isMasterClient = info.Sender.IsMasterClient;
 			bool flag = isMasterClient || table.ValidateDropPieceParams(pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(droppedByPlayer));
 			if (flag)
 			{
-				flag &= (isMasterClient || table.ValidateDropPieceState(pieceId, position, rotation, velocity, angVelocity, droppedByPlayer));
+				flag &= isMasterClient || table.ValidateDropPieceState(pieceId, position, rotation, velocity, angVelocity, droppedByPlayer);
 			}
 			if (flag)
 			{
-				base.photonView.RPC("PieceDroppedRPC", RpcTarget.All, new object[]
-				{
-					localCommandId,
-					pieceId,
-					position,
-					rotation,
-					velocity,
-					angVelocity,
-					droppedByPlayer
-				});
-				return;
+				base.photonView.RPC("PieceDroppedRPC", RpcTarget.All, localCommandId, pieceId, position, rotation, velocity, angVelocity, droppedByPlayer);
 			}
-			base.photonView.RPC("RequestFailedRPC", info.Sender, new object[]
+			else
 			{
-				localCommandId
-			});
-		}
-
-		[PunRPC]
-		public void PieceDroppedRPC(int localCommandId, int pieceId, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player droppedByPlayer, PhotonMessageInfo info)
-		{
-			MonkeAgent.IncrementRPCCall(info, "PieceDroppedRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.DropPiece, info))
-			{
-				return;
-			}
-			float num = 10000f;
-			if (position.IsValid(num) && rotation.IsValid())
-			{
-				float num2 = 10000f;
-				if (velocity.IsValid(num2))
-				{
-					float num3 = 10000f;
-					if (angVelocity.IsValid(num3))
-					{
-						BuilderTable table = this.GetTable();
-						if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-						{
-							return;
-						}
-						if (!table.isTableMutable)
-						{
-							return;
-						}
-						table.DropPiece(localCommandId, pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(droppedByPlayer), false);
-						return;
-					}
-				}
+				base.photonView.RPC("RequestFailedRPC", info.Sender, localCommandId);
 			}
 		}
+	}
 
-		public void PieceEnteredDropZone(BuilderPiece piece, BuilderDropZone.DropType dropType, int dropZoneId)
+	[PunRPC]
+	public void PieceDroppedRPC(int localCommandId, int pieceId, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angVelocity, Player droppedByPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PieceDroppedRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.DropPiece, info) && position.IsValid(10000f) && rotation.IsValid() && velocity.IsValid(10000f) && angVelocity.IsValid(10000f))
 		{
-			if (!PhotonNetwork.IsMasterClient)
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable)
 			{
-				return;
+				table.DropPiece(localCommandId, pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(droppedByPlayer), force: false);
 			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
+		}
+	}
+
+	public void PieceEnteredDropZone(BuilderPiece piece, BuilderDropZone.DropType dropType, int dropZoneId)
+	{
+		if (!PhotonNetwork.IsMasterClient)
+		{
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (table.isTableMutable)
+		{
 			BuilderPiece rootPiece = piece.GetRootPiece();
-			if (!table.ValidateRepelPiece(rootPiece))
+			if (table.ValidateRepelPiece(rootPiece))
 			{
-				return;
+				long num = BitPackUtils.PackWorldPosForNetwork(rootPiece.transform.position);
+				int num2 = BitPackUtils.PackQuaternionForNetwork(rootPiece.transform.rotation);
+				base.photonView.RPC("PieceEnteredDropZoneRPC", RpcTarget.All, rootPiece.pieceId, num, num2, dropZoneId);
 			}
-			long num = BitPackUtils.PackWorldPosForNetwork(rootPiece.transform.position);
-			int num2 = BitPackUtils.PackQuaternionForNetwork(rootPiece.transform.rotation);
-			base.photonView.RPC("PieceEnteredDropZoneRPC", RpcTarget.All, new object[]
-			{
-				rootPiece.pieceId,
-				num,
-				num2,
-				dropZoneId
-			});
 		}
+	}
 
-		[PunRPC]
-		public void PieceEnteredDropZoneRPC(int pieceId, long position, int rotation, int dropZoneId, PhotonMessageInfo info)
+	[PunRPC]
+	public void PieceEnteredDropZoneRPC(int pieceId, long position, int rotation, int dropZoneId, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PieceEnteredDropZoneRPC");
+		if (!info.Sender.IsMasterClient || !ValidateCallLimits(RPC.PieceDropZone, info))
 		{
-			MonkeAgent.IncrementRPCCall(info, "PieceEnteredDropZoneRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.PieceDropZone, info))
-			{
-				return;
-			}
-			Vector3 worldPos = BitPackUtils.UnpackWorldPosFromNetwork(position);
-			float num = 10000f;
-			if (!worldPos.IsValid(num))
-			{
-				return;
-			}
-			Quaternion worldRot = BitPackUtils.UnpackQuaternionFromNetwork(rotation);
-			if (!worldRot.IsValid())
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			table.PieceEnteredDropZone(pieceId, worldPos, worldRot, dropZoneId);
+			return;
 		}
-
-		[PunRPC]
-		public void PlotClaimedRPC(int pieceId, Player claimingPlayer, bool claimed, PhotonMessageInfo info)
+		Vector3 v = BitPackUtils.UnpackWorldPosFromNetwork(position);
+		if (!v.IsValid(10000f))
 		{
-			MonkeAgent.IncrementRPCCall(info, "PlotClaimedRPC");
-			if (!info.Sender.IsMasterClient)
+			return;
+		}
+		Quaternion q = BitPackUtils.UnpackQuaternionFromNetwork(rotation);
+		if (q.IsValid())
+		{
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable)
 			{
-				return;
+				table.PieceEnteredDropZone(pieceId, v, q, dropZoneId);
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.PlotClaimedMaster, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
+		}
+	}
+
+	[PunRPC]
+	public void PlotClaimedRPC(int pieceId, Player claimingPlayer, bool claimed, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "PlotClaimedRPC");
+		if (!info.Sender.IsMasterClient || !ValidateCallLimits(RPC.PlotClaimedMaster, info))
+		{
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (table.isTableMutable)
+		{
 			if (claimed)
 			{
 				table.PlotClaimed(pieceId, claimingPlayer);
-				return;
 			}
-			table.PlotFreed(pieceId, claimingPlayer);
+			else
+			{
+				table.PlotFreed(pieceId, claimingPlayer);
+			}
 		}
+	}
 
-		public void RequestCreateArmShelfForPlayer(Player player)
+	public void RequestCreateArmShelfForPlayer(Player player)
+	{
+		if (!PhotonNetwork.IsMasterClient)
 		{
-			if (!PhotonNetwork.IsMasterClient)
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (!table.isTableMutable)
+		{
+			return;
+		}
+		if (table.GetTableState() != BuilderTable.TableState.Ready)
+		{
+			if (!armShelfRequests.Contains(player))
 			{
-				return;
+				armShelfRequests.Add(player);
 			}
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (table.GetTableState() != BuilderTable.TableState.Ready)
-			{
-				if (!this.armShelfRequests.Contains(player))
-				{
-					this.armShelfRequests.Add(player);
-				}
-				return;
-			}
-			if (table.playerToArmShelfLeft.ContainsKey(player.ActorNumber))
-			{
-				return;
-			}
+		}
+		else if (!table.playerToArmShelfLeft.ContainsKey(player.ActorNumber))
+		{
 			int num = table.CreatePieceId();
 			int num2 = table.CreatePieceId();
 			int staticHash = table.armShelfPieceType.name.GetStaticHash();
-			base.photonView.RPC("ArmShelfCreatedRPC", RpcTarget.All, new object[]
-			{
-				num,
-				num2,
-				staticHash,
-				player
-			});
+			base.photonView.RPC("ArmShelfCreatedRPC", RpcTarget.All, num, num2, staticHash, player);
 		}
+	}
 
-		[PunRPC]
-		public void ArmShelfCreatedRPC(int pieceIdLeft, int pieceIdRight, int pieceType, Player owningPlayer, PhotonMessageInfo info)
+	[PunRPC]
+	public void ArmShelfCreatedRPC(int pieceIdLeft, int pieceIdRight, int pieceType, Player owningPlayer, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "ArmShelfCreatedRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.ArmShelfCreated, info))
 		{
-			MonkeAgent.IncrementRPCCall(info, "ArmShelfCreatedRPC");
-			if (!info.Sender.IsMasterClient)
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable && pieceType == table.armShelfPieceType.name.GetStaticHash())
 			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.ArmShelfCreated, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (pieceType != table.armShelfPieceType.name.GetStaticHash())
-			{
-				return;
-			}
-			table.CreateArmShelf(pieceIdLeft, pieceIdRight, pieceType, owningPlayer);
-		}
-
-		public void RequestShelfSelection(int shelfID, int groupID, bool isConveyor)
-		{
-			BuilderTable table = this.GetTable();
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (isConveyor)
-			{
-				if (shelfID < 0 || shelfID >= table.conveyors.Count)
-				{
-					return;
-				}
-			}
-			else if (shelfID < 0 || shelfID >= table.dispenserShelves.Count)
-			{
-				return;
-			}
-			if (table.GetTableState() == BuilderTable.TableState.Ready)
-			{
-				base.photonView.RPC("RequestShelfSelectionRPC", RpcTarget.MasterClient, new object[]
-				{
-					shelfID,
-					groupID,
-					isConveyor
-				});
+				table.CreateArmShelf(pieceIdLeft, pieceIdRight, pieceType, owningPlayer);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void RequestShelfSelectionRPC(int shelfId, int setId, bool isConveyor, PhotonMessageInfo info)
+	public void RequestShelfSelection(int shelfID, int groupID, bool isConveyor)
+	{
+		BuilderTable table = GetTable();
+		if (!table.isTableMutable)
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestShelfSelectionRPC");
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.ShelfSelection, info))
-			{
-				return;
-			}
-			if (!this.ValidateMasterClientIsReady(info.Sender))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (!table.ValidateShelfSelectionParams(shelfId, setId, isConveyor, info.Sender))
-			{
-				return;
-			}
-			base.photonView.RPC("ShelfSelectionChangedRPC", RpcTarget.All, new object[]
-			{
-				shelfId,
-				setId,
-				isConveyor,
-				info.Sender
-			});
+			return;
 		}
-
-		[PunRPC]
-		public void ShelfSelectionChangedRPC(int shelfId, int setId, bool isConveyor, Player caller, PhotonMessageInfo info)
+		if (isConveyor)
 		{
-			MonkeAgent.IncrementRPCCall(info, "ShelfSelectionChangedRPC");
-			if (!info.Sender.IsMasterClient)
+			if (shelfID < 0 || shelfID >= table.conveyors.Count)
 			{
 				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.ShelfSelectionMaster, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (!table.isTableMutable)
-			{
-				return;
-			}
-			if (shelfId < 0 || ((!isConveyor || shelfId >= table.conveyors.Count) && (isConveyor || shelfId >= table.dispenserShelves.Count)))
-			{
-				return;
-			}
-			table.ChangeSetSelection(shelfId, setId, isConveyor);
-		}
-
-		public void RequestFunctionalPieceStateChange(int pieceID, byte state)
-		{
-			BuilderTable table = this.GetTable();
-			if (!table.ValidateFunctionalPieceState(pieceID, state, NetworkSystem.Instance.LocalPlayer))
-			{
-				return;
-			}
-			if (table.GetTableState() == BuilderTable.TableState.Ready)
-			{
-				base.photonView.RPC("RequestFunctionalPieceStateChangeRPC", RpcTarget.MasterClient, new object[]
-				{
-					pieceID,
-					state
-				});
 			}
 		}
-
-		[PunRPC]
-		public void RequestFunctionalPieceStateChangeRPC(int pieceID, byte state, PhotonMessageInfo info)
+		else if (shelfID < 0 || shelfID >= table.dispenserShelves.Count)
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestFunctionalPieceStateChangeRPC");
-			if (!PhotonNetwork.IsMasterClient)
+			return;
+		}
+		if (table.GetTableState() == BuilderTable.TableState.Ready)
+		{
+			base.photonView.RPC("RequestShelfSelectionRPC", RpcTarget.MasterClient, shelfID, groupID, isConveyor);
+		}
+	}
+
+	[PunRPC]
+	public void RequestShelfSelectionRPC(int shelfId, int setId, bool isConveyor, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestShelfSelectionRPC");
+		if (PhotonNetwork.IsMasterClient && ValidateCallLimits(RPC.ShelfSelection, info) && ValidateMasterClientIsReady(info.Sender))
+		{
+			BuilderTable table = GetTable();
+			if ((RoomSystem.WasRoomPrivate || table.IsInBuilderZone()) && table.isTableMutable && table.ValidateShelfSelectionParams(shelfId, setId, isConveyor, info.Sender))
 			{
-				return;
+				base.photonView.RPC("ShelfSelectionChangedRPC", RpcTarget.All, shelfId, setId, isConveyor, info.Sender);
 			}
-			if (!this.ValidateMasterClientIsReady(info.Sender))
+		}
+	}
+
+	[PunRPC]
+	public void ShelfSelectionChangedRPC(int shelfId, int setId, bool isConveyor, Player caller, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "ShelfSelectionChangedRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.ShelfSelectionMaster, info))
+		{
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.isTableMutable && shelfId >= 0 && ((isConveyor && shelfId < table.conveyors.Count) || (!isConveyor && shelfId < table.dispenserShelves.Count)))
 			{
-				return;
+				table.ChangeSetSelection(shelfId, setId, isConveyor);
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.SetFunctionalState, info))
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (table.GetTableState() != BuilderTable.TableState.Ready)
-			{
-				return;
-			}
-			if (table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(info.Sender)))
+		}
+	}
+
+	public void RequestFunctionalPieceStateChange(int pieceID, byte state)
+	{
+		BuilderTable table = GetTable();
+		if (table.ValidateFunctionalPieceState(pieceID, state, NetworkSystem.Instance.LocalPlayer) && table.GetTableState() == BuilderTable.TableState.Ready)
+		{
+			base.photonView.RPC("RequestFunctionalPieceStateChangeRPC", RpcTarget.MasterClient, pieceID, state);
+		}
+	}
+
+	[PunRPC]
+	public void RequestFunctionalPieceStateChangeRPC(int pieceID, byte state, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestFunctionalPieceStateChangeRPC");
+		if (PhotonNetwork.IsMasterClient && ValidateMasterClientIsReady(info.Sender) && ValidateCallLimits(RPC.SetFunctionalState, info))
+		{
+			BuilderTable table = GetTable();
+			if ((RoomSystem.WasRoomPrivate || table.IsInBuilderZone()) && table.GetTableState() == BuilderTable.TableState.Ready && table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(info.Sender)))
 			{
 				table.OnFunctionalStateRequest(pieceID, state, NetPlayer.Get(info.Sender), info.SentServerTimestamp);
 			}
 		}
+	}
 
-		public void FunctionalPieceStateChangeMaster(int pieceID, byte state, Player instigator, int timeStamp)
+	public void FunctionalPieceStateChangeMaster(int pieceID, byte state, Player instigator, int timeStamp)
+	{
+		if (PhotonNetwork.IsMasterClient)
 		{
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
+			BuilderTable table = GetTable();
 			if (table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(instigator)) && state != table.GetPiece(pieceID).functionalPieceState)
 			{
-				base.photonView.RPC("FunctionalPieceStateChangeRPC", RpcTarget.All, new object[]
-				{
-					pieceID,
-					state,
-					instigator,
-					timeStamp
-				});
+				base.photonView.RPC("FunctionalPieceStateChangeRPC", RpcTarget.All, pieceID, state, instigator, timeStamp);
 			}
 		}
+	}
 
-		[PunRPC]
-		public void FunctionalPieceStateChangeRPC(int pieceID, byte state, Player caller, int timeStamp, PhotonMessageInfo info)
+	[PunRPC]
+	public void FunctionalPieceStateChangeRPC(int pieceID, byte state, Player caller, int timeStamp, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "FunctionalPieceStateChangeRPC");
+		if (info.Sender.IsMasterClient && ValidateCallLimits(RPC.SetFunctionalStateMaster, info) && caller != null)
 		{
-			MonkeAgent.IncrementRPCCall(info, "FunctionalPieceStateChangeRPC");
-			if (!info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.SetFunctionalStateMaster, info))
-			{
-				return;
-			}
-			if (caller == null)
-			{
-				return;
-			}
-			if ((ulong)(PhotonNetwork.ServerTimestamp - info.SentServerTimestamp) > (ulong)((long)PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout) || (ulong)(info.SentServerTimestamp - timeStamp) > (ulong)((long)PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout))
+			if ((uint)(PhotonNetwork.ServerTimestamp - info.SentServerTimestamp) > PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout || (uint)(info.SentServerTimestamp - timeStamp) > PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout)
 			{
 				timeStamp = PhotonNetwork.ServerTimestamp;
 			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(info.Sender)))
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(info.Sender)))
 			{
 				table.SetFunctionalPieceState(pieceID, state, NetPlayer.Get(caller), timeStamp);
 			}
 		}
+	}
 
-		public void RequestBlocksTerminalControl(bool locked)
+	public void RequestBlocksTerminalControl(bool locked)
+	{
+		BuilderTable table = GetTable();
+		if (!table.isTableMutable && !(table.linkedTerminal == null) && table.linkedTerminal.IsTerminalLocked != locked)
 		{
-			BuilderTable table = this.GetTable();
-			if (table.isTableMutable || table.linkedTerminal == null)
-			{
-				return;
-			}
-			if (table.linkedTerminal.IsTerminalLocked == locked)
-			{
-				return;
-			}
-			base.photonView.RPC("RequestBlocksTerminalControlRPC", RpcTarget.MasterClient, new object[]
-			{
-				locked
-			});
+			base.photonView.RPC("RequestBlocksTerminalControlRPC", RpcTarget.MasterClient, locked);
 		}
+	}
 
-		[PunRPC]
-		private void RequestBlocksTerminalControlRPC(bool lockedStatus, PhotonMessageInfo info)
+	[PunRPC]
+	private void RequestBlocksTerminalControlRPC(bool lockedStatus, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RequestBlocksTerminalControlRPC");
+		if (NetworkSystem.Instance.IsMasterClient && ValidateCallLimits(RPC.RequestTerminalControl, info) && info.Sender != null)
 		{
-			MonkeAgent.IncrementRPCCall(info, "RequestBlocksTerminalControlRPC");
-			if (!NetworkSystem.Instance.IsMasterClient)
+			BuilderTable table = GetTable();
+			if ((RoomSystem.WasRoomPrivate || table.IsInBuilderZone()) && !table.isTableMutable && !(table.linkedTerminal == null) && VRRigCache.Instance != null && VRRigCache.Instance.TryGetVrrig(info.Sender, out var playerRig) && !((table.linkedTerminal.transform.position - playerRig.Rig.bodyTransform.position).sqrMagnitude > 9f) && table.linkedTerminal.ValidateTerminalControlRequest(lockedStatus, info.Sender.ActorNumber))
 			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.RequestTerminalControl, info))
-			{
-				return;
-			}
-			if (info.Sender == null)
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!RoomSystem.WasRoomPrivate && !table.IsInBuilderZone())
-			{
-				return;
-			}
-			if (table.isTableMutable || table.linkedTerminal == null)
-			{
-				return;
-			}
-			RigContainer rigContainer;
-			if (!(VRRigCache.Instance != null) || !VRRigCache.Instance.TryGetVrrig(info.Sender, out rigContainer))
-			{
-				return;
-			}
-			if ((table.linkedTerminal.transform.position - rigContainer.Rig.bodyTransform.position).sqrMagnitude > 9f)
-			{
-				return;
-			}
-			if (table.linkedTerminal.ValidateTerminalControlRequest(lockedStatus, info.Sender.ActorNumber))
-			{
-				int num = lockedStatus ? info.Sender.ActorNumber : -2;
-				base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, new object[]
-				{
-					num
-				});
+				int num = (lockedStatus ? info.Sender.ActorNumber : (-2));
+				base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, num);
 			}
 		}
+	}
 
-		[PunRPC]
-		private void SetBlocksTerminalDriverRPC(int driver, PhotonMessageInfo info)
+	[PunRPC]
+	private void SetBlocksTerminalDriverRPC(int driver, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "SetBlocksTerminalDriverRPC");
+		if (info.Sender != null && info.Sender.IsMasterClient && (driver == -2 || NetworkSystem.Instance.GetPlayer(driver) != null) && ValidateCallLimits(RPC.SetTerminalDriver, info))
 		{
-			MonkeAgent.IncrementRPCCall(info, "SetBlocksTerminalDriverRPC");
+			BuilderTable table = GetTable();
+			if (!table.isTableMutable && !(table.linkedTerminal == null))
+			{
+				table.linkedTerminal.SetTerminalDriver(driver);
+			}
+		}
+	}
+
+	public void RequestLoadSharedBlocksMap(string mapID)
+	{
+		base.photonView.RPC("LoadSharedBlocksMapRPC", RpcTarget.MasterClient, mapID);
+	}
+
+	[PunRPC]
+	private void LoadSharedBlocksMapRPC(string mapID, PhotonMessageInfo info)
+	{
+		if (!NetworkSystem.Instance.IsMasterClient)
+		{
+			return;
+		}
+		MonkeAgent.IncrementRPCCall(info, "LoadSharedBlocksMapRPC");
+		if (!ValidateCallLimits(RPC.LoadSharedBlocksMap, info) || info.Sender == null || mapID.IsNullOrEmpty())
+		{
+			return;
+		}
+		BuilderTable table = GetTable();
+		if (table.isTableMutable || table.linkedTerminal == null)
+		{
+			return;
+		}
+		if (!table.linkedTerminal.ValidateLoadMapRequest(mapID, info.Sender.ActorNumber))
+		{
+			GTDev.LogWarning("SharedBlocks ValidateLoadMapRequest fail");
+			return;
+		}
+		BuilderTable.TableState tableState = table.GetTableState();
+		if (tableState == BuilderTable.TableState.Ready || tableState == BuilderTable.TableState.BadData)
+		{
+			table.SetPendingMap(mapID);
+			base.photonView.RPC("SharedTableEventRPC", RpcTarget.Others, (byte)0, mapID);
+			localClientTableInit.Reset();
+			table.OnMapCleared?.Invoke();
+			table.SetTableState(BuilderTable.TableState.WaitingForSharedMapLoad);
+			table.FindAndLoadSharedBlocksMap(mapID);
+		}
+		else
+		{
+			GTDev.LogWarning("SharedBlocks Invalid state " + tableState);
+			LoadSharedBlocksFailedMaster(mapID);
+		}
+	}
+
+	public void LoadSharedBlocksFailedMaster(string mapID)
+	{
+		if (NetworkSystem.Instance.IsMasterClient && mapID.Length <= 8)
+		{
+			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, (byte)1, mapID);
+		}
+	}
+
+	public void SharedBlocksOutOfBoundsMaster(string mapID)
+	{
+		if (NetworkSystem.Instance.IsMasterClient && mapID.Length <= 8)
+		{
+			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, (byte)2, mapID);
+		}
+	}
+
+	[PunRPC]
+	private void SharedTableEventRPC(byte eventType, string mapID, PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "SharedTableEventRPC");
+		if (eventType >= 3)
+		{
+			return;
+		}
+		if (!SharedBlocksManager.IsMapIDValid(mapID) && eventType != 1)
+		{
+			GTDev.LogWarning("BuilderTableNetworking SharedTableEventRPC Invalid Map ID");
+		}
+		else
+		{
 			if (info.Sender == null || !info.Sender.IsMasterClient)
 			{
 				return;
 			}
-			if (driver != -2 && NetworkSystem.Instance.GetPlayer(driver) == null)
+			if (!ValidateCallLimits(RPC.SharedTableEvent, info))
 			{
+				GTDev.LogError("SharedTableEventRPC Failed call limits");
 				return;
 			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.SetTerminalDriver, info))
+			BuilderTable table = GetTable();
+			if ((table.IsInBuilderZone() || info.Sender.IsLocal) && !table.isTableMutable)
 			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (table.isTableMutable || table.linkedTerminal == null)
-			{
-				return;
-			}
-			table.linkedTerminal.SetTerminalDriver(driver);
-		}
-
-		public void RequestLoadSharedBlocksMap(string mapID)
-		{
-			base.photonView.RPC("LoadSharedBlocksMapRPC", RpcTarget.MasterClient, new object[]
-			{
-				mapID
-			});
-		}
-
-		[PunRPC]
-		private void LoadSharedBlocksMapRPC(string mapID, PhotonMessageInfo info)
-		{
-			if (!NetworkSystem.Instance.IsMasterClient)
-			{
-				return;
-			}
-			MonkeAgent.IncrementRPCCall(info, "LoadSharedBlocksMapRPC");
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.LoadSharedBlocksMap, info))
-			{
-				return;
-			}
-			if (info.Sender == null || mapID.IsNullOrEmpty())
-			{
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (table.isTableMutable || table.linkedTerminal == null)
-			{
-				return;
-			}
-			if (!table.linkedTerminal.ValidateLoadMapRequest(mapID, info.Sender.ActorNumber))
-			{
-				GTDev.LogWarning<string>("SharedBlocks ValidateLoadMapRequest fail", null);
-				return;
-			}
-			BuilderTable.TableState tableState = table.GetTableState();
-			if (tableState == BuilderTable.TableState.Ready || tableState == BuilderTable.TableState.BadData)
-			{
-				table.SetPendingMap(mapID);
-				base.photonView.RPC("SharedTableEventRPC", RpcTarget.Others, new object[]
+				switch ((SharedTableEventTypes)eventType)
 				{
-					0,
-					mapID
-				});
-				this.localClientTableInit.Reset();
-				UnityEvent onMapCleared = table.OnMapCleared;
-				if (onMapCleared != null)
-				{
-					onMapCleared.Invoke();
-				}
-				table.SetTableState(BuilderTable.TableState.WaitingForSharedMapLoad);
-				table.FindAndLoadSharedBlocksMap(mapID);
-				return;
-			}
-			GTDev.LogWarning<string>("SharedBlocks Invalid state " + tableState.ToString(), null);
-			this.LoadSharedBlocksFailedMaster(mapID);
-		}
-
-		public void LoadSharedBlocksFailedMaster(string mapID)
-		{
-			if (!NetworkSystem.Instance.IsMasterClient)
-			{
-				return;
-			}
-			if (mapID.Length > 8)
-			{
-				return;
-			}
-			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, new object[]
-			{
-				1,
-				mapID
-			});
-		}
-
-		public void SharedBlocksOutOfBoundsMaster(string mapID)
-		{
-			if (!NetworkSystem.Instance.IsMasterClient)
-			{
-				return;
-			}
-			if (mapID.Length > 8)
-			{
-				return;
-			}
-			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, new object[]
-			{
-				2,
-				mapID
-			});
-		}
-
-		[PunRPC]
-		private void SharedTableEventRPC(byte eventType, string mapID, PhotonMessageInfo info)
-		{
-			MonkeAgent.IncrementRPCCall(info, "SharedTableEventRPC");
-			if (eventType >= 3)
-			{
-				return;
-			}
-			if (!SharedBlocksManager.IsMapIDValid(mapID) && eventType != 1)
-			{
-				GTDev.LogWarning<string>("BuilderTableNetworking SharedTableEventRPC Invalid Map ID", null);
-				return;
-			}
-			if (info.Sender == null || !info.Sender.IsMasterClient)
-			{
-				return;
-			}
-			if (!this.ValidateCallLimits(BuilderTableNetworking.RPC.SharedTableEvent, info))
-			{
-				GTDev.LogError<string>("SharedTableEventRPC Failed call limits", null);
-				return;
-			}
-			BuilderTable table = this.GetTable();
-			if (!table.IsInBuilderZone() && !info.Sender.IsLocal)
-			{
-				return;
-			}
-			if (table.isTableMutable)
-			{
-				return;
-			}
-			switch (eventType)
-			{
-			case 0:
-				this.OnSharedBlocksLoadStarted(mapID);
-				return;
-			case 1:
-				this.OnLoadSharedBlocksFailed(mapID);
-				return;
-			case 2:
-				this.OnSharedBlocksOutOfBounds(mapID);
-				return;
-			default:
-				return;
-			}
-		}
-
-		private void OnSharedBlocksLoadStarted(string mapID)
-		{
-			this.localClientTableInit.Reset();
-			BuilderTable table = this.GetTable();
-			if (table.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
-			{
-				table.ClearTable();
-				table.ClearQueuedCommands();
-				table.SetPendingMap(mapID);
-				table.SetTableState(BuilderTable.TableState.WaitingForInitalBuild);
-				this.PlayerEnterBuilder();
-			}
-		}
-
-		private void OnLoadSharedBlocksFailed(string mapID)
-		{
-			BuilderTable table = this.GetTable();
-			string pendingMap = table.GetPendingMap();
-			if (!pendingMap.IsNullOrEmpty() && !pendingMap.Equals(mapID))
-			{
-				GTDev.LogWarning<string>("BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected map ID " + mapID, null);
-			}
-			BuilderTable.TableState tableState = table.GetTableState();
-			if (!NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.WaitingForInitalBuild && tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.BadData)
-			{
-				GTDev.LogWarning<string>(string.Format("BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected table state {0}", tableState), null);
-				return;
-			}
-			if (NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitingForSharedMapLoad && tableState != BuilderTable.TableState.WaitForInitialBuildMaster && tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.BadData)
-			{
-				GTDev.LogWarning<string>(string.Format("BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected table state {0}", tableState), null);
-				return;
-			}
-			table.SetPendingMap(null);
-			if (table != null && !table.isTableMutable && table.linkedTerminal != null)
-			{
-				if (!SharedBlocksManager.IsMapIDValid(mapID))
-				{
-					UnityEvent<string> onMapLoadFailed = table.OnMapLoadFailed;
-					if (onMapLoadFailed == null)
-					{
-						return;
-					}
-					onMapLoadFailed.Invoke("BAD MAP ID");
-					return;
-				}
-				else
-				{
-					UnityEvent<string> onMapLoadFailed2 = table.OnMapLoadFailed;
-					if (onMapLoadFailed2 == null)
-					{
-						return;
-					}
-					onMapLoadFailed2.Invoke("LOAD FAILED");
+				case SharedTableEventTypes.LOAD_STARTED:
+					OnSharedBlocksLoadStarted(mapID);
+					break;
+				case SharedTableEventTypes.LOAD_FAILED:
+					OnLoadSharedBlocksFailed(mapID);
+					break;
+				case SharedTableEventTypes.OUT_OF_BOUNDS:
+					OnSharedBlocksOutOfBounds(mapID);
+					break;
 				}
 			}
 		}
+	}
 
-		private void OnSharedBlocksOutOfBounds(string mapID)
+	private void OnSharedBlocksLoadStarted(string mapID)
+	{
+		localClientTableInit.Reset();
+		BuilderTable table = GetTable();
+		if (table.GetTableState() != BuilderTable.TableState.WaitingForZoneAndRoom)
 		{
-			BuilderTable table = this.GetTable();
-			string pendingMap = table.GetPendingMap();
-			if (!pendingMap.IsNullOrEmpty() && !pendingMap.Equals(mapID))
+			table.ClearTable();
+			table.ClearQueuedCommands();
+			table.SetPendingMap(mapID);
+			table.SetTableState(BuilderTable.TableState.WaitingForInitalBuild);
+			PlayerEnterBuilder();
+		}
+	}
+
+	private void OnLoadSharedBlocksFailed(string mapID)
+	{
+		BuilderTable table = GetTable();
+		string pendingMap = table.GetPendingMap();
+		if (!pendingMap.IsNullOrEmpty() && !pendingMap.Equals(mapID))
+		{
+			GTDev.LogWarning("BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected map ID " + mapID);
+		}
+		BuilderTable.TableState tableState = table.GetTableState();
+		if (!NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.WaitingForInitalBuild && tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.BadData)
+		{
+			GTDev.LogWarning($"BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected table state {tableState}");
+			return;
+		}
+		if (NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitingForSharedMapLoad && tableState != BuilderTable.TableState.WaitForInitialBuildMaster && tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.BadData)
+		{
+			GTDev.LogWarning($"BuilderTableNetworking OnLoadSharedBlocksFailed Unexpected table state {tableState}");
+			return;
+		}
+		table.SetPendingMap(null);
+		if (table != null && !table.isTableMutable && table.linkedTerminal != null)
+		{
+			if (!SharedBlocksManager.IsMapIDValid(mapID))
 			{
-				GTDev.LogWarning<string>("BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected map ID " + mapID, null);
+				table.OnMapLoadFailed?.Invoke("BAD MAP ID");
 			}
-			BuilderTable.TableState tableState = table.GetTableState();
-			if (!NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.WaitingForInitalBuild)
+			else
 			{
-				GTDev.LogWarning<string>(string.Format("BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected table state {0}", tableState), null);
-				return;
-			}
-			if (NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForInitialBuildMaster && tableState != BuilderTable.TableState.BadData)
-			{
-				GTDev.LogWarning<string>(string.Format("BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected table state {0}", tableState), null);
-				return;
-			}
-			table.SetPendingMap(null);
-			if (table != null && !table.isTableMutable && table.linkedTerminal != null)
-			{
-				UnityEvent<string> onMapLoadFailed = table.OnMapLoadFailed;
-				if (onMapLoadFailed == null)
-				{
-					return;
-				}
-				onMapLoadFailed.Invoke("BLOCKS ARE OUT OF BOUNDS FOR SHARED BLOCKS ROOM");
+				table.OnMapLoadFailed?.Invoke("LOAD FAILED");
 			}
 		}
+	}
 
-		public void RequestPaintPiece(int pieceID, int materialType)
+	private void OnSharedBlocksOutOfBounds(string mapID)
+	{
+		BuilderTable table = GetTable();
+		string pendingMap = table.GetPendingMap();
+		if (!pendingMap.IsNullOrEmpty() && !pendingMap.Equals(mapID))
 		{
+			GTDev.LogWarning("BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected map ID " + mapID);
 		}
-
-		public PhotonView tablePhotonView;
-
-		private const int MAX_TABLE_BYTES = 1048576;
-
-		private const int MAX_TABLE_CHUNK_BYTES = 1000;
-
-		private const float DELAY_CLIENT_TABLE_CREATION_TIME = 1f;
-
-		private const float SEND_INIT_DATA_COOLDOWN = 0f;
-
-		private const int PIECE_SYNC_BYTES = 128;
-
-		private BuilderTable currTable;
-
-		private int nextLocalCommandId;
-
-		private List<BuilderTableNetworking.PlayerTableInitState> masterClientTableInit;
-
-		private List<BuilderTableNetworking.PlayerTableInitState> masterClientTableValidators;
-
-		private BuilderTableNetworking.PlayerTableInitState localClientTableInit;
-
-		private BuilderTableNetworking.PlayerTableInitState localValidationTable;
-
-		[HideInInspector]
-		public List<Player> armShelfRequests;
-
-		private CallLimiter[] callLimiters;
-
-		public class PlayerTableInitState
+		BuilderTable.TableState tableState = table.GetTableState();
+		if (!NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.WaitingForInitalBuild)
 		{
-			public PlayerTableInitState()
-			{
-				this.serializedTableState = new byte[1048576];
-				this.chunk = new byte[1000];
-				this.Reset();
-			}
-
-			public void Reset()
-			{
-				this.player = null;
-				this.numSerializedBytes = 0;
-				this.totalSerializedBytes = 0;
-			}
-
-			public Player player;
-
-			public int numSerializedBytes;
-
-			public int totalSerializedBytes;
-
-			public byte[] serializedTableState;
-
-			public byte[] chunk;
-
-			public float waitForInitTimeRemaining;
-
-			public float sendNextChunkTimeRemaining;
+			GTDev.LogWarning($"BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected table state {tableState}");
+			return;
 		}
-
-		private enum RPC
+		if (NetworkSystem.Instance.IsMasterClient && tableState != BuilderTable.TableState.WaitForInitialBuildMaster && tableState != BuilderTable.TableState.BadData)
 		{
-			PlayerEnterMaster,
-			TableDataMaster,
-			TableData,
-			TableDataStart,
-			PlacePieceMaster,
-			PlacePiece,
-			GrabPieceMaster,
-			GrabPiece,
-			DropPieceMaster,
-			DropPiece,
-			RequestFailed,
-			PieceDropZone,
-			CreatePiece,
-			CreatePieceMaster,
-			CreateShelfPieceMaster,
-			RecyclePieceMaster,
-			PlotClaimedMaster,
-			ArmShelfCreated,
-			ShelfSelection,
-			ShelfSelectionMaster,
-			SetFunctionalState,
-			SetFunctionalStateMaster,
-			RequestTerminalControl,
-			SetTerminalDriver,
-			LoadSharedBlocksMap,
-			SharedTableEvent,
-			Count
+			GTDev.LogWarning($"BuilderTableNetworking OnSharedBlocksOutOfBounds Unexpected table state {tableState}");
+			return;
 		}
-
-		private enum SharedTableEventTypes
+		table.SetPendingMap(null);
+		if (table != null && !table.isTableMutable && table.linkedTerminal != null)
 		{
-			LOAD_STARTED,
-			LOAD_FAILED,
-			OUT_OF_BOUNDS,
-			COUNT
+			table.OnMapLoadFailed?.Invoke("BLOCKS ARE OUT OF BOUNDS FOR SHARED BLOCKS ROOM");
 		}
+	}
+
+	public void RequestPaintPiece(int pieceID, int materialType)
+	{
 	}
 }

@@ -1,15 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 public abstract class HoldableObject : MonoBehaviour, IHoldableObject
 {
-	public virtual bool TwoHanded
-	{
-		get
-		{
-			return false;
-		}
-	}
+	public virtual bool TwoHanded => false;
 
 	protected void OnDestroy()
 	{
@@ -27,21 +20,14 @@ public abstract class HoldableObject : MonoBehaviour, IHoldableObject
 
 	public virtual bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
-		return (EquipmentInteractor.instance.rightHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.rightHand)) && (EquipmentInteractor.instance.leftHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.leftHand));
-	}
-
-	GameObject IHoldableObject.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	string IHoldableObject.get_name()
-	{
-		return base.name;
-	}
-
-	void IHoldableObject.set_name(string value)
-	{
-		base.name = value;
+		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)
+		{
+			return false;
+		}
+		if (EquipmentInteractor.instance.leftHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.leftHand)
+		{
+			return false;
+		}
+		return true;
 	}
 }

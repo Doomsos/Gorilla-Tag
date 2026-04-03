@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Fusion;
 using Photon.Pun;
@@ -8,413 +8,51 @@ using UnityEngine;
 [NetworkBehaviourWeaved(8)]
 public class ArtilleryCannonState : NetworkComponent
 {
-	internal event Action onRotationChanged;
-
-	internal event Action onFired;
-
-	internal float CurrentPitch
+	internal struct CrankSyncState
 	{
-		get
-		{
-			return this.currentPitch;
-		}
+		public int holderActorNr;
+
+		public bool isLeftHand;
+
+		public float angle;
 	}
 
-	internal float CurrentYaw
+	private enum ArtilleryMsg : byte
 	{
-		get
-		{
-			return this.currentYaw;
-		}
+		CrankGrabLeft,
+		CrankGrabRight,
+		CrankRelease,
+		CrankInput,
+		Fire
 	}
 
-	internal float PitchMin
+	[StructLayout(LayoutKind.Explicit, Size = 32)]
+	[NetworkStructWeaved(8)]
+	private struct FusionSyncState : INetworkStruct
 	{
-		get
-		{
-			return this.pitchMin;
-		}
-	}
+		[FieldOffset(0)]
+		public float pitch;
 
-	internal float PitchMax
-	{
-		get
-		{
-			return this.pitchMax;
-		}
-	}
+		[FieldOffset(4)]
+		public float yaw;
 
-	internal float DegreesPerCrankDegree
-	{
-		get
-		{
-			return this.degreesPerCrankDegree;
-		}
-	}
+		[FieldOffset(8)]
+		public int pitchHolderActorNr;
 
-	private int LocalActorNr
-	{
-		get
-		{
-			if (PhotonNetwork.LocalPlayer == null)
-			{
-				return -1;
-			}
-			return PhotonNetwork.LocalPlayer.ActorNumber;
-		}
-	}
+		[FieldOffset(12)]
+		public NetworkBool pitchIsLeftHand;
 
-	protected override void Awake()
-	{
-		base.Awake();
-		this.pitchCrankSync.holderActorNr = -1;
-		this.yawCrankSync.holderActorNr = -1;
-	}
+		[FieldOffset(16)]
+		public float pitchCrankAngle;
 
-	internal void UpdateLocalCrankState(int crankIndex, bool isLeftHand, float angle)
-	{
-		ref ArtilleryCannonState.CrankSyncState ptr = ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync;
-		int localActorNr = this.LocalActorNr;
-		if (ptr.holderActorNr == localActorNr)
-		{
-			ptr.isLeftHand = isLeftHand;
-			ptr.angle = angle;
-		}
-	}
+		[FieldOffset(20)]
+		public int yawHolderActorNr;
 
-	internal static VRRig FindRigForActor(int actorNr)
-	{
-		RigContainer rigContainer;
-		if (VRRigCache.Instance.TryGetVrrig(actorNr, out rigContainer))
-		{
-			return rigContainer.Rig;
-		}
-		return null;
-	}
+		[FieldOffset(24)]
+		public NetworkBool yawIsLeftHand;
 
-	internal unsafe bool NotifyCrankGrabbed(int crankIndex, bool isLeftHand)
-	{
-		ref ArtilleryCannonState.CrankSyncState ptr = ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync;
-		if (ptr.holderActorNr != -1)
-		{
-			return false;
-		}
-		ptr.holderActorNr = this.LocalActorNr;
-		*(ref (crankIndex == 0) ? ref this.pitchPendingGrabTime : ref this.yawPendingGrabTime) = Time.time;
-		if (PhotonNetwork.InRoom)
-		{
-			base.SendRPC("RPC_ArtilleryMessage", RpcTarget.MasterClient, new object[]
-			{
-				isLeftHand ? 0 : 1,
-				(byte)crankIndex,
-				0f
-			});
-		}
-		return true;
-	}
-
-	internal unsafe void NotifyCrankReleased(int crankIndex, float finalAngle)
-	{
-		ref ArtilleryCannonState.CrankSyncState ptr = ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync;
-		ptr.holderActorNr = -1;
-		ptr.angle = finalAngle;
-		*(ref (crankIndex == 0) ? ref this.pitchPendingGrabTime : ref this.yawPendingGrabTime) = 0f;
-		if (PhotonNetwork.InRoom)
-		{
-			base.SendRPC("RPC_ArtilleryMessage", RpcTarget.All, new object[]
-			{
-				2,
-				(byte)crankIndex,
-				finalAngle
-			});
-		}
-	}
-
-	internal void NotifyCrankInput(int crankIndex, float degrees)
-	{
-		if (crankIndex == 0)
-		{
-			this.currentPitch = Mathf.Clamp(this.currentPitch + degrees * this.degreesPerCrankDegree, this.pitchMin, this.pitchMax);
-		}
-		else
-		{
-			this.currentYaw += degrees * this.degreesPerCrankDegree;
-		}
-		Action action = this.onRotationChanged;
-		if (action != null)
-		{
-			action();
-		}
-		if (PhotonNetwork.InRoom)
-		{
-			float num = (crankIndex == 0) ? this.currentPitch : this.currentYaw;
-			base.SendRPC("RPC_ArtilleryMessage", RpcTarget.MasterClient, new object[]
-			{
-				3,
-				(byte)crankIndex,
-				num
-			});
-		}
-	}
-
-	internal bool TryFire()
-	{
-		if (Time.time < this.lastFireTime + this.fireCooldown)
-		{
-			return false;
-		}
-		this.lastFireTime = Time.time;
-		if (PhotonNetwork.InRoom)
-		{
-			base.SendRPC("RPC_ArtilleryMessage", RpcTarget.Others, new object[]
-			{
-				4,
-				0,
-				0f
-			});
-		}
-		return true;
-	}
-
-	[PunRPC]
-	public void RPC_ArtilleryMessage(byte msgType, byte crankIndex, float floatParam, PhotonMessageInfo info)
-	{
-		switch (msgType)
-		{
-		case 0:
-		case 1:
-		{
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			ref ArtilleryCannonState.CrankSyncState ptr = ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync;
-			if (ptr.holderActorNr == -1)
-			{
-				ptr.holderActorNr = info.Sender.ActorNumber;
-				ptr.isLeftHand = (msgType == 0);
-				return;
-			}
-			break;
-		}
-		case 2:
-		{
-			ref ArtilleryCannonState.CrankSyncState ptr2 = ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync;
-			if (ptr2.holderActorNr == info.Sender.ActorNumber)
-			{
-				ptr2.holderActorNr = -1;
-				ptr2.angle = floatParam;
-				return;
-			}
-			break;
-		}
-		case 3:
-		{
-			if (!PhotonNetwork.IsMasterClient)
-			{
-				return;
-			}
-			if ((ref (crankIndex == 0) ? ref this.pitchCrankSync : ref this.yawCrankSync).holderActorNr != info.Sender.ActorNumber)
-			{
-				return;
-			}
-			if (crankIndex == 0)
-			{
-				this.currentPitch = Mathf.Clamp(floatParam, this.pitchMin, this.pitchMax);
-			}
-			else
-			{
-				this.currentYaw = floatParam;
-			}
-			Action action = this.onRotationChanged;
-			if (action == null)
-			{
-				return;
-			}
-			action();
-			return;
-		}
-		case 4:
-		{
-			int actorNumber = info.Sender.ActorNumber;
-			if (this.pitchCrankSync.holderActorNr != actorNumber && this.yawCrankSync.holderActorNr != actorNumber)
-			{
-				return;
-			}
-			Action action2 = this.onFired;
-			if (action2 == null)
-			{
-				return;
-			}
-			action2();
-			break;
-		}
-		default:
-			return;
-		}
-	}
-
-	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		stream.SendNext(this.currentPitch);
-		stream.SendNext(this.currentYaw);
-		stream.SendNext(this.pitchCrankSync.holderActorNr);
-		stream.SendNext(this.pitchCrankSync.isLeftHand);
-		stream.SendNext(this.pitchCrankSync.angle);
-		stream.SendNext(this.yawCrankSync.holderActorNr);
-		stream.SendNext(this.yawCrankSync.isLeftHand);
-		stream.SendNext(this.yawCrankSync.angle);
-	}
-
-	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		float num = (float)stream.ReceiveNext();
-		float num2 = (float)stream.ReceiveNext();
-		int localActorNr = this.LocalActorNr;
-		this.ReadCrankSyncPUN(stream, ref this.pitchCrankSync, ref this.pitchPendingGrabTime, localActorNr);
-		this.ReadCrankSyncPUN(stream, ref this.yawCrankSync, ref this.yawPendingGrabTime, localActorNr);
-		if (this.pitchCrankSync.holderActorNr != localActorNr)
-		{
-			this.currentPitch = num;
-		}
-		if (this.yawCrankSync.holderActorNr != localActorNr)
-		{
-			this.currentYaw = num2;
-		}
-		Action action = this.onRotationChanged;
-		if (action == null)
-		{
-			return;
-		}
-		action();
-	}
-
-	private void ReadCrankSyncPUN(PhotonStream stream, ref ArtilleryCannonState.CrankSyncState crank, ref float pendingTime, int localActor)
-	{
-		int num = (int)stream.ReceiveNext();
-		bool isLeftHand = (bool)stream.ReceiveNext();
-		float angle = (float)stream.ReceiveNext();
-		if (pendingTime > 0f && crank.holderActorNr == localActor)
-		{
-			if (num == localActor)
-			{
-				pendingTime = 0f;
-			}
-			else if (num != -1)
-			{
-				pendingTime = 0f;
-			}
-			else
-			{
-				if (Time.time - pendingTime <= 1f)
-				{
-					return;
-				}
-				pendingTime = 0f;
-			}
-		}
-		crank.holderActorNr = num;
-		crank.isLeftHand = isLeftHand;
-		crank.angle = angle;
-	}
-
-	[Networked]
-	[NetworkedWeaved(0, 8)]
-	private unsafe ArtilleryCannonState.FusionSyncState FusionData
-	{
-		get
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing ArtilleryCannonState.FusionData. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			return *(ArtilleryCannonState.FusionSyncState*)(this.Ptr + 0);
-		}
-		set
-		{
-			if (this.Ptr == null)
-			{
-				throw new InvalidOperationException("Error when accessing ArtilleryCannonState.FusionData. Networked properties can only be accessed when Spawned() has been called.");
-			}
-			*(ArtilleryCannonState.FusionSyncState*)(this.Ptr + 0) = value;
-		}
-	}
-
-	public override void WriteDataFusion()
-	{
-		this.FusionData = new ArtilleryCannonState.FusionSyncState
-		{
-			pitch = this.currentPitch,
-			yaw = this.currentYaw,
-			pitchHolderActorNr = this.pitchCrankSync.holderActorNr,
-			pitchIsLeftHand = this.pitchCrankSync.isLeftHand,
-			pitchCrankAngle = this.pitchCrankSync.angle,
-			yawHolderActorNr = this.yawCrankSync.holderActorNr,
-			yawIsLeftHand = this.yawCrankSync.isLeftHand,
-			yawCrankAngle = this.yawCrankSync.angle
-		};
-	}
-
-	public override void ReadDataFusion()
-	{
-		ArtilleryCannonState.FusionSyncState fusionData = this.FusionData;
-		int localActorNr = this.LocalActorNr;
-		this.ReadCrankSyncFusion(ref this.pitchCrankSync, ref this.pitchPendingGrabTime, localActorNr, fusionData.pitchHolderActorNr, fusionData.pitchIsLeftHand, fusionData.pitchCrankAngle);
-		this.ReadCrankSyncFusion(ref this.yawCrankSync, ref this.yawPendingGrabTime, localActorNr, fusionData.yawHolderActorNr, fusionData.yawIsLeftHand, fusionData.yawCrankAngle);
-		if (this.pitchCrankSync.holderActorNr != localActorNr)
-		{
-			this.currentPitch = fusionData.pitch;
-		}
-		if (this.yawCrankSync.holderActorNr != localActorNr)
-		{
-			this.currentYaw = fusionData.yaw;
-		}
-		Action action = this.onRotationChanged;
-		if (action == null)
-		{
-			return;
-		}
-		action();
-	}
-
-	private void ReadCrankSyncFusion(ref ArtilleryCannonState.CrankSyncState crank, ref float pendingTime, int localActor, int incomingHolder, bool incomingLeftHand, float incomingAngle)
-	{
-		if (pendingTime > 0f && crank.holderActorNr == localActor)
-		{
-			if (incomingHolder == localActor)
-			{
-				pendingTime = 0f;
-			}
-			else if (incomingHolder != -1)
-			{
-				pendingTime = 0f;
-			}
-			else
-			{
-				if (Time.time - pendingTime <= 1f)
-				{
-					return;
-				}
-				pendingTime = 0f;
-			}
-		}
-		crank.holderActorNr = incomingHolder;
-		crank.isLeftHand = incomingLeftHand;
-		crank.angle = incomingAngle;
-	}
-
-	[WeaverGenerated]
-	public override void CopyBackingFieldsToState(bool A_1)
-	{
-		base.CopyBackingFieldsToState(A_1);
-		this.FusionData = this._FusionData;
-	}
-
-	[WeaverGenerated]
-	public override void CopyStateToBackingFields()
-	{
-		base.CopyStateToBackingFields();
-		this._FusionData = this.FusionData;
+		[FieldOffset(28)]
+		public float yawCrankAngle;
 	}
 
 	internal const int CRANK_PITCH = 0;
@@ -442,9 +80,9 @@ public class ArtilleryCannonState : NetworkComponent
 
 	private float lastFireTime;
 
-	internal ArtilleryCannonState.CrankSyncState pitchCrankSync;
+	internal CrankSyncState pitchCrankSync;
 
-	internal ArtilleryCannonState.CrankSyncState yawCrankSync;
+	internal CrankSyncState yawCrankSync;
 
 	private const float GRAB_GRACE_PERIOD = 1f;
 
@@ -455,52 +93,324 @@ public class ArtilleryCannonState : NetworkComponent
 	[WeaverGenerated]
 	[DefaultForProperty("FusionData", 0, 8)]
 	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
-	private ArtilleryCannonState.FusionSyncState _FusionData;
+	private FusionSyncState _FusionData;
 
-	internal struct CrankSyncState
+	internal float CurrentPitch => currentPitch;
+
+	internal float CurrentYaw => currentYaw;
+
+	internal float PitchMin => pitchMin;
+
+	internal float PitchMax => pitchMax;
+
+	internal float DegreesPerCrankDegree => degreesPerCrankDegree;
+
+	private int LocalActorNr
 	{
-		public int holderActorNr;
-
-		public bool isLeftHand;
-
-		public float angle;
+		get
+		{
+			if (PhotonNetwork.LocalPlayer == null)
+			{
+				return -1;
+			}
+			return PhotonNetwork.LocalPlayer.ActorNumber;
+		}
 	}
 
-	private enum ArtilleryMsg : byte
+	[Networked]
+	[NetworkedWeaved(0, 8)]
+	private unsafe FusionSyncState FusionData
 	{
-		CrankGrabLeft,
-		CrankGrabRight,
-		CrankRelease,
-		CrankInput,
-		Fire
+		get
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing ArtilleryCannonState.FusionData. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			return *(FusionSyncState*)((byte*)((NetworkBehaviour)this).Ptr + 0);
+		}
+		set
+		{
+			if (((NetworkBehaviour)this).Ptr == null)
+			{
+				throw new InvalidOperationException("Error when accessing ArtilleryCannonState.FusionData. Networked properties can only be accessed when Spawned() has been called.");
+			}
+			*(FusionSyncState*)((byte*)((NetworkBehaviour)this).Ptr + 0) = value;
+		}
 	}
 
-	[NetworkStructWeaved(8)]
-	[StructLayout(LayoutKind.Explicit, Size = 32)]
-	private struct FusionSyncState : INetworkStruct
+	internal event Action onRotationChanged;
+
+	internal event Action onFired;
+
+	protected override void Awake()
 	{
-		[FieldOffset(0)]
-		public float pitch;
+		base.Awake();
+		pitchCrankSync.holderActorNr = -1;
+		yawCrankSync.holderActorNr = -1;
+	}
 
-		[FieldOffset(4)]
-		public float yaw;
+	internal void UpdateLocalCrankState(int crankIndex, bool isLeftHand, float angle)
+	{
+		ref CrankSyncState reference = ref crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync;
+		int localActorNr = LocalActorNr;
+		if (reference.holderActorNr == localActorNr)
+		{
+			reference.isLeftHand = isLeftHand;
+			reference.angle = angle;
+		}
+	}
 
-		[FieldOffset(8)]
-		public int pitchHolderActorNr;
+	internal static VRRig FindRigForActor(int actorNr)
+	{
+		if (VRRigCache.Instance.TryGetVrrig(actorNr, out var playerRig))
+		{
+			return playerRig.Rig;
+		}
+		return null;
+	}
 
-		[FieldOffset(12)]
-		public NetworkBool pitchIsLeftHand;
+	internal bool NotifyCrankGrabbed(int crankIndex, bool isLeftHand)
+	{
+		ref CrankSyncState reference = ref crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync;
+		if (reference.holderActorNr != -1)
+		{
+			return false;
+		}
+		reference.holderActorNr = LocalActorNr;
+		crankIndex == 0 ? ref pitchPendingGrabTime : ref yawPendingGrabTime = Time.time;
+		if (PhotonNetwork.InRoom)
+		{
+			SendRPC("RPC_ArtilleryMessage", RpcTarget.MasterClient, (!isLeftHand) ? ((byte)1) : ((byte)0), (byte)crankIndex, 0f);
+		}
+		return true;
+	}
 
-		[FieldOffset(16)]
-		public float pitchCrankAngle;
+	internal void NotifyCrankReleased(int crankIndex, float finalAngle)
+	{
+		ref CrankSyncState reference = ref crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync;
+		reference.holderActorNr = -1;
+		reference.angle = finalAngle;
+		crankIndex == 0 ? ref pitchPendingGrabTime : ref yawPendingGrabTime = 0f;
+		if (PhotonNetwork.InRoom)
+		{
+			SendRPC("RPC_ArtilleryMessage", RpcTarget.All, (byte)2, (byte)crankIndex, finalAngle);
+		}
+	}
 
-		[FieldOffset(20)]
-		public int yawHolderActorNr;
+	internal void NotifyCrankInput(int crankIndex, float degrees)
+	{
+		if (crankIndex == 0)
+		{
+			currentPitch = Mathf.Clamp(currentPitch + degrees * degreesPerCrankDegree, pitchMin, pitchMax);
+		}
+		else
+		{
+			currentYaw += degrees * degreesPerCrankDegree;
+		}
+		this.onRotationChanged?.Invoke();
+		if (PhotonNetwork.InRoom)
+		{
+			float num = ((crankIndex == 0) ? currentPitch : currentYaw);
+			SendRPC("RPC_ArtilleryMessage", RpcTarget.MasterClient, (byte)3, (byte)crankIndex, num);
+		}
+	}
 
-		[FieldOffset(24)]
-		public NetworkBool yawIsLeftHand;
+	internal bool TryFire()
+	{
+		if (Time.time < lastFireTime + fireCooldown)
+		{
+			return false;
+		}
+		lastFireTime = Time.time;
+		if (PhotonNetwork.InRoom)
+		{
+			SendRPC("RPC_ArtilleryMessage", RpcTarget.Others, (byte)4, (byte)0, 0f);
+		}
+		return true;
+	}
 
-		[FieldOffset(28)]
-		public float yawCrankAngle;
+	[PunRPC]
+	public void RPC_ArtilleryMessage(byte msgType, byte crankIndex, float floatParam, PhotonMessageInfo info)
+	{
+		switch ((ArtilleryMsg)msgType)
+		{
+		case ArtilleryMsg.CrankGrabLeft:
+		case ArtilleryMsg.CrankGrabRight:
+			if (PhotonNetwork.IsMasterClient)
+			{
+				ref CrankSyncState reference = ref crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync;
+				if (reference.holderActorNr == -1)
+				{
+					reference.holderActorNr = info.Sender.ActorNumber;
+					reference.isLeftHand = msgType == 0;
+				}
+			}
+			break;
+		case ArtilleryMsg.CrankRelease:
+		{
+			ref CrankSyncState reference2 = ref crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync;
+			if (reference2.holderActorNr == info.Sender.ActorNumber)
+			{
+				reference2.holderActorNr = -1;
+				reference2.angle = floatParam;
+			}
+			break;
+		}
+		case ArtilleryMsg.CrankInput:
+			if (PhotonNetwork.IsMasterClient && (crankIndex == 0 ? ref pitchCrankSync : ref yawCrankSync).holderActorNr == info.Sender.ActorNumber)
+			{
+				if (crankIndex == 0)
+				{
+					currentPitch = Mathf.Clamp(floatParam, pitchMin, pitchMax);
+				}
+				else
+				{
+					currentYaw = floatParam;
+				}
+				this.onRotationChanged?.Invoke();
+			}
+			break;
+		case ArtilleryMsg.Fire:
+		{
+			int actorNumber = info.Sender.ActorNumber;
+			if (pitchCrankSync.holderActorNr == actorNumber || yawCrankSync.holderActorNr == actorNumber)
+			{
+				this.onFired?.Invoke();
+			}
+			break;
+		}
+		}
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		stream.SendNext(currentPitch);
+		stream.SendNext(currentYaw);
+		stream.SendNext(pitchCrankSync.holderActorNr);
+		stream.SendNext(pitchCrankSync.isLeftHand);
+		stream.SendNext(pitchCrankSync.angle);
+		stream.SendNext(yawCrankSync.holderActorNr);
+		stream.SendNext(yawCrankSync.isLeftHand);
+		stream.SendNext(yawCrankSync.angle);
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		float num = (float)stream.ReceiveNext();
+		float num2 = (float)stream.ReceiveNext();
+		int localActorNr = LocalActorNr;
+		ReadCrankSyncPUN(stream, ref pitchCrankSync, ref pitchPendingGrabTime, localActorNr);
+		ReadCrankSyncPUN(stream, ref yawCrankSync, ref yawPendingGrabTime, localActorNr);
+		if (pitchCrankSync.holderActorNr != localActorNr)
+		{
+			currentPitch = num;
+		}
+		if (yawCrankSync.holderActorNr != localActorNr)
+		{
+			currentYaw = num2;
+		}
+		this.onRotationChanged?.Invoke();
+	}
+
+	private void ReadCrankSyncPUN(PhotonStream stream, ref CrankSyncState crank, ref float pendingTime, int localActor)
+	{
+		int num = (int)stream.ReceiveNext();
+		bool isLeftHand = (bool)stream.ReceiveNext();
+		float angle = (float)stream.ReceiveNext();
+		if (pendingTime > 0f && crank.holderActorNr == localActor)
+		{
+			if (num == localActor)
+			{
+				pendingTime = 0f;
+			}
+			else if (num != -1)
+			{
+				pendingTime = 0f;
+			}
+			else
+			{
+				if (!(Time.time - pendingTime > 1f))
+				{
+					return;
+				}
+				pendingTime = 0f;
+			}
+		}
+		crank.holderActorNr = num;
+		crank.isLeftHand = isLeftHand;
+		crank.angle = angle;
+	}
+
+	public override void WriteDataFusion()
+	{
+		FusionData = new FusionSyncState
+		{
+			pitch = currentPitch,
+			yaw = currentYaw,
+			pitchHolderActorNr = pitchCrankSync.holderActorNr,
+			pitchIsLeftHand = pitchCrankSync.isLeftHand,
+			pitchCrankAngle = pitchCrankSync.angle,
+			yawHolderActorNr = yawCrankSync.holderActorNr,
+			yawIsLeftHand = yawCrankSync.isLeftHand,
+			yawCrankAngle = yawCrankSync.angle
+		};
+	}
+
+	public override void ReadDataFusion()
+	{
+		FusionSyncState fusionData = FusionData;
+		int localActorNr = LocalActorNr;
+		ReadCrankSyncFusion(ref pitchCrankSync, ref pitchPendingGrabTime, localActorNr, fusionData.pitchHolderActorNr, fusionData.pitchIsLeftHand, fusionData.pitchCrankAngle);
+		ReadCrankSyncFusion(ref yawCrankSync, ref yawPendingGrabTime, localActorNr, fusionData.yawHolderActorNr, fusionData.yawIsLeftHand, fusionData.yawCrankAngle);
+		if (pitchCrankSync.holderActorNr != localActorNr)
+		{
+			currentPitch = fusionData.pitch;
+		}
+		if (yawCrankSync.holderActorNr != localActorNr)
+		{
+			currentYaw = fusionData.yaw;
+		}
+		this.onRotationChanged?.Invoke();
+	}
+
+	private void ReadCrankSyncFusion(ref CrankSyncState crank, ref float pendingTime, int localActor, int incomingHolder, bool incomingLeftHand, float incomingAngle)
+	{
+		if (pendingTime > 0f && crank.holderActorNr == localActor)
+		{
+			if (incomingHolder == localActor)
+			{
+				pendingTime = 0f;
+			}
+			else if (incomingHolder != -1)
+			{
+				pendingTime = 0f;
+			}
+			else
+			{
+				if (!(Time.time - pendingTime > 1f))
+				{
+					return;
+				}
+				pendingTime = 0f;
+			}
+		}
+		crank.holderActorNr = incomingHolder;
+		crank.isLeftHand = incomingLeftHand;
+		crank.angle = incomingAngle;
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+		FusionData = _FusionData;
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
+		_FusionData = FusionData;
 	}
 }

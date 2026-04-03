@@ -1,16 +1,17 @@
-﻿using System;
 using UnityEngine;
 
 public class NamedTriggerZone : MonoBehaviour
 {
+	public string TriggerName = "Trigger";
+
 	private void Reset()
 	{
-		this.ConfigureCollider();
+		ConfigureCollider();
 	}
 
 	private void ConfigureCollider()
 	{
-		Collider collider = base.GetComponent<Collider>();
+		Collider collider = GetComponent<Collider>();
 		if (!collider)
 		{
 			collider = base.gameObject.AddComponent<BoxCollider>();
@@ -18,6 +19,4 @@ public class NamedTriggerZone : MonoBehaviour
 		collider.isTrigger = true;
 		base.gameObject.layer = LayerMask.NameToLayer("Gorilla Trigger");
 	}
-
-	public string TriggerName = "Trigger";
 }

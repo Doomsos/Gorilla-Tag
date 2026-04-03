@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GorillaLocomotion.Swimming;
 using GorillaTag.Cosmetics;
 using UnityEngine;
@@ -6,156 +6,14 @@ using UnityEngine.Events;
 
 public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 {
-	private void Awake()
+	[Flags]
+	public enum StickFlags
 	{
-		this.stickyPart.GetLocalPositionAndRotation(out this.stickyPartLocalPosition, out this.stickyPartLocalRotation);
-		this.stickyPartLocalScale = this.stickyPart.localScale;
-		this.headZoneInversePosition = this.INVERSE_HEAD_ROTATION * this.headZonePosition;
-		this.headZoneInverseLocalPosition = this.INVERSE_HEAD_ROTATION * this.localHeadZonePosition;
-		this.rb = base.GetComponent<Rigidbody>();
-		this.rbwi = base.GetComponent<RigidbodyWaterInteraction>();
-		this.collider = base.GetComponent<Collider>();
-		this.pcc = base.GetComponent<PlayerColoredCosmetic>();
-		this.triggerLayer = LayerMask.NameToLayer("Gorilla Tag Collider");
-		UnityEvent onReset = this.OnReset;
-		if (onReset == null)
-		{
-			return;
-		}
-		onReset.Invoke();
-	}
-
-	public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
-	{
-		UnityEvent onLaunch = this.OnLaunch;
-		if (onLaunch != null)
-		{
-			onLaunch.Invoke();
-		}
-		this.stickyPart.SetParent(base.transform, false);
-		this.stickyPart.SetLocalPositionAndRotation(this.stickyPartLocalPosition, this.stickyPartLocalRotation);
-		this.stickyPart.localScale = this.stickyPartLocalScale;
-		base.transform.SetPositionAndRotation(startPosition, startRotation);
-		base.transform.localScale = Vector3.one * ownerRig.scaleFactor;
-		this.rb.isKinematic = false;
-		this.rb.position = startPosition;
-		this.rb.rotation = startRotation;
-		this.rb.linearVelocity = velocity;
-		if (this.faceVelocityWhileAirborne)
-		{
-			TickSystem<object>.AddTickCallback(this);
-			this.rb.angularVelocity = Vector3.zero;
-		}
-		else
-		{
-			this.rb.angularVelocity = Random.onUnitSphere * Random.Range(this.launchRandomSpinSpeedMinMax.x, this.launchRandomSpinSpeedMinMax.y);
-		}
-		this.rbwi.enabled = true;
-		this.collider.enabled = true;
-		if (this.pcc != null)
-		{
-			this.pcc.UpdateColor(ownerRig.playerColor);
-		}
-	}
-
-	private void StickTo(Transform otherTransform, Vector3 position, Quaternion rotation)
-	{
-		this.stickyPart.parent = otherTransform;
-		this.stickyPart.SetPositionAndRotation(position + rotation * this.stickyPartLocalPosition, rotation * this.stickyPartLocalRotation);
-		this.rb.isKinematic = true;
-		this.rbwi.enabled = false;
-		this.collider.enabled = false;
-	}
-
-	private void OnCollisionEnter(Collision collision)
-	{
-		TickSystem<object>.RemoveTickCallback(this);
-		ContactPoint contact = collision.GetContact(0);
-		this.StickTo(collision.transform, contact.point, this.alignToHitNormal ? Quaternion.LookRotation(contact.normal, Random.onUnitSphere) : base.transform.rotation);
-		this.stickEvents.InvokeAll(StickyProjectile.StickFlags.Wall, false);
-	}
-
-	private void OnTriggerEnter(Collider other)
-	{
-		if (other.gameObject.layer != this.triggerLayer)
-		{
-			return;
-		}
-		TickSystem<object>.RemoveTickCallback(this);
-		Vector3 vector = Time.fixedDeltaTime * 2f * this.rb.linearVelocity;
-		Vector3 vector2 = base.transform.position - vector;
-		Vector3 vector3;
-		Quaternion rotation;
-		if (this.alignToHitNormal)
-		{
-			float magnitude = vector.magnitude;
-			RaycastHit raycastHit;
-			other.Raycast(new Ray(vector2, vector / magnitude), out raycastHit, 2f * magnitude);
-			vector3 = raycastHit.point;
-			rotation = Quaternion.LookRotation(raycastHit.normal, Random.onUnitSphere);
-		}
-		else
-		{
-			vector3 = other.ClosestPoint(vector2);
-			rotation = base.transform.rotation;
-		}
-		VRRig componentInParent = other.GetComponentInParent<VRRig>();
-		if (componentInParent != null)
-		{
-			if (this.headZoneRadius > 0f && string.Equals(other.name, "SpeakerHeadCollider"))
-			{
-				Vector3 b;
-				Quaternion quaternion;
-				other.transform.GetPositionAndRotation(out b, out quaternion);
-				Vector3 vector4 = quaternion * this.headZoneInversePosition + b;
-				if ((vector3 - vector4).magnitude <= this.headZoneRadius * componentInParent.scaleFactor)
-				{
-					if (componentInParent.isOfflineVRRig)
-					{
-						this.StickTo(other.transform, quaternion * this.headZoneInverseLocalPosition + b, quaternion * this.INVERSE_HEAD_ROTATION);
-						this.stickyPart.localScale *= this.scaleOnLocalHeadZone;
-						this.stickEvents.InvokeAll(StickyProjectile.StickFlags.LocalHeadZone, false);
-						return;
-					}
-					this.StickTo(other.transform, vector4, quaternion * this.INVERSE_HEAD_ROTATION);
-					this.stickEvents.InvokeAll(StickyProjectile.StickFlags.RemoteHeadZone, false);
-					return;
-				}
-				else if (componentInParent.isOfflineVRRig)
-				{
-					this.stickyPart.localScale *= this.scaleOnLocalHead;
-				}
-			}
-			this.stickEvents.InvokeAll(componentInParent.isOfflineVRRig ? StickyProjectile.StickFlags.LocalPlayer : StickyProjectile.StickFlags.RemotePlayer, false);
-		}
-		else
-		{
-			this.stickEvents.InvokeAll(StickyProjectile.StickFlags.Wall, false);
-		}
-		this.StickTo(other.transform, vector3, rotation);
-	}
-
-	private void OnEnable()
-	{
-		this.stickyPart.gameObject.SetActive(true);
-	}
-
-	private void OnDisable()
-	{
-		this.stickyPart.gameObject.SetActive(false);
-		UnityEvent onReset = this.OnReset;
-		if (onReset == null)
-		{
-			return;
-		}
-		onReset.Invoke();
-	}
-
-	public bool TickRunning { get; set; }
-
-	public void Tick()
-	{
-		this.rb.rotation = Quaternion.LookRotation(this.rb.linearVelocity);
+		Wall = 1,
+		LocalPlayer = 2,
+		RemotePlayer = 4,
+		LocalHeadZone = 8,
+		RemoteHeadZone = 0x10
 	}
 
 	[SerializeField]
@@ -201,7 +59,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 	private Vector3 localHeadZonePosition = new Vector3(0f, 0.05f, 0.2f);
 
 	[SerializeField]
-	private FlagEvents<StickyProjectile.StickFlags> stickEvents;
+	private FlagEvents<StickFlags> stickEvents;
 
 	private readonly Quaternion INVERSE_HEAD_ROTATION = Quaternion.Inverse(Quaternion.Euler(0f, 270f, 252.3229f));
 
@@ -225,13 +83,140 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 
 	private int triggerLayer;
 
-	[Flags]
-	public enum StickFlags
+	public bool TickRunning { get; set; }
+
+	private void Awake()
 	{
-		Wall = 1,
-		LocalPlayer = 2,
-		RemotePlayer = 4,
-		LocalHeadZone = 8,
-		RemoteHeadZone = 16
+		stickyPart.GetLocalPositionAndRotation(out stickyPartLocalPosition, out stickyPartLocalRotation);
+		stickyPartLocalScale = stickyPart.localScale;
+		headZoneInversePosition = INVERSE_HEAD_ROTATION * headZonePosition;
+		headZoneInverseLocalPosition = INVERSE_HEAD_ROTATION * localHeadZonePosition;
+		rb = GetComponent<Rigidbody>();
+		rbwi = GetComponent<RigidbodyWaterInteraction>();
+		collider = GetComponent<Collider>();
+		pcc = GetComponent<PlayerColoredCosmetic>();
+		triggerLayer = LayerMask.NameToLayer("Gorilla Tag Collider");
+		OnReset?.Invoke();
+	}
+
+	public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
+	{
+		OnLaunch?.Invoke();
+		stickyPart.SetParent(base.transform, worldPositionStays: false);
+		stickyPart.SetLocalPositionAndRotation(stickyPartLocalPosition, stickyPartLocalRotation);
+		stickyPart.localScale = stickyPartLocalScale;
+		base.transform.SetPositionAndRotation(startPosition, startRotation);
+		base.transform.localScale = Vector3.one * ownerRig.scaleFactor;
+		rb.isKinematic = false;
+		rb.position = startPosition;
+		rb.rotation = startRotation;
+		rb.linearVelocity = velocity;
+		if (faceVelocityWhileAirborne)
+		{
+			TickSystem<object>.AddTickCallback(this);
+			rb.angularVelocity = Vector3.zero;
+		}
+		else
+		{
+			rb.angularVelocity = UnityEngine.Random.onUnitSphere * UnityEngine.Random.Range(launchRandomSpinSpeedMinMax.x, launchRandomSpinSpeedMinMax.y);
+		}
+		rbwi.enabled = true;
+		collider.enabled = true;
+		if (pcc != null)
+		{
+			pcc.UpdateColor(ownerRig.playerColor);
+		}
+	}
+
+	private void StickTo(Transform otherTransform, Vector3 position, Quaternion rotation)
+	{
+		stickyPart.parent = otherTransform;
+		stickyPart.SetPositionAndRotation(position + rotation * stickyPartLocalPosition, rotation * stickyPartLocalRotation);
+		rb.isKinematic = true;
+		rbwi.enabled = false;
+		collider.enabled = false;
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		TickSystem<object>.RemoveTickCallback(this);
+		ContactPoint contact = collision.GetContact(0);
+		StickTo(collision.transform, contact.point, alignToHitNormal ? Quaternion.LookRotation(contact.normal, UnityEngine.Random.onUnitSphere) : base.transform.rotation);
+		stickEvents.InvokeAll(StickFlags.Wall);
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.layer != triggerLayer)
+		{
+			return;
+		}
+		TickSystem<object>.RemoveTickCallback(this);
+		Vector3 vector = Time.fixedDeltaTime * 2f * rb.linearVelocity;
+		Vector3 vector2 = base.transform.position - vector;
+		Vector3 vector3;
+		Quaternion rotation;
+		if (alignToHitNormal)
+		{
+			float magnitude = vector.magnitude;
+			other.Raycast(new Ray(vector2, vector / magnitude), out var hitInfo, 2f * magnitude);
+			vector3 = hitInfo.point;
+			rotation = Quaternion.LookRotation(hitInfo.normal, UnityEngine.Random.onUnitSphere);
+		}
+		else
+		{
+			vector3 = other.ClosestPoint(vector2);
+			rotation = base.transform.rotation;
+		}
+		VRRig componentInParent = other.GetComponentInParent<VRRig>();
+		if (componentInParent != null)
+		{
+			if (headZoneRadius > 0f && string.Equals(other.name, "SpeakerHeadCollider"))
+			{
+				other.transform.GetPositionAndRotation(out var position, out var rotation2);
+				Vector3 vector4 = rotation2 * headZoneInversePosition + position;
+				if ((vector3 - vector4).magnitude <= headZoneRadius * componentInParent.scaleFactor)
+				{
+					if (componentInParent.isOfflineVRRig)
+					{
+						StickTo(other.transform, rotation2 * headZoneInverseLocalPosition + position, rotation2 * INVERSE_HEAD_ROTATION);
+						stickyPart.localScale *= scaleOnLocalHeadZone;
+						stickEvents.InvokeAll(StickFlags.LocalHeadZone);
+					}
+					else
+					{
+						StickTo(other.transform, vector4, rotation2 * INVERSE_HEAD_ROTATION);
+						stickEvents.InvokeAll(StickFlags.RemoteHeadZone);
+					}
+					return;
+				}
+				if (componentInParent.isOfflineVRRig)
+				{
+					stickyPart.localScale *= scaleOnLocalHead;
+				}
+			}
+			stickEvents.InvokeAll(componentInParent.isOfflineVRRig ? StickFlags.LocalPlayer : StickFlags.RemotePlayer);
+		}
+		else
+		{
+			stickEvents.InvokeAll(StickFlags.Wall);
+		}
+		StickTo(other.transform, vector3, rotation);
+	}
+
+	private void OnEnable()
+	{
+		stickyPart.gameObject.SetActive(value: true);
+	}
+
+	private void OnDisable()
+	{
+		stickyPart.gameObject.SetActive(value: false);
+		OnReset?.Invoke();
+	}
+
+	public void Tick()
+	{
+		rb.rotation = Quaternion.LookRotation(rb.linearVelocity);
 	}
 }

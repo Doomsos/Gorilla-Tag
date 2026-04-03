@@ -1,354 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using GorillaExtensions;
 using GorillaTagScripts.VirtualStumpCustomMaps.UI;
+using Modio;
 using Modio.Customizations;
 using Modio.Users;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 {
-	public void Start()
+	private enum ETerminalState
 	{
-		this.optionList.gameObject.SetActive(true);
-		this.mainScreenText.gameObject.SetActive(true);
-		this.RefreshButtonState();
-		this.UpdateOptionListForCurrentState();
-		this.UpdateScreen();
-		CustomMapsKeyboard customMapsKeyboard = this.keyboard;
-		if (customMapsKeyboard != null)
-		{
-			customMapsKeyboard.OnKeyPressed.AddListener(new UnityAction<CustomMapKeyboardBinding>(this.OnKeyPressed));
-		}
-		ModIOManager.OnModIOLoggedIn.AddListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoginStarted.AddListener(new UnityAction(this.OnModIOLoginStarted));
-		ModIOManager.OnModIOLoginFailed.AddListener(new UnityAction<string>(this.OnModIOLoginFailed));
-		ModIOManager.OnModIOUserChanged.AddListener(new UnityAction<User>(this.OnModIOUserChanged));
-	}
-
-	public void OnDestroy()
-	{
-		CustomMapsKeyboard customMapsKeyboard = this.keyboard;
-		if (customMapsKeyboard != null)
-		{
-			customMapsKeyboard.OnKeyPressed.RemoveListener(new UnityAction<CustomMapKeyboardBinding>(this.OnKeyPressed));
-		}
-		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOLoginStarted.RemoveListener(new UnityAction(this.OnModIOLoginStarted));
-		ModIOManager.OnModIOLoginFailed.RemoveListener(new UnityAction<string>(this.OnModIOLoginFailed));
-		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
-	}
-
-	public void OnEnable()
-	{
-		this.RefreshButtonState();
-		this.UpdateOptionListForCurrentState();
-		this.UpdateScreen();
-	}
-
-	private void OnKeyPressed(CustomMapKeyboardBinding pressedButton)
-	{
-		if (!this.cachedError.IsNullOrEmpty())
-		{
-			this.cachedError = null;
-			this.RefreshButtonState();
-			this.UpdateScreen();
-			return;
-		}
-		if (pressedButton == CustomMapKeyboardBinding.up)
-		{
-			int num = this.currentState - VirtualStumpOptionsTerminal.ETerminalState.ROOM_SIZE;
-			if (num < 0)
-			{
-				num = 1;
-			}
-			this.ChangeState((VirtualStumpOptionsTerminal.ETerminalState)num);
-			this.UpdateOptionListForCurrentState();
-			this.UpdateScreen();
-			return;
-		}
-		if (pressedButton == CustomMapKeyboardBinding.down)
-		{
-			int num2 = (int)(this.currentState + 1);
-			if (num2 >= 2)
-			{
-				num2 = 0;
-			}
-			this.ChangeState((VirtualStumpOptionsTerminal.ETerminalState)num2);
-			this.UpdateOptionListForCurrentState();
-			this.UpdateScreen();
-			return;
-		}
-		VirtualStumpOptionsTerminal.ETerminalState eterminalState = this.currentState;
-		if (eterminalState == VirtualStumpOptionsTerminal.ETerminalState.MODIO_ACCOUNT)
-		{
-			this.OnKeyPressed_ModIOAccount(pressedButton);
-			return;
-		}
-		if (eterminalState != VirtualStumpOptionsTerminal.ETerminalState.ROOM_SIZE)
-		{
-			return;
-		}
-		this.OnKeyPressed_RoomSize(pressedButton);
-	}
-
-	private void ChangeState(VirtualStumpOptionsTerminal.ETerminalState newState)
-	{
-		if (newState == this.currentState)
-		{
-			return;
-		}
-		this.currentState = newState;
-		this.RefreshButtonState();
-	}
-
-	private void RefreshButtonState()
-	{
-		for (int i = 0; i < this.contextualButtons.Count; i++)
-		{
-			if (this.contextualButtons[i].IsNotNull())
-			{
-				this.contextualButtons[i].SetActive(false);
-			}
-		}
-		if (!this.cachedError.IsNullOrEmpty())
-		{
-			this.OKButton.SetActive(true);
-			return;
-		}
-		VirtualStumpOptionsTerminal.ETerminalState eterminalState = this.currentState;
-		if (eterminalState == VirtualStumpOptionsTerminal.ETerminalState.MODIO_ACCOUNT)
-		{
-			for (int j = 0; j < this.buttonsToShow_MODIO.Count; j++)
-			{
-				if (this.buttonsToShow_MODIO[j].IsNotNull())
-				{
-					this.buttonsToShow_MODIO[j].SetActive(true);
-				}
-			}
-			return;
-		}
-		if (eterminalState != VirtualStumpOptionsTerminal.ETerminalState.ROOM_SIZE)
-		{
-			return;
-		}
-		for (int k = 0; k < this.buttonsToShow_ROOMSIZE.Count; k++)
-		{
-			if (this.buttonsToShow_ROOMSIZE[k].IsNotNull())
-			{
-				this.buttonsToShow_ROOMSIZE[k].SetActive(true);
-			}
-		}
-	}
-
-	private void UpdateOptionListForCurrentState()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < 2; i++)
-		{
-			stringBuilder.Append(this.optionStrings[i]);
-			if (i == (int)this.currentState)
-			{
-				stringBuilder.Append(" <-");
-			}
-			stringBuilder.Append("\n");
-		}
-		this.optionList.text = stringBuilder.ToString();
-	}
-
-	private void UpdateScreen()
-	{
-		this.mainScreenText.text = "";
-		if (!this.cachedError.IsNullOrEmpty())
-		{
-			this.RefreshButtonState();
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.cachedError);
-			TMP_Text tmp_Text = this.mainScreenText;
-			string str = "<color=\"red\">";
-			StringBuilder stringBuilder2 = stringBuilder;
-			tmp_Text.text = str + ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
-			return;
-		}
-		VirtualStumpOptionsTerminal.ETerminalState eterminalState = this.currentState;
-		if (eterminalState == VirtualStumpOptionsTerminal.ETerminalState.MODIO_ACCOUNT)
-		{
-			this.mainScreenText.text = this.UpdateScreen_ModIOAccount();
-			return;
-		}
-		if (eterminalState != VirtualStumpOptionsTerminal.ETerminalState.ROOM_SIZE)
-		{
-			return;
-		}
-		this.mainScreenText.text = this.UpdateScreen_RoomSize();
-	}
-
-	private void OnModIOLoginStarted()
-	{
-		this.UpdateScreen();
-	}
-
-	private void OnModIOLoggedIn()
-	{
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		ModIOManager.OnModIOLoggedOut.AddListener(new UnityAction(this.OnModIOLoggedOut));
-		this.processingAccountLink = false;
-		this.UpdateScreen();
-		AssociateMotherhsipAndModIOAccountsRequest associateMotherhsipAndModIOAccountsRequest = new AssociateMotherhsipAndModIOAccountsRequest();
-		associateMotherhsipAndModIOAccountsRequest.ModIOId = ModIOManager.GetCurrentUserId();
-		associateMotherhsipAndModIOAccountsRequest.ModIOToken = ModIOManager.GetCurrentAuthToken();
-		associateMotherhsipAndModIOAccountsRequest.MothershipEnvId = MothershipClientApiUnity.EnvironmentId;
-		associateMotherhsipAndModIOAccountsRequest.MothershipPlayerId = MothershipClientContext.MothershipId;
-		associateMotherhsipAndModIOAccountsRequest.MothershipToken = MothershipClientContext.Token;
-		base.StartCoroutine(ModIOManager.AssociateMothershipAndModIOAccounts(associateMotherhsipAndModIOAccountsRequest, delegate(AssociateMotherhsipAndModIOAccountsResponse response)
-		{
-		}));
-	}
-
-	private void OnModIOLoggedOut()
-	{
-		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		this.processingAccountLink = false;
-		this.UpdateScreen();
-	}
-
-	private void OnModIOLoginFailed(string error)
-	{
-		this.processingAccountLink = false;
-		this.cachedError = error;
-		this.UpdateScreen();
-	}
-
-	private void OnModIOUserChanged(User user)
-	{
-		this.UpdateScreen();
-	}
-
-	private void OnKeyPressed_ModIOAccount(CustomMapKeyboardBinding pressedButton)
-	{
-		if (pressedButton == CustomMapKeyboardBinding.option1)
-		{
-			this.StartAccountLinkingProcess();
-		}
-		if (pressedButton == CustomMapKeyboardBinding.option2)
-		{
-			GTDev.Log<string>(string.Format("[VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount] logout {0}", ModIOManager.IsLoggedIn()), null);
-			if (ModIOManager.IsLoggedIn())
-			{
-				ModIOManager.LogoutFromModIO();
-			}
-		}
-		if (pressedButton == CustomMapKeyboardBinding.option3)
-		{
-			GTDev.Log<string>(string.Format("[VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount] login {0}", ModIOManager.IsLoggedIn()), null);
-			if (!ModIOManager.IsLoggedIn())
-			{
-				ModIOManager.CancelExternalAuthentication();
-				try
-				{
-					ModIOManager.RequestPlatformLogin();
-				}
-				catch (Exception arg)
-				{
-					GTDev.Log<string>(string.Format("VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount platform login error: {0}", arg), null);
-					throw;
-				}
-			}
-		}
-	}
-
-	private Task StartAccountLinkingProcess()
-	{
-		VirtualStumpOptionsTerminal.<StartAccountLinkingProcess>d__40 <StartAccountLinkingProcess>d__;
-		<StartAccountLinkingProcess>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
-		<StartAccountLinkingProcess>d__.<>4__this = this;
-		<StartAccountLinkingProcess>d__.<>1__state = -1;
-		<StartAccountLinkingProcess>d__.<>t__builder.Start<VirtualStumpOptionsTerminal.<StartAccountLinkingProcess>d__40>(ref <StartAccountLinkingProcess>d__);
-		return <StartAccountLinkingProcess>d__.<>t__builder.Task;
-	}
-
-	public void ShowPrompt(string url, string code)
-	{
-		this.cachedLinkURL = url;
-		this.cachedLinkCode = code;
-		this.UpdateScreen();
-	}
-
-	private string UpdateScreen_ModIOAccount()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		if (ModIOManager.IsLoggedIn())
-		{
-			stringBuilder.Append(this.loggedInAsString + "\n");
-			stringBuilder.Append("   " + ModIOManager.GetCurrentUsername() + "\n\n");
-			if (ModIOManager.GetLastAuthMethod() != ModIOManager.ModIOAuthMethod.LinkedAccount)
-			{
-				stringBuilder.Append(this.linkAccountPromptString + "\n");
-			}
-			else
-			{
-				stringBuilder.Append(this.alreadyLinkedAccountString + "\n");
-			}
-		}
-		else if (ModIOManager.IsLoggingIn() && !this.processingAccountLink)
-		{
-			stringBuilder.Append(this.loggingInString);
-		}
-		else if (ModIOManager.IsLoggingOut())
-		{
-			stringBuilder.Append(this.loggingOutString);
-		}
-		else if (this.processingAccountLink)
-		{
-			stringBuilder.Append(this.linkAccountPromptString + "\n\n");
-			stringBuilder.Append(this.urlLabelString + this.cachedLinkURL + "\n");
-			stringBuilder.Append(this.linkCodeLabelString + this.cachedLinkCode + "\n");
-		}
-		else
-		{
-			stringBuilder.Append(this.notLoggedInString + "\n\n");
-			stringBuilder.Append(this.loginPromptString);
-		}
-		return stringBuilder.ToString();
-	}
-
-	private void OnKeyPressed_RoomSize(CustomMapKeyboardBinding pressedButton)
-	{
-		if (pressedButton == CustomMapKeyboardBinding.left)
-		{
-			this.DecrementRoomSize();
-		}
-		if (pressedButton == CustomMapKeyboardBinding.right)
-		{
-			this.IncrementRoomSize();
-		}
-		this.UpdateScreen();
-	}
-
-	private void DecrementRoomSize()
-	{
-		RoomSystem.OverrideRoomSize(RoomSystem.GetOverridenRoomSize() - 1);
-		this.UpdateScreen();
-	}
-
-	private void IncrementRoomSize()
-	{
-		RoomSystem.OverrideRoomSize(RoomSystem.GetOverridenRoomSize() + 1);
-		this.UpdateScreen();
-	}
-
-	private string UpdateScreen_RoomSize()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append(this.roomSizeDescriptionString + "\n\n");
-		stringBuilder.Append(this.roomSizeLabelString + RoomSystem.GetOverridenRoomSize().ToString());
-		return stringBuilder.ToString();
+		MODIO_ACCOUNT,
+		ROOM_SIZE,
+		NUM_STATES
 	}
 
 	[SerializeField]
@@ -361,11 +29,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 	private CustomMapsKeyboard keyboard;
 
 	[SerializeField]
-	private List<string> optionStrings = new List<string>
-	{
-		"MOD.IO",
-		"ROOM SIZE"
-	};
+	private List<string> optionStrings = new List<string> { "MOD.IO", "ROOM SIZE" };
 
 	[SerializeField]
 	private string loggedInAsString = "LOGGED INTO MOD.IO AS: ";
@@ -423,12 +87,365 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 
 	private string cachedError;
 
-	private VirtualStumpOptionsTerminal.ETerminalState currentState;
+	private ETerminalState currentState;
 
-	private enum ETerminalState
+	public void Start()
 	{
-		MODIO_ACCOUNT,
-		ROOM_SIZE,
-		NUM_STATES
+		optionList.gameObject.SetActive(value: true);
+		mainScreenText.gameObject.SetActive(value: true);
+		RefreshButtonState();
+		UpdateOptionListForCurrentState();
+		UpdateScreen();
+		keyboard?.OnKeyPressed.AddListener(OnKeyPressed);
+		ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoginStarted.AddListener(OnModIOLoginStarted);
+		ModIOManager.OnModIOLoginFailed.AddListener(OnModIOLoginFailed);
+		ModIOManager.OnModIOUserChanged.AddListener(OnModIOUserChanged);
+	}
+
+	public void OnDestroy()
+	{
+		keyboard?.OnKeyPressed.RemoveListener(OnKeyPressed);
+		ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOLoginStarted.RemoveListener(OnModIOLoginStarted);
+		ModIOManager.OnModIOLoginFailed.RemoveListener(OnModIOLoginFailed);
+		ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+	}
+
+	public void OnEnable()
+	{
+		RefreshButtonState();
+		UpdateOptionListForCurrentState();
+		UpdateScreen();
+	}
+
+	private void OnKeyPressed(CustomMapKeyboardBinding pressedButton)
+	{
+		if (!cachedError.IsNullOrEmpty())
+		{
+			cachedError = null;
+			RefreshButtonState();
+			UpdateScreen();
+			return;
+		}
+		switch (pressedButton)
+		{
+		case CustomMapKeyboardBinding.up:
+		{
+			int num2 = (int)(currentState - 1);
+			if (num2 < 0)
+			{
+				num2 = 1;
+			}
+			ChangeState((ETerminalState)num2);
+			UpdateOptionListForCurrentState();
+			UpdateScreen();
+			break;
+		}
+		case CustomMapKeyboardBinding.down:
+		{
+			int num = (int)(currentState + 1);
+			if (num >= 2)
+			{
+				num = 0;
+			}
+			ChangeState((ETerminalState)num);
+			UpdateOptionListForCurrentState();
+			UpdateScreen();
+			break;
+		}
+		default:
+			switch (currentState)
+			{
+			case ETerminalState.MODIO_ACCOUNT:
+				OnKeyPressed_ModIOAccount(pressedButton);
+				break;
+			case ETerminalState.ROOM_SIZE:
+				OnKeyPressed_RoomSize(pressedButton);
+				break;
+			}
+			break;
+		}
+	}
+
+	private void ChangeState(ETerminalState newState)
+	{
+		if (newState != currentState)
+		{
+			currentState = newState;
+			RefreshButtonState();
+		}
+	}
+
+	private void RefreshButtonState()
+	{
+		for (int i = 0; i < contextualButtons.Count; i++)
+		{
+			if (contextualButtons[i].IsNotNull())
+			{
+				contextualButtons[i].SetActive(value: false);
+			}
+		}
+		if (!cachedError.IsNullOrEmpty())
+		{
+			OKButton.SetActive(value: true);
+			return;
+		}
+		switch (currentState)
+		{
+		case ETerminalState.MODIO_ACCOUNT:
+		{
+			for (int k = 0; k < buttonsToShow_MODIO.Count; k++)
+			{
+				if (buttonsToShow_MODIO[k].IsNotNull())
+				{
+					buttonsToShow_MODIO[k].SetActive(value: true);
+				}
+			}
+			break;
+		}
+		case ETerminalState.ROOM_SIZE:
+		{
+			for (int j = 0; j < buttonsToShow_ROOMSIZE.Count; j++)
+			{
+				if (buttonsToShow_ROOMSIZE[j].IsNotNull())
+				{
+					buttonsToShow_ROOMSIZE[j].SetActive(value: true);
+				}
+			}
+			break;
+		}
+		}
+	}
+
+	private void UpdateOptionListForCurrentState()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < 2; i++)
+		{
+			stringBuilder.Append(optionStrings[i]);
+			if (i == (int)currentState)
+			{
+				stringBuilder.Append(" <-");
+			}
+			stringBuilder.Append("\n");
+		}
+		optionList.text = stringBuilder.ToString();
+	}
+
+	private void UpdateScreen()
+	{
+		mainScreenText.text = "";
+		if (!cachedError.IsNullOrEmpty())
+		{
+			RefreshButtonState();
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(cachedError);
+			mainScreenText.text = "<color=\"red\">" + stringBuilder;
+			return;
+		}
+		switch (currentState)
+		{
+		case ETerminalState.MODIO_ACCOUNT:
+			mainScreenText.text = UpdateScreen_ModIOAccount();
+			break;
+		case ETerminalState.ROOM_SIZE:
+			mainScreenText.text = UpdateScreen_RoomSize();
+			break;
+		}
+	}
+
+	private void OnModIOLoginStarted()
+	{
+		UpdateScreen();
+	}
+
+	private void OnModIOLoggedIn()
+	{
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		ModIOManager.OnModIOLoggedOut.AddListener(OnModIOLoggedOut);
+		processingAccountLink = false;
+		UpdateScreen();
+		StartCoroutine(ModIOManager.AssociateMothershipAndModIOAccounts(new AssociateMotherhsipAndModIOAccountsRequest
+		{
+			ModIOId = ModIOManager.GetCurrentUserId(),
+			ModIOToken = ModIOManager.GetCurrentAuthToken(),
+			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
+			MothershipPlayerId = MothershipClientContext.MothershipId,
+			MothershipToken = MothershipClientContext.Token
+		}, delegate
+		{
+		}));
+	}
+
+	private void OnModIOLoggedOut()
+	{
+		ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+		processingAccountLink = false;
+		UpdateScreen();
+	}
+
+	private void OnModIOLoginFailed(string error)
+	{
+		processingAccountLink = false;
+		cachedError = error;
+		UpdateScreen();
+	}
+
+	private void OnModIOUserChanged(User user)
+	{
+		UpdateScreen();
+	}
+
+	private void OnKeyPressed_ModIOAccount(CustomMapKeyboardBinding pressedButton)
+	{
+		if (pressedButton == CustomMapKeyboardBinding.option1)
+		{
+			StartAccountLinkingProcess();
+		}
+		if (pressedButton == CustomMapKeyboardBinding.option2)
+		{
+			GTDev.Log($"[VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount] logout {ModIOManager.IsLoggedIn()}");
+			if (ModIOManager.IsLoggedIn())
+			{
+				ModIOManager.LogoutFromModIO();
+			}
+		}
+		if (pressedButton != CustomMapKeyboardBinding.option3)
+		{
+			return;
+		}
+		GTDev.Log($"[VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount] login {ModIOManager.IsLoggedIn()}");
+		if (!ModIOManager.IsLoggedIn())
+		{
+			ModIOManager.CancelExternalAuthentication();
+			try
+			{
+				ModIOManager.RequestPlatformLogin();
+			}
+			catch (Exception arg)
+			{
+				GTDev.Log($"VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount platform login error: {arg}");
+				throw;
+			}
+		}
+	}
+
+	private async Task StartAccountLinkingProcess()
+	{
+		if (!processingAccountLink)
+		{
+			processingAccountLink = true;
+			if (ModIOManager.IsAuthenticated())
+			{
+				if (ModIOManager.GetLastAuthMethod() == ModIOManager.ModIOAuthMethod.LinkedAccount)
+				{
+					ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+					ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+					ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+					ModIOManager.OnModIOUserChanged.AddListener(OnModIOUserChanged);
+					processingAccountLink = false;
+					return;
+				}
+				ModIOManager.OnModIOLoggedOut.RemoveListener(OnModIOLoggedOut);
+				ModIOManager.LogoutFromModIO();
+				ModIOManager.OnModIOLoggedIn.RemoveListener(OnModIOLoggedIn);
+				ModIOManager.OnModIOLoggedIn.AddListener(OnModIOLoggedIn);
+				ModIOManager.OnModIOUserChanged.RemoveListener(OnModIOUserChanged);
+				ModIOManager.OnModIOUserChanged.AddListener(OnModIOUserChanged);
+			}
+			ModIOManager.SetAccountLinkPrompter(this);
+			Error error = await ModIOManager.RequestAccountLinkCode();
+			if ((bool)error)
+			{
+				Debug.LogError("[ModIOAccountLinkingTerminal::StartAccountLinkingProcess] Failed to log in to mod.io: " + error.GetMessage());
+				cachedError = error.GetMessage() + "\n\nPRESS THE 'LINK MOD.IO ACCOUNT' BUTTON TO RETRY.";
+				processingAccountLink = false;
+				UpdateScreen();
+			}
+		}
+		else
+		{
+			UpdateScreen();
+		}
+	}
+
+	public void ShowPrompt(string url, string code)
+	{
+		cachedLinkURL = url;
+		cachedLinkCode = code;
+		UpdateScreen();
+	}
+
+	private string UpdateScreen_ModIOAccount()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (ModIOManager.IsLoggedIn())
+		{
+			stringBuilder.Append(loggedInAsString + "\n");
+			stringBuilder.Append("   " + ModIOManager.GetCurrentUsername() + "\n\n");
+			if (ModIOManager.GetLastAuthMethod() != ModIOManager.ModIOAuthMethod.LinkedAccount)
+			{
+				stringBuilder.Append(linkAccountPromptString + "\n");
+			}
+			else
+			{
+				stringBuilder.Append(alreadyLinkedAccountString + "\n");
+			}
+		}
+		else if (ModIOManager.IsLoggingIn() && !processingAccountLink)
+		{
+			stringBuilder.Append(loggingInString);
+		}
+		else if (ModIOManager.IsLoggingOut())
+		{
+			stringBuilder.Append(loggingOutString);
+		}
+		else if (processingAccountLink)
+		{
+			stringBuilder.Append(linkAccountPromptString + "\n\n");
+			stringBuilder.Append(urlLabelString + cachedLinkURL + "\n");
+			stringBuilder.Append(linkCodeLabelString + cachedLinkCode + "\n");
+		}
+		else
+		{
+			stringBuilder.Append(notLoggedInString + "\n\n");
+			stringBuilder.Append(loginPromptString);
+		}
+		return stringBuilder.ToString();
+	}
+
+	private void OnKeyPressed_RoomSize(CustomMapKeyboardBinding pressedButton)
+	{
+		if (pressedButton == CustomMapKeyboardBinding.left)
+		{
+			DecrementRoomSize();
+		}
+		if (pressedButton == CustomMapKeyboardBinding.right)
+		{
+			IncrementRoomSize();
+		}
+		UpdateScreen();
+	}
+
+	private void DecrementRoomSize()
+	{
+		RoomSystem.OverrideRoomSize((byte)(RoomSystem.GetOverridenRoomSize() - 1));
+		UpdateScreen();
+	}
+
+	private void IncrementRoomSize()
+	{
+		RoomSystem.OverrideRoomSize((byte)(RoomSystem.GetOverridenRoomSize() + 1));
+		UpdateScreen();
+	}
+
+	private string UpdateScreen_RoomSize()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(roomSizeDescriptionString + "\n\n");
+		stringBuilder.Append(roomSizeLabelString + RoomSystem.GetOverridenRoomSize());
+		return stringBuilder.ToString();
 	}
 }

@@ -1,42 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class CosmeticCategoryButton : CosmeticButton
 {
-	public void SetIcon(Sprite sprite)
-	{
-		this.equippedLeftIcon.enabled = false;
-		this.equippedRightIcon.enabled = false;
-		this.equippedIcon.enabled = (sprite != null);
-		this.equippedIcon.sprite = sprite;
-	}
-
-	public void SetDualIcon(Sprite leftSprite, Sprite rightSprite)
-	{
-		this.equippedLeftIcon.enabled = (leftSprite != null);
-		this.equippedRightIcon.enabled = (rightSprite != null);
-		this.equippedIcon.enabled = false;
-		this.equippedLeftIcon.sprite = leftSprite;
-		this.equippedRightIcon.sprite = rightSprite;
-	}
-
-	public override void UpdatePosition()
-	{
-		base.UpdatePosition();
-		if (this.equippedIcon != null)
-		{
-			this.equippedIcon.transform.position += this.posOffset;
-		}
-		if (this.equippedLeftIcon != null)
-		{
-			this.equippedLeftIcon.transform.position += this.posOffset;
-		}
-		if (this.equippedRightIcon != null)
-		{
-			this.equippedRightIcon.transform.position += this.posOffset;
-		}
-	}
-
 	[SerializeField]
 	private SpriteRenderer equippedIcon;
 
@@ -45,4 +10,38 @@ public class CosmeticCategoryButton : CosmeticButton
 
 	[SerializeField]
 	private SpriteRenderer equippedRightIcon;
+
+	public void SetIcon(Sprite sprite)
+	{
+		equippedLeftIcon.enabled = false;
+		equippedRightIcon.enabled = false;
+		equippedIcon.enabled = sprite != null;
+		equippedIcon.sprite = sprite;
+	}
+
+	public void SetDualIcon(Sprite leftSprite, Sprite rightSprite)
+	{
+		equippedLeftIcon.enabled = leftSprite != null;
+		equippedRightIcon.enabled = rightSprite != null;
+		equippedIcon.enabled = false;
+		equippedLeftIcon.sprite = leftSprite;
+		equippedRightIcon.sprite = rightSprite;
+	}
+
+	public override void UpdatePosition()
+	{
+		base.UpdatePosition();
+		if (equippedIcon != null)
+		{
+			equippedIcon.transform.position += posOffset;
+		}
+		if (equippedLeftIcon != null)
+		{
+			equippedLeftIcon.transform.position += posOffset;
+		}
+		if (equippedRightIcon != null)
+		{
+			equippedRightIcon.transform.position += posOffset;
+		}
+	}
 }

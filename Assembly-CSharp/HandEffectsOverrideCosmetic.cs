@@ -1,53 +1,10 @@
-﻿using System;
+using System;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using UnityEngine;
 
 public class HandEffectsOverrideCosmetic : MonoBehaviour, ISpawnable
 {
-	public bool IsSpawned { get; set; }
-
-	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
-
-	public void OnSpawn(VRRig rig)
-	{
-		this._rig = rig;
-	}
-
-	public void OnDespawn()
-	{
-	}
-
-	public void OnEnable()
-	{
-		if (!this.isLeftHand)
-		{
-			this._rig.CosmeticHandEffectsOverride_Right.Add(this);
-			return;
-		}
-		this._rig.CosmeticHandEffectsOverride_Left.Add(this);
-	}
-
-	public void OnDisable()
-	{
-		if (!this.isLeftHand)
-		{
-			this._rig.CosmeticHandEffectsOverride_Right.Remove(this);
-			return;
-		}
-		this._rig.CosmeticHandEffectsOverride_Left.Remove(this);
-	}
-
-	public HandEffectsOverrideCosmetic.HandEffectType handEffectType;
-
-	public bool isLeftHand;
-
-	public HandEffectsOverrideCosmetic.EffectsOverride firstPerson;
-
-	public HandEffectsOverrideCosmetic.EffectsOverride thirdPerson;
-
-	private VRRig _rig;
-
 	[Serializable]
 	public class EffectsOverride
 	{
@@ -67,5 +24,52 @@ public class HandEffectsOverrideCosmetic : MonoBehaviour, ISpawnable
 		None,
 		FistBump,
 		HighFive
+	}
+
+	public HandEffectType handEffectType;
+
+	public bool isLeftHand;
+
+	public EffectsOverride firstPerson;
+
+	public EffectsOverride thirdPerson;
+
+	private VRRig _rig;
+
+	public bool IsSpawned { get; set; }
+
+	public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
+
+	public void OnSpawn(VRRig rig)
+	{
+		_rig = rig;
+	}
+
+	public void OnDespawn()
+	{
+	}
+
+	public void OnEnable()
+	{
+		if (!isLeftHand)
+		{
+			_rig.CosmeticHandEffectsOverride_Right.Add(this);
+		}
+		else
+		{
+			_rig.CosmeticHandEffectsOverride_Left.Add(this);
+		}
+	}
+
+	public void OnDisable()
+	{
+		if (!isLeftHand)
+		{
+			_rig.CosmeticHandEffectsOverride_Right.Remove(this);
+		}
+		else
+		{
+			_rig.CosmeticHandEffectsOverride_Left.Remove(this);
+		}
 	}
 }

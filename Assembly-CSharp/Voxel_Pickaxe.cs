@@ -1,142 +1,18 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Audio;
 using Voxels;
 
 public class Voxel_Pickaxe : MonoBehaviour
 {
-	public bool Held { get; set; }
-
-	private void Reset()
+	[Serializable]
+	public struct InteractionPoint
 	{
-		this._layerMask = LayerMask.GetMask(new string[]
-		{
-			"Default"
-		});
-	}
+		public Transform transform;
 
-	private void Awake()
-	{
-		this._layerMask = LayerMask.GetMask(new string[]
-		{
-			"Default"
-		});
-		if (this.sound.transform == base.transform)
-		{
-			Debug.LogError("Audio source for " + base.name + " must be on a separate gameobject!", this);
-		}
-	}
+		public Vector3 previousPosition;
 
-	private void OnEnable()
-	{
-		this.ResetVelocity();
-	}
-
-	private void OnDisable()
-	{
-	}
-
-	private void FixedUpdate()
-	{
-		if (!this.Held)
-		{
-			return;
-		}
-		for (int i = 0; i < this.points.Length; i++)
-		{
-			this.UpdateInteractionPoint(ref this.points[i]);
-		}
-	}
-
-	private void StartGrabbing()
-	{
-		this.Held = true;
-		this.ResetVelocity();
-	}
-
-	private void StopGrabbing()
-	{
-		this.Held = false;
-	}
-
-	private void ResetVelocity()
-	{
-		for (int i = 0; i < this.points.Length; i++)
-		{
-			this.points[i].position = (this.points[i].previousPosition = this.points[i].transform.position);
-		}
-	}
-
-	private void UpdateInteractionPoint(ref Voxel_Pickaxe.InteractionPoint point)
-	{
-		point.previousPosition = point.position;
-		point.position = point.transform.position;
-		if (Time.time < this._nextHitTime)
-		{
-			return;
-		}
-		Vector3 vector = (point.position - point.previousPosition) / Time.fixedDeltaTime;
-		float magnitude = vector.magnitude;
-		if (magnitude < this.minHitSpeed)
-		{
-			return;
-		}
-		bool flag = Vector3.Dot(vector.normalized, point.transform.forward) >= this.alignThreshold;
-		RaycastHit hit;
-		if (Physics.Linecast(point.previousPosition, point.position, out hit, this._layerMask, QueryTriggerInteraction.Ignore))
-		{
-			ChunkComponent component = hit.collider.GetComponent<ChunkComponent>();
-			if (component && flag && magnitude >= this.minMineSpeed)
-			{
-				this.Play(this.goodHit, hit.point);
-				component.World.Mine(hit, this.mine);
-			}
-			else
-			{
-				this.Play(this.badHit, hit.point);
-			}
-			this._nextHitTime = Time.time + this.hitCooldown;
-		}
-	}
-
-	private void Play(AudioResource resource, Vector3 position)
-	{
-		if (!resource)
-		{
-			return;
-		}
-		this.sound.Stop();
-		this.sound.resource = resource;
-		this.sound.transform.position = position;
-		this.sound.Play();
-	}
-
-	public void OnEntityInit()
-	{
-		this.sound.transform.parent = null;
-	}
-
-	public void OnEntityDestroy()
-	{
-		this.sound.transform.parent = base.transform;
-	}
-
-	public void OnEntityStateChange(long prevState, long newState)
-	{
-	}
-
-	private void OnDrawGizmosSelected()
-	{
-		if (this.points == null)
-		{
-			return;
-		}
-		Gizmos.color = Color.green;
-		foreach (Voxel_Pickaxe.InteractionPoint interactionPoint in this.points)
-		{
-			Gizmos.DrawWireSphere(interactionPoint.transform.position, 0.02f);
-			Gizmos.DrawLine(interactionPoint.transform.position, interactionPoint.transform.position + interactionPoint.transform.forward * 0.5f);
-		}
+		public Vector3 position;
 	}
 
 	public VoxelAction mine = new VoxelAction
@@ -146,7 +22,7 @@ public class Voxel_Pickaxe : MonoBehaviour
 		operation = OperationType.Subtract
 	};
 
-	public Voxel_Pickaxe.InteractionPoint[] points;
+	public InteractionPoint[] points;
 
 	public AudioResource goodHit;
 
@@ -166,13 +42,129 @@ public class Voxel_Pickaxe : MonoBehaviour
 
 	private float _nextHitTime;
 
-	[Serializable]
-	public struct InteractionPoint
+	public bool Held { get; set; }
+
+	private void Reset()
 	{
-		public Transform transform;
+		_layerMask = LayerMask.GetMask("Default");
+	}
 
-		public Vector3 previousPosition;
+	private void Awake()
+	{
+		_layerMask = LayerMask.GetMask("Default");
+		if (sound.transform == base.transform)
+		{
+			Debug.LogError("Audio source for " + base.name + " must be on a separate gameobject!", this);
+		}
+	}
 
-		public Vector3 position;
+	private void OnEnable()
+	{
+		ResetVelocity();
+	}
+
+	private void OnDisable()
+	{
+	}
+
+	private void FixedUpdate()
+	{
+		if (Held)
+		{
+			for (int i = 0; i < points.Length; i++)
+			{
+				UpdateInteractionPoint(ref points[i]);
+			}
+		}
+	}
+
+	private void StartGrabbing()
+	{
+		Held = true;
+		ResetVelocity();
+	}
+
+	private void StopGrabbing()
+	{
+		Held = false;
+	}
+
+	private void ResetVelocity()
+	{
+		for (int i = 0; i < points.Length; i++)
+		{
+			points[i].position = (points[i].previousPosition = points[i].transform.position);
+		}
+	}
+
+	private void UpdateInteractionPoint(ref InteractionPoint point)
+	{
+		point.previousPosition = point.position;
+		point.position = point.transform.position;
+		if (Time.time < _nextHitTime)
+		{
+			return;
+		}
+		Vector3 vector = (point.position - point.previousPosition) / Time.fixedDeltaTime;
+		float magnitude = vector.magnitude;
+		if (magnitude < minHitSpeed)
+		{
+			return;
+		}
+		bool flag = Vector3.Dot(vector.normalized, point.transform.forward) >= alignThreshold;
+		if (Physics.Linecast(point.previousPosition, point.position, out var hitInfo, _layerMask, QueryTriggerInteraction.Ignore))
+		{
+			ChunkComponent component = hitInfo.collider.GetComponent<ChunkComponent>();
+			if ((bool)component && flag && magnitude >= minMineSpeed)
+			{
+				Play(goodHit, hitInfo.point);
+				component.World.Mine(hitInfo, mine);
+			}
+			else
+			{
+				Play(badHit, hitInfo.point);
+			}
+			_nextHitTime = Time.time + hitCooldown;
+		}
+	}
+
+	private void Play(AudioResource resource, Vector3 position)
+	{
+		if ((bool)resource)
+		{
+			sound.Stop();
+			sound.resource = resource;
+			sound.transform.position = position;
+			sound.Play();
+		}
+	}
+
+	public void OnEntityInit()
+	{
+		sound.transform.parent = null;
+	}
+
+	public void OnEntityDestroy()
+	{
+		sound.transform.parent = base.transform;
+	}
+
+	public void OnEntityStateChange(long prevState, long newState)
+	{
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		if (points != null)
+		{
+			Gizmos.color = Color.green;
+			InteractionPoint[] array = points;
+			for (int i = 0; i < array.Length; i++)
+			{
+				InteractionPoint interactionPoint = array[i];
+				Gizmos.DrawWireSphere(interactionPoint.transform.position, 0.02f);
+				Gizmos.DrawLine(interactionPoint.transform.position, interactionPoint.transform.position + interactionPoint.transform.forward * 0.5f);
+			}
+		}
 	}
 }

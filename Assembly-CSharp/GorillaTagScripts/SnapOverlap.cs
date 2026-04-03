@@ -1,15 +1,12 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public class SnapOverlap
 {
-	public class SnapOverlap
-	{
-		public BuilderAttachGridPlane otherPlane;
+	public BuilderAttachGridPlane otherPlane;
 
-		public SnapBounds bounds;
+	public SnapBounds bounds;
 
-		public SnapOverlap nextOverlap;
+	public SnapOverlap nextOverlap;
 
-		public bool inPool = true;
-	}
+	public bool inPool = true;
 }

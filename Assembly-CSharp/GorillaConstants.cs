@@ -1,5 +1,3 @@
-﻿using System;
-
 public static class GorillaConstants
 {
 	public const string redValue = "redValue";

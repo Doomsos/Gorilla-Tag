@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -6,59 +5,6 @@ using UnityEngine;
 
 public class GREntityDebugCanvas : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.builder = new StringBuilder(50);
-	}
-
-	private void Start()
-	{
-		if (this.text == null && this.textPanelPrefab != null)
-		{
-			GameObject gameObject = Object.Instantiate<GameObject>(this.textPanelPrefab, base.transform.position + this.prefabAttachOffset, Quaternion.identity, base.transform);
-			this.text = gameObject.GetComponent<TMP_Text>();
-		}
-		if (this.text != null)
-		{
-			this.text.fontSize = this.fontSize;
-			this.text.gameObject.SetActive(false);
-		}
-	}
-
-	private bool UpdateActive()
-	{
-		bool entityDebugEnabled = GhostReactorManager.entityDebugEnabled;
-		if (this.text != null)
-		{
-			this.text.gameObject.SetActive(entityDebugEnabled);
-		}
-		return entityDebugEnabled;
-	}
-
-	private void Update()
-	{
-	}
-
-	private void UpdateText()
-	{
-		if (this.text)
-		{
-			this.builder.Clear();
-			List<IGameEntityDebugComponent> list = new List<IGameEntityDebugComponent>();
-			base.GetComponents<IGameEntityDebugComponent>(list);
-			foreach (IGameEntityDebugComponent gameEntityDebugComponent in list)
-			{
-				List<string> list2 = new List<string>();
-				gameEntityDebugComponent.GetDebugTextLines(out list2);
-				foreach (string value in list2)
-				{
-					this.builder.AppendLine(value);
-				}
-			}
-			this.text.text = this.builder.ToString();
-		}
-	}
-
 	[SerializeField]
 	public TMP_Text text;
 
@@ -69,4 +15,58 @@ public class GREntityDebugCanvas : MonoBehaviour
 	public float fontSize = 100f;
 
 	private StringBuilder builder;
+
+	private void Awake()
+	{
+		builder = new StringBuilder(50);
+	}
+
+	private void Start()
+	{
+		if (text == null && textPanelPrefab != null)
+		{
+			GameObject gameObject = Object.Instantiate(textPanelPrefab, base.transform.position + prefabAttachOffset, Quaternion.identity, base.transform);
+			text = gameObject.GetComponent<TMP_Text>();
+		}
+		if (text != null)
+		{
+			text.fontSize = fontSize;
+			text.gameObject.SetActive(value: false);
+		}
+	}
+
+	private bool UpdateActive()
+	{
+		bool entityDebugEnabled = GhostReactorManager.entityDebugEnabled;
+		if (text != null)
+		{
+			text.gameObject.SetActive(entityDebugEnabled);
+		}
+		return entityDebugEnabled;
+	}
+
+	private void Update()
+	{
+	}
+
+	private void UpdateText()
+	{
+		if (!text)
+		{
+			return;
+		}
+		builder.Clear();
+		List<IGameEntityDebugComponent> list = new List<IGameEntityDebugComponent>();
+		GetComponents(list);
+		foreach (IGameEntityDebugComponent item in list)
+		{
+			List<string> strings = new List<string>();
+			item.GetDebugTextLines(out strings);
+			foreach (string item2 in strings)
+			{
+				builder.AppendLine(item2);
+			}
+		}
+		text.text = builder.ToString();
+	}
 }

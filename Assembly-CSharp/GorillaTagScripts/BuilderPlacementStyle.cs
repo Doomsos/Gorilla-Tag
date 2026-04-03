@@ -1,10 +1,7 @@
-﻿using System;
+namespace GorillaTagScripts;
 
-namespace GorillaTagScripts
+public enum BuilderPlacementStyle
 {
-	public enum BuilderPlacementStyle
-	{
-		Float,
-		SnapDown
-	}
+	Float,
+	SnapDown
 }

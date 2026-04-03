@@ -1,49 +1,14 @@
-﻿using System;
 using GorillaExtensions;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class HotPepperEvents : MonoBehaviour
 {
-	private void OnEnable()
+	public enum EdibleState
 	{
-		this._pepper.onBiteWorld.AddListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
-		this._pepper.onBiteView.AddListener(new UnityAction<VRRig, int>(this.OnBiteView));
-	}
-
-	private void OnDisable()
-	{
-		this._pepper.onBiteWorld.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
-		this._pepper.onBiteView.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteView));
-	}
-
-	public void OnBiteView(VRRig rig, int nextState)
-	{
-		this.OnBite(rig, nextState, true);
-	}
-
-	public void OnBiteWorld(VRRig rig, int nextState)
-	{
-		this.OnBite(rig, nextState, false);
-	}
-
-	public void OnBite(VRRig rig, int nextState, bool isViewRig)
-	{
-		if (nextState != 8)
-		{
-			return;
-		}
-		GameObject gameObject = rig.cosmeticReferences.Get(this.m_targetEffectID);
-		if (gameObject.IsNull())
-		{
-			return;
-		}
-		HotPepperFace component = gameObject.GetComponent<HotPepperFace>();
-		if (component.IsNull())
-		{
-			return;
-		}
-		component.PlayFX(1f);
+		A = 1,
+		B = 2,
+		C = 4,
+		D = 8
 	}
 
 	[SerializeField]
@@ -52,11 +17,42 @@ public class HotPepperEvents : MonoBehaviour
 	[SerializeField]
 	private CosmeticRefID m_targetEffectID = CosmeticRefID.HotPepperFaceEffect;
 
-	public enum EdibleState
+	private void OnEnable()
 	{
-		A = 1,
-		B,
-		C = 4,
-		D = 8
+		_pepper.onBiteWorld.AddListener(OnBiteWorld);
+		_pepper.onBiteView.AddListener(OnBiteView);
+	}
+
+	private void OnDisable()
+	{
+		_pepper.onBiteWorld.RemoveListener(OnBiteWorld);
+		_pepper.onBiteView.RemoveListener(OnBiteView);
+	}
+
+	public void OnBiteView(VRRig rig, int nextState)
+	{
+		OnBite(rig, nextState, isViewRig: true);
+	}
+
+	public void OnBiteWorld(VRRig rig, int nextState)
+	{
+		OnBite(rig, nextState, isViewRig: false);
+	}
+
+	public void OnBite(VRRig rig, int nextState, bool isViewRig)
+	{
+		if (nextState != 8)
+		{
+			return;
+		}
+		GameObject gameObject = rig.cosmeticReferences.Get(m_targetEffectID);
+		if (!gameObject.IsNull())
+		{
+			HotPepperFace component = gameObject.GetComponent<HotPepperFace>();
+			if (!component.IsNull())
+			{
+				component.PlayFX(1f);
+			}
+		}
 	}
 }

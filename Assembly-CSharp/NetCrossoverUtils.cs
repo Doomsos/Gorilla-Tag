@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -9,9 +9,13 @@ using UnityEngine;
 
 public static class NetCrossoverUtils
 {
+	private const int MaxParameterByteLength = 2048;
+
+	private static byte[] FixedBuffer;
+
 	public static void Prewarm()
 	{
-		NetCrossoverUtils.FixedBuffer = new byte[2048];
+		FixedBuffer = new byte[2048];
 	}
 
 	public static void WriteNetDataToBuffer<T>(this T data, PhotonStream stream) where T : struct, INetworkStruct
@@ -21,17 +25,17 @@ public static class NetCrossoverUtils
 			Debug.LogError("Attempted to write data to a reading stream!");
 			return;
 		}
-		IntPtr intPtr = 0;
+		IntPtr intPtr = default(IntPtr);
 		try
 		{
 			int num = Marshal.SizeOf(typeof(T));
 			intPtr = Marshal.AllocHGlobal(num);
-			Marshal.StructureToPtr<T>(data, intPtr, true);
-			Marshal.Copy(intPtr, NetCrossoverUtils.FixedBuffer, 0, num);
+			Marshal.StructureToPtr(data, intPtr, fDeleteOld: true);
+			Marshal.Copy(intPtr, FixedBuffer, 0, num);
 			stream.SendNext(num);
 			for (int i = 0; i < num; i++)
 			{
-				stream.SendNext(NetCrossoverUtils.FixedBuffer[i]);
+				stream.SendNext(FixedBuffer[i]);
 			}
 		}
 		finally
@@ -47,8 +51,7 @@ public static class NetCrossoverUtils
 			Debug.LogError("Attmpted to read data from a writing stream!");
 			return null;
 		}
-		IntPtr intPtr = 0;
-		object result;
+		IntPtr intPtr = default(IntPtr);
 		try
 		{
 			Type typeFromHandle = typeof(T);
@@ -56,25 +59,21 @@ public static class NetCrossoverUtils
 			int num2 = Marshal.SizeOf(typeFromHandle);
 			if (num != num2)
 			{
-				Debug.LogError(string.Format("Expected datasize {0} when reading data for type '{1}',", num2, typeFromHandle.Name) + string.Format("but {0} data is available!", num));
-				result = null;
+				Debug.LogError($"Expected datasize {num2} when reading data for type '{typeFromHandle.Name}'," + $"but {num} data is available!");
+				return null;
 			}
-			else
+			intPtr = Marshal.AllocHGlobal(num2);
+			for (int i = 0; i < num2; i++)
 			{
-				intPtr = Marshal.AllocHGlobal(num2);
-				for (int i = 0; i < num2; i++)
-				{
-					NetCrossoverUtils.FixedBuffer[i] = (byte)stream.ReceiveNext();
-				}
-				Marshal.Copy(NetCrossoverUtils.FixedBuffer, 0, intPtr, num2);
-				result = (T)((object)Marshal.PtrToStructure(intPtr, typeFromHandle));
+				FixedBuffer[i] = (byte)stream.ReceiveNext();
 			}
+			Marshal.Copy(FixedBuffer, 0, intPtr, num2);
+			return (T)Marshal.PtrToStructure(intPtr, typeFromHandle);
 		}
 		finally
 		{
 			Marshal.FreeHGlobal(intPtr);
 		}
-		return result;
 	}
 
 	public static void WriteNetDataToBuffer(this object data, PhotonStream stream)
@@ -84,17 +83,17 @@ public static class NetCrossoverUtils
 			Debug.LogError("Attempted to write data to a reading stream!");
 			return;
 		}
-		IntPtr intPtr = 0;
+		IntPtr intPtr = default(IntPtr);
 		try
 		{
 			int num = Marshal.SizeOf(data.GetType());
 			intPtr = Marshal.AllocHGlobal(num);
-			Marshal.StructureToPtr(data, intPtr, true);
-			Marshal.Copy(intPtr, NetCrossoverUtils.FixedBuffer, 0, num);
+			Marshal.StructureToPtr(data, intPtr, fDeleteOld: true);
+			Marshal.Copy(intPtr, FixedBuffer, 0, num);
 			stream.SendNext(num);
 			for (int i = 0; i < num; i++)
 			{
-				stream.SendNext(NetCrossoverUtils.FixedBuffer[i]);
+				stream.SendNext(FixedBuffer[i]);
 			}
 		}
 		finally
@@ -103,14 +102,14 @@ public static class NetCrossoverUtils
 		}
 	}
 
-	public static void SerializeToRPCData<T>(this RPCArgBuffer<T> argBuffer) where T : struct
+	public static void SerializeToRPCData<T>(this ref RPCArgBuffer<T> argBuffer) where T : struct
 	{
-		IntPtr intPtr = 0;
+		IntPtr intPtr = default(IntPtr);
 		try
 		{
 			int num = Marshal.SizeOf(typeof(T));
 			intPtr = Marshal.AllocHGlobal(num);
-			Marshal.StructureToPtr<T>(argBuffer.Args, intPtr, true);
+			Marshal.StructureToPtr(argBuffer.Args, intPtr, fDeleteOld: true);
 			Marshal.Copy(intPtr, argBuffer.Data, 0, num);
 		}
 		finally
@@ -119,9 +118,9 @@ public static class NetCrossoverUtils
 		}
 	}
 
-	public static void PopulateWithRPCData<T>(this RPCArgBuffer<T> argBuffer, byte[] data) where T : struct
+	public static void PopulateWithRPCData<T>(this ref RPCArgBuffer<T> argBuffer, byte[] data) where T : struct
 	{
-		IntPtr intPtr = 0;
+		IntPtr intPtr = default(IntPtr);
 		try
 		{
 			int num = Marshal.SizeOf(typeof(T));
@@ -135,17 +134,13 @@ public static class NetCrossoverUtils
 		}
 	}
 
-	public static Dictionary<string, SessionProperty> ToPropDict(this Hashtable hash)
+	public static Dictionary<string, SessionProperty> ToPropDict(this ExitGames.Client.Photon.Hashtable hash)
 	{
 		Dictionary<string, SessionProperty> dictionary = new Dictionary<string, SessionProperty>();
-		foreach (DictionaryEntry dictionaryEntry in hash)
+		foreach (DictionaryEntry item in hash)
 		{
-			dictionary.Add((string)dictionaryEntry.Key, (string)dictionaryEntry.Value);
+			dictionary.Add((string)item.Key, (string)item.Value);
 		}
 		return dictionary;
 	}
-
-	private const int MaxParameterByteLength = 2048;
-
-	private static byte[] FixedBuffer;
 }

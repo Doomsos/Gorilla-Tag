@@ -1,46 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Audio;
 
 [Serializable]
 public class AudioMixVar
 {
-	public float value
-	{
-		get
-		{
-			if (!this.group)
-			{
-				return 0f;
-			}
-			if (!this.mixer)
-			{
-				return 0f;
-			}
-			float result;
-			if (!this.mixer.GetFloat(this.name, out result))
-			{
-				return 0f;
-			}
-			return result;
-		}
-		set
-		{
-			if (this.mixer)
-			{
-				this.mixer.SetFloat(this.name, value);
-			}
-		}
-	}
-
-	public void ReturnToPool()
-	{
-		if (this._pool != null)
-		{
-			this._pool.Return(this);
-		}
-	}
-
 	public AudioMixerGroup group;
 
 	public AudioMixer mixer;
@@ -52,4 +16,39 @@ public class AudioMixVar
 
 	[SerializeField]
 	private AudioMixVarPool _pool;
+
+	public float value
+	{
+		get
+		{
+			if (!group)
+			{
+				return 0f;
+			}
+			if (!mixer)
+			{
+				return 0f;
+			}
+			if (!mixer.GetFloat(name, out var result))
+			{
+				return 0f;
+			}
+			return result;
+		}
+		set
+		{
+			if ((bool)mixer)
+			{
+				mixer.SetFloat(name, value);
+			}
+		}
+	}
+
+	public void ReturnToPool()
+	{
+		if (_pool != null)
+		{
+			_pool.Return(this);
+		}
+	}
 }

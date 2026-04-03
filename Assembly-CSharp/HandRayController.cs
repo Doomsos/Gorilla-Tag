@@ -1,159 +1,12 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class HandRayController : MonoBehaviour
 {
-	public static HandRayController Instance
+	private enum HandSide
 	{
-		get
-		{
-			if (HandRayController.instance == null)
-			{
-				HandRayController.instance = Object.FindAnyObjectByType<HandRayController>();
-				if (HandRayController.instance == null)
-				{
-					Debug.LogErrorFormat("[KID::UI::HAND_RAY_CONTROLLER] Not found in scene", Array.Empty<object>());
-				}
-			}
-			return HandRayController.instance;
-		}
-	}
-
-	private void Awake()
-	{
-		if (HandRayController.instance != null && HandRayController.instance != this)
-		{
-			Debug.LogErrorFormat(base.gameObject, "[KID::UI::HAND_RAY_CONTROLLER] Duplicate instance of HandRayController", Array.Empty<object>());
-			Object.DestroyImmediate(this);
-			return;
-		}
-		HandRayController.instance = this;
-	}
-
-	private void Start()
-	{
-		this._leftHandRay.attachTransform = (this._leftHandRay.rayOriginTransform = KIDHandReference.LeftHand.transform);
-		this._rightHandRay.attachTransform = (this._rightHandRay.rayOriginTransform = KIDHandReference.RightHand.transform);
-		this.DisableHandRays();
-		this._activationCounter = 0;
-	}
-
-	private void OnDisable()
-	{
-		this.DisableHandRays();
-	}
-
-	public void EnableHandRays()
-	{
-		if (this._activationCounter == 0)
-		{
-			if (ControllerBehaviour.Instance)
-			{
-				ControllerBehaviour.Instance.OnAction += this.PostUpdate;
-			}
-			this.ToggleHands();
-		}
-		this._activationCounter++;
-	}
-
-	public void DisableHandRays()
-	{
-		this._activationCounter--;
-		if (this._activationCounter == 0)
-		{
-			if (ControllerBehaviour.Instance)
-			{
-				ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
-			}
-			this.HideHands();
-		}
-	}
-
-	public void PulseActiveHandray(float vibrationStrength, float vibrationDuration)
-	{
-		if (this._activeHandRay == null)
-		{
-			return;
-		}
-		this._activeHandRay.SendHapticImpulse(vibrationStrength, vibrationDuration);
-	}
-
-	private void PostUpdate()
-	{
-		if (!this._hasInitialised)
-		{
-			return;
-		}
-		if (this.ActiveHand == HandRayController.HandSide.Left)
-		{
-			if (ControllerBehaviour.Instance.RightButtonDown)
-			{
-				this.ToggleHands();
-			}
-			return;
-		}
-		if (ControllerBehaviour.Instance.LeftButtonDown)
-		{
-			this.ToggleHands();
-		}
-	}
-
-	private void ToggleRightHandRay(bool enabled)
-	{
-		Debug.LogFormat(string.Format("[KID::UI::HAND_RAY_CONTROLLER] RIGHT Hand is: {0}. Setting to: {1}", this._rightHandRay.gameObject.activeInHierarchy, enabled), Array.Empty<object>());
-		this._rightHandRay.gameObject.SetActive(enabled);
-		if (enabled)
-		{
-			this._activeHandRay = this._rightHandRay;
-		}
-	}
-
-	private void ToggleLeftHandRay(bool enabled)
-	{
-		Debug.LogFormat(string.Format("[KID::UI::HAND_RAY_CONTROLLER] LEFT Hand is: {0}. Setting to: {1}", this._rightHandRay.gameObject.activeInHierarchy, enabled), Array.Empty<object>());
-		this._leftHandRay.gameObject.SetActive(enabled);
-		if (enabled)
-		{
-			this._activeHandRay = this._leftHandRay;
-		}
-	}
-
-	private void InitialiseHands()
-	{
-		Debug.Log("[KID::UI::HAND_RAY_CONTROLLER] Initialising Hands");
-		this.ToggleRightHandRay(this.ActiveHand == HandRayController.HandSide.Right);
-		this.ToggleLeftHandRay(this.ActiveHand == HandRayController.HandSide.Left);
-		this._hasInitialised = true;
-	}
-
-	private void ToggleHands()
-	{
-		if (!this._hasInitialised)
-		{
-			this.InitialiseHands();
-			return;
-		}
-		HandRayController.HandSide handSide = (this.ActiveHand == HandRayController.HandSide.Left) ? HandRayController.HandSide.Right : HandRayController.HandSide.Left;
-		Debug.LogFormat(string.Concat(new string[]
-		{
-			"[KID::UI::HAND_RAY_CONTROLLER] Setting ActiveHand FROM: [",
-			this.ActiveHand.ToString(),
-			"] TO: [",
-			handSide.ToString(),
-			"]"
-		}), Array.Empty<object>());
-		this.ActiveHand = handSide;
-		this.ToggleRightHandRay(handSide == HandRayController.HandSide.Right);
-		this.ToggleLeftHandRay(handSide == HandRayController.HandSide.Left);
-	}
-
-	private void HideHands()
-	{
-		this.ToggleRightHandRay(false);
-		this.ToggleLeftHandRay(false);
-		this._hasInitialised = false;
-		this._activeHandRay = null;
+		Left,
+		Right
 	}
 
 	[OnEnterPlay_SetNull]
@@ -167,15 +20,158 @@ public class HandRayController : MonoBehaviour
 
 	private bool _hasInitialised;
 
-	private HandRayController.HandSide ActiveHand = HandRayController.HandSide.Right;
+	private HandSide ActiveHand = HandSide.Right;
 
 	private XRRayInteractor _activeHandRay;
 
 	private int _activationCounter;
 
-	private enum HandSide
+	public static HandRayController Instance
 	{
-		Left,
-		Right
+		get
+		{
+			if (instance == null)
+			{
+				instance = Object.FindAnyObjectByType<HandRayController>();
+				if (instance == null)
+				{
+					Debug.LogErrorFormat("[KID::UI::HAND_RAY_CONTROLLER] Not found in scene");
+				}
+			}
+			return instance;
+		}
+	}
+
+	private void Awake()
+	{
+		if (instance != null && instance != this)
+		{
+			Debug.LogErrorFormat(base.gameObject, "[KID::UI::HAND_RAY_CONTROLLER] Duplicate instance of HandRayController");
+			Object.DestroyImmediate(this);
+		}
+		else
+		{
+			instance = this;
+		}
+	}
+
+	private void Start()
+	{
+		XRRayInteractor leftHandRay = _leftHandRay;
+		Transform attachTransform = (_leftHandRay.rayOriginTransform = KIDHandReference.LeftHand.transform);
+		leftHandRay.attachTransform = attachTransform;
+		XRRayInteractor rightHandRay = _rightHandRay;
+		attachTransform = (_rightHandRay.rayOriginTransform = KIDHandReference.RightHand.transform);
+		rightHandRay.attachTransform = attachTransform;
+		DisableHandRays();
+		_activationCounter = 0;
+	}
+
+	private void OnDisable()
+	{
+		DisableHandRays();
+	}
+
+	public void EnableHandRays()
+	{
+		if (_activationCounter == 0)
+		{
+			if ((bool)ControllerBehaviour.Instance)
+			{
+				ControllerBehaviour.Instance.OnAction += PostUpdate;
+			}
+			ToggleHands();
+		}
+		_activationCounter++;
+	}
+
+	public void DisableHandRays()
+	{
+		_activationCounter--;
+		if (_activationCounter == 0)
+		{
+			if ((bool)ControllerBehaviour.Instance)
+			{
+				ControllerBehaviour.Instance.OnAction -= PostUpdate;
+			}
+			HideHands();
+		}
+	}
+
+	public void PulseActiveHandray(float vibrationStrength, float vibrationDuration)
+	{
+		if (!(_activeHandRay == null))
+		{
+			_activeHandRay.SendHapticImpulse(vibrationStrength, vibrationDuration);
+		}
+	}
+
+	private void PostUpdate()
+	{
+		if (!_hasInitialised)
+		{
+			return;
+		}
+		if (ActiveHand == HandSide.Left)
+		{
+			if (ControllerBehaviour.Instance.RightButtonDown)
+			{
+				ToggleHands();
+			}
+		}
+		else if (ControllerBehaviour.Instance.LeftButtonDown)
+		{
+			ToggleHands();
+		}
+	}
+
+	private void ToggleRightHandRay(bool enabled)
+	{
+		Debug.LogFormat($"[KID::UI::HAND_RAY_CONTROLLER] RIGHT Hand is: {_rightHandRay.gameObject.activeInHierarchy}. Setting to: {enabled}");
+		_rightHandRay.gameObject.SetActive(enabled);
+		if (enabled)
+		{
+			_activeHandRay = _rightHandRay;
+		}
+	}
+
+	private void ToggleLeftHandRay(bool enabled)
+	{
+		Debug.LogFormat($"[KID::UI::HAND_RAY_CONTROLLER] LEFT Hand is: {_rightHandRay.gameObject.activeInHierarchy}. Setting to: {enabled}");
+		_leftHandRay.gameObject.SetActive(enabled);
+		if (enabled)
+		{
+			_activeHandRay = _leftHandRay;
+		}
+	}
+
+	private void InitialiseHands()
+	{
+		Debug.Log("[KID::UI::HAND_RAY_CONTROLLER] Initialising Hands");
+		ToggleRightHandRay(ActiveHand == HandSide.Right);
+		ToggleLeftHandRay(ActiveHand == HandSide.Left);
+		_hasInitialised = true;
+	}
+
+	private void ToggleHands()
+	{
+		if (!_hasInitialised)
+		{
+			InitialiseHands();
+			return;
+		}
+		HandSide handSide = ((ActiveHand == HandSide.Left) ? HandSide.Right : HandSide.Left);
+		Debug.LogFormat("[KID::UI::HAND_RAY_CONTROLLER] Setting ActiveHand FROM: [" + ActiveHand.ToString() + "] TO: [" + handSide.ToString() + "]");
+		ActiveHand = handSide;
+		ToggleRightHandRay(handSide == HandSide.Right);
+		ToggleLeftHandRay(handSide == HandSide.Left);
+	}
+
+	private void HideHands()
+	{
+		ToggleRightHandRay(enabled: false);
+		ToggleLeftHandRay(enabled: false);
+		_hasInitialised = false;
+		_activeHandRay = null;
 	}
 }

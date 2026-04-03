@@ -1,38 +1,38 @@
-﻿using System;
 using UnityEngine;
 
 public class RotateXform : MonoBehaviour
 {
-	private void Update()
+	public enum Mode
 	{
-		if (!this.xform)
-		{
-			return;
-		}
-		Vector3 vector = (this.mode == RotateXform.Mode.Local) ? this.xform.localEulerAngles : this.xform.eulerAngles;
-		float num = Time.deltaTime * this.speedFactor;
-		vector.x += this.speed.x * num;
-		vector.y += this.speed.y * num;
-		vector.z += this.speed.z * num;
-		if (this.mode == RotateXform.Mode.Local)
-		{
-			this.xform.localEulerAngles = vector;
-			return;
-		}
-		this.xform.eulerAngles = vector;
+		Local,
+		World
 	}
 
 	public Transform xform;
 
 	public Vector3 speed = Vector3.zero;
 
-	public RotateXform.Mode mode;
+	public Mode mode;
 
 	public float speedFactor = 0.0625f;
 
-	public enum Mode
+	private void Update()
 	{
-		Local,
-		World
+		if ((bool)xform)
+		{
+			Vector3 vector = ((mode == Mode.Local) ? xform.localEulerAngles : xform.eulerAngles);
+			float num = Time.deltaTime * speedFactor;
+			vector.x += speed.x * num;
+			vector.y += speed.y * num;
+			vector.z += speed.z * num;
+			if (mode == Mode.Local)
+			{
+				xform.localEulerAngles = vector;
+			}
+			else
+			{
+				xform.eulerAngles = vector;
+			}
+		}
 	}
 }

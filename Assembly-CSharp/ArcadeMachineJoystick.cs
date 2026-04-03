@@ -1,17 +1,30 @@
-﻿using System;
 using Photon.Pun;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOwnershipGuardCallbacks
 {
+	private XRNode xrNode;
+
+	private ArcadeMachine machine;
+
+	private RequestableOwnershipGuard guard;
+
+	private GorillaSnapTurn snapTurn;
+
+	private bool snapTurnOverride;
+
 	public bool heldByLocalPlayer { get; private set; }
 
 	public bool IsHeldLeftHanded
 	{
 		get
 		{
-			return this.heldByLocalPlayer && this.xrNode == XRNode.LeftHand;
+			if (heldByLocalPlayer)
+			{
+				return xrNode == XRNode.LeftHand;
+			}
+			return false;
 		}
 	}
 
@@ -23,36 +36,36 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 	{
 		this.machine = machine;
 		this.player = player;
-		this.guard = base.GetComponent<RequestableOwnershipGuard>();
-		this.guard.AddCallbackTarget(this);
+		guard = GetComponent<RequestableOwnershipGuard>();
+		guard.AddCallbackTarget(this);
 	}
 
 	public void BindController(bool leftHand)
 	{
-		this.xrNode = (leftHand ? XRNode.LeftHand : XRNode.RightHand);
-		this.heldByLocalPlayer = true;
+		xrNode = (leftHand ? XRNode.LeftHand : XRNode.RightHand);
+		heldByLocalPlayer = true;
 		if (!leftHand)
 		{
-			if (!this.snapTurn)
+			if (!snapTurn)
 			{
-				this.snapTurn = GorillaTagger.Instance.GetComponent<GorillaSnapTurn>();
+				snapTurn = GorillaTagger.Instance.GetComponent<GorillaSnapTurn>();
 			}
-			if (this.snapTurn != null)
+			if (snapTurn != null)
 			{
-				this.snapTurnOverride = true;
-				this.snapTurn.SetTurningOverride(this);
+				snapTurnOverride = true;
+				snapTurn.SetTurningOverride(this);
 			}
 		}
 		if (PhotonNetwork.IsMasterClient)
 		{
-			this.guard.TransferOwnership(PhotonNetwork.LocalPlayer, "");
+			guard.TransferOwnership(PhotonNetwork.LocalPlayer);
 		}
-		else if (!this.guard.isMine)
+		else if (!guard.isMine)
 		{
-			this.guard.RequestOwnership(new Action(this.OnOwnershipSuccess), new Action(this.OnOwnershipFail));
+			guard.RequestOwnership(OnOwnershipSuccess, OnOwnershipFail);
 		}
-		ControllerInputPoller.AddUpdateCallback(new Action(this.OnInputUpdate));
-		PlayerGameEvents.MiscEvent("PlayArcadeGame", 1);
+		ControllerInputPoller.AddUpdateCallback(OnInputUpdate);
+		PlayerGameEvents.MiscEvent("PlayArcadeGame");
 	}
 
 	private void OnOwnershipSuccess()
@@ -61,82 +74,81 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 
 	private void OnOwnershipFail()
 	{
-		this.ForceRelease();
+		ForceRelease();
 	}
 
 	public void UnbindController()
 	{
-		this.heldByLocalPlayer = false;
-		if (this.snapTurnOverride)
+		heldByLocalPlayer = false;
+		if (snapTurnOverride)
 		{
-			this.snapTurnOverride = false;
-			this.snapTurn.UnsetTurningOverride(this);
+			snapTurnOverride = false;
+			snapTurn.UnsetTurningOverride(this);
 		}
-		this.OnInputUpdate();
-		ControllerInputPoller.RemoveUpdateCallback(new Action(this.OnInputUpdate));
+		OnInputUpdate();
+		ControllerInputPoller.RemoveUpdateCallback(OnInputUpdate);
 	}
 
 	private void OnInputUpdate()
 	{
 		ArcadeButtons arcadeButtons = (ArcadeButtons)0;
-		if (this.heldByLocalPlayer)
+		if (heldByLocalPlayer)
 		{
 			arcadeButtons |= ArcadeButtons.GRAB;
-			if (ControllerInputPoller.Primary2DAxis(this.xrNode).y > 0.5f)
+			if (ControllerInputPoller.Primary2DAxis(xrNode).y > 0.5f)
 			{
 				arcadeButtons |= ArcadeButtons.UP;
 			}
-			if (ControllerInputPoller.Primary2DAxis(this.xrNode).y < -0.5f)
+			if (ControllerInputPoller.Primary2DAxis(xrNode).y < -0.5f)
 			{
 				arcadeButtons |= ArcadeButtons.DOWN;
 			}
-			if (ControllerInputPoller.Primary2DAxis(this.xrNode).x < -0.5f)
+			if (ControllerInputPoller.Primary2DAxis(xrNode).x < -0.5f)
 			{
 				arcadeButtons |= ArcadeButtons.LEFT;
 			}
-			if (ControllerInputPoller.Primary2DAxis(this.xrNode).x > 0.5f)
+			if (ControllerInputPoller.Primary2DAxis(xrNode).x > 0.5f)
 			{
 				arcadeButtons |= ArcadeButtons.RIGHT;
 			}
-			if (ControllerInputPoller.PrimaryButtonPress(this.xrNode))
+			if (ControllerInputPoller.PrimaryButtonPress(xrNode))
 			{
 				arcadeButtons |= ArcadeButtons.B0;
 			}
-			if (ControllerInputPoller.SecondaryButtonPress(this.xrNode))
+			if (ControllerInputPoller.SecondaryButtonPress(xrNode))
 			{
 				arcadeButtons |= ArcadeButtons.B1;
 			}
-			if (ControllerInputPoller.TriggerFloat(this.xrNode) > 0.5f)
+			if (ControllerInputPoller.TriggerFloat(xrNode) > 0.5f)
 			{
 				arcadeButtons |= ArcadeButtons.TRIGGER;
 			}
 		}
-		if (arcadeButtons != this.currentButtonState)
+		if (arcadeButtons != currentButtonState)
 		{
-			this.machine.OnJoystickStateChange(this.player, arcadeButtons);
+			machine.OnJoystickStateChange(player, arcadeButtons);
 		}
-		this.currentButtonState = arcadeButtons;
+		currentButtonState = arcadeButtons;
 	}
 
 	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (info.Sender != info.photonView.Owner)
+		if (info.Sender == info.photonView.Owner)
 		{
-			return;
+			ArcadeButtons arcadeButtons = (ArcadeButtons)(int)stream.ReceiveNext();
+			if (arcadeButtons != currentButtonState && machine != null)
+			{
+				machine.OnJoystickStateChange(player, arcadeButtons);
+			}
+			currentButtonState = arcadeButtons;
+			machine.ReadPlayerDataPUN(player, stream, info);
 		}
-		ArcadeButtons arcadeButtons = (ArcadeButtons)((int)stream.ReceiveNext());
-		if (arcadeButtons != this.currentButtonState && this.machine != null)
-		{
-			this.machine.OnJoystickStateChange(this.player, arcadeButtons);
-		}
-		this.currentButtonState = arcadeButtons;
-		this.machine.ReadPlayerDataPUN(this.player, stream, info);
 	}
 
 	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
-		stream.SendNext((int)this.currentButtonState);
-		this.machine.WritePlayerDataPUN(this.player, stream, info);
+		stream.SendNext((int)currentButtonState);
+		machine.WritePlayerDataPUN(player, stream, info);
 	}
 
 	public void ReceiveRemoteState(ArcadeButtons newState)
@@ -145,36 +157,36 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 
 	public bool TurnOverrideActive()
 	{
-		return this.snapTurnOverride;
+		return snapTurnOverride;
 	}
 
 	public override bool CanBeGrabbed(GorillaGrabber grabber)
 	{
-		return !this.machine.IsControllerInUse(this.player);
+		return !machine.IsControllerInUse(player);
 	}
 
 	public void ForceRelease()
 	{
-		this.heldByLocalPlayer = false;
-		this.currentButtonState = (ArcadeButtons)0;
+		heldByLocalPlayer = false;
+		currentButtonState = (ArcadeButtons)0;
 	}
 
 	public void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
 	{
-		if (this.heldByLocalPlayer && (toPlayer == null || !toPlayer.IsLocal))
+		if (heldByLocalPlayer && (toPlayer == null || !toPlayer.IsLocal))
 		{
-			this.ForceRelease();
+			ForceRelease();
 		}
 	}
 
 	public bool OnOwnershipRequest(NetPlayer fromPlayer)
 	{
-		return !this.heldByLocalPlayer;
+		return !heldByLocalPlayer;
 	}
 
 	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)
 	{
-		return !this.heldByLocalPlayer;
+		return !heldByLocalPlayer;
 	}
 
 	public void OnMyOwnerLeft()
@@ -184,14 +196,4 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 	public void OnMyCreatorLeft()
 	{
 	}
-
-	private XRNode xrNode;
-
-	private ArcadeMachine machine;
-
-	private RequestableOwnershipGuard guard;
-
-	private GorillaSnapTurn snapTurn;
-
-	private bool snapTurnOverride;
 }

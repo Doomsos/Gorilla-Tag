@@ -1,4 +1,3 @@
-﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -7,15 +6,15 @@ public static class UnityObjectUtils
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static T AsNull<T>(this T obj) where T : Object
 	{
-		if (obj == null)
+		if ((object)obj == null)
 		{
-			return default(T);
+			return null;
 		}
 		if (!(obj == null))
 		{
 			return obj;
 		}
-		return default(T);
+		return null;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

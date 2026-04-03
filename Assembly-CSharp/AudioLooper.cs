@@ -1,30 +1,8 @@
-﻿using System;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class AudioLooper : MonoBehaviour
 {
-	protected virtual void Awake()
-	{
-		this.audioSource = base.GetComponent<AudioSource>();
-	}
-
-	private void Update()
-	{
-		if (!this.audioSource.isPlaying)
-		{
-			if (this.audioSource.clip == this.loopClip && this.interjectionClips.Length != 0 && Random.value < this.interjectionLikelyhood)
-			{
-				this.audioSource.clip = this.interjectionClips[Random.Range(0, this.interjectionClips.Length)];
-			}
-			else
-			{
-				this.audioSource.clip = this.loopClip;
-			}
-			this.audioSource.GTPlay();
-		}
-	}
-
 	private AudioSource audioSource;
 
 	[SerializeField]
@@ -35,4 +13,25 @@ public class AudioLooper : MonoBehaviour
 
 	[SerializeField]
 	private float interjectionLikelyhood = 0.5f;
+
+	protected virtual void Awake()
+	{
+		audioSource = GetComponent<AudioSource>();
+	}
+
+	private void Update()
+	{
+		if (!audioSource.isPlaying)
+		{
+			if (audioSource.clip == loopClip && interjectionClips.Length != 0 && Random.value < interjectionLikelyhood)
+			{
+				audioSource.clip = interjectionClips[Random.Range(0, interjectionClips.Length)];
+			}
+			else
+			{
+				audioSource.clip = loopClip;
+			}
+			audioSource.GTPlay();
+		}
+	}
 }

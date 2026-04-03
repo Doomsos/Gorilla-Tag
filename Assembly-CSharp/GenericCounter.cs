@@ -1,41 +1,8 @@
-﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class GenericCounter : MonoBehaviour
 {
-	public void CountUp()
-	{
-		this.currentCount++;
-		this.DoCallbacks();
-	}
-
-	public void CountDown()
-	{
-		this.currentCount--;
-		this.DoCallbacks();
-	}
-
-	private void DoCallbacks()
-	{
-		if (this.currentCount < this.Threshold)
-		{
-			this.whenLessThan.Invoke();
-			return;
-		}
-		if (this.currentCount == this.Threshold)
-		{
-			this.whenEqual.Invoke();
-			return;
-		}
-		this.whenGreaterThan.Invoke();
-	}
-
-	public void ResetCounter()
-	{
-		this.currentCount = 0;
-	}
-
 	[SerializeField]
 	private int Threshold;
 
@@ -49,4 +16,37 @@ public class GenericCounter : MonoBehaviour
 	private UnityEvent whenGreaterThan;
 
 	private int currentCount;
+
+	public void CountUp()
+	{
+		currentCount++;
+		DoCallbacks();
+	}
+
+	public void CountDown()
+	{
+		currentCount--;
+		DoCallbacks();
+	}
+
+	private void DoCallbacks()
+	{
+		if (currentCount < Threshold)
+		{
+			whenLessThan.Invoke();
+		}
+		else if (currentCount == Threshold)
+		{
+			whenEqual.Invoke();
+		}
+		else
+		{
+			whenGreaterThan.Invoke();
+		}
+	}
+
+	public void ResetCounter()
+	{
+		currentCount = 0;
+	}
 }

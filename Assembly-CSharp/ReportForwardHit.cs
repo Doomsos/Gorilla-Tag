@@ -1,69 +1,8 @@
-﻿using System;
 using NetSynchrony;
 using UnityEngine;
 
 public class ReportForwardHit : MonoBehaviour
 {
-	private void Start()
-	{
-		this.seekFreq = ReportForwardHit.rand.NextFloat(this.minseekFreq, this.maxseekFreq);
-	}
-
-	private void OnEnable()
-	{
-		if (this.seekOnEnable)
-		{
-			this.seek();
-		}
-		if (this.nsRand != null)
-		{
-			this.nsRand.Dispatch += this.NsRand_Dispatch;
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (this.nsRand != null)
-		{
-			this.nsRand.Dispatch -= this.NsRand_Dispatch;
-		}
-	}
-
-	private void NsRand_Dispatch(RandomDispatcher randomDispatcher)
-	{
-		this.seek();
-	}
-
-	private void Update()
-	{
-		if (this.nsRand != null)
-		{
-			return;
-		}
-		this.timeSinceSeek += Time.deltaTime;
-		if (this.timeSinceSeek > this.seekFreq)
-		{
-			this.seek();
-			this.timeSinceSeek = 0f;
-			this.seekFreq = ReportForwardHit.rand.NextFloat(this.minseekFreq, this.maxseekFreq);
-		}
-	}
-
-	private void seek()
-	{
-		float num = Mathf.Max(new float[]
-		{
-			base.transform.lossyScale.x,
-			base.transform.lossyScale.y,
-			base.transform.lossyScale.z
-		});
-		RaycastHit raycastHit;
-		if (Physics.Raycast(base.transform.position, base.transform.forward, out raycastHit, this.maxRadias * num) && this.colliderFound != null)
-		{
-			this.colliderFound.Invoke(base.transform.position, raycastHit.point);
-		}
-	}
-
 	private static SRand rand = new SRand("ReportForwardHit");
 
 	[SerializeField]
@@ -87,4 +26,57 @@ public class ReportForwardHit : MonoBehaviour
 
 	[SerializeField]
 	private bool seekOnEnable;
+
+	private void Start()
+	{
+		seekFreq = rand.NextFloat(minseekFreq, maxseekFreq);
+	}
+
+	private void OnEnable()
+	{
+		if (seekOnEnable)
+		{
+			seek();
+		}
+		if (nsRand != null)
+		{
+			nsRand.Dispatch += NsRand_Dispatch;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (nsRand != null)
+		{
+			nsRand.Dispatch -= NsRand_Dispatch;
+		}
+	}
+
+	private void NsRand_Dispatch(RandomDispatcher randomDispatcher)
+	{
+		seek();
+	}
+
+	private void Update()
+	{
+		if (!(nsRand != null))
+		{
+			timeSinceSeek += Time.deltaTime;
+			if (timeSinceSeek > seekFreq)
+			{
+				seek();
+				timeSinceSeek = 0f;
+				seekFreq = rand.NextFloat(minseekFreq, maxseekFreq);
+			}
+		}
+	}
+
+	private void seek()
+	{
+		float num = Mathf.Max(base.transform.lossyScale.x, base.transform.lossyScale.y, base.transform.lossyScale.z);
+		if (Physics.Raycast(base.transform.position, base.transform.forward, out var hitInfo, maxRadias * num) && colliderFound != null)
+		{
+			colliderFound.Invoke(base.transform.position, hitInfo.point);
+		}
+	}
 }

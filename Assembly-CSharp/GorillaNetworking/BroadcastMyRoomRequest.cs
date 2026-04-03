@@ -1,13 +1,10 @@
-﻿using System;
+namespace GorillaNetworking;
 
-namespace GorillaNetworking
+public class BroadcastMyRoomRequest
 {
-	public class BroadcastMyRoomRequest
-	{
-		public string KeyToFollow;
+	public string KeyToFollow;
 
-		public string RoomToJoin;
+	public string RoomToJoin;
 
-		public bool Set;
-	}
+	public bool Set;
 }

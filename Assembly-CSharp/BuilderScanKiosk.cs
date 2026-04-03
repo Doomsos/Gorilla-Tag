@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,411 +6,14 @@ using GorillaTagScripts;
 using GorillaTagScripts.Builder;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BuilderScanKiosk : MonoBehaviourTick
 {
-	public static bool IsSaveSlotValid(int slot)
+	private enum ScannerState
 	{
-		return slot >= 0 && slot < BuilderScanKiosk.NUM_SAVE_SLOTS;
-	}
-
-	private void Start()
-	{
-		if (this.saveButton != null)
-		{
-			this.saveButton.onPressButton.AddListener(new UnityAction(this.OnSavePressed));
-		}
-		if (this.targetTable != null)
-		{
-			this.targetTable.OnSaveDirtyChanged.AddListener(new UnityAction<bool>(this.OnSaveDirtyChanged));
-			this.targetTable.OnSaveSuccess.AddListener(new UnityAction(this.OnSaveSuccess));
-			this.targetTable.OnSaveFailure.AddListener(new UnityAction<string>(this.OnSaveFail));
-			SharedBlocksManager.OnSaveTimeUpdated += this.OnSaveTimeUpdated;
-		}
-		if (this.noneButton != null)
-		{
-			this.noneButton.onPressButton.AddListener(new UnityAction(this.OnNoneButtonPressed));
-		}
-		foreach (GorillaPressableButton gorillaPressableButton in this.scanButtons)
-		{
-			gorillaPressableButton.onPressed += this.OnScanButtonPressed;
-		}
-		this.scanTriangle = this.scanAnimation.GetComponent<MeshRenderer>();
-		this.scanTriangle.enabled = false;
-		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		this.LoadPlayerPrefs();
-		this.UpdateUI();
-	}
-
-	private new void OnEnable()
-	{
-		base.OnEnable();
-		LocalisationManager.RegisterOnLanguageChanged(new Action(this.UpdateUI));
-	}
-
-	private new void OnDisable()
-	{
-		base.OnDisable();
-		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.UpdateUI));
-	}
-
-	private void OnDestroy()
-	{
-		if (this.saveButton != null)
-		{
-			this.saveButton.onPressButton.RemoveListener(new UnityAction(this.OnSavePressed));
-		}
-		SharedBlocksManager.OnSaveTimeUpdated -= this.OnSaveTimeUpdated;
-		if (this.targetTable != null)
-		{
-			this.targetTable.OnSaveDirtyChanged.RemoveListener(new UnityAction<bool>(this.OnSaveDirtyChanged));
-			this.targetTable.OnSaveFailure.RemoveListener(new UnityAction<string>(this.OnSaveFail));
-		}
-		if (this.noneButton != null)
-		{
-			this.noneButton.onPressButton.RemoveListener(new UnityAction(this.OnNoneButtonPressed));
-		}
-		foreach (GorillaPressableButton gorillaPressableButton in this.scanButtons)
-		{
-			if (!(gorillaPressableButton == null))
-			{
-				gorillaPressableButton.onPressed -= this.OnScanButtonPressed;
-			}
-		}
-	}
-
-	private void OnNoneButtonPressed()
-	{
-		if (this.targetTable == null)
-		{
-			return;
-		}
-		if (this.scannerState == BuilderScanKiosk.ScannerState.CONFIRMATION)
-		{
-			this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		}
-		if (this.targetTable.CurrentSaveSlot != -1)
-		{
-			this.targetTable.CurrentSaveSlot = -1;
-			this.SavePlayerPrefs();
-			this.UpdateUI();
-		}
-	}
-
-	private void OnScanButtonPressed(GorillaPressableButton button, bool isLeft)
-	{
-		if (this.targetTable == null)
-		{
-			return;
-		}
-		if (this.scannerState == BuilderScanKiosk.ScannerState.CONFIRMATION)
-		{
-			this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		}
-		int i = 0;
-		while (i < this.scanButtons.Count)
-		{
-			if (button.Equals(this.scanButtons[i]))
-			{
-				if (i != this.targetTable.CurrentSaveSlot)
-				{
-					this.targetTable.CurrentSaveSlot = i;
-					this.SavePlayerPrefs();
-					this.UpdateUI();
-					return;
-				}
-				break;
-			}
-			else
-			{
-				i++;
-			}
-		}
-	}
-
-	public void OnDevScanPressed()
-	{
-	}
-
-	private void LoadPlayerPrefs()
-	{
-		int @int = PlayerPrefs.GetInt(BuilderScanKiosk.playerPrefKey, -1);
-		this.targetTable.CurrentSaveSlot = @int;
-		this.UpdateUI();
-	}
-
-	private void SavePlayerPrefs()
-	{
-		PlayerPrefs.SetInt(BuilderScanKiosk.playerPrefKey, this.targetTable.CurrentSaveSlot);
-		PlayerPrefs.Save();
-	}
-
-	private void ToggleSaveButton(bool enabled)
-	{
-		if (enabled)
-		{
-			this.saveButton.enabled = true;
-			this.saveButton.buttonRenderer.material = this.saveButton.unpressedMaterial;
-			return;
-		}
-		this.saveButton.enabled = false;
-		this.saveButton.buttonRenderer.material = this.saveButton.pressedMaterial;
-	}
-
-	public override void Tick()
-	{
-		if (this.isAnimating)
-		{
-			if (this.scanAnimation == null)
-			{
-				this.isAnimating = false;
-			}
-			else if ((double)Time.time > this.scanCompleteTime)
-			{
-				this.scanTriangle.enabled = false;
-				this.isAnimating = false;
-			}
-		}
-		if (this.coolingDown && (double)Time.time > this.coolDownCompleteTime)
-		{
-			this.coolingDown = false;
-			this.UpdateUI();
-		}
-	}
-
-	private void OnSavePressed()
-	{
-		if (this.targetTable == null || !this.isDirty || this.coolingDown)
-		{
-			return;
-		}
-		BuilderScanKiosk.ScannerState scannerState = this.scannerState;
-		if (scannerState == BuilderScanKiosk.ScannerState.IDLE)
-		{
-			this.scannerState = BuilderScanKiosk.ScannerState.CONFIRMATION;
-			this.UpdateUI();
-			return;
-		}
-		if (scannerState != BuilderScanKiosk.ScannerState.CONFIRMATION)
-		{
-			return;
-		}
-		this.scannerState = BuilderScanKiosk.ScannerState.SAVING;
-		if (this.scanAnimation != null)
-		{
-			this.scanCompleteTime = (double)(Time.time + this.scanAnimation.clip.length);
-			this.scanTriangle.enabled = true;
-			this.scanAnimation.Rewind();
-			this.scanAnimation.Play();
-		}
-		if (this.soundBank != null)
-		{
-			this.soundBank.Play();
-		}
-		this.isAnimating = true;
-		this.saveError = false;
-		this.errorMsg = string.Empty;
-		this.coolDownCompleteTime = (double)(Time.time + this.saveCooldownSeconds);
-		this.coolingDown = true;
-		this.UpdateUI();
-		string busyStr;
-		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR_BUSY", out busyStr, "BUSY");
-		string blocksErrStr;
-		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR_BLOCKS", out blocksErrStr, "PLEASE REMOVE BLOCKS CONNECTED OUTSIDE OF TABLE PLATFORM");
-		this.targetTable.SaveTableForPlayer(busyStr, blocksErrStr);
-	}
-
-	private string GetSavePath()
-	{
-		return string.Concat(new string[]
-		{
-			this.GetSaveFolder(),
-			Path.DirectorySeparatorChar.ToString(),
-			BuilderScanKiosk.SAVE_FILE,
-			"_",
-			this.targetTable.CurrentSaveSlot.ToString(),
-			".png"
-		});
-	}
-
-	private string GetSaveFolder()
-	{
-		return Application.persistentDataPath + Path.DirectorySeparatorChar.ToString() + BuilderScanKiosk.SAVE_FOLDER;
-	}
-
-	private void OnSaveDirtyChanged(bool dirty)
-	{
-		this.isDirty = dirty;
-		this.UpdateUI();
-	}
-
-	private void OnSaveTimeUpdated()
-	{
-		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		this.saveError = false;
-		this.UpdateUI();
-	}
-
-	private void OnSaveSuccess()
-	{
-		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		this.saveError = false;
-		this.UpdateUI();
-	}
-
-	private void OnSaveFail(string errorMsg)
-	{
-		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
-		this.saveError = true;
-		this.errorMsg = errorMsg;
-		this.UpdateUI();
-	}
-
-	private void UpdateUI()
-	{
-		this.screenText.text = this.GetTextForScreen();
-		this.ToggleSaveButton(BuilderScanKiosk.IsSaveSlotValid(this.targetTable.CurrentSaveSlot) && !this.coolingDown);
-		this.noneButton.buttonRenderer.material = ((!BuilderScanKiosk.IsSaveSlotValid(this.targetTable.CurrentSaveSlot)) ? this.noneButton.pressedMaterial : this.noneButton.unpressedMaterial);
-		bool flag = SubscriptionManager.IsLocalSubscribed();
-		for (int i = 0; i < this.scanButtons.Count; i++)
-		{
-			GorillaPressableButton gorillaPressableButton = this.scanButtons[i];
-			if (gorillaPressableButton.isSubscriberOnlyButton && !flag)
-			{
-				gorillaPressableButton.buttonRenderer.material = ((gorillaPressableButton.nonSubscriberMaterial != null) ? gorillaPressableButton.nonSubscriberMaterial : gorillaPressableButton.unpressedMaterial);
-			}
-			else
-			{
-				gorillaPressableButton.buttonRenderer.material = ((this.targetTable.CurrentSaveSlot == i) ? gorillaPressableButton.pressedMaterial : gorillaPressableButton.unpressedMaterial);
-			}
-		}
-		if (this.scannerState == BuilderScanKiosk.ScannerState.CONFIRMATION)
-		{
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_CONFIRM_BUTTON", out text, "YES UPDATE SCAN");
-			this.saveButton.myTmpText.text = text;
-			return;
-		}
-		string text2;
-		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATED_BUTTON", out text2, "UPDATE SCAN");
-		this.saveButton.myTmpText.text = text2;
-	}
-
-	private string GetTextForScreen()
-	{
-		if (this.targetTable == null)
-		{
-			return "";
-		}
-		StringBuilder stringBuilder = new StringBuilder();
-		string value = "";
-		int currentSaveSlot = this.targetTable.CurrentSaveSlot;
-		if (!BuilderScanKiosk.IsSaveSlotValid(currentSaveSlot))
-		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT", out value, "<b><color=red>NONE</color></b>");
-			stringBuilder.Append(value);
-		}
-		else if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
-		{
-			stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
-		}
-		else
-		{
-			stringBuilder.Append("<b><color=red>");
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
-			stringBuilder.Append(value);
-			stringBuilder.Append(currentSaveSlot + 1);
-			stringBuilder.Append("</color></b>");
-			SharedBlocksManager.LocalPublishInfo publishInfoForSlot = SharedBlocksManager.GetPublishInfoForSlot(currentSaveSlot);
-			DateTime t = DateTime.FromBinary(publishInfoForSlot.publishTime);
-			if (t > DateTime.MinValue)
-			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_LABEL", out value, "UPDATED ");
-				stringBuilder.Append(": ");
-				stringBuilder.Append(value);
-				stringBuilder.Append(t.ToString());
-				stringBuilder.Append("\n");
-			}
-			if (SharedBlocksManager.IsMapIDValid(publishInfoForSlot.mapID))
-			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_MAP_ID_LABEL", out value, "MAP ID: ");
-				stringBuilder.Append(value);
-				stringBuilder.Append(publishInfoForSlot.mapID.Substring(0, 4));
-				stringBuilder.Append("-");
-				stringBuilder.Append(publishInfoForSlot.mapID.Substring(4));
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_CODE_INSTRUCTIONS", out value, "\nUSE THIS CODE IN THE SHARE MY BLOCKS ROOM");
-				stringBuilder.Append(value);
-			}
-		}
-		stringBuilder.Append("\n");
-		switch (this.scannerState)
-		{
-		case BuilderScanKiosk.ScannerState.IDLE:
-			if (this.saveError)
-			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR", out value, "ERROR WHILE SCANNING: ");
-				stringBuilder.Append(value);
-				stringBuilder.Append(this.errorMsg);
-			}
-			else if (this.coolingDown)
-			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_COOLDOWN", out value, "COOLING DOWN...");
-				stringBuilder.Append(value);
-			}
-			else if (!this.isDirty)
-			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_NO_CHANGES", out value, "NO UNSAVED CHANGES");
-				stringBuilder.Append(value);
-			}
-			break;
-		case BuilderScanKiosk.ScannerState.CONFIRMATION:
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_REPLACE", out value, "YOU ARE ABOUT TO REPLACE ");
-			if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
-			{
-				stringBuilder.Append(value);
-				stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
-			}
-			else
-			{
-				stringBuilder.Append(value);
-				stringBuilder.Append("<b><color=red>");
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
-				stringBuilder.Append(value);
-				stringBuilder.Append(currentSaveSlot + 1);
-				stringBuilder.Append("</color></b>");
-			}
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_CONFIRMATION", out value, " ARE YOU SURE YOU WANT TO SCAN?");
-			stringBuilder.Append(value);
-			break;
-		case BuilderScanKiosk.ScannerState.SAVING:
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_SAVING", out value, "SCANNING BUILD...");
-			stringBuilder.Append(value);
-			break;
-		default:
-			throw new ArgumentOutOfRangeException();
-		}
-		stringBuilder.Append("\n\n\n");
-		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_LOAD_INSTRUCTIONS", out value, "CREATE A <b><color=red>NEW</color></b> PRIVATE ROOM TO LOAD ");
-		stringBuilder.Append(value);
-		if (!BuilderScanKiosk.IsSaveSlotValid(currentSaveSlot))
-		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_EMPTY_TABLE", out value, "<b><color=red>AN EMPTY TABLE</color></b>");
-			stringBuilder.Append(value);
-		}
-		else if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
-		{
-			stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
-		}
-		else
-		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
-			stringBuilder.Append("<b><color=red>");
-			stringBuilder.Append(value);
-			stringBuilder.Append(currentSaveSlot + 1);
-			stringBuilder.Append("</color></b>");
-		}
-		return stringBuilder.ToString();
+		IDLE,
+		CONFIRMATION,
+		SAVING
 	}
 
 	private const string MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT_KEY = "MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT";
@@ -507,12 +110,397 @@ public class BuilderScanKiosk : MonoBehaviourTick
 
 	private double scanCompleteTime;
 
-	private BuilderScanKiosk.ScannerState scannerState;
+	private ScannerState scannerState;
 
-	private enum ScannerState
+	public static bool IsSaveSlotValid(int slot)
 	{
-		IDLE,
-		CONFIRMATION,
-		SAVING
+		if (slot >= 0)
+		{
+			return slot < NUM_SAVE_SLOTS;
+		}
+		return false;
+	}
+
+	private void Start()
+	{
+		if (saveButton != null)
+		{
+			saveButton.onPressButton.AddListener(OnSavePressed);
+		}
+		if (targetTable != null)
+		{
+			targetTable.OnSaveDirtyChanged.AddListener(OnSaveDirtyChanged);
+			targetTable.OnSaveSuccess.AddListener(OnSaveSuccess);
+			targetTable.OnSaveFailure.AddListener(OnSaveFail);
+			SharedBlocksManager.OnSaveTimeUpdated += OnSaveTimeUpdated;
+		}
+		if (noneButton != null)
+		{
+			noneButton.onPressButton.AddListener(OnNoneButtonPressed);
+		}
+		foreach (GorillaPressableButton scanButton in scanButtons)
+		{
+			scanButton.onPressed += OnScanButtonPressed;
+		}
+		scanTriangle = scanAnimation.GetComponent<MeshRenderer>();
+		scanTriangle.enabled = false;
+		scannerState = ScannerState.IDLE;
+		LoadPlayerPrefs();
+		UpdateUI();
+	}
+
+	private new void OnEnable()
+	{
+		base.OnEnable();
+		LocalisationManager.RegisterOnLanguageChanged(UpdateUI);
+	}
+
+	private new void OnDisable()
+	{
+		base.OnDisable();
+		LocalisationManager.UnregisterOnLanguageChanged(UpdateUI);
+	}
+
+	private void OnDestroy()
+	{
+		if (saveButton != null)
+		{
+			saveButton.onPressButton.RemoveListener(OnSavePressed);
+		}
+		SharedBlocksManager.OnSaveTimeUpdated -= OnSaveTimeUpdated;
+		if (targetTable != null)
+		{
+			targetTable.OnSaveDirtyChanged.RemoveListener(OnSaveDirtyChanged);
+			targetTable.OnSaveFailure.RemoveListener(OnSaveFail);
+		}
+		if (noneButton != null)
+		{
+			noneButton.onPressButton.RemoveListener(OnNoneButtonPressed);
+		}
+		foreach (GorillaPressableButton scanButton in scanButtons)
+		{
+			if (!(scanButton == null))
+			{
+				scanButton.onPressed -= OnScanButtonPressed;
+			}
+		}
+	}
+
+	private void OnNoneButtonPressed()
+	{
+		if (!(targetTable == null))
+		{
+			if (scannerState == ScannerState.CONFIRMATION)
+			{
+				scannerState = ScannerState.IDLE;
+			}
+			if (targetTable.CurrentSaveSlot != -1)
+			{
+				targetTable.CurrentSaveSlot = -1;
+				SavePlayerPrefs();
+				UpdateUI();
+			}
+		}
+	}
+
+	private void OnScanButtonPressed(GorillaPressableButton button, bool isLeft)
+	{
+		if (targetTable == null)
+		{
+			return;
+		}
+		if (scannerState == ScannerState.CONFIRMATION)
+		{
+			scannerState = ScannerState.IDLE;
+		}
+		for (int i = 0; i < scanButtons.Count; i++)
+		{
+			if (button.Equals(scanButtons[i]))
+			{
+				if (i != targetTable.CurrentSaveSlot)
+				{
+					targetTable.CurrentSaveSlot = i;
+					SavePlayerPrefs();
+					UpdateUI();
+				}
+				break;
+			}
+		}
+	}
+
+	public void OnDevScanPressed()
+	{
+	}
+
+	private void LoadPlayerPrefs()
+	{
+		int currentSaveSlot = PlayerPrefs.GetInt(playerPrefKey, -1);
+		targetTable.CurrentSaveSlot = currentSaveSlot;
+		UpdateUI();
+	}
+
+	private void SavePlayerPrefs()
+	{
+		PlayerPrefs.SetInt(playerPrefKey, targetTable.CurrentSaveSlot);
+		PlayerPrefs.Save();
+	}
+
+	private void ToggleSaveButton(bool enabled)
+	{
+		if (enabled)
+		{
+			saveButton.enabled = true;
+			saveButton.buttonRenderer.material = saveButton.unpressedMaterial;
+		}
+		else
+		{
+			saveButton.enabled = false;
+			saveButton.buttonRenderer.material = saveButton.pressedMaterial;
+		}
+	}
+
+	public override void Tick()
+	{
+		if (isAnimating)
+		{
+			if (scanAnimation == null)
+			{
+				isAnimating = false;
+			}
+			else if ((double)Time.time > scanCompleteTime)
+			{
+				scanTriangle.enabled = false;
+				isAnimating = false;
+			}
+		}
+		if (coolingDown && (double)Time.time > coolDownCompleteTime)
+		{
+			coolingDown = false;
+			UpdateUI();
+		}
+	}
+
+	private void OnSavePressed()
+	{
+		if (targetTable == null || !isDirty || coolingDown)
+		{
+			return;
+		}
+		switch (scannerState)
+		{
+		case ScannerState.IDLE:
+			scannerState = ScannerState.CONFIRMATION;
+			UpdateUI();
+			break;
+		case ScannerState.CONFIRMATION:
+		{
+			scannerState = ScannerState.SAVING;
+			if (scanAnimation != null)
+			{
+				scanCompleteTime = Time.time + scanAnimation.clip.length;
+				scanTriangle.enabled = true;
+				scanAnimation.Rewind();
+				scanAnimation.Play();
+			}
+			if (soundBank != null)
+			{
+				soundBank.Play();
+			}
+			isAnimating = true;
+			saveError = false;
+			errorMsg = string.Empty;
+			coolDownCompleteTime = Time.time + saveCooldownSeconds;
+			coolingDown = true;
+			UpdateUI();
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR_BUSY", out var result, "BUSY");
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR_BLOCKS", out var result2, "PLEASE REMOVE BLOCKS CONNECTED OUTSIDE OF TABLE PLATFORM");
+			targetTable.SaveTableForPlayer(result, result2);
+			break;
+		}
+		}
+	}
+
+	private string GetSavePath()
+	{
+		return GetSaveFolder() + Path.DirectorySeparatorChar + SAVE_FILE + "_" + targetTable.CurrentSaveSlot + ".png";
+	}
+
+	private string GetSaveFolder()
+	{
+		return Application.persistentDataPath + Path.DirectorySeparatorChar + SAVE_FOLDER;
+	}
+
+	private void OnSaveDirtyChanged(bool dirty)
+	{
+		isDirty = dirty;
+		UpdateUI();
+	}
+
+	private void OnSaveTimeUpdated()
+	{
+		scannerState = ScannerState.IDLE;
+		saveError = false;
+		UpdateUI();
+	}
+
+	private void OnSaveSuccess()
+	{
+		scannerState = ScannerState.IDLE;
+		saveError = false;
+		UpdateUI();
+	}
+
+	private void OnSaveFail(string errorMsg)
+	{
+		scannerState = ScannerState.IDLE;
+		saveError = true;
+		this.errorMsg = errorMsg;
+		UpdateUI();
+	}
+
+	private void UpdateUI()
+	{
+		screenText.text = GetTextForScreen();
+		ToggleSaveButton(IsSaveSlotValid(targetTable.CurrentSaveSlot) && !coolingDown);
+		noneButton.buttonRenderer.material = ((!IsSaveSlotValid(targetTable.CurrentSaveSlot)) ? noneButton.pressedMaterial : noneButton.unpressedMaterial);
+		bool flag = SubscriptionManager.IsLocalSubscribed();
+		for (int i = 0; i < scanButtons.Count; i++)
+		{
+			GorillaPressableButton gorillaPressableButton = scanButtons[i];
+			if (gorillaPressableButton.isSubscriberOnlyButton && !flag)
+			{
+				gorillaPressableButton.buttonRenderer.material = ((gorillaPressableButton.nonSubscriberMaterial != null) ? gorillaPressableButton.nonSubscriberMaterial : gorillaPressableButton.unpressedMaterial);
+			}
+			else
+			{
+				gorillaPressableButton.buttonRenderer.material = ((targetTable.CurrentSaveSlot == i) ? gorillaPressableButton.pressedMaterial : gorillaPressableButton.unpressedMaterial);
+			}
+		}
+		if (scannerState == ScannerState.CONFIRMATION)
+		{
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_CONFIRM_BUTTON", out var result, "YES UPDATE SCAN");
+			saveButton.myTmpText.text = result;
+		}
+		else
+		{
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATED_BUTTON", out var result2, "UPDATE SCAN");
+			saveButton.myTmpText.text = result2;
+		}
+	}
+
+	private string GetTextForScreen()
+	{
+		if (targetTable == null)
+		{
+			return "";
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		string result = "";
+		int currentSaveSlot = targetTable.CurrentSaveSlot;
+		if (!IsSaveSlotValid(currentSaveSlot))
+		{
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT", out result, "<b><color=red>NONE</color></b>");
+			stringBuilder.Append(result);
+		}
+		else if (currentSaveSlot == DEV_SAVE_SLOT)
+		{
+			stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
+		}
+		else
+		{
+			stringBuilder.Append("<b><color=red>");
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out result, "SCAN ");
+			stringBuilder.Append(result);
+			stringBuilder.Append(currentSaveSlot + 1);
+			stringBuilder.Append("</color></b>");
+			SharedBlocksManager.LocalPublishInfo publishInfoForSlot = SharedBlocksManager.GetPublishInfoForSlot(currentSaveSlot);
+			DateTime dateTime = DateTime.FromBinary(publishInfoForSlot.publishTime);
+			if (dateTime > DateTime.MinValue)
+			{
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_LABEL", out result, "UPDATED ");
+				stringBuilder.Append(": ");
+				stringBuilder.Append(result);
+				stringBuilder.Append(dateTime.ToString());
+				stringBuilder.Append("\n");
+			}
+			if (SharedBlocksManager.IsMapIDValid(publishInfoForSlot.mapID))
+			{
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_MAP_ID_LABEL", out result, "MAP ID: ");
+				stringBuilder.Append(result);
+				stringBuilder.Append(publishInfoForSlot.mapID.Substring(0, 4));
+				stringBuilder.Append("-");
+				stringBuilder.Append(publishInfoForSlot.mapID.Substring(4));
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_CODE_INSTRUCTIONS", out result, "\nUSE THIS CODE IN THE SHARE MY BLOCKS ROOM");
+				stringBuilder.Append(result);
+			}
+		}
+		stringBuilder.Append("\n");
+		switch (scannerState)
+		{
+		case ScannerState.IDLE:
+			if (saveError)
+			{
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR", out result, "ERROR WHILE SCANNING: ");
+				stringBuilder.Append(result);
+				stringBuilder.Append(errorMsg);
+			}
+			else if (coolingDown)
+			{
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_COOLDOWN", out result, "COOLING DOWN...");
+				stringBuilder.Append(result);
+			}
+			else if (!isDirty)
+			{
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_NO_CHANGES", out result, "NO UNSAVED CHANGES");
+				stringBuilder.Append(result);
+			}
+			break;
+		case ScannerState.CONFIRMATION:
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_REPLACE", out result, "YOU ARE ABOUT TO REPLACE ");
+			if (currentSaveSlot == DEV_SAVE_SLOT)
+			{
+				stringBuilder.Append(result);
+				stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
+			}
+			else
+			{
+				stringBuilder.Append(result);
+				stringBuilder.Append("<b><color=red>");
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out result, "SCAN ");
+				stringBuilder.Append(result);
+				stringBuilder.Append(currentSaveSlot + 1);
+				stringBuilder.Append("</color></b>");
+			}
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_CONFIRMATION", out result, " ARE YOU SURE YOU WANT TO SCAN?");
+			stringBuilder.Append(result);
+			break;
+		case ScannerState.SAVING:
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_SAVING", out result, "SCANNING BUILD...");
+			stringBuilder.Append(result);
+			break;
+		default:
+			throw new ArgumentOutOfRangeException();
+		}
+		stringBuilder.Append("\n\n\n");
+		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_LOAD_INSTRUCTIONS", out result, "CREATE A <b><color=red>NEW</color></b> PRIVATE ROOM TO LOAD ");
+		stringBuilder.Append(result);
+		if (!IsSaveSlotValid(currentSaveSlot))
+		{
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_EMPTY_TABLE", out result, "<b><color=red>AN EMPTY TABLE</color></b>");
+			stringBuilder.Append(result);
+		}
+		else if (currentSaveSlot == DEV_SAVE_SLOT)
+		{
+			stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
+		}
+		else
+		{
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out result, "SCAN ");
+			stringBuilder.Append("<b><color=red>");
+			stringBuilder.Append(result);
+			stringBuilder.Append(currentSaveSlot + 1);
+			stringBuilder.Append("</color></b>");
+		}
+		return stringBuilder.ToString();
 	}
 }

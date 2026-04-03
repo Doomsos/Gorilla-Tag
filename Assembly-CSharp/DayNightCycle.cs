@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using Unity.Collections;
 using Unity.Jobs;
@@ -7,119 +6,23 @@ using UnityEngine.Experimental.Rendering;
 
 public class DayNightCycle : MonoBehaviour
 {
-	public void Awake()
+	public struct LerpBakedLightingJob : IJob
 	{
-		this.fromMap = new Texture2D(this._sunriseMap.width, this._sunriseMap.height);
-		this.fromMap = LightmapSettings.lightmaps[0].lightmapColor;
-		this.toMap = new Texture2D(this._dayMap.width, this._dayMap.height);
-		this.toMap.SetPixels(this._dayMap.GetPixels());
-		this.toMap.Apply();
-		this.workBlockMix = new Color[this.subTextureSize * this.subTextureSize];
-		this.newTexture = new Texture2D(this.fromMap.width, this.fromMap.height, this.fromMap.graphicsFormat, TextureCreationFlags.None);
-		this.newData = new LightmapData();
-		this.textureHeight = this.fromMap.height;
-		this.textureWidth = this.fromMap.width;
-		this.subTextureArray = new Texture2D[(int)Mathf.Pow((float)(this.textureHeight / this.subTextureSize), 2f)];
-		Debug.Log("aaaa " + this.fromMap.format.ToString());
-		Debug.Log("aaaa " + this.fromMap.graphicsFormat.ToString());
-		this.startJob = false;
-		this.startCoroutine = false;
-		this.startedCoroutine = false;
-		this.finishedCoroutine = false;
-	}
+		public NativeArray<Color> fromPixels;
 
-	public void Update()
-	{
-		if (this.startJob)
-		{
-			this.startJob = false;
-			this.startTime = Time.realtimeSinceStartup;
-			base.StartCoroutine(this.UpdateWork());
-			this.timeTakenStartingJob = Time.realtimeSinceStartup - this.startTime;
-			this.startTime = Time.realtimeSinceStartup;
-		}
-		if (this.jobStarted && this.jobHandle.IsCompleted)
-		{
-			this.timeTakenDuringJob = Time.realtimeSinceStartup - this.startTime;
-			this.startTime = Time.realtimeSinceStartup;
-			this.jobHandle.Complete();
-			this.jobStarted = false;
-			this.newTexture.SetPixels(this.job.mixedPixels.ToArray());
-			this.newData.lightmapDir = LightmapSettings.lightmaps[0].lightmapDir;
-			LightmapSettings.lightmaps = new LightmapData[]
-			{
-				this.newData
-			};
-			this.job.fromPixels.Dispose();
-			this.job.toPixels.Dispose();
-			this.job.mixedPixels.Dispose();
-			this.timeTakenPostJob = Time.realtimeSinceStartup - this.startTime;
-		}
-		if (this.startCoroutine)
-		{
-			this.startCoroutine = false;
-			this.startTime = Time.realtimeSinceStartup;
-			this.newTexture = new Texture2D(this.fromMap.width, this.fromMap.height);
-			base.StartCoroutine(this.UpdateWork());
-		}
-		if (this.startedCoroutine && this.finishedCoroutine)
-		{
-			this.startedCoroutine = false;
-			this.finishedCoroutine = false;
-			this.timeTakenDuringJob = Time.realtimeSinceStartup - this.startTime;
-			this.startTime = Time.realtimeSinceStartup;
-			this.newData = LightmapSettings.lightmaps[0];
-			this.newData.lightmapColor = this.fromMap;
-			LightmapData[] lightmaps = LightmapSettings.lightmaps;
-			lightmaps[0].lightmapColor = this.fromMap;
-			LightmapSettings.lightmaps = lightmaps;
-			this.timeTakenPostJob = Time.realtimeSinceStartup - this.startTime;
-		}
-	}
+		public NativeArray<Color> toPixels;
 
-	public IEnumerator UpdateWork()
-	{
-		yield return 0;
-		this.timeTakenStartingJob = Time.realtimeSinceStartup - this.startTime;
-		this.startTime = Time.realtimeSinceStartup;
-		this.startedCoroutine = true;
-		this.currentSubTexture = 0;
-		int num;
-		for (int i = 0; i < this.subTextureArray.Length; i = num + 1)
+		public NativeArray<Color> mixedPixels;
+
+		public float lerpValue;
+
+		public void Execute()
 		{
-			this.subTextureArray[i] = new Texture2D(this.subTextureSize, this.subTextureSize, this.fromMap.graphicsFormat, TextureCreationFlags.None);
-			yield return 0;
-			num = i;
-		}
-		for (int i = 0; i < this.textureWidth / this.subTextureSize; i = num + 1)
-		{
-			this.currentColumn = i;
-			for (int j = 0; j < this.textureHeight / this.subTextureSize; j = num + 1)
+			for (int i = 0; i < fromPixels.Length; i++)
 			{
-				this.currentRow = j;
-				this.workBlockFrom = this.fromMap.GetPixels(i * this.subTextureSize, j * this.subTextureSize, this.subTextureSize, this.subTextureSize);
-				this.workBlockTo = this.toMap.GetPixels(i * this.subTextureSize, j * this.subTextureSize, this.subTextureSize, this.subTextureSize);
-				for (int k = 0; k < this.subTextureSize * this.subTextureSize - 1; k++)
-				{
-					this.workBlockMix[k] = Color.Lerp(this.workBlockFrom[k], this.workBlockTo[k], this.lerpAmount);
-				}
-				this.subTextureArray[j * (this.textureWidth / this.subTextureSize) + i].SetPixels(0, 0, this.subTextureSize, this.subTextureSize, this.workBlockMix);
-				yield return 0;
-				num = j;
+				mixedPixels[i] = Color.Lerp(fromPixels[i], toPixels[i], 0.5f);
 			}
-			num = i;
 		}
-		for (int i = 0; i < this.subTextureArray.Length; i = num + 1)
-		{
-			this.currentSubTexture = i;
-			this.subTextureArray[i].Apply();
-			yield return 0;
-			Graphics.CopyTexture(this.subTextureArray[i], 0, 0, 0, 0, this.subTextureSize, this.subTextureSize, this.newTexture, 0, 0, i * this.subTextureSize % this.textureHeight, (int)Mathf.Floor((float)(this.subTextureSize * i / this.textureHeight)) * this.subTextureSize);
-			yield return 0;
-			num = i;
-		}
-		this.finishedCoroutine = true;
-		yield break;
 	}
 
 	public Texture2D _dayMap;
@@ -130,7 +33,7 @@ public class DayNightCycle : MonoBehaviour
 
 	private Texture2D toMap;
 
-	public DayNightCycle.LerpBakedLightingJob job;
+	public LerpBakedLightingJob job;
 
 	public JobHandle jobHandle;
 
@@ -192,22 +95,109 @@ public class DayNightCycle : MonoBehaviour
 
 	public int currentRowInSubtexture;
 
-	public struct LerpBakedLightingJob : IJob
+	public void Awake()
 	{
-		public void Execute()
+		fromMap = new Texture2D(_sunriseMap.width, _sunriseMap.height);
+		fromMap = LightmapSettings.lightmaps[0].lightmapColor;
+		toMap = new Texture2D(_dayMap.width, _dayMap.height);
+		toMap.SetPixels(_dayMap.GetPixels());
+		toMap.Apply();
+		workBlockMix = new Color[subTextureSize * subTextureSize];
+		newTexture = new Texture2D(fromMap.width, fromMap.height, fromMap.graphicsFormat, TextureCreationFlags.None);
+		newData = new LightmapData();
+		textureHeight = fromMap.height;
+		textureWidth = fromMap.width;
+		subTextureArray = new Texture2D[(int)Mathf.Pow(textureHeight / subTextureSize, 2f)];
+		Debug.Log("aaaa " + fromMap.format);
+		Debug.Log("aaaa " + fromMap.graphicsFormat);
+		startJob = false;
+		startCoroutine = false;
+		startedCoroutine = false;
+		finishedCoroutine = false;
+	}
+
+	public void Update()
+	{
+		if (startJob)
 		{
-			for (int i = 0; i < this.fromPixels.Length; i++)
+			startJob = false;
+			startTime = Time.realtimeSinceStartup;
+			StartCoroutine(UpdateWork());
+			timeTakenStartingJob = Time.realtimeSinceStartup - startTime;
+			startTime = Time.realtimeSinceStartup;
+		}
+		if (jobStarted && jobHandle.IsCompleted)
+		{
+			timeTakenDuringJob = Time.realtimeSinceStartup - startTime;
+			startTime = Time.realtimeSinceStartup;
+			jobHandle.Complete();
+			jobStarted = false;
+			newTexture.SetPixels(job.mixedPixels.ToArray());
+			newData.lightmapDir = LightmapSettings.lightmaps[0].lightmapDir;
+			LightmapSettings.lightmaps = new LightmapData[1] { newData };
+			job.fromPixels.Dispose();
+			job.toPixels.Dispose();
+			job.mixedPixels.Dispose();
+			timeTakenPostJob = Time.realtimeSinceStartup - startTime;
+		}
+		if (startCoroutine)
+		{
+			startCoroutine = false;
+			startTime = Time.realtimeSinceStartup;
+			newTexture = new Texture2D(fromMap.width, fromMap.height);
+			StartCoroutine(UpdateWork());
+		}
+		if (startedCoroutine && finishedCoroutine)
+		{
+			startedCoroutine = false;
+			finishedCoroutine = false;
+			timeTakenDuringJob = Time.realtimeSinceStartup - startTime;
+			startTime = Time.realtimeSinceStartup;
+			newData = LightmapSettings.lightmaps[0];
+			newData.lightmapColor = fromMap;
+			LightmapData[] lightmaps = LightmapSettings.lightmaps;
+			lightmaps[0].lightmapColor = fromMap;
+			LightmapSettings.lightmaps = lightmaps;
+			timeTakenPostJob = Time.realtimeSinceStartup - startTime;
+		}
+	}
+
+	public IEnumerator UpdateWork()
+	{
+		yield return 0;
+		timeTakenStartingJob = Time.realtimeSinceStartup - startTime;
+		startTime = Time.realtimeSinceStartup;
+		startedCoroutine = true;
+		currentSubTexture = 0;
+		for (int i = 0; i < subTextureArray.Length; i++)
+		{
+			subTextureArray[i] = new Texture2D(subTextureSize, subTextureSize, fromMap.graphicsFormat, TextureCreationFlags.None);
+			yield return 0;
+		}
+		for (int i = 0; i < textureWidth / subTextureSize; i++)
+		{
+			currentColumn = i;
+			for (int j = 0; j < textureHeight / subTextureSize; j++)
 			{
-				this.mixedPixels[i] = Color.Lerp(this.fromPixels[i], this.toPixels[i], 0.5f);
+				currentRow = j;
+				workBlockFrom = fromMap.GetPixels(i * subTextureSize, j * subTextureSize, subTextureSize, subTextureSize);
+				workBlockTo = toMap.GetPixels(i * subTextureSize, j * subTextureSize, subTextureSize, subTextureSize);
+				for (int k = 0; k < subTextureSize * subTextureSize - 1; k++)
+				{
+					workBlockMix[k] = Color.Lerp(workBlockFrom[k], workBlockTo[k], lerpAmount);
+				}
+				subTextureArray[j * (textureWidth / subTextureSize) + i].SetPixels(0, 0, subTextureSize, subTextureSize, workBlockMix);
+				yield return 0;
 			}
 		}
-
-		public NativeArray<Color> fromPixels;
-
-		public NativeArray<Color> toPixels;
-
-		public NativeArray<Color> mixedPixels;
-
-		public float lerpValue;
+		for (int i = 0; i < subTextureArray.Length; i++)
+		{
+			currentSubTexture = i;
+			subTextureArray[i].Apply();
+			yield return 0;
+			Graphics.CopyTexture(subTextureArray[i], 0, 0, 0, 0, subTextureSize, subTextureSize, newTexture, 0, 0, i * subTextureSize % textureHeight, (int)Mathf.Floor(subTextureSize * i / textureHeight) * subTextureSize);
+			yield return 0;
+		}
+		finishedCoroutine = true;
 	}
 }

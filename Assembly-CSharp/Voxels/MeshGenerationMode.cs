@@ -1,10 +1,7 @@
-﻿using System;
+namespace Voxels;
 
-namespace Voxels
+public enum MeshGenerationMode
 {
-	public enum MeshGenerationMode
-	{
-		MarchingCubes,
-		SurfaceNets
-	}
+	MarchingCubes,
+	SurfaceNets
 }

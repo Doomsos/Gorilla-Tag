@@ -1,28 +1,7 @@
-﻿using System;
 using UnityEngine;
 
 public class BitmapFontText : MonoBehaviour
 {
-	private void Awake()
-	{
-		this.Init();
-		this.Render();
-	}
-
-	public void Render()
-	{
-		this.font.RenderToTexture(this.texture, this.uppercaseOnly ? this.text.ToUpperInvariant() : this.text);
-	}
-
-	public void Init()
-	{
-		this.texture = new Texture2D(this.textArea.x, this.textArea.y, this.font.fontImage.format, false);
-		this.texture.filterMode = FilterMode.Point;
-		this.material = new Material(this.renderer.sharedMaterial);
-		this.material.mainTexture = this.texture;
-		this.renderer.sharedMaterial = this.material;
-	}
-
 	public string text;
 
 	public bool uppercaseOnly;
@@ -37,4 +16,24 @@ public class BitmapFontText : MonoBehaviour
 	public Material material;
 
 	public BitmapFont font;
+
+	private void Awake()
+	{
+		Init();
+		Render();
+	}
+
+	public void Render()
+	{
+		font.RenderToTexture(texture, uppercaseOnly ? text.ToUpperInvariant() : text);
+	}
+
+	public void Init()
+	{
+		texture = new Texture2D(textArea.x, textArea.y, font.fontImage.format, mipChain: false);
+		texture.filterMode = FilterMode.Point;
+		material = new Material(renderer.sharedMaterial);
+		material.mainTexture = texture;
+		renderer.sharedMaterial = material;
+	}
 }
