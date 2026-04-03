@@ -8,6 +8,8 @@ CrittersManager.RemoteReceivedCritterEvent(CrittersManager/CritterEvent eventTyp
 SuperInfectionManager.SIClientToAuthorityRPC(System.Int32 clientToAuthorityRPCEnum, System.Object[] data, Photon.Pun.PhotonMessageInfo info)
 SuperInfectionManager.SIAuthorityToClientRPC(System.Int32 authorityToClientRPCEnum, System.Object[] data, Photon.Pun.PhotonMessageInfo info)
 SuperInfectionManager.SIClientToClientRPC(System.Int32 clientToClientRPCEnum, System.Object[] data, Photon.Pun.PhotonMessageInfo info)
+ArtilleryCannonState.RPC_ArtilleryMessage(System.Byte msgType, System.Byte crankIndex, System.Single floatParam, Photon.Pun.PhotonMessageInfo info)
+BatteryChargerState.RPC_BatteryMessage(System.Byte msgType, System.Byte crankIndex, System.Single floatParam, Photon.Pun.PhotonMessageInfo info)
 GhostLabReliableState.RPC_RemoteEntranceDoorState(GhostLab/EntranceDoorsState newState, Fusion.RpcInfo info)
 GhostLabReliableState.RPC_RemoteSingleDoorState(System.Int32 doorIndex, Fusion.RpcInfo info)
 GhostLabReliableState.RemoteEntranceDoorState(GhostLab/EntranceDoorsState newState, Photon.Pun.PhotonMessageInfo info)

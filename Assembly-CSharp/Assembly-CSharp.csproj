@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{56DAB6D9-875B-4856-BEC1-3BD9FC6AB72F}</ProjectGuid>
+    <ProjectGuid>{9ABC21F3-3E3A-4A5D-A2D0-6048021E2B66}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -334,6 +334,10 @@
     <Compile Include="ArcadeMachineJoystickNetworkState.cs" />
     <Compile Include="ArcingProjectileLauncher.cs" />
     <Compile Include="ArrayUtils.cs" />
+    <Compile Include="ArtilleryCannon.cs" />
+    <Compile Include="ArtilleryCannonState.cs" />
+    <Compile Include="ArtilleryCrank.cs" />
+    <Compile Include="ArtilleryCrankType.cs" />
     <Compile Include="AssetContentAPI.cs" />
     <Compile Include="AssetUtils.cs" />
     <Compile Include="AssociateMotherhsipAndModIOAccountsRequest.cs" />
@@ -364,6 +368,9 @@
     <Compile Include="BasePageHandler.cs" />
     <Compile Include="BasePlatform.cs" />
     <Compile Include="BasicFireSpawner.cs" />
+    <Compile Include="BatteryCharger.cs" />
+    <Compile Include="BatteryChargerCrank.cs" />
+    <Compile Include="BatteryChargerState.cs" />
     <Compile Include="BattleGameModeData.cs" />
     <Compile Include="BeeAvoiderTest.cs" />
     <Compile Include="BeeAvoidPoint.cs" />
@@ -618,6 +625,8 @@
     <Compile Include="CosmeticRefRegistry.cs" />
     <Compile Include="CosmeticRefTarget.cs" />
     <Compile Include="CosmeticRoom\CurrencyBoard.cs" />
+    <Compile Include="CosmeticRoom\EvolvingCosmeticKiosk.cs" />
+    <Compile Include="CosmeticRoom\EvolvingCosmeticKioskButtonSet.cs" />
     <Compile Include="CosmeticRoom\FittingRoom.cs" />
     <Compile Include="CosmeticRoom\ItemCheckout.cs" />
     <Compile Include="CosmeticRoom\ItemScripts\TrickTreatHoldable.cs" />
@@ -635,6 +644,7 @@
     <Compile Include="CosmeticTiltReactor.cs" />
     <Compile Include="CosmeticWardrobe.cs" />
     <Compile Include="CosmeticWardrobeProximityDetector.cs" />
+    <Compile Include="CounterRotator.cs" />
     <Compile Include="CrankableToyCarDeployed.cs" />
     <Compile Include="CrankableToyCarHoldable.cs" />
     <Compile Include="CreateBonesLol.cs" />
@@ -753,6 +763,7 @@
     <Compile Include="Decelerate.cs" />
     <Compile Include="DeepLinkHandler.cs" />
     <Compile Include="DeepLinkSender.cs" />
+    <Compile Include="DefaultNamespace\EvolvingCosmeticSaveData.cs" />
     <Compile Include="DefaultNamespace\SoundBankPlayerCosmetic.cs" />
     <Compile Include="DelayedDestroyCrittersPooledObject.cs" />
     <Compile Include="DelayedDestroyObject.cs" />
@@ -937,6 +948,7 @@
     <Compile Include="Fusion\CodeGen\FixedStorage@6.cs" />
     <Compile Include="Fusion\CodeGen\FixedStorage@71.cs" />
     <Compile Include="Fusion\CodeGen\ReaderWriter@BarrelCannon__BarrelCannonState.cs" />
+    <Compile Include="Fusion\CodeGen\ReaderWriter@BatteryChargerState__FusionCrankData.cs" />
     <Compile Include="Fusion\CodeGen\ReaderWriter@Fusion_NetworkString.2.cs" />
     <Compile Include="Fusion\CodeGen\ReaderWriter@Fusion_NetworkString.cs" />
     <Compile Include="Fusion\CodeGen\ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus.cs" />
@@ -1030,6 +1042,7 @@
     <Compile Include="GameSnappableCollider.cs" />
     <Compile Include="GameStateFx.cs" />
     <Compile Include="GameTriggerInteractable.cs" />
+    <Compile Include="GenericCounter.cs" />
     <Compile Include="GenericObservable.cs" />
     <Compile Include="GenericTriggerReactor.cs" />
     <Compile Include="GeodeItem.cs" />
@@ -1455,6 +1468,8 @@
     <Compile Include="GorillaTagScripts\SceneBasedObject.cs" />
     <Compile Include="GorillaTagScripts\SnapOverlap.cs" />
     <Compile Include="GorillaTagScripts\SubscriptionManager.cs" />
+    <Compile Include="GorillaTagScripts\Subscription\AlarmClocks\AlarmClock.cs" />
+    <Compile Include="GorillaTagScripts\Subscription\AlarmClocks\AlarmClockManager.cs" />
     <Compile Include="GorillaTagScripts\Subscription\FeatureTogglesScreen.cs" />
     <Compile Include="GorillaTagScripts\Subscription\FeatureToggleUI.cs" />
     <Compile Include="GorillaTagScripts\Subscription\HandScanner.cs" />
@@ -1569,6 +1584,7 @@
     <Compile Include="GorillaTag\Cosmetics\PickupableVariant.cs" />
     <Compile Include="GorillaTag\Cosmetics\PlayHapticsCosmetic.cs" />
     <Compile Include="GorillaTag\Cosmetics\ProjectileShooterCosmetic.cs" />
+    <Compile Include="GorillaTag\Cosmetics\ProximityLookAt.cs" />
     <Compile Include="GorillaTag\Cosmetics\RandomWeightedOutput.cs" />
     <Compile Include="GorillaTag\Cosmetics\RCBlimp.cs" />
     <Compile Include="GorillaTag\Cosmetics\RCCosmeticNetworkSync.cs" />
@@ -1617,6 +1633,7 @@
     <Compile Include="GorillaTag\ExpectedUsersDecayTimer.cs" />
     <Compile Include="GorillaTag\Gravity\BasicGravityZone.cs" />
     <Compile Include="GorillaTag\Gravity\ChangingBasicGravityZone.cs" />
+    <Compile Include="GorillaTag\Gravity\ConsensusGravityZone.cs" />
     <Compile Include="GorillaTag\Gravity\CubicPlanetZone.cs" />
     <Compile Include="GorillaTag\Gravity\GravityInfo.cs" />
     <Compile Include="GorillaTag\Gravity\GravityZoneScaleFilter.cs" />
@@ -1662,7 +1679,6 @@
     <Compile Include="GorillaTag\InAction.cs" />
     <Compile Include="GorillaTag\InDelegateListProcessor.2.cs" />
     <Compile Include="GorillaTag\InDelegateListProcessor.cs" />
-    <Compile Include="GorillaTag\InfectionLavaController.cs" />
     <Compile Include="GorillaTag\InspectorNote.cs" />
     <Compile Include="GorillaTag\IRefreshable.cs" />
     <Compile Include="GorillaTag\IResettableItem.cs" />
@@ -1729,7 +1745,6 @@
     <Compile Include="GorillaTag\TickSystemTimer.cs" />
     <Compile Include="GorillaTag\TickSystemTimerAbstract.cs" />
     <Compile Include="GorillaTag\VectorLabelTextAttribute.cs" />
-    <Compile Include="GorillaTag\VolcanoEffects.cs" />
     <Compile Include="GorillaTag\WatchableGameObjectSO.cs" />
     <Compile Include="GorillaTag\WatchableIntSO.cs" />
     <Compile Include="GorillaTag\XformOffset.cs" />
@@ -2067,6 +2082,7 @@
     <Compile Include="ICallbackUnique.cs" />
     <Compile Include="IClickable.cs" />
     <Compile Include="ICosmeticCritterTickForEach.cs" />
+    <Compile Include="ICosmeticStateSync.cs" />
     <Compile Include="ICustomKnockbackAbility.cs" />
     <Compile Include="Id128.cs" />
     <Compile Include="Id128Ext.cs" />
@@ -2102,6 +2118,10 @@
     <Compile Include="IGRSummoningEntity.cs" />
     <Compile Include="IHoldableObject.cs" />
     <Compile Include="ImplosionExplosionMain.cs" />
+    <Compile Include="IndirectMeshGroup.cs" />
+    <Compile Include="IndirectMeshInstance.cs" />
+    <Compile Include="IndirectMeshRenderer.cs" />
+    <Compile Include="InfectionLavaController.cs" />
     <Compile Include="InlineAttribute.cs" />
     <Compile Include="InlineBoxAttribute.cs" />
     <Compile Include="InlineFoldoutAttribute.cs" />
@@ -2216,6 +2236,8 @@
     <Compile Include="LerpScale.cs" />
     <Compile Include="LerpTask.cs" />
     <Compile Include="LifeCycleEventTrigger.cs" />
+    <Compile Include="LightArray.cs" />
+    <Compile Include="LightArrayPresets.cs" />
     <Compile Include="LightningDispatcher.cs" />
     <Compile Include="LightningDispatcherEvent.cs" />
     <Compile Include="LightningGenerator.cs" />
@@ -2332,7 +2354,6 @@
     <Compile Include="MetroSpotlight.cs" />
     <Compile Include="MicrophoneCosmetic.cs" />
     <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
-    <Compile Include="MirrorCameraScript.cs" />
     <Compile Include="MockWarningServer.cs" />
     <Compile Include="ModeSelectButton.cs" />
     <Compile Include="ModIOAccountLinkingTerminal.cs" />
@@ -2389,6 +2410,7 @@
     <Compile Include="MTAssets\EasyMeshCombiner\RuntimeMeshCombiner.cs" />
     <Compile Include="MusicFadeArea.cs" />
     <Compile Include="MusicManager.cs" />
+    <Compile Include="MusicManagerEventTargets.cs" />
     <Compile Include="MusicSource.cs" />
     <Compile Include="NamedTriggerZone.cs" />
     <Compile Include="NativeCollectionExtensions.cs" />
@@ -2489,6 +2511,7 @@
     <Compile Include="ParticleEffectsPool.cs" />
     <Compile Include="ParticleEffectsPoolStatic.cs" />
     <Compile Include="ParticleSystemEventShortcut.cs" />
+    <Compile Include="ParticleSystemSet.cs" />
     <Compile Include="PartyGameModeWarning.cs" />
     <Compile Include="PartyHornTransferableObject.cs" />
     <Compile Include="PartyInABox.cs" />
@@ -2509,6 +2532,7 @@
     <Compile Include="PeriodicNoiseGenerator.cs" />
     <Compile Include="PerSceneRenderData.cs" />
     <Compile Include="PersistLog.cs" />
+    <Compile Include="PersonalGravityZoneEvents.cs" />
     <Compile Include="PhotoBoothCamera.cs" />
     <Compile Include="PhotoBoothImageReciever.cs" />
     <Compile Include="PhotonAuthenticator.cs" />
@@ -2740,6 +2764,7 @@
     <Compile Include="SICombinedTerminal.cs" />
     <Compile Include="SICreationBitMasks.cs" />
     <Compile Include="SIDispenserGadgetListEntry.cs" />
+    <Compile Include="SIExclusionType.cs" />
     <Compile Include="SIExclusionZone.cs" />
     <Compile Include="SIGadget.cs" />
     <Compile Include="SIGadgetAirGrab.cs" />
@@ -2954,6 +2979,7 @@
     <Compile Include="TapInnerGlow.cs" />
     <Compile Include="Tappable.cs" />
     <Compile Include="TappableBeeHive.cs" />
+    <Compile Include="TappableDent.cs" />
     <Compile Include="TappableGuardianIdol.cs" />
     <Compile Include="TappableManager.cs" />
     <Compile Include="TappableSystem.cs" />
@@ -3002,6 +3028,7 @@
     <Compile Include="TimeSettings.cs" />
     <Compile Include="TimeSince.cs" />
     <Compile Include="TitleDataActivation.cs" />
+    <Compile Include="TitleDataDateRefActivation.cs" />
     <Compile Include="TitleDataLocalization.cs" />
     <Compile Include="TMPPermission.cs" />
     <Compile Include="TMPSession.cs" />
@@ -3157,6 +3184,7 @@
     <Compile Include="VoiceLoudnessReactorTransformRotationTarget.cs" />
     <Compile Include="VoiceLoudnessReactorTransformTarget.cs" />
     <Compile Include="VoiceShiftCosmetic.cs" />
+    <Compile Include="VolcanoEffects.cs" />
     <Compile Include="VolumeCast.cs" />
     <Compile Include="VotingCard.cs" />
     <Compile Include="VoxelAction.cs" />
