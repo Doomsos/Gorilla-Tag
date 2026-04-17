@@ -224,7 +224,7 @@ public class LckSocialCameraManager : MonoBehaviour
 
 	private void UpdateCococamVisibility(LckBodyCameraSpawner.CameraState cameraState, CameraMode cameraMode, bool forceHidden, bool cameraActive)
 	{
-		if ((uint)(cameraMode - 2) <= 1u)
+		if (cameraMode == CameraMode.ThirdPerson || cameraMode == CameraMode.Drone)
 		{
 			CoconutCamera.SetVisualsActive(cameraActive);
 		}

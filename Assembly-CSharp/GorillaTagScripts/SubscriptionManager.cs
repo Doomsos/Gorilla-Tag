@@ -126,6 +126,8 @@ public class SubscriptionManager : MonoBehaviour
 
 	public const string FAN_CLUB_BASE_SKU = "fan_club";
 
+	public const string FAN_CLUB_STEAM_SKU = "40494";
+
 	public const string SUBSCRIBER_NAME_COLOR_HEX = "#ffc600";
 
 	public static Color SUBSCRIBER_NAME_COLOR = Color.gold;

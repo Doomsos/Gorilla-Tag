@@ -57,6 +57,8 @@ public abstract class NetworkSystem : MonoBehaviour
 
 	public DelegateListProcessor OnReturnedToSinglePlayer = new DelegateListProcessor();
 
+	public DelegateListProcessor OnPreLeavingRoom = new DelegateListProcessor();
+
 	public DelegateListProcessor<NetPlayer> OnPlayerJoined = new DelegateListProcessor<NetPlayer>();
 
 	public DelegateListProcessor<NetPlayer> OnPlayerLeft = new DelegateListProcessor<NetPlayer>();
@@ -154,6 +156,11 @@ public abstract class NetworkSystem : MonoBehaviour
 	internal void MultiplayerStarted()
 	{
 		OnMultiplayerStarted?.InvokeSafe();
+	}
+
+	internal void PreLeavingRoom()
+	{
+		OnPreLeavingRoom?.InvokeSafe();
 	}
 
 	protected void SinglePlayerStarted()

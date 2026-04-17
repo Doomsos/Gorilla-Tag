@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GorillaTag;
 using GorillaTag.Gravity;
+using Photon.Pun;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR;
@@ -20,6 +21,8 @@ public class GameEntity : MonoBehaviour
 	public delegate void EntityDestroyedEvent(GameEntity entity);
 
 	public const int Invalid = -1;
+
+	public const int ScenePlacedTypeId = -2147483647;
 
 	public List<GameEntity> builtInEntities;
 
@@ -63,6 +66,18 @@ public class GameEntity : MonoBehaviour
 
 	internal bool shouldDestroyOnZoneExit;
 
+	[NonSerialized]
+	internal bool scenePlacedInitialized;
+
+	[NonSerialized]
+	internal Vector3 scenePlacedHomePosition;
+
+	[NonSerialized]
+	internal Quaternion scenePlacedHomeRotation;
+
+	[NonSerialized]
+	internal float scenePlacedHomeScale;
+
 	public Action OnGrabbed;
 
 	public Action OnReleased;
@@ -96,7 +111,7 @@ public class GameEntity : MonoBehaviour
 	public GameEntityId id { get; internal set; }
 
 	[DebugReadout]
-	public int typeId { get; private set; }
+	public int typeId { get; internal set; }
 
 	[DebugReadout]
 	public long createData { get; set; }
@@ -137,6 +152,8 @@ public class GameEntity : MonoBehaviour
 
 	[DebugReadout]
 	public GameEntityId attachedToEntityId { get; internal set; }
+
+	public bool IsScenePlaced { get; internal set; }
 
 	public bool IsHeldOrSnappedByLocalPlayer => AttachedPlayerActorNr == NetworkSystem.Instance.LocalPlayer.ActorNumber;
 
@@ -238,6 +255,19 @@ public class GameEntity : MonoBehaviour
 				builtInEntities[i].isBuiltIn = true;
 			}
 		}
+		if (TryGetComponent<XSceneRefTarget>(out var component) && component.UniqueID > 0)
+		{
+			IsScenePlaced = true;
+			GameEntityManager.RegisterScenePlacedEntity(this);
+		}
+	}
+
+	private void Start()
+	{
+		if (IsScenePlaced && !PhotonNetwork.InRoom)
+		{
+			base.gameObject.SetActive(value: false);
+		}
 	}
 
 	public void Create(GameEntityManager manager, int netId, int typeId)
@@ -246,9 +276,10 @@ public class GameEntity : MonoBehaviour
 		this.typeId = typeId;
 		if (builtInEntities != null)
 		{
+			bool flag = netId < -1 && netId != int.MinValue;
 			for (int i = 0; i < builtInEntities.Count; i++)
 			{
-				int netId2 = netId + 1 + i;
+				int netId2 = (flag ? (netId - 1 - i) : (netId + 1 + i));
 				manager.AddGameEntity(netId2, builtInEntities[i]);
 				builtInEntities[i].Create(manager, netId2, -1);
 			}
@@ -278,6 +309,10 @@ public class GameEntity : MonoBehaviour
 				entityComponents[i].OnEntityDestroy();
 			}
 			this.onEntityDestroyed?.Invoke(this);
+			if (IsScenePlaced)
+			{
+				GameEntityManager.UnregisterScenePlacedEntity(this);
+			}
 		}
 	}
 
@@ -409,6 +444,14 @@ public class GameEntity : MonoBehaviour
 
 	public GameEntityId MigrateToEntityManager(GameEntityManager newManager)
 	{
+		if (IsScenePlaced)
+		{
+			if (manager != null)
+			{
+				manager.ReleaseScenePlacedHold(this);
+			}
+			return id;
+		}
 		manager.RemoveGameEntity(this);
 		manager = newManager;
 		GameEntityId result = (id = newManager.AddGameEntity(this));

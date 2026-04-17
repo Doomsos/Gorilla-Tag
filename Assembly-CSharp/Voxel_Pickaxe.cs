@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using Voxels;
 
-public class Voxel_Pickaxe : MonoBehaviour
+public class Voxel_Pickaxe : MonoBehaviour, IGameEntityComponent
 {
 	[Serializable]
 	public struct InteractionPoint
@@ -38,9 +38,13 @@ public class Voxel_Pickaxe : MonoBehaviour
 
 	public float alignThreshold = 0.7f;
 
+	private GameEntity _gameEntity;
+
 	private int _layerMask;
 
 	private float _nextHitTime;
+
+	private bool _isLocal;
 
 	public bool Held { get; set; }
 
@@ -51,6 +55,7 @@ public class Voxel_Pickaxe : MonoBehaviour
 
 	private void Awake()
 	{
+		_gameEntity = GetComponent<GameEntity>();
 		_layerMask = LayerMask.GetMask("Default");
 		if (sound.transform == base.transform)
 		{
@@ -60,11 +65,26 @@ public class Voxel_Pickaxe : MonoBehaviour
 
 	private void OnEnable()
 	{
+		if (_gameEntity != null)
+		{
+			GameEntity gameEntity = _gameEntity;
+			gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(StartGrabbing));
+			GameEntity gameEntity2 = _gameEntity;
+			gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(StopGrabbing));
+		}
+		_isLocal = GetComponentInParent<VRRig>() == VRRig.LocalRig;
 		ResetVelocity();
 	}
 
 	private void OnDisable()
 	{
+		if (_gameEntity != null)
+		{
+			GameEntity gameEntity = _gameEntity;
+			gameEntity.OnGrabbed = (Action)Delegate.Remove(gameEntity.OnGrabbed, new Action(StartGrabbing));
+			GameEntity gameEntity2 = _gameEntity;
+			gameEntity2.OnReleased = (Action)Delegate.Remove(gameEntity2.OnReleased, new Action(StopGrabbing));
+		}
 	}
 
 	private void FixedUpdate()
@@ -81,6 +101,8 @@ public class Voxel_Pickaxe : MonoBehaviour
 	private void StartGrabbing()
 	{
 		Held = true;
+		VRRig componentInParent = GetComponentInParent<VRRig>();
+		_isLocal = componentInParent == VRRig.LocalRig;
 		ResetVelocity();
 	}
 
@@ -112,20 +134,24 @@ public class Voxel_Pickaxe : MonoBehaviour
 			return;
 		}
 		bool flag = Vector3.Dot(vector.normalized, point.transform.forward) >= alignThreshold;
-		if (Physics.Linecast(point.previousPosition, point.position, out var hitInfo, _layerMask, QueryTriggerInteraction.Ignore))
+		if (!Physics.Linecast(point.previousPosition, point.position, out var hitInfo, _layerMask, QueryTriggerInteraction.Ignore))
 		{
-			ChunkComponent component = hitInfo.collider.GetComponent<ChunkComponent>();
-			if ((bool)component && flag && magnitude >= minMineSpeed)
+			return;
+		}
+		ChunkComponent component = hitInfo.collider.GetComponent<ChunkComponent>();
+		if ((bool)component && flag && magnitude >= minMineSpeed)
+		{
+			Play(goodHit, hitInfo.point);
+			if (_isLocal)
 			{
-				Play(goodHit, hitInfo.point);
 				component.World.Mine(hitInfo, mine);
 			}
-			else
-			{
-				Play(badHit, hitInfo.point);
-			}
-			_nextHitTime = Time.time + hitCooldown;
 		}
+		else
+		{
+			Play(badHit, hitInfo.point);
+		}
+		_nextHitTime = Time.time + hitCooldown;
 	}
 
 	private void Play(AudioResource resource, Vector3 position)
@@ -141,12 +167,18 @@ public class Voxel_Pickaxe : MonoBehaviour
 
 	public void OnEntityInit()
 	{
-		sound.transform.parent = null;
+		if (sound != null)
+		{
+			sound.transform.parent = null;
+		}
 	}
 
 	public void OnEntityDestroy()
 	{
-		sound.transform.parent = base.transform;
+		if (!ApplicationQuittingState.IsQuitting && !(this == null) && !(sound == null) && base.gameObject.scene.isLoaded)
+		{
+			sound.transform.parent = base.transform;
+		}
 	}
 
 	public void OnEntityStateChange(long prevState, long newState)

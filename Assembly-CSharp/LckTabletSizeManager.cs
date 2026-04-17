@@ -65,6 +65,7 @@ public class LckTabletSizeManager : MonoBehaviour
 				SetCustomNearClip(_firstPersonCamera);
 				break;
 			case CameraMode.ThirdPerson:
+			case CameraMode.Headset:
 			case CameraMode.Drone:
 				break;
 			}

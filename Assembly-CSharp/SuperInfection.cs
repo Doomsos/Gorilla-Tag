@@ -106,7 +106,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 
 	private void Awake()
 	{
-		resourceRegions = resourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true);
+		resourceRegions = ((resourceNodeParent != null) ? resourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true) : Array.Empty<SIResourceRegion>());
 		_resourcePrefabs = new List<SIResource>();
 		SIResourceRegion[] array = resourceRegions;
 		foreach (SIResourceRegion sIResourceRegion in array)
@@ -116,8 +116,8 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 				_resourcePrefabs.Add(sIResourceRegion.resourcePrefab);
 			}
 		}
-		perRoundResourceRegions = perRoundResourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true);
-		resourceResetHeight = resourceResetLoc.position.y;
+		perRoundResourceRegions = ((perRoundResourceNodeParent != null) ? perRoundResourceNodeParent.GetComponentsInChildren<SIResourceRegion>(includeInactive: true) : Array.Empty<SIResourceRegion>());
+		resourceResetHeight = ((resourceResetLoc != null) ? resourceResetLoc.position.y : float.MinValue);
 	}
 
 	public void OnEnable()
@@ -127,7 +127,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		{
 			siManager.OnEnableZoneSuperInfection(this);
 		}
-		if (siManager.isActiveAndEnabled)
+		if (siManager == null || siManager.isActiveAndEnabled)
 		{
 			DisableStations();
 		}
@@ -183,7 +183,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		for (int i = 0; i < siTerminals.Length; i++)
 		{
 			siTerminals[i].gameObject.SetActive(value: true);
-			if ((bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn)
+			if ((bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn && siManager != null)
 			{
 				siManager.RegisterTryOnDispenser();
 			}
@@ -192,7 +192,10 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		{
 			siDeposits[j].gameObject.SetActive(value: true);
 		}
-		questBoard.gameObject.SetActive(value: true);
+		if (questBoard != null)
+		{
+			questBoard.gameObject.SetActive(value: true);
+		}
 		if (purchaseTerminal != null)
 		{
 			purchaseTerminal.gameObject.SetActive(value: true);
@@ -219,7 +222,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		}
 		for (int i = 0; i < siTerminals.Length; i++)
 		{
-			if ((bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn)
+			if (siManager != null && (bool)siTerminals[i].dispenser && siTerminals[i].dispenser.isTryOn)
 			{
 				siManager.UnregisterTryOnDispenser();
 			}
@@ -230,7 +233,10 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		{
 			siDeposits[j].gameObject.SetActive(value: false);
 		}
-		questBoard.gameObject.SetActive(value: false);
+		if (questBoard != null)
+		{
+			questBoard.gameObject.SetActive(value: false);
+		}
 		if (purchaseTerminal != null)
 		{
 			purchaseTerminal.gameObject.SetActive(value: false);

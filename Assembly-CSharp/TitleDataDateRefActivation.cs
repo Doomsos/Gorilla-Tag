@@ -20,6 +20,12 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 	private class TitleDataDateRefActivationTarget : IComparable<TitleDataDateRefActivationTarget>
 	{
 		[SerializeField]
+		private bool activationState;
+
+		[SerializeField]
+		private GameObject gameObject;
+
+		[SerializeField]
 		private int hrs;
 
 		[SerializeField]
@@ -29,52 +35,23 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 		private int sec;
 
 		[SerializeField]
-		private GameObject gameObject;
-
-		[SerializeField]
-		private bool activationState;
-
-		[SerializeField]
-		private bool initialState;
-
-		[SerializeField]
-		private bool persistent = true;
-
-		[SerializeField]
 		private UnityEvent payload;
-
-		[SerializeField]
-		private bool lateDispatch;
 
 		private DateTime dateTime = DateTime.MaxValue;
 
-		private string gameObjectName
-		{
-			get
-			{
-				if (!(gameObject == null))
-				{
-					return (activationState ? "Activate " : "Deactivate ") + gameObject.name;
-				}
-				return "No Game Object";
-			}
-		}
-
-		private string eventsLabel => $"Events [{payload.GetPersistentEventCount()}]" + (lateDispatch ? " *" : "");
+		public GameObject GameObject => gameObject;
 
 		public DateTime ActivationTime => dateTime;
 
 		public void Initialize(DateTime refTime)
 		{
 			dateTime = refTime.AddHours(hrs).AddMinutes(min).AddSeconds(sec);
-			gameObject.SetActive(initialState);
 		}
 
 		public void Activate(DateTime now)
 		{
-			float num = (float)(now - dateTime).TotalSeconds;
-			PersistLog.Log($"TitleDataDateRefActivationTarget :: Activate :: Time:{num}");
-			Activate(num);
+			float late = (float)(now - dateTime).TotalSeconds;
+			Activate(late);
 		}
 
 		public void Activate()
@@ -84,7 +61,7 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 
 		private void Activate(float late)
 		{
-			if (gameObject != null && (persistent || late < 1f))
+			if (gameObject != null && late < 1f)
 			{
 				gameObject.SetActive(activationState);
 				if (activationState)
@@ -97,7 +74,7 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 					}
 				}
 			}
-			if (lateDispatch || late < 1f)
+			if (late < 1f)
 			{
 				payload?.Invoke();
 			}
@@ -105,7 +82,7 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 
 		int IComparable<TitleDataDateRefActivationTarget>.CompareTo(TitleDataDateRefActivationTarget other)
 		{
-			return dateTime.CompareTo(other.dateTime);
+			return (hrs * 3600 + min * 60 + sec).CompareTo(other.hrs * 3600 + other.min * 60 + other.sec);
 		}
 	}
 
@@ -187,10 +164,5 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 				nodeList.RemoveAt(0);
 			}
 		}
-	}
-
-	public void ManuallyTriggerNode(int i)
-	{
-		nodes[i].Activate();
 	}
 }

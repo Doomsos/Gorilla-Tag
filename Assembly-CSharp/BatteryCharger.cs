@@ -273,7 +273,7 @@ public class BatteryCharger : MonoBehaviour
 	{
 		for (int i = 0; i < actions.Length; i++)
 		{
-			if ((actions[i].Direction == BatteryChargerEvent.VDirection.Up && previousCharge < state.CurrentCharge && previousCharge < actions[i].Value && state.CurrentCharge >= state.CurrentCharge) || (actions[i].Direction == BatteryChargerEvent.VDirection.Down && previousCharge > state.CurrentCharge && previousCharge > actions[i].Value && state.CurrentCharge <= state.CurrentCharge))
+			if ((actions[i].Direction == BatteryChargerEvent.VDirection.Up && previousCharge < state.CurrentCharge && previousCharge < actions[i].Value && state.CurrentCharge >= actions[i].Value) || (actions[i].Direction == BatteryChargerEvent.VDirection.Down && previousCharge > state.CurrentCharge && previousCharge > actions[i].Value && state.CurrentCharge <= actions[i].Value))
 			{
 				actions[i].Action?.Invoke();
 			}

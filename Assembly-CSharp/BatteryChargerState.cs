@@ -79,6 +79,14 @@ public class BatteryChargerState : NetworkComponent
 
 	private float[] pendingGrabTime = new float[20];
 
+	private const float CRANK_RPC_INTERVAL = 1f;
+
+	private float nextCrankRPCTimestamp;
+
+	private float pendingCrankCharge;
+
+	private int pendingCrankIndex = -1;
+
 	private bool m_disableNetworking;
 
 	[WeaverGenerated]
@@ -245,6 +253,7 @@ public class BatteryChargerState : NetworkComponent
 	{
 		if (crankIndex >= 0 && crankIndex < 20)
 		{
+			FlushCrankRPC();
 			ref CrankSyncState reference = ref crankSyncs[crankIndex];
 			reference.holderActorNr = -1;
 			reference.angle = finalAngle;
@@ -258,20 +267,40 @@ public class BatteryChargerState : NetworkComponent
 
 	internal void NotifyCrankInput(int crankIndex, float degrees)
 	{
-		if (crankIndex >= 0 && crankIndex < 20)
+		if (crankIndex < 0 || crankIndex >= 20)
 		{
-			float num = Mathf.Abs(degrees) * chargePerCrankDegree;
-			float num2 = currentCharge;
-			currentCharge = Mathf.Clamp(currentCharge + num, 0f, maxCharge);
-			this.onChargeChanged?.Invoke();
-			if (num2 < maxCharge && currentCharge >= maxCharge)
+			return;
+		}
+		float num = Mathf.Abs(degrees) * chargePerCrankDegree;
+		if (num <= 0f)
+		{
+			return;
+		}
+		float num2 = currentCharge;
+		currentCharge = Mathf.Clamp(currentCharge + num, 0f, maxCharge);
+		this.onChargeChanged?.Invoke();
+		if (num2 < maxCharge && currentCharge >= maxCharge)
+		{
+			this.onFullyCharged?.Invoke();
+		}
+		if (PhotonNetwork.InRoom)
+		{
+			pendingCrankCharge = currentCharge;
+			pendingCrankIndex = crankIndex;
+			if (Time.time >= nextCrankRPCTimestamp)
 			{
-				this.onFullyCharged?.Invoke();
+				FlushCrankRPC();
 			}
-			if (PhotonNetwork.InRoom)
-			{
-				SendRPC("RPC_BatteryMessage", RpcTarget.MasterClient, (byte)3, (byte)crankIndex, currentCharge);
-			}
+		}
+	}
+
+	private void FlushCrankRPC()
+	{
+		if (pendingCrankIndex >= 0 && !(pendingCrankCharge <= 0f))
+		{
+			SendRPC("RPC_BatteryMessage", RpcTarget.MasterClient, (byte)3, (byte)pendingCrankIndex, pendingCrankCharge);
+			nextCrankRPCTimestamp = Time.time + 1f;
+			pendingCrankIndex = -1;
 		}
 	}
 
@@ -338,7 +367,7 @@ public class BatteryChargerState : NetworkComponent
 
 	public void SetEventPhase(int phase)
 	{
-		if (PhotonNetwork.IsMasterClient && phase != eventPhase)
+		if ((!PhotonNetwork.InRoom || PhotonNetwork.IsMasterClient) && phase != eventPhase)
 		{
 			eventPhase = phase;
 			this.onEventPhaseChanged?.Invoke(phase);

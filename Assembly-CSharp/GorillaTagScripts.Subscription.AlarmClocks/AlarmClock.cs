@@ -1,22 +1,21 @@
 using System.Collections;
-using System.Threading.Tasks;
-using GorillaLocomotion;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace GorillaTagScripts.Subscription.AlarmClocks;
 
-[RequireComponent(typeof(Collider))]
 public sealed class AlarmClock : MonoBehaviour
 {
-	private const float TouchDebouncePeriod = 1f;
+	private const float TouchDebouncePeriod = 0.25f;
 
 	[SerializeField]
 	private string _key;
 
 	[SerializeField]
-	private TextMeshPro _readout;
+	private GorillaPressableButton _button;
+
+	[SerializeField]
+	private GameObject _alarmClockOff;
 
 	[SerializeField]
 	private float _onTime = 1f;
@@ -34,11 +33,19 @@ public sealed class AlarmClock : MonoBehaviour
 
 	public bool Initialized { get; private set; }
 
-	private async void Awake()
+	private void OnEnable()
 	{
-		while (AlarmClockManager.Instance == null)
+		_button.onPressButton.AddListener(OnButtonPressed);
+		OnActivate.AddListener(OnActivateCallback);
+		OnDeactivate.AddListener(OnDeactivateCallback);
+		StartCoroutine(ActivateCoroutine());
+	}
+
+	private IEnumerator ActivateCoroutine()
+	{
+		while (AlarmClockManager.Instance == null || !AlarmClockManager.Instance.Initialized)
 		{
-			await Task.Yield();
+			yield return null;
 		}
 		if (AlarmClockManager.Instance.ActiveKey == _key)
 		{
@@ -51,23 +58,17 @@ public sealed class AlarmClock : MonoBehaviour
 		Initialized = true;
 	}
 
-	private void OnEnable()
-	{
-		OnActivate.AddListener(OnActivateCallback);
-		OnDeactivate.AddListener(OnDeactivateCallback);
-		StartCoroutine(Blink());
-	}
-
 	private void OnDisable()
 	{
+		_button.onPressButton.RemoveListener(OnButtonPressed);
 		OnActivate.RemoveListener(OnActivateCallback);
 		OnDeactivate.RemoveListener(OnDeactivateCallback);
 		StopAllCoroutines();
 	}
 
-	private void OnTriggerEnter(Collider other)
+	private void OnButtonPressed()
 	{
-		if (Initialized && !(Time.time < _lastTouchTime + 1f) && !(other.GetComponentInParent<GTPlayer>() == null) && SubscriptionManager.IsLocalSubscribed())
+		if (Initialized && !(Time.time < _lastTouchTime + 0.25f) && SubscriptionManager.IsLocalSubscribed())
 		{
 			_lastTouchTime = Time.time;
 			AlarmClockManager.ToggleAlarmClock(this);
@@ -76,24 +77,13 @@ public sealed class AlarmClock : MonoBehaviour
 
 	private void OnActivateCallback()
 	{
-		_readout.text = "SET";
-		_readout.color = Color.green;
+		_alarmClockOff.SetActive(value: false);
+		_button.buttonRenderer.material.color = Color.red;
 	}
 
 	private void OnDeactivateCallback()
 	{
-		_readout.text = "88:88";
-		_readout.color = Color.red;
-	}
-
-	private IEnumerator Blink()
-	{
-		while (true)
-		{
-			_readout.enabled = true;
-			yield return new WaitForSeconds(_onTime);
-			_readout.enabled = false;
-			yield return new WaitForSeconds(_offTime);
-		}
+		_alarmClockOff.SetActive(value: true);
+		_button.buttonRenderer.material.color = (SubscriptionManager.IsLocalSubscribed() ? Color.white : new Color(0.33f, 0.33f, 0.33f));
 	}
 }

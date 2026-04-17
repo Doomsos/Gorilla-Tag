@@ -275,7 +275,10 @@ public class PlayFabTitleDataCache : MonoBehaviour
 	{
 		if (e == null)
 		{
-			e = new PlayFabError();
+			e = new PlayFabError
+			{
+				ErrorMessage = "PlayFabError was null. Maybe an exception was encountered."
+			};
 		}
 		foreach (DataRequest request in requests)
 		{

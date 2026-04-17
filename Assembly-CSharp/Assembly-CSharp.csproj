@@ -78,6 +78,9 @@
     <Reference Include="UnityEngine.VideoModule">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
     </Reference>
+    <Reference Include="KID">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\KID.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
@@ -164,9 +167,6 @@
     </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="KID">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\KID.dll</HintPath>
     </Reference>
     <Reference Include="nexus.nexussdk.Runtime">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\nexus.nexussdk.Runtime.dll</HintPath>

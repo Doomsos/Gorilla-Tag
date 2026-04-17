@@ -1,4 +1,4 @@
-public enum OperationType
+public enum OperationType : byte
 {
 	Subtract,
 	Add

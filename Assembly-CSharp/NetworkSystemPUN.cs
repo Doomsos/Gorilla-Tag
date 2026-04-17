@@ -930,12 +930,13 @@ public class NetworkSystemPUN : NetworkSystem
 		{
 			Debug.Log("[KID] Trying to set custom nickname but that permission has been disallowed");
 			PhotonNetwork.LocalPlayer.NickName = "gorilla";
-			return;
 		}
-		PlayerPrefs.SetString("playerName", id);
-		string nickName = PhotonNetwork.LocalPlayer.NickName;
-		PhotonNetwork.LocalPlayer.NickName = id;
-		_ = nickName != id;
+		else
+		{
+			PlayerPrefs.SetString("playerName", id);
+			_ = PhotonNetwork.LocalPlayer.NickName;
+			PhotonNetwork.LocalPlayer.NickName = id;
+		}
 	}
 
 	public override string GetMyNickName()

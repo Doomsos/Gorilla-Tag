@@ -5,11 +5,18 @@ using UnityEngine;
 
 public class ParticleSystemSet : MonoBehaviour
 {
+	[SerializeField]
+	private GameObject[] ActiveDuringEmission;
+
 	private Vector3 localScale = Vector3.one;
 
 	private ParticleSystem[] ps;
 
 	private ParticleSystem.MainModule[] psMains;
+
+	public GameObject[] skipForSimulationSpeed;
+
+	private HashSet<ParticleSystem.MainModule> skipSet;
 
 	private ParticleSystem.EmissionModule[] psEmits;
 
@@ -23,10 +30,15 @@ public class ParticleSystemSet : MonoBehaviour
 		ps = GetComponentsInChildren<ParticleSystem>();
 		List<ParticleSystem.MainModule> list = new List<ParticleSystem.MainModule>();
 		List<ParticleSystem.EmissionModule> list2 = new List<ParticleSystem.EmissionModule>();
+		skipSet = new HashSet<ParticleSystem.MainModule>();
 		for (int i = 0; i < ps.Length; i++)
 		{
 			list.Add(ps[i].main);
 			list2.Add(ps[i].emission);
+		}
+		for (int j = 0; j < skipForSimulationSpeed.Length; j++)
+		{
+			skipSet.Add(skipForSimulationSpeed[j].GetComponent<ParticleSystem>().main);
 		}
 		psMains = list.ToArray();
 		psEmits = list2.ToArray();
@@ -45,7 +57,10 @@ public class ParticleSystemSet : MonoBehaviour
 	{
 		for (int i = 0; i < psMains.Length; i++)
 		{
-			psMains[i].simulationSpeed = target;
+			if (!skipSet.Contains(psMains[i]))
+			{
+				psMains[i].simulationSpeed = target;
+			}
 		}
 	}
 
@@ -56,8 +71,11 @@ public class ParticleSystemSet : MonoBehaviour
 		{
 			for (int i = 0; i < psMains.Length; i++)
 			{
-				psMains[i].simulationSpeed = Mathf.MoveTowards(psMains[i].simulationSpeed, target, Time.deltaTime * fadeRate);
-				loop = psMains[i].simulationSpeed != target;
+				if (!skipSet.Contains(psMains[i]))
+				{
+					psMains[i].simulationSpeed = Mathf.MoveTowards(psMains[i].simulationSpeed, target, Time.deltaTime * fadeRate);
+					loop = psMains[i].simulationSpeed != target;
+				}
 			}
 			await Task.Yield();
 		}
@@ -99,6 +117,10 @@ public class ParticleSystemSet : MonoBehaviour
 			psMains[i].prewarm = false;
 			ps[i].Play();
 		}
+		for (int j = 0; j < ActiveDuringEmission.Length; j++)
+		{
+			ActiveDuringEmission[j].SetActive(value: true);
+		}
 	}
 
 	public void StopEmission()
@@ -106,6 +128,10 @@ public class ParticleSystemSet : MonoBehaviour
 		for (int i = 0; i < ps.Length; i++)
 		{
 			ps[i].Stop();
+		}
+		for (int j = 0; j < ActiveDuringEmission.Length; j++)
+		{
+			ActiveDuringEmission[j].SetActive(value: false);
 		}
 	}
 

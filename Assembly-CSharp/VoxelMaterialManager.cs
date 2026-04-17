@@ -18,7 +18,23 @@ public class VoxelMaterialManager : MonoBehaviour
 
 	public List<LightingProfile> lightingProfiles;
 
+	[Range(0f, 1f)]
+	[SerializeField]
+	private float shadowBrightness = 0.3f;
+
+	[Range(0f, 1f)]
+	[SerializeField]
+	private float backlightBrightness = 0.2f;
+
+	[SerializeField]
+	private int startingIndex = 2;
+
 	private int _timeOfDayIndex = -1;
+
+	private void OnEnable()
+	{
+		SetLightingProfile(startingIndex);
+	}
 
 	private void Update()
 	{
@@ -36,15 +52,20 @@ public class VoxelMaterialManager : MonoBehaviour
 			int num = lightmapNames.IndexOf(currentTimeOfDay);
 			if (num >= 0 && num < lightingProfiles.Count)
 			{
-				Debug.Log($"[V] Setting lighting profile {num} ({currentTimeOfDay})");
-				LightingProfile lightingProfile = lightingProfiles[num];
-				Shader.SetGlobalVector("_Light_Direction", lightingProfile.direction);
-				Shader.SetGlobalColor("_Light_Color", lightingProfile.color);
-				Shader.SetGlobalColor("_Shadow_Color", lightingProfile.color * 0.32f);
-				Shader.SetGlobalColor("_Rim_Color", lightingProfile.color * 0.1f);
-				Shader.SetGlobalColor("_Backlight_Color", lightingProfile.color * 0.07f);
+				SetLightingProfile(num);
 				_timeOfDayIndex = BetterDayNightManager.instance.currentTimeIndex;
 			}
 		}
+	}
+
+	private void SetLightingProfile(int index)
+	{
+		index = Mathf.Clamp(index, 0, lightingProfiles.Count - 1);
+		LightingProfile lightingProfile = lightingProfiles[index];
+		Shader.SetGlobalVector("_Light_Direction", lightingProfile.direction);
+		Shader.SetGlobalColor("_Light_Color", lightingProfile.color);
+		Shader.SetGlobalColor("_Shadow_Color", lightingProfile.color * shadowBrightness);
+		Shader.SetGlobalColor("_Backlight_Color", lightingProfile.color * backlightBrightness);
+		_timeOfDayIndex = index;
 	}
 }

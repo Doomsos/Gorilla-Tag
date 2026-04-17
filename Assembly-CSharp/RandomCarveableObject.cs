@@ -91,7 +91,7 @@ public class RandomCarveableObject : MonoBehaviour
 	public async void SpawnNewCarveable()
 	{
 		await UniTask.Yield();
-		if ((bool)_carveable)
+		if ((bool)_carveable && VoxelManager.HasAuthority)
 		{
 			ClearBounds();
 		}
@@ -101,7 +101,11 @@ public class RandomCarveableObject : MonoBehaviour
 		world.SetWorldBounds(_voxelBounds);
 		world.UpdateWorld = true;
 		await UniTask.WaitUntil(() => world.BoundsChunksLoaded(_voxelBounds));
-		FillBounds();
+		if (VoxelManager.HasAuthority)
+		{
+			FillBounds();
+		}
+		VoxelManager.ReplicateState(world);
 		_carveable.gameObject.SetActive(value: true);
 	}
 }

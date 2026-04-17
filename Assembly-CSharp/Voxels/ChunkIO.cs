@@ -53,39 +53,74 @@ public static class ChunkIO
 			Directory.CreateDirectory(Root);
 		}
 		using FileStream output = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: false);
-		using BinaryWriter binaryWriter = new BinaryWriter(output);
-		binaryWriter.Write(1448040524u);
-		binaryWriter.Write(5);
-		binaryWriter.Write(chunk.Id.x);
-		binaryWriter.Write(chunk.Id.y);
-		binaryWriter.Write(chunk.Id.z);
-		binaryWriter.Write(chunk.Size.x);
-		binaryWriter.Write(chunk.Size.y);
-		binaryWriter.Write(chunk.Size.z);
-		binaryWriter.Write(chunk.Dimensions.x);
-		binaryWriter.Write(chunk.Dimensions.y);
-		binaryWriter.Write(chunk.Dimensions.z);
-		WriteNativeArray(binaryWriter, chunk.Density);
-		WriteNativeArray(binaryWriter, chunk.Material);
+		using BinaryWriter bw = new BinaryWriter(output);
+		WriteChunk(bw, in chunk);
+	}
+
+	public static byte[] SerializeChunk(in ChunkDTO chunk)
+	{
+		using MemoryStream memoryStream = new MemoryStream(4096);
+		using BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		WriteChunk(binaryWriter, in chunk);
+		binaryWriter.Flush();
+		return memoryStream.ToArray();
+	}
+
+	private static void WriteChunk(BinaryWriter bw, in ChunkDTO chunk)
+	{
+		bw.Write(1448040524u);
+		bw.Write(5);
+		bw.Write(chunk.WorldId);
+		bw.Write(chunk.Id.x);
+		bw.Write(chunk.Id.y);
+		bw.Write(chunk.Id.z);
+		bw.Write(chunk.Size.x);
+		bw.Write(chunk.Size.y);
+		bw.Write(chunk.Size.z);
+		bw.Write(chunk.Dimensions.x);
+		bw.Write(chunk.Dimensions.y);
+		bw.Write(chunk.Dimensions.z);
+		WriteNativeArray(bw, chunk.Density);
+		WriteNativeArray(bw, chunk.Material);
 	}
 
 	public static ChunkDTO Load(string path, Allocator alloc = Allocator.Persistent)
 	{
 		using FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: false);
-		using BinaryReader binaryReader = new BinaryReader(input);
-		uint num = binaryReader.ReadUInt32();
-		int num2 = binaryReader.ReadInt32();
+		using BinaryReader br = new BinaryReader(input);
+		return ReadChunk(br, alloc);
+	}
+
+	public static bool TryDeserializeChunk(in byte[] data, out ChunkDTO dto)
+	{
+		dto = DeserializeChunk(in data);
+		return dto.IsValid;
+	}
+
+	public static ChunkDTO DeserializeChunk(in byte[] data, Allocator alloc = Allocator.Persistent)
+	{
+		using MemoryStream input = new MemoryStream(data);
+		using BinaryReader br = new BinaryReader(input);
+		return ReadChunk(br);
+	}
+
+	private static ChunkDTO ReadChunk(BinaryReader br, Allocator alloc = Allocator.Persistent)
+	{
+		uint num = br.ReadUInt32();
+		int num2 = br.ReadInt32();
 		if (num != 1448040524 || num2 != 5)
 		{
 			return default(ChunkDTO);
 		}
-		int3 id = new int3(binaryReader.ReadInt32(), binaryReader.ReadInt32(), binaryReader.ReadInt32());
-		int3 size = new int3(binaryReader.ReadInt32(), binaryReader.ReadInt32(), binaryReader.ReadInt32());
-		int3 dimensions = new int3(binaryReader.ReadInt32(), binaryReader.ReadInt32(), binaryReader.ReadInt32());
-		NativeArray<byte> density = ReadNativeArray(binaryReader, alloc);
-		NativeArray<byte> material = ReadNativeArray(binaryReader, alloc);
+		int worldId = br.ReadInt32();
+		int3 id = new int3(br.ReadInt32(), br.ReadInt32(), br.ReadInt32());
+		int3 size = new int3(br.ReadInt32(), br.ReadInt32(), br.ReadInt32());
+		int3 dimensions = new int3(br.ReadInt32(), br.ReadInt32(), br.ReadInt32());
+		NativeArray<byte> density = ReadNativeArray(br, alloc);
+		NativeArray<byte> material = ReadNativeArray(br, alloc);
 		return new ChunkDTO
 		{
+			WorldId = worldId,
 			Id = id,
 			Size = size,
 			Dimensions = dimensions,

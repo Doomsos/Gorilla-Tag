@@ -12,6 +12,9 @@ public class PrivateUIRoom : MonoBehaviourTick
 	private TextMeshPro _text;
 
 	[SerializeField]
+	private float _textDistance = 4f;
+
+	[SerializeField]
 	private GameObject occluder;
 
 	[SerializeField]
@@ -220,6 +223,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		{
 			return;
 		}
+		instance._text.text = "";
 		AssignShoulderCameraToCanvases(focus);
 		instance.uiParents.Add(focus, focus.parent);
 		focus.gameObject.SetActive(value: false);
@@ -359,6 +363,16 @@ public class PrivateUIRoom : MonoBehaviourTick
 		_shoulderCameraReference.transform.position = _uiRoot.position;
 		_shoulderCameraReference.transform.rotation = _uiRoot.rotation;
 		backgroundRenderer.material.SetVector(backgroundDirectionPropertyID, backgroundRenderer.transform.InverseTransformDirection(normalized));
+		SetTextPositionAndRotation(transform);
+	}
+
+	private void SetTextPositionAndRotation(Transform pov)
+	{
+		if (_text.enabled && !string.IsNullOrEmpty(_text.text))
+		{
+			_text.transform.position = pov.position + _textDistance * (pov.rotation * Vector3.forward);
+			_text.transform.rotation = Quaternion.LookRotation(pov.rotation * Vector3.forward, Vector3.up);
+		}
 	}
 
 	private void UpdateUIPosition()
@@ -367,6 +381,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		lastStablePosition = transform.position;
 		_uiRoot.position = lastStablePosition + lastStableRotation * new Vector3(0f, 0f, 0.02f);
 		_shoulderCameraReference.transform.position = _uiRoot.position;
+		SetTextPositionAndRotation(transform);
 	}
 
 	public static bool GetInOverlay()

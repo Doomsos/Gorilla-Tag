@@ -139,6 +139,26 @@ public class Chunk : IDisposable
 		Mesh = null;
 	}
 
+	public void UpdateFrom(ChunkDTO dto)
+	{
+		Id = dto.Id;
+		Size = dto.Size;
+		Dimensions = dto.Dimensions;
+		VoxelCount = Dimensions.x * Dimensions.y * Dimensions.z;
+		DisposeAllExceptComponent();
+		Density = dto.Density;
+		Material = dto.Material;
+		IsDataGenerated = true;
+		IsDataChanged = true;
+		IsMeshGenerated = false;
+		IsMeshCreated = false;
+		IsCollisionBaked = false;
+		IsMeshAssigned = false;
+		IsDirty = true;
+		VertexCount = 0;
+		Mesh = null;
+	}
+
 	public void Clear()
 	{
 		DisposeMeshData();
@@ -191,6 +211,21 @@ public class Chunk : IDisposable
 		{
 			UnityEngine.Object.Destroy(Component.gameObject);
 		}
+	}
+
+	public void DisposeAllExceptComponent()
+	{
+		if (Density.IsCreated)
+		{
+			Density.Dispose();
+			Density = default(NativeArray<byte>);
+		}
+		if (Material.IsCreated)
+		{
+			Material.Dispose();
+			Material = default(NativeArray<byte>);
+		}
+		DisposeMeshData();
 	}
 
 	public void DisposeMeshData()

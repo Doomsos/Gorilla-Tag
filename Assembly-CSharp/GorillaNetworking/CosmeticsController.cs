@@ -12,6 +12,7 @@ using GorillaNetworking.Store;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using GorillaTagScripts;
+using GorillaTagScripts.Subscription;
 using GorillaTagScripts.VirtualStumpCustomMaps;
 using Photon.Pun;
 using Photon.Realtime;
@@ -797,6 +798,8 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 
 	public Action OnGetCurrency;
 
+	private string purchaseLocation;
+
 	[FormerlySerializedAs("allCosmetics")]
 	[SerializeField]
 	private List<CosmeticItem> _allCosmetics;
@@ -1012,6 +1015,18 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 	[field: OnEnterPlay_Set(false)]
 	public static bool hasInstance { get; private set; }
 
+	public string PurchaseLocation
+	{
+		get
+		{
+			return purchaseLocation;
+		}
+		set
+		{
+			purchaseLocation = value;
+		}
+	}
+
 	public List<CosmeticItem> allCosmetics
 	{
 		get
@@ -1140,6 +1155,17 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 				cosmeticStand.InitializeCosmetic();
 			}
 		}
+	}
+
+	private string ConsumePurchaseLocation()
+	{
+		if (purchaseLocation.IsNullOrEmpty())
+		{
+			return GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString();
+		}
+		string result = purchaseLocation;
+		purchaseLocation = null;
+		return result;
 	}
 
 	public void AddWardrobeInstance(WardrobeInstance instance)
@@ -2996,6 +3022,10 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 
 	private void ProcessSteamCallback(MicroTxnAuthorizationResponse_t callBackResponse)
 	{
+		if (SubscriptionKiosk.ProcessingSubscriptionPurchase)
+		{
+			return;
+		}
 		Debug.Log("Steam has called back that the user has finished the payment interaction");
 		if (callBackResponse.m_bAuthorized == 0)
 		{
@@ -3027,7 +3057,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			},
 			{
 				"Location",
-				GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString()
+				ConsumePurchaseLocation()
 			}
 		};
 		if (validatedCreatorCode != null)
@@ -3052,7 +3082,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			},
 			{
 				"Location",
-				GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString()
+				ConsumePurchaseLocation()
 			}
 		};
 		if (validatedCreatorCode != null)

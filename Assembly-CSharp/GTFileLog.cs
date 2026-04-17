@@ -104,6 +104,10 @@ public static class GTFileLog
 
 		internal void WriteEntryNoTrace(string level, string msg)
 		{
+			if (ApplicationQuittingState.IsQuitting)
+			{
+				return;
+			}
 			lock (_lock)
 			{
 				EnsureWriter(null);
@@ -126,6 +130,10 @@ public static class GTFileLog
 
 		internal void WriteEntry(string level, string msg, string trace)
 		{
+			if (ApplicationQuittingState.IsQuitting)
+			{
+				return;
+			}
 			lock (_lock)
 			{
 				EnsureWriter(trace);

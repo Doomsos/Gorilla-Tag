@@ -11,24 +11,19 @@ public static class JamUtil
 
 	public static RaycastHit ToRaycastHit(this Collision collision)
 	{
-		if (collision.ConvertToRaycast(out var hit))
+		if (!collision.ConvertToRaycast(out var hit))
 		{
-			Debug.Log($"Hit {hit.collider.name} [{collision.contacts[0].otherCollider == hit.collider}]", hit.collider);
-		}
-		else
-		{
-			Debug.LogError($"No hit! ({collision})");
+			GTDev.LogError($"No hit! ({collision})");
 		}
 		return hit;
 	}
 
 	public static bool ConvertToRaycast(this Collision collision, out RaycastHit hit)
 	{
-		Vector3 point = collision.contacts[0].point;
-		Vector3 normal = collision.contacts[0].normal;
+		ContactPoint contact = collision.GetContact(0);
+		Vector3 point = contact.point;
+		Vector3 normal = contact.normal;
 		LayerMask layerMask = 1 << collision.gameObject.layer;
-		bool result = Physics.Raycast(new Ray(point + normal * 0.01f, -normal), out hit, 0.1f, layerMask, QueryTriggerInteraction.Ignore);
-		Debug.Log($"Match: {collision.contacts[0].otherCollider == hit.collider}");
-		return result;
+		return Physics.Raycast(new Ray(point + normal * 0.1f, -normal), out hit, 0.2f, layerMask, QueryTriggerInteraction.Ignore);
 	}
 }

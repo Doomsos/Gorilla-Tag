@@ -21,7 +21,6 @@ SecondLookSkeletonSynchValues.RemoteActivateGhost(Photon.Pun.PhotonMessageInfo i
 SecondLookSkeletonSynchValues.RemotePlayerSeen(Photon.Pun.PhotonMessageInfo info)
 SecondLookSkeletonSynchValues.RemotePlayerCaught(Photon.Pun.PhotonMessageInfo info)
 Ballista.FireBallistaRPC(Photon.Pun.PhotonMessageInfo info)
-MonkeBusinessStation.BroadcastRedeemQuestPoints(System.Int32 redeemedPointCount, Photon.Pun.PhotonMessageInfo info)
 GTDoor.ChangeDoorState(GTDoor/DoorState shouldOpenState, Photon.Pun.PhotonMessageInfo info)
 GTDoor.RPC_ChangeDoorState(GTDoor/DoorState shouldOpenState, System.Int32 doorId)
 PlantableFlagManager.UpdateFlagColorRPC(System.Int32 flagIndex, System.Int32 colorIndex, Photon.Pun.PhotonMessageInfo info)

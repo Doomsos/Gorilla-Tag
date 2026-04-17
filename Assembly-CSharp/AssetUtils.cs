@@ -39,4 +39,15 @@ public static class AssetUtils
 	{
 		return 0L;
 	}
+
+	public static string GetGameObjectPath(GameObject obj)
+	{
+		string text = "/" + obj.name;
+		while (obj.transform.parent != null)
+		{
+			obj = obj.transform.parent.gameObject;
+			text = "/" + obj.name + text;
+		}
+		return text;
+	}
 }

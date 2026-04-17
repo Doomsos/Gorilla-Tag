@@ -369,6 +369,20 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 
 	public static bool CanLoadEntities { get; private set; }
 
+	internal static void SetZoneDynamicLighting(bool enable)
+	{
+		if (enable && !usingDynamicLighting)
+		{
+			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(enable: true);
+			usingDynamicLighting = true;
+		}
+		else if (!enable && usingDynamicLighting)
+		{
+			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(enable: false);
+			usingDynamicLighting = false;
+		}
+	}
+
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitOnLoad()
 	{
@@ -759,9 +773,8 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			Color ambientLightDynamic = new Color(loadedMapPackageInfo.uberShaderAmbientDynamicLight_R, loadedMapPackageInfo.uberShaderAmbientDynamicLight_G, loadedMapPackageInfo.uberShaderAmbientDynamicLight_B, loadedMapPackageInfo.uberShaderAmbientDynamicLight_A);
 			if (loadedMapPackageInfo.useUberShaderDynamicLighting)
 			{
-				GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: true);
+				SetZoneDynamicLighting(enable: true);
 				GameLightingManager.instance.SetAmbientLightDynamic(ambientLightDynamic);
-				usingDynamicLighting = true;
 			}
 			VirtualStumpReturnWatch.SetWatchProperties(loadedMapPackageInfo.GetReturnToVStumpWatchProps());
 		}
@@ -1131,9 +1144,8 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		disableHoldingHandsCustomMode = sceneDescriptor.DisableHoldingHandsCustomOnly;
 		if (sceneDescriptor.UseUberShaderDynamicLighting)
 		{
-			GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: true);
+			SetZoneDynamicLighting(enable: true);
 			GameLightingManager.instance.SetAmbientLightDynamic(sceneDescriptor.UberShaderAmbientDynamicLight);
-			usingDynamicLighting = true;
 		}
 		List<int> list = new List<int>();
 		foreach (GameModeType availableModesForOldMap in instance.availableModesForOldMaps)
@@ -1787,7 +1799,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			{
 				componentInChildren.SetCustomMapScene(placeholderGameObject.scene);
 				customMapATM = gameObject5;
-				ATM_Manager.instance.AddATM(componentInChildren);
+				ATM_Manager.instance.AddATM(componentInChildren, null);
 				if (!component.defaultCreatorCode.IsNullOrEmpty())
 				{
 					ATM_Manager.instance.SetTemporaryCreatorCode(component.defaultCreatorCode);
@@ -2154,15 +2166,13 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (flag)
 			{
-				GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: true);
+				SetZoneDynamicLighting(enable: true);
 				GameLightingManager.instance.SetAmbientLightDynamic(array[num].UberShaderAmbientDynamicLight);
-				usingDynamicLighting = true;
 			}
 			else
 			{
-				GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: false);
+				SetZoneDynamicLighting(enable: false);
 				GameLightingManager.instance.SetAmbientLightDynamic(Color.black);
-				usingDynamicLighting = false;
 			}
 		}
 		else if (loadedMapPackageInfo.customMapSupportVersion > 2)
@@ -2170,15 +2180,13 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			if (loadedMapPackageInfo.useUberShaderDynamicLighting)
 			{
 				Color ambientLightDynamic = new Color(loadedMapPackageInfo.uberShaderAmbientDynamicLight_R, loadedMapPackageInfo.uberShaderAmbientDynamicLight_G, loadedMapPackageInfo.uberShaderAmbientDynamicLight_B, loadedMapPackageInfo.uberShaderAmbientDynamicLight_A);
-				GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: true);
+				SetZoneDynamicLighting(enable: true);
 				GameLightingManager.instance.SetAmbientLightDynamic(ambientLightDynamic);
-				usingDynamicLighting = true;
 			}
 			else
 			{
-				GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: false);
+				SetZoneDynamicLighting(enable: false);
 				GameLightingManager.instance.SetAmbientLightDynamic(Color.black);
-				usingDynamicLighting = false;
 			}
 		}
 		if (!list.IsNullOrEmpty() || !list2.IsNullOrEmpty())
@@ -2348,8 +2356,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		LightmapSettings.lightmaps = lightmaps;
 		UnloadLightmaps();
 		yield return ResetLightmaps();
-		usingDynamicLighting = false;
-		GameLightingManager.instance.SetCustomDynamicLightingEnabled(enable: false);
+		SetZoneDynamicLighting(enable: false);
 		GameLightingManager.instance.SetAmbientLightDynamic(Color.black);
 		if (mapBundle != null)
 		{

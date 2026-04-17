@@ -228,6 +228,7 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 		if (networkSpeaker != null)
 		{
 			CleanupLoudSpeakerNetwork();
+			networkSpeaker.gameObject.SetActive(value: false);
 			if (netDestroy)
 			{
 				networkSpeaker.SetParent(base.transform, worldPositionStays: false);
@@ -236,7 +237,6 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 			{
 				networkSpeaker.SetParent(null);
 			}
-			networkSpeaker.gameObject.SetActive(value: false);
 		}
 		vrrig = null;
 	}

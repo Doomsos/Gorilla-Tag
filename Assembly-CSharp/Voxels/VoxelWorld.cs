@@ -73,7 +73,7 @@ public class VoxelWorld : MonoBehaviour
 
 	protected NativeHashSet<int3> chunksToGenerate;
 
-	protected NativeList<int3> sortedChunks = new NativeList<int3>(Allocator.Persistent);
+	protected NativeList<int3> sortedChunks;
 
 	protected int chunkSortIndex;
 
@@ -95,9 +95,17 @@ public class VoxelWorld : MonoBehaviour
 
 	private bool _updateWorld = true;
 
+	private static UnityEngine.BoundsInt _opBounds;
+
+	private static Chunk _opChunk;
+
+	public IEnumerable<Chunk> Chunks => chunks.Values;
+
 	public bool Initialized { get; private set; }
 
 	public bool IsInfinite => worldType == WorldType.Infinite;
+
+	public int Id { get; private set; }
 
 	public bool UpdateWorld
 	{
@@ -206,6 +214,7 @@ public class VoxelWorld : MonoBehaviour
 		{
 			target = base.transform;
 		}
+		Id = this.GenerateHashcodeFromPath();
 	}
 
 	private void Start()
@@ -216,8 +225,22 @@ public class VoxelWorld : MonoBehaviour
 		VoxelCount = VoxelDimension * VoxelDimension * VoxelDimension;
 		int num = viewDistance * 2 + 1;
 		chunksToGenerate = new NativeHashSet<int3>(num * num * num, Allocator.Persistent);
+		sortedChunks = new NativeList<int3>(Allocator.Persistent);
 		ConfigurePools();
 		Initialized = true;
+	}
+
+	private void OnEnable()
+	{
+		VoxelManager.Register(this);
+	}
+
+	private void OnDisable()
+	{
+		if (!ApplicationQuittingState.IsQuitting)
+		{
+			VoxelManager.Unregister(this);
+		}
 	}
 
 	private void OnDestroy()
@@ -225,6 +248,18 @@ public class VoxelWorld : MonoBehaviour
 		if (persistChanges)
 		{
 			SaveChunks();
+		}
+		foreach (Chunk value in chunks.Values)
+		{
+			value.Dispose();
+		}
+		if (sortedChunks.IsCreated)
+		{
+			sortedChunks.Dispose();
+		}
+		if (chunksToGenerate.IsCreated)
+		{
+			chunksToGenerate.Dispose();
 		}
 	}
 
@@ -325,6 +360,11 @@ public class VoxelWorld : MonoBehaviour
 		}, null, collectionCheck: true, 100, 100);
 	}
 
+	public bool TryGetChunk(int3 chunkId, out Chunk chunk)
+	{
+		return chunks.TryGetValue(chunkId, out chunk);
+	}
+
 	private Chunk GetPooledChunk(int3 chunkId)
 	{
 		Chunk chunk = _chunkPool.Get();
@@ -345,6 +385,30 @@ public class VoxelWorld : MonoBehaviour
 			pooledChunk.Id = chunkId;
 		}
 		return pooledChunk;
+	}
+
+	public void SetChunkFrom(ChunkDTO dto)
+	{
+		if (!chunks.TryGetValue(dto.Id, out var value))
+		{
+			value = GetPooledChunk(dto.Id);
+			chunks[dto.Id] = value;
+		}
+		value.SetFrom(dto);
+	}
+
+	public void UpdateChunkFrom(ChunkDTO dto)
+	{
+		if (!chunks.TryGetValue(dto.Id, out var value))
+		{
+			value = GetPooledChunk(dto.Id);
+			chunks[dto.Id] = value;
+			value.SetFrom(dto);
+		}
+		else
+		{
+			value.UpdateFrom(dto);
+		}
 	}
 
 	private void Save(Chunk chunk)
@@ -514,6 +578,20 @@ public class VoxelWorld : MonoBehaviour
 		generationQueueChanged = true;
 	}
 
+	public void ResetChunk(int3 chunkId)
+	{
+		if (chunks.TryGetValue(chunkId, out var value) && value.IsDataChanged)
+		{
+			if (chunkJobs.TryGetValue(_opChunk.Id, out var value2))
+			{
+				value2.Complete();
+				chunkJobs.Remove(chunkId);
+			}
+			value.IsDataGenerated = false;
+			value.IsDirty = true;
+		}
+	}
+
 	private void ProcessChunk(int3 chunkId)
 	{
 		if (!chunks.TryGetValue(chunkId, out var value))
@@ -649,31 +727,31 @@ public class VoxelWorld : MonoBehaviour
 	public void SetVoxelDensityCustom(UnityEngine.BoundsInt worldBounds, Func<int3, byte, byte> setDensityFunction)
 	{
 		ForEachChunkInBounds(worldBounds, SetVoxelDensityInChunk);
-		void SetVoxelDensityInChunk(Chunk chunk)
+		void SetVoxelDensityInChunk()
 		{
 			ChunkTaskSet value;
-			bool flag = chunkJobs.TryGetValue(chunk.Id, out value);
+			bool flag = chunkJobs.TryGetValue(_opChunk.Id, out value);
 			if (flag)
 			{
 				value.Complete();
 			}
 			bool anyChanged = false;
-			ForEachVoxelInChunkInBounds(worldBounds, chunk, SetVoxelDensity);
+			ForEachVoxelInChunkInBounds(_opBounds, _opChunk, SetDensity);
 			if (anyChanged)
 			{
-				chunk.IsDataChanged = true;
-				MeshChunkImmediately(chunk);
+				_opChunk.IsDataChanged = true;
+				MeshChunkImmediately(_opChunk);
 			}
 			else if (flag)
 			{
 				HandleJobCompletion(value);
 			}
-			void SetVoxelDensity(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density)
+			void SetDensity(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density)
 			{
 				byte b = setDensityFunction(voxelWorldPosition, density);
 				if (b != density)
 				{
-					chunk.Density[voxelIndex] = b;
+					_opChunk.Density[voxelIndex] = b;
 					anyChanged = true;
 				}
 			}
@@ -683,20 +761,20 @@ public class VoxelWorld : MonoBehaviour
 	public void SetVoxelDataCustom(UnityEngine.BoundsInt worldBounds, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction)
 	{
 		ForEachChunkInBounds(worldBounds, SetVoxelDataInChunk);
-		void SetVoxelDataInChunk(Chunk chunk)
+		void SetVoxelDataInChunk()
 		{
 			ChunkTaskSet value;
-			bool flag = chunkJobs.TryGetValue(chunk.Id, out value);
+			bool flag = chunkJobs.TryGetValue(_opChunk.Id, out value);
 			if (flag)
 			{
 				value.Complete();
 			}
 			bool anyChanged = false;
-			ForEachVoxelInChunkInBounds(worldBounds, chunk, SetVoxelData);
+			ForEachVoxelInChunkInBounds(_opBounds, _opChunk, SetVoxelData);
 			if (anyChanged)
 			{
-				chunk.IsDataChanged = true;
-				MeshChunkImmediately(chunk);
+				_opChunk.IsDataChanged = true;
+				MeshChunkImmediately(_opChunk);
 			}
 			else if (flag)
 			{
@@ -707,8 +785,8 @@ public class VoxelWorld : MonoBehaviour
 				var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
 				if (b != density || b2 != material)
 				{
-					chunk.Density[voxelIndex] = b;
-					chunk.Material[voxelIndex] = b2;
+					_opChunk.Density[voxelIndex] = b;
+					_opChunk.Material[voxelIndex] = b2;
 					anyChanged = true;
 				}
 			}
@@ -719,20 +797,20 @@ public class VoxelWorld : MonoBehaviour
 	{
 		UnityEngine.BoundsInt boundsFor = GetBoundsFor(voxels);
 		ForEachChunkInBounds(boundsFor, SetVoxelDataInChunk);
-		void SetVoxelDataInChunk(Chunk chunk)
+		void SetVoxelDataInChunk()
 		{
 			ChunkTaskSet value;
-			bool flag = chunkJobs.TryGetValue(chunk.Id, out value);
+			bool flag = chunkJobs.TryGetValue(_opChunk.Id, out value);
 			if (flag)
 			{
 				value.Complete();
 			}
 			bool anyChanged = false;
-			ForEachSpecifiedVoxelInChunk(voxels, chunk, SetVoxelData);
+			ForEachSpecifiedVoxelInChunk(voxels, _opChunk, SetVoxelData);
 			if (anyChanged)
 			{
-				chunk.IsDataChanged = true;
-				MeshChunkImmediately(chunk);
+				_opChunk.IsDataChanged = true;
+				MeshChunkImmediately(_opChunk);
 			}
 			else if (flag)
 			{
@@ -743,11 +821,206 @@ public class VoxelWorld : MonoBehaviour
 				var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
 				if (b != density || b2 != material)
 				{
-					chunk.Density[voxelIndex] = b;
-					chunk.Material[voxelIndex] = b2;
+					_opChunk.Density[voxelIndex] = b;
+					_opChunk.Material[voxelIndex] = b2;
 					anyChanged = true;
 				}
 			}
+		}
+	}
+
+	public void SetVoxels(UnityEngine.BoundsInt bounds, Voxel[] voxels, bool immediate = true)
+	{
+		bounds.GetVoxelCount();
+		ForEachChunkInBounds(bounds, SetVoxelDataInChunk);
+		void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte material, byte density)
+		{
+			byte material2 = voxels[P_5.index].Material;
+			byte density2 = voxels[P_5.index].Density;
+			byte b = material2;
+			byte b2 = density2;
+			if (b != density || b2 != material)
+			{
+				_opChunk.Density[voxelIndex] = b;
+				_opChunk.Material[voxelIndex] = b2;
+				P_5.anyChanged = true;
+			}
+		}
+		void SetVoxelDataInChunk()
+		{
+			ChunkTaskSet value;
+			bool flag = chunkJobs.TryGetValue(_opChunk.Id, out value);
+			if (flag)
+			{
+				value.Complete();
+			}
+			bool anyChanged = false;
+			int3 zero = int3.zero;
+			int3 max = _opChunk.Dimensions - 1;
+			int index = 0;
+			for (int i = _opBounds.min.x; i <= _opBounds.max.x; i++)
+			{
+				for (int j = _opBounds.min.y; j <= _opBounds.max.y; j++)
+				{
+					for (int k = _opBounds.min.z; k <= _opBounds.max.z; k++)
+					{
+						int3 int5 = new int3(i, j, k);
+						int3 localPosition = _opChunk.GetLocalPosition(int5);
+						if (localPosition.IsInBounds(zero, max))
+						{
+							int num = localPosition.x + VoxelDimension * (localPosition.y + VoxelDimension * localPosition.z);
+							SetVoxelData(int5, localPosition, num, _opChunk.Material[num], _opChunk.Density[num]);
+						}
+						index++;
+					}
+				}
+			}
+			if (anyChanged)
+			{
+				_opChunk.IsDataChanged = true;
+				if (immediate)
+				{
+					MeshChunkImmediately(_opChunk);
+				}
+				else
+				{
+					_opChunk.IsMeshGenerated = false;
+				}
+			}
+			else if (flag)
+			{
+				HandleJobCompletion(value);
+			}
+		}
+	}
+
+	public void SetVoxelDensity(UnityEngine.BoundsInt bounds, byte[] data, bool immediate = true)
+	{
+		ForEachChunkInBounds(bounds, SetVoxelDensityInChunk);
+		void SetVoxelDensity(int voxelIndex, byte density)
+		{
+			byte b = data[P_2.index];
+			if (b != density)
+			{
+				_opChunk.Density[voxelIndex] = b;
+				P_2.anyChanged = true;
+			}
+		}
+		void SetVoxelDensityInChunk()
+		{
+			ChunkTaskSet value;
+			bool flag = chunkJobs.TryGetValue(_opChunk.Id, out value);
+			if (flag)
+			{
+				value.Complete();
+			}
+			bool anyChanged = false;
+			int3 zero = int3.zero;
+			int3 max = _opChunk.Dimensions - 1;
+			int index = 0;
+			for (int i = _opBounds.min.x; i <= _opBounds.max.x; i++)
+			{
+				for (int j = _opBounds.min.y; j <= _opBounds.max.y; j++)
+				{
+					for (int k = _opBounds.min.z; k <= _opBounds.max.z; k++)
+					{
+						int3 voxelPosition = new int3(i, j, k);
+						int3 localPosition = _opChunk.GetLocalPosition(voxelPosition);
+						if (localPosition.IsInBounds(zero, max))
+						{
+							int num = localPosition.x + VoxelDimension * (localPosition.y + VoxelDimension * localPosition.z);
+							SetVoxelDensity(num, _opChunk.Density[num]);
+						}
+						index++;
+					}
+				}
+			}
+			if (anyChanged)
+			{
+				_opChunk.IsDataChanged = true;
+				if (immediate)
+				{
+					MeshChunkImmediately(_opChunk);
+				}
+				else
+				{
+					_opChunk.IsMeshGenerated = false;
+				}
+			}
+			else if (flag)
+			{
+				HandleJobCompletion(value);
+			}
+		}
+	}
+
+	public byte GetVoxelMaterial(int3 voxelId)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (!chunks.TryGetValue(key, out var value))
+		{
+			return 0;
+		}
+		int3 int5 = voxelId - value.Id * value.Size;
+		int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+		return value.Material[index];
+	}
+
+	public byte GetVoxelDensity(int3 voxelId)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (!chunks.TryGetValue(key, out var value))
+		{
+			return 0;
+		}
+		int3 int5 = voxelId - value.Id * value.Size;
+		int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+		return value.Density[index];
+	}
+
+	public Voxel GetVoxelData(int3 voxelId)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (!chunks.TryGetValue(key, out var value))
+		{
+			return default(Voxel);
+		}
+		int3 int5 = voxelId - value.Id * value.Size;
+		int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+		return new Voxel(value.Material[index], value.Density[index]);
+	}
+
+	public void SetVoxelMaterial(int3 voxelId, byte material)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (chunks.TryGetValue(key, out var value))
+		{
+			int3 int5 = voxelId - value.Id * value.Size;
+			int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+			value.Material[index] = material;
+		}
+	}
+
+	public void SetVoxelDensity(int3 voxelId, byte density)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (chunks.TryGetValue(key, out var value))
+		{
+			int3 int5 = voxelId - value.Id * value.Size;
+			int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+			value.Density[index] = density;
+		}
+	}
+
+	public void SetVoxelData(int3 voxelId, Voxel data)
+	{
+		int3 key = voxelId.LocalPositionToChunkId(ChunkSize);
+		if (chunks.TryGetValue(key, out var value))
+		{
+			int3 int5 = voxelId - value.Id * value.Size;
+			int index = int5.x + VoxelDimension * (int5.y + VoxelDimension * int5.z);
+			value.Material[index] = data.Material;
+			value.Density[index] = data.Density;
 		}
 	}
 
@@ -798,8 +1071,39 @@ public class VoxelWorld : MonoBehaviour
 		return true;
 	}
 
-	private void ForEachChunkInBounds(UnityEngine.BoundsInt worldBounds, Action<Chunk> action)
+	private void ForEachChunkInBounds(UnityEngine.BoundsInt worldBounds, Action action)
 	{
+		_opBounds = worldBounds;
+		int3 int5 = (worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
+		int3 int6 = worldBounds.max.LocalPositionToChunkId(ChunkSize);
+		for (int i = int5.x; i <= int6.x; i++)
+		{
+			for (int j = int5.y; j <= int6.y; j++)
+			{
+				for (int k = int5.z; k <= int6.z; k++)
+				{
+					int3 int7 = new int3(i, j, k);
+					if (chunks.TryGetValue(int7, out var value))
+					{
+						_opChunk = value;
+						action();
+					}
+					else
+					{
+						Debug.LogError($"Couldn't find chunk {int7} to perform operation");
+					}
+				}
+			}
+		}
+	}
+
+	public void GetChunksForBounds(UnityEngine.BoundsInt worldBounds, ref List<Chunk> list)
+	{
+		if (list == null)
+		{
+			list = new List<Chunk>();
+		}
+		list.Clear();
 		int3 int5 = (worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
 		int3 int6 = worldBounds.max.LocalPositionToChunkId(ChunkSize);
 		for (int i = int5.x; i <= int6.x; i++)
@@ -811,7 +1115,7 @@ public class VoxelWorld : MonoBehaviour
 					int3 key = new int3(i, j, k);
 					if (chunks.TryGetValue(key, out var value))
 					{
-						action(value);
+						list.Add(value);
 					}
 				}
 			}

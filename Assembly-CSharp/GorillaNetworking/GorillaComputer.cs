@@ -736,6 +736,8 @@ public class GorillaComputer : MonoBehaviour, IMatchmakingCallbacks, IGorillaSli
 
 	private int currentTroopPopulation = -1;
 
+	private List<string> topVstumpMaps = new List<string>();
+
 	private float lastCheckedWifi;
 
 	private float checkIfDisconnectedSeconds = 10f;
@@ -1375,12 +1377,25 @@ public class GorillaComputer : MonoBehaviour, IMatchmakingCallbacks, IGorillaSli
 				GeneralFailureMessage(versionMismatch);
 				return;
 			}
-			if (jsonObject.TryGetValue("QueueStats", out value) && ((JsonObject)value).TryGetValue("TopTroops", out value))
+			if (jsonObject.TryGetValue("QueueStats", out value))
 			{
-				topTroops.Clear();
-				foreach (object item in (JsonArray)value)
+				JsonObject jsonObject2 = (JsonObject)value;
+				Debug.Log("QueueStats: " + jsonObject2);
+				if (jsonObject2.TryGetValue("TopTroops", out value))
 				{
-					topTroops.Add(item.ToString());
+					topTroops.Clear();
+					foreach (object item in (JsonArray)value)
+					{
+						topTroops.Add(item.ToString());
+					}
+				}
+				if (jsonObject2.TryGetValue("TopVstumpMapIds", out value))
+				{
+					topVstumpMaps.Clear();
+					foreach (object item2 in (JsonArray)value)
+					{
+						topVstumpMaps.Add(item2.ToString());
+					}
 				}
 			}
 			if (jsonObject.TryGetValue("BannedUsers", out value))

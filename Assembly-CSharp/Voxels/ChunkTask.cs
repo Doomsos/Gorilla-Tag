@@ -91,11 +91,11 @@ public struct ChunkTask
 			int length = math.min(chunk.VoxelCount * 15, 65535);
 			if (!chunk.VertexData.IsCreated)
 			{
-				chunk.VertexData = new NativeArray<MeshVertexData>(length, Allocator.TempJob);
+				chunk.VertexData = new NativeArray<MeshVertexData>(length, Allocator.Persistent);
 			}
 			if (!chunk.TriangleData.IsCreated)
 			{
-				chunk.TriangleData = new NativeArray<ushort>(length, Allocator.TempJob);
+				chunk.TriangleData = new NativeArray<ushort>(length, Allocator.Persistent);
 			}
 			onComplete = delegate
 			{
@@ -154,11 +154,11 @@ public struct ChunkTask
 		int length = math.min(chunk.VoxelCount * 15, 65535);
 		if (!chunk.VertexData.IsCreated)
 		{
-			chunk.VertexData = new NativeArray<MeshVertexData>(length, Allocator.TempJob);
+			chunk.VertexData = new NativeArray<MeshVertexData>(length, Allocator.Persistent);
 		}
 		if (!chunk.TriangleData.IsCreated)
 		{
-			chunk.TriangleData = new NativeArray<ushort>(length, Allocator.TempJob);
+			chunk.TriangleData = new NativeArray<ushort>(length, Allocator.Persistent);
 		}
 		MeshUtilities.VoxelMeshData voxelMeshData = MeshUtilities.SplitByAngle(surfaceNetsBuffer.Vertices.AsArray(), surfaceNetsBuffer.Materials.AsArray(), surfaceNetsBuffer.Triangles.AsArray(), parameters.NormalThreshold, parameters.AreaWeightedNormals);
 		ref NativeList<float3> vertices = ref surfaceNetsBuffer.Vertices;

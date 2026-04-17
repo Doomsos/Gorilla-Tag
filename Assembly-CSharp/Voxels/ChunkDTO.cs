@@ -5,6 +5,8 @@ namespace Voxels;
 
 public struct ChunkDTO
 {
+	public int WorldId;
+
 	public int3 Id;
 
 	public int3 Size;
@@ -29,6 +31,7 @@ public struct ChunkDTO
 
 	public ChunkDTO(Chunk chunk)
 	{
+		WorldId = chunk.World.Id;
 		Id = chunk.Id;
 		Size = chunk.Size;
 		Dimensions = chunk.Dimensions;

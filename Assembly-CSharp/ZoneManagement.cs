@@ -45,7 +45,7 @@ public class ZoneManagement : MonoBehaviour
 
 	public bool hasInstance { get; private set; }
 
-	public bool ZonesSetting { get; private set; }
+	public bool Initialized { get; private set; }
 
 	public static event ZoneChangeEvent OnZoneChange;
 
@@ -182,11 +182,11 @@ public class ZoneManagement : MonoBehaviour
 		allObjects = hashSet.ToArray();
 		objectActivationState = new bool[allObjects.Length];
 		AddSceneToForceStayLoaded("City");
+		Initialized = true;
 	}
 
 	private void SetZones(GTZone[] newActiveZones)
 	{
-		ZonesSetting = true;
 		for (int i = 0; i < objectActivationState.Length; i++)
 		{
 			objectActivationState[i] = false;
@@ -309,7 +309,11 @@ public class ZoneManagement : MonoBehaviour
 			}
 		}
 		OnSceneLoadsCompleted?.Invoke();
-		ZonesSetting = false;
+	}
+
+	public bool AnyActiveLoadOps()
+	{
+		return _scenes_to_loadOps.Values.Any((AsyncOperation op) => !op.isDone);
 	}
 
 	private ZoneData GetZoneData(GTZone zone)
@@ -322,6 +326,11 @@ public class ZoneManagement : MonoBehaviour
 			}
 		}
 		return null;
+	}
+
+	public string GetSceneNameForZone(GTZone zone)
+	{
+		return GetZoneData(zone)?.sceneName;
 	}
 
 	public static bool IsValidZoneInt(int zoneInt)

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class RigEventVolume : MonoBehaviour, IBuildValidation
+public class RigEventVolume : MonoBehaviour
 {
 	private enum Mode
 	{
@@ -55,35 +56,57 @@ public class RigEventVolume : MonoBehaviour, IBuildValidation
 
 	private void OnEnable()
 	{
-		if (!(rigCollection == null))
+		if (mode != Mode.ABSOLUTE)
 		{
-			VRRigCollection vRRigCollection = rigCollection;
-			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
-			VRRigCollection vRRigCollection2 = rigCollection;
-			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+			if (rigCollection != null)
+			{
+				VRRigCollection vRRigCollection = rigCollection;
+				vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
+				VRRigCollection vRRigCollection2 = rigCollection;
+				vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+			}
+			else
+			{
+				NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(OnNetJoined);
+				NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(OnNetLeft);
+			}
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (!(rigCollection == null))
-		{
-			VRRigCollection vRRigCollection = rigCollection;
-			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
-			VRRigCollection vRRigCollection2 = rigCollection;
-			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
-		}
+		OnDestroy();
 	}
 
 	private void OnDestroy()
 	{
-		if (!(rigCollection == null))
+		if (mode != Mode.ABSOLUTE)
 		{
-			VRRigCollection vRRigCollection = rigCollection;
-			vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
-			VRRigCollection vRRigCollection2 = rigCollection;
-			vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+			if (rigCollection != null)
+			{
+				VRRigCollection vRRigCollection = rigCollection;
+				vRRigCollection.playerEnteredCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection.playerEnteredCollection, new Action<RigContainer>(OnJoined));
+				VRRigCollection vRRigCollection2 = rigCollection;
+				vRRigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Remove(vRRigCollection2.playerLeftCollection, new Action<RigContainer>(OnLeft));
+			}
+			else
+			{
+				NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(OnNetJoined);
+				NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(OnNetLeft);
+			}
 		}
+	}
+
+	private void OnNetJoined(NetPlayer np)
+	{
+		int num = ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount);
+		countChanged(gameObjects.Count, gameObjects.Count, num - 1, num, null);
+	}
+
+	private void OnNetLeft(NetPlayer np)
+	{
+		int num = ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount);
+		countChanged(gameObjects.Count, gameObjects.Count, num + 1, num, null);
 	}
 
 	private void OnJoined(RigContainer rc)
@@ -108,7 +131,7 @@ public class RigEventVolume : MonoBehaviour, IBuildValidation
 		{
 			gameObjects.Add(component, 0);
 			rigs.Add(component.Rig);
-			int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+			int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
 			countChanged(gameObjects.Count - 1, gameObjects.Count, num, num, component);
 			if (component.Rig == VRRig.LocalRig)
 			{
@@ -132,7 +155,7 @@ public class RigEventVolume : MonoBehaviour, IBuildValidation
 		{
 			gameObjects.Remove(component);
 			rigs.Remove(component.Rig);
-			int num = ((rigCollection == null) ? 1 : rigCollection.Rigs.Count);
+			int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
 			countChanged(gameObjects.Count + 1, gameObjects.Count, num, num, component);
 			if (component.Rig == VRRig.LocalRig)
 			{
@@ -166,15 +189,5 @@ public class RigEventVolume : MonoBehaviour, IBuildValidation
 			}
 		}
 		this.OnCountChanged?.Invoke();
-	}
-
-	bool IBuildValidation.BuildValidationCheck()
-	{
-		if (mode == Mode.RELATIVE && rigCollection == null)
-		{
-			Debug.Log("RigEventVolume on " + base.name + " is set to RELATIVE mode but has no Player Count Source. This will crash!");
-			return false;
-		}
-		return true;
 	}
 }

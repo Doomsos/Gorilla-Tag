@@ -10,7 +10,7 @@ public class GameLightingManagerEventRelay : MonoBehaviour
 		}
 		else
 		{
-			GameLightingManager.instance.SetCustomDynamicLightingEnabled(value);
+			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(value);
 		}
 	}
 

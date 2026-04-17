@@ -190,17 +190,18 @@ public class BuilderTableNetworking : MonoBehaviourPunCallbacks, ITickSystemTick
 			masterClientTableInit.Clear();
 			localClientTableInit.Reset();
 			BuilderTable table = GetTable();
+			bool flag = RoomSystem.WasRoomPrivate || table.IsInBuilderZone();
 			BuilderTable.TableState tableState = table.GetTableState();
-			bool flag = (tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.WaitingForZoneAndRoom && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.ReceivingMasterResync) || table.pieces.Count <= 0;
-			if (!flag)
+			bool flag2 = (tableState != BuilderTable.TableState.Ready && tableState != BuilderTable.TableState.WaitingForZoneAndRoom && tableState != BuilderTable.TableState.WaitForMasterResync && tableState != BuilderTable.TableState.ReceivingMasterResync) || table.pieces.Count <= 0 || !flag;
+			if (!flag2)
 			{
-				flag |= table.pieces.Count <= 0;
+				flag2 |= table.pieces.Count <= 0;
 			}
-			if (flag)
+			if (flag2)
 			{
 				table.ClearTable();
 				table.ClearQueuedCommands();
-				table.SetTableState(BuilderTable.TableState.WaitForInitialBuildMaster);
+				table.SetTableState(flag ? BuilderTable.TableState.WaitForInitialBuildMaster : BuilderTable.TableState.WaitingForZoneAndRoom);
 				return;
 			}
 			for (int i = 0; i < table.pieces.Count; i++)

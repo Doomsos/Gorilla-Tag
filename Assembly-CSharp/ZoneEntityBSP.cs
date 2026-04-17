@@ -62,6 +62,10 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 			lastExitedNode = currentNode;
 			currentNode = zoneDef;
 			lastEnteredNode = zoneDef;
+			if (_entityRig != null)
+			{
+				_ = _entityRig.isOfflineVRRig;
+			}
 			if (_emitTelemetry)
 			{
 				ZoneDef zoneDef2 = lastEnteredNode;

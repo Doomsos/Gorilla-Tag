@@ -224,6 +224,22 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 		}, successCallback, errorCallback);
 	}
 
+	public void ReturnVstumpMapStats(ReturnVstumpMapStatsRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
+	{
+		successCallback = DebugWrapCb(successCallback, "ReturnVstumpMapStats result");
+		errorCallback = DebugWrapCb(errorCallback, "ReturnVstumpMapStats error");
+		PlayFabCloudScriptAPI.ExecuteFunction(new ExecuteFunctionRequest
+		{
+			Entity = playerEntity,
+			FunctionName = "ReturnVstumpMapStats",
+			FunctionParameter = new
+			{
+				MapIds = request.mapIds
+			},
+			GeneratePlayStreamEvent = false
+		}, successCallback, errorCallback);
+	}
+
 	private Action<T> DebugWrapCb<T>(Action<T> cb, string label)
 	{
 		return delegate(T arg)

@@ -9,6 +9,7 @@ using UnityEngine.Events;
 
 namespace GorillaTagScripts.Subscription.AlarmClocks;
 
+[DefaultExecutionOrder(10000)]
 public sealed class AlarmClockManager : MonoBehaviour
 {
 	[Serializable]
@@ -27,6 +28,9 @@ public sealed class AlarmClockManager : MonoBehaviour
 	private string _loadingMessage = "";
 
 	[SerializeField]
+	private float _wrongWarpTolerance = 0.5f;
+
+	[SerializeField]
 	private AlarmClockData[] _clockData = new AlarmClockData[0];
 
 	[SerializeField]
@@ -43,9 +47,11 @@ public sealed class AlarmClockManager : MonoBehaviour
 
 	public static AlarmClockManager Instance { get; private set; }
 
+	public bool Initialized { get; private set; }
+
 	public string ActiveKey { get; private set; } = "";
 
-	private void Awake()
+	private void Start()
 	{
 		if (Instance != null)
 		{
@@ -61,7 +67,12 @@ public sealed class AlarmClockManager : MonoBehaviour
 		}
 		Instance = this;
 		ActiveKey = PlayerPrefs.GetString("AlarmClock");
-		if (!string.IsNullOrEmpty(ActiveKey))
+		if (string.IsNullOrEmpty(ActiveKey))
+		{
+			Debug.Log("No alarm clock value found.");
+			Initialized = true;
+		}
+		else
 		{
 			StartCoroutine(ConnectToPlayerSpawned());
 		}
@@ -75,6 +86,10 @@ public sealed class AlarmClockManager : MonoBehaviour
 		}
 		PrivateUIRoom.ForceStartOverlay(_loadingMessage);
 		yield return new WaitForSeconds(1f);
+		while (ZoneManagement.instance == null || !ZoneManagement.instance.Initialized)
+		{
+			yield return null;
+		}
 		GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
 	}
 
@@ -137,40 +152,71 @@ public sealed class AlarmClockManager : MonoBehaviour
 				_teleportTarget = alarmClockData.SpawnPoint;
 				PrivateUIRoom.ForceStartOverlay(_loadingMessage);
 				ZoneManagement.SetActiveZones(alarmClockData.Zones);
-				StartCoroutine(OnZoneLoaded());
-				StartCoroutine(ClearUnsubPlayerData());
+				StartCoroutine(WaitForSubscriptionData());
+				return;
 			}
 		}
+		Initialized = true;
+	}
+
+	private IEnumerator WaitForSubscriptionData()
+	{
+		while (!MothershipClientApiUnity.IsClientLoggedIn() || !SubscriptionManager.LocalSubscriptionDataInitialized)
+		{
+			yield return null;
+		}
+		StartCoroutine(SubscriptionManager.IsLocalSubscribed() ? ZoneLoad() : ClearUnsubPlayerData());
 	}
 
 	private IEnumerator ClearUnsubPlayerData()
 	{
-		while (!MothershipClientApiUnity.IsClientLoggedIn())
+		while (!MothershipClientApiUnity.IsClientLoggedIn() || !SubscriptionManager.LocalSubscriptionDataInitialized)
 		{
 			yield return null;
 		}
 		if (SubscriptionManager.LocalSubscriptionStatus() != SubscriptionManager.SubscriptionStatus.Active)
 		{
+			Debug.Log("No subscription, warping home.");
 			PlayerPrefs.SetString("AlarmClock", "");
-			GTPlayer.Instance.TeleportTo(_defaultSpawn.position, _defaultSpawn.rotation);
+			GTPlayer.Instance.TeleportTo(_defaultSpawn, matchDestinationRotation: true, maintainVelocity: false);
+			Initialized = true;
+			yield return null;
+			PrivateUIRoom.StopForcedOverlay();
 		}
 	}
 
-	private IEnumerator OnZoneLoaded()
+	private IEnumerator ZoneLoad()
 	{
 		yield return null;
 		if (_activeClockData.Zones.Length > 1 || _activeClockData.Zones[0] != GTZone.forest)
 		{
-			while (ZoneManagement.instance.ZonesSetting)
+			while (ZoneManagement.instance.AnyActiveLoadOps())
 			{
 				yield return null;
 			}
 		}
-		if (GTPlayer.hasInstance)
+		while (!GTPlayer.hasInstance)
 		{
-			GTPlayer.Instance.TeleportTo(_teleportTarget.position, _teleportTarget.rotation);
+			yield return null;
+		}
+		yield return null;
+		GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
+		yield return null;
+		int fixAttempts = 0;
+		while ((GTPlayer.Instance.playerRigidBody.position - _teleportTarget.position).sqrMagnitude > _wrongWarpTolerance * _wrongWarpTolerance)
+		{
+			int num = fixAttempts + 1;
+			fixAttempts = num;
+			if (num > 10)
+			{
+				break;
+			}
+			Debug.Log("AlarmClockManager attempting wrong warp fix.");
+			GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
+			yield return null;
 		}
 		PrivateUIRoom.StopForcedOverlay();
 		OnWakeUp?.Invoke();
+		Initialized = true;
 	}
 }

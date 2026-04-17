@@ -286,7 +286,7 @@ public class TitleDataActivation : MonoBehaviour, IGorillaSliceableSimple
 
 	private void onTDError(PlayFabError error)
 	{
-		Debug.LogError($"TitleDataActivation :: onTDError :: {titleDataKey} :: {error}");
+		Debug.LogError($"TitleDataActivation on {AssetUtils.GetGameObjectPath(base.gameObject)} :: onTDError :: {titleDataKey} :: {error}");
 	}
 
 	private void OnEnable()

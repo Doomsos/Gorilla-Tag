@@ -1,4 +1,5 @@
 using System;
+using GorillaNetworking;
 using TMPro;
 using UnityEngine;
 
@@ -41,17 +42,15 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	[SerializeField]
 	private GameObject staticScreen;
 
-	private bool observable;
-
 	public static Action<VODTarget> AlertEnabled;
 
 	public static Action<VODTarget> AlertDisabled;
 
+	private VODPlayer.VODNextStreamData upNextData;
+
 	public VODTargetAudioSettings AudioSettings => audioSettings;
 
 	public Renderer Renderer => targetRenderer;
-
-	public TMP_Text UpNextText => upNext;
 
 	public Material StandbyOverride => standbyOverride;
 
@@ -65,6 +64,16 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 			}
 			return new VODPlayer.VODStream.VODStreamChannel[1];
 		}
+	}
+
+	public void SetNext(VODPlayer.VODNextStreamData data)
+	{
+		upNextData = data;
+	}
+
+	public void ClearNext()
+	{
+		upNextData = default(VODPlayer.VODNextStreamData);
 	}
 
 	public bool VerifyChannel(VODPlayer.VODStream.VODStreamChannel ch)
@@ -85,7 +94,6 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 
 	protected override void OnLostObservable()
 	{
-		observable = false;
 		if (!staticScreen.activeInHierarchy && AlertDisabled != null)
 		{
 			AlertDisabled(this);
@@ -94,7 +102,6 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 
 	protected override void OnBecameObservable()
 	{
-		observable = true;
 		if (!staticScreen.activeInHierarchy && AlertEnabled != null)
 		{
 			AlertEnabled(this);
@@ -137,6 +144,18 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 
 	protected override void ObservableSliceUpdate()
 	{
+		if (upNextData.Title.IsNullOrEmpty())
+		{
+			if (upNext.text.Length > 0)
+			{
+				upNext.text = string.Empty;
+			}
+		}
+		else if (!(GorillaComputer.instance == null))
+		{
+			TimeSpan timeSpan = upNextData.StartTime - GorillaComputer.instance.GetServerTime();
+			upNext.text = $"next: {upNextData.Title} - {timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+		}
 	}
 
 	public void ShowStatic(bool on)

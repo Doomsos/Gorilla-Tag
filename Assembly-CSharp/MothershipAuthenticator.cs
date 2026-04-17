@@ -17,7 +17,9 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 
 	public bool UseConstantTestAccountId;
 
-	public int MaxMetaLoginAttempts = 5;
+	private int loginAttempts;
+
+	public int MaxLoginAttempts = 5;
 
 	public Action OnLoginSuccess;
 
@@ -84,10 +86,12 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 	{
 		MothershipClientApiUnity.StartLoginWithSteam(delegate(PlayerSteamBeginLoginResponse resp)
 		{
+			Debug.Log($"Mothership: Steam Login started at {DateTime.Now}");
 			string nonce = resp.Nonce;
 			SteamAuthTicket ticketHandle = HAuthTicket.Invalid;
 			ticketHandle = SteamAuthenticator.GetAuthTicketForWebApi(nonce, delegate(string ticket)
 			{
+				Debug.Log($"Mothership: Attempting to complete login at {DateTime.Now}");
 				MothershipClientApiUnity.CompleteLoginWithSteam(nonce, ticket, delegate
 				{
 					ticketHandle.Dispose();
@@ -98,8 +102,16 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 				{
 					ticketHandle.Dispose();
 					Debug.LogError($"Couldn't log into Mothership with Steam error {MothershipError.Message} trace ID: {MothershipError.TraceId} status: {errorCode} Mothership error code: {MothershipError.MothershipErrorCode}");
-					OnLoginAttemptFailure?.Invoke(1);
-					OnLoginFailure?.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
+					loginAttempts++;
+					OnLoginAttemptFailure?.Invoke(loginAttempts);
+					if (loginAttempts >= MaxLoginAttempts)
+					{
+						OnLoginFailure?.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
+					}
+					else
+					{
+						LogInWithSteam();
+					}
 				});
 			}, delegate(EResult error)
 			{

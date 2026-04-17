@@ -89,6 +89,8 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	private const int roomFXTypeCount = 5;
 
+	public bool HasSIZonePlatform => zoneSuperInfectionRef.TargetID != 0;
+
 	public bool HasActiveTryOnDispenser => tryOnDispenserCount > 0;
 
 	public bool IsSupercharged => false;
@@ -254,6 +256,14 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public bool IsZoneReady()
 	{
+		if (!HasSIZonePlatform)
+		{
+			if (NetworkSystem.Instance.InRoom)
+			{
+				return VRRig.LocalRig.zoneEntity.currentZone == gameEntityManager.zone;
+			}
+			return false;
+		}
 		if (NetworkSystem.Instance.InRoom && IsSuperGameMode() && zoneSuperInfection.IsNotNull() && VRRig.LocalRig.zoneEntity.currentZone == gameEntityManager.zone && SIProgression.Instance != null)
 		{
 			return SIProgression.Instance._treeReady;
@@ -263,6 +273,10 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public bool ShouldClearZone()
 	{
+		if (!HasSIZonePlatform)
+		{
+			return false;
+		}
 		if (GameMode.ActiveGameMode != null)
 		{
 			GameModeType gameModeType = GameMode.ActiveGameMode.GameType();
@@ -277,13 +291,8 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public static bool IsSuperGameMode()
 	{
-		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
-		if (activeGameMode != null)
-		{
-			GameModeType gameModeType = activeGameMode.GameType();
-			return gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual;
-		}
-		return false;
+		GameModeType currentGameModeType = GameMode.CurrentGameModeType;
+		return currentGameModeType == GameModeType.SuperInfect || currentGameModeType == GameModeType.SuperCasual;
 	}
 
 	public void OnCreateGameEntity(GameEntity entity)
@@ -355,17 +364,20 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public void OnZoneInit()
 	{
-		if ((object)zoneSuperInfection == null)
+		if ((object)zoneSuperInfection == null && HasSIZonePlatform)
 		{
 			PendingZoneInit = true;
 			return;
 		}
 		activeSuperInfectionManager = this;
-		if (gameEntityManager.IsAuthority())
+		if (gameEntityManager.IsAuthority() && zoneSuperInfection != null)
 		{
 			TestSpawnGadget();
 		}
-		zoneSuperInfection.OnZoneInit();
+		if (zoneSuperInfection != null)
+		{
+			zoneSuperInfection.OnZoneInit();
+		}
 		if (SIPlayer.Get(NetworkSystem.Instance.LocalPlayer.ActorNumber) != null)
 		{
 			progression.Init();
@@ -508,22 +520,22 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		{
 		case ClientToAuthorityRPC.CombinedTerminalButtonPress:
 		{
-			if (data.Length == 4 && GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType4) && GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType5) && GameEntityManager.ValidateDataType<int>(data[2], out var dataAsType6) && GameEntityManager.ValidateDataType<int>(data[3], out var dataAsType7) && dataAsType7 >= 0 && dataAsType7 < zoneSuperInfection.siTerminals.Length && Enum.IsDefined(typeof(SITouchscreenButton.SITouchscreenButtonType), (SITouchscreenButton.SITouchscreenButtonType)dataAsType4) && Enum.IsDefined(typeof(SICombinedTerminal.TerminalSubFunction), (SICombinedTerminal.TerminalSubFunction)dataAsType6))
+			if (!(zoneSuperInfection == null) && data.Length == 4 && GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType9) && GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType10) && GameEntityManager.ValidateDataType<int>(data[2], out var dataAsType11) && GameEntityManager.ValidateDataType<int>(data[3], out var dataAsType12) && dataAsType12 >= 0 && dataAsType12 < zoneSuperInfection.siTerminals.Length && Enum.IsDefined(typeof(SITouchscreenButton.SITouchscreenButtonType), (SITouchscreenButton.SITouchscreenButtonType)dataAsType9) && Enum.IsDefined(typeof(SICombinedTerminal.TerminalSubFunction), (SICombinedTerminal.TerminalSubFunction)dataAsType11))
 			{
-				zoneSuperInfection.siTerminals[dataAsType7].TouchscreenButtonPressed((SITouchscreenButton.SITouchscreenButtonType)dataAsType4, dataAsType5, info.Sender.ActorNumber, (SICombinedTerminal.TerminalSubFunction)dataAsType6);
+				zoneSuperInfection.siTerminals[dataAsType12].TouchscreenButtonPressed((SITouchscreenButton.SITouchscreenButtonType)dataAsType9, dataAsType10, info.Sender.ActorNumber, (SICombinedTerminal.TerminalSubFunction)dataAsType11);
 			}
 			break;
 		}
 		case ClientToAuthorityRPC.CombinedTerminalHandScan:
 		{
-			if (data.Length != 1 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType12) || dataAsType12 < 0 || dataAsType12 >= zoneSuperInfection.siTerminals.Length)
+			if (zoneSuperInfection == null || data.Length != 1 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType4) || dataAsType4 < 0 || dataAsType4 >= zoneSuperInfection.siTerminals.Length)
 			{
 				break;
 			}
 			SIPlayer sIPlayer = SIPlayer.Get(info.Sender.ActorNumber);
 			if (!(sIPlayer == null))
 			{
-				SICombinedTerminal sICombinedTerminal = zoneSuperInfection.siTerminals[dataAsType12];
+				SICombinedTerminal sICombinedTerminal = zoneSuperInfection.siTerminals[dataAsType4];
 				if (sIPlayer.gamePlayer.rig.IsPositionInRange(sICombinedTerminal.transform.position, 3f))
 				{
 					sICombinedTerminal.PlayerHandScanned(info.Sender.ActorNumber);
@@ -533,16 +545,16 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		}
 		case ClientToAuthorityRPC.ResourceDepositDeposited:
 		{
-			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType8) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType9) || dataAsType9 < 0 || dataAsType9 >= zoneSuperInfection.siDeposits.Length)
+			if (zoneSuperInfection == null || data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType5) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType6) || dataAsType6 < 0 || dataAsType6 >= zoneSuperInfection.siDeposits.Length)
 			{
 				break;
 			}
-			GameEntity gameEntityFromNetId2 = gameEntityManager.GetGameEntityFromNetId(dataAsType8);
+			GameEntity gameEntityFromNetId2 = gameEntityManager.GetGameEntityFromNetId(dataAsType5);
 			if (gameEntityFromNetId2 == null)
 			{
 				break;
 			}
-			SIResourceDeposit sIResourceDeposit = zoneSuperInfection.siDeposits[dataAsType9];
+			SIResourceDeposit sIResourceDeposit = zoneSuperInfection.siDeposits[dataAsType6];
 			if (!(gameEntityFromNetId2.transform.position - sIResourceDeposit.transform.position).IsLongerThan(3f))
 			{
 				SIResource component2 = gameEntityFromNetId2.GetComponent<SIResource>();
@@ -555,17 +567,17 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		}
 		case ClientToAuthorityRPC.CallEntityRPC:
 		{
-			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType10) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType11))
+			if (data.Length != 2 || !GameEntityManager.ValidateDataType<int>(data[0], out var dataAsType7) || !GameEntityManager.ValidateDataType<int>(data[1], out var dataAsType8))
 			{
 				break;
 			}
-			GameEntity gameEntityFromNetId3 = gameEntityManager.GetGameEntityFromNetId(dataAsType10);
+			GameEntity gameEntityFromNetId3 = gameEntityManager.GetGameEntityFromNetId(dataAsType7);
 			if ((bool)gameEntityFromNetId3)
 			{
 				SIGadget component3 = gameEntityFromNetId3.GetComponent<SIGadget>();
 				if ((bool)component3)
 				{
-					component3.ProcessClientToAuthorityRPC(info, dataAsType11, null);
+					component3.ProcessClientToAuthorityRPC(info, dataAsType8, null);
 				}
 			}
 			break;
@@ -779,6 +791,10 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public bool ValidateMigratedGameEntity(int netId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int actorNr)
 	{
+		if (techTreeSO.IsSpawnableEntityTypeId(entityTypeId) && !IsSuperGameMode())
+		{
+			return false;
+		}
 		SIPlayer.Get(actorNr);
 		if ((createData & long.MinValue) != 0L)
 		{
@@ -837,11 +853,15 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	public bool ValidateCreateItem(int nedId, int entityTypeId, Vector3 position, Quaternion rotation, long createData, int createdByEntityNetId)
 	{
 		gameEntityManager.IsAuthority();
+		if (techTreeSO.IsSpawnableEntityTypeId(entityTypeId) && !IsSuperGameMode())
+		{
+			return false;
+		}
 		if (!techTreeSO.TryGetUpgradeTypeByEntityTypeId(entityTypeId, out var upgradeType))
 		{
 			return true;
 		}
-		if ((createData & long.MinValue) != 0L && !HasActiveTryOnDispenser)
+		if ((createData & long.MinValue) != 0L)
 		{
 			return HasActiveTryOnDispenser;
 		}

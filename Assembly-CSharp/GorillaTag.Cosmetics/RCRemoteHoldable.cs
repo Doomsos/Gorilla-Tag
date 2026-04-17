@@ -244,6 +244,10 @@ public class RCRemoteHoldable : TransferrableObject, ISnapTurnOverride
 			return false;
 		}
 		CosmeticItemInstance cosmeticItemInstance = componentInParent.cosmeticsObjectRegistry.Cosmetic(base.name);
+		if (cosmeticItemInstance == null)
+		{
+			return false;
+		}
 		int instanceID = base.gameObject.GetInstanceID();
 		if (_TryFindRemoteVehicle_InCosmeticInstanceArray(instanceID, cosmeticItemInstance.objects))
 		{

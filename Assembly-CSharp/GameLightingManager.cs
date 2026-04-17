@@ -281,9 +281,12 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 			}
 			PullLightData(numLightsToPull);
 			int num = Mathf.Min(gameLights.Count, maxUseTestLights);
-			lightDataBuffer.SetData(lightData, 0, 0, num);
-			Shader.SetGlobalBuffer(_shaderPropId_GameLight_Lights, lightDataBuffer);
-			Shader.SetGlobalInteger(_shaderPropId_GameLight_UseMaxLights, num);
+			if (num > 0)
+			{
+				lightDataBuffer.SetData(lightData, 0, 0, num);
+				Shader.SetGlobalBuffer(_shaderPropId_GameLight_Lights, lightDataBuffer);
+				Shader.SetGlobalInteger(_shaderPropId_GameLight_UseMaxLights, num);
+			}
 		}
 	}
 

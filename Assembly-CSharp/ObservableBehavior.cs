@@ -4,10 +4,14 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 {
 	private bool firstFrame = true;
 
-	private bool observable = true;
+	protected bool observable = true;
 
 	[SerializeField]
 	private ObservableBehaviorRule observableBehaviorRule;
+
+	private float dist;
+
+	public float Distance => dist;
 
 	private void OnEnable()
 	{
@@ -38,9 +42,9 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
 		Transform transform = Camera.main.transform;
-		float num = Vector3.Distance(transform.position, base.transform.position);
-		float num2 = ((!(observableBehaviorRule != null) || !observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
-		bool flag = observableBehaviorRule == null || (observableBehaviorRule.ObservableDistanceRange.x <= num && num <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num2 && num2 <= observableBehaviorRule.ObservableDotRange.y);
+		dist = Vector3.Distance(transform.position, base.transform.position);
+		float num = ((!(observableBehaviorRule != null) || !observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
+		bool flag = observableBehaviorRule == null || (observableBehaviorRule.ObservableDistanceRange.x <= dist && dist <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num && num <= observableBehaviorRule.ObservableDotRange.y);
 		if (firstFrame || observable != flag)
 		{
 			if (flag)

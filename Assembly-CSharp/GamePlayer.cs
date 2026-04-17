@@ -386,18 +386,25 @@ public class GamePlayer : MonoBehaviour
 		for (int i = 0; i < 4; i++)
 		{
 			GameEntityId entityId = slots[i].entityId;
-			if (entityId != GameEntityId.Invalid && slots[i].entityManager != newEntityManager)
+			if (!(entityId != GameEntityId.Invalid) || !(slots[i].entityManager != newEntityManager))
 			{
-				GameEntity gameEntity = slots[i].entityManager.GetGameEntity(entityId);
-				if (gameEntity != null)
+				continue;
+			}
+			GameEntity gameEntity = slots[i].entityManager.GetGameEntity(entityId);
+			if (gameEntity != null)
+			{
+				if (gameEntity.IsScenePlaced)
 				{
-					GameEntityId entityId2 = gameEntity.MigrateToEntityManager(newEntityManager);
-					SlotData slotData = slots[i];
-					slotData.entityManager = newEntityManager;
-					slotData.entityId = entityId2;
-					slots[i] = slotData;
-					num++;
+					slots[i].entityManager?.ReleaseScenePlacedHold(gameEntity);
+					ClearSlot(i);
+					continue;
 				}
+				GameEntityId entityId2 = gameEntity.MigrateToEntityManager(newEntityManager);
+				SlotData slotData = slots[i];
+				slotData.entityManager = newEntityManager;
+				slotData.entityId = entityId2;
+				slots[i] = slotData;
+				num++;
 			}
 		}
 		return num;

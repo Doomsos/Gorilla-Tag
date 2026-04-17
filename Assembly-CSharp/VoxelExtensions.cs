@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using PlayFab.Internal;
 using Unity.Mathematics;
 using UnityEngine;
@@ -20,19 +21,19 @@ public static class VoxelExtensions
 
 	private static bool _cascade = true;
 
+	private static VoxelAction _action;
+
+	private static Vector3 _origin;
+
+	private static int _totalMined;
+
+	private static int _dirtMined;
+
+	private static int _stoneMined;
+
 	public static void Mine(this VoxelWorld world, Collision collision, VoxelAction action)
 	{
-		switch (action.operation)
-		{
-		case OperationType.Subtract:
-			world.Mine(collision.ToRaycastHit(), action);
-			break;
-		case OperationType.Add:
-			world.UnMine(collision.ToRaycastHit(), action);
-			break;
-		default:
-			throw new ArgumentOutOfRangeException();
-		}
+		world.Mine(collision.ToRaycastHit(), action);
 	}
 
 	public static void Mine(this VoxelWorld world, RaycastHit hit, VoxelAction action)
@@ -50,30 +51,14 @@ public static class VoxelExtensions
 		}
 	}
 
-	public static void UnMine(this VoxelWorld world, RaycastHit hit, VoxelAction action)
-	{
-		switch (world.MeshGenerationMode)
-		{
-		case MeshGenerationMode.MarchingCubes:
-			Debug.LogWarning("UnMine not implemented for Marching Cubes");
-			break;
-		case MeshGenerationMode.SurfaceNets:
-			world.UnMine_SurfaceNets(hit, action);
-			break;
-		default:
-			throw new ArgumentOutOfRangeException();
-		}
-	}
-
 	private static void Mine_MarchingCubes(this VoxelWorld world, RaycastHit hit, VoxelAction action)
 	{
 		action.radius /= world.Scale;
-		Vector3 origin = hit.point;
-		_lastHitPoint = origin;
+		Vector3 vector = (_lastHitPoint = hit.point);
 		int triangleIndex = hit.triangleIndex;
 		if (_showDebug)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.red, 20f);
+			Debug.DrawLine(Camera.main.transform.position, vector, Color.red, 20f);
 		}
 		if (hit.collider is MeshCollider { sharedMesh: var sharedMesh } meshCollider)
 		{
@@ -82,46 +67,43 @@ public static class VoxelExtensions
 				Debug.LogWarning($"Invalid triangle index {triangleIndex} for mesh {sharedMesh?.name}");
 				return;
 			}
-			Vector3 vector = meshCollider.transform.InverseTransformPoint(origin);
+			Vector3 vector2 = meshCollider.transform.InverseTransformPoint(vector);
 			int[] triangles = sharedMesh.triangles;
 			Vector3[] vertices = sharedMesh.vertices;
-			Vector3 vector2 = vertices[triangles[triangleIndex * 3]];
-			Vector3 vector3 = vertices[triangles[triangleIndex * 3 + 1]];
-			Vector3 vector4 = vertices[triangles[triangleIndex * 3 + 2]];
-			Vector3 position = ((!((vector - vector2).sqrMagnitude < (vector - vector3).sqrMagnitude)) ? (((vector - vector3).sqrMagnitude < (vector - vector4).sqrMagnitude) ? vector3 : vector4) : (((vector - vector2).sqrMagnitude < (vector - vector4).sqrMagnitude) ? vector2 : vector4));
+			Vector3 vector3 = vertices[triangles[triangleIndex * 3]];
+			Vector3 vector4 = vertices[triangles[triangleIndex * 3 + 1]];
+			Vector3 vector5 = vertices[triangles[triangleIndex * 3 + 2]];
+			Vector3 position = ((!((vector2 - vector3).sqrMagnitude < (vector2 - vector4).sqrMagnitude)) ? (((vector2 - vector4).sqrMagnitude < (vector2 - vector5).sqrMagnitude) ? vector4 : vector5) : (((vector2 - vector3).sqrMagnitude < (vector2 - vector5).sqrMagnitude) ? vector3 : vector5));
 			position = (_lastVertex = meshCollider.transform.TransformPoint(position));
 			if (_showDebug)
 			{
-				Debug.Log($"Closest vertex to {origin}: {position}");
+				Debug.Log($"Closest vertex to {vector}: {position}");
 			}
 			if (_showDebug)
 			{
-				Debug.DrawLine(origin, position, Color.blue, 20f);
+				Debug.DrawLine(vector, position, Color.blue, 20f);
 			}
 			position = world.GetLocalPosition(position);
-			origin = position.SnapToInt();
-			if (_cascade && !world.GetDensityAt(origin).IsSolid())
+			vector = position.SnapToInt();
+			if (_cascade && !world.GetDensityAt(vector).IsSolid())
 			{
 				if (_showDebug)
 				{
-					Debug.Log($"Hit air at {origin}, moving to next voxel");
+					Debug.Log($"Hit air at {vector}, moving to next voxel");
 				}
 				if (_showDebug)
 				{
-					Debug.DrawLine(origin, origin + (position - origin).normalized, Color.cyan, 20f);
+					Debug.DrawLine(vector, vector + (position - vector).normalized, Color.cyan, 20f);
 				}
-				origin += (position - origin).normalized;
+				vector += (position - vector).normalized;
 			}
 		}
-		_lastGridPoint = origin;
+		_lastGridPoint = vector;
 		if (_showDebug)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.white, 20f);
+			Debug.DrawLine(Camera.main.transform.position, vector, Color.white, 20f);
 		}
-		int total = 0;
-		int dirt = 0;
-		int stone = 0;
-		int3 v = origin.ToInt3();
+		int3 v = vector.ToInt3();
 		if (_showDebug)
 		{
 			Debug.DrawLine(Camera.main.transform.position, v.ToVector3(), Color.yellow, 20f);
@@ -129,78 +111,38 @@ public static class VoxelExtensions
 		Vector3Int vector3Int = Vector3Int.one * Mathf.CeilToInt(action.radius);
 		Vector3Int position2 = v.ToVectorInt() - vector3Int;
 		_lastBounds = new UnityEngine.BoundsInt(position2, vector3Int * 2);
-		world.SetVoxelDataCustom(_lastBounds, MineAt);
-		Debug.Log($"Mined [{total} = {stone}S + {dirt}D] at {origin} with bounds {_lastBounds}");
-		if (total > 0)
-		{
-			SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hit.point, hit.normal, dirt, stone);
-		}
-		(byte density, byte material) MineAt(int3 point, (byte density, byte material) data)
-		{
-			(byte density, byte material) tuple = data;
-			byte item = tuple.density;
-			byte b = tuple.material;
-			float num = ((b == 0) ? action.strength : (action.strength * 0.2f));
-			float num2 = math.distance(origin, point);
-			byte b2 = ((num2 > action.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / action.radius), 0f, 255f)));
-			if (_showDebug && item != b2)
-			{
-				Debug.Log($"Hit at {origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
-			}
-			if (item.IsSolid())
-			{
-				int num3 = (int)((float)(item - b2) / 10f);
-				total += num3;
-				switch (b)
-				{
-				case 0:
-					dirt += num3;
-					break;
-				case 1:
-					stone += num3;
-					break;
-				}
-				if (!b2.IsSolid())
-				{
-					b = 0;
-				}
-			}
-			return (density: b2, material: b);
-		}
+		VoxelManager.Mine(world, _lastBounds, hit.point, hit.normal, vector, action);
 	}
 
 	private static void Mine_SurfaceNets(this VoxelWorld world, RaycastHit hit, VoxelAction action)
 	{
-		Vector3 origin = hit.point;
-		_lastHitPoint = origin;
+		action.radius /= world.Scale;
+		Vector3 end = (_lastHitPoint = hit.point);
 		if (_showDebug)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.red, 20f);
+			Debug.DrawLine(Camera.main.transform.position, end, Color.red, 20f);
 		}
 		Vector3 localPosition = world.GetLocalPosition(GetTriangleCenter(hit));
-		origin = localPosition.SnapToInt();
-		if (_cascade && world.GetDensityAt(origin) == 0)
+		end = localPosition.SnapToInt();
+		if (_cascade && world.GetDensityAt(end) == 0)
 		{
 			if (_showDebug)
 			{
-				Debug.Log($"Hit air at {origin}, moving to next voxel");
+				Debug.Log($"Hit air at {end}, moving to next voxel");
 			}
-			int3 closestCardinalNeighbour = origin.ToInt3().GetClosestCardinalNeighbour(localPosition - hit.normal * 0.5f);
+			int3 closestCardinalNeighbour = end.ToInt3().GetClosestCardinalNeighbour(localPosition - hit.normal * 0.5f);
 			if (_showDebug)
 			{
-				Debug.DrawLine(origin, closestCardinalNeighbour.ToFloat3(), Color.cyan, 20f);
+				Debug.DrawLine(end, closestCardinalNeighbour.ToFloat3(), Color.cyan, 20f);
 			}
-			origin = closestCardinalNeighbour.ToFloat3();
+			end = closestCardinalNeighbour.ToFloat3();
 		}
-		_lastGridPoint = origin;
+		_lastGridPoint = end;
 		if (_showDebug)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.white, 20f);
+			Debug.DrawLine(Camera.main.transform.position, end, Color.white, 20f);
 		}
-		int total = 0;
-		int dirt = 0;
-		int stone = 0;
-		int3 v = origin.ToInt3();
+		int3 v = end.ToInt3();
 		if (_showDebug)
 		{
 			Debug.DrawLine(Camera.main.transform.position, v.ToVector3(), Color.yellow, 20f);
@@ -208,119 +150,144 @@ public static class VoxelExtensions
 		Vector3Int vector3Int = Vector3Int.one * Mathf.CeilToInt(action.radius);
 		Vector3Int position = v.ToVectorInt() - vector3Int;
 		_lastBounds = new UnityEngine.BoundsInt(position, vector3Int * 2);
-		world.SetVoxelDataCustom(_lastBounds, MineAt);
-		Debug.Log($"Mined {stone}S + {dirt}D = {total} at {origin} with bounds {_lastBounds}");
-		if (total > 0)
+		VoxelManager.Mine(world, _lastBounds, hit.point, hit.normal, end, action);
+	}
+
+	public static (int dirt, int stone) PerformLocalMiningOperation(this VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action)
+	{
+		_lastBounds = bounds;
+		_action = action;
+		_origin = origin;
+		_totalMined = 0;
+		_dirtMined = 0;
+		_stoneMined = 0;
+		switch (_action.operation)
 		{
-			SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hit.point, hit.normal, dirt, stone);
+		case OperationType.Subtract:
+			world.SetVoxelDataCustom(bounds, MineAt);
+			if (_totalMined > 0)
+			{
+				SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hitPoint, hitNormal, _dirtMined, _stoneMined);
+			}
+			break;
+		case OperationType.Add:
+			world.SetVoxelDataCustom(bounds, UnMineAt);
+			break;
+		default:
+			throw new ArgumentOutOfRangeException();
 		}
-		(byte density, byte material) MineAt(int3 point, (byte density, byte material) data)
+		return (dirt: _dirtMined, stone: _stoneMined);
+	}
+
+	public static void PerformLocalOperation(this VoxelWorld world, Vector3 localPosition, VoxelAction action)
+	{
+		UnityEngine.BoundsInt bounds = world.GetBounds(localPosition, action.radius);
+		_action = action;
+		_origin = localPosition;
+		switch (_action.operation)
 		{
-			(byte density, byte material) tuple = data;
-			byte item = tuple.density;
-			byte b = tuple.material;
-			float num = ((b == 0) ? action.strength : (action.strength * 0.2f));
-			float num2 = math.distance(origin, point);
-			byte b2 = ((num2 > action.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / action.radius), 0f, 255f)));
-			if (_showDebug && item != b2)
-			{
-				Debug.Log($"Hit at {origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
-			}
-			if (item.IsSolid())
-			{
-				int num3 = (int)((float)(item - b2) / 10f);
-				total += num3;
-				switch (b)
-				{
-				case 0:
-					dirt += num3;
-					break;
-				case 1:
-					stone += num3;
-					break;
-				}
-				if (!b2.IsSolid())
-				{
-					b = 0;
-				}
-			}
-			return (density: b2, material: b);
+		case OperationType.Subtract:
+			world.SetVoxelDensityCustom(bounds, SubtractAt);
+			break;
+		case OperationType.Add:
+			world.SetVoxelDensityCustom(bounds, AddAt);
+			break;
+		default:
+			throw new ArgumentOutOfRangeException();
 		}
 	}
 
-	private static void UnMine_SurfaceNets(this VoxelWorld world, RaycastHit hit, VoxelAction action)
+	private static (byte density, byte material) MineAt(int3 point, (byte density, byte material) data)
 	{
-		action.radius /= world.Scale;
-		Vector3 origin = hit.point;
-		_lastHitPoint = origin;
-		if (_showDebug)
+		(byte density, byte material) tuple = data;
+		byte item = tuple.density;
+		byte item2 = tuple.material;
+		float num = ((item2 == 0) ? _action.strength : (_action.strength * 0.2f));
+		float num2 = math.distance(_origin, point);
+		byte b = ((num2 > _action.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / _action.radius), 0f, 255f)));
+		if (_showDebug && item != b)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.red, 20f);
+			Debug.Log($"Hit at {_origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b}[{b.ToFloat()}]");
 		}
-		Vector3 localPosition = world.GetLocalPosition(GetTriangleCenter(hit));
-		origin = localPosition.SnapToInt();
-		if (_cascade && world.GetDensityAt(origin) == byte.MaxValue)
+		if (item.IsSolid())
 		{
-			if (_showDebug)
+			int num3 = (int)((float)(item - b) / 10f);
+			_totalMined += num3;
+			switch (item2)
 			{
-				Debug.Log($"Hit solid block at {origin}, moving to next voxel");
+			case 0:
+				_dirtMined += num3;
+				break;
+			case 1:
+				_stoneMined += num3;
+				break;
 			}
-			int3 closestCardinalNeighbour = origin.ToInt3().GetClosestCardinalNeighbour(localPosition + hit.normal * 0.5f);
-			if (_showDebug)
-			{
-				Debug.DrawLine(origin, closestCardinalNeighbour.ToFloat3(), Color.cyan, 20f);
-			}
-			origin = closestCardinalNeighbour.ToFloat3();
 		}
-		_lastGridPoint = origin;
-		if (_showDebug)
+		return (density: b, material: item2);
+	}
+
+	private static (byte density, byte material) UnMineAt(int3 point, (byte density, byte material) data)
+	{
+		(byte density, byte material) tuple = data;
+		byte item = tuple.density;
+		byte b = tuple.material;
+		float num = math.distance(_origin, point);
+		byte b2 = ((num > _action.radius) ? item : ((byte)math.clamp((float)(int)item + _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f)));
+		if (item != b2)
 		{
-			Debug.DrawLine(Camera.main.transform.position, origin, Color.white, 20f);
+			b = _action.material;
 		}
-		int total = 0;
-		int dirt = 0;
-		int stone = 0;
-		int3 v = origin.ToInt3();
-		if (_showDebug)
+		if (_showDebug && item != b2)
 		{
-			Debug.DrawLine(Camera.main.transform.position, v.ToVector3(), Color.yellow, 20f);
+			Debug.Log($"Unmined at {_origin}->{point}=d{num:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
 		}
-		Vector3Int vector3Int = Vector3Int.one * Mathf.CeilToInt(action.radius);
-		Vector3Int position = v.ToVectorInt() - vector3Int;
-		_lastBounds = new UnityEngine.BoundsInt(position, vector3Int * 2);
-		world.SetVoxelDataCustom(_lastBounds, UnMineAt);
-		Debug.Log($"UnMined {stone}S + {dirt}D = {total} at {origin} with bounds {_lastBounds}");
-		(byte density, byte material) UnMineAt(int3 point, (byte density, byte material) data)
+		if (!item.IsSolid() && b2.IsSolid())
 		{
-			(byte density, byte material) tuple = data;
-			byte item = tuple.density;
-			byte b = tuple.material;
-			float num = math.distance(origin, point);
-			byte b2 = ((num > action.radius) ? item : ((byte)math.clamp((float)(int)item + action.strength * math.lerp(255f, 0f, num / action.radius), 0f, 255f)));
-			if (item != b2)
+			int num2 = (int)((float)(b2 - item) / 10f);
+			_totalMined += num2;
+			switch (b)
 			{
-				b = action.material;
+			case 0:
+				_dirtMined += num2;
+				break;
+			case 1:
+				_stoneMined += num2;
+				break;
 			}
-			if (_showDebug && item != b2)
-			{
-				Debug.Log($"Unmined at {origin}->{point}=d{num:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
-			}
-			if (!item.IsSolid() && b2.IsSolid())
-			{
-				int num2 = (int)((float)(b2 - item) / 10f);
-				total += num2;
-				switch (b)
-				{
-				case 0:
-					dirt += num2;
-					break;
-				case 1:
-					stone += num2;
-					break;
-				}
-			}
-			return (density: b2, material: b);
 		}
+		return (density: b2, material: b);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static byte SubtractAt(int3 point, byte density)
+	{
+		float num = math.distance(_origin, point);
+		if (!(num > _action.radius))
+		{
+			return (byte)math.clamp((float)(int)density - _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f);
+		}
+		return density;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static byte AddAt(int3 point, byte density)
+	{
+		float num = math.distance(_origin, point);
+		if (!(num > _action.radius))
+		{
+			return (byte)math.clamp((float)(int)density + _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f);
+		}
+		return density;
+	}
+
+	public static void Dig(this VoxelWorld world, Vector3 position, float radius, float strength)
+	{
+		VoxelManager.PerformOperation(world, position, new VoxelAction(OperationType.Subtract, radius, strength, 0));
+	}
+
+	public static void Add(this VoxelWorld world, Vector3 position, float radius, float strength)
+	{
+		VoxelManager.PerformOperation(world, position, new VoxelAction(OperationType.Add, radius, strength, 0));
 	}
 
 	public static void SetVoxel(this VoxelWorld world, int x, int y, int z, byte density, byte materialId)
@@ -343,41 +310,13 @@ public static class VoxelExtensions
 		}
 	}
 
-	public static void Dig(this VoxelWorld world, Vector3 position, float radius, float strength)
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int GetVoxelCount(this UnityEngine.BoundsInt bounds)
 	{
-		position = world.GetLocalPosition(position);
-		radius /= world.Scale;
-		UnityEngine.BoundsInt bounds = world.GetBounds(position, radius);
-		world.SetVoxelDensityCustom(bounds, DigAt);
-		byte DigAt(int3 point, byte density)
-		{
-			float num = math.distance(position, point);
-			if (!(num > radius))
-			{
-				return (byte)math.clamp((float)(int)density - strength * math.lerp(255f, 0f, num / radius), 0f, 255f);
-			}
-			return density;
-		}
+		return (bounds.max.x - bounds.min.x + 1) * (bounds.max.y - bounds.min.y + 1) * (bounds.max.z - bounds.min.z + 1);
 	}
 
-	public static void Add(this VoxelWorld world, Vector3 position, float radius, float strength)
-	{
-		position = world.GetLocalPosition(position);
-		radius /= world.Scale;
-		UnityEngine.BoundsInt bounds = world.GetBounds(position, radius);
-		world.SetVoxelDensityCustom(bounds, AddAt);
-		byte AddAt(int3 point, byte density)
-		{
-			float num = math.distance(position, point);
-			if (!(num > radius))
-			{
-				return (byte)math.clamp((float)(int)density + strength * math.lerp(255f, 0f, num / radius), 0f, 255f);
-			}
-			return density;
-		}
-	}
-
-	private static UnityEngine.BoundsInt GetBounds(this VoxelWorld world, float3 point, float radius)
+	public static UnityEngine.BoundsInt GetBounds(this VoxelWorld world, float3 point, float radius)
 	{
 		int3 voxelForLocalPosition = world.GetVoxelForLocalPosition(point);
 		int num = Mathf.CeilToInt(radius);
@@ -408,5 +347,40 @@ public static class VoxelExtensions
 			return (v1: item, v2: item2, v3: item3);
 		}
 		return (v1: Vector3.zero, v2: Vector3.zero, v3: Vector3.zero);
+	}
+
+	public static string GetFullPath(this Component component)
+	{
+		if (!component)
+		{
+			return "";
+		}
+		return component.gameObject.GetFullPath() + "/" + component.GetType().Name;
+	}
+
+	public static string GetFullPath(this GameObject go)
+	{
+		if (!go)
+		{
+			return "";
+		}
+		string text = go.name;
+		Transform parent = go.transform.parent;
+		while ((bool)parent)
+		{
+			text = parent.name + "/" + text;
+			parent = parent.parent;
+		}
+		return go.scene.name + "/" + text;
+	}
+
+	public static int GenerateHashcodeFromPath(this Component component)
+	{
+		return component.GetFullPath().GetHashCode();
+	}
+
+	public static int GenerateHashcodeFromPath(this GameObject go)
+	{
+		return go.GetFullPath().GetHashCode();
 	}
 }

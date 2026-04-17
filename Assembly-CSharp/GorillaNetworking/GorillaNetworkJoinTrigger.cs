@@ -161,7 +161,12 @@ public class GorillaNetworkJoinTrigger : GorillaTriggerBox
 
 	public virtual string GetFullDesiredGameModeString()
 	{
-		return networkZone + "|" + GorillaComputer.instance.currentQueue + "|" + GetDesiredGameType();
+		return new GameModeString
+		{
+			zone = networkZone,
+			queue = GorillaComputer.instance.currentQueue,
+			gameType = GetDesiredGameType()
+		}.ToString();
 	}
 
 	public virtual bool SameZoneAsOverride()
