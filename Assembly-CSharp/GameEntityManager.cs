@@ -142,7 +142,7 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 
 	public SuperInfectionManager superInfectionManager;
 
-	private List<IGameEntityZoneComponent> zoneComponents;
+	protected List<IGameEntityZoneComponent> zoneComponents;
 
 	private List<GameEntity> entities;
 
@@ -308,13 +308,13 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 			return;
 		}
 		scenePlacedEntitiesRegistered = true;
-		List<GameEntity> allScenePlacedInScene = GetAllScenePlacedInScene(GetZoneSceneName());
-		_ = allScenePlacedInScene?.Count;
-		if (allScenePlacedInScene != null)
+		string zoneSceneName = GetZoneSceneName();
+		s_scenePlacedEntities.TryGetValue(zoneSceneName, out var value);
+		if (value != null)
 		{
-			for (int i = 0; i < allScenePlacedInScene.Count; i++)
+			for (int i = 0; i < value.Count; i++)
 			{
-				RegisterSingleScenePlacedEntity(allScenePlacedInScene[i]);
+				RegisterSingleScenePlacedEntity(value[i]);
 			}
 		}
 	}
@@ -821,7 +821,7 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 		return zoneStateData.state == ZoneState.Active;
 	}
 
-	public bool IsPositionInManagerBounds(Vector3 pos)
+	public virtual bool IsPositionInManagerBounds(Vector3 pos)
 	{
 		if (boundsBoxCollider != null)
 		{
@@ -3440,7 +3440,7 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 		}
 	}
 
-	private bool IsInZone()
+	protected virtual bool IsInZone()
 	{
 		bool flag = VRRig.LocalRig.zoneEntity.currentZone == zone;
 		for (int i = 0; i < zoneComponents.Count; i++)
@@ -3796,12 +3796,6 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 			return value.Count > 0;
 		}
 		return false;
-	}
-
-	internal static List<GameEntity> GetAllScenePlacedInScene(string sceneName)
-	{
-		s_scenePlacedEntities.TryGetValue(sceneName, out var value);
-		return value;
 	}
 
 	internal static void RegisterScenePlacedEntity(GameEntity entity)
