@@ -391,7 +391,8 @@ public class GTPlayer : MonoBehaviour
 	public enum LiquidType
 	{
 		Water,
-		Lava
+		Lava,
+		SwimInAir
 	}
 
 	private struct HoverBoardCast
@@ -1672,7 +1673,7 @@ public class GTPlayer : MonoBehaviour
 				bool flag = headInWater;
 				float num5 = Vector3.Dot(waterSurfaceForHead.surfacePoint - headCollider.transform.position, waterSurfaceForHead.surfaceNormal);
 				float num6 = Vector3.Dot(headCollider.transform.position - (waterSurfaceForHead.surfacePoint - waterSurfaceForHead.surfaceNormal * waterSurfaceForHead.maxDepth), waterSurfaceForHead.surfaceNormal);
-				headInWater = forcedUnderwater || (num5 > 0f && num6 > 0f);
+				headInWater = (forcedUnderwater || (num5 > 0f && num6 > 0f)) && waterVolume.LiquidType != LiquidType.SwimInAir;
 				if (headInWater && !flag)
 				{
 					audioSetToUnderwater = true;

@@ -99,11 +99,15 @@ public class VoxelWorld : MonoBehaviour
 
 	private static Chunk _opChunk;
 
+	private static bool _opAnyChanged;
+
 	public IEnumerable<Chunk> Chunks => chunks.Values;
 
 	public bool Initialized { get; private set; }
 
 	public bool IsInfinite => worldType == WorldType.Infinite;
+
+	public UnityEngine.BoundsInt WorldBounds => worldBounds;
 
 	public int Id { get; private set; }
 
@@ -261,6 +265,8 @@ public class VoxelWorld : MonoBehaviour
 		{
 			chunksToGenerate.Dispose();
 		}
+		sortedChunks = default(NativeList<int3>);
+		chunksToGenerate = default(NativeHashSet<int3>);
 	}
 
 	private void Update()
@@ -563,6 +569,10 @@ public class VoxelWorld : MonoBehaviour
 
 	private void RegenerateAllChunks()
 	{
+		if (!Initialized)
+		{
+			return;
+		}
 		foreach (ChunkTaskSet value in chunkJobs.Values)
 		{
 			value.Complete();
@@ -582,7 +592,7 @@ public class VoxelWorld : MonoBehaviour
 	{
 		if (chunks.TryGetValue(chunkId, out var value) && value.IsDataChanged)
 		{
-			if (chunkJobs.TryGetValue(_opChunk.Id, out var value2))
+			if (chunkJobs.TryGetValue(chunkId, out var value2))
 			{
 				value2.Complete();
 				chunkJobs.Remove(chunkId);
@@ -724,9 +734,18 @@ public class VoxelWorld : MonoBehaviour
 		chunk.IsDirty = false;
 	}
 
-	public void SetVoxelDensityCustom(UnityEngine.BoundsInt worldBounds, Func<int3, byte, byte> setDensityFunction)
+	public void SetVoxelDensityCustom(UnityEngine.BoundsInt worldBounds, Func<int3, byte, byte> setDensityFunction, bool immediate = true)
 	{
 		ForEachChunkInBounds(worldBounds, SetVoxelDensityInChunk);
+		void SetDensity(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density)
+		{
+			byte b = setDensityFunction(voxelWorldPosition, density);
+			if (b != density)
+			{
+				_opChunk.Density[voxelIndex] = b;
+				_opAnyChanged = true;
+			}
+		}
 		void SetVoxelDensityInChunk()
 		{
 			ChunkTaskSet value;
@@ -735,32 +754,41 @@ public class VoxelWorld : MonoBehaviour
 			{
 				value.Complete();
 			}
-			bool anyChanged = false;
+			_opAnyChanged = false;
 			ForEachVoxelInChunkInBounds(_opBounds, _opChunk, SetDensity);
-			if (anyChanged)
+			if (_opAnyChanged)
 			{
 				_opChunk.IsDataChanged = true;
-				MeshChunkImmediately(_opChunk);
+				if (immediate)
+				{
+					MeshChunkImmediately(_opChunk);
+				}
+				else
+				{
+					_opChunk.IsMeshGenerated = false;
+					_opChunk.IsDirty = true;
+				}
 			}
 			else if (flag)
 			{
 				HandleJobCompletion(value);
 			}
-			void SetDensity(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density)
-			{
-				byte b = setDensityFunction(voxelWorldPosition, density);
-				if (b != density)
-				{
-					_opChunk.Density[voxelIndex] = b;
-					anyChanged = true;
-				}
-			}
 		}
 	}
 
-	public void SetVoxelDataCustom(UnityEngine.BoundsInt worldBounds, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction)
+	public void SetVoxelDataCustom(UnityEngine.BoundsInt worldBounds, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction, bool immediate = true)
 	{
 		ForEachChunkInBounds(worldBounds, SetVoxelDataInChunk);
+		void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
+		{
+			var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
+			if (b != density || b2 != material)
+			{
+				_opChunk.Density[voxelIndex] = b;
+				_opChunk.Material[voxelIndex] = b2;
+				_opAnyChanged = true;
+			}
+		}
 		void SetVoxelDataInChunk()
 		{
 			ChunkTaskSet value;
@@ -769,34 +797,42 @@ public class VoxelWorld : MonoBehaviour
 			{
 				value.Complete();
 			}
-			bool anyChanged = false;
+			_opAnyChanged = false;
 			ForEachVoxelInChunkInBounds(_opBounds, _opChunk, SetVoxelData);
-			if (anyChanged)
+			if (_opAnyChanged)
 			{
 				_opChunk.IsDataChanged = true;
-				MeshChunkImmediately(_opChunk);
+				if (immediate)
+				{
+					MeshChunkImmediately(_opChunk);
+				}
+				else
+				{
+					_opChunk.IsMeshGenerated = false;
+					_opChunk.IsDirty = true;
+				}
 			}
 			else if (flag)
 			{
 				HandleJobCompletion(value);
 			}
-			void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
-			{
-				var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
-				if (b != density || b2 != material)
-				{
-					_opChunk.Density[voxelIndex] = b;
-					_opChunk.Material[voxelIndex] = b2;
-					anyChanged = true;
-				}
-			}
 		}
 	}
 
-	public void SetVoxelDataCustom(int3[] voxels, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction)
+	public void SetVoxelDataCustom(int3[] voxels, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction, bool immediate = true)
 	{
 		UnityEngine.BoundsInt boundsFor = GetBoundsFor(voxels);
 		ForEachChunkInBounds(boundsFor, SetVoxelDataInChunk);
+		void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
+		{
+			var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
+			if (b != density || b2 != material)
+			{
+				_opChunk.Density[voxelIndex] = b;
+				_opChunk.Material[voxelIndex] = b2;
+				_opAnyChanged = true;
+			}
+		}
 		void SetVoxelDataInChunk()
 		{
 			ChunkTaskSet value;
@@ -805,26 +841,24 @@ public class VoxelWorld : MonoBehaviour
 			{
 				value.Complete();
 			}
-			bool anyChanged = false;
+			_opAnyChanged = false;
 			ForEachSpecifiedVoxelInChunk(voxels, _opChunk, SetVoxelData);
-			if (anyChanged)
+			if (_opAnyChanged)
 			{
 				_opChunk.IsDataChanged = true;
-				MeshChunkImmediately(_opChunk);
+				if (immediate)
+				{
+					MeshChunkImmediately(_opChunk);
+				}
+				else
+				{
+					_opChunk.IsMeshGenerated = false;
+					_opChunk.IsDirty = true;
+				}
 			}
 			else if (flag)
 			{
 				HandleJobCompletion(value);
-			}
-			void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
-			{
-				var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
-				if (b != density || b2 != material)
-				{
-					_opChunk.Density[voxelIndex] = b;
-					_opChunk.Material[voxelIndex] = b2;
-					anyChanged = true;
-				}
 			}
 		}
 	}
@@ -843,7 +877,7 @@ public class VoxelWorld : MonoBehaviour
 			{
 				_opChunk.Density[voxelIndex] = b;
 				_opChunk.Material[voxelIndex] = b2;
-				P_5.anyChanged = true;
+				_opAnyChanged = true;
 			}
 		}
 		void SetVoxelDataInChunk()
@@ -854,7 +888,7 @@ public class VoxelWorld : MonoBehaviour
 			{
 				value.Complete();
 			}
-			bool anyChanged = false;
+			_opAnyChanged = false;
 			int3 zero = int3.zero;
 			int3 max = _opChunk.Dimensions - 1;
 			int index = 0;
@@ -875,7 +909,7 @@ public class VoxelWorld : MonoBehaviour
 					}
 				}
 			}
-			if (anyChanged)
+			if (_opAnyChanged)
 			{
 				_opChunk.IsDataChanged = true;
 				if (immediate)
@@ -885,6 +919,7 @@ public class VoxelWorld : MonoBehaviour
 				else
 				{
 					_opChunk.IsMeshGenerated = false;
+					_opChunk.IsDirty = true;
 				}
 			}
 			else if (flag)
@@ -903,7 +938,7 @@ public class VoxelWorld : MonoBehaviour
 			if (b != density)
 			{
 				_opChunk.Density[voxelIndex] = b;
-				P_2.anyChanged = true;
+				_opAnyChanged = true;
 			}
 		}
 		void SetVoxelDensityInChunk()
@@ -914,7 +949,7 @@ public class VoxelWorld : MonoBehaviour
 			{
 				value.Complete();
 			}
-			bool anyChanged = false;
+			_opAnyChanged = false;
 			int3 zero = int3.zero;
 			int3 max = _opChunk.Dimensions - 1;
 			int index = 0;
@@ -935,7 +970,7 @@ public class VoxelWorld : MonoBehaviour
 					}
 				}
 			}
-			if (anyChanged)
+			if (_opAnyChanged)
 			{
 				_opChunk.IsDataChanged = true;
 				if (immediate)
@@ -945,6 +980,7 @@ public class VoxelWorld : MonoBehaviour
 				else
 				{
 					_opChunk.IsMeshGenerated = false;
+					_opChunk.IsDirty = true;
 				}
 			}
 			else if (flag)
@@ -1040,18 +1076,18 @@ public class VoxelWorld : MonoBehaviour
 		};
 	}
 
-	public (int3 min, int3 max) GetChunkBoundsForLocalBounds(UnityEngine.BoundsInt worldBounds)
+	public (int3 min, int3 max) GetChunkBoundsForLocalBounds(UnityEngine.BoundsInt worldBounds, bool includeLLC = false)
 	{
-		return (min: (worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize), max: worldBounds.max.LocalPositionToChunkId(ChunkSize));
+		return (min: (worldBounds.min - (includeLLC ? (Vector3Int.one * Chunk.Pad) : Vector3Int.zero)).LocalPositionToChunkId(ChunkSize), max: worldBounds.max.LocalPositionToChunkId(ChunkSize));
 	}
 
-	public bool BoundsChunksLoaded(UnityEngine.BoundsInt localWorldBounds)
+	public bool BoundsChunksLoaded(UnityEngine.BoundsInt localWorldBounds, bool includeLLC = false)
 	{
 		if (!Initialized)
 		{
 			return false;
 		}
-		(int3 min, int3 max) chunkBoundsForLocalBounds = GetChunkBoundsForLocalBounds(localWorldBounds);
+		(int3 min, int3 max) chunkBoundsForLocalBounds = GetChunkBoundsForLocalBounds(localWorldBounds, includeLLC);
 		int3 item = chunkBoundsForLocalBounds.min;
 		int3 item2 = chunkBoundsForLocalBounds.max;
 		for (int i = item.x; i <= item2.x; i++)
@@ -1071,11 +1107,21 @@ public class VoxelWorld : MonoBehaviour
 		return true;
 	}
 
-	private void ForEachChunkInBounds(UnityEngine.BoundsInt worldBounds, Action action)
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private Vector3Int ClampToWorldBounds(Vector3Int coord)
 	{
-		_opBounds = worldBounds;
-		int3 int5 = (worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
-		int3 int6 = worldBounds.max.LocalPositionToChunkId(ChunkSize);
+		if (worldType == WorldType.Bounded)
+		{
+			coord.Clamp(worldBounds.min, worldBounds.max);
+		}
+		return coord;
+	}
+
+	private void ForEachChunkInBounds(UnityEngine.BoundsInt bounds, Action action)
+	{
+		_opBounds = bounds;
+		int3 int5 = ClampToWorldBounds(bounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
+		int3 int6 = ClampToWorldBounds(bounds.max).LocalPositionToChunkId(ChunkSize);
 		for (int i = int5.x; i <= int6.x; i++)
 		{
 			for (int j = int5.y; j <= int6.y; j++)
@@ -1104,8 +1150,8 @@ public class VoxelWorld : MonoBehaviour
 			list = new List<Chunk>();
 		}
 		list.Clear();
-		int3 int5 = (worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
-		int3 int6 = worldBounds.max.LocalPositionToChunkId(ChunkSize);
+		int3 int5 = ClampToWorldBounds(worldBounds.min - Vector3Int.one * Chunk.Pad).LocalPositionToChunkId(ChunkSize);
+		int3 int6 = ClampToWorldBounds(worldBounds.max).LocalPositionToChunkId(ChunkSize);
 		for (int i = int5.x; i <= int6.x; i++)
 		{
 			for (int j = int5.y; j <= int6.y; j++)

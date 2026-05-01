@@ -13,6 +13,12 @@ public static class VectorUtilities
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int3 ToInt3(this Vector3Int v)
+	{
+		return new int3(v.x, v.y, v.z);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int3 ToInt3(this Vector3 v)
 	{
 		return new int3((int)v.x, (int)v.y, (int)v.z);
@@ -148,5 +154,17 @@ public static class VectorUtilities
 			}
 		}
 		return cardinalNeighbours[num];
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Vector3Int Min(Vector3Int v1, Vector3Int v2)
+	{
+		return new Vector3Int(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.min(v1.z, v2.z));
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Vector3Int Max(Vector3Int v1, Vector3Int v2)
+	{
+		return new Vector3Int(math.max(v1.x, v2.x), math.max(v1.y, v2.y), math.max(v1.z, v2.z));
 	}
 }

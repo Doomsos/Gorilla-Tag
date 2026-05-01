@@ -1,12 +1,23 @@
 using Fusion;
+using GorillaNetworking;
 using UnityEngine;
 
 [NetworkBehaviourWeaved(0)]
 public class CustomMapsEntityManager : GameEntityManager
 {
+	private static bool IsOverrideEnabled()
+	{
+		GorillaServer instance = GorillaServer.Instance;
+		if (instance != null)
+		{
+			return instance.CheckIsVStumpGrabbablesFixEnabled();
+		}
+		return false;
+	}
+
 	public override bool IsPositionInManagerBounds(Vector3 pos)
 	{
-		if (CustomMapLoader.CanLoadEntities)
+		if (CustomMapLoader.CanLoadEntities && IsOverrideEnabled())
 		{
 			return true;
 		}
@@ -15,7 +26,7 @@ public class CustomMapsEntityManager : GameEntityManager
 
 	protected override bool IsInZone()
 	{
-		if (!CustomMapLoader.CanLoadEntities)
+		if (!CustomMapLoader.CanLoadEntities || !IsOverrideEnabled())
 		{
 			return base.IsInZone();
 		}

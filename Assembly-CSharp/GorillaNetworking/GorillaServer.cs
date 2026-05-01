@@ -30,6 +30,10 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 		TypeNameHandling = TypeNameHandling.Auto
 	};
 
+	private (bool valid, bool value) cachedVStumpGrabbablesFix;
+
+	private (bool valid, bool value) cachedSuppressZonesInVStump;
+
 	public bool FeatureFlagsReady => featureFlags.ready;
 
 	private PlayFab.CloudScriptModels.EntityKey playerEntity => new PlayFab.CloudScriptModels.EntityKey
@@ -319,8 +323,33 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 		return featureFlags.IsEnabledForUser("2025-09-MothershipAnalyticsSampleRate");
 	}
 
-	public bool CheckIsPlayFabTelemetryEnabled()
+	public bool CheckIsVStumpGrabbablesFixEnabled()
 	{
-		return featureFlags.IsEnabledForUser("2025-09-PlayFabAnalyticsSampleRate");
+		if (cachedVStumpGrabbablesFix.valid)
+		{
+			return cachedVStumpGrabbablesFix.value;
+		}
+		bool flag = featureFlags.IsEnabledForUser("2026-04-VStumpGrabbablesFix");
+		if (featureFlags.ready)
+		{
+			cachedVStumpGrabbablesFix.value = flag;
+			cachedVStumpGrabbablesFix.valid = true;
+		}
+		return flag;
+	}
+
+	public bool CheckIsSuppressZonesInVStumpEnabled()
+	{
+		if (cachedSuppressZonesInVStump.valid)
+		{
+			return cachedSuppressZonesInVStump.value;
+		}
+		bool flag = featureFlags.IsEnabledForUser("2026-04-SuppressZonesInVStump");
+		if (featureFlags.ready)
+		{
+			cachedSuppressZonesInVStump.value = flag;
+			cachedSuppressZonesInVStump.valid = true;
+		}
+		return flag;
 	}
 }

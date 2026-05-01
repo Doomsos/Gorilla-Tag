@@ -11,7 +11,8 @@ public class CosmeticSwapper : MonoBehaviour, ITickSystemTick
 	private enum SwapMode
 	{
 		AllAtOnce,
-		StepByStep
+		StepByStep,
+		Random
 	}
 
 	private struct CosmeticState
@@ -30,6 +31,10 @@ public class CosmeticSwapper : MonoBehaviour, ITickSystemTick
 
 	[SerializeField]
 	private SwapMode swapMode = SwapMode.StepByStep;
+
+	[Tooltip("Optional. When assigned, TriggerSwap sources the cosmetic ID from the cycle controller's active sub-item instead of the cosmeticIDs list. Use SwapMode.Random to call CycleRandom() automatically on each hit before reading the active sub-item.")]
+	[SerializeField]
+	private SubCosmeticCycleController cycleController;
 
 	[SerializeField]
 	private float stepTimeout = 10f;
@@ -99,53 +104,90 @@ public class CosmeticSwapper : MonoBehaviour, ITickSystemTick
 
 	public int GetNumberOfSteps()
 	{
+		if (cycleController != null)
+		{
+			return cycleController.Count;
+		}
 		return cosmeticIDs.Count;
 	}
 
 	private void TriggerSwap(VRRig rig)
 	{
-		if ((GorillaGameManager.instance != null && gameModeExclusion.Contains(GorillaGameManager.instance.GameType())) || rig == null || controller == null || cosmeticIDs.Count == 0 || rig != GorillaTagger.Instance.offlineVRRig)
+		if ((GorillaGameManager.instance != null && gameModeExclusion.Contains(GorillaGameManager.instance.GameType())) || rig == null || controller == null || rig != GorillaTagger.Instance.offlineVRRig)
 		{
 			return;
 		}
-		if (swapMode == SwapMode.AllAtOnce)
+		if (cycleController != null)
 		{
-			foreach (string cosmeticID in cosmeticIDs)
+			if (swapMode == SwapMode.Random)
 			{
-				CosmeticState? cosmeticState = SwapInCosmeticWithReturn(cosmeticID, rig);
+				cycleController.CycleRandom();
+			}
+			string appliedCosmeticID = cycleController.GetAppliedCosmeticID();
+			if (!string.IsNullOrEmpty(appliedCosmeticID))
+			{
+				CosmeticState? cosmeticState = SwapInCosmeticWithReturn(appliedCosmeticID, rig);
 				if (cosmeticState.HasValue)
 				{
 					AddNewSwappedCosmetic(cosmeticState.Value);
 				}
 			}
-			return;
-		}
-		int cosmeticStepIndex = CosmeticStepIndex;
-		if (cosmeticStepIndex < 0 || cosmeticStepIndex >= cosmeticIDs.Count)
-		{
-			return;
-		}
-		string nameOrId = cosmeticIDs[cosmeticStepIndex];
-		CosmeticState? cosmeticState2 = SwapInCosmeticWithReturn(nameOrId, rig);
-		if (!cosmeticState2.HasValue)
-		{
-			return;
-		}
-		AddNewSwappedCosmetic(cosmeticState2.Value);
-		if (cosmeticStepIndex == cosmeticIDs.Count - 1)
-		{
-			if (holdFinalStep)
-			{
-				MarkFinalCosmeticStep();
-			}
-			if (OnSwappingSequenceCompleted != null)
-			{
-				OnSwappingSequenceCompleted.Invoke(rig);
-			}
 		}
 		else
 		{
-			UnmarkFinalCosmeticStep();
+			if (cosmeticIDs.Count == 0)
+			{
+				return;
+			}
+			if (swapMode == SwapMode.Random)
+			{
+				string nameOrId = cosmeticIDs[Random.Range(0, cosmeticIDs.Count)];
+				CosmeticState? cosmeticState2 = SwapInCosmeticWithReturn(nameOrId, rig);
+				if (cosmeticState2.HasValue)
+				{
+					AddNewSwappedCosmetic(cosmeticState2.Value);
+				}
+				return;
+			}
+			if (swapMode == SwapMode.AllAtOnce)
+			{
+				foreach (string cosmeticID in cosmeticIDs)
+				{
+					CosmeticState? cosmeticState3 = SwapInCosmeticWithReturn(cosmeticID, rig);
+					if (cosmeticState3.HasValue)
+					{
+						AddNewSwappedCosmetic(cosmeticState3.Value);
+					}
+				}
+				return;
+			}
+			int cosmeticStepIndex = CosmeticStepIndex;
+			if (cosmeticStepIndex < 0 || cosmeticStepIndex >= cosmeticIDs.Count)
+			{
+				return;
+			}
+			string nameOrId2 = cosmeticIDs[cosmeticStepIndex];
+			CosmeticState? cosmeticState4 = SwapInCosmeticWithReturn(nameOrId2, rig);
+			if (!cosmeticState4.HasValue)
+			{
+				return;
+			}
+			AddNewSwappedCosmetic(cosmeticState4.Value);
+			if (cosmeticStepIndex == cosmeticIDs.Count - 1)
+			{
+				if (holdFinalStep)
+				{
+					MarkFinalCosmeticStep();
+				}
+				if (OnSwappingSequenceCompleted != null)
+				{
+					OnSwappingSequenceCompleted.Invoke(rig);
+				}
+			}
+			else
+			{
+				UnmarkFinalCosmeticStep();
+			}
 		}
 	}
 

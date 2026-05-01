@@ -11,11 +11,13 @@ using UnityEngine;
 internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 {
 	[Serializable]
-	public class PlayFabSubscriptionData
+	public class SharedSubscriptionData
 	{
 		public string Sku;
 
 		public bool IsActive;
+
+		public DateTimeOffset? ExpirationTime;
 	}
 
 	public float playerLookUpCooldown = 3f;
@@ -226,7 +228,19 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 								{
 									try
 									{
-										isSubscribed = JsonConvert.DeserializeObject<PlayFabSubscriptionData>(datum.Value.Value).IsActive;
+										SharedSubscriptionData sharedSubscriptionData = JsonConvert.DeserializeObject<SharedSubscriptionData>(datum.Value.Value);
+										bool num;
+										if (!sharedSubscriptionData.ExpirationTime.HasValue)
+										{
+											num = sharedSubscriptionData.IsActive;
+										}
+										else
+										{
+											DateTimeOffset now = DateTimeOffset.Now;
+											DateTimeOffset? expirationTime = sharedSubscriptionData.ExpirationTime;
+											num = now < expirationTime;
+										}
+										isSubscribed = num;
 									}
 									catch (Exception ex)
 									{
@@ -345,10 +359,15 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 			{
 				GorillaTelemetry.PostShopEvent(rig, GTShopEventType.item_try_on, rig.tryOnSet.items);
 			}
+			if (rig.isOfflineVRRig)
+			{
+				CosmeticsController.ClearTryOnCollectable();
+			}
 		}
 		else if (rig.isOfflineVRRig)
 		{
 			rig.tryOnSet.ClearSet(CosmeticsController.instance.nullItem);
+			CosmeticsController.ClearTryOnCollectable();
 			CosmeticsController.instance.ClearCheckout(sendEvent: false);
 			CosmeticsController.instance.UpdateShoppingCart();
 			CosmeticsController.instance.UpdateWornCosmetics(sync: true);

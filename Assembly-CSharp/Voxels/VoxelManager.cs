@@ -112,6 +112,8 @@ public class VoxelManager : NetworkComponent
 
 	private static Dictionary<int, VoxelWorld> _worlds = new Dictionary<int, VoxelWorld>();
 
+	private static StaticArrayBag<byte> _arrayBag = new StaticArrayBag<byte>();
+
 	private NetPlayer _owner;
 
 	private static Dictionary<int, StateInitQueue> _initQueues = new Dictionary<int, StateInitQueue>();
@@ -301,6 +303,11 @@ public class VoxelManager : NetworkComponent
 		{
 			SendWorldStateRequest(key);
 		}
+	}
+
+	public static void RequestWorldState(VoxelWorld world)
+	{
+		SendWorldStateRequest(world.Id);
 	}
 
 	private static void OnWorldStateRequestReceived(int worldId, PhotonMessageInfoWrapped info)
@@ -666,7 +673,7 @@ public class VoxelManager : NetworkComponent
 	private static void GetDensityForBounds(VoxelWorld world, UnityEngine.BoundsInt bounds, out byte[] voxels)
 	{
 		int voxelCount = bounds.GetVoxelCount();
-		voxels = new byte[voxelCount];
+		voxels = _arrayBag.GetStaticArray(voxelCount);
 		int num = 0;
 		for (int i = bounds.min.x; i <= bounds.max.x; i++)
 		{
@@ -693,7 +700,7 @@ public class VoxelManager : NetworkComponent
 		}
 		else
 		{
-			value.SetVoxelDensity(bounds, array);
+			value.SetVoxelDensity(bounds, array, immediate: false);
 		}
 	}
 

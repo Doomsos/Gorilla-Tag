@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GorillaNetworking;
 using PlayFab;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -37,6 +38,9 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 		[SerializeField]
 		private UnityEvent payload;
 
+		[SerializeField]
+		private UnityEvent<float> persistantPayload;
+
 		private DateTime dateTime = DateTime.MaxValue;
 
 		public GameObject GameObject => gameObject;
@@ -61,23 +65,15 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 
 		private void Activate(float late)
 		{
-			if (gameObject != null && late < 1f)
+			if (gameObject != null)
 			{
 				gameObject.SetActive(activationState);
-				if (activationState)
-				{
-					Animator[] componentsInChildren = gameObject.GetComponentsInChildren<Animator>();
-					for (int i = 0; i < componentsInChildren.Length; i++)
-					{
-						int fullPathHash = componentsInChildren[i].GetCurrentAnimatorStateInfo(0).fullPathHash;
-						componentsInChildren[i].PlayInFixedTime(fullPathHash, 0, late);
-					}
-				}
 			}
 			if (late < 1f)
 			{
 				payload?.Invoke();
 			}
+			persistantPayload?.Invoke(late);
 		}
 
 		int IComparable<TitleDataDateRefActivationTarget>.CompareTo(TitleDataDateRefActivationTarget other)
@@ -92,9 +88,14 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 	[SerializeField]
 	private TitleDataDateRefActivationTarget[] nodes;
 
+	[SerializeField]
+	private TMP_Text tmpStatus;
+
 	private ReadyState readyState;
 
 	private List<TitleDataDateRefActivationTarget> nodeList = new List<TitleDataDateRefActivationTarget>();
+
+	private int activations;
 
 	private async void Initialize()
 	{
@@ -119,14 +120,7 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 	{
 		try
 		{
-			nodeList.Clear();
-			DateTime refTime = DateTime.Parse(s);
-			for (int i = 0; i < nodes.Length; i++)
-			{
-				nodes[i].Initialize(refTime);
-				nodeList.Add(nodes[i]);
-			}
-			nodeList.Sort();
+			setStartDate(DateTime.Parse(s));
 			readyState = ReadyState.Ready;
 		}
 		catch (Exception ex)
@@ -134,6 +128,23 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 			Debug.Log("TitleDataDateRefActivation :: onTD :: " + ex.Message + " :: " + ex.StackTrace);
 			readyState = ReadyState.Crashed;
 		}
+	}
+
+	public void StartNow(float delay)
+	{
+		setStartDate(GorillaComputer.instance.GetServerTime().AddSeconds(delay));
+	}
+
+	private void setStartDate(DateTime d)
+	{
+		nodeList.Clear();
+		for (int i = 0; i < nodes.Length; i++)
+		{
+			nodes[i].Initialize(d);
+			nodeList.Add(nodes[i]);
+		}
+		nodeList.Sort();
+		activations = 0;
 	}
 
 	private void onTDError(PlayFabError error)
@@ -155,13 +166,22 @@ public class TitleDataDateRefActivation : MonoBehaviour, IGorillaSliceableSimple
 
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
-		if (readyState == ReadyState.Ready)
+		if (readyState != ReadyState.Ready || nodeList.Count == 0)
 		{
-			DateTime serverTime = GorillaComputer.instance.GetServerTime();
-			if (serverTime.Year >= 2000 && nodeList.Count > 0 && nodeList[0].ActivationTime <= serverTime)
+			return;
+		}
+		DateTime serverTime = GorillaComputer.instance.GetServerTime();
+		if (serverTime.Year >= 2000)
+		{
+			if (tmpStatus != null)
+			{
+				tmpStatus.text = $"action {activations + 1} of {nodes.Length} in {nodeList[0].ActivationTime - GorillaComputer.instance.GetServerTime():g} s";
+			}
+			if (nodeList[0].ActivationTime <= serverTime)
 			{
 				nodeList[0].Activate(serverTime);
 				nodeList.RemoveAt(0);
+				activations++;
 			}
 		}
 	}

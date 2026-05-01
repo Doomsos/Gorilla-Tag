@@ -1,11 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Fusion;
+using Photon.Pun;
 using Unity.Mathematics;
 using UnityEngine;
 using Voxels;
 
-public class RandomCarveableObject : MonoBehaviour
+[NetworkBehaviourWeaved(0)]
+public class RandomCarveableObject : NetworkComponent
 {
 	[SerializeField]
 	private Transform spawnPoint;
@@ -19,39 +23,54 @@ public class RandomCarveableObject : MonoBehaviour
 	[SerializeField]
 	private VoxelWorld world;
 
+	[SerializeField]
+	private GameObject spawnFX;
+
+	[SerializeField]
+	private CallLimiter spamCheck = new CallLimiter(1, 1f);
+
+	private int _carveableIndex = -1;
+
+	private int _version;
+
 	private GameObject _carveable;
 
 	private int3[] _voxels;
 
 	private UnityEngine.BoundsInt _voxelBounds;
 
-	private void Start()
+	private bool HasAuthority => VoxelManager.HasAuthority;
+
+	private new void Start()
 	{
 		if ((object)world == null)
 		{
 			world = GetComponentInParent<VoxelWorld>();
 		}
-		world.UpdateWorld = false;
+		spawnFX.SetActive(value: false);
+		world.SetWorldBounds(new UnityEngine.BoundsInt(Vector3Int.zero, (Chunk.DefaultSize - 1).ToVectorInt()));
 		for (int num = spawnPoint.childCount - 1; num >= 0; num--)
 		{
 			JamUtil.Destroy(spawnPoint.GetChild(num).gameObject);
 		}
-		SpawnNewCarveable();
+		Init();
 	}
 
-	private void SelectCarveable()
+	private void Init()
 	{
-		for (int num = spawnPoint.childCount - 1; num >= 0; num--)
+		if (HasAuthority)
 		{
-			JamUtil.Destroy(spawnPoint.GetChild(num).gameObject);
+			SpawnRandomCarveable();
 		}
-		_carveable = Object.Instantiate(prefabs[UnityEngine.Random.Range(0, prefabs.Length)], spawnPoint.position, spawnPoint.rotation, spawnPoint);
-		_carveable.transform.localScale = Vector3.one;
+		else if (_version != 0 && IsValidPrefab(_carveableIndex))
+		{
+			SpawnCarveable(_carveableIndex);
+		}
 	}
 
-	private void ClearBounds()
+	private void ClearWorld()
 	{
-		SetBoundsDensity(0);
+		world.SetVoxels(world.WorldBounds, 0, materialId, immediate: false);
 	}
 
 	private void FillBounds()
@@ -88,24 +107,154 @@ public class RandomCarveableObject : MonoBehaviour
 		}
 	}
 
-	public async void SpawnNewCarveable()
+	private void SetCarveable(int index)
 	{
-		await UniTask.Yield();
-		if ((bool)_carveable && VoxelManager.HasAuthority)
+		_carveableIndex = index;
+		for (int num = spawnPoint.childCount - 1; num >= 0; num--)
 		{
-			ClearBounds();
+			JamUtil.Destroy(spawnPoint.GetChild(num).gameObject);
 		}
-		SelectCarveable();
-		CollectVoxelSet();
-		_carveable.gameObject.SetActive(value: false);
-		world.SetWorldBounds(_voxelBounds);
-		world.UpdateWorld = true;
-		await UniTask.WaitUntil(() => world.BoundsChunksLoaded(_voxelBounds));
+		_carveable = UnityEngine.Object.Instantiate(prefabs[_carveableIndex], spawnPoint.position, spawnPoint.rotation, spawnPoint);
+		_carveable.transform.localScale = Vector3.one;
+	}
+
+	public void RequestSpawnRandomCarveable()
+	{
+		Debug.Log("RequestSpawnRandomCarveable()");
+		if (HasAuthority)
+		{
+			SpawnRandomCarveable();
+		}
+		else
+		{
+			base.GetView.RPC("RPC_SpawnRandomCarveable", RpcTarget.MasterClient);
+		}
+	}
+
+	private bool IsValidAuthorityRPC(PhotonMessageInfo info)
+	{
 		if (VoxelManager.HasAuthority)
 		{
-			FillBounds();
+			return spamCheck.CheckCallTime(Time.unscaledTime);
 		}
-		VoxelManager.ReplicateState(world);
-		_carveable.gameObject.SetActive(value: true);
+		return false;
+	}
+
+	[PunRPC]
+	public void RPC_SpawnRandomCarveable(PhotonMessageInfo info)
+	{
+		MonkeAgent.IncrementRPCCall(info, "RPC_SpawnRandomCarveable");
+		if (IsValidAuthorityRPC(info))
+		{
+			SpawnRandomCarveable();
+		}
+	}
+
+	private void SpawnRandomCarveable()
+	{
+		SpawnCarveable(UnityEngine.Random.Range(0, prefabs.Length));
+	}
+
+	private async void SpawnCarveable(int index)
+	{
+		_ = 1;
+		try
+		{
+			if (!IsValidPrefab(index))
+			{
+				Debug.LogError($"Invalid index: {index}");
+				return;
+			}
+			spawnFX.SetActive(value: false);
+			await UniTask.WaitUntil(() => world.WorldGenerationComplete);
+			ClearWorld();
+			SetCarveable(index);
+			_carveable.gameObject.SetActive(value: false);
+			CollectVoxelSet();
+			if (!world.WorldBounds.Contains(_voxelBounds))
+			{
+				world.SetWorldBounds(world.WorldBounds.Union(_voxelBounds));
+				await UniTask.WaitUntil(() => world.BoundsChunksLoaded(_voxelBounds));
+			}
+			spawnFX.SetActive(value: true);
+			FillBounds();
+			_carveable.gameObject.SetActive(value: true);
+			if (HasAuthority)
+			{
+				IncrementVersion();
+			}
+			else
+			{
+				VoxelManager.RequestWorldState(world);
+			}
+		}
+		catch (Exception exception)
+		{
+			Debug.LogException(exception);
+		}
+	}
+
+	private void IncrementVersion()
+	{
+		_version++;
+	}
+
+	private bool IsValidPrefab(int index)
+	{
+		if (index >= 0)
+		{
+			return index < prefabs.Length;
+		}
+		return false;
+	}
+
+	public override void WriteDataFusion()
+	{
+	}
+
+	public override void ReadDataFusion()
+	{
+	}
+
+	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		stream.SendNext(_carveableIndex);
+		stream.SendNext(_version);
+	}
+
+	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (info.Sender == info.photonView.Owner)
+		{
+			int num = (int)stream.ReceiveNext();
+			int num2 = (int)stream.ReceiveNext();
+			if (_carveableIndex != num || _version != num2)
+			{
+				OnStateChange(num, num2);
+			}
+		}
+	}
+
+	public void OnStateChange(int newIndex, int newVersion)
+	{
+		_carveableIndex = newIndex;
+		_version = newVersion;
+		IsValidPrefab(_carveableIndex);
+		if (IsValidPrefab(_carveableIndex))
+		{
+			SpawnCarveable(_carveableIndex);
+		}
+	}
+
+	[WeaverGenerated]
+	public override void CopyBackingFieldsToState(bool P_0)
+	{
+		base.CopyBackingFieldsToState(P_0);
+	}
+
+	[WeaverGenerated]
+	public override void CopyStateToBackingFields()
+	{
+		base.CopyStateToBackingFields();
 	}
 }

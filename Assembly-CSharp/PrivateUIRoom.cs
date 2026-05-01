@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GorillaExtensions;
 using GorillaLocomotion;
@@ -8,6 +9,15 @@ using Valve.VR;
 
 public class PrivateUIRoom : MonoBehaviourTick
 {
+	[Flags]
+	public enum OverlaySource
+	{
+		KID = 1,
+		ModIO = 2,
+		CustomMap = 4,
+		AlarmClock = 8
+	}
+
 	[SerializeField]
 	private TextMeshPro _text;
 
@@ -48,7 +58,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 
 	private bool inOverlay;
 
-	private bool overlayForcedActive;
+	private OverlaySource overlayForcedSources;
 
 	private static PrivateUIRoom instance;
 
@@ -71,6 +81,8 @@ public class PrivateUIRoom : MonoBehaviourTick
 
 	private static CinemachineVirtualCamera _virtualCameraReference;
 
+	private bool overlayForcedActive => overlayForcedSources != (OverlaySource)0;
+
 	private GTPlayer localPlayer => GTPlayer.Instance;
 
 	private void Awake()
@@ -89,7 +101,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 		else
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 	}
 
@@ -260,7 +272,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 			}
 			else
 			{
-				Object.Destroy(focus.gameObject);
+				UnityEngine.Object.Destroy(focus.gameObject);
 			}
 			if (instance.ui.Count > 0)
 			{
@@ -274,11 +286,11 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	public static void ForceStartOverlay(string text = "")
+	public static void ForceStartOverlay(OverlaySource source, string text = "")
 	{
 		if (!(instance == null))
 		{
-			instance.overlayForcedActive = true;
+			instance.overlayForcedSources |= source;
 			if (!instance.inOverlay)
 			{
 				instance._text.text = text;
@@ -287,12 +299,12 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	public static void StopForcedOverlay()
+	public static void StopForcedOverlay(OverlaySource source)
 	{
 		if (!(instance == null))
 		{
-			instance.overlayForcedActive = false;
-			if (instance.ui.Count == 0 && instance.inOverlay)
+			instance.overlayForcedSources &= ~source;
+			if (!instance.overlayForcedActive && instance.ui.Count == 0 && instance.inOverlay)
 			{
 				StopOverlay();
 			}

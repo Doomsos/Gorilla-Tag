@@ -21,15 +21,19 @@ public static class VoxelExtensions
 
 	private static bool _cascade = true;
 
-	private static VoxelAction _action;
+	private static VoxelAction _opAction;
 
-	private static Vector3 _origin;
+	private static Vector3 _opOrigin;
 
-	private static int _totalMined;
+	private static int _opTotalMined;
 
-	private static int _dirtMined;
+	private static int _opDirtMined;
 
-	private static int _stoneMined;
+	private static int _opStoneMined;
+
+	private static byte _opDensity;
+
+	private static byte _opMaterialId;
 
 	public static void Mine(this VoxelWorld world, Collision collision, VoxelAction action)
 	{
@@ -156,18 +160,18 @@ public static class VoxelExtensions
 	public static (int dirt, int stone) PerformLocalMiningOperation(this VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action)
 	{
 		_lastBounds = bounds;
-		_action = action;
-		_origin = origin;
-		_totalMined = 0;
-		_dirtMined = 0;
-		_stoneMined = 0;
-		switch (_action.operation)
+		_opAction = action;
+		_opOrigin = origin;
+		_opTotalMined = 0;
+		_opDirtMined = 0;
+		_opStoneMined = 0;
+		switch (_opAction.operation)
 		{
 		case OperationType.Subtract:
 			world.SetVoxelDataCustom(bounds, MineAt);
-			if (_totalMined > 0)
+			if (_opTotalMined > 0)
 			{
-				SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hitPoint, hitNormal, _dirtMined, _stoneMined);
+				SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hitPoint, hitNormal, _opDirtMined, _opStoneMined);
 			}
 			break;
 		case OperationType.Add:
@@ -176,15 +180,15 @@ public static class VoxelExtensions
 		default:
 			throw new ArgumentOutOfRangeException();
 		}
-		return (dirt: _dirtMined, stone: _stoneMined);
+		return (dirt: _opDirtMined, stone: _opStoneMined);
 	}
 
 	public static void PerformLocalOperation(this VoxelWorld world, Vector3 localPosition, VoxelAction action)
 	{
 		UnityEngine.BoundsInt bounds = world.GetBounds(localPosition, action.radius);
-		_action = action;
-		_origin = localPosition;
-		switch (_action.operation)
+		_opAction = action;
+		_opOrigin = localPosition;
+		switch (_opAction.operation)
 		{
 		case OperationType.Subtract:
 			world.SetVoxelDensityCustom(bounds, SubtractAt);
@@ -202,24 +206,24 @@ public static class VoxelExtensions
 		(byte density, byte material) tuple = data;
 		byte item = tuple.density;
 		byte item2 = tuple.material;
-		float num = ((item2 == 0) ? _action.strength : (_action.strength * 0.2f));
-		float num2 = math.distance(_origin, point);
-		byte b = ((num2 > _action.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / _action.radius), 0f, 255f)));
+		float num = ((item2 == 0) ? _opAction.strength : (_opAction.strength * 0.2f));
+		float num2 = math.distance(_opOrigin, point);
+		byte b = ((num2 > _opAction.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / _opAction.radius), 0f, 255f)));
 		if (_showDebug && item != b)
 		{
-			Debug.Log($"Hit at {_origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b}[{b.ToFloat()}]");
+			Debug.Log($"Hit at {_opOrigin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b}[{b.ToFloat()}]");
 		}
 		if (item.IsSolid())
 		{
 			int num3 = (int)((float)(item - b) / 10f);
-			_totalMined += num3;
+			_opTotalMined += num3;
 			switch (item2)
 			{
 			case 0:
-				_dirtMined += num3;
+				_opDirtMined += num3;
 				break;
 			case 1:
-				_stoneMined += num3;
+				_opStoneMined += num3;
 				break;
 			}
 		}
@@ -231,27 +235,27 @@ public static class VoxelExtensions
 		(byte density, byte material) tuple = data;
 		byte item = tuple.density;
 		byte b = tuple.material;
-		float num = math.distance(_origin, point);
-		byte b2 = ((num > _action.radius) ? item : ((byte)math.clamp((float)(int)item + _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f)));
+		float num = math.distance(_opOrigin, point);
+		byte b2 = ((num > _opAction.radius) ? item : ((byte)math.clamp((float)(int)item + _opAction.strength * math.lerp(255f, 0f, num / _opAction.radius), 0f, 255f)));
 		if (item != b2)
 		{
-			b = _action.material;
+			b = _opAction.material;
 		}
 		if (_showDebug && item != b2)
 		{
-			Debug.Log($"Unmined at {_origin}->{point}=d{num:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
+			Debug.Log($"Unmined at {_opOrigin}->{point}=d{num:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
 		}
 		if (!item.IsSolid() && b2.IsSolid())
 		{
 			int num2 = (int)((float)(b2 - item) / 10f);
-			_totalMined += num2;
+			_opTotalMined += num2;
 			switch (b)
 			{
 			case 0:
-				_dirtMined += num2;
+				_opDirtMined += num2;
 				break;
 			case 1:
-				_stoneMined += num2;
+				_opStoneMined += num2;
 				break;
 			}
 		}
@@ -261,10 +265,10 @@ public static class VoxelExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static byte SubtractAt(int3 point, byte density)
 	{
-		float num = math.distance(_origin, point);
-		if (!(num > _action.radius))
+		float num = math.distance(_opOrigin, point);
+		if (!(num > _opAction.radius))
 		{
-			return (byte)math.clamp((float)(int)density - _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f);
+			return (byte)math.clamp((float)(int)density - _opAction.strength * math.lerp(255f, 0f, num / _opAction.radius), 0f, 255f);
 		}
 		return density;
 	}
@@ -272,12 +276,23 @@ public static class VoxelExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static byte AddAt(int3 point, byte density)
 	{
-		float num = math.distance(_origin, point);
-		if (!(num > _action.radius))
+		float num = math.distance(_opOrigin, point);
+		if (!(num > _opAction.radius))
 		{
-			return (byte)math.clamp((float)(int)density + _action.strength * math.lerp(255f, 0f, num / _action.radius), 0f, 255f);
+			return (byte)math.clamp((float)(int)density + _opAction.strength * math.lerp(255f, 0f, num / _opAction.radius), 0f, 255f);
 		}
 		return density;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static (byte density, byte materialID) SetVoxelAt(int3 point, (byte density, byte materialId) data)
+	{
+		return (density: _opDensity, materialID: _opMaterialId);
+	}
+
+	public static void PerformAction(this VoxelWorld world, Vector3 position, VoxelAction action)
+	{
+		VoxelManager.PerformOperation(world, position, action);
 	}
 
 	public static void Dig(this VoxelWorld world, Vector3 position, float radius, float strength)
@@ -301,19 +316,40 @@ public static class VoxelExtensions
 		}
 	}
 
-	public static void SetVoxels(this VoxelWorld world, int3[] voxels, byte density, byte materialId)
+	public static void SetVoxels(this VoxelWorld world, UnityEngine.BoundsInt worldBounds, byte density, byte materialId, bool immediate = true)
 	{
-		world.SetVoxelDataCustom(voxels, SetVoxelAt);
-		(byte density, byte material) SetVoxelAt(int3 point, (byte density, byte material) data)
-		{
-			return (density: density, material: materialId);
-		}
+		_opDensity = density;
+		_opMaterialId = materialId;
+		world.SetVoxelDataCustom(worldBounds, SetVoxelAt, immediate);
+	}
+
+	public static void SetVoxels(this VoxelWorld world, int3[] voxels, byte density, byte materialId, bool immediate = true)
+	{
+		_opDensity = density;
+		_opMaterialId = materialId;
+		world.SetVoxelDataCustom(voxels, SetVoxelAt, immediate);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int GetVoxelCount(this UnityEngine.BoundsInt bounds)
 	{
 		return (bounds.max.x - bounds.min.x + 1) * (bounds.max.y - bounds.min.y + 1) * (bounds.max.z - bounds.min.z + 1);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool Contains(this UnityEngine.BoundsInt a, UnityEngine.BoundsInt b)
+	{
+		if (a.Contains(b.min))
+		{
+			return a.Contains(b.max);
+		}
+		return false;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static UnityEngine.BoundsInt Union(this UnityEngine.BoundsInt a, UnityEngine.BoundsInt b)
+	{
+		return new UnityEngine.BoundsInt(VectorUtilities.Min(a.min, b.min), VectorUtilities.Max(a.max, b.max));
 	}
 
 	public static UnityEngine.BoundsInt GetBounds(this VoxelWorld world, float3 point, float radius)

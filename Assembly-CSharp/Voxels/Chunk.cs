@@ -228,16 +228,44 @@ public class Chunk : IDisposable
 		DisposeMeshData();
 	}
 
+	public void AllocateVertexData(int length)
+	{
+		if (VertexData.IsCreated)
+		{
+			if (VertexData.Length == length)
+			{
+				return;
+			}
+			NativeArrayPool<MeshVertexData>.Return(VertexData);
+			VertexData = default(NativeArray<MeshVertexData>);
+		}
+		VertexData = NativeArrayPool<MeshVertexData>.Get(length);
+	}
+
+	public void AllocateTriangleData(int length)
+	{
+		if (TriangleData.IsCreated)
+		{
+			if (TriangleData.Length == length)
+			{
+				return;
+			}
+			NativeArrayPool<ushort>.Return(TriangleData);
+			TriangleData = default(NativeArray<ushort>);
+		}
+		TriangleData = NativeArrayPool<ushort>.Get(length);
+	}
+
 	public void DisposeMeshData()
 	{
 		if (VertexData.IsCreated)
 		{
-			VertexData.Dispose();
+			NativeArrayPool<MeshVertexData>.Return(VertexData);
 			VertexData = default(NativeArray<MeshVertexData>);
 		}
 		if (TriangleData.IsCreated)
 		{
-			TriangleData.Dispose();
+			NativeArrayPool<ushort>.Return(TriangleData);
 			TriangleData = default(NativeArray<ushort>);
 		}
 		if (GenericMeshData is IDisposable disposable)

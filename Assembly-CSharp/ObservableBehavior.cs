@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimple
+public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimple, IBuildValidation
 {
 	private bool firstFrame = true;
 
@@ -9,7 +9,23 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	[SerializeField]
 	private ObservableBehaviorRule observableBehaviorRule;
 
+	[SerializeField]
+	private RigEventVolume observableVolume;
+
 	private float dist;
+
+	public ObservableBehaviorRule ObservableBehaviorRule
+	{
+		get
+		{
+			return observableBehaviorRule;
+		}
+		set
+		{
+			observableBehaviorRule = value;
+			firstFrame = true;
+		}
+	}
 
 	public float Distance => dist;
 
@@ -41,10 +57,14 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
-		Transform transform = Camera.main.transform;
-		dist = Vector3.Distance(transform.position, base.transform.position);
-		float num = ((!(observableBehaviorRule != null) || !observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
-		bool flag = observableBehaviorRule == null || (observableBehaviorRule.ObservableDistanceRange.x <= dist && dist <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num && num <= observableBehaviorRule.ObservableDotRange.y);
+		bool flag = observableVolume != null && observableVolume.LocalRigPresent;
+		if (observableVolume == null && observableBehaviorRule != null)
+		{
+			Transform transform = Camera.main.transform;
+			dist = Vector3.Distance(transform.position, base.transform.position);
+			float num = ((!observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
+			flag = observableBehaviorRule.ObservableDistanceRange.x <= dist && dist <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num && num <= observableBehaviorRule.ObservableDotRange.y;
+		}
 		if (firstFrame || observable != flag)
 		{
 			if (flag)
@@ -77,4 +97,32 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	protected abstract void OnBecameObservable();
 
 	protected abstract void ObservableSliceUpdate();
+
+	public bool BuildValidationCheck()
+	{
+		if (observableVolume == null && observableBehaviorRule == null)
+		{
+			Debug.LogError("observableVolume & observableBehaviorRule can't both be null!");
+			return false;
+		}
+		if (observableVolume != null && observableBehaviorRule != null)
+		{
+			Debug.LogWarning("observableVolume will override the observableBehaviorRule");
+		}
+		return true;
+	}
+
+	public void OnDrawGizmosSelected()
+	{
+		if (observableBehaviorRule != null)
+		{
+			if (observableBehaviorRule.ObservableDistanceRange.x > 0f)
+			{
+				Gizmos.color = Color.red;
+				Gizmos.DrawWireSphere(base.transform.position, observableBehaviorRule.ObservableDistanceRange.x);
+			}
+			Gizmos.color = Color.green;
+			Gizmos.DrawWireSphere(base.transform.position, observableBehaviorRule.ObservableDistanceRange.y);
+		}
+	}
 }

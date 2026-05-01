@@ -280,7 +280,10 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 
 	public void SetRendererMaterial(Material mat)
 	{
-		buttonRenderer.material = mat;
+		if ((bool)buttonRenderer)
+		{
+			buttonRenderer.material = mat;
+		}
 	}
 
 	public void SetPressedMaterial()

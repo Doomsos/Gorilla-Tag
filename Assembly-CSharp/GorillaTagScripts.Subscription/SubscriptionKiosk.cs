@@ -6,6 +6,7 @@ using Oculus.Platform.Models;
 using Steamworks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Video;
 
 namespace GorillaTagScripts.Subscription;
 
@@ -24,6 +25,7 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 		SubscriptionPurchaseInProgress,
 		SubscriptionPurchaseResult,
 		FeatureToggles,
+		SubscriptionSteamWarning,
 		None
 	}
 
@@ -44,6 +46,25 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 
 	private const string subSKU = "fan_club";
 
+	[SerializeField]
+	private VideoPlayer subsVideoPlayer;
+
+	[SerializeField]
+	private ObservableBehavior subsVideoObservable;
+
+	[SerializeField]
+	private VideoClip defaultVideoClip;
+
+	[SerializeField]
+	private VideoClip steamSubsVideoClip;
+
+	[SerializeField]
+	private ObservableBehaviorRule defaultObservableRule;
+
+	[SerializeField]
+	private ObservableBehaviorRule steamObservableRule;
+
+	[Space]
 	[SerializeField]
 	private GameObject steamComingSoon;
 
@@ -161,13 +182,21 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 		screensByState.Add(ScreenState.SubscriptionPurchaseInProgress, purchaseProgressScreen);
 		screensByState.Add(ScreenState.SubscriptionPurchaseResult, purchaseResultScreen);
 		screensByState.Add(ScreenState.FeatureToggles, featureTogglesScreen);
+		screensByState.Add(ScreenState.SubscriptionSteamWarning, steamComingSoon);
 	}
 
 	private void OnEnable()
 	{
-		steamComingSoon.SetActive(value: true);
-		waitingForScanScreen.SetActive(value: false);
-		UnityEngine.Object.Destroy(this);
+		if (PlayFabAuthenticator.instance.GetSafety())
+		{
+			UpdateState(ScreenState.SafeAccount);
+			UnityEngine.Object.Destroy(this);
+			return;
+		}
+		UpdateState(ScreenState.WaitingForScan);
+		subsVideoPlayer.clip = defaultVideoClip;
+		GorillaSlicerSimpleManager.RegisterSliceable(this);
+		SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Combine(SubscriptionManager.OnLocalSubscriptionData, new Action(LocalSubscriptionDataUpdated));
 	}
 
 	private void OnDisable()
@@ -291,6 +320,14 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 		case ScreenState.MainMenuUnsubscribed:
 			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Subscribe)
 			{
+				UpdateState(ScreenState.SubscriptionSteamWarning);
+				subsVideoPlayer.clip = steamSubsVideoClip;
+				subsVideoObservable.ObservableBehaviorRule = steamObservableRule;
+			}
+			break;
+		case ScreenState.SubscriptionSteamWarning:
+			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Subscribe)
+			{
 				UpdateState(ScreenState.PurchaseSubscription);
 			}
 			break;
@@ -315,6 +352,8 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 				HandScanned();
 				break;
 			}
+			subsVideoPlayer.clip = defaultVideoClip;
+			subsVideoObservable.ObservableBehaviorRule = defaultObservableRule;
 			break;
 		case ScreenState.SubscriptionPurchaseResult:
 			if (buttonType == SITouchscreenButton.SITouchscreenButtonType.Confirm)
@@ -323,6 +362,7 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 			}
 			break;
 		case ScreenState.SubscriptionPurchaseInProgress:
+		case ScreenState.FeatureToggles:
 			break;
 		}
 	}
@@ -413,6 +453,8 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 		unsubscribedMenuPlayerName.text = NetworkSystem.Instance.LocalPlayer.SanitizedNickName;
 		mainMenuUnsubscribedQuestText.SetActive(value: false);
 		mainMenuUnsubscribedSteamText.SetActive(value: true);
+		subsVideoPlayer.clip = defaultVideoClip;
+		subsVideoObservable.ObservableBehaviorRule = defaultObservableRule;
 	}
 
 	private void UpdateSubscriptionData()
@@ -568,6 +610,21 @@ public class SubscriptionKiosk : MonoBehaviour, ITouchScreenStation, IGorillaSli
 			{
 				UpdateState(ScreenState.SubscriptionData);
 			}
+		}
+		subsVideoPlayer.clip = defaultVideoClip;
+	}
+
+	private void UpdateSubsVideo()
+	{
+		if (SubscriptionManager.IsLocalSubscribed())
+		{
+			subsVideoObservable.ObservableBehaviorRule = defaultObservableRule;
+			subsVideoPlayer.clip = defaultVideoClip;
+		}
+		else
+		{
+			subsVideoPlayer.clip = steamSubsVideoClip;
+			subsVideoObservable.ObservableBehaviorRule = steamObservableRule;
 		}
 	}
 

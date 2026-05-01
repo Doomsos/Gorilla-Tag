@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
 using GorillaNetworking;
+using GorillaTagScripts;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -79,9 +80,14 @@ public class FriendDisplay : MonoBehaviour
 	[SerializeField]
 	private Material[] _pageButtonAlerttMaterials;
 
-	private int cardsPerPage = 9;
+	public const int MainPageCapacity = 9;
 
-	private int totalPages = 5;
+	public const int VIMPageCapacity = 9;
+
+	[SerializeField]
+	private int vimPageCount = 1;
+
+	private int cardsPerPage = 9;
 
 	[SerializeField]
 	private float pageButtonInactiveZPos;
@@ -95,7 +101,24 @@ public class FriendDisplay : MonoBehaviour
 
 	private bool localPlayerAtDisplay;
 
+	private int _currentPage;
+
+	public static int ConfiguredVimPageCount { get; private set; } = 1;
+
+	private int totalPages => 1 + vimPageCount;
+
+	public int TotalCapacity => 9 + vimPageCount * 9;
+
+	public int VIMTotalCapacity => vimPageCount * 9;
+
+	public int VimPageCount => vimPageCount;
+
 	public bool InRemoveMode => inRemoveMode;
+
+	private void Awake()
+	{
+		ConfiguredVimPageCount = vimPageCount;
+	}
 
 	private void Start()
 	{
@@ -105,6 +128,7 @@ public class FriendDisplay : MonoBehaviour
 		triggerNotifier.TriggerEnterEvent += TriggerEntered;
 		triggerNotifier.TriggerExitEvent += TriggerExited;
 		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(OnJoinedRoom);
+		SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Combine(SubscriptionManager.OnLocalSubscriptionData, new Action(OnLocalSubscriptionChanged));
 	}
 
 	private void OnDestroy()
@@ -117,6 +141,15 @@ public class FriendDisplay : MonoBehaviour
 		{
 			triggerNotifier.TriggerEnterEvent -= TriggerEntered;
 			triggerNotifier.TriggerExitEvent -= TriggerExited;
+		}
+		SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Remove(SubscriptionManager.OnLocalSubscriptionData, new Action(OnLocalSubscriptionChanged));
+	}
+
+	private void OnLocalSubscriptionChanged()
+	{
+		if (localPlayerAtDisplay)
+		{
+			GoToFriendPage(_currentPage);
 		}
 	}
 
@@ -196,15 +229,42 @@ public class FriendDisplay : MonoBehaviour
 
 	private void UpdatePageButtons(int selectedPage)
 	{
-		for (int i = 0; i < totalPages; i++)
+		int count = FriendBackendController.Instance.FriendsList.Count;
+		bool flag = SubscriptionManager.IsLocalSubscribed();
+		bool flag2 = false;
+		int num = Mathf.Min(totalPages, PageButtons.Length);
+		for (int i = 1; i < num; i++)
 		{
-			if (FriendBackendController.Instance.FriendsList.Count > cardsPerPage * Mathf.Max(i, 1))
+			bool flag3 = count > 9 + (i - 1) * 9;
+			if (flag || flag3)
 			{
-				SetPageButtonAppearance(PageButtons[i], (i != selectedPage) ? ButtonState.Active : ButtonState.Alert);
+				flag2 = true;
+				break;
+			}
+		}
+		for (int j = 0; j < PageButtons.Length; j++)
+		{
+			bool flag4;
+			if (j >= num)
+			{
+				flag4 = false;
+			}
+			else if (j == 0)
+			{
+				flag4 = flag2;
 			}
 			else
 			{
-				SetPageButtonAppearance(PageButtons[i], active: false);
+				bool flag5 = count > 9 + (j - 1) * 9;
+				flag4 = flag || flag5;
+			}
+			if (flag4)
+			{
+				SetPageButtonAppearance(PageButtons[j], (j != selectedPage) ? ButtonState.Active : ButtonState.Alert);
+			}
+			else
+			{
+				SetPageButtonAppearance(PageButtons[j], active: false);
 			}
 		}
 	}
@@ -329,39 +389,38 @@ public class FriendDisplay : MonoBehaviour
 
 	public void OnGetFriendsReceived(List<FriendBackendController.Friend> friendsList)
 	{
-		PopulateFriendCards(friendsList);
 		UpdateLocalPlayerPrivacyButtons();
 		PopulateLocalPlayerCard();
-		UpdatePageButtons(0);
-	}
-
-	private void PopulateFriendCards(List<FriendBackendController.Friend> friendsList)
-	{
-		int num = Mathf.Min(friendCards.Length, friendsList.Count);
-		for (int i = 0; i < num && friendsList[i] != null; i++)
-		{
-			friendCards[i].Populate(friendsList[i]);
-		}
+		GoToFriendPage(_currentPage);
 	}
 
 	public void GoToFriendPage(int currentPage)
 	{
+		int num = Mathf.Min(totalPages, PageButtons.Length);
+		if (currentPage < 0 || currentPage >= num)
+		{
+			currentPage = 0;
+		}
+		_currentPage = currentPage;
 		UpdatePageButtons(currentPage);
 		for (int i = 0; i < friendCards.Length; i++)
 		{
 			friendCards[i].SetEmpty();
 		}
-		int num = currentPage * cardsPerPage;
-		Mathf.Min(num + cardsPerPage, FriendBackendController.Instance.FriendsList.Count);
-		int num2 = 0;
+		List<FriendBackendController.Friend> friendsList = FriendBackendController.Instance.FriendsList;
+		int num2 = currentPage * cardsPerPage;
 		for (int j = 0; j < friendCards.Length; j++)
 		{
-			if (FriendBackendController.Instance.FriendsList.Count <= num + num2)
+			int num3 = num2 + j;
+			bool flag = num3 >= 9;
+			if (num3 < friendsList.Count)
 			{
-				break;
+				friendCards[j].Populate(friendsList[num3], flag);
 			}
-			friendCards[j].Populate(FriendBackendController.Instance.FriendsList[num + num2]);
-			num2++;
+			else
+			{
+				friendCards[j].SetEmpty(flag);
+			}
 		}
 	}
 

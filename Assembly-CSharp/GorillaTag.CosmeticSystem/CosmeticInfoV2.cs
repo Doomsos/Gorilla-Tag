@@ -98,6 +98,26 @@ public struct CosmeticInfoV2 : ISerializationCallbackReceiver
 	[Tooltip("TODO COMMENT")]
 	public CosmeticSO[] setCosmetics;
 
+	[Space]
+	[Tooltip("For parent (collection) cosmetics: the slots that collectables snap into. Each entry defines the slot type and its local space offset from the cosmetic's root. Edit slot positions visually via the Cosmetic Editor Stage. The slot count is implicit from this array's length.")]
+	public CosmeticCollectionSlotDefinition[] collectionSlots;
+
+	[Tooltip("For parent (collection) cosmetics: when true only one collectable is visible at a time and the player can cycle through them. When false all slots are shown simultaneously")]
+	public bool collectionIsCycling;
+
+	[Tooltip("For parent (collection) cosmetics: when true each sub-item's Target Slot Index is respected and items snap to their declared slot. When false index values are ignored and sub-items fill slots in acquisition order. Uncheck this to quickly compare both layouts without touching sub-item SOs.")]
+	public bool collectionUsesIndexTargeting;
+
+	[Space]
+	[Tooltip("For sub-item (collectable) cosmetics: the PlayFab ID of the parent cosmetic that must be owned before this sub-item can be purchased. Leave empty if this is not a sub-item.")]
+	public string collectionParentPlayFabID;
+
+	[Tooltip("For sub-item (collectable) cosmetics: the slot index (0-based) on the parent cosmeticSO that this sub-item occupies. Set to Any for interchangeable items (e.g. badges) that fill any available slot in acquisition order. Set to a specific index when this item must always go to a particular socket on the parent.")]
+	public int collectionTargetSlotIndex;
+
+	[Tooltip("PlayFab ID of the cosmetic to apply to a hit player via Cosmetic Swapper (e.g. chicken sword) tech. Distinct from this sub-item's own visual.")]
+	public string appliedCosmeticPlayFabID;
+
 	[NonSerialized]
 	public string debugCosmeticSOName;
 
@@ -198,10 +218,16 @@ public struct CosmeticInfoV2 : ISerializationCallbackReceiver
 		firstPersonViewParts = new CosmeticPart[0];
 		localRigParts = new CosmeticPart[0];
 		setCosmetics = new CosmeticSO[0];
+		collectionSlots = Array.Empty<CosmeticCollectionSlotDefinition>();
+		collectionIsCycling = false;
+		collectionParentPlayFabID = string.Empty;
+		collectionTargetSlotIndex = -1;
 		anchorAntiIntersectOffsets = default(CosmeticAnchorAntiIntersectOffsets);
 		debugCosmeticSOName = "__UNINITIALIZED__";
 		throwableMaterialGrabIndices = new int[0];
 		throwableIndex = -1;
+		collectionUsesIndexTargeting = false;
+		appliedCosmeticPlayFabID = null;
 	}
 
 	void ISerializationCallbackReceiver.OnBeforeSerialize()

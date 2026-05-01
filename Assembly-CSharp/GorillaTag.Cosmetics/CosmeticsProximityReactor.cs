@@ -27,6 +27,7 @@ public class CosmeticsProximityReactor : MonoBehaviour, ISpawnable
 	public enum InteractionMode
 	{
 		CosmeticToCosmetic,
+		CosmeticToEnvironment,
 		GorillaBodyToCosmetic
 	}
 
@@ -40,16 +41,16 @@ public class CosmeticsProximityReactor : MonoBehaviour, ISpawnable
 	[Serializable]
 	public class InteractionSetting
 	{
-		[Tooltip("Determines what type of interaction this block handles.\n• CosmeticToCosmetic: triggers when two cosmetics with matching keys are nearby.\n• GorillaBodyToCosmetic: triggers when a Gorilla body part (hand, head, etc.) is near this cosmetic.")]
+		[Tooltip("Determines what type of interaction this block handles.\n• CosmeticToCosmetic: triggers when two cosmetics with matching keys are nearby.\n• CosmeticToEnvironment: broadcasts keys that EnvironmentProximityReactor objects listen for. Use this to mark a cosmetic as a trigger for scene objects.\n• GorillaBodyToCosmetic: triggers when a Gorilla body part (hand, head, etc.) is near this cosmetic.")]
 		public InteractionMode mode;
 
-		[Tooltip("Keys this block broadcasts. Other cosmetics whose Key list or listener list contain a matching key can react to this block.")]
+		[Tooltip("Keys this block broadcasts. Other cosmetics or environment objects whose Key list or Listener list contain a matching key can react to this block.")]
 		public List<string> interactionKeys = new List<string>();
 
-		[Tooltip("If the other cosmetic is broadcasting any of these keys, this block will not fire, even if another key matches.")]
+		[Tooltip("If the other side is broadcasting any of these keys, this block will not fire, even if another key matches.")]
 		public List<string> ignoreKeys = new List<string>();
 
-		[Tooltip("Keys this block silently listens for. When the other cosmetic broadcasts one of these keys, this block fires. Listener keys are never broadcast outward, so two Listener-only objects will never trigger each other.")]
+		[Tooltip("Keys this block silently listens for. When the other side broadcasts one of these keys, this block fires. Listener keys are never broadcast outward, so two Listener-only objects will never trigger each other.")]
 		public List<string> listenerKeys = new List<string>();
 
 		[Tooltip("Specifies which Gorilla body parts (e.g., Hands, Head) can trigger this interaction.\nUse this when the Mode is set to GorillaBodyToCosmetic.")]
@@ -89,6 +90,11 @@ public class CosmeticsProximityReactor : MonoBehaviour, ISpawnable
 		public bool IsCosmeticToCosmetic()
 		{
 			return mode == InteractionMode.CosmeticToCosmetic;
+		}
+
+		public bool IsCosmeticToEnvironment()
+		{
+			return mode == InteractionMode.CosmeticToEnvironment;
 		}
 
 		public bool IsGorillaBodyToCosmetic()
@@ -238,6 +244,11 @@ public class CosmeticsProximityReactor : MonoBehaviour, ISpawnable
 			}
 			return false;
 		}
+	}
+
+	public VRRig GetOwnerRig()
+	{
+		return MyRig;
 	}
 
 	public void OnSpawn(VRRig rig)

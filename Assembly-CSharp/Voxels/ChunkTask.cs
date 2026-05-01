@@ -89,14 +89,8 @@ public struct ChunkTask
 		JobHandle CreateMarchingCubesMeshJob()
 		{
 			int length = math.min(chunk.VoxelCount * 15, 65535);
-			if (!chunk.VertexData.IsCreated)
-			{
-				chunk.VertexData = new NativeArray<MeshVertexData>(length, Allocator.Persistent);
-			}
-			if (!chunk.TriangleData.IsCreated)
-			{
-				chunk.TriangleData = new NativeArray<ushort>(length, Allocator.Persistent);
-			}
+			chunk.AllocateVertexData(length);
+			chunk.AllocateTriangleData(length);
 			onComplete = delegate
 			{
 				chunk.IsMeshGenerated = true;

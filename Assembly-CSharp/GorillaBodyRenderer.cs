@@ -116,6 +116,7 @@ public class GorillaBodyRenderer : MonoBehaviour
 	private static void HideSkeletonOverlay(VRRig rig)
 	{
 		rig.bodyRenderer.Refresh();
+		rig.bodyRenderer.bodyDefault.sharedMaterial = rig.bodyRenderer.myDefaultSkinMaterialInstance;
 	}
 
 	public void SetGameModeBodyType(GorillaBodyType bodyType)

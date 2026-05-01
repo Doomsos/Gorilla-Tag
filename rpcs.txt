@@ -21,6 +21,8 @@ SecondLookSkeletonSynchValues.RemoteActivateGhost(Photon.Pun.PhotonMessageInfo i
 SecondLookSkeletonSynchValues.RemotePlayerSeen(Photon.Pun.PhotonMessageInfo info)
 SecondLookSkeletonSynchValues.RemotePlayerCaught(Photon.Pun.PhotonMessageInfo info)
 Ballista.FireBallistaRPC(Photon.Pun.PhotonMessageInfo info)
+RandomCarveableObject.RPC_SpawnRandomCarveable(Photon.Pun.PhotonMessageInfo info)
+GrabbyTentacleNetworking.ApplyTargetRPC(System.Int32 tentacleIndex, Photon.Realtime.Player targetPlayer, Photon.Pun.PhotonMessageInfo info)
 GTDoor.ChangeDoorState(GTDoor/DoorState shouldOpenState, Photon.Pun.PhotonMessageInfo info)
 GTDoor.RPC_ChangeDoorState(GTDoor/DoorState shouldOpenState, System.Int32 doorId)
 PlantableFlagManager.UpdateFlagColorRPC(System.Int32 flagIndex, System.Int32 colorIndex, Photon.Pun.PhotonMessageInfo info)
@@ -248,3 +250,4 @@ GorillaTag.ScienceExperimentManager.PlayerHitByWaterBalloonRPC(System.Int32 play
 GorillaTag.ScienceExperimentManager.RPC_PlayerHitByWaterBalloon(System.Int32 playerId, Fusion.RpcInfo info)
 GorillaTag.ScienceExperimentPlatformGenerator.SpawnSodaBubbleRPC(UnityEngine.Vector2 surfacePosLocal, System.Single spawnSize, System.Single lifetime, System.Double spawnTime, Photon.Pun.PhotonMessageInfo info)
 GorillaTag.Cosmetics.RCCosmeticNetworkSync.HitRCVehicleRPC(UnityEngine.Vector3 hitVelocity, System.Boolean isProjectile, Photon.Pun.PhotonMessageInfo info)
+GorillaTag.Cosmetics.EnvironmentProximityReactorManager.RPC_ProximityState(System.Int32 reactorId, System.Int32 blockIndex, System.Boolean isBelow, Fusion.RpcInfo info)

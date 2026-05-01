@@ -26,6 +26,8 @@ public class CosmeticsProximityReactorManager : MonoBehaviour, IGorillaSliceable
 
 	public static CosmeticsProximityReactorManager Instance => _instance;
 
+	public IReadOnlyList<CosmeticsProximityReactor> Cosmetics => cosmetics;
+
 	private void Awake()
 	{
 		if (_instance != null && _instance != this)

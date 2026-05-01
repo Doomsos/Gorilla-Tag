@@ -12,10 +12,8 @@ public class TitleDataFeatureFlags
 
 	public Dictionary<string, bool> defaults = new Dictionary<string, bool>
 	{
-		{ "2024-06-CosmeticsAuthenticationV2", true },
-		{ "2025-04-CosmeticsAuthenticationV2-SetData", false },
-		{ "2025-04-CosmeticsAuthenticationV2-ReadData", false },
-		{ "2025-04-CosmeticsAuthenticationV2-Compat", true }
+		{ "2026-04-VStumpGrabbablesFix", true },
+		{ "2026-04-SuppressZonesInVStump", true }
 	};
 
 	private Dictionary<string, int> flagValueByName = new Dictionary<string, int>();

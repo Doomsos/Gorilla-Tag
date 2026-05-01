@@ -99,6 +99,11 @@ public class DynamicCosmeticStand : MonoBehaviour, iFlagForBaking
 		addToCartTextTMP?.gameObject.SetActive(value: true);
 		slotPriceTextTMP?.gameObject.SetActive(value: true);
 		AddStandToStoreController();
+		if (CosmeticsController.hasInstance)
+		{
+			CosmeticsController instance = CosmeticsController.instance;
+			instance.OnCosmeticsUpdated = (Action)Delegate.Combine(instance.OnCosmeticsUpdated, new Action(RefreshPurchaseGate));
+		}
 	}
 
 	public void OnDisable()
@@ -106,11 +111,23 @@ public class DynamicCosmeticStand : MonoBehaviour, iFlagForBaking
 		addToCartTextTMP?.gameObject.SetActive(value: false);
 		slotPriceTextTMP?.gameObject.SetActive(value: false);
 		RemoveStandFromStoreController();
+		if (CosmeticsController.hasInstance)
+		{
+			CosmeticsController instance = CosmeticsController.instance;
+			instance.OnCosmeticsUpdated = (Action)Delegate.Remove(instance.OnCosmeticsUpdated, new Action(RefreshPurchaseGate));
+		}
 	}
 
 	public void AddStandToStoreController()
 	{
-		StartCoroutine(ConnectToStoreController());
+		if (StoreController.instance != null && StoreController.instance.cosmeticsInitialized)
+		{
+			_AddStandToStoreController();
+		}
+		else
+		{
+			StartCoroutine(ConnectToStoreController());
+		}
 	}
 
 	private IEnumerator ConnectToStoreController()
@@ -189,6 +206,43 @@ public class DynamicCosmeticStand : MonoBehaviour, iFlagForBaking
 		if (slotPriceTextTMP != null)
 		{
 			slotPriceTextTMP.text = thisCosmeticItem.itemCategory.ToString().ToUpper() + " " + thisCosmeticItem.cost;
+		}
+		RefreshPurchaseGate();
+	}
+
+	public void RefreshPurchaseGate()
+	{
+		if (thisCosmeticItem.itemCategory != CosmeticsController.CosmeticCategory.Collectable)
+		{
+			return;
+		}
+		CosmeticsController instance = CosmeticsController.instance;
+		string collectionParentPlayFabID = thisCosmeticItem.collectionParentPlayFabID;
+		if (string.IsNullOrEmpty(collectionParentPlayFabID) || !instance.IsOwnedByPlayFabID(collectionParentPlayFabID))
+		{
+			AddToCartButton.gameObject.SetActive(value: false);
+			CosmeticsController.CosmeticItem value;
+			string text = (instance.allCosmeticsDict.TryGetValue(collectionParentPlayFabID, out value) ? value.overrideDisplayName : collectionParentPlayFabID);
+			if (slotPriceTextTMP != null)
+			{
+				slotPriceTextTMP.text = "REQUIRES\n" + text;
+			}
+		}
+		else if (!instance.CanPurchaseCollectable(thisCosmeticItem.itemName))
+		{
+			AddToCartButton.gameObject.SetActive(value: false);
+			if (slotPriceTextTMP != null)
+			{
+				slotPriceTextTMP.text = "SLOTS FULL";
+			}
+		}
+		else
+		{
+			AddToCartButton.gameObject.SetActive(value: true);
+			if (slotPriceTextTMP != null)
+			{
+				slotPriceTextTMP.text = thisCosmeticItem.itemCategory.ToString().ToUpper() + " " + thisCosmeticItem.cost;
+			}
 		}
 	}
 

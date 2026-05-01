@@ -305,6 +305,39 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 		UpdateCosmeticsWithTryonShared(currentItemsPacked, tryOnItemsPacked, playfx, info);
 	}
 
+	public void RPC_UpdateCosmeticsWithCollectablesPacked(int[] data, PhotonMessageInfo info)
+	{
+		if (data == null || data.Length == 0)
+		{
+			vrrig?.UpdateCosmeticsWithCollectables(Array.Empty<int>(), Array.Empty<int>(), info);
+			return;
+		}
+		int num = data[0];
+		if (num >= 0 && 1 + num <= data.Length)
+		{
+			int[] array = new int[num];
+			if (num > 0)
+			{
+				Array.Copy(data, 1, array, 0, num);
+			}
+			int num2 = data.Length - 1 - num;
+			int[] array2 = new int[num2];
+			if (num2 > 0)
+			{
+				Array.Copy(data, 1 + num, array2, 0, num2);
+			}
+			vrrig?.UpdateCosmeticsWithCollectables(array, array2, info);
+		}
+	}
+
+	public void RPC_SetCollectionCycleIndex(int[] data, PhotonMessageInfo info)
+	{
+		if (data != null && data.Length >= 2)
+		{
+			vrrig?.SetCollectionCycleIndex(data[0], data[1], info);
+		}
+	}
+
 	[PunRPC]
 	public void RPC_HideAllCosmetics(PhotonMessageInfo info)
 	{

@@ -118,6 +118,11 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 		return true;
 	}
 
+	private void Start()
+	{
+		targetRenderer.material = ((standbyOverride == null) ? VODPlayer.StandbyMaterial : standbyOverride);
+	}
+
 	protected override void UnityOnEnable()
 	{
 		VODPlayer.OnCrash = (Action)Delegate.Combine(VODPlayer.OnCrash, new Action(VODPlayer_OnCrash));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using GorillaNetworking;
 using KID.Model;
@@ -173,6 +174,8 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
+	private static Material _standbyMaterial;
+
 	private const string PlayerPrefKey_Cache = "_VODCache_";
 
 	public static Action OnCrash;
@@ -193,9 +196,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	[SerializeField]
 	private Material playBackMaterial;
-
-	[SerializeField]
-	private Material disconnectedMaterial;
 
 	[SerializeField]
 	private Material busyMaterial;
@@ -221,6 +221,13 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	private int tdGot;
 
 	private Permission voiceChatPerm;
+
+	public static Material StandbyMaterial => _standbyMaterial;
+
+	private void Awake()
+	{
+		_standbyMaterial = standbyMaterial;
+	}
 
 	public async void OnEnable()
 	{
@@ -287,8 +294,9 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return;
 		}
+		VODStream.VODStreamChannel[] priorityChannelArray = getPriorityChannelArray();
 		targets.Add(o);
-		o.gameObject.SetActive(state != State.CRASHED);
+		bool flag = !Enumerable.SequenceEqual(priorityChannelArray, getPriorityChannelArray());
 		if (state == State.RUNNING && player.isPlaying && o.VerifyChannel(playerChannel))
 		{
 			o.Renderer.material = playBackMaterial;
@@ -296,7 +304,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		}
 		o.Renderer.material = getStandby(o);
 		o.SetNext(GetNextStream(o.Channel));
-		if (!player.isPlaying)
+		if ((!player.isPlaying && targets.Count == 1) || flag)
 		{
 			PlayPreviouStream();
 		}
@@ -304,12 +312,26 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private void VODTarget_AlertDisabled(VODTarget o)
 	{
-		if (targets.Contains(o))
+		if (!targets.Contains(o))
 		{
-			targets.Remove(o);
+			return;
 		}
-		o.Renderer.material = ((o.StandbyOverride == null) ? disconnectedMaterial : o.StandbyOverride);
+		VODStream.VODStreamChannel[] priorityChannelArray = getPriorityChannelArray();
+		targets.Remove(o);
+		bool flag = !Enumerable.SequenceEqual(priorityChannelArray, getPriorityChannelArray());
+		o.Renderer.material = ((o.StandbyOverride == null) ? standbyMaterial : o.StandbyOverride);
 		o.ClearNext();
+		if (!playerBusy)
+		{
+			if (player.isPlaying && (targets.Count == 0 || flag))
+			{
+				player.Stop();
+			}
+			if (targets.Count > 0 && flag)
+			{
+				PlayPreviouStream();
+			}
+		}
 	}
 
 	private void Player_loopPointReached(VideoPlayer source)
@@ -409,7 +431,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private List<VODStream.VODStreamChannel> getPriorityChannels()
 	{
-		List<VODStream.VODStreamChannel> list = new List<VODStream.VODStreamChannel>();
+		return new List<VODStream.VODStreamChannel>(getPriorityChannelArray());
+	}
+
+	private VODStream.VODStreamChannel[] getPriorityChannelArray()
+	{
 		float num = float.MaxValue;
 		VODTarget vODTarget = null;
 		for (int i = 0; i < targets.Count; i++)
@@ -422,9 +448,9 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		}
 		if (vODTarget != null)
 		{
-			list.AddRange(vODTarget.Channel);
+			return vODTarget.Channel;
 		}
-		return list;
+		return new VODStream.VODStreamChannel[0];
 	}
 
 	private async Task<string> GetCachedFile(string url, string extension)

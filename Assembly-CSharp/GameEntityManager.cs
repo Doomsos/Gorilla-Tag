@@ -6,6 +6,7 @@ using Cysharp.Text;
 using Fusion;
 using GorillaExtensions;
 using GorillaLocomotion;
+using GorillaNetworking;
 using GorillaTag;
 using Ionic.Zlib;
 using Photon.Pun;
@@ -818,7 +819,25 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 
 	public virtual bool IsZoneActive()
 	{
+		if (GorillaComputer.instance != null && GorillaComputer.instance.IsPlayerInVirtualStump() && IsSuppressZonesInVStumpEnabled())
+		{
+			if (CustomMapLoader.CanLoadEntities && zone == GTZone.customMaps)
+			{
+				return zoneStateData.state == ZoneState.Active;
+			}
+			return false;
+		}
 		return zoneStateData.state == ZoneState.Active;
+	}
+
+	private static bool IsSuppressZonesInVStumpEnabled()
+	{
+		GorillaServer instance = GorillaServer.Instance;
+		if (instance != null)
+		{
+			return instance.CheckIsSuppressZonesInVStumpEnabled();
+		}
+		return false;
 	}
 
 	public virtual bool IsPositionInManagerBounds(Vector3 pos)
@@ -1762,6 +1781,11 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 			{
 				flag = true;
 			}
+		}
+		IGameEntityCustomStateChange component8 = gameEntity.GetComponent<IGameEntityCustomStateChange>();
+		if (component8 != null)
+		{
+			flag = component8.CanChangeState(newState, info.Sender.ActorNumber);
 		}
 		if (flag)
 		{
@@ -3442,6 +3466,14 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 
 	protected virtual bool IsInZone()
 	{
+		if (GorillaComputer.instance.IsPlayerInVirtualStump() && IsSuppressZonesInVStumpEnabled())
+		{
+			if (CustomMapLoader.CanLoadEntities)
+			{
+				return zone == GTZone.customMaps;
+			}
+			return false;
+		}
 		bool flag = VRRig.LocalRig.zoneEntity.currentZone == zone;
 		for (int i = 0; i < zoneComponents.Count; i++)
 		{

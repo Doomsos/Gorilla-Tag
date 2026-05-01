@@ -522,7 +522,7 @@ public class KIDManager : MonoBehaviour
 		{
 			return true;
 		}
-		PrivateUIRoom.ForceStartOverlay();
+		PrivateUIRoom.ForceStartOverlay(PrivateUIRoom.OverlaySource.KID);
 		switch (await WarningScreens.StartWarningScreen(_requestCancellationSource.Token))
 		{
 		case WarningButtonResult.None:
@@ -557,7 +557,7 @@ public class KIDManager : MonoBehaviour
 	{
 		if (PlayerPrefs.GetInt(KIDSetupPlayerPref, 0) == 0)
 		{
-			PrivateUIRoom.ForceStartOverlay();
+			PrivateUIRoom.ForceStartOverlay(PrivateUIRoom.OverlaySource.KID);
 		}
 	}
 
@@ -609,7 +609,7 @@ public class KIDManager : MonoBehaviour
 							}
 							if (newSessionData.status == SessionStatus.PROHIBITED || newSessionData.status == SessionStatus.PENDING_AGE_APPEAL)
 							{
-								PrivateUIRoom.ForceStartOverlay();
+								PrivateUIRoom.ForceStartOverlay(PrivateUIRoom.OverlaySource.KID);
 								KIDUI_AgeAppealController.Instance.StartAgeAppealScreens(newSessionData.status);
 							}
 							else
@@ -627,13 +627,13 @@ public class KIDManager : MonoBehaviour
 								}
 								if (num3 != 0)
 								{
-									PrivateUIRoom.ForceStartOverlay();
+									PrivateUIRoom.ForceStartOverlay(PrivateUIRoom.OverlaySource.KID);
 									(AgeStatusType, TMPSession) obj2 = await AgeGateFlow(newSessionData);
 									_ = obj2.Item1;
 									TMPSession item = obj2.Item2;
 									if (_requestCancellationSource.IsCancellationRequested)
 									{
-										goto IL_06bb;
+										goto IL_06bd;
 									}
 									newSession = item;
 								}
@@ -642,7 +642,7 @@ public class KIDManager : MonoBehaviour
 									await LegalAgreements.instance.StartLegalAgreements();
 									if (_requestCancellationSource.IsCancellationRequested)
 									{
-										goto IL_06bb;
+										goto IL_06bd;
 									}
 								}
 								if (UpdatePermissions(newSession) && CurrentSession != null)
@@ -688,8 +688,8 @@ public class KIDManager : MonoBehaviour
 					}
 				}
 			}
-			goto IL_06bb;
-			IL_06bb:
+			goto IL_06bd;
+			IL_06bd:
 			num = 1;
 			end_IL_00b2:;
 		}
@@ -712,7 +712,7 @@ public class KIDManager : MonoBehaviour
 			{
 				await LegalAgreements.instance.StartLegalAgreements();
 			}
-			PrivateUIRoom.StopForcedOverlay();
+			PrivateUIRoom.StopForcedOverlay(PrivateUIRoom.OverlaySource.KID);
 		}
 		object obj4 = obj;
 		if (obj4 != null)
@@ -734,7 +734,7 @@ public class KIDManager : MonoBehaviour
 			{
 				GorillaSnapTurn.LoadSettingsFromCache();
 			}
-			PrivateUIRoom.StopForcedOverlay();
+			PrivateUIRoom.StopForcedOverlay(PrivateUIRoom.OverlaySource.KID);
 		}
 	}
 

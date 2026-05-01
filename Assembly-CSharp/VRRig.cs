@@ -416,6 +416,12 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	public bool inTempCosmSpace;
 
+	[NonSerialized]
+	public CosmeticsController.CosmeticItem[] remoteCollectables = Array.Empty<CosmeticsController.CosmeticItem>();
+
+	[NonSerialized]
+	public Dictionary<string, int> remoteCycleStates = new Dictionary<string, int>();
+
 	public bool muted;
 
 	private float lastScaleFactor = 1f;
@@ -3024,6 +3030,53 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		else
 		{
 			MonkeAgent.instance.SendReport("inappropriate tag data being sent update cosmetics with tryon", player.UserId, player.NickName);
+		}
+	}
+
+	public void UpdateCosmeticsWithCollectables(int[] collectablesPacked, int[] cycleStatesPacked, PhotonMessageInfoWrapped info)
+	{
+		IncrementRPC(info, "RPC_UpdateCosmeticsWithCollectablesPacked");
+		if (info.Sender != netView.Owner || collectablesPacked == null)
+		{
+			return;
+		}
+		remoteCollectables = CosmeticsController.instance.UnpackCollectableItems(collectablesPacked);
+		remoteCycleStates.Clear();
+		if (cycleStatesPacked != null)
+		{
+			char[] array = new char[6] { '\0', '\0', '\0', '\0', '\0', '.' };
+			for (int i = 0; i + 1 < cycleStatesPacked.Length; i += 2)
+			{
+				int num = cycleStatesPacked[i];
+				array[0] = (char)(65 + num % 26);
+				array[1] = (char)(65 + num / 26 % 26);
+				array[2] = (char)(65 + num / 676 % 26);
+				array[3] = (char)(65 + num / 17576 % 26);
+				array[4] = (char)(65 + num / 456976 % 26);
+				remoteCycleStates[new string(array)] = cycleStatesPacked[i + 1];
+			}
+		}
+		if (initializedCosmetics)
+		{
+			SetCosmeticsActive(playfx: false);
+		}
+	}
+
+	public void SetCollectionCycleIndex(int packedParentID, int activeIndex, PhotonMessageInfoWrapped info)
+	{
+		IncrementRPC(info, "RPC_SetCollectionCycleIndex");
+		if (info.Sender == netView.Owner)
+		{
+			char[] array = new char[6];
+			array[5] = '.';
+			array[0] = (char)(65 + packedParentID % 26);
+			array[1] = (char)(65 + packedParentID / 26 % 26);
+			array[2] = (char)(65 + packedParentID / 676 % 26);
+			array[3] = (char)(65 + packedParentID / 17576 % 26);
+			array[4] = (char)(65 + packedParentID / 456976 % 26);
+			string text = new string(array);
+			remoteCycleStates[text] = activeIndex;
+			CosmeticCollectionDisplay.FindForRig(GetInstanceID(), text)?.SetActiveIndex(activeIndex);
 		}
 	}
 

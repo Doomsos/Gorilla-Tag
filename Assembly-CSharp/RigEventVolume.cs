@@ -9,7 +9,8 @@ public class RigEventVolume : MonoBehaviour
 	private enum Mode
 	{
 		RELATIVE,
-		ABSOLUTE
+		ABSOLUTE,
+		NONE
 	}
 
 	private Dictionary<RigEventVolumeTrigger, int> gameObjects = new Dictionary<RigEventVolumeTrigger, int>();
@@ -48,15 +49,19 @@ public class RigEventVolume : MonoBehaviour
 
 	private List<VRRig> rigs = new List<VRRig>();
 
+	private bool localRigPresent;
+
 	public VRRig[] Rigs => rigs.ToArray();
 
 	public int RigCount => gameObjects.Keys.Count;
+
+	public bool LocalRigPresent => localRigPresent;
 
 	public event Action OnCountChanged;
 
 	private void OnEnable()
 	{
-		if (mode != Mode.ABSOLUTE)
+		if (mode == Mode.RELATIVE)
 		{
 			if (rigCollection != null)
 			{
@@ -80,7 +85,7 @@ public class RigEventVolume : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		if (mode != Mode.ABSOLUTE)
+		if (mode == Mode.RELATIVE)
 		{
 			if (rigCollection != null)
 			{
@@ -131,11 +136,15 @@ public class RigEventVolume : MonoBehaviour
 		{
 			gameObjects.Add(component, 0);
 			rigs.Add(component.Rig);
-			int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
-			countChanged(gameObjects.Count - 1, gameObjects.Count, num, num, component);
+			if (mode != Mode.NONE)
+			{
+				int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
+				countChanged(gameObjects.Count - 1, gameObjects.Count, num, num, component);
+			}
 			if (component.Rig == VRRig.LocalRig)
 			{
 				LocalRigEnters?.Invoke(component.Rig);
+				localRigPresent = true;
 			}
 		}
 		else
@@ -155,11 +164,15 @@ public class RigEventVolume : MonoBehaviour
 		{
 			gameObjects.Remove(component);
 			rigs.Remove(component.Rig);
-			int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
-			countChanged(gameObjects.Count + 1, gameObjects.Count, num, num, component);
+			if (mode != Mode.NONE)
+			{
+				int num = ((!(rigCollection == null)) ? rigCollection.Rigs.Count : ((PhotonNetwork.CurrentRoom == null) ? 1 : PhotonNetwork.CurrentRoom.PlayerCount));
+				countChanged(gameObjects.Count + 1, gameObjects.Count, num, num, component);
+			}
 			if (component.Rig == VRRig.LocalRig)
 			{
 				LocalRigExits?.Invoke(component.Rig);
+				localRigPresent = false;
 			}
 		}
 	}

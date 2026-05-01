@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using GorillaExtensions;
 using GorillaUtil;
 using LitJson;
@@ -32,6 +30,10 @@ public class PlayFabTitleDataCache : MonoBehaviour
 
 	private static Action<PlayFabTitleDataCache> k_onnLoaded;
 
+	public static Action<string, string> OnValueRetieved;
+
+	public static Action<string, string> OnCachedValueRetieved;
+
 	public DataUpdate OnTitleDataUpdate;
 
 	private const string FileName = "TitleDataCache.json";
@@ -58,6 +60,7 @@ public class PlayFabTitleDataCache : MonoBehaviour
 		if (!ignoreCache && !isFirstLoad && localizedTitleData.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, out var value) && value.TryGetValue(name, out var value2))
 		{
 			callback.SafeInvoke(value2);
+			OnCachedValueRetieved?.Invoke(name, value2);
 			return;
 		}
 		DataRequest item = new DataRequest
@@ -232,6 +235,7 @@ public class PlayFabTitleDataCache : MonoBehaviour
 						try
 						{
 							dataRequest.Callback?.Invoke(text5);
+							OnValueRetieved?.Invoke(text3, text5);
 						}
 						catch (Exception ex)
 						{
@@ -255,20 +259,6 @@ public class PlayFabTitleDataCache : MonoBehaviour
 			playFabTitleDataCache.isFirstLoad = false;
 			playFabTitleDataCache.updateDataCoroutine = null;
 		}
-	}
-
-	private static string MD5(string value)
-	{
-		MD5CryptoServiceProvider mD5CryptoServiceProvider = new MD5CryptoServiceProvider();
-		byte[] bytes = Encoding.Default.GetBytes(value);
-		byte[] array = mD5CryptoServiceProvider.ComputeHash(bytes);
-		StringBuilder stringBuilder = new StringBuilder();
-		byte[] array2 = array;
-		foreach (byte b in array2)
-		{
-			stringBuilder.Append(b.ToString("x2"));
-		}
-		return stringBuilder.ToString();
 	}
 
 	private void ClearRequestWithError(PlayFabError e = null)

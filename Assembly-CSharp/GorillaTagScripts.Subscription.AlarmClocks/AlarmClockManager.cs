@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using GorillaLocomotion;
+using GorillaNetworking;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Events;
@@ -19,6 +20,8 @@ public sealed class AlarmClockManager : MonoBehaviour
 
 		public GTZone[] Zones;
 
+		public XSceneRef[] Objects;
+
 		public Transform SpawnPoint;
 	}
 
@@ -28,7 +31,7 @@ public sealed class AlarmClockManager : MonoBehaviour
 	private string _loadingMessage = "";
 
 	[SerializeField]
-	private float _wrongWarpTolerance = 0.5f;
+	private float _wrongWarpTolerance = 0.1f;
 
 	[SerializeField]
 	private AlarmClockData[] _clockData = new AlarmClockData[0];
@@ -44,6 +47,8 @@ public sealed class AlarmClockManager : MonoBehaviour
 
 	[CanBeNull]
 	private AlarmClock _activeClock;
+
+	private float _trackingEndTime;
 
 	public static AlarmClockManager Instance { get; private set; }
 
@@ -67,30 +72,92 @@ public sealed class AlarmClockManager : MonoBehaviour
 		}
 		Instance = this;
 		ActiveKey = PlayerPrefs.GetString("AlarmClock");
-		if (string.IsNullOrEmpty(ActiveKey))
+		if (!string.IsNullOrEmpty(ActiveKey))
 		{
-			Debug.Log("No alarm clock value found.");
-			Initialized = true;
+			AlarmClockData alarmClockData = _clockData.FirstOrDefault((AlarmClockData c) => c.Key == ActiveKey);
+			if (alarmClockData != null && alarmClockData.SpawnPoint != _defaultSpawn)
+			{
+				_activeClockData = alarmClockData;
+				_teleportTarget = alarmClockData.SpawnPoint;
+				StartCoroutine(PerformWakeUpSequence());
+				return;
+			}
+		}
+		Initialized = true;
+	}
+
+	private IEnumerator PerformWakeUpSequence()
+	{
+		while (!GTPlayer.hasInstance)
+		{
+			yield return null;
+		}
+		GTPlayer.Instance.disableMovement = true;
+		while (!GorillaTagger.hasInstance || !GorillaTagger.Instance.mainCamera)
+		{
+			yield return null;
+		}
+		PrivateUIRoom.ForceStartOverlay(PrivateUIRoom.OverlaySource.AlarmClock, _loadingMessage);
+		PersistLog.Log($"[AC][F{Time.frameCount}] Waiting for game systems");
+		while (!GameSystemsLoaded())
+		{
+			yield return null;
+		}
+		PersistLog.Log($"[AC][F{Time.frameCount}] Game systems loaded");
+		if (SubscriptionManager.IsLocalSubscribed())
+		{
+			RequestLoadZones();
+			yield return null;
+			while (!AllZonesLoaded())
+			{
+				while (ZoneManagement.instance.AnyActiveLoadOps())
+				{
+					yield return null;
+				}
+				if (!AllZonesLoaded())
+				{
+					PersistLog.Log(string.Format("[AC][F{0}] Missing zones.  Requested:{1} Active: {2}", Time.frameCount, string.Join(", ", _activeClockData.Zones), string.Join(", ", GetActiveZones())));
+					RequestLoadZones();
+					yield return null;
+				}
+			}
+			PersistLog.Log($"[AC][F{Time.frameCount}] All zones loaded.");
+			XSceneRef[] objects = _activeClockData.Objects;
+			foreach (XSceneRef xSceneRef in objects)
+			{
+				if (xSceneRef.TryResolve(out GameObject result))
+				{
+					result.SetActive(value: true);
+				}
+			}
+			yield return null;
+			GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
+			yield return null;
+			int fixAttempts = 0;
+			while ((GTPlayer.Instance.mainCamera.transform.position - _teleportTarget.position).sqrMagnitude > _wrongWarpTolerance * _wrongWarpTolerance)
+			{
+				int i = fixAttempts + 1;
+				fixAttempts = i;
+				if (i > 10)
+				{
+					break;
+				}
+				PersistLog.Log($"[AC][F{Time.frameCount}] AlarmClockManager attempting wrong warp fix. (Off by {GTPlayer.Instance.mainCamera.transform.position - _teleportTarget.position:F2})");
+				GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
+				yield return null;
+			}
+			GTPlayer.Instance.disableMovement = false;
+			PrivateUIRoom.StopForcedOverlay(PrivateUIRoom.OverlaySource.AlarmClock);
+			OnWakeUp?.Invoke();
 		}
 		else
 		{
-			StartCoroutine(ConnectToPlayerSpawned());
+			PersistLog.Log("No subscription.  Clearing clock data.");
+			PlayerPrefs.SetString("AlarmClock", "");
 		}
-	}
-
-	private IEnumerator ConnectToPlayerSpawned()
-	{
-		while (GorillaTagger.Instance == null || GorillaTagger.Instance.mainCamera == null)
-		{
-			yield return null;
-		}
-		PrivateUIRoom.ForceStartOverlay(_loadingMessage);
-		yield return new WaitForSeconds(1f);
-		while (ZoneManagement.instance == null || !ZoneManagement.instance.Initialized)
-		{
-			yield return null;
-		}
-		GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
+		Initialized = true;
+		GTPlayer.Instance.disableMovement = false;
+		PrivateUIRoom.StopForcedOverlay(PrivateUIRoom.OverlaySource.AlarmClock);
 	}
 
 	public static void ToggleAlarmClock(AlarmClock clock)
@@ -140,83 +207,80 @@ public sealed class AlarmClockManager : MonoBehaviour
 		return true;
 	}
 
-	private void OnPlayerSpawned()
+	private static bool GameSystemsLoaded()
 	{
-		Debug.Log("Loaded alarm clock value " + ActiveKey);
-		if (!string.IsNullOrEmpty(ActiveKey))
+		if ((bool)ZoneManagement.instance && ZoneManagement.instance.Initialized && (bool)CosmeticsController.instance && CosmeticsController.instance.v2_isCosmeticPlayFabCatalogDataLoaded && CosmeticsV2Spawner_Dirty.isPrepared)
 		{
-			AlarmClockData alarmClockData = _clockData.FirstOrDefault((AlarmClockData c) => c.Key == ActiveKey);
-			if (alarmClockData != null)
-			{
-				_activeClockData = alarmClockData;
-				_teleportTarget = alarmClockData.SpawnPoint;
-				PrivateUIRoom.ForceStartOverlay(_loadingMessage);
-				ZoneManagement.SetActiveZones(alarmClockData.Zones);
-				StartCoroutine(WaitForSubscriptionData());
-				return;
-			}
+			return SubscriptionManager.LocalSubscriptionDataInitialized;
 		}
-		Initialized = true;
+		return false;
 	}
 
-	private IEnumerator WaitForSubscriptionData()
+	private bool AllZonesLoaded()
 	{
-		while (!MothershipClientApiUnity.IsClientLoggedIn() || !SubscriptionManager.LocalSubscriptionDataInitialized)
+		if (ZoneManagement.instance.AnyActiveLoadOps())
 		{
+			return false;
+		}
+		GTZone[] zones = _activeClockData.Zones;
+		for (int i = 0; i < zones.Length; i++)
+		{
+			if (!ZoneManagement.IsInZone(zones[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private List<GTZone> GetActiveZones()
+	{
+		List<GTZone> list = new List<GTZone>();
+		foreach (GTZone value in Enum.GetValues(typeof(GTZone)))
+		{
+			if (ZoneManagement.IsInZone(value))
+			{
+				list.Add(value);
+			}
+		}
+		return list;
+	}
+
+	private void RequestLoadZones()
+	{
+		PersistLog.Log(string.Format("[AC][F{0}] Requesting zones: {1}", Time.frameCount, string.Join(", ", _activeClockData.Zones)));
+		ZoneManagement.SetActiveZones(_activeClockData.Zones);
+	}
+
+	private void StartTracking()
+	{
+		StartCoroutine(DoTracking());
+	}
+
+	private void StopTracking(float delay)
+	{
+		Debug.Log($"[AC][F{Time.frameCount}] STOP TRACKING");
+		_trackingEndTime = Time.time + delay;
+	}
+
+	private IEnumerator DoTracking()
+	{
+		_trackingEndTime = float.PositiveInfinity;
+		while (Time.time < _trackingEndTime)
+		{
+			Debug.Log($"[AC][F{Time.frameCount}] Pos: {GTPlayer.Instance.transform.position} Off:[{GTPlayer.Instance.LastPosition - _teleportTarget.position}] Distance: {(GTPlayer.Instance.LastPosition - _teleportTarget.position).magnitude}[R{(GTPlayer.Instance.playerRigidBody.position - _teleportTarget.position).magnitude}][C{(GTPlayer.Instance.mainCamera.transform.position - _teleportTarget.position).magnitude}]");
 			yield return null;
 		}
-		StartCoroutine(SubscriptionManager.IsLocalSubscribed() ? ZoneLoad() : ClearUnsubPlayerData());
 	}
 
 	private IEnumerator ClearUnsubPlayerData()
 	{
-		while (!MothershipClientApiUnity.IsClientLoggedIn() || !SubscriptionManager.LocalSubscriptionDataInitialized)
-		{
-			yield return null;
-		}
-		if (SubscriptionManager.LocalSubscriptionStatus() != SubscriptionManager.SubscriptionStatus.Active)
-		{
-			Debug.Log("No subscription, warping home.");
-			PlayerPrefs.SetString("AlarmClock", "");
-			GTPlayer.Instance.TeleportTo(_defaultSpawn, matchDestinationRotation: true, maintainVelocity: false);
-			Initialized = true;
-			yield return null;
-			PrivateUIRoom.StopForcedOverlay();
-		}
-	}
-
-	private IEnumerator ZoneLoad()
-	{
-		yield return null;
-		if (_activeClockData.Zones.Length > 1 || _activeClockData.Zones[0] != GTZone.forest)
-		{
-			while (ZoneManagement.instance.AnyActiveLoadOps())
-			{
-				yield return null;
-			}
-		}
-		while (!GTPlayer.hasInstance)
-		{
-			yield return null;
-		}
-		yield return null;
-		GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
-		yield return null;
-		int fixAttempts = 0;
-		while ((GTPlayer.Instance.playerRigidBody.position - _teleportTarget.position).sqrMagnitude > _wrongWarpTolerance * _wrongWarpTolerance)
-		{
-			int num = fixAttempts + 1;
-			fixAttempts = num;
-			if (num > 10)
-			{
-				break;
-			}
-			Debug.Log("AlarmClockManager attempting wrong warp fix.");
-			GTPlayer.Instance.TeleportTo(_teleportTarget, matchDestinationRotation: true, maintainVelocity: false);
-			yield return null;
-		}
-		PrivateUIRoom.StopForcedOverlay();
-		OnWakeUp?.Invoke();
+		PersistLog.Log("No subscription, warping home.");
+		PlayerPrefs.SetString("AlarmClock", "");
+		GTPlayer.Instance.TeleportTo(_defaultSpawn, matchDestinationRotation: true, maintainVelocity: false);
 		Initialized = true;
+		yield return null;
+		GTPlayer.Instance.disableMovement = false;
+		PrivateUIRoom.StopForcedOverlay(PrivateUIRoom.OverlaySource.AlarmClock);
 	}
 }

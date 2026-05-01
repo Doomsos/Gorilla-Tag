@@ -1,64 +1,53 @@
+using System;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class GorillaEventAnimation : MonoBehaviour
 {
-	[SerializeField]
-	private Animation _animation;
-
-	public bool controlledAnimation;
+	public Animation _animation;
 
 	public float offsetTime;
 
 	public int animationClipIndex;
 
-	[Header("Ensure this matches the list of clips on the animation component")]
 	public AnimationClip[] clips;
 
-	private int lastClipIndex;
+	[NonSerialized]
+	public int _clipIndex;
 
-	public bool PreviewAudioInEditMode;
-
-	private void OnEnable()
+	private void Awake()
 	{
-		if (!controlledAnimation)
+		if (_animation == null)
 		{
-			_animation.enabled = true;
-			return;
+			_animation = GetComponentInChildren<Animation>();
 		}
-		_animation.enabled = true;
-		_animation.clip = clips[animationClipIndex];
-		if (_animation.GetClip(clips[animationClipIndex].name) == null)
+		_animation.playAutomatically = false;
+		for (int i = 0; i < clips.Length; i++)
 		{
-			_animation.AddClip(clips[animationClipIndex], clips[animationClipIndex].name);
+			clips[i].legacy = true;
 		}
-		_animation.clip.legacy = true;
-		_animation.Play(clips[animationClipIndex].name);
-		_animation[_animation.clip.name].time = offsetTime;
 	}
 
 	private void OnDisable()
 	{
-		if (controlledAnimation)
-		{
-			_animation.enabled = false;
-		}
+		_animation.enabled = false;
 	}
 
-	private void Update()
+	public void PlayClipByIndex(int index, float startTime)
 	{
-		if (controlledAnimation)
+		if (index >= 0 && index < clips.Length)
 		{
-			if (animationClipIndex != lastClipIndex)
+			if (!_animation.enabled)
 			{
-				OnEnable();
+				_animation.enabled = true;
 			}
-			lastClipIndex = animationClipIndex;
+			AnimationClip animationClip = clips[index];
+			if (_animation.GetClip(animationClip.name) == null)
+			{
+				_animation.AddClip(animationClip, animationClip.name);
+			}
+			_animation.Play(animationClip.name);
+			_animation[animationClip.name].time = startTime;
+			_clipIndex = index;
 		}
-	}
-
-	public void PlayClip(string clipName)
-	{
-		_animation.Play(clipName);
 	}
 }
