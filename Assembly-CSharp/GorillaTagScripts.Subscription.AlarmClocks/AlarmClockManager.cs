@@ -223,10 +223,15 @@ public sealed class AlarmClockManager : MonoBehaviour
 			return false;
 		}
 		GTZone[] zones = _activeClockData.Zones;
-		for (int i = 0; i < zones.Length; i++)
+		foreach (GTZone gTZone in zones)
 		{
-			if (!ZoneManagement.IsInZone(zones[i]))
+			if (!ZoneManagement.instance.IsSceneLoaded(gTZone))
 			{
+				return false;
+			}
+			if (!ZoneManagement.IsZoneLoaded(gTZone))
+			{
+				PersistLog.Log($"[AC][F{Time.frameCount}] ZoneManagement reports Zone {gTZone} is loaded but SceneManager says no.");
 				return false;
 			}
 		}

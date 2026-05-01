@@ -92,6 +92,20 @@ public class ZoneManagement : MonoBehaviour
 		return instance.GetZoneData(zone)?.active ?? false;
 	}
 
+	public static bool IsZoneLoaded(GTZone zone)
+	{
+		if (!instance)
+		{
+			FindInstance();
+		}
+		ZoneData zoneData = instance.GetZoneData(zone);
+		if (zoneData != null && zoneData.active)
+		{
+			return SceneManager.GetSceneByName(zoneData.sceneName).isLoaded;
+		}
+		return false;
+	}
+
 	public GameObject GetPrimaryGameObject(GTZone zone)
 	{
 		return GetZoneData(zone).rootGameObjects[0];
