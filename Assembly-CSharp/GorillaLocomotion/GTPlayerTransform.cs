@@ -38,7 +38,7 @@ public class GTPlayerTransform : MonkeGravityController
 
 	public static Quaternion BodyRotation => k_bodyTransform.rotation;
 
-	public static bool UseNetRotation { get; set; } = false;
+	public static bool UseNetRotation => true;
 
 	public static bool IgnoreGravityRotation { get; set; } = false;
 
@@ -138,12 +138,10 @@ public class GTPlayerTransform : MonkeGravityController
 
 	public static void EnableNetworkRotations()
 	{
-		UseNetRotation = true;
 	}
 
 	public static void DisableNetworkRotations()
 	{
-		UseNetRotation = false;
 	}
 
 	protected override void Awake()
@@ -167,17 +165,45 @@ public class GTPlayerTransform : MonkeGravityController
 
 	public override void ApplyGravityUpRotation(in Vector3 upDir, float speed)
 	{
-		if (!IgnoreGravityRotation && k_rotationOverrideFrameTime < Time.frameCount - 1)
+		if (IgnoreGravityRotation || k_rotationOverrideFrameTime >= Time.frameCount - 1)
 		{
-			if (base.InstantRotation)
-			{
-				RotateToUp(in upDir);
-			}
-			else
-			{
-				RotateToUp((!(Vector3.Angle(Up, upDir) * (MathF.PI / 180f) <= speed)) ? Vector3.RotateTowards(Up, upDir, speed, 0f) : upDir);
-			}
+			return;
 		}
+		if (base.InstantRotation)
+		{
+			RotateToUp(in upDir);
+			return;
+		}
+		float num = Vector3.Angle(Up, upDir);
+		Vector3 targetUp;
+		if (num * (MathF.PI / 180f) <= speed)
+		{
+			targetUp = upDir;
+		}
+		else
+		{
+			Vector3 target = upDir;
+			if (Mathf.Approximately(num, 180f))
+			{
+				switch (m_preferredRotationDirection)
+				{
+				case RotationDirection.Left:
+					target = k_bodyTransform.right * -1f;
+					break;
+				case RotationDirection.Right:
+					target = k_bodyTransform.right;
+					break;
+				case RotationDirection.Forward:
+					target = k_bodyTransform.forward;
+					break;
+				case RotationDirection.Backward:
+					target = k_bodyTransform.forward * -1f;
+					break;
+				}
+			}
+			targetUp = Vector3.RotateTowards(Up, target, speed, 0f);
+		}
+		RotateToUp(in targetUp);
 	}
 
 	public override void ApplyGravityForce(in Vector3 force, ForceMode forceType = ForceMode.Acceleration)

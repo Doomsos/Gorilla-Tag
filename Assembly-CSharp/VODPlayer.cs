@@ -455,7 +455,18 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private async Task<string> GetCachedFile(string url, string extension)
 	{
-		string filePath = Application.persistentDataPath + Path.DirectorySeparatorChar + $"V{url.GetHashCode():X}.{extension}";
+		string path = $"V{url.GetHashCode():X}.{extension}";
+		string filePath = Path.Combine(Application.persistentDataPath, path);
+		if (File.Exists(filePath))
+		{
+			return filePath;
+		}
+		string text = Path.Combine(Application.persistentDataPath, "GTv_Cache");
+		if (!Directory.Exists(text))
+		{
+			Directory.CreateDirectory(text);
+		}
+		filePath = Path.Combine(text, path);
 		if (File.Exists(filePath))
 		{
 			return filePath;

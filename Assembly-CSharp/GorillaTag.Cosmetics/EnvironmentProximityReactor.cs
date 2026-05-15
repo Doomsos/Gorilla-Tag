@@ -35,6 +35,9 @@ public class EnvironmentProximityReactor : MonoBehaviour
 		[Tooltip("Fires every frame on the triggering client while the cosmetic remains below the threshold. Local-only")]
 		public UnityEvent<Vector3> whileBelowLocal;
 
+		[Tooltip("Fires every frame on ALL clients while any player's cosmetic remains below the threshold.")]
+		public UnityEvent<Vector3> whileBelowShared;
+
 		[Tooltip("Fires on the triggering client when the cosmetic goes back above the threshold.")]
 		public UnityEvent onAboveLocal;
 
@@ -43,6 +46,9 @@ public class EnvironmentProximityReactor : MonoBehaviour
 
 		[NonSerialized]
 		public bool wasBelow;
+
+		[NonSerialized]
+		public bool wasSharedBelow;
 
 		[NonSerialized]
 		public float lastTriggerTime = -9999f;
@@ -154,6 +160,7 @@ public class EnvironmentProximityReactor : MonoBehaviour
 				if (!interactionBlock.wasBelow && interactionBlock.CanPlay(time))
 				{
 					interactionBlock.wasBelow = true;
+					interactionBlock.wasSharedBelow = true;
 					interactionBlock.lastTriggerTime = time;
 					interactionBlock.onBelowLocal?.Invoke(arg);
 					interactionBlock.onBelowShared?.Invoke(arg);
@@ -162,14 +169,37 @@ public class EnvironmentProximityReactor : MonoBehaviour
 				else if (interactionBlock.wasBelow)
 				{
 					interactionBlock.whileBelowLocal?.Invoke(arg);
+					interactionBlock.whileBelowShared?.Invoke(arg);
+					if (!interactionBlock.wasSharedBelow)
+					{
+						interactionBlock.wasSharedBelow = true;
+						interactionBlock.onBelowShared?.Invoke(arg);
+						EnvironmentProximityReactorManager.Instance?.BroadcastProximityState(reactorId, i, isBelow: true);
+					}
 				}
 			}
 			else if (interactionBlock.wasBelow)
 			{
 				interactionBlock.wasBelow = false;
+				interactionBlock.wasSharedBelow = false;
 				interactionBlock.onAboveLocal?.Invoke();
 				interactionBlock.onAboveShared?.Invoke();
 				EnvironmentProximityReactorManager.Instance?.BroadcastProximityState(reactorId, i, isBelow: false);
+			}
+			if (interactionBlock.wasSharedBelow && !interactionBlock.wasBelow)
+			{
+				interactionBlock.whileBelowShared?.Invoke(base.transform.position);
+			}
+		}
+	}
+
+	public void SyncStateTo(NetPlayer newPlayer, EnvironmentProximityReactorManager manager)
+	{
+		for (int i = 0; i < blocks.Count; i++)
+		{
+			if (blocks[i].wasBelow)
+			{
+				manager.BroadcastProximityStateTo(newPlayer, reactorId, i, isBelow: true);
 			}
 		}
 	}
@@ -181,10 +211,12 @@ public class EnvironmentProximityReactor : MonoBehaviour
 			InteractionBlock interactionBlock = blocks[blockIndex];
 			if (isBelow)
 			{
+				interactionBlock.wasSharedBelow = true;
 				interactionBlock.onBelowShared?.Invoke(base.transform.position);
 			}
 			else
 			{
+				interactionBlock.wasSharedBelow = false;
 				interactionBlock.onAboveShared?.Invoke();
 			}
 		}
@@ -226,6 +258,7 @@ public class EnvironmentProximityReactor : MonoBehaviour
 		foreach (InteractionBlock block in blocks)
 		{
 			block.wasBelow = false;
+			block.wasSharedBelow = false;
 			block.lastTriggerTime = -9999f;
 		}
 	}

@@ -24,5 +24,6 @@ public enum FXType
 	MaterialCycler,
 	RequestOwnershipFromAuthority,
 	GroupJoin,
+	EnvironmentProximityReactor,
 	Length
 }

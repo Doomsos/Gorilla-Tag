@@ -83,9 +83,10 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 		{
 			return;
 		}
+		_daysAccrued = 0;
+		UnselectAll();
 		vRRig.reliableState?.RegisterCosmeticStateSyncTarget(GetStateSyncSlot(), this);
 		SubscriptionManager.SubscriptionDetails subscriptionDetails = SubscriptionManager.GetSubscriptionDetails(vRRig);
-		_daysAccrued = 0;
 		switch (ageRule)
 		{
 		case SubscriptionAgeRule.ItemAge:
@@ -162,8 +163,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 	{
 		if (CanGoBack())
 		{
-			int selectedObjectIndex = SelectedObjectIndex - 1;
-			SelectedObjectIndex = selectedObjectIndex;
+			SelectedObjectIndex--;
 			ActivateSelectedIndex();
 		}
 	}
@@ -172,8 +172,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 	{
 		if (CanGoForward())
 		{
-			int selectedObjectIndex = SelectedObjectIndex + 1;
-			SelectedObjectIndex = selectedObjectIndex;
+			SelectedObjectIndex++;
 			ActivateSelectedIndex();
 		}
 	}
@@ -182,13 +181,11 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 	{
 		while (SelectedObjectIndex > other.SelectedObjectIndex && CanGoBack())
 		{
-			int selectedObjectIndex = SelectedObjectIndex - 1;
-			SelectedObjectIndex = selectedObjectIndex;
+			SelectedObjectIndex--;
 		}
 		while (SelectedObjectIndex < other.SelectedObjectIndex && CanGoForward())
 		{
-			int selectedObjectIndex = SelectedObjectIndex + 1;
-			SelectedObjectIndex = selectedObjectIndex;
+			SelectedObjectIndex++;
 		}
 		ActivateSelectedIndex();
 	}
@@ -229,6 +226,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 		{
 			CosmeticsController.CosmeticCategory.Hat => VRRigReliableState.StateSyncSlots.Hat, 
 			CosmeticsController.CosmeticCategory.Shirt => VRRigReliableState.StateSyncSlots.Shirt, 
+			CosmeticsController.CosmeticCategory.Face => VRRigReliableState.StateSyncSlots.Face, 
 			_ => throw new Exception($"Unhandled CosmeticCategory {cosmeticSOFromDisplayName.info.category.Value}"), 
 		};
 	}

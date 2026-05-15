@@ -29,6 +29,12 @@ public class RandomCarveableObject : NetworkComponent
 	[SerializeField]
 	private CallLimiter spamCheck = new CallLimiter(1, 1f);
 
+	[SerializeField]
+	private RigEventVolume proximityTrigger;
+
+	[SerializeField]
+	private GorillaPressableButton button;
+
 	private int _carveableIndex = -1;
 
 	private int _version;
@@ -38,6 +44,10 @@ public class RandomCarveableObject : NetworkComponent
 	private int3[] _voxels;
 
 	private UnityEngine.BoundsInt _voxelBounds;
+
+	private bool _buttonConfigured;
+
+	private bool _canRequestNewCarveable;
 
 	private bool HasAuthority => VoxelManager.HasAuthority;
 
@@ -53,7 +63,15 @@ public class RandomCarveableObject : NetworkComponent
 		{
 			JamUtil.Destroy(spawnPoint.GetChild(num).gameObject);
 		}
+		proximityTrigger.OnCountChanged += OnPlayerCountChanged;
+		OnPlayerCountChanged();
 		Init();
+	}
+
+	private void OnDestroy()
+	{
+		NetworkBehaviourUtils.InternalOnDestroy(this);
+		proximityTrigger.OnCountChanged -= OnPlayerCountChanged;
 	}
 
 	private void Init()
@@ -118,16 +136,35 @@ public class RandomCarveableObject : NetworkComponent
 		_carveable.transform.localScale = Vector3.one;
 	}
 
+	private void OnPlayerCountChanged()
+	{
+		SetCanRequestNewCarveable(proximityTrigger.RigCount == 0);
+	}
+
+	private void SetCanRequestNewCarveable(bool active)
+	{
+		if (!_buttonConfigured || _canRequestNewCarveable != active)
+		{
+			button.isOn = active;
+			button.UpdateColor();
+			_buttonConfigured = true;
+			_canRequestNewCarveable = active;
+		}
+	}
+
 	public void RequestSpawnRandomCarveable()
 	{
-		Debug.Log("RequestSpawnRandomCarveable()");
-		if (HasAuthority)
+		if (_canRequestNewCarveable)
 		{
-			SpawnRandomCarveable();
-		}
-		else
-		{
-			base.GetView.RPC("RPC_SpawnRandomCarveable", RpcTarget.MasterClient);
+			Debug.Log("RequestSpawnRandomCarveable()");
+			if (HasAuthority)
+			{
+				SpawnRandomCarveable();
+			}
+			else
+			{
+				base.GetView.RPC("RPC_SpawnRandomCarveable", RpcTarget.MasterClient);
+			}
 		}
 	}
 

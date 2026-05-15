@@ -1211,7 +1211,7 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public void OnJoinRoomFailed(short returnCode, string message)
 	{
-		Debug.Log("onJoinRoomFailed " + returnCode + " " + message);
+		PersistLog.Log("OnJoinRoomFailed " + returnCode + " " + message);
 		if (internalState == InternalState.Searching_Joining)
 		{
 			if (returnCode == 32765)
@@ -1227,6 +1227,7 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public void OnCreateRoomFailed(short returnCode, string message)
 	{
+		PersistLog.Log("OnCreateRoomFailed " + returnCode + " " + message);
 		if (internalState == InternalState.Searching_Creating)
 		{
 			internalState = InternalState.Searching_CreateFailed;

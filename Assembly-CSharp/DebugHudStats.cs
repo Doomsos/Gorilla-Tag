@@ -103,8 +103,20 @@ public class DebugHudStats : MonoBehaviour
 
 	private bool button3Down;
 
+	private bool button5Down;
+
+	private bool button6Down;
+
+	private bool button7Down;
+
+	private bool button8Down;
+
 	[SerializeField]
 	private StringTable betaTitleDataOveride;
+
+	private Array fixedWeathers;
+
+	private int fixedWeatherIndex;
 
 	public static DebugHudStats Instance => _instance;
 
@@ -117,6 +129,7 @@ public class DebugHudStats : MonoBehaviour
 		else
 		{
 			_instance = this;
+			fixedWeathers = Enum.GetValues(typeof(BetterDayNightManager.WeatherType));
 		}
 		base.gameObject.SetActive(value: false);
 	}
@@ -139,13 +152,24 @@ public class DebugHudStats : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		base.transform.LookAt(Camera.main.transform.position, Vector3.up);
+		if (GTPlayerTransform.Instance != null)
+		{
+			base.transform.LookAt(Camera.main.transform.position, GTPlayerTransform.Instance.GravityUp);
+		}
+		else
+		{
+			base.transform.LookAt(Camera.main.transform.position, Vector3.up);
+		}
 		if (currentState == State.timeAdjust)
 		{
 			bool flag = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
 			bool flag2 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
 			bool flag3 = ControllerInputPoller.TriggerFloat(XRNode.RightHand) > 0.5f;
 			bool flag4 = ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.5f;
+			bool flag5 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x > 0.5f;
+			bool flag6 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x < -0.5f;
+			bool flag7 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y > 0.5f;
+			bool flag8 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y < -0.5f;
 			if (button1Down && !flag)
 			{
 				GorillaComputer.instance.AddSeverTime(flag4 ? (-60) : 60);
@@ -158,30 +182,50 @@ public class DebugHudStats : MonoBehaviour
 			{
 				GorillaComputer.instance.AddSeverTime(flag4 ? (-1440) : 1440);
 			}
+			if (!button5Down && flag5)
+			{
+				ChangeTOD(1);
+			}
+			if (!button6Down && flag6)
+			{
+				ChangeTOD(-1);
+			}
+			if (!button7Down && flag7)
+			{
+				ChangeWeather(1);
+			}
+			if (!button8Down && flag8)
+			{
+				ChangeWeather(-1);
+			}
 			button1Down = flag;
 			button2Down = flag2;
 			button3Down = flag3;
+			button5Down = flag5;
+			button6Down = flag6;
+			button7Down = flag7;
+			button8Down = flag8;
 		}
 		if (currentState == State.TitleDataMonitor || currentState == State.ShowLog || currentState == State.ShowError)
 		{
-			bool flag5 = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
-			bool flag6 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
-			if (button1Down && !flag5)
+			bool flag9 = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+			bool flag10 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+			if (button1Down && !flag9)
 			{
 				logging.pageToDisplay = ((logging.pageToDisplay >= logging.textInfo.pageCount) ? 1 : (logging.pageToDisplay + 1));
 				updateLogTitle();
 			}
-			if (button2Down && !flag6)
+			if (button2Down && !flag10)
 			{
 				logging.pageToDisplay = ((logging.pageToDisplay > 1) ? (logging.pageToDisplay - 1) : logging.textInfo.pageCount);
 				updateLogTitle();
 			}
-			button1Down = flag5;
-			button2Down = flag6;
+			button1Down = flag9;
+			button2Down = flag10;
 		}
-		bool flag7 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
-		bool flag8 = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
-		if ((buttonDown && !flag7) || (buttonDownBack && !flag8))
+		bool flag11 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
+		bool flag12 = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
+		if ((buttonDown && !flag11) || (buttonDownBack && !flag12))
 		{
 			NextState(buttonDown);
 			if (currentState == State.ShowStats)
@@ -196,8 +240,8 @@ public class DebugHudStats : MonoBehaviour
 				RigidbodyHighlighter.Instance.Active = currentState == State.ShowRBs;
 			}
 		}
-		buttonDown = flag7;
-		buttonDownBack = flag8;
+		buttonDown = flag11;
+		buttonDownBack = flag12;
 		if (firstAwake == 0f)
 		{
 			firstAwake = Time.time;
@@ -311,10 +355,12 @@ public class DebugHudStats : MonoBehaviour
 				break;
 			}
 			case State.timeAdjust:
-				builder.AppendLine("\nAdjust Time:\n");
+				builder.AppendLine("\nAdjust Time\n");
 				builder.AppendLine("Press [A] to advance one hour [+ R Grip to go back one hour]");
 				builder.AppendLine("Press [B] to advance five minutes [+ R Grip to go back one minute]");
 				builder.AppendLine("Press [R] Trigger to advance one day [+ R Grip to go back one day]");
+				builder.AppendLine($"\nAdjust Environment {BetterDayNightManager.instance.currentTimeIndex + 1}/{BetterDayNightManager.instance.timeOfDayRange.Length} : {BetterDayNightManager.instance.CurrentWeather()} \n");
+				builder.AppendLine("[L STICK L/R] to change Time Of Day. [L STICK U/D] to change Weather.");
 				break;
 			case State.RecordingMode:
 				builder.AppendLine("\nMo-Cap Recording:\n");
@@ -328,12 +374,30 @@ public class DebugHudStats : MonoBehaviour
 		updateTimer = 0f;
 	}
 
+	private void ChangeTOD(int v)
+	{
+		int num = (BetterDayNightManager.instance.currentTimeIndex + BetterDayNightManager.instance.timeOfDayRange.Length + v) % BetterDayNightManager.instance.timeOfDayRange.Length;
+		BetterDayNightManager.instance.SetTimeOfDay(num);
+		BetterDayNightManager.instance.SetOverrideIndex(num);
+		BetterDayNightManager.instance.SetFixedWeather((BetterDayNightManager.WeatherType)fixedWeathers.GetValue(fixedWeatherIndex));
+	}
+
+	private void ChangeWeather(int v)
+	{
+		fixedWeatherIndex = (fixedWeatherIndex + fixedWeathers.Length + v) % fixedWeathers.Length;
+		BetterDayNightManager.instance.SetFixedWeather((BetterDayNightManager.WeatherType)fixedWeathers.GetValue(fixedWeatherIndex));
+	}
+
 	private void NextState(bool fwd)
 	{
 		PlayerGameEvents.OnPlayerMoved -= OnPlayerMoved;
 		PlayerGameEvents.OnPlayerSwam -= OnPlayerSwam;
 		logging.gameObject.SetActive(value: false);
 		logging.pageToDisplay = 1;
+		if (currentState == State.timeAdjust)
+		{
+			BetterDayNightManager.instance.ClearFixedWeather();
+		}
 		switch (currentState)
 		{
 		case State.Inactive:
@@ -363,6 +427,10 @@ public class DebugHudStats : MonoBehaviour
 		case State.RecordingMode:
 			currentState = ((!fwd) ? State.timeAdjust : State.Inactive);
 			break;
+		}
+		if (currentState == State.timeAdjust)
+		{
+			BetterDayNightManager.instance.SetFixedWeather((BetterDayNightManager.WeatherType)fixedWeathers.GetValue(fixedWeatherIndex));
 		}
 		UpdateLog();
 	}
@@ -472,14 +540,14 @@ public class DebugHudStats : MonoBehaviour
 			logMessage[logMessage.Count - 1] = text;
 		}
 		pLog = condition;
-		if (logMessage.Count > 1000)
+		if (logMessage.Count > 100)
 		{
 			logMessage.RemoveAt(0);
 		}
 		if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
 		{
 			logError.Add(text + "\n" + stackTrace);
-			if (logError.Count > 1000)
+			if (logError.Count > 100)
 			{
 				logError.RemoveAt(0);
 			}

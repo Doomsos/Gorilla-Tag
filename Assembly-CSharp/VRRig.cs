@@ -422,6 +422,10 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	[NonSerialized]
 	public Dictionary<string, int> remoteCycleStates = new Dictionary<string, int>();
 
+	private readonly List<CosmeticCollectionDisplay> scratchDisplayList = new List<CosmeticCollectionDisplay>();
+
+	private int[] cycleStatesArray = Array.Empty<int>();
+
 	public bool muted;
 
 	private float lastScaleFactor = 1f;
@@ -2627,16 +2631,33 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	public void RequestCosmetics(PhotonMessageInfoWrapped info)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.senderID);
-		if (netView.IsMine && CosmeticsController.hasInstance)
+		if (!netView.IsMine || !CosmeticsController.hasInstance)
 		{
-			if (CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
+			return;
+		}
+		if (CosmeticsController.instance.isHidingCosmeticsFromRemotePlayers)
+		{
+			netView.SendRPC("RPC_HideAllCosmetics", info.Sender);
+			return;
+		}
+		int[] array = CosmeticsController.instance.currentWornSet.ToPackedIDArray();
+		int[] array2 = CosmeticsController.instance.tryOnSet.ToPackedIDArray();
+		netView.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", player, array, array2, false);
+		CosmeticCollectionDisplay.GetDisplaysForRig(GetInstanceID(), scratchDisplayList);
+		if (scratchDisplayList.Count > 0)
+		{
+			int num = scratchDisplayList.Count * 2;
+			if (cycleStatesArray.Length != num)
 			{
-				netView.SendRPC("RPC_HideAllCosmetics", info.Sender);
-				return;
+				cycleStatesArray = new int[num];
 			}
-			int[] array = CosmeticsController.instance.currentWornSet.ToPackedIDArray();
-			int[] array2 = CosmeticsController.instance.tryOnSet.ToPackedIDArray();
-			netView.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", player, array, array2, false);
+			for (int i = 0; i < scratchDisplayList.Count; i++)
+			{
+				string parentPlayFabID = scratchDisplayList[i].ParentPlayFabID;
+				cycleStatesArray[i * 2] = parentPlayFabID[0] - 65 + 26 * (parentPlayFabID[1] - 65 + 26 * (parentPlayFabID[2] - 65 + 26 * (parentPlayFabID[3] - 65 + 26 * (parentPlayFabID[4] - 65))));
+				cycleStatesArray[i * 2 + 1] = scratchDisplayList[i].ActiveIndex;
+			}
+			netView.SendRPC("RPC_UpdateCosmeticsWithCollectablesPacked", player, cycleStatesArray);
 		}
 	}
 
@@ -3033,32 +3054,31 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		}
 	}
 
-	public void UpdateCosmeticsWithCollectables(int[] collectablesPacked, int[] cycleStatesPacked, PhotonMessageInfoWrapped info)
+	public void UpdateCosmeticsWithCollectables(int[] cycleStatesPacked, PhotonMessageInfoWrapped info)
 	{
 		IncrementRPC(info, "RPC_UpdateCosmeticsWithCollectablesPacked");
-		if (info.Sender != netView.Owner || collectablesPacked == null)
+		if (info.Sender != netView.Owner || cycleStatesPacked == null || cycleStatesPacked.Length % 2 != 0 || cycleStatesPacked.Length > 64)
 		{
 			return;
 		}
-		remoteCollectables = CosmeticsController.instance.UnpackCollectableItems(collectablesPacked);
+		int num = cycleStatesPacked.Length / 2;
 		remoteCycleStates.Clear();
-		if (cycleStatesPacked != null)
+		char[] array = new char[6] { '\0', '\0', '\0', '\0', '\0', '.' };
+		for (int i = 0; i < num; i++)
 		{
-			char[] array = new char[6] { '\0', '\0', '\0', '\0', '\0', '.' };
-			for (int i = 0; i + 1 < cycleStatesPacked.Length; i += 2)
+			int num2 = cycleStatesPacked[i * 2];
+			int num3 = cycleStatesPacked[i * 2 + 1];
+			if (num3 >= 0)
 			{
-				int num = cycleStatesPacked[i];
-				array[0] = (char)(65 + num % 26);
-				array[1] = (char)(65 + num / 26 % 26);
-				array[2] = (char)(65 + num / 676 % 26);
-				array[3] = (char)(65 + num / 17576 % 26);
-				array[4] = (char)(65 + num / 456976 % 26);
-				remoteCycleStates[new string(array)] = cycleStatesPacked[i + 1];
+				array[0] = (char)(65 + num2 % 26);
+				array[1] = (char)(65 + num2 / 26 % 26);
+				array[2] = (char)(65 + num2 / 676 % 26);
+				array[3] = (char)(65 + num2 / 17576 % 26);
+				array[4] = (char)(65 + num2 / 456976 % 26);
+				string text = new string(array);
+				remoteCycleStates[text] = num3;
+				CosmeticCollectionDisplay.FindForRig(GetInstanceID(), text)?.SetActiveIndex(num3);
 			}
-		}
-		if (initializedCosmetics)
-		{
-			SetCosmeticsActive(playfx: false);
 		}
 	}
 

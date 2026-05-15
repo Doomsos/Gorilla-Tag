@@ -15,8 +15,6 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	{
 		public string Sku;
 
-		public bool IsActive;
-
 		public DateTimeOffset? ExpirationTime;
 	}
 
@@ -228,19 +226,10 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 								{
 									try
 									{
-										SharedSubscriptionData sharedSubscriptionData = JsonConvert.DeserializeObject<SharedSubscriptionData>(datum.Value.Value);
-										bool num;
-										if (!sharedSubscriptionData.ExpirationTime.HasValue)
-										{
-											num = sharedSubscriptionData.IsActive;
-										}
-										else
-										{
-											DateTimeOffset now = DateTimeOffset.Now;
-											DateTimeOffset? expirationTime = sharedSubscriptionData.ExpirationTime;
-											num = now < expirationTime;
-										}
-										isSubscribed = num;
+										SharedSubscriptionData? sharedSubscriptionData = JsonConvert.DeserializeObject<SharedSubscriptionData>(datum.Value.Value);
+										DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+										DateTimeOffset? expirationTime = sharedSubscriptionData.ExpirationTime;
+										isSubscribed = utcNow < expirationTime;
 									}
 									catch (Exception ex)
 									{

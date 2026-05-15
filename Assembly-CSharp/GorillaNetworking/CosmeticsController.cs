@@ -452,6 +452,17 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			}
 			if (gameObject == null)
 			{
+				foreach (GameObject holdableObject in instance.holdableObjects)
+				{
+					if (holdableObject != null)
+					{
+						gameObject = holdableObject;
+						break;
+					}
+				}
+			}
+			if (gameObject == null)
+			{
 				return;
 			}
 			if (!gameObject.TryGetComponent<CosmeticCollectionDisplay>(out var component))
@@ -459,6 +470,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 				component = gameObject.AddComponent<CosmeticCollectionDisplay>();
 			}
 			List<CosmeticItem> list = new List<CosmeticItem>();
+			List<CosmeticItem> value;
 			if (rig.isLocal)
 			{
 				for (int i = 0; i < instance2.unlockedCosmetics.Count; i++)
@@ -473,23 +485,20 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 				{
 					list.Add(tryOnC);
 				}
-			}
-			else
-			{
-				CosmeticItem[] remoteCollectables = rig.remoteCollectables;
-				for (int num = 0; num < remoteCollectables.Length; num++)
+				if (component.ContentMatches(list))
 				{
-					if (!remoteCollectables[num].isNullItem && remoteCollectables[num].collectionParentPlayFabID == parentItem.itemName)
-					{
-						list.Add(remoteCollectables[num]);
-					}
+					return;
 				}
+			}
+			else if (instance2.collectablesByParentID.TryGetValue(parentItem.itemName, out value))
+			{
+				list.AddRange(value);
 			}
 			component.Populate(list, cosmeticInfo, gameObject.transform);
 			CosmeticCollectionDisplay.Register(rig.GetInstanceID(), parentItem.itemName, component);
-			if (!rig.isLocal && rig.remoteCycleStates.TryGetValue(parentItem.itemName, out var value))
+			if (!rig.isLocal && rig.remoteCycleStates.TryGetValue(parentItem.itemName, out var value2))
 			{
-				component.SetActiveIndex(value);
+				component.SetActiveIndex(value2);
 			}
 		}
 
@@ -996,6 +1005,10 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 	[NonSerialized]
 	public Dictionary<string, List<CosmeticItem>> collectablesByParentID = new Dictionary<string, List<CosmeticItem>>();
 
+	private static readonly List<CosmeticCollectionDisplay> scratchDisplayList = new List<CosmeticCollectionDisplay>();
+
+	private static int[] cycleStatesArray = Array.Empty<int>();
+
 	public int currencyBalance;
 
 	public string currencyName;
@@ -1328,7 +1341,9 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		{
 			return false;
 		}
-		return GetOwnedCollectableCount(collectionParentPlayFabID) < value2.collectionSlotCount;
+		List<CosmeticItem> value3;
+		int num = ((!value2.collectionIsCycling) ? value2.collectionSlotCount : (collectablesByParentID.TryGetValue(collectionParentPlayFabID, out value3) ? value3.Count : 0));
+		return GetOwnedCollectableCount(collectionParentPlayFabID) < num;
 	}
 
 	public void Awake()
@@ -2611,16 +2626,33 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		VRRig localRig = VRRig.LocalRig;
 		activeMergedSet.MergeInSets(currentWornSet, tempUnlockedSet, (string id) => PlayerCosmeticsSystem.LocalPlayerInTemporaryCosmeticSpace() || PlayerCosmeticsSystem.IsTemporaryCosmeticAllowed(localRig, id));
 		GorillaTagger.Instance.offlineVRRig.LocalUpdateCosmeticsWithTryon(activeMergedSet, tryOnSet, playfx);
-		if (sync && GorillaTagger.Instance.myVRRig != null)
+		if (!sync || !(GorillaTagger.Instance.myVRRig != null))
 		{
-			if (isHidingCosmeticsFromRemotePlayers)
+			return;
+		}
+		if (isHidingCosmeticsFromRemotePlayers)
+		{
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All);
+			return;
+		}
+		int[] array = activeMergedSet.ToPackedIDArray();
+		int[] array2 = tryOnSet.ToPackedIDArray();
+		GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, array, array2, playfx);
+		CosmeticCollectionDisplay.GetDisplaysForRig(GorillaTagger.Instance.offlineVRRig.GetInstanceID(), scratchDisplayList);
+		if (scratchDisplayList.Count > 0)
+		{
+			int num = scratchDisplayList.Count * 2;
+			if (cycleStatesArray.Length != num)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All);
-				return;
+				cycleStatesArray = new int[num];
 			}
-			int[] array = activeMergedSet.ToPackedIDArray();
-			int[] array2 = tryOnSet.ToPackedIDArray();
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, array, array2, playfx);
+			for (int num2 = 0; num2 < scratchDisplayList.Count; num2++)
+			{
+				string parentPlayFabID = scratchDisplayList[num2].ParentPlayFabID;
+				cycleStatesArray[num2 * 2] = parentPlayFabID[0] - 65 + 26 * (parentPlayFabID[1] - 65 + 26 * (parentPlayFabID[2] - 65 + 26 * (parentPlayFabID[3] - 65 + 26 * (parentPlayFabID[4] - 65))));
+				cycleStatesArray[num2 * 2 + 1] = scratchDisplayList[num2].ActiveIndex;
+			}
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithCollectablesPacked", RpcTarget.Others, cycleStatesArray);
 		}
 	}
 

@@ -241,7 +241,7 @@ public class DynamicCosmeticStand : MonoBehaviour, iFlagForBaking
 			AddToCartButton.gameObject.SetActive(value: true);
 			if (slotPriceTextTMP != null)
 			{
-				slotPriceTextTMP.text = thisCosmeticItem.itemCategory.ToString().ToUpper() + " " + thisCosmeticItem.cost;
+				slotPriceTextTMP.text = "ADD-ON   " + thisCosmeticItem.cost;
 			}
 		}
 	}

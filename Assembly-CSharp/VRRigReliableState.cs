@@ -12,14 +12,15 @@ public class VRRigReliableState : MonoBehaviour, IWrappedSerializable, INetworkS
 	{
 		Hat,
 		Shirt,
-		length
+		Face,
+		Length
 	}
 
 	[NonSerialized]
-	private ICosmeticStateSync[] m_cosmeticStateTargets = new ICosmeticStateSync[2];
+	private ICosmeticStateSync[] m_cosmeticStateTargets = new ICosmeticStateSync[3];
 
 	[NonSerialized]
-	private int[] m_cosmeticStates = new int[2];
+	private int[] m_cosmeticStates = new int[3];
 
 	[NonSerialized]
 	public int[] activeTransferrableObjectIndex;

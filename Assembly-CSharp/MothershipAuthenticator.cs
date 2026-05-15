@@ -27,6 +27,8 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 
 	public Action<int> OnLoginAttemptFailure;
 
+	private double lastSliceUpdateTime;
+
 	[RuntimeInitializeOnLoadMethod]
 	private static void Init()
 	{
@@ -130,19 +132,26 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 
 	public void OnEnable()
 	{
-		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		if (MothershipClientApiUnity.IsEnabled())
+		{
+			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+			lastSliceUpdateTime = Time.unscaledTimeAsDouble;
+		}
 	}
 
 	public void OnDisable()
 	{
-		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		if (MothershipClientApiUnity.IsEnabled())
+		{
+			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		}
 	}
 
 	public void SliceUpdate()
 	{
-		if (MothershipClientApiUnity.IsEnabled())
-		{
-			MothershipClientApiUnity.Tick(Time.deltaTime);
-		}
+		double unscaledTimeAsDouble = Time.unscaledTimeAsDouble;
+		float deltaTime = (float)(unscaledTimeAsDouble - lastSliceUpdateTime);
+		lastSliceUpdateTime = unscaledTimeAsDouble;
+		MothershipClientApiUnity.Tick(deltaTime);
 	}
 }

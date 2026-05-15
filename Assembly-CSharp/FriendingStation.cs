@@ -265,16 +265,17 @@ public class FriendingStation : MonoBehaviour
 		{
 			return false;
 		}
-		int num = 9;
+		int configuredFreeExtraPageCount = FriendDisplay.ConfiguredFreeExtraPageCount;
 		int configuredVimPageCount = FriendDisplay.ConfiguredVimPageCount;
-		int num2 = 9 * configuredVimPageCount;
-		int num3 = num + num2;
+		int num = 9 * configuredVimPageCount;
+		int num2 = 9 + 9 * configuredFreeExtraPageCount;
+		int num3 = num2 + num;
 		int count = instance.FriendsList.Count;
-		if (count < num)
+		if (count < num2)
 		{
 			return false;
 		}
-		if (SubscriptionManager.IsLocalSubscribed())
+		if (SubscriptionManager.IsLocalSubscribed() || configuredVimPageCount == 0)
 		{
 			if (count >= num3)
 			{
@@ -283,14 +284,14 @@ public class FriendingStation : MonoBehaviour
 			}
 			return false;
 		}
-		int num4 = Mathf.Clamp(count - num, 0, num2);
+		int num4 = Mathf.Clamp(count - num2, 0, num);
 		if (num4 <= 0)
 		{
-			fullMessage = ZString.Format("FRIEND SLOTS ARE FULL! SUBSCRIBE FOR {0} ADDITIONAL SLOTS!", num2);
+			fullMessage = ZString.Format("FRIEND SLOTS ARE FULL! SUBSCRIBE FOR {0} ADDITIONAL SLOTS!", num);
 		}
 		else
 		{
-			int arg = num2 - num4;
+			int arg = num - num4;
 			fullMessage = ZString.Format("RENEW GTFC SUBSCRIPTION TO UNLOCK YOUR REMAINING {0} SLOTS.", arg);
 		}
 		return true;

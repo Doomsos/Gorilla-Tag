@@ -28,6 +28,8 @@ public class CosmeticsProximityReactorManager : MonoBehaviour, IGorillaSliceable
 
 	public IReadOnlyList<CosmeticsProximityReactor> Cosmetics => cosmetics;
 
+	public static event Action<CosmeticsProximityReactor> OnCosmeticRegistered;
+
 	private void Awake()
 	{
 		if (_instance != null && _instance != this)
@@ -71,6 +73,7 @@ public class CosmeticsProximityReactorManager : MonoBehaviour, IGorillaSliceable
 		if (!cosmetics.Contains(cosmetic))
 		{
 			cosmetics.Add(cosmetic);
+			CosmeticsProximityReactorManager.OnCosmeticRegistered?.Invoke(cosmetic);
 		}
 		IReadOnlyList<string> types = cosmetic.GetTypes();
 		for (int i = 0; i < types.Count; i++)

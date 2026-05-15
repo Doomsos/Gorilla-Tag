@@ -30,6 +30,10 @@ public class MonkeGravityController : MonoBehaviour, ICallbackUnique, ICallBack
 	[SerializeField]
 	private BasicGravityZone m_alwaysInZone;
 
+	[Tooltip("The direction we wish to rotate if the target is 180 degrees off.")]
+	[SerializeField]
+	protected RotationDirection m_preferredRotationDirection = RotationDirection.Right;
+
 	private bool m_register;
 
 	private readonly List<BasicGravityZone> m_gravityZones = new List<BasicGravityZone>(3);
@@ -49,6 +53,18 @@ public class MonkeGravityController : MonoBehaviour, ICallbackUnique, ICallBack
 	protected bool InstantRotation => m_instantRotation;
 
 	protected bool OverrideForceMode => m_overrideForceMode;
+
+	public RotationDirection PreferredRotationDirection
+	{
+		get
+		{
+			return m_preferredRotationDirection;
+		}
+		set
+		{
+			m_preferredRotationDirection = value;
+		}
+	}
 
 	public bool Register => m_register;
 
@@ -187,7 +203,34 @@ public class MonkeGravityController : MonoBehaviour, ICallbackUnique, ICallBack
 	public virtual void ApplyGravityUpRotation(in Vector3 upDir, float speed)
 	{
 		Vector3 up = m_targetTransform.up;
-		Vector3 toDirection = (m_instantRotation ? upDir : Vector3.RotateTowards(up, upDir, speed, 0f));
+		Vector3 toDirection;
+		if (!m_instantRotation)
+		{
+			Vector3 vector = upDir;
+			if (vector == up * -1f)
+			{
+				switch (m_preferredRotationDirection)
+				{
+				case RotationDirection.Left:
+					vector = m_targetTransform.right * -1f;
+					break;
+				case RotationDirection.Right:
+					vector = m_targetTransform.right;
+					break;
+				case RotationDirection.Forward:
+					vector = m_targetTransform.forward;
+					break;
+				case RotationDirection.Backward:
+					vector = m_targetTransform.forward * -1f;
+					break;
+				}
+			}
+			toDirection = Vector3.RotateTowards(up, vector, speed, 0f);
+		}
+		else
+		{
+			toDirection = upDir;
+		}
 		Quaternion quaternion = Quaternion.FromToRotation(up, toDirection);
 		m_targetRigidBody.MoveRotation(quaternion * m_targetTransform.rotation);
 		if (quaternion == Quaternion.identity)

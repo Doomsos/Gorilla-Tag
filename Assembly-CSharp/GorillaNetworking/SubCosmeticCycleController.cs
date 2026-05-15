@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 namespace GorillaNetworking;
@@ -73,14 +74,20 @@ public class SubCosmeticCycleController : MonoBehaviour
 		SendCycleRPC(index);
 	}
 
+	public void SetDisplayVisible(bool visible)
+	{
+		Display?.SetVisible(visible);
+	}
+
 	private void SendCycleRPC(int newIndex)
 	{
 		if (syncCycleOverNetwork)
 		{
 			string text = Display?.ParentPlayFabID;
-			if (!string.IsNullOrEmpty(text) && text.Length >= 5)
+			if (!string.IsNullOrEmpty(text) && text.Length >= 5 && NetworkSystem.Instance.InRoom)
 			{
-				_ = NetworkSystem.Instance.InRoom;
+				int num = text[0] - 65 + 26 * (text[1] - 65 + 26 * (text[2] - 65 + 26 * (text[3] - 65 + 26 * (text[4] - 65))));
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_SetCollectionCycleIndex", RpcTarget.Others, new int[2] { num, newIndex });
 			}
 		}
 	}
