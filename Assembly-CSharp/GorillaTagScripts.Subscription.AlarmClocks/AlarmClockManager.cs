@@ -104,7 +104,7 @@ public sealed class AlarmClockManager : MonoBehaviour
 			yield return null;
 		}
 		PersistLog.Log($"[AC][F{Time.frameCount}] Game systems loaded");
-		if (SubscriptionManager.IsLocalSubscribed())
+		if (PlayFabAuthenticator.instance != null && SubscriptionManager.IsLocalSubscribed())
 		{
 			RequestLoadZones();
 			yield return null;
@@ -152,8 +152,17 @@ public sealed class AlarmClockManager : MonoBehaviour
 		}
 		else
 		{
+			if (PlayFabAuthenticator.instance == null)
+			{
+				PersistLog.Log($"[AC][F{Time.frameCount}] AlarmClockManager failed wake up because PlayFabAuthenticator was null.");
+			}
+			else if (PlayFabAuthenticator.instance.loginFailed)
+			{
+				PersistLog.Log($"[AC][F{Time.frameCount}] AlarmClockManager failed wake up because login failed.");
+			}
 			PersistLog.Log("No subscription.  Clearing clock data.");
 			PlayerPrefs.SetString("AlarmClock", "");
+			StartCoroutine(ClearUnsubPlayerData());
 		}
 		Initialized = true;
 		GTPlayer.Instance.disableMovement = false;
@@ -209,11 +218,11 @@ public sealed class AlarmClockManager : MonoBehaviour
 
 	private static bool GameSystemsLoaded()
 	{
-		if ((bool)ZoneManagement.instance && ZoneManagement.instance.Initialized && (bool)CosmeticsController.instance && CosmeticsController.instance.v2_isCosmeticPlayFabCatalogDataLoaded && CosmeticsV2Spawner_Dirty.isPrepared)
+		if ((!ZoneManagement.instance || !ZoneManagement.instance.Initialized || !CosmeticsController.instance || !CosmeticsController.instance.v2_isCosmeticPlayFabCatalogDataLoaded || !CosmeticsV2Spawner_Dirty.isPrepared || !SubscriptionManager.LocalSubscriptionDataInitialized) && (!(PlayFabAuthenticator.instance != null) || !PlayFabAuthenticator.instance.loginFailed))
 		{
-			return SubscriptionManager.LocalSubscriptionDataInitialized;
+			return PlayFabAuthenticator.instance == null;
 		}
-		return false;
+		return true;
 	}
 
 	private bool AllZonesLoaded()

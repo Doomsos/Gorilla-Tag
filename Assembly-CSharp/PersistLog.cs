@@ -125,8 +125,13 @@ public class PersistLog : MonoBehaviour
 
 	public static void Log(string msg)
 	{
+		Log(LogType.Log, msg);
+	}
+
+	public static void Log(LogType type, string msg)
+	{
 		msg = $"T+{Time.time} >[DEV MSG]> {msg}\n\n";
-		Debug.Log(msg);
+		Debug.unityLogger.Log(type, msg);
 		if (sr != null)
 		{
 			sr.Write(msg);

@@ -57,6 +57,16 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		{
 			Instance.SteamAuthenticator = Instance.gameObject.GetOrAddComponent<SteamAuthenticator>();
 		}
+		MothershipClientApiUnity.SetLogCallback(delegate(MothershipLogLevel level, string message)
+		{
+			PersistLog.Log(level switch
+			{
+				MothershipLogLevel.INFO => LogType.Log, 
+				MothershipLogLevel.WARN => LogType.Warning, 
+				MothershipLogLevel.ERROR => LogType.Error, 
+				_ => LogType.Log, 
+			}, message);
+		});
 		MothershipClientApiUnity.SetAuthRefreshedCallback(delegate
 		{
 			BeginLoginFlow();
@@ -106,7 +116,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 					Debug.LogError($"Couldn't log into Mothership with Steam error {MothershipError.Message} trace ID: {MothershipError.TraceId} status: {errorCode} Mothership error code: {MothershipError.MothershipErrorCode}");
 					loginAttempts++;
 					OnLoginAttemptFailure?.Invoke(loginAttempts);
-					if (loginAttempts >= MaxLoginAttempts)
+					if (MothershipError.StatusCode == 400 || loginAttempts >= MaxLoginAttempts)
 					{
 						OnLoginFailure?.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
 					}

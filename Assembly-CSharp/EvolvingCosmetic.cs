@@ -111,21 +111,39 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 			}
 			break;
 		}
-		for (int i = 0; i < ageAwareGameObjects.Length && !(_daysAccrued < ageAwareGameObjects[i].minActiveDays); i++)
+		if (!_daysAccrued.HasValue)
 		{
-			SelectedObjectIndex = i;
-		}
-		ActivateSelectedIndex();
-		if (_daysAccrued.HasValue)
-		{
-			DispatchDaysOnEnable?.Invoke(Mathf.Min(_daysAccrued.Value, capDays));
-			if (maxDays > 0)
-			{
-				DispatchDaysOnEnableNormalized?.Invoke(Mathf.Min((float)_daysAccrued.Value / (float)maxDays, 1f) * (float)multiplier);
-			}
+			Debug.LogError("_daysAccrued was not set by end of OnEnable.");
 			return;
 		}
-		throw new NullReferenceException("_daysAccrued was not set by end of OnEnable.");
+		int value = _daysAccrued.Value;
+		SelectedObjectIndex = FindAgeAwareIndex(value);
+		ActivateSelectedIndex();
+		DispatchDaysOnEnable?.Invoke(Mathf.Min(value, capDays));
+		if (maxDays > 0)
+		{
+			DispatchDaysOnEnableNormalized?.Invoke(Mathf.Min((float)value / (float)maxDays, 1f) * (float)multiplier);
+		}
+	}
+
+	private int FindAgeAwareIndex(int daysAccrued)
+	{
+		if (ageAwareGameObjects.Length == 0)
+		{
+			return 0;
+		}
+		if (ageAwareGameObjects[0].minActiveDays > daysAccrued)
+		{
+			return -1;
+		}
+		for (int i = 0; i < ageAwareGameObjects.Length; i++)
+		{
+			if (daysAccrued <= ageAwareGameObjects[i].maxActiveDays)
+			{
+				return i;
+			}
+		}
+		return ageAwareGameObjects.Length - 1;
 	}
 
 	private void OnDisable()
