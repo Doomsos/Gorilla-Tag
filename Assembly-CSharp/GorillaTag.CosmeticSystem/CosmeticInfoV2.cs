@@ -105,15 +105,21 @@ public struct CosmeticInfoV2 : ISerializationCallbackReceiver
 	[Tooltip("For parent (collection) cosmetics: when true only one collectable is visible at a time and the player can cycle through them. When false all slots are shown simultaneously")]
 	public bool collectionIsCycling;
 
-	[Tooltip("For parent (collection) cosmetics: when true each sub-item's Target Slot Index is respected and items snap to their declared slot. When false index values are ignored and sub-items fill slots in acquisition order. Uncheck this to quickly compare both layouts without touching sub-item SOs.")]
+	[Tooltip("[Non-cycling collections only] When true, each sub-item is placed at the specific physical slot position declared by its 'Target Slot Index', rather than filling slots in purchase order. Use this when sub-items must always occupy a fixed dedicated position on the parent ")]
 	public bool collectionUsesIndexTargeting;
+
+	[Tooltip("[Cycling collections only] When true, sub-items are cycled through in ascending Series Index order rather than purchase order, regardless of when they were acquired. Gaps in the series are skipped only owned items appear, but always in their correct numbered sequence (e.g. comic reade always cycle as #1 → #2 → #3 even if bought out of order).")]
+	public bool collectionUsesSeriesOrder;
 
 	[Space]
 	[Tooltip("For sub-item (collectable) cosmetics: the PlayFab ID of the parent cosmetic that must be owned before this sub-item can be purchased. Leave empty if this is not a sub-item.")]
 	public string collectionParentPlayFabID;
 
-	[Tooltip("For sub-item (collectable) cosmetics: the slot index (0-based) on the parent cosmeticSO that this sub-item occupies. Set to Any for interchangeable items (e.g. badges) that fill any available slot in acquisition order. Set to a specific index when this item must always go to a particular socket on the parent.")]
+	[Tooltip("[Non-cycling collections with 'Use Slot Targeting enabled] Declares which fixed physical slot on the parent this item occupies. Set to 'Any' to fill the next available slot in purchase order instead. Has no effect when the parent uses cycling mode.")]
 	public int collectionTargetSlotIndex;
+
+	[Tooltip("[Cycling collections with 'Use Series Order' enabled] Declares this item's position in a numbered series (start from 0). Items cycle in ascending order of this value and gaps are skipped. Leave at -1 if the parent does not use series ordering.")]
+	public int collectionSeriesIndex;
 
 	[Tooltip("PlayFab ID of the cosmetic to apply to a hit player via Cosmetic Swapper (e.g. chicken sword) tech. Distinct from this sub-item's own visual.")]
 	public string appliedCosmeticPlayFabID;
@@ -227,6 +233,8 @@ public struct CosmeticInfoV2 : ISerializationCallbackReceiver
 		throwableMaterialGrabIndices = new int[0];
 		throwableIndex = -1;
 		collectionUsesIndexTargeting = false;
+		collectionUsesSeriesOrder = false;
+		collectionSeriesIndex = -1;
 		appliedCosmeticPlayFabID = null;
 	}
 

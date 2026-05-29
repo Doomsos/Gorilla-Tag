@@ -485,6 +485,23 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 				{
 					list.Add(tryOnC);
 				}
+				if (cosmeticInfo.collectionIsCycling && cosmeticInfo.collectionUsesSeriesOrder)
+				{
+					list.Sort(delegate(CosmeticItem a, CosmeticItem b)
+					{
+						int collectionSeriesIndex = a.collectionSeriesIndex;
+						int collectionSeriesIndex2 = b.collectionSeriesIndex;
+						if (collectionSeriesIndex < 0 && collectionSeriesIndex2 < 0)
+						{
+							return 0;
+						}
+						if (collectionSeriesIndex < 0)
+						{
+							return 1;
+						}
+						return (collectionSeriesIndex2 < 0) ? (-1) : collectionSeriesIndex.CompareTo(collectionSeriesIndex2);
+					});
+				}
 				if (component.ContentMatches(list))
 				{
 					return;
@@ -809,6 +826,9 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 
 		[NonSerialized]
 		public int collectionTargetSlotIndex;
+
+		[NonSerialized]
+		public int collectionSeriesIndex;
 
 		[NonSerialized]
 		public string appliedCosmeticPlayFabID;
@@ -1234,6 +1254,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			cosmeticItem.collectionIsCycling = value.collectionIsCycling;
 			cosmeticItem.collectionUsesIndexTargeting = value.collectionUsesIndexTargeting;
 			cosmeticItem.collectionTargetSlotIndex = value.collectionTargetSlotIndex;
+			cosmeticItem.collectionSeriesIndex = value.collectionSeriesIndex;
 			cosmeticItem.appliedCosmeticPlayFabID = value.appliedCosmeticPlayFabID ?? string.Empty;
 			CosmeticItem item = cosmeticItem;
 			_allCosmetics.Add(item);

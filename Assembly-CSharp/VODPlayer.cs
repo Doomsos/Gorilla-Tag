@@ -84,6 +84,9 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 		public bool hideUpNext;
 
+		public string id;
+
+		[Obsolete]
 		public string url;
 
 		public VODStreamType type;
@@ -453,13 +456,13 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		return new VODStream.VODStreamChannel[0];
 	}
 
-	private async Task<string> GetCachedFile(string url, string extension)
+	private bool CheckForCachedFile(string fileId, string extension, out string filePath)
 	{
-		string path = $"V{url.GetHashCode():X}.{extension}";
-		string filePath = Path.Combine(Application.persistentDataPath, path);
+		string path = $"V{fileId.GetHashCode():X}.{extension}";
+		filePath = Path.Combine(Application.persistentDataPath, path);
 		if (File.Exists(filePath))
 		{
-			return filePath;
+			return true;
 		}
 		string text = Path.Combine(Application.persistentDataPath, "GTv_Cache");
 		if (!Directory.Exists(text))
@@ -467,7 +470,12 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			Directory.CreateDirectory(text);
 		}
 		filePath = Path.Combine(text, path);
-		if (File.Exists(filePath))
+		return File.Exists(filePath);
+	}
+
+	private async Task<string> GetCachedFile(string url, string fileId, string extension)
+	{
+		if (CheckForCachedFile(fileId, extension, out var filePath))
 		{
 			return filePath;
 		}
@@ -573,15 +581,59 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		switch (str.type)
 		{
 		case VODStream.VODStreamType.VIDEO:
-			StartVideoPlayback(str.url, str.ch, time);
+		{
+			if (str.id.IsNullOrEmpty())
+			{
+				StartVideoPlayback(str.url, str.url, str.ch, time, null);
+				break;
+			}
+			if (CheckForCachedFile(str.id, "mp4", out var filePath2))
+			{
+				StartVideoPlayback(filePath2, str.id, str.ch, time, filePath2);
+				break;
+			}
+			MothershipClientApiUnity.GetDLCFileDetails(str.id, delegate(SharedDownloadableFileResult result)
+			{
+				StartVideoPlayback(result.url, str.id, str.ch, time, null);
+			}, delegate(MothershipError error, int status)
+			{
+				Debug.Log("VOD: FILE FETCH FAILED Mothership Error: " + error.MothershipErrorCode + " Trace ID: " + error.TraceId + " Message: " + error.Message);
+				if (!str.url.IsNullOrEmpty())
+				{
+					StartVideoPlayback(str.url, str.url, str.ch, time, null);
+				}
+			});
 			break;
+		}
 		case VODStream.VODStreamType.IMAGE:
-			StartImagePlayback(str.url, str.duration, str.ch, time);
+		{
+			if (str.id.IsNullOrEmpty())
+			{
+				StartImagePlayback(str.url, str.url, str.duration, str.ch, time, null);
+				break;
+			}
+			if (CheckForCachedFile(str.id, "mp4", out var filePath))
+			{
+				StartImagePlayback(filePath, str.id, str.duration, str.ch, time, filePath);
+				break;
+			}
+			MothershipClientApiUnity.GetDLCFileDetails(str.id, delegate(SharedDownloadableFileResult result)
+			{
+				StartImagePlayback(result.url, str.id, str.duration, str.ch, time, null);
+			}, delegate(MothershipError error, int status)
+			{
+				Debug.Log("VOD: FILE FETCH FAILED Mothership Error: " + error.MothershipErrorCode + " Trace ID: " + error.TraceId + " Message: " + error.Message);
+				if (!str.url.IsNullOrEmpty())
+				{
+					StartImagePlayback(str.url, str.url, str.duration, str.ch, time, null);
+				}
+			});
 			break;
+		}
 		}
 	}
 
-	private async void StartImagePlayback(string url, int duration, VODStream.VODStreamChannel ch, double time = 0.0)
+	private async void StartImagePlayback(string url, string fileId, int duration, VODStream.VODStreamChannel ch, double time, string cachedUrl)
 	{
 		duration -= (int)time;
 		if (duration <= 0)
@@ -598,8 +650,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 				targets[i].ClearNext();
 			}
 		}
-		string text = await GetCachedFile(url, "png");
-		if (text == null)
+		if (cachedUrl == null)
+		{
+			cachedUrl = await GetCachedFile(url, fileId, "png");
+		}
+		if (cachedUrl == null)
 		{
 			Debug.LogError("VOD :: cache error :: " + url);
 			for (int j = 0; j < imageTargets.Count; j++)
@@ -608,7 +663,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			}
 			return;
 		}
-		UnityWebRequest www = new UnityWebRequest(text);
+		UnityWebRequest www = new UnityWebRequest(cachedUrl);
 		DownloadHandlerTexture downloadHandlerTexture = (DownloadHandlerTexture)(www.downloadHandler = new DownloadHandlerTexture());
 		await www.SendWebRequest();
 		if (www.result != UnityWebRequest.Result.Success)
@@ -635,7 +690,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	private async void StartVideoPlayback(string url, VODStream.VODStreamChannel ch, double time = 0.0)
+	private async void StartVideoPlayback(string url, string fileId, VODStream.VODStreamChannel ch, double time, string cachedUrl)
 	{
 		if (playerBusy)
 		{
@@ -661,14 +716,17 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		}
 		try
 		{
-			string text = await GetCachedFile(url, "mp4");
-			if (text == null)
+			if (cachedUrl == null)
+			{
+				cachedUrl = await GetCachedFile(url, fileId, "mp4");
+			}
+			if (cachedUrl == null)
 			{
 				Debug.LogError("VOD :: cache error :: " + url);
 				playerBusy = false;
 				return;
 			}
-			player.url = text;
+			player.url = cachedUrl;
 			player.Prepare();
 			while (!player.isPrepared && Application.isPlaying)
 			{

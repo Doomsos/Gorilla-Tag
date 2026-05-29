@@ -1,6 +1,8 @@
 using System;
+using GorillaLocomotion.Climbing;
 using GorillaTag.Gravity;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace GorillaLocomotion;
 
@@ -23,6 +25,10 @@ public class GTPlayerTransform : MonkeGravityController
 
 	[SerializeField]
 	private GTPlayer m_gtPlayerInstance;
+
+	public static float GravityStrength { get; private set; }
+
+	public static Vector3 GravityForce { get; private set; } = Physics.gravity;
 
 	public static Vector3 Up { get; private set; } = Vector3.up;
 
@@ -91,27 +97,37 @@ public class GTPlayerTransform : MonkeGravityController
 	{
 		ref readonly GTPlayer.HandState leftHandRef = ref k_playerInstance.LeftHandRef;
 		ref readonly GTPlayer.HandState rightHandRef = ref k_playerInstance.RightHandRef;
-		Vector3 pivotPoint = k_transform.position;
+		Vector3 pivotPoint = k_rigidBody.position;
 		Quaternion rotation = newRotation * Quaternion.Inverse(currentRotation);
-		Vector3 rotatedDifference = GetRotatedDifference(in pivotPoint, k_bodyTransform.position, in rotation);
-		if (leftHandRef.wasColliding || leftHandRef.wasSliding)
+		Vector3 vector = GetRotatedDifference(in pivotPoint, k_bodyTransform.position, in rotation);
+		bool flag = false;
+		bool flag2 = false;
+		GorillaHandClimber currentClimber = k_playerInstance.CurrentClimber;
+		if (k_playerInstance.isClimbing)
 		{
-			Vector3 rotatedDifference2 = GetRotatedDifference(in pivotPoint, in leftHandRef.lastPosition, in rotation);
-			if (Vector3.Dot(Vector3.Normalize(rotatedDifference2), leftHandRef.lastHitInfo.normal) <= 0f)
+			flag = currentClimber.xrNode == XRNode.LeftHand;
+			flag2 = currentClimber.xrNode == XRNode.RightHand;
+		}
+		if (leftHandRef.wasColliding || leftHandRef.wasSliding || flag)
+		{
+			Vector3 rotatedDifference = GetRotatedDifference(in pivotPoint, flag ? currentClimber.transform.position : leftHandRef.lastPosition, in rotation);
+			Vector3 lhs = Vector3.Normalize(rotatedDifference);
+			if (flag || Vector3.Dot(lhs, leftHandRef.lastHitInfo.normal) <= 0f)
 			{
-				rotatedDifference -= rotatedDifference2;
+				vector = rotatedDifference;
 			}
 		}
-		if (rightHandRef.wasColliding || rightHandRef.wasSliding)
+		if (rightHandRef.wasColliding || rightHandRef.wasSliding || flag2)
 		{
-			Vector3 rotatedDifference3 = GetRotatedDifference(in pivotPoint, in rightHandRef.lastPosition, in rotation);
-			if (Vector3.Dot(Vector3.Normalize(rotatedDifference3), rightHandRef.lastHitInfo.normal) <= 0f)
+			Vector3 rotatedDifference2 = GetRotatedDifference(in pivotPoint, flag2 ? currentClimber.transform.position : rightHandRef.lastPosition, in rotation);
+			Vector3 lhs2 = Vector3.Normalize(rotatedDifference2);
+			if (flag2 || Vector3.Dot(lhs2, rightHandRef.lastHitInfo.normal) <= 0f)
 			{
-				rotatedDifference -= rotatedDifference3;
+				vector = rotatedDifference2;
 			}
 		}
-		k_rotationPosOffsetChange -= rotatedDifference;
-		k_rigidBody.position = pivotPoint - rotatedDifference;
+		k_rotationPosOffsetChange -= vector;
+		k_rigidBody.position = pivotPoint - vector;
 		k_rigidBody.rotation = newRotation;
 		Up = newRotation * Vector3.up;
 		Down = Up * -1f;
@@ -156,6 +172,8 @@ public class GTPlayerTransform : MonkeGravityController
 		k_rigidBody = m_targetRigidBody;
 		k_bodyTransform = m_gtPlayerBodyTransform;
 		k_playerInstance = m_gtPlayerInstance;
+		GravityStrength = Physics.gravity.magnitude * -1f;
+		GravityForce = Physics.gravity;
 		Up = k_transform.up;
 		Forward = k_transform.forward;
 		Right = k_transform.right;
@@ -208,6 +226,8 @@ public class GTPlayerTransform : MonkeGravityController
 
 	public override void ApplyGravityForce(in Vector3 force, ForceMode forceType = ForceMode.Acceleration)
 	{
+		GravityForce = force;
+		GravityStrength = GravityForce.magnitude * -1f;
 		if (!IgnoreGravityForce && !k_playerInstance.isClimbing && k_playerInstance.GravityOverrideCount <= 0)
 		{
 			base.ApplyGravityForce(force * k_playerInstance.scale, forceType);

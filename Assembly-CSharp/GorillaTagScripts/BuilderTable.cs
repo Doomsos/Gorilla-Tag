@@ -502,7 +502,7 @@ public class BuilderTable : MonoBehaviour, ITickSystemTick
 	private SharedBlocksManager.StartingMapConfig startingMapConfig = new SharedBlocksManager.StartingMapConfig
 	{
 		pageNumber = 0,
-		pageSize = 10,
+		pageSize = 50,
 		sortMethod = SharedBlocksManager.MapSortMethod.Top.ToString(),
 		useMapID = false,
 		mapID = null
@@ -4875,6 +4875,7 @@ public class BuilderTable : MonoBehaviour, ITickSystemTick
 			{
 				GTDev.LogError("BuilderTable " + tableZone.ToString() + " OnGetStartingMapConfigSuccess Unknown sort method " + startingMapConfig.sortMethod);
 			}
+			SharedBlocksManager.instance.RefreshPopularMapsForRandom();
 		}
 		catch (Exception ex)
 		{
@@ -4893,7 +4894,7 @@ public class BuilderTable : MonoBehaviour, ITickSystemTick
 		startingMapConfig = new SharedBlocksManager.StartingMapConfig
 		{
 			pageNumber = 0,
-			pageSize = 10,
+			pageSize = 50,
 			sortMethod = SharedBlocksManager.MapSortMethod.Top.ToString(),
 			useMapID = false,
 			mapID = null

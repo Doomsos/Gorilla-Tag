@@ -13,11 +13,11 @@ public class PersistLog : MonoBehaviour
 
 	private bool dup;
 
-	private List<Tuple<string, string>> earlyQ;
+	private List<(double time, string msg, string strace)> earlyQ;
 
 	private async void OnEnable()
 	{
-		earlyQ = new List<Tuple<string, string>>();
+		earlyQ = new List<(double, string, string)>();
 		Application.logMessageReceived += LogMessageEnqueue;
 		while (GorillaComputer.instance == null)
 		{
@@ -69,9 +69,9 @@ public class PersistLog : MonoBehaviour
 		}
 		sr.Write($"{DateTime.Now:U}\r\n\r\n                           MONKE WUZ HERE!\r\n               _______    /\r\n              /       \\\r\n             /  _____  \\\r\n            / / _   _ \\ \\\r\n           [ | (O) (O) | ]\r\n            | \\  . .  / |\r\n     _______|  | _._ |  |_______\r\n    /        \\  \\___/  /        \\\r\n\r\nApp Id:        {Application.identifier}\r\nApp Ver:       {Application.version}\r\nPlatform:      {Application.platform}\r\nSys Lang:      {Application.systemLanguage}\r\nGC Version:    {GorillaComputer.instance.version}\r\nGC Build Code: {GorillaComputer.instance.buildCode}\r\nGC Build Date: {GorillaComputer.instance.buildDate}\r\n\r\n");
 		Application.logMessageReceived -= LogMessageEnqueue;
-		for (int j = 0; j < earlyQ.Count; j++)
+		foreach (var (num, arg, arg2) in earlyQ)
 		{
-			sr.Write($"T+{Time.time} >> {earlyQ[j].Item1}\n==========================\n{earlyQ[j].Item2}\n\n");
+			sr.Write($"T+{num} >> {arg}\n==========================\n{arg2}\n\n");
 		}
 		sr.Flush();
 		Application.logMessageReceived += LogMessageReceived;
@@ -97,7 +97,7 @@ public class PersistLog : MonoBehaviour
 	{
 		if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
 		{
-			earlyQ.Add(Tuple.Create(msg, strace));
+			earlyQ.Add((Time.realtimeSinceStartupAsDouble, msg, strace));
 		}
 	}
 
@@ -109,16 +109,17 @@ public class PersistLog : MonoBehaviour
 			{
 				if (!dup)
 				{
-					sr.Write($"T+{Time.time} >> Duplicate log entry... Supressing further\n\n");
+					sr.Write($"T+{Time.realtimeSinceStartupAsDouble} >> Duplicate log entry... Supressing further\n\n");
+					sr.Flush();
 					dup = true;
 				}
 			}
 			else
 			{
-				sr.Write($"T+{Time.time} >> {msg}\n==========================\n{strace}\n\n");
+				sr.Write($"T+{Time.realtimeSinceStartupAsDouble} >> {msg}\n==========================\n{strace}\n\n");
+				sr.Flush();
 				dup = false;
 			}
-			sr.Flush();
 		}
 		plog = msg + strace;
 	}
@@ -130,7 +131,7 @@ public class PersistLog : MonoBehaviour
 
 	public static void Log(LogType type, string msg)
 	{
-		msg = $"T+{Time.time} >[DEV MSG]> {msg}\n\n";
+		msg = $"T+{Time.realtimeSinceStartupAsDouble} >[DEV MSG]> {msg}\n\n";
 		Debug.unityLogger.Log(type, msg);
 		if (sr != null)
 		{

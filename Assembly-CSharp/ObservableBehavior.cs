@@ -4,7 +4,7 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 {
 	private bool firstFrame = true;
 
-	protected bool observable = true;
+	protected bool observable;
 
 	[SerializeField]
 	private ObservableBehaviorRule observableBehaviorRule;
@@ -13,6 +13,9 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	private RigEventVolume observableVolume;
 
 	private float dist;
+
+	[SerializeField]
+	private bool triggerLostObservableIfSpawnedUnobservable;
 
 	public ObservableBehaviorRule ObservableBehaviorRule
 	{
@@ -65,20 +68,17 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 			float num = ((!observableBehaviorRule.InverseObservable) ? Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward) : Vector3.Dot((base.transform.position - transform.position).normalized, base.transform.forward));
 			flag = observableBehaviorRule.ObservableDistanceRange.x <= dist && dist <= observableBehaviorRule.ObservableDistanceRange.y && observableBehaviorRule.ObservableDotRange.x <= num && num <= observableBehaviorRule.ObservableDotRange.y;
 		}
-		if (firstFrame || observable != flag)
+		if ((firstFrame && flag) || (observable != flag && flag))
 		{
-			if (flag)
-			{
-				OnBecameObservable();
-			}
-			else
-			{
-				OnLostObservable();
-			}
+			OnBecameObservable();
 		}
-		observable = flag;
+		else if ((firstFrame && !flag && triggerLostObservableIfSpawnedUnobservable) || (observable != flag && !flag))
+		{
+			OnLostObservable();
+		}
 		firstFrame = false;
-		if (flag)
+		observable = flag;
+		if (observable)
 		{
 			ObservableSliceUpdate();
 		}

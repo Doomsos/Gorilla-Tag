@@ -184,7 +184,7 @@ public class SharedBlocksManager : MonoBehaviour
 	private StartingMapConfig startingMapConfig = new StartingMapConfig
 	{
 		pageNumber = 0,
-		pageSize = 10,
+		pageSize = 50,
 		sortMethod = MapSortMethod.Top.ToString(),
 		useMapID = false,
 		mapID = null
@@ -332,6 +332,28 @@ public class SharedBlocksManager : MonoBehaviour
 		await WaitForPlayfabSessionToken();
 		FetchConfigurationFromTitleData();
 		LoadPlayerPrefs();
+		if (NetworkSystem.Instance != null)
+		{
+			NetworkSystem.Instance.OnMultiplayerStarted += new Action(OnJoinedRoom);
+		}
+		if (NetworkSystem.Instance != null && NetworkSystem.Instance.InRoom)
+		{
+			RefreshPopularMapsForRandom();
+		}
+	}
+
+	private void OnDestroy()
+	{
+		if (NetworkSystem.Instance != null)
+		{
+			NetworkSystem.Instance.OnMultiplayerStarted -= new Action(OnJoinedRoom);
+		}
+	}
+
+	private void OnJoinedRoom()
+	{
+		Debug.Log("OnJoinedRoom inside SharedBlocksManager");
+		RefreshPopularMapsForRandom();
 	}
 
 	private bool TryGetCachedSharedBlocksMapByMapID(string mapID, out SharedBlocksMap result)
@@ -624,6 +646,26 @@ public class SharedBlocksManager : MonoBehaviour
 				callback?.Invoke(arg1: false, "CONNECTION ERROR");
 			}
 		}
+	}
+
+	public void RefreshPopularMapsForRandom()
+	{
+		if (ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocksShared) && MothershipClientContext.IsClientLoggedIn() && !getTopMapsInProgress)
+		{
+			if (hasCachedTopMaps && Time.realtimeSinceStartupAsDouble <= lastGetTopMapsTime + 60.0 && latestPopularMaps != null && latestPopularMaps.Count > 0)
+			{
+				this.OnGetPopularMapsComplete?.Invoke(obj: true);
+			}
+			else
+			{
+				RequestGetConfiguredTopMaps();
+			}
+		}
+	}
+
+	public bool RequestGetConfiguredTopMaps()
+	{
+		return RequestGetTopMaps(startingMapConfig.pageNumber, startingMapConfig.pageSize, startingMapConfig.sortMethod);
 	}
 
 	private void RequestPublishMap(string userMetadataKey)
@@ -1368,6 +1410,37 @@ public class SharedBlocksManager : MonoBehaviour
 			this.OnFetchPrivateScanComplete?.Invoke(currentGetScanIndex, arg2: false);
 			currentGetScanIndex = -1;
 		}
+	}
+
+	public bool TryGetRandomPopularMap(out SharedBlocksMap map)
+	{
+		map = null;
+		if (latestPopularMaps == null || latestPopularMaps.Count == 0)
+		{
+			return false;
+		}
+		GTDev.Log($"[SharedBlocksManager] Selecting from {latestPopularMaps.Count} popular maps");
+		for (int i = 0; i < Mathf.Min(10, latestPopularMaps.Count); i++)
+		{
+			int num = UnityEngine.Random.Range(0, latestPopularMaps.Count);
+			GTDev.Log($"[SharedBlocksManager] Random pick index: {num}");
+			SharedBlocksMap sharedBlocksMap = latestPopularMaps[num];
+			if (sharedBlocksMap != null && IsMapIDValid(sharedBlocksMap.MapID))
+			{
+				map = sharedBlocksMap;
+				return true;
+			}
+		}
+		for (int j = 0; j < latestPopularMaps.Count; j++)
+		{
+			SharedBlocksMap sharedBlocksMap2 = latestPopularMaps[j];
+			if (sharedBlocksMap2 != null && IsMapIDValid(sharedBlocksMap2.MapID))
+			{
+				map = sharedBlocksMap2;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private async Task WaitForMothership()

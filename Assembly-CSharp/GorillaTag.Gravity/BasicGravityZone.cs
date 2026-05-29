@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GorillaTag.Gravity;
 
@@ -13,6 +15,14 @@ public class BasicGravityZone : MonoBehaviour, ICallbackUnique, ICallBack
 	[SerializeField]
 	private GravityZoneScaleFilter scaleFilter;
 
+	[Tooltip("- Newest: Only in effect when this is the newest zone entered by the physics object. \n\n- Closest: if this gravity zone is the closest, then it will have effect. \n\n- Additive:  always in effect when a physics object is inside.")]
+	[SerializeField]
+	private GravityZoneRule m_gravityRule = GravityZoneRule.Closest;
+
+	[Tooltip("The gravity zone with the highest authority will cause gravity zones with a lower authority level to be ignored. Gravity zones with the same authority level will follow the Gravity Rule setting.")]
+	[SerializeField]
+	private int m_authorityLevel;
+
 	[Header("Rotation Settings")]
 	[Tooltip("If enabled, rotates the target away from gravity direction to be upside down")]
 	[SerializeField]
@@ -22,13 +32,26 @@ public class BasicGravityZone : MonoBehaviour, ICallbackUnique, ICallBack
 	protected bool rotateTarget = true;
 
 	[SerializeField]
-	protected float rotationSpeed = 10f;
+	private bool m_useRotationSpeedOverride;
+
+	[SerializeField]
+	[FormerlySerializedAs("rotationSpeed")]
+	private float m_rotationSpeedOverride = 10f;
+
+	[NonSerialized]
+	private float m_rotationSpeed;
 
 	protected Vector3 m_gravityDirection;
 
 	protected ListProcessor<MonkeGravityController> m_gravityTargets = new ListProcessor<MonkeGravityController>(5);
 
 	private Dictionary<MonkeGravityController, GravityInfo> m_targetGravityInfos = new Dictionary<MonkeGravityController, GravityInfo>(5);
+
+	public GravityZoneRule GravityRule => m_gravityRule;
+
+	public int AuthorityLevel => m_authorityLevel;
+
+	protected float RotationSpeed => m_rotationSpeed;
 
 	private IReadOnlyList<MonkeGravityController> GravityTargets => m_gravityTargets.GetReadonlyList();
 
@@ -38,6 +61,7 @@ public class BasicGravityZone : MonoBehaviour, ICallbackUnique, ICallBack
 	{
 		m_gravityDirection = base.gameObject.transform.up;
 		invertRotationDirection = (gravityStrength > 0f && !invertRotationDirection) || (gravityStrength <= 0f && invertRotationDirection);
+		m_rotationSpeed = (m_useRotationSpeedOverride ? m_rotationSpeedOverride : MonkeGravityManager.DefaultGravityInfo.rotationSpeed);
 	}
 
 	protected virtual void OnEnable()
@@ -78,10 +102,6 @@ public class BasicGravityZone : MonoBehaviour, ICallbackUnique, ICallBack
 		value.rotationSpeed = GetRotationSpeed(in offsetFromGravity);
 		value.rotate = GetRotationIntent(in offsetFromGravity);
 		m_targetGravityInfos[targetController] = value;
-		if (value.gravityStrength != 0f)
-		{
-			targetController.ApplyGravityForce(gravityDirection * value.gravityStrength);
-		}
 	}
 
 	protected virtual Vector3 GetGravityVectorAtPoint(in Vector3 worldPosition, in MonkeGravityController controller)
@@ -110,7 +130,7 @@ public class BasicGravityZone : MonoBehaviour, ICallbackUnique, ICallBack
 
 	protected virtual float GetRotationSpeed(in Vector3 offsetFromGravity)
 	{
-		return rotationSpeed;
+		return m_rotationSpeed;
 	}
 
 	public bool GetGravityInfo(MonkeGravityController target, out GravityInfo info)

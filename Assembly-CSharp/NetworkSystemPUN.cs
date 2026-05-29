@@ -459,11 +459,11 @@ public class NetworkSystemPUN : NetworkSystem
 		internalState = InternalState.Searching_Joining;
 		if (opts.IsJoiningWithFriends)
 		{
-			PhotonNetwork.JoinRandomRoom(opts.CustomProps, opts.MaxPlayers, MatchmakingMode.RandomMatching, null, null, opts.joinFriendIDs.ToArray());
+			PhotonNetwork.JoinRandomRoom(opts.EffectiveSearchFilter, opts.MaxPlayers, MatchmakingMode.RandomMatching, null, null, opts.joinFriendIDs.ToArray());
 		}
 		else
 		{
-			PhotonNetwork.JoinRandomRoom(opts.CustomProps, opts.MaxPlayers, MatchmakingMode.FillRoom, null, null);
+			PhotonNetwork.JoinRandomRoom(opts.EffectiveSearchFilter, opts.MaxPlayers, MatchmakingMode.FillRoom, null, null);
 		}
 		if (!(await WaitForStateCheck(new InternalState[2]
 		{

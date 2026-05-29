@@ -1133,6 +1133,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		{
 			mapLoadProgressCallback?.Invoke(MapLoadStatus.Loading, endingProgress, "PROCESSING COMPLETE");
 		}
+		GorillaTelemetry.EnqueueTelemetryEvent("vstump_map_loaded", new Dictionary<string, object>());
 		if (loadedMapPackageInfo == null || loadedMapPackageInfo.customMapSupportVersion >= 3 || !sceneDescriptor.IsInitialScene)
 		{
 			yield break;

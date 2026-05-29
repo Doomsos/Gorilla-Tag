@@ -2027,9 +2027,8 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			localGrabOverrideBlend = -1f;
 		}
-		Vector3 position = base.transform.position;
-		leftHandLink.Read(leftHand.syncPos, syncRotation, position, data.isGroundedHand, data.isGroundedButt, (packedFields & 0x40000) != 0, (packedFields & 0x100000) != 0, data.leftHandGrabbedActorNumber, data.leftGrabbedHandIsLeft);
-		rightHandLink.Read(rightHand.syncPos, syncRotation, position, data.isGroundedHand, data.isGroundedButt, (packedFields & 0x80000) != 0, (packedFields & 0x200000) != 0, data.rightHandGrabbedActorNumber, data.rightGrabbedHandIsLeft);
+		leftHandLink.Read(leftHand.syncPos, syncRotation, syncPos, data.isGroundedHand, data.isGroundedButt, (packedFields & 0x40000) != 0, (packedFields & 0x100000) != 0, data.leftHandGrabbedActorNumber, data.leftGrabbedHandIsLeft);
+		rightHandLink.Read(rightHand.syncPos, syncRotation, syncPos, data.isGroundedHand, data.isGroundedButt, (packedFields & 0x80000) != 0, (packedFields & 0x200000) != 0, data.rightHandGrabbedActorNumber, data.rightGrabbedHandIsLeft);
 		LastTouchedGroundAtNetworkTime = data.lastTouchedGroundAtTime;
 		LastHandTouchedGroundAtNetworkTime = data.lastHandTouchedGroundAtTime;
 		UpdateRopeData();

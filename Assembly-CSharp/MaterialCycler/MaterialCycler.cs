@@ -1,8 +1,9 @@
 using System;
 using System.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
+
+namespace MaterialCycler;
 
 public class MaterialCycler : MonoBehaviour
 {
@@ -16,12 +17,13 @@ public class MaterialCycler : MonoBehaviour
 	}
 
 	[SerializeField]
+	private string _cyclerKey;
+
+	[SerializeField]
 	private MaterialPack[] materials;
 
 	[SerializeField]
 	private Renderer[] renderers;
-
-	private int index;
 
 	[SerializeField]
 	private string setColorTarget = "_BaseColor";
@@ -29,35 +31,60 @@ public class MaterialCycler : MonoBehaviour
 	[SerializeField]
 	private UnityEvent<Vector3> reset;
 
+	[SerializeField]
+	private GrabbingColorPicker _colorPicker;
+
 	private Coroutine crDirty;
 
 	private float synchTime;
 
-	private MaterialCyclerNetworked materialCyclerNetworked;
+	private int? _keyHash;
+
+	public int index { get; private set; }
+
+	public GrabbingColorPicker ColorPicker => _colorPicker;
+
+	public int NumMaterials => materials.Length;
+
+	public int KeyHash
+	{
+		get
+		{
+			int valueOrDefault = _keyHash.GetValueOrDefault();
+			if (!_keyHash.HasValue)
+			{
+				valueOrDefault = _cyclerKey.GetStaticHash();
+				_keyHash = valueOrDefault;
+				return valueOrDefault;
+			}
+			return valueOrDefault;
+		}
+	}
 
 	private void Awake()
 	{
-		materialCyclerNetworked = GetComponent<MaterialCyclerNetworked>();
 		SetMaterials();
+		if (string.IsNullOrEmpty(_cyclerKey))
+		{
+			throw new Exception("Must have a defined Cycler Key on all MaterialCyclers.");
+		}
 	}
 
 	private void OnEnable()
 	{
-		if (materialCyclerNetworked != null)
+		if (string.IsNullOrEmpty(_cyclerKey))
 		{
-			materialCyclerNetworked.OnSynchronize += MaterialCyclerNetworked_OnSynchronize;
+			throw new Exception("Must have a defined Cycler Key on all MaterialCyclers.");
 		}
+		MaterialCyclerManager.Instance.RegisterCycler(KeyHash, this);
 	}
 
 	private void OnDisable()
 	{
-		if (materialCyclerNetworked != null)
-		{
-			materialCyclerNetworked.OnSynchronize -= MaterialCyclerNetworked_OnSynchronize;
-		}
+		MaterialCyclerManager.Instance.UnregisterCycler(this);
 	}
 
-	private void MaterialCyclerNetworked_OnSynchronize(int idx, int3 rgb)
+	internal void MaterialCyclerNetworked_OnSynchronize(int idx, Color rgb)
 	{
 		if (idx >= 0 && idx < materials.Length)
 		{
@@ -65,10 +92,20 @@ public class MaterialCycler : MonoBehaviour
 			for (int i = 0; i < renderers.Length; i++)
 			{
 				renderers[i].material = materials[index].Materials[i];
-				renderers[i].material.SetColor(setColorTarget, new Color((float)rgb.x / 9f, (float)rgb.y / 9f, (float)rgb.z / 9f));
+				renderers[i].material.SetColor(setColorTarget, rgb);
 			}
 			reset.Invoke(new Vector3(renderers[0].material.color.r, renderers[0].material.color.g, renderers[0].material.color.b));
 		}
+	}
+
+	public void SynchronizeLocal(float r, float g, float b)
+	{
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			renderers[i].material = materials[index].Materials[i];
+			renderers[i].material.SetColor(setColorTarget, new Color(r, g, b));
+		}
+		reset.Invoke(new Vector3(renderers[0].material.color.r, renderers[0].material.color.g, renderers[0].material.color.b));
 	}
 
 	private void SetMaterials()
@@ -89,20 +126,22 @@ public class MaterialCycler : MonoBehaviour
 
 	public void NextMaterial()
 	{
-		index = (index + 1) % materials.Length;
+		CycleMaterial((index + 1) % materials.Length);
+	}
+
+	internal void CycleMaterial(int newIndex)
+	{
+		index = newIndex;
 		SetMaterials();
 		SetDirty();
 	}
 
 	private void SetDirty()
 	{
-		if (!(materialCyclerNetworked == null))
+		synchTime = Time.time + MaterialCyclerManager.Instance.SyncTimeOut;
+		if (crDirty == null)
 		{
-			synchTime = Time.time + materialCyclerNetworked.SyncTimeOut;
-			if (crDirty == null)
-			{
-				crDirty = StartCoroutine(timeOutDirty());
-			}
+			crDirty = StartCoroutine(timeOutDirty());
 		}
 	}
 
@@ -118,7 +157,7 @@ public class MaterialCycler : MonoBehaviour
 
 	private void synchronize()
 	{
-		materialCyclerNetworked.Synchronize(index, renderers[0].material.color);
+		MaterialCyclerManager.Instance.Synchronize(KeyHash, index, renderers[0].material.color);
 	}
 
 	public void SetColor(Vector3 rgb)

@@ -134,7 +134,7 @@ public class GorillaZipline : MonoBehaviour
 		{
 			float num = 0f;
 			Vector3 direction = spline.GetDirection(currentT);
-			num = Physics.gravity.y * direction.y * settings.gravityMulti;
+			num = GTPlayerTransform.GravityStrength * Vector3.Dot(GTPlayerTransform.PhysicsUp, direction) * settings.gravityMulti;
 			currentSpeed = Mathf.MoveTowards(currentSpeed, settings.maxSpeed, num * Time.deltaTime);
 			float num2 = MathUtils.Linear(currentSpeed, 0f, settings.maxFrictionSpeed, settings.friction, settings.maxFriction);
 			currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, num2 * Time.deltaTime);

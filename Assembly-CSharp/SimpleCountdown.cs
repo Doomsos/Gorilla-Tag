@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using GorillaNetworking;
+using GorillaNetworking.ScheduledEvents;
 using PlayFab;
 using TMPro;
 using UnityEngine;
@@ -13,7 +14,8 @@ public class SimpleCountdown : ObservableBehavior
 		None,
 		TitleData,
 		FixedDate,
-		TimeSync
+		TimeSync,
+		ScheduledEvent
 	}
 
 	private enum DisplayFormat
@@ -48,6 +50,8 @@ public class SimpleCountdown : ObservableBehavior
 	private TextMeshPro tmp;
 
 	private DateTime overrideDt = DateTime.MinValue;
+
+	public Action ManualCountdownComplete;
 
 	private async void Start()
 	{
@@ -106,9 +110,19 @@ public class SimpleCountdown : ObservableBehavior
 		TimeSpan timeSpan;
 		if (overrideDt < serverTime)
 		{
+			if (overrideDt > DateTime.MinValue)
+			{
+				ManualCountdownComplete?.Invoke();
+				overrideDt = DateTime.MinValue;
+			}
 			if (mode == Mode.TimeSync)
 			{
 				dt = timeSyncRule.GetNext(serverTime);
+			}
+			else if (mode == Mode.ScheduledEvent)
+			{
+				double value = ((ScheduledEventManager.Instance != null) ? ScheduledEventManager.Instance.SecondsUntilEventStart : 0.0);
+				dt = serverTime.AddSeconds(value);
 			}
 			timeSpan = dt - serverTime;
 		}

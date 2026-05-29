@@ -144,7 +144,7 @@ public class BuilderTableNetworking : MonoBehaviourPunCallbacks, ITickSystemTick
 		callLimiters[21] = new CallLimiter(50, 1f);
 		callLimiters[22] = new CallLimiter(20, 1f);
 		callLimiters[23] = new CallLimiter(20, 1f);
-		callLimiters[24] = new CallLimiter(3, 30f);
+		callLimiters[24] = new CallLimiter(1, 1f);
 		callLimiters[25] = new CallLimiter(10, 1f);
 		armShelfRequests = new List<Player>(10);
 	}

@@ -174,7 +174,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 			return false;
 		}
 		AgeAwareGameObject ageAwareGameObject = ageAwareGameObjects[index];
-		return _daysAccrued.Value >= ageAwareGameObject.minActiveDays;
+		return _daysAccrued.GetValueOrDefault() >= ageAwareGameObject.minActiveDays;
 	}
 
 	public void GoBack()

@@ -2842,7 +2842,7 @@ public class GTPlayer : MonoBehaviour
 				RotateWithSurface(rotationDelta, currentClimber.handRoot.position);
 				lastClimbableRotation = currentClimbable.transform.rotation;
 			}
-			playerRigidBody.MovePosition(playerRigidBody.position - zero);
+			playerRigidBody.position -= zero;
 			if ((bool)currentSwing)
 			{
 				currentSwing.lastGrabTime = Time.time;
