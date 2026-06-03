@@ -3158,19 +3158,18 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(), delegate(GetUserInventoryResult result)
 			{
-				Dictionary<string, string> dictionary = new Dictionary<string, string>();
 				foreach (ItemInstance item in result.Inventory)
 				{
-					if (!dictionary.ContainsKey(item.ItemId))
+					if (item.CatalogVersion == CosmeticsController.instance.catalog)
 					{
-						dictionary[item.ItemId] = item.ItemId;
-						if (item.CatalogVersion == CosmeticsController.instance.catalog)
+						if (item.PurchaseDate.HasValue)
+						{
+							int daysOwned = (int)(DateTime.UtcNow - item.PurchaseDate.Value).TotalDays;
+							AddCosmetic(item.ItemId, daysOwned);
+						}
+						else
 						{
 							AddCosmetic(item.ItemId);
-							if (item.PurchaseDate.HasValue)
-							{
-								_playerOwnedCosmeticsAge[item.ItemId] = (int)(DateTime.UtcNow - item.PurchaseDate.Value).TotalDays;
-							}
 						}
 					}
 				}
@@ -4164,9 +4163,22 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		CheckForEarlyAccess();
 	}
 
-	internal void AddCosmetic(string cosmeticId)
+	internal void AddCosmetic(string cosmeticId, int daysOwned = 0)
 	{
-		_playerOwnedCosmetics.Add(cosmeticId);
+		bool flag = _playerOwnedCosmetics.Add(cosmeticId);
+		if (daysOwned >= 1)
+		{
+			int num = daysOwned;
+			if (!flag && _playerOwnedCosmeticsAge.TryGetValue(cosmeticId, out var value))
+			{
+				num = Mathf.Max(value, num);
+				_playerOwnedCosmeticsAge[cosmeticId] = num;
+			}
+			else
+			{
+				_playerOwnedCosmeticsAge[cosmeticId] = num;
+			}
+		}
 	}
 
 	internal bool HasCosmetic(string cosmeticId)

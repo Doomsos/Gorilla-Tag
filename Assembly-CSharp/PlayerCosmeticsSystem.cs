@@ -16,6 +16,8 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		public string Sku;
 
 		public DateTimeOffset? ExpirationTime;
+
+		public int TotalLifetimeSeconds;
 	}
 
 	public float playerLookUpCooldown = 3f;
@@ -222,6 +224,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 							if (netPlayer != null)
 							{
 								bool isSubscribed = false;
+								int daysAccrued = 0;
 								if (!string.IsNullOrEmpty(datum.Value.Value))
 								{
 									try
@@ -230,13 +233,14 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 										DateTimeOffset utcNow = DateTimeOffset.UtcNow;
 										DateTimeOffset? expirationTime = sharedSubscriptionData.ExpirationTime;
 										isSubscribed = utcNow < expirationTime;
+										daysAccrued = sharedSubscriptionData.TotalLifetimeSeconds / 86400;
 									}
 									catch (Exception ex)
 									{
 										Debug.LogError("Failed to deserialize subscription data for " + netPlayer.NickName + ": " + ex.Message);
 									}
 								}
-								SubscriptionManager.UpdatePlayerSubscriptionData(netPlayer, isSubscribed);
+								SubscriptionManager.UpdatePlayerSubscriptionData(netPlayer, isSubscribed, daysAccrued);
 							}
 						}
 					}

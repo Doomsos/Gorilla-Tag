@@ -13,256 +13,256 @@
   <ItemGroup />
   <ItemGroup>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="PhotonUnityNetworking">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PhotonUnityNetworking.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PhotonUnityNetworking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="PlayFab">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PlayFab.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PlayFab.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="Fusion.Common">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Fusion.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Fusion.Common.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.OdinInspector.Attributes">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Sirenix.OdinInspector.Attributes.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Sirenix.OdinInspector.Attributes.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Fusion.Runtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Fusion.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Fusion.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="ZString">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\ZString.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\ZString.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mathematics">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Mathematics.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="Oculus.VR">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Oculus.VR.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Oculus.VR.dll</HintPath>
     </Reference>
     <Reference Include="XNode">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\XNode.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\XNode.dll</HintPath>
     </Reference>
     <Reference Include="AA.Mothership">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\AA.Mothership.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\AA.Mothership.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Collections">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Collections.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Collections.dll</HintPath>
     </Reference>
     <Reference Include="PhotonRealtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PhotonRealtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PhotonRealtime.dll</HintPath>
     </Reference>
     <Reference Include="AstarPathfindingProject">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\AstarPathfindingProject.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\AstarPathfindingProject.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
     </Reference>
     <Reference Include="KID">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\KID.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\KID.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestTextureModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Burst">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Burst.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Burst.dll</HintPath>
     </Reference>
     <Reference Include="UniTask">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UniTask.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UniTask.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.DirectorModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.AIModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.AIModule.dll</HintPath>
     </Reference>
     <Reference Include="Photon3Unity3D">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Photon3Unity3D.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Photon3Unity3D.dll</HintPath>
     </Reference>
     <Reference Include="Oculus.Platform">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Oculus.Platform.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Oculus.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ResourceManager">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.ResourceManager.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.ResourceManager.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Addressables">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Addressables.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Addressables.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="ALINE">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\ALINE.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\ALINE.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Splines">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Splines.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Splines.dll</HintPath>
     </Reference>
     <Reference Include="Fusion.Sockets">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Fusion.Sockets.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Fusion.Sockets.dll</HintPath>
     </Reference>
     <Reference Include="PhotonVoice">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PhotonVoice.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PhotonVoice.dll</HintPath>
     </Reference>
     <Reference Include="PhotonVoice.API">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PhotonVoice.API.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PhotonVoice.API.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.Interaction.Toolkit">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.XR.Interaction.Toolkit.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.XR.Interaction.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="LIV.LCKCore">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\LIV.LCKCore.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\LIV.LCKCore.dll</HintPath>
     </Reference>
     <Reference Include="LIV.LCK">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\LIV.LCK.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\LIV.LCK.dll</HintPath>
     </Reference>
     <Reference Include="LIV.LCK_GorillaTag">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\LIV.LCK_GorillaTag.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\LIV.LCK_GorillaTag.dll</HintPath>
     </Reference>
     <Reference Include="Fusion.Unity">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Fusion.Unity.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Fusion.Unity.dll</HintPath>
     </Reference>
     <Reference Include="Fusion.Realtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Fusion.Realtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Fusion.Realtime.dll</HintPath>
     </Reference>
     <Reference Include="com.rlabrecque.steamworks.net">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\com.rlabrecque.steamworks.net.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath>
     </Reference>
     <Reference Include="PhotonVoice.PUN">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\PhotonVoice.PUN.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\PhotonVoice.PUN.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Cinemachine">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Cinemachine.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Cinemachine.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.OpenVR">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.XR.OpenVR.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.XR.OpenVR.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="nexus.nexussdk.Runtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\nexus.nexussdk.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\nexus.nexussdk.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Localization">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Localization.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Localization.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.CoreUtils">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.XR.CoreUtils.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.XR.CoreUtils.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AndroidJNIModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.AndroidJNIModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
     </Reference>
     <Reference Include="GT_CustomMapSupportRuntime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\GT_CustomMapSupportRuntime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\GT_CustomMapSupportRuntime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.AI.Navigation.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.AI.Navigation.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="Modio">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Modio.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Modio.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InputSystem">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.InputSystem.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.InputSystem.dll</HintPath>
     </Reference>
     <Reference Include="Backtrace.Unity">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Backtrace.Unity.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Backtrace.Unity.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.Physics2DModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TilemapModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.TilemapModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR_Actions">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\SteamVR_Actions.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\SteamVR_Actions.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\SteamVR.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\SteamVR.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Animation.Rigging">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.Animation.Rigging.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Animation.Rigging.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
     </Reference>
     <Reference Include="VoiceSDK.Runtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\VoiceSDK.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\VoiceSDK.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Runtime">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Unity.ProBuilder.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.ProBuilder.dll</HintPath>
     </Reference>
     <Reference Include="BakeryRuntimeAssembly">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\BakeryRuntimeAssembly.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\BakeryRuntimeAssembly.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.TerrainModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\K4os.Compression.LZ4.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\K4os.Compression.LZ4.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="endel.nativewebsocket">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\endel.nativewebsocket.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\endel.nativewebsocket.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SubsystemsModule">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.SubsystemsModule.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.SubsystemsModule.dll</HintPath>
     </Reference>
     <Reference Include="Modio.Unity">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\Modio.Unity.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Modio.Unity.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\Documents\Projects\Overdose-Recode\assemblies\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

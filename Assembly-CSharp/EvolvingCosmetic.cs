@@ -1,5 +1,6 @@
 using System;
 using DefaultNamespace;
+using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaNetworking;
 using GorillaTag.CosmeticSystem;
@@ -53,6 +54,8 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 
 	private int? _daysAccrued;
 
+	private VRRig m_parentRig;
+
 	public int StateValue => SelectedObjectIndex;
 
 	public int SelectedObjectIndex { get; private set; } = -1;
@@ -70,30 +73,43 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 
 	private void OnEnable()
 	{
-		VRRig vRRig = GetComponentInParent<VRRig>();
-		if (vRRig == null)
+		if (m_parentRig == null)
 		{
-			if (GetComponentInParent<GTPlayer>() == null)
+			VRRig vRRig = GetComponentInParent<VRRig>();
+			if (vRRig == null)
 			{
-				return;
+				if (GetComponentInParent<GTPlayer>() == null)
+				{
+					return;
+				}
+				vRRig = VRRig.LocalRig;
 			}
-			vRRig = VRRig.LocalRig;
+			m_parentRig = vRRig;
 		}
-		if (vRRig == null)
+		if (!(m_parentRig == null))
 		{
-			return;
+			if (m_parentRig.isLocal)
+			{
+				SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Remove(SubscriptionManager.OnLocalSubscriptionData, new Action(UpdateDaysAccrued));
+				SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Combine(SubscriptionManager.OnLocalSubscriptionData, new Action(UpdateDaysAccrued));
+			}
+			_daysAccrued = 0;
+			UnselectAll();
+			m_parentRig.reliableState.RegisterCosmeticStateSyncTarget(GetStateSyncSlot(), this);
+			UpdateDaysAccrued();
 		}
-		_daysAccrued = 0;
-		UnselectAll();
-		vRRig.reliableState?.RegisterCosmeticStateSyncTarget(GetStateSyncSlot(), this);
-		SubscriptionManager.SubscriptionDetails subscriptionDetails = SubscriptionManager.GetSubscriptionDetails(vRRig);
+	}
+
+	private void UpdateDaysAccrued()
+	{
+		SubscriptionManager.SubscriptionDetails subscriptionDetails = SubscriptionManager.GetSubscriptionDetails(m_parentRig);
 		switch (ageRule)
 		{
 		case SubscriptionAgeRule.ItemAge:
-			_daysAccrued = vRRig.CheckCosmeticAge(base.name);
+			_daysAccrued = m_parentRig.CheckCosmeticAge(base.name);
 			break;
 		case SubscriptionAgeRule.MinItemSubscriptionAge:
-			_daysAccrued = Mathf.Min(subscriptionDetails.daysAccrued, vRRig.CheckCosmeticAge(base.name));
+			_daysAccrued = Mathf.Min(subscriptionDetails.daysAccrued, m_parentRig.CheckCosmeticAge(base.name));
 			break;
 		case SubscriptionAgeRule.SubscriptionAge:
 			_daysAccrued = subscriptionDetails.daysAccrued;
@@ -101,7 +117,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 		case SubscriptionAgeRule.MinItemSubscriptionAgeActive:
 			if (subscriptionDetails.active)
 			{
-				_daysAccrued = Mathf.Min(subscriptionDetails.daysAccrued, vRRig.CheckCosmeticAge(base.name));
+				_daysAccrued = Mathf.Min(subscriptionDetails.daysAccrued, m_parentRig.CheckCosmeticAge(base.name));
 			}
 			break;
 		case SubscriptionAgeRule.SubscriptionAgeActive:
@@ -148,12 +164,23 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 
 	private void OnDisable()
 	{
-		(GetComponentInParent<VRRig>()?.reliableState)?.UnRegisterCosmeticStateSyncTarget(GetStateSyncSlot(), this);
+		if (!m_parentRig.IsNull())
+		{
+			if (m_parentRig.isLocal)
+			{
+				SubscriptionManager.OnLocalSubscriptionData = (Action)Delegate.Remove(SubscriptionManager.OnLocalSubscriptionData, new Action(UpdateDaysAccrued));
+			}
+			m_parentRig.reliableState.UnRegisterCosmeticStateSyncTarget(GetStateSyncSlot(), this);
+		}
 	}
 
 	private void ActivateSelectedIndex()
 	{
-		if (IsSelectedIndexAvailable())
+		if (SelectedObjectIndex < 0)
+		{
+			UnselectAll();
+		}
+		else if (IsSelectedIndexAvailable())
 		{
 			for (int i = 0; i < ageAwareGameObjects.Length; i++)
 			{
