@@ -2338,7 +2338,7 @@ public class GameEntityManager : NetworkComponent, IRequestableOwnershipGuardCal
 		VRRig vRRig = GorillaGameManager.StaticFindRigForPlayer(thrownByPlayer);
 		if (vRRig != null && gameEntity.gravityController != null)
 		{
-			gameEntity.gravityController.SetPersonalGravityDirection(-vRRig.transform.up);
+			gameEntity.gravityController.SetPersonalGravityDirection(vRRig.transform.up);
 		}
 		bool num = thrownByPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 		int handIndex = GamePlayer.GetHandIndex(isLeftHand);

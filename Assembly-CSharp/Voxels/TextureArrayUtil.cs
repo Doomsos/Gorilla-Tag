@@ -40,4 +40,23 @@ public class TextureArrayUtil : MonoBehaviour
 			return true;
 		}
 	}
+
+	public static Texture2DArray CreateTextureArray(Texture2D[] textures)
+	{
+		if (textures == null || textures.Length == 0)
+		{
+			return null;
+		}
+		int width = textures[0].width;
+		int height = textures[0].height;
+		bool mipChain = textures[0].mipmapCount > 1;
+		int num = textures.Length;
+		Texture2DArray texture2DArray = new Texture2DArray(width, height, num, textures[0].format, mipChain);
+		for (int i = 0; i < num; i++)
+		{
+			Graphics.CopyTexture(textures[i], 0, texture2DArray, i);
+		}
+		texture2DArray.Apply(updateMipmaps: false, makeNoLongerReadable: true);
+		return texture2DArray;
+	}
 }

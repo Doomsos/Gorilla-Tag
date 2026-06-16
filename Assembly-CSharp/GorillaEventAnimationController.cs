@@ -39,11 +39,15 @@ public class GorillaEventAnimationController : MonoBehaviour
 
 	private float lateStart;
 
+	private float animationTime;
+
 	public int animationClipIndex;
 
 	public List<AnimationClip> clips;
 
 	private AnimationClip currentClip;
+
+	private float totalTime;
 
 	private Dictionary<AnimationClip, Dictionary<GorillaEventAnimation, List<ControlledAnimationKeyframeData>>> bakedAnimationData;
 
@@ -51,8 +55,11 @@ public class GorillaEventAnimationController : MonoBehaviour
 	[HideInInspector]
 	private List<AnimToGEAKeyframeData> bakedAnimKeyframeData;
 
+	private float suspended;
+
 	private void Awake()
 	{
+		totalTime = 0f;
 		bakedAnimationData = new Dictionary<AnimationClip, Dictionary<GorillaEventAnimation, List<ControlledAnimationKeyframeData>>>();
 		for (int i = 0; i < bakedAnimKeyframeData.Count; i++)
 		{
@@ -62,6 +69,7 @@ public class GorillaEventAnimationController : MonoBehaviour
 			{
 				bakedAnimationData[clip].Add(bakedAnimKeyframeData[i].gEAKeyframeData[j].gEA, bakedAnimKeyframeData[i].gEAKeyframeData[j].keyframeData);
 			}
+			totalTime += clip.length;
 		}
 	}
 
@@ -137,21 +145,15 @@ public class GorillaEventAnimationController : MonoBehaviour
 				}
 			}
 		}
-	}
-
-	public void SetPlayState(bool isPlaying)
-	{
-		playAnimation = isPlaying;
-	}
-
-	public void SetAnimationClip(int clipIndex)
-	{
-		animationClipIndex = clipIndex;
+		if (animationTime < totalTime)
+		{
+			animationTime += Time.deltaTime;
+		}
 	}
 
 	public void StartPlaying(float secondsPast)
 	{
-		lateStart = secondsPast;
+		animationTime = (lateStart = secondsPast);
 		animationClipIndex = 0;
 		playAnimation = true;
 	}
@@ -159,5 +161,29 @@ public class GorillaEventAnimationController : MonoBehaviour
 	public void StartPlaying()
 	{
 		StartPlaying(0f);
+	}
+
+	private void OnEnable()
+	{
+		if (!(suspended <= 0f))
+		{
+			lateStart = animationTime + (Time.time - suspended);
+			animationClipIndex = 0;
+			playAnimation = true;
+			suspended = 0f;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (playAnimation)
+		{
+			suspended = Time.time;
+			playAnimation = false;
+			if (controllingAnimation.isPlaying)
+			{
+				controllingAnimation.Stop();
+			}
+		}
 	}
 }

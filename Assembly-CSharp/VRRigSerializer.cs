@@ -314,9 +314,18 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 	[PunRPC]
 	public void RPC_SetCollectionCycleIndex(int[] data, PhotonMessageInfo info)
 	{
+		if (data != null && data.Length == 3)
+		{
+			vrrig?.SetCollectionCycleIndex(data[0], data[1], data[2], info);
+		}
+	}
+
+	[PunRPC]
+	public void RPC_BroadcastSubCosmeticSignal(int[] data, PhotonMessageInfo info)
+	{
 		if (data != null && data.Length == 2)
 		{
-			vrrig?.SetCollectionCycleIndex(data[0], data[1], info);
+			vrrig?.BroadcastSubCosmeticSignal(data[0], data[1], info);
 		}
 	}
 

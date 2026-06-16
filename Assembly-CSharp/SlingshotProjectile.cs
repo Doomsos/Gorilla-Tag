@@ -175,7 +175,7 @@ public class SlingshotProjectile : MonoBehaviour
 		isSettled = false;
 		if (VRRigCache.Instance.TryGetVrrig(player, out var playerRig))
 		{
-			gravityController.SetPersonalGravityDirection(-playerRig.Rig.transform.up);
+			gravityController.SetPersonalGravityDirection(playerRig.Rig.transform.up);
 		}
 		OnLaunch?.Invoke(projectileOwner);
 	}

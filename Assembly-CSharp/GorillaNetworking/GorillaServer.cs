@@ -300,12 +300,12 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 
 	public bool CheckIsInKIDOptInCohort()
 	{
-		return featureFlags.IsEnabledForUser("2025-04-KIDOptIn");
+		return featureFlags.IsEnabled("2025-04-KIDOptIn");
 	}
 
 	public bool CheckIsInKIDRequiredCohort()
 	{
-		return featureFlags.IsEnabledForUser("2025-04-KIDRequired");
+		return featureFlags.IsEnabled("2025-04-KIDRequired");
 	}
 
 	public bool CheckOptedInKID()
@@ -315,12 +315,12 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 
 	public bool CheckIsTZE_Enabled()
 	{
-		return featureFlags.IsEnabledForUser("2025-10-TelemetryZoneEventSampling");
+		return featureFlags.IsEnabled("2025-10-TelemetryZoneEventSampling");
 	}
 
 	public bool CheckIsMothershipTelemetryEnabled()
 	{
-		return featureFlags.IsEnabledForUser("2025-09-MothershipAnalyticsSampleRate");
+		return featureFlags.IsEnabled("2025-09-MothershipAnalyticsSampleRate");
 	}
 
 	public bool CheckIsVStumpGrabbablesFixEnabled()
@@ -329,7 +329,7 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 		{
 			return cachedVStumpGrabbablesFix.value;
 		}
-		bool flag = featureFlags.IsEnabledForUser("2026-04-VStumpGrabbablesFix");
+		bool flag = featureFlags.IsEnabled("2026-04-VStumpGrabbablesFix");
 		if (featureFlags.ready)
 		{
 			cachedVStumpGrabbablesFix.value = flag;
@@ -344,12 +344,27 @@ public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 		{
 			return cachedSuppressZonesInVStump.value;
 		}
-		bool flag = featureFlags.IsEnabledForUser("2026-04-SuppressZonesInVStump");
+		bool flag = featureFlags.IsEnabled("2026-04-SuppressZonesInVStump");
 		if (featureFlags.ready)
 		{
 			cachedSuppressZonesInVStump.value = flag;
 			cachedSuppressZonesInVStump.valid = true;
 		}
 		return flag;
+	}
+
+	public bool CheckRoomControlsEnabled()
+	{
+		return featureFlags.IsEnabled("2026-05-RoomControlsEnabled");
+	}
+
+	public bool CheckRoomControlsEnabledForUser(string playFabId)
+	{
+		return featureFlags.IsEnabledForUser("2026-05-RoomControlsEnabled", playFabId);
+	}
+
+	public bool CheckRoomControlsEnabledForAnyone()
+	{
+		return featureFlags.IsEnabledForAnyone("2026-05-RoomControlsEnabled");
 	}
 }

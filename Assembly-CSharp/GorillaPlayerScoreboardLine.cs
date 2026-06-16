@@ -39,6 +39,9 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 
 	public GorillaPlayerLineButton reportButton;
 
+	[Space]
+	public GameObject reportButtons;
+
 	public GameObject hateSpeechButton;
 
 	public GameObject toxicityButton;
@@ -47,6 +50,23 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 
 	public GameObject cancelButton;
 
+	[Space]
+	public GameObject roomControlButtons;
+
+	public GorillaPlayerLineButton muteForRoomButton;
+
+	public GorillaPlayerLineButton kickButton;
+
+	public GorillaPlayerLineButton banButton;
+
+	[Space]
+	public GameObject confirmRoomControlButtons;
+
+	public GorillaPlayerLineButton confirmRoomControlButton;
+
+	public GorillaPlayerLineButton cancelRoomControlButton;
+
+	[Space]
 	public SpriteRenderer speakerIcon;
 
 	public bool canPressNextReportButton = true;
@@ -82,6 +102,12 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 	public bool doneReporting;
 
 	public bool lastVisible = true;
+
+	private GorillaPlayerLineButton _parentConfirmButton;
+
+	private bool _attemptingKick;
+
+	private bool _attemptingBan;
 
 	public GorillaScoreBoard parentScoreboard;
 
@@ -141,8 +167,11 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		if (rigContainer != null)
 		{
 			rigContainer.hasManualMute = isMuteManual;
-			rigContainer.Muted = ((mute != 0) ? true : false);
+			rigContainer.SetMuted(RigContainer.MuteReason.Manual, (mute != 0) ? true : false);
 		}
+		_parentConfirmButton = null;
+		_attemptingKick = false;
+		_attemptingBan = false;
 	}
 
 	public void SetLineData(NetPlayer netPlayer)
@@ -174,13 +203,13 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		if (playerNameVisible != playerVRRig.playerNameVisible)
 		{
 			UpdatePlayerText();
-			parentScoreboard.IsDirty = true;
+			parentScoreboard.SetDirty();
 			if (playerVRRig.creator.IsMasterClient && GorillaComputer.instance.IsPlayerInVirtualStump())
 			{
 				CustomMapModeSelector.RefreshHostName();
 			}
 		}
-		if (!(rigContainer != null))
+		if (rigContainer == null)
 		{
 			return;
 		}
@@ -199,7 +228,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 				}
 			}
 		}
-		Material material = ((playerVRRig.setMatIndex != 0) ? playerVRRig.materialsToChangeTo[playerVRRig.setMatIndex] : playerVRRig.scoreboardMaterial);
+		Material material = ((playerVRRig.setMatIndex == 0) ? playerVRRig.scoreboardMaterial : playerVRRig.materialsToChangeTo[playerVRRig.setMatIndex]);
 		if (playerSwatch.material != material)
 		{
 			playerSwatch.material = material;
@@ -216,14 +245,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		{
 			if (playerVRRig.remoteUseReplacementVoice || playerVRRig.localUseReplacementVoice || GorillaComputer.instance.voiceChatOn == "FALSE")
 			{
-				if (playerVRRig.SpeakingLoudness > playerVRRig.replacementVoiceLoudnessThreshold && !rigContainer.ForceMute && !rigContainer.Muted)
-				{
-					speakerIcon.enabled = true;
-				}
-				else
-				{
-					speakerIcon.enabled = false;
-				}
+				speakerIcon.enabled = playerVRRig.SpeakingLoudness > playerVRRig.replacementVoiceLoudnessThreshold && !rigContainer.IsMutedFor(~RigContainer.MuteReason.Auto);
 			}
 			else if ((rigContainer.Voice != null && rigContainer.Voice.IsSpeaking) || (playerVRRig.rigSerializer != null && playerVRRig.rigSerializer.IsLocallyOwned && myRecorder != null && myRecorder.IsCurrentlyTransmitting))
 			{
@@ -247,6 +269,12 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 				muteButton.UpdateColor();
 			}
 		}
+		bool flag = RoomControls.MutedPlayers.ContainsKey(linePlayer.UserId);
+		if (muteForRoomButton.isOn != flag)
+		{
+			muteForRoomButton.isOn = flag;
+			muteForRoomButton.UpdateColor();
+		}
 	}
 
 	private void UpdatePlayerText()
@@ -266,15 +294,48 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 			{
 				playerNameVisible = NormalizeName(linePlayer.NickName != currentNickname, linePlayer.NickName);
 			}
-			bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
 			currentNickname = linePlayer.NickName;
-			playerName.text = (flag ? playerNameVisible : linePlayer.DefaultName);
+			playerName.text = (KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags) ? playerNameVisible : linePlayer.DefaultName);
 		}
 		catch (Exception)
 		{
 			playerNameVisible = linePlayer.DefaultName;
 			MonkeAgent.instance.SendReport("NmError", linePlayer.UserId, linePlayer.NickName);
 		}
+	}
+
+	public bool IsLineActive()
+	{
+		return base.gameObject.activeInHierarchy;
+	}
+
+	public bool IsPlayerInRoom()
+	{
+		if (linePlayer != null)
+		{
+			return linePlayer.InRoom;
+		}
+		return false;
+	}
+
+	public bool IsReportButtonActive()
+	{
+		return reportButton.isActiveAndEnabled;
+	}
+
+	public bool IsConfirmButtonsActive()
+	{
+		return confirmRoomControlButtons.activeInHierarchy;
+	}
+
+	public bool IsConfirmParentKick()
+	{
+		return _parentConfirmButton == kickButton;
+	}
+
+	public bool IsConfirmParentBan()
+	{
+		return _parentConfirmButton == banButton;
 	}
 
 	public void PressButton(bool isOn, GorillaPlayerLineButton.ButtonType buttonType)
@@ -291,7 +352,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 				if (rigContainer != null)
 				{
 					rigContainer.hasManualMute = isMuteManual;
-					rigContainer.Muted = ((mute != 0) ? true : false);
+					rigContainer.SetMuted(RigContainer.MuteReason.Manual, (mute != 0) ? true : false);
 				}
 				PlayerPrefs.Save();
 				muteButton.UpdateColor();
@@ -300,6 +361,51 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 			break;
 		case GorillaPlayerLineButton.ButtonType.Report:
 			SetReportState(reportState: true, buttonType);
+			break;
+		case GorillaPlayerLineButton.ButtonType.MuteAllRoom:
+			Debug.Log("Pressed Mute Room Control button for player " + linePlayer.UserId);
+			AttemptRoomControlMute();
+			break;
+		case GorillaPlayerLineButton.ButtonType.KickRoom:
+			if (_attemptingKick || _attemptingBan)
+			{
+				Debug.Log("Ban or kick for player " + linePlayer.UserId + " is already in progress!");
+				break;
+			}
+			Debug.Log("Pressed Kick Room Control button for player " + linePlayer.UserId);
+			ShowConfirmButtons(kickButton);
+			break;
+		case GorillaPlayerLineButton.ButtonType.BanRoom:
+			if (_attemptingKick || _attemptingBan)
+			{
+				Debug.Log("Ban or kick for player " + linePlayer.UserId + " is already in progress!");
+				break;
+			}
+			Debug.Log("Pressed Ban Room Control button for player " + linePlayer.UserId);
+			ShowConfirmButtons(banButton);
+			break;
+		case GorillaPlayerLineButton.ButtonType.Confirm:
+			if (IsConfirmParentKick())
+			{
+				if (AttemptRoomControlKick())
+				{
+					HideConfirmButtons();
+				}
+			}
+			else if (IsConfirmParentBan() && AttemptRoomControlBan())
+			{
+				HideConfirmButtons();
+			}
+			break;
+		case GorillaPlayerLineButton.ButtonType.Cancel:
+			if (_parentConfirmButton == null)
+			{
+				SetReportState(reportState: false, buttonType);
+			}
+			else
+			{
+				HideConfirmButtons();
+			}
 			break;
 		default:
 			SetReportState(reportState: false, buttonType);
@@ -311,11 +417,8 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 	{
 		canPressNextReportButton = buttonType != GorillaPlayerLineButton.ButtonType.Toxicity && buttonType != GorillaPlayerLineButton.ButtonType.Report;
 		reportInProgress = reportState;
-		if (reportState)
-		{
-			SwapToReportState(reportInProgress: true);
-		}
-		else
+		SwapToReportState(reportState);
+		if (!reportState)
 		{
 			SwapToReportState(reportInProgress: false);
 			if (linePlayer != null && buttonType != GorillaPlayerLineButton.ButtonType.Cancel)
@@ -364,7 +467,37 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		NetworkSystemRaiseEvent.RaiseEvent(code, data, options, reliable: true);
 	}
 
-	public string NormalizeName(bool doIt, string text)
+	public void ToggleRoomControlButtons(bool toggle, bool hideConfirm = true)
+	{
+		roomControlButtons.gameObject.SetActive(toggle);
+		if (hideConfirm && !toggle)
+		{
+			HideConfirmButtons();
+		}
+	}
+
+	public void ShowConfirmButtons(GorillaPlayerLineButton parentButton)
+	{
+		kickButton.gameObject.SetActive(value: false);
+		banButton.gameObject.SetActive(value: false);
+		confirmRoomControlButtons.SetActive(value: true);
+		confirmRoomControlButton.SetTouchTime(0.5f);
+		cancelRoomControlButton.SetTouchTime(0.5f);
+		confirmRoomControlButtons.transform.localPosition = new Vector2(parentButton.transform.localPosition.x, 0f);
+		_parentConfirmButton = parentButton;
+		parentScoreboard.RedrawPlayerLines();
+	}
+
+	public void HideConfirmButtons()
+	{
+		kickButton.gameObject.SetActive(value: true);
+		banButton.gameObject.SetActive(value: true);
+		confirmRoomControlButtons.SetActive(value: false);
+		_parentConfirmButton = null;
+		parentScoreboard.RedrawPlayerLines();
+	}
+
+	private string NormalizeName(bool doIt, string text)
 	{
 		if (doIt)
 		{
@@ -410,9 +543,52 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 	private void SwapToReportState(bool reportInProgress)
 	{
 		reportButton.gameObject.SetActive(!reportInProgress);
-		hateSpeechButton.SetActive(reportInProgress);
-		toxicityButton.SetActive(reportInProgress);
-		cheatingButton.SetActive(reportInProgress);
-		cancelButton.SetActive(reportInProgress);
+		reportButtons.SetActive(reportInProgress);
+	}
+
+	private bool AttemptRoomControlMute()
+	{
+		if (!RoomControls.CanModerate(out var cannotReason))
+		{
+			Debug.LogWarning("Cannot mute player in room: " + cannotReason + ".");
+			return false;
+		}
+		if (RoomControls.MutedPlayers.ContainsKey(linePlayer.UserId))
+		{
+			Debug.Log("Attempting UNMUTE in room for player " + linePlayer.UserId);
+			RoomControls.UnmutePlayer(linePlayer.UserId);
+		}
+		else
+		{
+			Debug.Log("Attempting MUTE in room for player " + linePlayer.UserId);
+			RoomControls.MutePlayer(linePlayer.ActorNumber);
+		}
+		return true;
+	}
+
+	private bool AttemptRoomControlKick()
+	{
+		if (!RoomControls.CanModerate(out var cannotReason))
+		{
+			Debug.LogWarning("Cannot kick player from room: " + cannotReason + ".");
+			return false;
+		}
+		Debug.Log("Attempting KICK from room for player " + linePlayer.UserId);
+		RoomControls.KickPlayer(linePlayer.ActorNumber);
+		_attemptingKick = true;
+		return true;
+	}
+
+	private bool AttemptRoomControlBan()
+	{
+		if (!RoomControls.CanModerate(out var cannotReason))
+		{
+			Debug.LogWarning("Cannot ban player from room: " + cannotReason + ".");
+			return false;
+		}
+		Debug.Log("Attempting BAN from room for player " + linePlayer.UserId);
+		RoomControls.KickAndBlockPlayer(linePlayer.ActorNumber);
+		_attemptingBan = true;
+		return true;
 	}
 }

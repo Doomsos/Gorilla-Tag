@@ -93,6 +93,8 @@ public abstract class NetworkSystem : MonoBehaviour
 		}
 	}
 
+	public IReadOnlyList<NetPlayer> NetPlayerCache => netPlayerCache;
+
 	public NetPlayer LocalPlayer => netPlayerCache.Find((NetPlayer p) => p.IsLocal);
 
 	public virtual bool IsMasterClient { get; }

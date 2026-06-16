@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using GorillaNetworking;
-using TMPro;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
 
 public class PhotoBoothCamera : MonoBehaviour
 {
@@ -17,12 +16,6 @@ public class PhotoBoothCamera : MonoBehaviour
 	private RenderTexture renderTexture;
 
 	[SerializeField]
-	private TMP_Text imageLabel;
-
-	[SerializeField]
-	private Image imageImage;
-
-	[SerializeField]
 	private string saveName = "img";
 
 	[SerializeField]
@@ -30,6 +23,15 @@ public class PhotoBoothCamera : MonoBehaviour
 
 	[SerializeField]
 	private string imageDescription = "";
+
+	[SerializeField]
+	private Texture2D overlay;
+
+	[SerializeField]
+	private UnityEvent OnCaptureImage;
+
+	[SerializeField]
+	private UnityEvent OnSaveImage;
 
 	private List<RenderTexture> rt = new List<RenderTexture>();
 
@@ -47,21 +49,18 @@ public class PhotoBoothCamera : MonoBehaviour
 		rt.Clear();
 	}
 
-	public void Capture(float FOV)
+	public void Capture(float FOV = 60f)
 	{
 		cam.fieldOfView = FOV;
 		cam.Render();
 		rt.Add(new RenderTexture(renderTexture.width, renderTexture.height, 1));
 		Graphics.Blit(renderTexture, rt[rt.Count - 1]);
-		OnCapture(rt[rt.Count - 1], rt.Count - 1);
+		OnCapture?.Invoke(rt[rt.Count - 1], rt.Count - 1);
+		OnCaptureImage?.Invoke();
 	}
 
-	public void Print()
+	private void _print()
 	{
-		if (!saveImageToDevice)
-		{
-			return;
-		}
 		string fileName = saveName;
 		if (appendDateToFile)
 		{
@@ -72,23 +71,43 @@ public class PhotoBoothCamera : MonoBehaviour
 			}
 			fileName += dateTime.ToString("yyyyMMddHHmmss");
 		}
-		RenderTexture print = new RenderTexture(renderTexture.width, renderTexture.height * rt.Count, 1);
+		Texture2D print = new Texture2D(renderTexture.width, renderTexture.height * rt.Count);
 		for (int i = 0; i < rt.Count; i++)
 		{
 			Graphics.CopyTexture(rt[i], 0, 0, 0, 0, rt[i].width, rt[i].height, print, 0, 0, 0, rt[i].height * i);
 		}
-		NativeArray<byte> narray = new NativeArray<byte>(print.width * print.height * 4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+		NativeArray<Color32> narray = new NativeArray<Color32>(print.width * print.height, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 		AsyncGPUReadback.RequestIntoNativeArray(ref narray, print, 0, delegate(AsyncGPUReadbackRequest request)
 		{
 			if (!request.hasError)
 			{
+				if ((bool)overlay)
+				{
+					Color32[] pixels = overlay.GetPixels32();
+					for (int j = 0; j < narray.Length; j++)
+					{
+						if (j < pixels.Length && pixels[j].a > 0)
+						{
+							narray[j] = pixels[j];
+						}
+					}
+				}
 				SaveImage(print, narray, fileName, imageDescription);
 			}
 			narray.Dispose();
+			OnSaveImage?.Invoke();
 		});
 	}
 
-	private void SaveImage(RenderTexture rt, NativeArray<byte> narray, string fileName, string desc)
+	public void Print()
+	{
+		if (saveImageToDevice)
+		{
+			_print();
+		}
+	}
+
+	private void SaveImage(Texture rt, NativeArray<Color32> narray, string fileName, string desc)
 	{
 		NativeArray<byte> nativeArray = ImageConversion.EncodeNativeArrayToJPG(narray, rt.graphicsFormat, (uint)rt.width, (uint)rt.height);
 		File.WriteAllBytes(Path.Combine(Application.persistentDataPath, fileName + ".jpg"), nativeArray.ToArray());

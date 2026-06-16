@@ -12,6 +12,8 @@ public class ScavengerTarget : MonoBehaviour, IGorillaGrabable
 
 	public string TargetName;
 
+	public string DisplayName;
+
 	public UnityEvent[] TargetCollected;
 
 	public UnityEvent<ScavengerTarget>[] TargetCollectedArg;

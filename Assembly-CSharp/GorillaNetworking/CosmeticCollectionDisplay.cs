@@ -9,15 +9,21 @@ namespace GorillaNetworking;
 
 public class CosmeticCollectionDisplay : MonoBehaviour
 {
-	private static readonly Dictionary<(int, string), CosmeticCollectionDisplay> Registered = new Dictionary<(int, string), CosmeticCollectionDisplay>();
+	private static readonly Dictionary<(VRRig, string), CosmeticCollectionDisplay> Registered = new Dictionary<(VRRig, string), CosmeticCollectionDisplay>();
+
+	private static readonly List<CosmeticCollectionDisplay> AllDisplays = new List<CosmeticCollectionDisplay>();
 
 	private bool isCycling;
 
 	private bool isVisible = true;
 
+	private bool isLocal;
+
 	private int activeIndex;
 
-	private int registeredRigID;
+	private int visibleMask;
+
+	private VRRig registeredRig;
 
 	private string registeredParentID;
 
@@ -27,11 +33,17 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 
 	private readonly List<CosmeticsController.CosmeticItem> placedCollectables = new List<CosmeticsController.CosmeticItem>();
 
+	private readonly List<int> canonicalIndices = new List<int>();
+
 	public string ParentPlayFabID { get; private set; }
 
 	public int ActiveIndex => activeIndex;
 
 	public int Count => spawnedAnchors.Count;
+
+	public int VisibleMask => visibleMask;
+
+	public bool IsLocal => isLocal;
 
 	public CosmeticsController.CosmeticItem? ActiveCollectable
 	{
@@ -45,26 +57,76 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 		}
 	}
 
-	public static void Register(int rigID, string parentID, CosmeticCollectionDisplay display)
+	public int ActiveCanonicalIndex
 	{
-		display.registeredRigID = rigID;
-		display.registeredParentID = parentID;
-		display.ParentPlayFabID = parentID;
-		Registered[(rigID, parentID)] = display;
+		get
+		{
+			if (placedCollectables.Count == 0 || activeIndex < 0 || activeIndex >= canonicalIndices.Count)
+			{
+				return -1;
+			}
+			return canonicalIndices[activeIndex];
+		}
 	}
 
-	public static CosmeticCollectionDisplay FindForRig(int rigID, string parentID)
+	public static void Register(VRRig rig, string parentID, CosmeticCollectionDisplay display, bool isLocal)
 	{
-		Registered.TryGetValue((rigID, parentID), out var value);
+		display.registeredRig = rig;
+		display.registeredParentID = parentID;
+		display.ParentPlayFabID = parentID;
+		display.isLocal = isLocal;
+		if (Registered.TryGetValue((rig, parentID), out var value) && value != null && value != display)
+		{
+			Object.Destroy(value);
+		}
+		Registered[(rig, parentID)] = display;
+		if (!AllDisplays.Contains(display))
+		{
+			AllDisplays.Add(display);
+		}
+	}
+
+	public static CosmeticCollectionDisplay FindForRig(VRRig rig, string parentID)
+	{
+		Registered.TryGetValue((rig, parentID), out var value);
 		return value;
 	}
 
-	public static void GetDisplaysForRig(int rigID, List<CosmeticCollectionDisplay> result)
+	public static void GetAllForParent(VRRig rig, string parentID, List<CosmeticCollectionDisplay> result)
 	{
 		result.Clear();
-		foreach (KeyValuePair<(int, string), CosmeticCollectionDisplay> item in Registered)
+		for (int i = 0; i < AllDisplays.Count; i++)
 		{
-			if (item.Key.Item1 == rigID)
+			CosmeticCollectionDisplay cosmeticCollectionDisplay = AllDisplays[i];
+			if (!(cosmeticCollectionDisplay == null) && cosmeticCollectionDisplay.registeredRig == rig && cosmeticCollectionDisplay.registeredParentID == parentID)
+			{
+				result.Add(cosmeticCollectionDisplay);
+			}
+		}
+	}
+
+	public static void DestroyAllForParentExcept(VRRig rig, string parentID, GameObject host)
+	{
+		for (int num = AllDisplays.Count - 1; num >= 0; num--)
+		{
+			CosmeticCollectionDisplay cosmeticCollectionDisplay = AllDisplays[num];
+			if (cosmeticCollectionDisplay == null)
+			{
+				AllDisplays.RemoveAt(num);
+			}
+			else if (!(cosmeticCollectionDisplay.registeredRig != rig) && !(cosmeticCollectionDisplay.registeredParentID != parentID) && !(cosmeticCollectionDisplay.gameObject == host))
+			{
+				Object.Destroy(cosmeticCollectionDisplay);
+			}
+		}
+	}
+
+	public static void GetDisplaysForRig(VRRig rig, List<CosmeticCollectionDisplay> result)
+	{
+		result.Clear();
+		foreach (KeyValuePair<(VRRig, string), CosmeticCollectionDisplay> item in Registered)
+		{
+			if (item.Key.Item1 == rig)
 			{
 				result.Add(item.Value);
 			}
@@ -100,6 +162,7 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 	{
 		ClearSpawnedAnchors();
 		placedCollectables.Clear();
+		canonicalIndices.Clear();
 		isCycling = parentInfo.collectionIsCycling;
 		bool collectionUsesIndexTargeting = parentInfo.collectionUsesIndexTargeting;
 		if (isCycling)
@@ -119,6 +182,7 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 				gameObject.transform.localScale = localScale;
 				spawnedAnchors.Add(gameObject);
 				placedCollectables.Add(ownedCollectables[i]);
+				canonicalIndices.Add(ResolveCanonicalIndex(parentInfo.playFabID, ownedCollectables[i].itemName));
 				InstantiateIntoAnchor(ownedCollectables[i], gameObject.transform);
 			}
 		}
@@ -133,7 +197,7 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 				{
 					for (int k = 0; k < ownedCollectables.Count; k++)
 					{
-						if (ownedCollectables[k].collectionTargetSlotIndex == j)
+						if (ownedCollectables[k].GetTargetSlotIndexForParent(parentInfo.playFabID) == j)
 						{
 							cosmeticItem = ownedCollectables[k];
 							break;
@@ -158,12 +222,31 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 					gameObject2.transform.localScale = localScale2;
 					spawnedAnchors.Add(gameObject2);
 					placedCollectables.Add(cosmeticItem.Value);
+					canonicalIndices.Add(ResolveCanonicalIndex(parentInfo.playFabID, cosmeticItem.Value.itemName));
 					InstantiateIntoAnchor(cosmeticItem.Value, gameObject2.transform);
 				}
 			}
 		}
 		activeIndex = 0;
+		visibleMask = 0;
+		for (int l = 0; l < canonicalIndices.Count; l++)
+		{
+			int num2 = canonicalIndices[l];
+			if (num2 >= 0 && num2 < 32)
+			{
+				visibleMask |= 1 << num2;
+			}
+		}
 		ApplyCyclingVisibility();
+	}
+
+	private static int ResolveCanonicalIndex(string parentPlayFabID, string itemName)
+	{
+		if (!CosmeticsController.hasInstance)
+		{
+			return -1;
+		}
+		return CosmeticsController.instance.GetCanonicalCollectableIndex(parentPlayFabID, itemName);
 	}
 
 	public void SetActiveIndex(int index)
@@ -172,6 +255,53 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 		{
 			activeIndex = Mathf.Clamp(index, 0, spawnedAnchors.Count - 1);
 			RefreshAnchorVisibility();
+			PersistLocalState();
+		}
+	}
+
+	public void SetVisibleMask(int mask)
+	{
+		visibleMask = mask;
+		RefreshAnchorVisibility();
+		PersistLocalState();
+	}
+
+	public bool SetEquippedAtCanonical(int canonicalIndex, bool equipped)
+	{
+		if (canonicalIndex < 0 || canonicalIndex >= 32)
+		{
+			return false;
+		}
+		int num = 1 << canonicalIndex;
+		int num2 = (equipped ? (visibleMask | num) : (visibleMask & ~num));
+		if (num2 == visibleMask)
+		{
+			return false;
+		}
+		visibleMask = num2;
+		RefreshAnchorVisibility();
+		PersistLocalState();
+		return true;
+	}
+
+	public bool IsEquippedAtCanonical(int canonicalIndex)
+	{
+		if (canonicalIndex < 0 || canonicalIndex >= 32)
+		{
+			return true;
+		}
+		return (visibleMask & (1 << canonicalIndex)) != 0;
+	}
+
+	public void PersistLocalState()
+	{
+		if (isLocal && !string.IsNullOrEmpty(registeredParentID) && CosmeticsController.hasInstance)
+		{
+			CosmeticsController.instance.localCycleStates[(registeredRig, registeredParentID)] = new CosmeticsController.CollectionState
+			{
+				activeIndex = activeIndex,
+				visibleMask = visibleMask
+			};
 		}
 	}
 
@@ -249,9 +379,11 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 	{
 		for (int i = 0; i < spawnedAnchors.Count; i++)
 		{
-			if (spawnedAnchors[i] != null)
+			if (!(spawnedAnchors[i] == null))
 			{
-				bool active = isVisible && (!isCycling || i == activeIndex);
+				int num = ((i < canonicalIndices.Count) ? canonicalIndices[i] : i);
+				bool flag = num < 0 || num >= 32 || (visibleMask & (1 << num)) != 0;
+				bool active = isVisible && flag && (!isCycling || i == activeIndex);
 				spawnedAnchors[i].SetActive(active);
 			}
 		}
@@ -276,24 +408,44 @@ public class CosmeticCollectionDisplay : MonoBehaviour
 		}
 		spawnedAnchors.Clear();
 		placedCollectables.Clear();
+		canonicalIndices.Clear();
+	}
+
+	private void UnregisterIfOwner()
+	{
+		(VRRig, string) key = (registeredRig, registeredParentID);
+		if (Registered.TryGetValue(key, out var value) && value == this)
+		{
+			Registered.Remove(key);
+		}
 	}
 
 	private void OnDisable()
 	{
-		Registered.Remove((registeredRigID, registeredParentID));
+		UnregisterIfOwner();
 	}
 
 	private void OnEnable()
 	{
 		if (!string.IsNullOrEmpty(registeredParentID))
 		{
-			Registered[(registeredRigID, registeredParentID)] = this;
+			(VRRig, string) key = (registeredRig, registeredParentID);
+			if (!Registered.TryGetValue(key, out var value) || value == null || value == this)
+			{
+				Registered[key] = this;
+			}
+			if (isLocal && CosmeticsController.hasInstance && CosmeticsController.instance.localCycleStates.TryGetValue((registeredRig, registeredParentID), out var value2))
+			{
+				visibleMask = value2.visibleMask;
+				SetActiveIndex(value2.activeIndex);
+			}
 		}
 	}
 
 	private void OnDestroy()
 	{
-		Registered.Remove((registeredRigID, registeredParentID));
+		UnregisterIfOwner();
+		AllDisplays.Remove(this);
 		ClearSpawnedAnchors();
 	}
 }

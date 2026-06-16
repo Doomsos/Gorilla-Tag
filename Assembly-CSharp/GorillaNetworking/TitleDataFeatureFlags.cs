@@ -20,7 +20,7 @@ public class TitleDataFeatureFlags
 
 	private Dictionary<string, List<string>> flagValueByUser = new Dictionary<string, List<string>>();
 
-	private Dictionary<string, bool> logSent = new Dictionary<string, bool>();
+	private readonly HashSet<(string flagName, string playFabId)> logSent = new HashSet<(string, string)>();
 
 	public bool ready { get; private set; }
 
@@ -59,28 +59,45 @@ public class TitleDataFeatureFlags
 		});
 	}
 
-	public bool IsEnabledForUser(string flagName)
+	public bool IsEnabled(string flagName)
 	{
-		logSent.TryGetValue(flagName, out var _);
-		logSent[flagName] = true;
-		string playFabPlayerId = PlayFabAuthenticator.instance.GetPlayFabPlayerId();
-		if (flagValueByUser.TryGetValue(flagName, out var value2) && value2 != null && value2.Contains(playFabPlayerId))
+		return IsEnabledForUser(flagName, PlayFabAuthenticator.instance.GetPlayFabPlayerId());
+	}
+
+	public bool IsEnabledForUser(string flagName, string playFabId)
+	{
+		bool flag = !logSent.Add((flagName, playFabId));
+		if (flagValueByUser.TryGetValue(flagName, out var value) && value.Contains(playFabId))
 		{
 			return true;
 		}
-		bool value4;
-		if (!flagValueByName.TryGetValue(flagName, out var value3))
+		bool value3;
+		if (!flagValueByName.TryGetValue(flagName, out var value2))
 		{
-			return defaults.TryGetValue(flagName, out value4) && value4;
+			return defaults.TryGetValue(flagName, out value3) && value3;
 		}
-		if (value3 <= 0)
+		if (value2 <= 0)
 		{
 			return false;
 		}
-		if (value3 >= 100)
+		if (value2 >= 100)
 		{
 			return true;
 		}
-		return XXHash32.Compute(Encoding.UTF8.GetBytes(playFabPlayerId)) % 100 < value3;
+		return XXHash32.Compute(Encoding.UTF8.GetBytes(playFabId)) % 100 < value2;
+	}
+
+	public bool IsEnabledForAnyone(string flagName)
+	{
+		if (flagValueByUser.TryGetValue(flagName, out var value) && value.Count > 0)
+		{
+			return true;
+		}
+		bool value3;
+		if (!flagValueByName.TryGetValue(flagName, out var value2))
+		{
+			return defaults.TryGetValue(flagName, out value3) && value3;
+		}
+		return value2 > 0;
 	}
 }

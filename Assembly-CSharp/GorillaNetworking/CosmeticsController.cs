@@ -10,6 +10,7 @@ using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaNetworking.Store;
 using GorillaTag;
+using GorillaTag.Cosmetics;
 using GorillaTag.CosmeticSystem;
 using GorillaTagScripts;
 using GorillaTagScripts.Subscription;
@@ -436,87 +437,83 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			{
 				return;
 			}
-			CosmeticsController instance2 = CosmeticsController.instance;
-			if (!instance2.TryGetCosmeticInfoV2(parentItem.itemName, out var cosmeticInfo) || cosmeticInfo.collectionSlots == null || cosmeticInfo.collectionSlots.Length == 0)
-			{
-				return;
-			}
-			GameObject gameObject = null;
-			foreach (GameObject @object in instance.objects)
-			{
-				if (@object != null)
-				{
-					gameObject = @object;
-					break;
-				}
-			}
+			GameObject gameObject = FindFirstPickupableVariantRoot(instance.objects) ?? FindFirstPickupableVariantRoot(instance.holdableObjects);
 			if (gameObject == null)
 			{
-				foreach (GameObject holdableObject in instance.holdableObjects)
+				CosmeticCollectionDisplay.GetAllForParent(rig, parentItem.itemName, scratchDisplayList);
+				for (int i = 0; i < scratchDisplayList.Count; i++)
 				{
-					if (holdableObject != null)
+					CosmeticCollectionDisplay cosmeticCollectionDisplay = scratchDisplayList[i];
+					if (cosmeticCollectionDisplay != null && cosmeticCollectionDisplay.gameObject != null && cosmeticCollectionDisplay.GetComponent<PickupableVariant>() != null)
 					{
-						gameObject = holdableObject;
+						gameObject = cosmeticCollectionDisplay.gameObject;
 						break;
 					}
 				}
 			}
 			if (gameObject == null)
 			{
+				gameObject = FindFirstNonNull(instance.objects) ?? FindFirstNonNull(instance.holdableObjects);
+			}
+			if (gameObject != null)
+			{
+				CosmeticCollectionDisplay.DestroyAllForParentExcept(rig, parentItem.itemName, gameObject);
+				RemoveStaleDisplaysForParent(rig, parentItem.itemName, gameObject);
+				PopulateCollectionDisplayOnRoot(gameObject, parentItem, rig);
+			}
+		}
+
+		private static void RemoveStaleDisplaysForParent(VRRig rig, string parentPlayFabID, GameObject host)
+		{
+			if (rig == null || string.IsNullOrEmpty(parentPlayFabID))
+			{
 				return;
 			}
-			if (!gameObject.TryGetComponent<CosmeticCollectionDisplay>(out var component))
+			CosmeticCollectionDisplay[] componentsInChildren = rig.GetComponentsInChildren<CosmeticCollectionDisplay>(includeInactive: true);
+			foreach (CosmeticCollectionDisplay cosmeticCollectionDisplay in componentsInChildren)
 			{
-				component = gameObject.AddComponent<CosmeticCollectionDisplay>();
-			}
-			List<CosmeticItem> list = new List<CosmeticItem>();
-			List<CosmeticItem> value;
-			if (rig.isLocal)
-			{
-				for (int i = 0; i < instance2.unlockedCosmetics.Count; i++)
+				if (!(cosmeticCollectionDisplay == null) && !(cosmeticCollectionDisplay.gameObject == host) && !(cosmeticCollectionDisplay.ParentPlayFabID != parentPlayFabID))
 				{
-					if (instance2.unlockedCosmetics[i].collectionParentPlayFabID == parentItem.itemName)
+					UnityEngine.Object.Destroy(cosmeticCollectionDisplay);
+				}
+			}
+		}
+
+		private static GameObject FindFirstPickupableVariantRoot(IList<GameObject> roots)
+		{
+			if (roots == null)
+			{
+				return null;
+			}
+			for (int i = 0; i < roots.Count; i++)
+			{
+				GameObject gameObject = roots[i];
+				if (!(gameObject == null))
+				{
+					PickupableVariant componentInChildren = gameObject.GetComponentInChildren<PickupableVariant>(includeInactive: true);
+					if (componentInChildren != null)
 					{
-						list.Add(instance2.unlockedCosmetics[i]);
+						return componentInChildren.gameObject;
 					}
 				}
-				CosmeticItem tryOnC = instance2.tryOnCollectableItem;
-				if (!tryOnC.isNullItem && tryOnC.collectionParentPlayFabID == parentItem.itemName && !list.Exists((CosmeticItem x) => x.itemName == tryOnC.itemName) && VRRig.LocalRig != null && VRRig.LocalRig.inTryOnRoom)
-				{
-					list.Add(tryOnC);
-				}
-				if (cosmeticInfo.collectionIsCycling && cosmeticInfo.collectionUsesSeriesOrder)
-				{
-					list.Sort(delegate(CosmeticItem a, CosmeticItem b)
-					{
-						int collectionSeriesIndex = a.collectionSeriesIndex;
-						int collectionSeriesIndex2 = b.collectionSeriesIndex;
-						if (collectionSeriesIndex < 0 && collectionSeriesIndex2 < 0)
-						{
-							return 0;
-						}
-						if (collectionSeriesIndex < 0)
-						{
-							return 1;
-						}
-						return (collectionSeriesIndex2 < 0) ? (-1) : collectionSeriesIndex.CompareTo(collectionSeriesIndex2);
-					});
-				}
-				if (component.ContentMatches(list))
-				{
-					return;
-				}
 			}
-			else if (instance2.collectablesByParentID.TryGetValue(parentItem.itemName, out value))
+			return null;
+		}
+
+		private static GameObject FindFirstNonNull(IList<GameObject> roots)
+		{
+			if (roots == null)
 			{
-				list.AddRange(value);
+				return null;
 			}
-			component.Populate(list, cosmeticInfo, gameObject.transform);
-			CosmeticCollectionDisplay.Register(rig.GetInstanceID(), parentItem.itemName, component);
-			if (!rig.isLocal && rig.remoteCycleStates.TryGetValue(parentItem.itemName, out var value2))
+			for (int i = 0; i < roots.Count; i++)
 			{
-				component.SetActiveIndex(value2);
+				if (roots[i] != null)
+				{
+					return roots[i];
+				}
 			}
+			return null;
 		}
 
 		public void DeactivateAllCosmetcs(BodyDockPositions bDock, CosmeticItem nullItem, CosmeticItemRegistry cosmeticObjectRegistry)
@@ -661,7 +658,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 			int num3 = 16;
 			for (int i = 0; i < num3; i++)
 			{
-				if (!items[i].isNullItem && (items[i].itemName.Length == 6 || items[i].itemName == "Slingshot"))
+				if (!items[i].isNullItem && !string.IsNullOrEmpty(items[i].itemName) && (items[i].itemName.Length == 6 || items[i].itemName == "Slingshot"))
 				{
 					num |= 1 << i;
 					num2++;
@@ -756,6 +753,14 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 	}
 
 	[Serializable]
+	public struct CollectionState
+	{
+		public int activeIndex;
+
+		public int visibleMask;
+	}
+
+	[Serializable]
 	public struct CosmeticItem
 	{
 		[Tooltip("Should match the spreadsheet item name.")]
@@ -813,7 +818,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		public bool isNullItem;
 
 		[NonSerialized]
-		public string collectionParentPlayFabID;
+		public CosmeticCollectionParentLink[] collectionParentLinks;
 
 		[NonSerialized]
 		public int collectionSlotCount;
@@ -825,13 +830,66 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		public bool collectionUsesIndexTargeting;
 
 		[NonSerialized]
-		public int collectionTargetSlotIndex;
-
-		[NonSerialized]
-		public int collectionSeriesIndex;
-
-		[NonSerialized]
 		public string appliedCosmeticPlayFabID;
+
+		public bool IsCollectable
+		{
+			get
+			{
+				CosmeticCollectionParentLink[] array = collectionParentLinks;
+				if (array != null)
+				{
+					return array.Length > 0;
+				}
+				return false;
+			}
+		}
+
+		public bool IsCollectableOf(string parentPlayFabID)
+		{
+			if (collectionParentLinks == null)
+			{
+				return false;
+			}
+			for (int i = 0; i < collectionParentLinks.Length; i++)
+			{
+				if (collectionParentLinks[i].parentPlayFabID == parentPlayFabID)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public int GetTargetSlotIndexForParent(string parentPlayFabID)
+		{
+			if (collectionParentLinks != null)
+			{
+				for (int i = 0; i < collectionParentLinks.Length; i++)
+				{
+					if (collectionParentLinks[i].parentPlayFabID == parentPlayFabID)
+					{
+						return collectionParentLinks[i].targetSlotIndex;
+					}
+				}
+			}
+			return -1;
+		}
+
+		public int GetSeriesIndexForParent(string parentPlayFabID)
+		{
+			if (collectionParentLinks != null)
+			{
+				for (int i = 0; i < collectionParentLinks.Length; i++)
+				{
+					if (collectionParentLinks[i].parentPlayFabID == parentPlayFabID)
+					{
+						return collectionParentLinks[i].seriesIndex;
+					}
+				}
+			}
+			return -1;
+		}
 	}
 
 	[Serializable]
@@ -1025,9 +1083,16 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 	[NonSerialized]
 	public Dictionary<string, List<CosmeticItem>> collectablesByParentID = new Dictionary<string, List<CosmeticItem>>();
 
+	[NonSerialized]
+	public Dictionary<(VRRig rig, string parentID), CollectionState> localCycleStates = new Dictionary<(VRRig, string), CollectionState>();
+
 	private static readonly List<CosmeticCollectionDisplay> scratchDisplayList = new List<CosmeticCollectionDisplay>();
 
 	private static int[] cycleStatesArray = Array.Empty<int>();
+
+	private static readonly List<CosmeticItem> scratchCanonicalCollectables = new List<CosmeticItem>();
+
+	private static readonly List<CosmeticItem> scratchCanonicalIndexList = new List<CosmeticItem>();
 
 	public int currencyBalance;
 
@@ -1247,14 +1312,12 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 				overrideDisplayName = value.displayName,
 				bothHandsHoldable = value.usesBothHandSlots,
 				isNullItem = false,
-				collectionParentPlayFabID = value.collectionParentPlayFabID
+				collectionParentLinks = value.collectionParentLinks
 			};
 			CosmeticCollectionSlotDefinition[] collectionSlots = value.collectionSlots;
 			cosmeticItem.collectionSlotCount = ((collectionSlots != null) ? collectionSlots.Length : 0);
 			cosmeticItem.collectionIsCycling = value.collectionIsCycling;
 			cosmeticItem.collectionUsesIndexTargeting = value.collectionUsesIndexTargeting;
-			cosmeticItem.collectionTargetSlotIndex = value.collectionTargetSlotIndex;
-			cosmeticItem.collectionSeriesIndex = value.collectionSeriesIndex;
 			cosmeticItem.appliedCosmeticPlayFabID = value.appliedCosmeticPlayFabID ?? string.Empty;
 			CosmeticItem item = cosmeticItem;
 			_allCosmetics.Add(item);
@@ -1262,15 +1325,23 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		collectablesByParentID = new Dictionary<string, List<CosmeticItem>>();
 		for (int k = 0; k < _allCosmetics.Count; k++)
 		{
-			string collectionParentPlayFabID = _allCosmetics[k].collectionParentPlayFabID;
-			if (!string.IsNullOrEmpty(collectionParentPlayFabID))
+			CosmeticCollectionParentLink[] collectionParentLinks = _allCosmetics[k].collectionParentLinks;
+			if (collectionParentLinks == null)
 			{
-				if (!collectablesByParentID.TryGetValue(collectionParentPlayFabID, out var value2))
+				continue;
+			}
+			for (int l = 0; l < collectionParentLinks.Length; l++)
+			{
+				string parentPlayFabID = collectionParentLinks[l].parentPlayFabID;
+				if (!string.IsNullOrEmpty(parentPlayFabID))
 				{
-					value2 = new List<CosmeticItem>();
-					collectablesByParentID[collectionParentPlayFabID] = value2;
+					if (!collectablesByParentID.TryGetValue(parentPlayFabID, out var value2))
+					{
+						value2 = new List<CosmeticItem>();
+						collectablesByParentID[parentPlayFabID] = value2;
+					}
+					value2.Add(_allCosmetics[k]);
 				}
-				value2.Add(_allCosmetics[k]);
 			}
 		}
 		v2_allCosmeticsInfoAssetRef_isLoaded = true;
@@ -1335,10 +1406,25 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		int num = 0;
 		for (int i = 0; i < unlockedCosmetics.Count; i++)
 		{
-			if (unlockedCosmetics[i].collectionParentPlayFabID == parentPlayFabID)
+			if (unlockedCosmetics[i].IsCollectableOf(parentPlayFabID))
 			{
 				num++;
 			}
+		}
+		return num;
+	}
+
+	private int GetRemainingCollectableSlots(string parentPlayFabID)
+	{
+		if (!allCosmeticsDict.TryGetValue(parentPlayFabID, out var value))
+		{
+			return 0;
+		}
+		List<CosmeticItem> value2;
+		int num = ((!value.collectionIsCycling) ? value.collectionSlotCount : (collectablesByParentID.TryGetValue(parentPlayFabID, out value2) ? value2.Count : 0)) - GetOwnedCollectableCount(parentPlayFabID);
+		if (num <= 0)
+		{
+			return 0;
 		}
 		return num;
 	}
@@ -1349,22 +1435,135 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		{
 			return false;
 		}
-		string collectionParentPlayFabID = value.collectionParentPlayFabID;
-		if (string.IsNullOrEmpty(collectionParentPlayFabID))
+		if (!value.IsCollectable)
 		{
 			return true;
 		}
-		if (!IsOwnedByPlayFabID(collectionParentPlayFabID))
+		CosmeticCollectionParentLink[] collectionParentLinks = value.collectionParentLinks;
+		for (int i = 0; i < collectionParentLinks.Length; i++)
 		{
-			return false;
+			string parentPlayFabID = collectionParentLinks[i].parentPlayFabID;
+			if (!string.IsNullOrEmpty(parentPlayFabID) && IsOwnedByPlayFabID(parentPlayFabID) && GetRemainingCollectableSlots(parentPlayFabID) > 0)
+			{
+				return true;
+			}
 		}
-		if (!allCosmeticsDict.TryGetValue(collectionParentPlayFabID, out var value2))
+		return false;
+	}
+
+	public void BuildCanonicalCollectableOrder(string parentPlayFabID, List<CosmeticItem> result)
+	{
+		result.Clear();
+		if (string.IsNullOrEmpty(parentPlayFabID) || !collectablesByParentID.TryGetValue(parentPlayFabID, out var value))
 		{
-			return false;
+			return;
 		}
-		List<CosmeticItem> value3;
-		int num = ((!value2.collectionIsCycling) ? value2.collectionSlotCount : (collectablesByParentID.TryGetValue(collectionParentPlayFabID, out value3) ? value3.Count : 0));
-		return GetOwnedCollectableCount(collectionParentPlayFabID) < num;
+		result.AddRange(value);
+		CosmeticInfoV2 cosmeticInfo;
+		bool seriesOrder = TryGetCosmeticInfoV2(parentPlayFabID, out cosmeticInfo) && cosmeticInfo.collectionIsCycling && cosmeticInfo.collectionUsesSeriesOrder;
+		result.Sort(delegate(CosmeticItem a, CosmeticItem b)
+		{
+			if (seriesOrder)
+			{
+				int num = a.GetSeriesIndexForParent(parentPlayFabID);
+				int num2 = b.GetSeriesIndexForParent(parentPlayFabID);
+				if (num < 0)
+				{
+					num = int.MaxValue;
+				}
+				if (num2 < 0)
+				{
+					num2 = int.MaxValue;
+				}
+				if (num != num2)
+				{
+					return num.CompareTo(num2);
+				}
+			}
+			return string.CompareOrdinal(a.itemName, b.itemName);
+		});
+	}
+
+	public int GetCanonicalCollectableIndex(string parentPlayFabID, string itemName)
+	{
+		BuildCanonicalCollectableOrder(parentPlayFabID, scratchCanonicalIndexList);
+		for (int i = 0; i < scratchCanonicalIndexList.Count; i++)
+		{
+			if (scratchCanonicalIndexList[i].itemName == itemName)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public static void PopulateCollectionDisplayOnRoot(GameObject rootObj, CosmeticItem parentItem, VRRig rig)
+	{
+		if (rootObj == null || parentItem.collectionSlotCount <= 0 || !hasInstance || !instance.TryGetCosmeticInfoV2(parentItem.itemName, out var cosmeticInfo) || cosmeticInfo.collectionSlots == null || cosmeticInfo.collectionSlots.Length == 0)
+		{
+			return;
+		}
+		if (!rootObj.TryGetComponent<CosmeticCollectionDisplay>(out var component))
+		{
+			component = rootObj.AddComponent<CosmeticCollectionDisplay>();
+		}
+		List<CosmeticItem> list = new List<CosmeticItem>();
+		bool flag = false;
+		if (rig.isLocal)
+		{
+			instance.BuildCanonicalCollectableOrder(parentItem.itemName, scratchCanonicalCollectables);
+			CosmeticItem cosmeticItem = instance.tryOnCollectableItem;
+			flag = !cosmeticItem.isNullItem && cosmeticItem.IsCollectableOf(parentItem.itemName) && VRRig.LocalRig != null && VRRig.LocalRig.inTryOnRoom;
+			for (int i = 0; i < scratchCanonicalCollectables.Count; i++)
+			{
+				CosmeticItem item = scratchCanonicalCollectables[i];
+				bool num = instance.IsOwnedByPlayFabID(item.itemName);
+				bool flag2 = flag && item.itemName == cosmeticItem.itemName;
+				if (num || flag2)
+				{
+					list.Add(item);
+				}
+			}
+			if (component.ContentMatches(list))
+			{
+				CosmeticCollectionDisplay.Register(rig, parentItem.itemName, component, rig.isLocal);
+				return;
+			}
+		}
+		else
+		{
+			instance.BuildCanonicalCollectableOrder(parentItem.itemName, list);
+			if (component.ContentMatches(list))
+			{
+				CosmeticCollectionDisplay.Register(rig, parentItem.itemName, component, rig.isLocal);
+				if (rig.remoteCycleStates.TryGetValue(parentItem.itemName, out var value))
+				{
+					component.SetVisibleMask(value.visibleMask);
+					component.SetActiveIndex(value.activeIndex);
+				}
+				return;
+			}
+		}
+		component.Populate(list, cosmeticInfo, rootObj.transform);
+		if (flag)
+		{
+			component.PersistLocalState();
+		}
+		CosmeticCollectionDisplay.Register(rig, parentItem.itemName, component, rig.isLocal);
+		CollectionState value3;
+		if (rig.isLocal)
+		{
+			if (instance.localCycleStates.TryGetValue((rig, parentItem.itemName), out var value2))
+			{
+				component.SetVisibleMask(value2.visibleMask);
+				component.SetActiveIndex(value2.activeIndex);
+			}
+		}
+		else if (rig.remoteCycleStates.TryGetValue(parentItem.itemName, out value3))
+		{
+			component.SetVisibleMask(value3.visibleMask);
+			component.SetActiveIndex(value3.activeIndex);
+		}
 	}
 
 	public void Awake()
@@ -2659,19 +2858,22 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 		int[] array = activeMergedSet.ToPackedIDArray();
 		int[] array2 = tryOnSet.ToPackedIDArray();
 		GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, array, array2, playfx);
-		CosmeticCollectionDisplay.GetDisplaysForRig(GorillaTagger.Instance.offlineVRRig.GetInstanceID(), scratchDisplayList);
+		CosmeticCollectionDisplay.GetDisplaysForRig(GorillaTagger.Instance.offlineVRRig, scratchDisplayList);
 		if (scratchDisplayList.Count > 0)
 		{
-			int num = scratchDisplayList.Count * 2;
+			int num = scratchDisplayList.Count * 3;
 			if (cycleStatesArray.Length != num)
 			{
 				cycleStatesArray = new int[num];
 			}
 			for (int num2 = 0; num2 < scratchDisplayList.Count; num2++)
 			{
-				string parentPlayFabID = scratchDisplayList[num2].ParentPlayFabID;
-				cycleStatesArray[num2 * 2] = parentPlayFabID[0] - 65 + 26 * (parentPlayFabID[1] - 65 + 26 * (parentPlayFabID[2] - 65 + 26 * (parentPlayFabID[3] - 65 + 26 * (parentPlayFabID[4] - 65))));
-				cycleStatesArray[num2 * 2 + 1] = scratchDisplayList[num2].ActiveIndex;
+				CosmeticCollectionDisplay cosmeticCollectionDisplay = scratchDisplayList[num2];
+				string parentPlayFabID = cosmeticCollectionDisplay.ParentPlayFabID;
+				cycleStatesArray[num2 * 3] = parentPlayFabID[0] - 65 + 26 * (parentPlayFabID[1] - 65 + 26 * (parentPlayFabID[2] - 65 + 26 * (parentPlayFabID[3] - 65 + 26 * (parentPlayFabID[4] - 65))));
+				CosmeticItem? activeCollectable = cosmeticCollectionDisplay.ActiveCollectable;
+				cycleStatesArray[num2 * 3 + 1] = (activeCollectable.HasValue ? GetCanonicalCollectableIndex(parentPlayFabID, activeCollectable.Value.itemName) : cosmeticCollectionDisplay.ActiveIndex);
+				cycleStatesArray[num2 * 3 + 2] = cosmeticCollectionDisplay.VisibleMask;
 			}
 			GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithCollectablesPacked", RpcTarget.Others, cycleStatesArray);
 		}

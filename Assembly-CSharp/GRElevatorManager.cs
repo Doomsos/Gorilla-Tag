@@ -614,6 +614,24 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 				UpdateElevatorState(ElevatorSystemState.DestinationPressed, ElevatorLocation.VIMExperience1);
 			}
 			break;
+		case GRElevator.ButtonType.VIMExperience2:
+			if (currentState != ElevatorSystemState.WaitingToTeleport)
+			{
+				UpdateElevatorState(ElevatorSystemState.DestinationPressed, ElevatorLocation.VIMExperience2);
+			}
+			break;
+		case GRElevator.ButtonType.VIMExperience3:
+			if (currentState != ElevatorSystemState.WaitingToTeleport)
+			{
+				UpdateElevatorState(ElevatorSystemState.DestinationPressed, ElevatorLocation.VIMExperience3);
+			}
+			break;
+		case GRElevator.ButtonType.VIMExperience4:
+			if (currentState != ElevatorSystemState.WaitingToTeleport)
+			{
+				UpdateElevatorState(ElevatorSystemState.DestinationPressed, ElevatorLocation.VIMExperience4);
+			}
+			break;
 		case GRElevator.ButtonType.Summon:
 			if (currentState != ElevatorSystemState.WaitingToTeleport && currentState != ElevatorSystemState.DestinationPressed)
 			{

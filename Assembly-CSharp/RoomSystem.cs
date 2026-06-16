@@ -207,7 +207,7 @@ internal class RoomSystem : MonoBehaviour
 
 		public const byte VOX_SET_DENSITY = 105;
 
-		public const byte VOX_PLAY_FX = 106;
+		public const byte VOX_MINE = 106;
 
 		public const byte RPC = byte.MaxValue;
 	}

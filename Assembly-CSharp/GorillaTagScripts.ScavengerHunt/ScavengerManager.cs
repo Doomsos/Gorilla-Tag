@@ -40,7 +40,17 @@ public class ScavengerManager : MonoBehaviour
 
 		private HashSet<string>? _collectedTargetNamesNullable;
 
-		public bool IsCompleted => Targets.Count == CollectedTargetNames.Count;
+		public bool IsCompleted
+		{
+			get
+			{
+				if (Targets.Count > 0)
+				{
+					return Targets.Count == CollectedTargetNames.Count;
+				}
+				return false;
+			}
+		}
 
 		public IReadOnlyList<ScavengerTarget> Targets => _targets ?? (_targets = new List<ScavengerTarget>());
 
@@ -63,11 +73,11 @@ public class ScavengerManager : MonoBehaviour
 			{
 				if (!initialLoad || SendTargetCollectedEventsOnLoad)
 				{
-					SendTargetCollectedEvents(target);
+					SendTargetCollectedEvents(target, initialLoad);
 				}
 				if (IsCompleted && (!initialLoad || SendHuntCompletedEventsOnLoad))
 				{
-					SendHuntCompletedEvents();
+					SendHuntCompletedEvents(initialLoad);
 				}
 				return true;
 			}
@@ -89,7 +99,7 @@ public class ScavengerManager : MonoBehaviour
 			}
 		}
 
-		private void SendTargetCollectedEvents(ScavengerTarget target)
+		private void SendTargetCollectedEvents(ScavengerTarget target, bool initialLoad)
 		{
 			if (!Deprecated)
 			{
@@ -97,15 +107,17 @@ public class ScavengerManager : MonoBehaviour
 				TargetCollectedArg.InvokeAll(target);
 				target.TargetCollected.InvokeAll();
 				target.TargetCollectedArg.InvokeAll(target);
+				OnTargetCollected?.Invoke(Name, target.name, !initialLoad);
 			}
 		}
 
-		private void SendHuntCompletedEvents()
+		private void SendHuntCompletedEvents(bool initialLoad)
 		{
 			if (!Deprecated)
 			{
 				HuntCompleted.InvokeAll();
 				HuntCompletedArg.InvokeAll(this);
+				OnHuntCompleted?.Invoke(Name, !initialLoad);
 			}
 		}
 
@@ -238,6 +250,10 @@ public class ScavengerManager : MonoBehaviour
 		}
 	}
 
+	public static Action<string, bool> OnHuntCompleted;
+
+	public static Action<string, string, bool> OnTargetCollected;
+
 	public const string MothershipKey = "ScavengerHunt";
 
 	public Hunt[] Hunts = new Hunt[0];
@@ -251,7 +267,7 @@ public class ScavengerManager : MonoBehaviour
 			Instance = this;
 			return;
 		}
-		throw new Exception("Too ScavengerManagers exist at once, this should never happen.");
+		throw new Exception("Two ScavengerManagers exist at once, this should never happen.");
 	}
 
 	private void Start()

@@ -473,16 +473,38 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 				CosmeticItemRegistry key = item2.Key;
 				for (int j = 0; j < value.Count; j++)
 				{
-					if (!(value[j] == null) && overrides[key][j])
+					if (!(value[j] == null))
 					{
-						key.InitializeCosmetic(value[j], isOverride: true);
+						try
+						{
+							if (overrides[key][j])
+							{
+								key.InitializeCosmetic(value[j], isOverride: true);
+							}
+						}
+						catch (Exception exception)
+						{
+							UnityEngine.Debug.LogError("CosmeticsV2Spawner_Dirty.PostCompletionProcess: InitializeCosmetic (override) threw for \"" + value[j].name + "\" on rig \"" + ((key.Rig != null) ? key.Rig.name : "<null rig>") + "\". Skipping this cosmetic so the rest of the batch still initializes. Exception follows:", value[j]);
+							UnityEngine.Debug.LogException(exception, value[j]);
+						}
 					}
 				}
 				for (int k = 0; k < value.Count; k++)
 				{
-					if (!(value[k] == null) && !overrides[key][k])
+					if (!(value[k] == null))
 					{
-						key.InitializeCosmetic(value[k], isOverride: false);
+						try
+						{
+							if (!overrides[key][k])
+							{
+								key.InitializeCosmetic(value[k], isOverride: false);
+							}
+						}
+						catch (Exception exception2)
+						{
+							UnityEngine.Debug.LogError("CosmeticsV2Spawner_Dirty.PostCompletionProcess: InitializeCosmetic threw for \"" + value[k].name + "\" on rig \"" + ((key.Rig != null) ? key.Rig.name : "<null rig>") + "\". Skipping this cosmetic so the rest of the batch still initializes. Exception follows:", value[k]);
+							UnityEngine.Debug.LogException(exception2, value[k]);
+						}
 					}
 				}
 				for (int l = 0; l < value.Count; l++)
@@ -500,9 +522,9 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 									componentsInChildren[m].CosmeticSelectedSide = sides[key][l];
 									componentsInChildren[m].OnSpawn(key.Rig);
 								}
-								catch (Exception exception)
+								catch (Exception exception3)
 								{
-									UnityEngine.Debug.LogException(exception);
+									UnityEngine.Debug.LogException(exception3);
 								}
 							}
 						}
@@ -512,6 +534,10 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 				sides[key].Clear();
 				overrides[key].Clear();
 				key.RefreshRig();
+				if (key.Rig != null && key.Rig.myBodyDockPositions != null)
+				{
+					key.Rig.myBodyDockPositions.RefreshTransferrableItems();
+				}
 			}
 		}
 	}
@@ -602,24 +628,27 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 		}
 		transform2.name = name;
 		VRRigData value2 = ((loadOpInfo.vrRigIndex != -1) ? _gVRRigDatas[loadOpInfo.vrRigIndex] : default(VRRigData));
-		Transform transform3 = loadOpInfo.part.partType switch
+		if (loadOpInfo.cosmeticInfoV2.category != CosmeticsController.CosmeticCategory.Collectable)
 		{
-			ECosmeticPartType.Holdable => ((GTHardCodedBones.EBone)loadOpInfo.attachInfo.parentBone != GTHardCodedBones.EBone.body_AnchorFront_StowSlot) ? value2.parentOfDeactivatedHoldables : value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
-			ECosmeticPartType.Functional => value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
-			ECosmeticPartType.FirstPerson => g_gorillaPlayer.CosmeticsHeadTarget, 
-			ECosmeticPartType.LocalRig => value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
-			_ => throw new ArgumentOutOfRangeException("partType", "unhandled part type."), 
-		};
-		if ((bool)transform3)
-		{
-			transform.SetParent(transform3, worldPositionStays: false);
-			transform.localPosition = loadOpInfo.attachInfo.offset.pos;
-			transform.localRotation = loadOpInfo.attachInfo.offset.rot;
-			transform.localScale = loadOpInfo.attachInfo.offset.scale;
-		}
-		else
-		{
-			UnityEngine.Debug.LogError($"Bone transform not found for cosmetic part type {loadOpInfo.part.partType}. Cosmetic: " + "\"" + loadOpInfo.cosmeticInfoV2.displayName + "\"," + $"part: \"{loadOpInfo.part.prefabAssetRef.RuntimeKey}\"");
+			Transform transform3 = loadOpInfo.part.partType switch
+			{
+				ECosmeticPartType.Holdable => ((GTHardCodedBones.EBone)loadOpInfo.attachInfo.parentBone != GTHardCodedBones.EBone.body_AnchorFront_StowSlot) ? value2.parentOfDeactivatedHoldables : value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
+				ECosmeticPartType.Functional => value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
+				ECosmeticPartType.FirstPerson => g_gorillaPlayer.CosmeticsHeadTarget, 
+				ECosmeticPartType.LocalRig => value2.boneXforms[(int)loadOpInfo.attachInfo.parentBone], 
+				_ => throw new ArgumentOutOfRangeException("partType", "unhandled part type."), 
+			};
+			if ((bool)transform3)
+			{
+				transform.SetParent(transform3, worldPositionStays: false);
+				transform.localPosition = loadOpInfo.attachInfo.offset.pos;
+				transform.localRotation = loadOpInfo.attachInfo.offset.rot;
+				transform.localScale = loadOpInfo.attachInfo.offset.scale;
+			}
+			else
+			{
+				UnityEngine.Debug.LogError($"Bone transform not found for cosmetic part type {loadOpInfo.part.partType}. Cosmetic: " + "\"" + loadOpInfo.cosmeticInfoV2.displayName + "\"," + $"part: \"{loadOpInfo.part.prefabAssetRef.RuntimeKey}\"");
+			}
 		}
 		switch (loadOpInfo.part.partType)
 		{

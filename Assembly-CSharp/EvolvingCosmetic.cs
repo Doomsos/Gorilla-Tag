@@ -146,7 +146,7 @@ public class EvolvingCosmetic : MonoBehaviour, ICosmeticStateSync
 	{
 		if (ageAwareGameObjects.Length == 0)
 		{
-			return 0;
+			return -1;
 		}
 		if (ageAwareGameObjects[0].minActiveDays > daysAccrued)
 		{

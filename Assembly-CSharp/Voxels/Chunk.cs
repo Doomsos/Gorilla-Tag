@@ -184,6 +184,7 @@ public class Chunk : IDisposable
 			MeshCollider = chunkComponent.meshCollider;
 			Component.name = GetChunkName(Id);
 			Component.World = World;
+			Component.meshRenderer.sharedMaterial = World.MaterialSet.Material;
 		}
 		else
 		{

@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using PlayFab.Internal;
 using Unity.Mathematics;
 using UnityEngine;
 using Voxels;
@@ -21,15 +21,21 @@ public static class VoxelExtensions
 
 	private static bool _cascade = true;
 
+	private static List<int> _tris;
+
+	private static List<Vector3> _verts;
+
+	private static VoxelMaterialSet _opMaterialSet;
+
+	private static VoxelOperation _op;
+
 	private static VoxelAction _opAction;
 
 	private static Vector3 _opOrigin;
 
 	private static int _opTotalMined;
 
-	private static int _opDirtMined;
-
-	private static int _opStoneMined;
+	private static int[] _opMined;
 
 	private static byte _opDensity;
 
@@ -66,17 +72,30 @@ public static class VoxelExtensions
 		}
 		if (hit.collider is MeshCollider { sharedMesh: var sharedMesh } meshCollider)
 		{
-			if (sharedMesh == null || triangleIndex < 0 || triangleIndex >= sharedMesh.triangles.Length / 3)
+			if (!sharedMesh)
 			{
-				Debug.LogWarning($"Invalid triangle index {triangleIndex} for mesh {sharedMesh?.name}");
+				Debug.LogError($"{meshCollider} has no mesh!?");
+				return;
+			}
+			if (_tris == null)
+			{
+				_tris = new List<int>(65535);
+			}
+			if (_verts == null)
+			{
+				_verts = new List<Vector3>(65535);
+			}
+			sharedMesh.GetTriangles(_tris, 0);
+			sharedMesh.GetVertices(_verts);
+			if (triangleIndex < 0 || triangleIndex >= _tris.Count / 3)
+			{
+				Debug.LogError($"Invalid triangle index {triangleIndex} for mesh {sharedMesh.name}");
 				return;
 			}
 			Vector3 vector2 = meshCollider.transform.InverseTransformPoint(vector);
-			int[] triangles = sharedMesh.triangles;
-			Vector3[] vertices = sharedMesh.vertices;
-			Vector3 vector3 = vertices[triangles[triangleIndex * 3]];
-			Vector3 vector4 = vertices[triangles[triangleIndex * 3 + 1]];
-			Vector3 vector5 = vertices[triangles[triangleIndex * 3 + 2]];
+			Vector3 vector3 = _verts[_tris[triangleIndex * 3]];
+			Vector3 vector4 = _verts[_tris[triangleIndex * 3 + 1]];
+			Vector3 vector5 = _verts[_tris[triangleIndex * 3 + 2]];
 			Vector3 position = ((!((vector2 - vector3).sqrMagnitude < (vector2 - vector4).sqrMagnitude)) ? (((vector2 - vector4).sqrMagnitude < (vector2 - vector5).sqrMagnitude) ? vector4 : vector5) : (((vector2 - vector3).sqrMagnitude < (vector2 - vector5).sqrMagnitude) ? vector3 : vector5));
 			position = (_lastVertex = meshCollider.transform.TransformPoint(position));
 			if (_showDebug)
@@ -157,21 +176,29 @@ public static class VoxelExtensions
 		VoxelManager.Mine(world, _lastBounds, hit.point, hit.normal, end, action);
 	}
 
-	public static (int dirt, int stone) PerformLocalMiningOperation(this VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action)
+	private static void AddMined(byte material, int amount)
+	{
+		if (material < _opMined.Length)
+		{
+			_opTotalMined += amount;
+			_opMined[material] += amount;
+		}
+	}
+
+	public static int[] PerformLocalMiningOperation(this VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op)
 	{
 		_lastBounds = bounds;
-		_opAction = action;
-		_opOrigin = origin;
+		_opMaterialSet = world.MaterialSet;
+		_op = op;
 		_opTotalMined = 0;
-		_opDirtMined = 0;
-		_opStoneMined = 0;
-		switch (_opAction.operation)
+		_opMined = VoxelManager.GetIntArray(world.MaterialSet.Materials.Length);
+		switch (_op.operationType)
 		{
 		case OperationType.Subtract:
 			world.SetVoxelDataCustom(bounds, MineAt);
 			if (_opTotalMined > 0)
 			{
-				SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hitPoint, hitNormal, _opDirtMined, _opStoneMined);
+				world.MaterialSet.PlayDigFX(hitPoint, hitNormal, _opMined);
 			}
 			break;
 		case OperationType.Add:
@@ -180,7 +207,7 @@ public static class VoxelExtensions
 		default:
 			throw new ArgumentOutOfRangeException();
 		}
-		return (dirt: _opDirtMined, stone: _opStoneMined);
+		return _opMined;
 	}
 
 	public static void PerformLocalOperation(this VoxelWorld world, Vector3 localPosition, VoxelAction action)
@@ -206,26 +233,17 @@ public static class VoxelExtensions
 		(byte density, byte material) tuple = data;
 		byte item = tuple.density;
 		byte item2 = tuple.material;
-		float num = ((item2 == 0) ? _opAction.strength : (_opAction.strength * 0.2f));
-		float num2 = math.distance(_opOrigin, point);
-		byte b = ((num2 > _opAction.radius) ? item : ((byte)math.clamp((float)(int)item - num * math.lerp(255f, 0f, num2 / _opAction.radius), 0f, 255f)));
+		int num = _op.strength / _opMaterialSet.GetHardness(item2);
+		int num2 = FastDistance(_op.origin, point * 256);
+		byte b = ((num2 > _op.radius) ? item : ((byte)math.clamp(item - num * IntLerp(255, 0, num2, _op.radius) / 256, 0, 255)));
 		if (_showDebug && item != b)
 		{
-			Debug.Log($"Hit at {_opOrigin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b}[{b.ToFloat()}]");
+			Debug.Log($"Hit at {_op.origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b}[{b.ToFloat()}]");
 		}
 		if (item.IsSolid())
 		{
-			int num3 = (int)((float)(item - b) / 10f);
-			_opTotalMined += num3;
-			switch (item2)
-			{
-			case 0:
-				_opDirtMined += num3;
-				break;
-			case 1:
-				_opStoneMined += num3;
-				break;
-			}
+			int amount = (item - b) / 10;
+			AddMined(item2, amount);
 		}
 		return (density: b, material: item2);
 	}
@@ -235,29 +253,21 @@ public static class VoxelExtensions
 		(byte density, byte material) tuple = data;
 		byte item = tuple.density;
 		byte b = tuple.material;
-		float num = math.distance(_opOrigin, point);
-		byte b2 = ((num > _opAction.radius) ? item : ((byte)math.clamp((float)(int)item + _opAction.strength * math.lerp(255f, 0f, num / _opAction.radius), 0f, 255f)));
+		int num = _op.strength / _opMaterialSet.GetHardness(b);
+		int num2 = FastDistance(_op.origin, point * 256);
+		byte b2 = (((float)num2 > _opAction.radius) ? item : ((byte)math.clamp(item + num * IntLerp(255, 0, num2, _op.radius) / 256, 0, 255)));
 		if (item != b2)
 		{
 			b = _opAction.material;
 		}
 		if (_showDebug && item != b2)
 		{
-			Debug.Log($"Unmined at {_opOrigin}->{point}=d{num:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
+			Debug.Log($"Unmined at {_op.origin}->{point}=d{num2:F2} with density {item}[{item.ToFloat()}] -> {b2}[{b2.ToFloat()}]");
 		}
 		if (!item.IsSolid() && b2.IsSolid())
 		{
-			int num2 = (int)((float)(b2 - item) / 10f);
-			_opTotalMined += num2;
-			switch (b)
-			{
-			case 0:
-				_opDirtMined += num2;
-				break;
-			case 1:
-				_opStoneMined += num2;
-				break;
-			}
+			int amount = (int)((float)(b2 - item) / 10f);
+			AddMined(b, amount);
 		}
 		return (density: b2, material: b);
 	}
@@ -367,19 +377,34 @@ public static class VoxelExtensions
 
 	private static (Vector3 v1, Vector3 v2, Vector3 v3) GetWorldTriangle(RaycastHit hit)
 	{
-		if (hit.collider is MeshCollider { sharedMesh: var sharedMesh } meshCollider)
+		if (hit.collider is MeshCollider meshCollider)
 		{
-			if (sharedMesh == null || hit.triangleIndex < 0 || hit.triangleIndex >= sharedMesh.triangles.Length / 3)
+			int triangleIndex = hit.triangleIndex;
+			Mesh sharedMesh = meshCollider.sharedMesh;
+			if (!sharedMesh)
 			{
-				Debug.LogWarning($"Invalid triangle index {hit.triangleIndex} for mesh {sharedMesh?.name}");
-				return (v1: Vector3.zero, v2: Vector3.zero, v3: Vector3.zero);
+				Debug.LogError($"{meshCollider} has no mesh!?");
+				return default((Vector3, Vector3, Vector3));
 			}
-			int[] triangles = sharedMesh.triangles;
-			Vector3[] vertices = sharedMesh.vertices;
+			if (_tris == null)
+			{
+				_tris = new List<int>(65535);
+			}
+			if (_verts == null)
+			{
+				_verts = new List<Vector3>(65535);
+			}
+			sharedMesh.GetTriangles(_tris, 0);
+			sharedMesh.GetVertices(_verts);
+			if (triangleIndex < 0 || triangleIndex >= _tris.Count / 3)
+			{
+				Debug.LogError($"Invalid triangle index {triangleIndex} for mesh {sharedMesh.name}");
+				return default((Vector3, Vector3, Vector3));
+			}
 			Transform transform = meshCollider.transform;
-			Vector3 item = transform.TransformPoint(vertices[triangles[hit.triangleIndex * 3]]);
-			Vector3 item2 = transform.TransformPoint(vertices[triangles[hit.triangleIndex * 3 + 1]]);
-			Vector3 item3 = transform.TransformPoint(vertices[triangles[hit.triangleIndex * 3 + 2]]);
+			Vector3 item = transform.TransformPoint(_verts[_tris[triangleIndex * 3]]);
+			Vector3 item2 = transform.TransformPoint(_verts[_tris[triangleIndex * 3 + 1]]);
+			Vector3 item3 = transform.TransformPoint(_verts[_tris[triangleIndex * 3 + 2]]);
 			return (v1: item, v2: item2, v3: item3);
 		}
 		return (v1: Vector3.zero, v2: Vector3.zero, v3: Vector3.zero);
@@ -418,5 +443,53 @@ public static class VoxelExtensions
 	public static int GenerateHashcodeFromPath(this GameObject go)
 	{
 		return go.GetFullPath().GetHashCode();
+	}
+
+	public static int FastDistance(int3 a, int3 b)
+	{
+		int3 obj = math.abs(a - b);
+		int num = obj.x;
+		int num2 = obj.y;
+		int num3 = obj.z;
+		if (num < num2)
+		{
+			int num4 = num2;
+			int num5 = num;
+			num = num4;
+			num2 = num5;
+		}
+		if (num < num3)
+		{
+			int num6 = num3;
+			int num5 = num;
+			num = num6;
+			num3 = num5;
+		}
+		if (num2 < num3)
+		{
+			int num7 = num3;
+			int num5 = num2;
+			num2 = num7;
+			num3 = num5;
+		}
+		int num8 = num;
+		int num9 = num2;
+		int num10 = num3;
+		return num8 + (num9 >> 1) + (num10 >> 2);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int IntLerp(int start, int end, int t, int tMax)
+	{
+		t = t * 256 / tMax;
+		t = math.clamp(t, 0, 256);
+		return start + (int)((long)t * (long)(end - start) / 256);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int IntLerp(int start, int end, int t)
+	{
+		t = math.clamp(t, 0, 256);
+		return start + (int)((long)t * (long)(end - start) / 256);
 	}
 }

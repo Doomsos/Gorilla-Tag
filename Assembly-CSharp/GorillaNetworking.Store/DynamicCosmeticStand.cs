@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using GorillaExtensions;
+using GorillaTag.CosmeticSystem;
 using GT_CustomMapSupportRuntime;
 using TMPro;
 using UnityEngine;
@@ -217,15 +218,36 @@ public class DynamicCosmeticStand : MonoBehaviour, iFlagForBaking
 			return;
 		}
 		CosmeticsController instance = CosmeticsController.instance;
-		string collectionParentPlayFabID = thisCosmeticItem.collectionParentPlayFabID;
-		if (string.IsNullOrEmpty(collectionParentPlayFabID) || !instance.IsOwnedByPlayFabID(collectionParentPlayFabID))
+		CosmeticCollectionParentLink[] collectionParentLinks = thisCosmeticItem.collectionParentLinks;
+		string text = null;
+		string text2 = null;
+		if (collectionParentLinks != null)
+		{
+			for (int i = 0; i < collectionParentLinks.Length; i++)
+			{
+				string parentPlayFabID = collectionParentLinks[i].parentPlayFabID;
+				if (!string.IsNullOrEmpty(parentPlayFabID))
+				{
+					if (text2 == null)
+					{
+						text2 = parentPlayFabID;
+					}
+					if (instance.IsOwnedByPlayFabID(parentPlayFabID))
+					{
+						text = parentPlayFabID;
+						break;
+					}
+				}
+			}
+		}
+		if (text == null)
 		{
 			AddToCartButton.gameObject.SetActive(value: false);
 			CosmeticsController.CosmeticItem value;
-			string text = (instance.allCosmeticsDict.TryGetValue(collectionParentPlayFabID, out value) ? value.overrideDisplayName : collectionParentPlayFabID);
+			string text3 = ((text2 != null && instance.allCosmeticsDict.TryGetValue(text2, out value)) ? value.overrideDisplayName : text2);
 			if (slotPriceTextTMP != null)
 			{
-				slotPriceTextTMP.text = "REQUIRES\n" + text;
+				slotPriceTextTMP.text = "REQUIRES\n" + text3;
 			}
 		}
 		else if (!instance.CanPurchaseCollectable(thisCosmeticItem.itemName))

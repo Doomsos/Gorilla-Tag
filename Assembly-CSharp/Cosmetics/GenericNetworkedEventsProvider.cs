@@ -96,25 +96,46 @@ public class GenericNetworkedEventsProvider : MonoBehaviour
 			sharedEvent?.Invoke();
 			break;
 		case EventType.Int:
-			sharedEvent_int?.Invoke((int)args[1]);
+			if (args[1] is int arg)
+			{
+				sharedEvent_int?.Invoke(arg);
+			}
 			break;
 		case EventType.Float:
-			sharedEvent_float?.Invoke((float)args[1]);
+			if (args[1] is float num && float.IsFinite(num))
+			{
+				sharedEvent_float?.Invoke(num);
+			}
 			break;
 		case EventType.Bool:
-			sharedEvent_bool?.Invoke((bool)args[1]);
+			if (args[1] is bool arg2)
+			{
+				sharedEvent_bool?.Invoke(arg2);
+			}
 			break;
 		case EventType.Vector3:
-			sharedEvent_vector3?.Invoke((Vector3)args[1]);
+			if (args[1] is Vector3 v && v.IsValid(10000f))
+			{
+				sharedEvent_vector3?.Invoke(v);
+			}
 			break;
 		case EventType.String:
-			sharedEvent_string?.Invoke((string)args[1]);
+			if (args[1] is string { Length: <=10 } text)
+			{
+				sharedEvent_string?.Invoke(text);
+			}
 			break;
 		case EventType.Long:
-			sharedEvent_long?.Invoke((long)args[1]);
+			if (args[1] is long arg3)
+			{
+				sharedEvent_long?.Invoke(arg3);
+			}
 			break;
 		case EventType.Quaternion:
-			sharedEvent_quaternion?.Invoke((Quaternion)args[1]);
+			if (args[1] is Quaternion q && q.IsValid())
+			{
+				sharedEvent_quaternion?.Invoke(q);
+			}
 			break;
 		}
 	}

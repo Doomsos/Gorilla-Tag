@@ -25,5 +25,6 @@ public enum FXType
 	RequestOwnershipFromAuthority,
 	GroupJoin,
 	EnvironmentProximityReactor,
+	BroadcastCosmeticSignal,
 	Length
 }

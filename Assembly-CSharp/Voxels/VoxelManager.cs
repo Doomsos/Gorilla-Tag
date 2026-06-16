@@ -4,9 +4,9 @@ using Fusion;
 using GorillaExtensions;
 using K4os.Compression.LZ4;
 using Photon.Pun;
-using PlayFab.Internal;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Voxels;
 
@@ -102,9 +102,11 @@ public class VoxelManager : NetworkComponent
 		StartEmptyChunk,
 		ContinueChunk,
 		SetDensity,
-		PLayFX,
+		MineCommand,
 		Count
 	}
+
+	public const int OP_SCALE = 256;
 
 	private const int MAX_DATA_SIZE = 1000;
 
@@ -112,7 +114,9 @@ public class VoxelManager : NetworkComponent
 
 	private static Dictionary<int, VoxelWorld> _worlds = new Dictionary<int, VoxelWorld>();
 
-	private static StaticArrayBag<byte> _arrayBag = new StaticArrayBag<byte>();
+	private static StaticArrayBag<byte> _byteArrayBag = new StaticArrayBag<byte>();
+
+	private static StaticArrayBag<int> _intArrayBag = new StaticArrayBag<int>();
 
 	private NetPlayer _owner;
 
@@ -159,6 +163,7 @@ public class VoxelManager : NetworkComponent
 		RoomSystem.JoinedRoomEvent += new Action(OnNetworkJoinedRoom);
 		RoomSystem.LeftRoomEvent += new Action(OnNetworkLeftRoom);
 		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(OnPlayerLeft);
+		Application.lowMemory += OnLowMemory;
 	}
 
 	internal override void OnDisable()
@@ -168,6 +173,7 @@ public class VoxelManager : NetworkComponent
 		RoomSystem.JoinedRoomEvent -= new Action(OnNetworkJoinedRoom);
 		RoomSystem.LeftRoomEvent -= new Action(OnNetworkLeftRoom);
 		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(OnPlayerLeft);
+		Application.lowMemory -= OnLowMemory;
 	}
 
 	private void Update()
@@ -205,6 +211,16 @@ public class VoxelManager : NetworkComponent
 		}
 	}
 
+	private void OnLowMemory()
+	{
+		long num = 1048576L;
+		long num2 = Profiler.GetMonoUsedSizeLong() / num;
+		GC.Collect();
+		GC.WaitForPendingFinalizers();
+		long num3 = Profiler.GetMonoUsedSizeLong() / num;
+		PersistLog.Log($"Performing Memory Cleanup.  Used Memory: {num2}M->{num3}M ({num3 - num2}M)");
+	}
+
 	private static void UpdateTransferLog()
 	{
 		float num = Time.realtimeSinceStartup - 1f;
@@ -219,6 +235,16 @@ public class VoxelManager : NetworkComponent
 	{
 		_sendHistory.Enqueue((Time.realtimeSinceStartup, bytes));
 		_sendRate += bytes;
+	}
+
+	public static int[] GetIntArray(int length)
+	{
+		int[] staticArray = _intArrayBag.GetStaticArray(length);
+		for (int i = 0; i < length; i++)
+		{
+			staticArray[i] = 0;
+		}
+		return staticArray;
 	}
 
 	public static void Register(VoxelWorld world)
@@ -600,48 +626,40 @@ public class VoxelManager : NetworkComponent
 
 	public static void Mine(VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action)
 	{
+		VoxelOperation op = new VoxelOperation(origin, action);
 		if (InRoom)
 		{
 			if (HasAuthority)
 			{
-				MineAuthority(world, bounds, hitPoint, hitNormal, origin, action);
+				MineAuthority(world, bounds, hitPoint, hitNormal, op);
 				return;
 			}
-			world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, origin, action);
-			SendMineOperationRequest(world.Id, bounds, hitPoint, hitNormal, origin, action);
+			world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, op);
+			SendMineOperationRequest(world.Id, bounds, hitPoint, hitNormal, op);
 		}
 		else
 		{
-			world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, origin, action);
+			world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, op);
 		}
 	}
 
-	private static void MineAuthority(VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action, NetPlayer sender = null)
+	private static void MineAuthority(VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op, NetPlayer sender = null)
 	{
 		if (sender == null)
 		{
 			sender = NetworkSystem.Instance.LocalPlayer;
 		}
-		var (num, num2) = world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, origin, action);
-		if (num > 0 || num2 > 0)
+		world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, op);
+		foreach (NetPlayer item in RoomSystem.PlayersInRoom)
 		{
-			foreach (NetPlayer item in RoomSystem.PlayersInRoom)
+			if (!item.IsLocal && item != sender)
 			{
-				if (!item.IsLocal && item != sender)
-				{
-					SendPlayDigFX(item, hitPoint, hitNormal, num, num2);
-				}
+				SendMineCommand(item, world.Id, bounds, hitPoint, hitNormal, op);
 			}
 		}
-		SendDensity(world, bounds);
 	}
 
-	private static void OnPlayDigFXReceived(Vector3 hitPoint, Vector3 hitNormal, int dirtMined, int stoneMined)
-	{
-		SingletonMonoBehaviour<VoxelActions>.instance.PlayDigFX(hitPoint, hitNormal, dirtMined, stoneMined);
-	}
-
-	private static void OnMineRequestReceived(int worldId, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action, PhotonMessageInfoWrapped info)
+	private static void OnMineRequestReceived(int worldId, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op, PhotonMessageInfoWrapped info)
 	{
 		if (!_worlds.TryGetValue(worldId, out var value))
 		{
@@ -649,7 +667,7 @@ public class VoxelManager : NetworkComponent
 		}
 		else
 		{
-			MineAuthority(value, bounds, hitPoint, hitNormal, origin, action, info.Sender);
+			MineAuthority(value, bounds, hitPoint, hitNormal, op, info.Sender);
 		}
 	}
 
@@ -673,7 +691,7 @@ public class VoxelManager : NetworkComponent
 	private static void GetDensityForBounds(VoxelWorld world, UnityEngine.BoundsInt bounds, out byte[] voxels)
 	{
 		int voxelCount = bounds.GetVoxelCount();
-		voxels = _arrayBag.GetStaticArray(voxelCount);
+		voxels = _byteArrayBag.GetStaticArray(voxelCount);
 		int num = 0;
 		for (int i = bounds.min.x; i <= bounds.max.x; i++)
 		{
@@ -702,6 +720,11 @@ public class VoxelManager : NetworkComponent
 		{
 			value.SetVoxelDensity(bounds, array, immediate: false);
 		}
+	}
+
+	private static void OnMineCommandReceived(VoxelWorld world, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op)
+	{
+		world.PerformLocalMiningOperation(bounds, hitPoint, hitNormal, op);
 	}
 
 	internal static bool IsValidAuthorityRPC(PhotonMessageInfoWrapped info, RPC eventType)
@@ -755,7 +778,7 @@ public class VoxelManager : NetworkComponent
 		RoomSystem.netEventCallbacks[103] = DeserializeStartChunk;
 		RoomSystem.netEventCallbacks[104] = DeserializeContinueChunk;
 		RoomSystem.netEventCallbacks[105] = DeserializeSetDensity;
-		RoomSystem.netEventCallbacks[106] = DeserializePlayDigFX;
+		RoomSystem.netEventCallbacks[106] = DeserializeMineCommand;
 	}
 
 	private static void SendWorldStateRequest(int worldId)
@@ -787,18 +810,18 @@ public class VoxelManager : NetworkComponent
 		}
 	}
 
-	private static void SendMineOperationRequest(int worldId, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, Vector3 origin, VoxelAction action)
+	private static void SendMineOperationRequest(int worldId, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op)
 	{
-		object[] evData = new object[6] { worldId, bounds, hitPoint, hitNormal, origin, action };
+		object[] evData = new object[5] { worldId, bounds, hitPoint, hitNormal, op };
 		RoomSystem.SendEvent(102, evData, in NetworkSystemRaiseEvent.neoMaster, reliable: true);
 	}
 
 	private static void DeserializeMineOperationRequest(object[] eventData, PhotonMessageInfoWrapped info)
 	{
 		MonkeAgent.IncrementRPCCall(info, "DeserializeMineOperationRequest");
-		if (IsValidAuthorityRPC(info, RPC.MineRequest) && eventData.TryDeserializeTo<int, UnityEngine.BoundsInt, Vector3, Vector3, Vector3, VoxelAction>(out var v, out var v2, out var v3, out var v4, out var v5, out var v6) && v3.IsValid(10000f) && Mathf.Approximately(v4.sqrMagnitude, 1f) && v5.IsValid(10000f) && v6.IsValid() && !(v6.radius > 5f))
+		if (IsValidAuthorityRPC(info, RPC.MineRequest) && eventData.TryDeserializeTo<int, UnityEngine.BoundsInt, Vector3, Vector3, VoxelOperation>(out var v, out var v2, out var v3, out var v4, out var v5) && v3.IsValid(10000f) && Mathf.Approximately(v4.sqrMagnitude, 1f) && v5.IsValid())
 		{
-			OnMineRequestReceived(v, v2, v3, v4, v5, v6, info);
+			OnMineRequestReceived(v, v2, v3, v4, v5, info);
 		}
 	}
 
@@ -864,21 +887,18 @@ public class VoxelManager : NetworkComponent
 		}
 	}
 
-	private static void SendPlayDigFX(NetPlayer player, Vector3 hitPoint, Vector3 hitNormal, int dirt, int stone)
+	private static void SendMineCommand(NetPlayer player, int worldId, UnityEngine.BoundsInt bounds, Vector3 hitPoint, Vector3 hitNormal, VoxelOperation op)
 	{
-		object[] evData = new object[4] { hitPoint, hitNormal, dirt, stone };
-		if (hitPoint.IsValid(10000f) && Mathf.Approximately(hitNormal.sqrMagnitude, 1f))
-		{
-			RoomSystem.SendEvent(106, evData, in player, reliable: true);
-		}
+		object[] evData = new object[5] { worldId, bounds, hitPoint, hitNormal, op };
+		RoomSystem.SendEvent(106, evData, in player, reliable: true);
 	}
 
-	private static void DeserializePlayDigFX(object[] eventData, PhotonMessageInfoWrapped info)
+	private static void DeserializeMineCommand(object[] eventData, PhotonMessageInfoWrapped info)
 	{
-		MonkeAgent.IncrementRPCCall(info, "DeserializePlayDigFX");
-		if (IsValidClientRPC(info, RPC.PLayFX) && eventData.TryDeserializeTo<Vector3, Vector3, int, int>(out var v, out var v2, out var v3, out var v4) && v.IsValid(10000f) && Mathf.Approximately(v2.sqrMagnitude, 1f))
+		MonkeAgent.IncrementRPCCall(info, "DeserializeMineCommand");
+		if (IsValidClientRPC(info, RPC.MineCommand) && eventData.TryDeserializeTo<int, UnityEngine.BoundsInt, Vector3, Vector3, VoxelOperation>(out var v, out var v2, out var v3, out var v4, out var v5) && _worlds.TryGetValue(v, out var value) && Mathf.Approximately(v4.sqrMagnitude, 1f) && v3.IsValid(10000f))
 		{
-			OnPlayDigFXReceived(v, v2, v3, v4);
+			OnMineCommandReceived(value, v2, v3, v4, v5);
 		}
 	}
 

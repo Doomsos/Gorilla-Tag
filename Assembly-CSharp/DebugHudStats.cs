@@ -9,6 +9,7 @@ using GorillaUtil;
 using TMPro;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
@@ -43,6 +44,9 @@ public class DebugHudStats : MonoBehaviour
 
 	[SerializeField]
 	private TMP_Text fpsWarning;
+
+	[SerializeField]
+	private TMP_Text dismiss;
 
 	[SerializeField]
 	private float delayUpdateRate = 0.25f;
@@ -117,6 +121,8 @@ public class DebugHudStats : MonoBehaviour
 	private Array fixedWeathers;
 
 	private int fixedWeatherIndex;
+
+	private float btnDownTime;
 
 	public static DebugHudStats Instance => _instance;
 
@@ -239,6 +245,7 @@ public class DebugHudStats : MonoBehaviour
 			{
 				RigidbodyHighlighter.Instance.Active = currentState == State.ShowRBs;
 			}
+			btnDownTime = 0f;
 		}
 		buttonDown = flag11;
 		buttonDownBack = flag12;
@@ -278,6 +285,7 @@ public class DebugHudStats : MonoBehaviour
 			float renderViewportScale = XRSettings.renderViewportScale;
 			float renderScale = (GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset).renderScale;
 			builder.AppendLine($"draw calls: {drawCallsRecorder.LastValue} tris: {trisRecorder.LastValue} " + $"rs: {eyeTextureResolutionScale}/{renderViewportScale}/{renderScale} ");
+			builder.AppendLine($"Memory: {Profiler.GetMonoUsedSizeLong() / 1048576}M");
 			if (GorillaComputer.instance != null)
 			{
 				DateTime serverTime = GorillaComputer.instance.GetServerTime();
@@ -372,6 +380,16 @@ public class DebugHudStats : MonoBehaviour
 			text.text = builder.ToString();
 		}
 		updateTimer = 0f;
+		if (buttonDown && currentState != State.RecordingMode)
+		{
+			btnDownTime += Time.deltaTime / delayUpdateRate;
+			if (btnDownTime >= 15f)
+			{
+				base.gameObject.SetActive(value: false);
+			}
+			dismiss.text = $"let go of that button in the next {15f - btnDownTime:0.0} seconds or the debug hud will vanish forever";
+		}
+		dismiss.gameObject.SetActive(buttonDown && currentState != State.RecordingMode && btnDownTime > 5f);
 	}
 
 	private void ChangeTOD(int v)

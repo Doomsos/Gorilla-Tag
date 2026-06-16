@@ -23,6 +23,11 @@ public static class AssetUtils
 		results = Array.Empty<T>();
 	}
 
+	public static T[] FindAllAssetsOfType<T>() where T : UnityEngine.Object
+	{
+		return Array.Empty<T>();
+	}
+
 	[HideInCallstack]
 	[Conditional("UNITY_EDITOR")]
 	public static void ForceSave<T>(this IList<T> assets, Action<T> onPreSave = null, bool unloadUnusedAfter = false) where T : UnityEngine.Object

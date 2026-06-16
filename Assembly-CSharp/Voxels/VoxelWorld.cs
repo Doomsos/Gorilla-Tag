@@ -23,6 +23,8 @@ public class VoxelWorld : MonoBehaviour
 	private static readonly Dictionary<int, VoxelWorld> WorldLookup = new Dictionary<int, VoxelWorld>();
 
 	[Header("World Settings")]
+	public VoxelMaterialSet MaterialSet;
+
 	public GenerationParameters generationParameters = new GenerationParameters
 	{
 		NoiseScale = 0.01f,
@@ -100,6 +102,8 @@ public class VoxelWorld : MonoBehaviour
 	private static Chunk _opChunk;
 
 	private static bool _opAnyChanged;
+
+	private static Func<int3, (byte density, byte material), (byte density, byte material)> _opSetDataFunction;
 
 	public IEnumerable<Chunk> Chunks => chunks.Values;
 
@@ -721,8 +725,13 @@ public class VoxelWorld : MonoBehaviour
 				chunkComponent.transform.localPosition = (chunk.Id * ChunkSize).ToVector3() * worldScale;
 				chunk.SetComponent(chunkComponent);
 			}
+			Mesh sharedMesh = chunk.MeshFilter.sharedMesh;
 			chunk.MeshFilter.sharedMesh = mesh;
 			chunk.MeshCollider.sharedMesh = mesh;
+			if ((bool)sharedMesh)
+			{
+				_meshPool.Release(sharedMesh);
+			}
 			chunk.GameObject.SetActive(value: true);
 		}
 		else if ((bool)chunk.Component)
@@ -778,10 +787,11 @@ public class VoxelWorld : MonoBehaviour
 
 	public void SetVoxelDataCustom(UnityEngine.BoundsInt worldBounds, Func<int3, (byte density, byte material), (byte density, byte material)> setDataFunction, bool immediate = true)
 	{
+		_opSetDataFunction = setDataFunction;
 		ForEachChunkInBounds(worldBounds, SetVoxelDataInChunk);
-		void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
+		static void SetVoxelData(int3 voxelWorldPosition, int3 voxelLocalPosition, int voxelIndex, byte density, byte material)
 		{
-			var (b, b2) = setDataFunction(voxelWorldPosition, (density, material));
+			var (b, b2) = _opSetDataFunction(voxelWorldPosition, (density, material));
 			if (b != density || b2 != material)
 			{
 				_opChunk.Density[voxelIndex] = b;
@@ -1350,5 +1360,20 @@ public class VoxelWorld : MonoBehaviour
 	public int3 GetVoxelForLocalPosition(Vector3 localPosition)
 	{
 		return localPosition.RoundToInt();
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Matrix4x4 matrix = Matrix4x4.TRS(base.transform.position, base.transform.rotation, Vector3.one * worldScale);
+		Vector3 vector = worldBounds.min;
+		Vector3 vector2 = worldBounds.max;
+		Vector3 vector3 = (vector + vector2) / 2f;
+		Vector3 size = vector2 - vector;
+		Gizmos.color = Color.green;
+		Gizmos.DrawLine(base.transform.position, matrix.MultiplyPoint(vector3));
+		Gizmos.matrix = matrix;
+		Gizmos.DrawWireCube(vector3, size);
+		Gizmos.color = new Color(0f, 1f, 0f, 0.25f);
+		Gizmos.DrawCube(vector3, size);
 	}
 }
