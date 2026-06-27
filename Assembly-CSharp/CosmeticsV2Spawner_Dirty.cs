@@ -178,17 +178,17 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 		}
 		if (!CosmeticsController.hasInstance)
 		{
-			UnityEngine.Debug.LogError("(should never happen) cannot instantiate prefabs before cosmetics controller instance is available.");
+			UnityEngine.Debug.LogError("(Should never happen) Cannot instantiate prefabs before cosmetics controller instance is available.");
 			return;
 		}
 		if (!CosmeticsController.instance.v2_allCosmeticsInfoAssetRef.IsValid())
 		{
-			UnityEngine.Debug.LogError("(should never happen) cannot load prefabs before v2_allCosmeticsInfoAssetRef is loaded.");
+			UnityEngine.Debug.LogError("(Should never happen) Cannot load prefabs before v2_allCosmeticsInfoAssetRef is loaded.");
 			return;
 		}
 		if (!(CosmeticsController.instance.v2_allCosmeticsInfoAssetRef.Asset is AllCosmeticsArraySO allCosmeticsArraySO))
 		{
-			UnityEngine.Debug.LogError("(should never happen) v2_allCosmeticsInfoAssetRef is valid but null.");
+			UnityEngine.Debug.LogError("(Should never happen) v2_allCosmeticsInfoAssetRef is valid but null.");
 			return;
 		}
 		if (!GTHardCodedBones.TryGetBoneXforms(VRRig.LocalRig, out var outBoneXforms, out var outErrorMsg))

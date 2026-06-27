@@ -151,15 +151,21 @@ public class CosmeticSwapper : MonoBehaviour, ITickSystemTick
 			}
 			if (swapMode == SwapMode.AllAtOnce)
 			{
-				foreach (string cosmeticID in cosmeticIDs)
+				if (newSwappedCosmetics.Count > 0)
 				{
-					CosmeticState? cosmeticState3 = SwapInCosmeticWithReturn(cosmeticID, rig);
-					if (cosmeticState3.HasValue)
-					{
-						AddNewSwappedCosmetic(cosmeticState3.Value);
-					}
+					return;
 				}
-				return;
+				{
+					foreach (string cosmeticID in cosmeticIDs)
+					{
+						CosmeticState? cosmeticState3 = SwapInCosmeticWithReturn(cosmeticID, rig);
+						if (cosmeticState3.HasValue)
+						{
+							AddNewSwappedCosmetic(cosmeticState3.Value);
+						}
+					}
+					return;
+				}
 			}
 			int cosmeticStepIndex = CosmeticStepIndex;
 			if (cosmeticStepIndex < 0 || cosmeticStepIndex >= cosmeticIDs.Count)

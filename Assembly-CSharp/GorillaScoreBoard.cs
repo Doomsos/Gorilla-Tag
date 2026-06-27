@@ -261,13 +261,17 @@ public class GorillaScoreBoard : MonoBehaviour
 		_isDirty = false;
 	}
 
-	private void Start()
+	private void Awake()
 	{
 		linesRTs.Clear();
 		for (int i = 0; i < lines.Count; i++)
 		{
 			linesRTs.Add(lines[i].GetComponent<RectTransform>());
 		}
+	}
+
+	private void Start()
+	{
 		GorillaScoreboardTotalUpdater.RegisterScoreboard(this);
 	}
 

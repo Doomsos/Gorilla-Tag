@@ -3673,7 +3673,7 @@ public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuil
 
 	public void UpdateMyCosmetics()
 	{
-		if (GorillaServer.Instance != null)
+		if (!(GorillaServer.Instance == null))
 		{
 			GorillaServer.Instance.UpdateUserCosmetics();
 		}

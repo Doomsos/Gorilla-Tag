@@ -58,7 +58,7 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 
 	public Material nonSubscriberMaterial;
 
-	private bool _localPlayerSubscribed;
+	protected bool _localPlayerSubscribed;
 
 	private bool _subscriptionChecked;
 

@@ -133,10 +133,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		{
 			muteButton.gameObject.SetActive(value: false);
 			reportButton.gameObject.SetActive(value: false);
-			hateSpeechButton.SetActive(value: false);
-			toxicityButton.SetActive(value: false);
-			cheatingButton.SetActive(value: false);
-			cancelButton.SetActive(value: false);
+			reportButtons.SetActive(value: false);
 			return;
 		}
 		muteButton.gameObject.SetActive(value: true);
@@ -418,22 +415,18 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		canPressNextReportButton = buttonType != GorillaPlayerLineButton.ButtonType.Toxicity && buttonType != GorillaPlayerLineButton.ButtonType.Report;
 		reportInProgress = reportState;
 		SwapToReportState(reportState);
-		if (!reportState)
+		if (!reportState && linePlayer != null && buttonType != GorillaPlayerLineButton.ButtonType.Cancel)
 		{
-			SwapToReportState(reportInProgress: false);
-			if (linePlayer != null && buttonType != GorillaPlayerLineButton.ButtonType.Cancel)
+			if ((!reportedHateSpeech && buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech) || (!reportedToxicity && buttonType == GorillaPlayerLineButton.ButtonType.Toxicity) || (!reportedCheating && buttonType == GorillaPlayerLineButton.ButtonType.Cheating))
 			{
-				if ((!reportedHateSpeech && buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech) || (!reportedToxicity && buttonType == GorillaPlayerLineButton.ButtonType.Toxicity) || (!reportedCheating && buttonType == GorillaPlayerLineButton.ButtonType.Cheating))
-				{
-					ReportPlayer(linePlayer.UserId, buttonType, playerNameVisible);
-					doneReporting = true;
-				}
-				reportedCheating = reportedCheating || buttonType == GorillaPlayerLineButton.ButtonType.Cheating;
-				reportedToxicity = reportedToxicity || buttonType == GorillaPlayerLineButton.ButtonType.Toxicity;
-				reportedHateSpeech = reportedHateSpeech || buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech;
-				reportButton.isOn = true;
-				reportButton.UpdateColor();
+				ReportPlayer(linePlayer.UserId, buttonType, playerNameVisible);
+				doneReporting = true;
 			}
+			reportedCheating = reportedCheating || buttonType == GorillaPlayerLineButton.ButtonType.Cheating;
+			reportedToxicity = reportedToxicity || buttonType == GorillaPlayerLineButton.ButtonType.Toxicity;
+			reportedHateSpeech = reportedHateSpeech || buttonType == GorillaPlayerLineButton.ButtonType.HateSpeech;
+			reportButton.isOn = true;
+			reportButton.UpdateColor();
 		}
 		if (GorillaScoreboardTotalUpdater.instance != null)
 		{

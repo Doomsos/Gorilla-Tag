@@ -35,6 +35,9 @@ public class CosmeticWardrobe : MonoBehaviour
 	private CosmeticWardrobeSelection[] cosmeticCollectionDisplays;
 
 	[SerializeField]
+	private CosmeticButton[] uniqueCosmeticButtons;
+
+	[SerializeField]
 	private CosmeticWardrobeCategory[] cosmeticCategoryButtons;
 
 	[SerializeField]
@@ -114,11 +117,15 @@ public class CosmeticWardrobe : MonoBehaviour
 		{
 			cosmeticCollectionDisplays[k].selectButton.onPressed += HandlePressedSelectCosmeticButton;
 		}
-		for (int l = 0; l < cosmeticCategoryButtons.Length; l++)
+		for (int l = 0; l < uniqueCosmeticButtons.Length; l++)
 		{
-			cosmeticCategoryButtons[l].button.onPressed += HandleChangeCategory;
-			cosmeticCategoryButtons[l].slot1RemovedItem = CosmeticsController.instance.nullItem;
-			cosmeticCategoryButtons[l].slot2RemovedItem = CosmeticsController.instance.nullItem;
+			uniqueCosmeticButtons[l].onPressed += HandlePressedSelectCosmeticButtonUnique;
+		}
+		for (int m = 0; m < cosmeticCategoryButtons.Length; m++)
+		{
+			cosmeticCategoryButtons[m].button.onPressed += HandleChangeCategory;
+			cosmeticCategoryButtons[m].slot1RemovedItem = CosmeticsController.instance.nullItem;
+			cosmeticCategoryButtons[m].slot2RemovedItem = CosmeticsController.instance.nullItem;
 		}
 		CosmeticsController instance = CosmeticsController.instance;
 		instance.OnCosmeticsUpdated = (Action)Delegate.Combine(instance.OnCosmeticsUpdated, new Action(HandleCosmeticsUpdated));
@@ -143,9 +150,13 @@ public class CosmeticWardrobe : MonoBehaviour
 		{
 			cosmeticCollectionDisplays[i].selectButton.onPressed -= HandlePressedSelectCosmeticButton;
 		}
-		for (int j = 0; j < cosmeticCategoryButtons.Length; j++)
+		for (int j = 0; j < uniqueCosmeticButtons.Length; j++)
 		{
-			cosmeticCategoryButtons[j].button.onPressed -= HandleChangeCategory;
+			uniqueCosmeticButtons[j].onPressed -= HandlePressedSelectCosmeticButtonUnique;
+		}
+		for (int k = 0; k < cosmeticCategoryButtons.Length; k++)
+		{
+			cosmeticCategoryButtons[k].button.onPressed -= HandleChangeCategory;
 		}
 		CosmeticsController instance = CosmeticsController.instance;
 		instance.OnCosmeticsUpdated = (Action)Delegate.Remove(instance.OnCosmeticsUpdated, new Action(HandleCosmeticsUpdated));
@@ -228,6 +239,51 @@ public class CosmeticWardrobe : MonoBehaviour
 			else
 			{
 				cosmeticCategoryButtons[selectedCategoryIndex].slot1RemovedItem = CosmeticsController.instance.nullItem;
+			}
+			break;
+		}
+	}
+
+	private async void RepressUniqueButton(GorillaPressableButton button, bool isLeft, string itemName)
+	{
+		float startTime = Time.time;
+		float maxTime = 5f;
+		while (VRRig.LocalRig.cosmeticsObjectRegistry.Cosmetic(itemName) == null)
+		{
+			if (Time.time > startTime + maxTime)
+			{
+				return;
+			}
+			await Awaitable.NextFrameAsync();
+		}
+		HandlePressedSelectCosmeticButtonUnique(button, isLeft);
+	}
+
+	private void HandlePressedSelectCosmeticButtonUnique(GorillaPressableButton button, bool isLeft)
+	{
+		for (int i = 0; i < uniqueCosmeticButtons.Length; i++)
+		{
+			if (!(uniqueCosmeticButtons[i] == button))
+			{
+				continue;
+			}
+			if (string.IsNullOrEmpty(uniqueCosmeticButtons[i].SetCosmeticItemID) || uniqueCosmeticButtons[i].SetCosmeticItemID == "NOTHING")
+			{
+				break;
+			}
+			if (VRRig.LocalRig.cosmeticsObjectRegistry.Cosmetic(uniqueCosmeticButtons[i].SetCosmeticItemID) == null)
+			{
+				Debug.LogWarning("Could not find cosmetic " + uniqueCosmeticButtons[i].SetCosmeticItemID + " in cosmetic registry!");
+				RepressUniqueButton(button, isLeft, uniqueCosmeticButtons[i].SetCosmeticItemID);
+				continue;
+			}
+			if (CosmeticsController.instance.allCosmeticsDict.TryGetValue(uniqueCosmeticButtons[i].SetCosmeticItemID, out var value))
+			{
+				CosmeticsController.instance.PressWardrobeItemButton(value, isLeft, m_useTemporarySet);
+			}
+			else
+			{
+				Debug.LogWarning("Could not find cosmetic in dictionary named " + uniqueCosmeticButtons[i].SetCosmeticItemID + "!");
 			}
 			break;
 		}

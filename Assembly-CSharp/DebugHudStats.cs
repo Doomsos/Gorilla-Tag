@@ -166,89 +166,92 @@ public class DebugHudStats : MonoBehaviour
 		{
 			base.transform.LookAt(Camera.main.transform.position, Vector3.up);
 		}
-		if (currentState == State.timeAdjust)
+		if (!ControllerInputPoller.HandTrackingActive())
 		{
-			bool flag = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
-			bool flag2 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
-			bool flag3 = ControllerInputPoller.TriggerFloat(XRNode.RightHand) > 0.5f;
-			bool flag4 = ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.5f;
-			bool flag5 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x > 0.5f;
-			bool flag6 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x < -0.5f;
-			bool flag7 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y > 0.5f;
-			bool flag8 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y < -0.5f;
-			if (button1Down && !flag)
+			if (currentState == State.timeAdjust)
 			{
-				GorillaComputer.instance.AddSeverTime(flag4 ? (-60) : 60);
+				bool flag = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+				bool flag2 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+				bool flag3 = ControllerInputPoller.TriggerFloat(XRNode.RightHand) > 0.5f;
+				bool flag4 = ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.5f;
+				bool flag5 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x > 0.5f;
+				bool flag6 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).x < -0.5f;
+				bool flag7 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y > 0.5f;
+				bool flag8 = ControllerInputPoller.Primary2DAxis(XRNode.LeftHand).y < -0.5f;
+				if (button1Down && !flag)
+				{
+					GorillaComputer.instance.AddSeverTime(flag4 ? (-60) : 60);
+				}
+				if (button2Down && !flag2)
+				{
+					GorillaComputer.instance.AddSeverTime(flag4 ? (-1) : 5);
+				}
+				if (button3Down && !flag3)
+				{
+					GorillaComputer.instance.AddSeverTime(flag4 ? (-1440) : 1440);
+				}
+				if (!button5Down && flag5)
+				{
+					ChangeTOD(1);
+				}
+				if (!button6Down && flag6)
+				{
+					ChangeTOD(-1);
+				}
+				if (!button7Down && flag7)
+				{
+					ChangeWeather(1);
+				}
+				if (!button8Down && flag8)
+				{
+					ChangeWeather(-1);
+				}
+				button1Down = flag;
+				button2Down = flag2;
+				button3Down = flag3;
+				button5Down = flag5;
+				button6Down = flag6;
+				button7Down = flag7;
+				button8Down = flag8;
 			}
-			if (button2Down && !flag2)
+			if (currentState == State.TitleDataMonitor || currentState == State.ShowLog || currentState == State.ShowError)
 			{
-				GorillaComputer.instance.AddSeverTime(flag4 ? (-1) : 5);
+				bool flag9 = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+				bool flag10 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+				if (button1Down && !flag9)
+				{
+					logging.pageToDisplay = ((logging.pageToDisplay >= logging.textInfo.pageCount) ? 1 : (logging.pageToDisplay + 1));
+					updateLogTitle();
+				}
+				if (button2Down && !flag10)
+				{
+					logging.pageToDisplay = ((logging.pageToDisplay > 1) ? (logging.pageToDisplay - 1) : logging.textInfo.pageCount);
+					updateLogTitle();
+				}
+				button1Down = flag9;
+				button2Down = flag10;
 			}
-			if (button3Down && !flag3)
+			bool flag11 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
+			bool flag12 = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
+			if ((buttonDown && !flag11) || (buttonDownBack && !flag12))
 			{
-				GorillaComputer.instance.AddSeverTime(flag4 ? (-1440) : 1440);
+				NextState(buttonDown);
+				if (currentState == State.ShowStats)
+				{
+					distanceMoved = (distanceSwam = 0f);
+					PlayerGameEvents.OnPlayerMoved += OnPlayerMoved;
+					PlayerGameEvents.OnPlayerSwam += OnPlayerSwam;
+				}
+				text.gameObject.SetActive(currentState != State.Inactive);
+				if (RigidbodyHighlighter.Instance != null)
+				{
+					RigidbodyHighlighter.Instance.Active = currentState == State.ShowRBs;
+				}
+				btnDownTime = 0f;
 			}
-			if (!button5Down && flag5)
-			{
-				ChangeTOD(1);
-			}
-			if (!button6Down && flag6)
-			{
-				ChangeTOD(-1);
-			}
-			if (!button7Down && flag7)
-			{
-				ChangeWeather(1);
-			}
-			if (!button8Down && flag8)
-			{
-				ChangeWeather(-1);
-			}
-			button1Down = flag;
-			button2Down = flag2;
-			button3Down = flag3;
-			button5Down = flag5;
-			button6Down = flag6;
-			button7Down = flag7;
-			button8Down = flag8;
+			buttonDown = flag11;
+			buttonDownBack = flag12;
 		}
-		if (currentState == State.TitleDataMonitor || currentState == State.ShowLog || currentState == State.ShowError)
-		{
-			bool flag9 = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
-			bool flag10 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
-			if (button1Down && !flag9)
-			{
-				logging.pageToDisplay = ((logging.pageToDisplay >= logging.textInfo.pageCount) ? 1 : (logging.pageToDisplay + 1));
-				updateLogTitle();
-			}
-			if (button2Down && !flag10)
-			{
-				logging.pageToDisplay = ((logging.pageToDisplay > 1) ? (logging.pageToDisplay - 1) : logging.textInfo.pageCount);
-				updateLogTitle();
-			}
-			button1Down = flag9;
-			button2Down = flag10;
-		}
-		bool flag11 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
-		bool flag12 = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
-		if ((buttonDown && !flag11) || (buttonDownBack && !flag12))
-		{
-			NextState(buttonDown);
-			if (currentState == State.ShowStats)
-			{
-				distanceMoved = (distanceSwam = 0f);
-				PlayerGameEvents.OnPlayerMoved += OnPlayerMoved;
-				PlayerGameEvents.OnPlayerSwam += OnPlayerSwam;
-			}
-			text.gameObject.SetActive(currentState != State.Inactive);
-			if (RigidbodyHighlighter.Instance != null)
-			{
-				RigidbodyHighlighter.Instance.Active = currentState == State.ShowRBs;
-			}
-			btnDownTime = 0f;
-		}
-		buttonDown = flag11;
-		buttonDownBack = flag12;
 		if (firstAwake == 0f)
 		{
 			firstAwake = Time.time;

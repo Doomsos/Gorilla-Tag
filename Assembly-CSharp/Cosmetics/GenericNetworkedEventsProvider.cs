@@ -76,21 +76,29 @@ public class GenericNetworkedEventsProvider : MonoBehaviour
 
 	private void TriggerSharedEvents(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 	{
-		if (sender != target || info.senderID != myRig.creator.ActorNumber)
+		if (sender == target && info.senderID == myRig.creator.ActorNumber)
 		{
-			return;
+			MonkeAgent.IncrementRPCCall(info, "TriggerSharedEvents");
+			if (callLimiter.CheckCallTime(Time.time))
+			{
+				InvokeSharedEvents(args);
+			}
 		}
-		MonkeAgent.IncrementRPCCall(info, "TriggerSharedEvents");
-		if (!callLimiter.CheckCallTime(Time.time))
-		{
-			return;
-		}
+	}
+
+	private void InvokeSharedEvents(object[] args)
+	{
 		if (args == null || args.Length == 0)
 		{
 			sharedEvent?.Invoke();
 			return;
 		}
-		switch ((EventType)(byte)args[0])
+		object obj = args[0];
+		if (!(obj is byte))
+		{
+			return;
+		}
+		switch ((EventType)(byte)obj)
 		{
 		case EventType.None:
 			sharedEvent?.Invoke();
@@ -144,7 +152,11 @@ public class GenericNetworkedEventsProvider : MonoBehaviour
 	{
 		if (PhotonNetwork.InRoom && _events?.Activate != null)
 		{
-			_events.Activate.RaiseOthers(args);
+			_events.Activate.RaiseAll(args);
+		}
+		else
+		{
+			InvokeSharedEvents(args);
 		}
 	}
 

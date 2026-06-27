@@ -198,7 +198,7 @@ public class SubscriberExclusiveZone : MonoBehaviour, IGorillaSliceableSimple
 			if (Time.time - lastShoveTime >= shoveCooldown)
 			{
 				lastShoveTime = Time.time;
-				instance.TeleportTo(ejectionPoint.position, instance.transform.rotation, keepVelocity: true);
+				instance.TeleportTo(ejectionPoint.transform);
 				OnEnterRestrictedZone?.Invoke();
 			}
 		}

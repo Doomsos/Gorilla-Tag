@@ -86,15 +86,22 @@ public class ScavengerManager : MonoBehaviour
 
 		public void RegisterTarget(ScavengerTarget target)
 		{
-			if (!Targets.Contains<ScavengerTarget>(target))
+			if (Targets.Contains<ScavengerTarget>(target))
 			{
-				if (!Enumerable.Contains<string>(TargetNames, target.TargetName))
+				return;
+			}
+			if (!Enumerable.Contains<string>(TargetNames, target.TargetName))
+			{
+				Debug.LogError("Scavenger hunt " + Name + " tried to register target " + target.TargetName + " even though it is not defined in the hunt in ScavengerManager.");
+				return;
+			}
+			_targets.Add(target);
+			if (!(Instance == null))
+			{
+				Tuple<string, string> item = new Tuple<string, string>(Name, target.TargetName);
+				if (Instance._collectOnLoad.Contains(item))
 				{
-					Debug.LogError("Scavenger hunt " + Name + " tried to register target " + target.TargetName + " even though it is not defined in the hunt in ScavengerManager.");
-				}
-				else
-				{
-					_targets.Add(target);
+					Collect(target, initialLoad: true);
 				}
 			}
 		}
@@ -256,6 +263,8 @@ public class ScavengerManager : MonoBehaviour
 
 	public const string MothershipKey = "ScavengerHunt";
 
+	private List<Tuple<string, string>> _collectOnLoad = new List<Tuple<string, string>>();
+
 	public Hunt[] Hunts = new Hunt[0];
 
 	public static ScavengerManager? Instance { get; private set; }
@@ -377,6 +386,7 @@ public class ScavengerManager : MonoBehaviour
 
 	public void FromJson(ScavengerJson json)
 	{
+		_collectOnLoad.Clear();
 		Hunt[] hunts = Hunts;
 		for (int i = 0; i < hunts.Length; i++)
 		{
@@ -389,24 +399,23 @@ public class ScavengerManager : MonoBehaviour
 			{
 				throw new Exception("Cannot import scavenger data, no hunt by name " + collectedTarget.Key + ".");
 			}
-			string[] value = collectedTarget.Value;
-			foreach (string text in value)
+			if (hunt.Deprecated)
 			{
-				ScavengerTarget target = hunt.GetTarget(text);
-				if ((object)target == null)
-				{
-					if (!hunt.Deprecated)
-					{
-						throw new Exception("Cannot import scavenger data, no hunt/target by name " + collectedTarget.Key + "." + text);
-					}
-				}
-				else
+				continue;
+			}
+			string[] value = collectedTarget.Value;
+			foreach (string item in value)
+			{
+				ScavengerTarget target = hunt.GetTarget(item);
+				if (target != null)
 				{
 					hunt.Collect(target, initialLoad: true);
 				}
+				else
+				{
+					_collectOnLoad.Add(new Tuple<string, string>(collectedTarget.Key, item));
+				}
 			}
 		}
-		int num = Hunts.Sum((Hunt hunt2) => hunt2.Targets.Count);
-		Debug.Log($"Imported {num} targets from {Hunts.Length} scavenger hunts.");
 	}
 }
