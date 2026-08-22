@@ -233,8 +233,15 @@ public class GameEntity : MonoBehaviour
 		rigidBody = GetComponent<Rigidbody>();
 		if (gravityController == null)
 		{
-			gravityController = GetComponent<MonkeGravityController>();
-			if (gravityController == null)
+			if (TryGetComponent<MonkeGravityController>(out gravityController))
+			{
+				if (rigidBody != null)
+				{
+					gravityController.GlobalGravityIntent = rigidBody.useGravity;
+					rigidBody.useGravity = false;
+				}
+			}
+			else
 			{
 				gravityController = base.gameObject.AddComponent<MonkeGravityController>();
 			}
