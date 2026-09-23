@@ -232,6 +232,7 @@ GorillaTagScripts.CustomMapSupport.CMSSerializer.SyncTriggerHistory_RPC(System.B
 GorillaTagScripts.CustomMapSupport.CMSSerializer.SyncTriggerCounts_RPC(System.Collections.Generic.Dictionary`2<System.Byte,System.Byte> syncedTriggerCounts, Photon.Pun.PhotonMessageInfo info)
 GorillaTagScripts.CustomMapSupport.CMSSerializer.RequestTrigger_RPC(System.Byte triggerID, Photon.Pun.PhotonMessageInfo info)
 GorillaTagScripts.CustomMapSupport.CMSSerializer.ActivateTrigger_RPC(System.Byte triggerID, System.Int32 originatingPlayer, Photon.Pun.PhotonMessageInfo info)
+GorillaTagScripts.Subscription.FreeCosmeticKiosk.ActivateClaimVFX(Photon.Pun.PhotonMessageInfo info)
 MaterialCycler.MaterialCyclerManager.RPC_Synchronize(System.Int32 key, System.Int32 materialIndex, System.Int32 colourPacked, Photon.Pun.PhotonMessageInfo info)
 GorillaLocomotion.Gameplay.OldGorillaRopeSwing.SetVelocity(System.Int32 boneIndex, UnityEngine.Vector3 velocity, System.Boolean wholeRope, UnityEngine.Vector3[] ropeRotations, UnityEngine.Vector3[] ropeVelocities)
 GorillaLocomotion.Gameplay.RopeSwingManager.SetVelocity(System.Int32 ropeId, System.Int32 boneIndex, UnityEngine.Vector3 velocity, System.Boolean wholeRope, Photon.Pun.PhotonMessageInfo info)
