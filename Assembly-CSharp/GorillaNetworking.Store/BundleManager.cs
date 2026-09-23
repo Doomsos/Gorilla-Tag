@@ -92,6 +92,14 @@ public class BundleManager : MonoBehaviour
 		Initialize();
 	}
 
+	private void OnDestroy()
+	{
+		foreach (StoreBundle storeBundle in _storeBundles)
+		{
+			storeBundle.Dispose();
+		}
+	}
+
 	private void Initialize()
 	{
 		foreach (StoreBundle storeBundle in _storeBundles)
@@ -175,6 +183,7 @@ public class BundleManager : MonoBehaviour
 					UnityEngine.Object.DestroyImmediate(bundleStand.gameObject);
 				}
 			}
+			storeBundle.Dispose();
 		}
 		_spawnedBundleStands.Clear();
 		storeBundlesById.Clear();
@@ -350,6 +359,14 @@ public class BundleManager : MonoBehaviour
 		if (storeBundlesBySKU.ContainsKey(productSku))
 		{
 			storeBundlesBySKU[productSku].TryUpdatePrice(productFormattedPrice);
+		}
+	}
+
+	public void UpdateGtfcBundlePrice(string productSku, string productFormattedPrice)
+	{
+		if (CosmeticsController.instance.TryGetBundleMapping(productSku, out var bundleMapping) && bundleMapping.skuNameGTFC == productSku && storeBundlesById.TryGetValue(bundleMapping.playFabItemName, out var value))
+		{
+			value.TryUpdateGtfcPrice(productFormattedPrice);
 		}
 	}
 
